@@ -223,14 +223,15 @@ template <- sim_ragged_d2_fixed(
   p_keep = 1.0,
   seed = base_seed
 )
+# Named rather than inline so the checkpoint guard can hash them: the fit these
+# two define decides every cached number, and an edit to either must invalidate
+# the cache (M120).
+base_formula <- score ~ 0 + rater + (1 | cluster:subject)
+base_prior <- brms::set_prior("student_t(4, 0, 1)", class = "sd")
 base_fit <- do.call(
   brms::brm,
   c(
-    list(
-      formula = score ~ 0 + rater + (1 | cluster:subject),
-      data = template,
-      prior = brms::set_prior("student_t(4, 0, 1)", class = "sd")
-    ),
+    list(formula = base_formula, data = template, prior = base_prior),
     brm_args
   )
 )
@@ -250,6 +251,7 @@ ckpt_trace_register(ckpt)
 # M120: the resume was keyed on the cell LABEL alone, so editing a cell's nc /
 # ns / theta2 / p_keep and re-running served the OLD cell under the new label --
 # the one shape a label can never reveal.
+ckpt_site <- "oracle-bayesian-incomplete-fixed-nested"
 cell_spec <- function(cl) {
   ckpt_spec(
     params = list(
@@ -262,16 +264,23 @@ cell_spec <- function(cl) {
       n_rep = n_rep,
       base_seed = base_seed
     ),
-    block = c("sim_ragged_d2_fixed", "one_rep_summary", "one_cell"),
-    site = "oracle-bayesian-incomplete-fixed-nested"
+    block = c(
+      "sim_ragged_d2_fixed",
+      "one_rep_summary",
+      "one_cell",
+      "kc_of",
+      "base_formula",
+      "base_prior",
+      "brm_args"
+    ),
+    site = ckpt_site
   )
 }
-file_spec <- function() cell_spec(cells[[1]])
 
 store <- if (file.exists(ckpt)) {
-  ckpt_read(ckpt, file_spec())
+  ckpt_store_load(ckpt, ckpt_site)
 } else {
-  ckpt_store_new()
+  ckpt_store_new(ckpt_site)
 }
 done <- list()
 for (cl in cells) {
@@ -292,7 +301,7 @@ for (cl in cells) {
     base_seed = base_seed
   )
   store <- ckpt_store_put(store, cl$label, done[[cl$label]], cell_spec(cl))
-  ckpt_write(ckpt, payload = store, spec = file_spec())
+  ckpt_store_save(ckpt, store)
 }
 # Before the fixture write: no cell may have come from an unguarded read.
 ckpt_trace_assert()

@@ -23,23 +23,51 @@
 
 # ---- spec construction -------------------------------------------------------
 
-# Hash the declared generating block: the deparsed BODIES of the named
-# functions, in the declared order, under their declared names. Base R only —
-# tools::md5sum needs a file, so the deparsed text goes through a tempfile.
+# Resolve a declared block name WITHOUT inheriting past the global environment.
+# get0()'s ordinary lookup continues up the search path, so a declared function
+# that has been renamed resolves to any same-named function in an attached
+# package and the hash then tracks that stranger forever: two sites declare a
+# block function named `simulate`, which stats:: also exports. Stopping at
+# globalenv() turns a rename back into the "not found" abort it is.
+ckpt_find_block <- function(nm, envir) {
+  e <- envir
+  repeat {
+    if (exists(nm, envir = e, inherits = FALSE)) {
+      return(list(found = TRUE, value = get(nm, envir = e)))
+    }
+    if (identical(e, globalenv()) || identical(e, emptyenv())) {
+      return(list(found = FALSE, value = NULL))
+    }
+    e <- parent.env(e)
+  }
+}
+
+# Hash the declared generating block, in the declared order, under the declared
+# names. A declared FUNCTION contributes its deparsed body; a declared VALUE
+# contributes its deparsed value. Values are in the block because not everything
+# that decides a cached number is a function: the seed-offset vectors, the
+# sampler argument lists, and the formula and prior the base fit is compiled
+# from all determine the cached rows and would otherwise change unnoticed.
+# Base R only — tools::md5sum needs a file, so the deparsed text goes through a
+# tempfile.
 ckpt_block_hash <- function(block, envir = parent.frame()) {
   if (!length(block)) {
     stop("checkpoint spec: no declared generating block", call. = FALSE)
   }
   text <- unlist(lapply(block, function(nm) {
-    fn <- get0(nm, envir = envir, mode = "function")
-    if (is.null(fn)) {
+    hit <- ckpt_find_block(nm, envir)
+    if (!hit$found) {
       stop(
-        "checkpoint spec: declared block function not found: ",
+        "checkpoint spec: declared block entry not found: ",
         nm,
         call. = FALSE
       )
     }
-    c(paste0("## ", nm), deparse(body(fn)))
+    if (is.function(hit$value)) {
+      c(paste0("## fn ", nm), deparse(body(hit$value)))
+    } else {
+      c(paste0("## val ", nm), deparse(hit$value))
+    }
   }))
   f <- tempfile("ckpt-block-")
   on.exit(unlink(f), add = TRUE)
@@ -134,7 +162,6 @@ ckpt_write <- function(path, payload, spec) {
 # with no recorded spec is refused rather than trusted: every checkpoint written
 # before this guard existed is exactly that file, and its provenance is unknown.
 ckpt_read <- function(path, spec) {
-  ckpt_trace_note(path, guarded = TRUE)
   ckpt_trace_state$in_guard <- TRUE
   on.exit(ckpt_trace_state$in_guard <- FALSE, add = TRUE)
   raw <- readRDS(path)
@@ -166,9 +193,70 @@ ckpt_read <- function(path, spec) {
 # per-cell list) can go stale entry by entry: the early entries predate a design
 # change and the later ones do not. Specs therefore live per entry, not only per
 # file, and a matching sibling is served while a stale one is refused.
+#
+# The FILE carries no design spec at all — only which site wrote it and the
+# container format. A file-level design spec cannot be right here: it has to be
+# some entry's spec, and stamping the file with one entry's parameters both
+# discards every valid sibling when that entry is edited (on the nested-fixed
+# site, ~720 Stan refits) and fires before the per-entry check can ever
+# discriminate, leaving the per-entry machinery inert. So all design comparison
+# happens per entry, and the file check answers only the question a file-level
+# record can answer: is this cache even ours?
 
-ckpt_store_new <- function() {
-  list(entries = list())
+ckpt_store_format_version <- 1L
+
+ckpt_store_new <- function(site) {
+  if (!is.character(site) || length(site) != 1L || !nzchar(site)) {
+    stop("checkpoint store: a store needs its site name", call. = FALSE)
+  }
+  list(
+    ckpt_store_format = ckpt_store_format_version,
+    site = site,
+    entries = list()
+  )
+}
+
+ckpt_store_save <- function(path, store) {
+  dir <- dirname(path)
+  if (!dir.exists(dir)) {
+    dir.create(dir, recursive = TRUE, showWarnings = FALSE)
+  }
+  saveRDS(store, path)
+  invisible(path)
+}
+
+# Load a store, or abort. The only file-level questions are whether this is a
+# store this guard wrote and whether the site that wrote it is the one asking;
+# staleness is an entry-level question and is asked by ckpt_store_get().
+ckpt_store_load <- function(path, site) {
+  ckpt_trace_state$in_guard <- TRUE
+  on.exit(ckpt_trace_state$in_guard <- FALSE, add = TRUE)
+  store <- readRDS(path)
+  if (
+    !is.list(store) ||
+      !identical(store$ckpt_store_format, ckpt_store_format_version)
+  ) {
+    stop(
+      "stale-checkpoint guard: ",
+      path,
+      " is not a guarded checkpoint store, so what design produced it is ",
+      "unknown (delete it and let the run recompute)",
+      call. = FALSE
+    )
+  }
+  if (!identical(store$site, site)) {
+    stop(
+      "stale-checkpoint guard: ",
+      path,
+      " was written by a different site: recorded '",
+      store$site,
+      "', current '",
+      site,
+      "' (delete the checkpoint and let the run recompute)",
+      call. = FALSE
+    )
+  }
+  store
 }
 
 ckpt_store_put <- function(store, key, payload, spec) {
@@ -210,16 +298,15 @@ ckpt_store_get <- function(store, key, spec) {
 }
 
 # ---- the run-scoped deserialization trace ------------------------------------
-# Comparing specs protects reads routed through ckpt_read(). The trace protects
-# the run against reads that are not: it records every readRDS() as it happens,
-# so no spelling of the call -- bare, base::-qualified, or through an alias --
-# is invisible to it. Registered locations bound what it judges; a read outside
+# Comparing specs protects reads routed through the guard. The trace protects
+# the run against reads that are not: it watches readRDS() as it happens, so no
+# spelling of the call -- bare, base::-qualified, or through an alias -- is
+# invisible to it. Registered locations bound what it judges; a read outside
 # them is somebody else's business and is left alone.
 
 ckpt_trace_state <- new.env(parent = emptyenv())
 ckpt_trace_state$registered <- character(0)
-ckpt_trace_state$observed <- character(0)
-ckpt_trace_state$guarded <- character(0)
+ckpt_trace_state$bypassed <- character(0)
 ckpt_trace_state$installed <- FALSE
 ckpt_trace_state$in_guard <- FALSE
 
@@ -243,22 +330,25 @@ ckpt_trace_register <- function(path) {
 # parent-side assertion cannot see a worker's reads at all, and would pass
 # vacuously over exactly the harness this guard was written for. Aborting at the
 # read keeps the check in whichever process performed it.
-ckpt_trace_note <- function(path, guarded = FALSE) {
+#
+# What is recorded is the BYPASS, not the path. Recording paths and subtracting
+# the guarded ones at the end cannot work: a path is read through the guard on
+# nearly every resume, so any later bare read of that same path is subtracted
+# out by its own earlier legitimate sibling, and a bypass a caller swallowed is
+# then never reported at all. A bypass is an event; it is recorded when it
+# happens and is never cancelled by anything that happened before or after it.
+ckpt_trace_note <- function(path) {
   # readRDS() also accepts a connection; only a path can be compared against a
   # registered location, so anything else is somebody else's business.
   if (!is.character(path) || length(path) != 1L) {
     return(invisible(NULL))
   }
-  p <- ckpt_norm(path)
-  if (guarded) {
-    ckpt_trace_state$guarded <- union(ckpt_trace_state$guarded, p)
-    return(invisible(NULL))
-  }
   if (isTRUE(ckpt_trace_state$in_guard)) {
     return(invisible(NULL))
   }
-  ckpt_trace_state$observed <- union(ckpt_trace_state$observed, p)
+  p <- ckpt_norm(path)
   if (length(ckpt_under_registered(p))) {
+    ckpt_trace_state$bypassed <- union(ckpt_trace_state$bypassed, p)
     stop(
       "stale-checkpoint guard: ",
       basename(p),
@@ -271,8 +361,7 @@ ckpt_trace_note <- function(path, guarded = FALSE) {
 }
 
 ckpt_trace_reset <- function() {
-  ckpt_trace_state$observed <- character(0)
-  ckpt_trace_state$guarded <- character(0)
+  ckpt_trace_state$bypassed <- character(0)
   invisible(NULL)
 }
 
@@ -319,10 +408,7 @@ ckpt_under_registered <- function(paths) {
 # without going through the guard has already read rows of unknown provenance,
 # and must not go on to write a fixture from them.
 ckpt_trace_assert <- function() {
-  suspect <- setdiff(
-    ckpt_under_registered(ckpt_trace_state$observed),
-    ckpt_trace_state$guarded
-  )
+  suspect <- ckpt_trace_state$bypassed
   if (length(suspect)) {
     stop(
       "stale-checkpoint guard: ",

@@ -47,6 +47,9 @@ gen_demo <- function(rho, k) {
   rho * seq_len(k)
 }
 helper_outside_block <- function(x) x
+# A declared VALUE in the block, not a function: seed offsets, sampler argument
+# lists and model formulas all decide cached numbers without being functions.
+demo_offsets <- c(a = 0L, b = 100L)
 
 demo_spec <- function(
   rho = 0.3,
@@ -55,7 +58,7 @@ demo_spec <- function(
   dist = "gaussian",
   n_rep = 2,
   base_seed = 1,
-  block = "gen_demo",
+  block = c("gen_demo", "demo_offsets"),
   site = "demo"
 ) {
   ckpt_spec(
@@ -164,16 +167,48 @@ pass(
   "a comment inside the block, and an edit outside it, keep the cache usable"
 )
 
+# A declared block entry that is a VALUE, not a function, is hashed the same
+# way: the seed offsets and sampler arguments the oracle sites declare decide
+# their cached numbers without being functions.
+demo_offsets <- c(a = 0L, b = 200L)
+expect_error(
+  ckpt_read(drift, demo_spec()),
+  "a changed declared VALUE in the block is refused like a changed function",
+  must_match = "generating block"
+)
+demo_offsets <- c(a = 0L, b = 100L)
+stopifnot(identical(ckpt_read(drift, demo_spec()), gen_demo(0.3, 10)))
+pass("restoring the declared value makes the cache usable again")
+
+# A declared block name that no longer exists is "not found", never silently
+# resolved to a same-named function further up the search path. Two real sites
+# declare a block function named `simulate`, which stats:: also exports: without
+# this the hash would quietly track stats::simulate forever after a rename.
+simulate <- function(design) design
+stopifnot(is.function(stats::simulate)) # the stranger that must not be reached
+stopifnot(nzchar(demo_spec(block = c("gen_demo", "simulate"))$block_hash))
+pass("the site's own block function is found while it exists")
+rm(simulate) # the rename: the site's own function is gone
+expect_error(
+  demo_spec(block = c("gen_demo", "simulate")),
+  "a renamed block function is 'not found', not resolved to stats::simulate",
+  must_match = "declared block entry not found: simulate"
+)
+
 # ---- AC3: a partially stale cache -------------------------------------------
 # Early entries predate a design change and later ones do not. Guarding whole
 # files cannot see this, so the guard specs each ENTRY.
+# The file itself carries no design spec — only which site wrote it. A
+# file-level design spec would have to be some entry's spec, and it would then
+# fire before the per-entry check ever ran, leaving the per-entry machinery
+# inert and discarding every valid sibling of the one edited entry.
 cat("\n== AC3: a partially stale multi-entry cache ==\n")
 part <- path_of("partial")
-store <- ckpt_store_new()
+store <- ckpt_store_new("demo-store")
 store <- ckpt_store_put(store, "rep-1", gen_demo(0.3, 10), demo_spec())
 store <- ckpt_store_put(store, "rep-2", gen_demo(0.6, 10), demo_spec(rho = 0.6))
-ckpt_write(part, payload = store, spec = demo_spec(site = "demo-store"))
-loaded <- ckpt_read(part, demo_spec(site = "demo-store"))
+ckpt_store_save(part, store)
+loaded <- ckpt_store_load(part, "demo-store")
 stopifnot(identical(
   ckpt_store_get(loaded, "rep-1", demo_spec()),
   gen_demo(0.3, 10)
@@ -183,6 +218,18 @@ expect_error(
   ckpt_store_get(loaded, "rep-2", demo_spec()),
   "the sibling entry computed under a superseded design is refused",
   must_match = "rho"
+)
+
+# The file-level question a file-level record CAN answer: is this cache ours?
+expect_error(
+  ckpt_store_load(part, "another-site"),
+  "a store written by another site is refused and both sites named",
+  must_match = "recorded 'demo-store', current 'another-site'"
+)
+expect_error(
+  ckpt_store_load(bare, "demo-store"),
+  "a file that is not a guarded store at all is refused, not trusted",
+  must_match = "not a guarded checkpoint store"
 )
 
 # ---- AC2: the run-scoped trace ----------------------------------------------
@@ -217,11 +264,17 @@ expect_error(
 
 # And the end-of-run assertion still reports a bypass that was caught and
 # swallowed by a caller's tryCatch rather than allowed to kill the run.
+#
+# The guarded read FIRST, with no reset between, is the point of this case: a
+# real run reads each checkpoint through the guard before anything bypasses it,
+# and a trace that recorded paths and subtracted the guarded ones would let that
+# legitimate read cancel the bypass that follows it. Nothing is reset here.
 ckpt_trace_reset()
+invisible(ckpt_read(p, demo_spec()))
 invisible(tryCatch(readRDS(p), error = function(e) NULL))
 expect_error(
   ckpt_trace_assert(),
-  "a bypass swallowed by a tryCatch still fails the end-of-run assertion",
+  "a bypass swallowed by a tryCatch is reported even after a guarded read of the same path",
   must_match = "bypassed the checkpoint guard"
 )
 
@@ -274,10 +327,37 @@ expect_error(
   must_match = "rho changed"
 )
 
-# The fork case, which is why the trace aborts at the read rather than only at
-# the end-of-run assertion: M111 maps its cells with parallel::mclapply, and a
-# worker's trace state dies with the worker. A stale checkpoint must therefore
-# be refused INSIDE the worker, and surface as that cell's failure.
+# THE fork case for the trace, and the reason the trace aborts at the read
+# rather than only at the end-of-run assertion: M111 maps its cells with
+# parallel::mclapply, and a forked worker's trace state dies with the worker, so
+# a parent-side assertion cannot see a worker's reads at all. The read here is a
+# bare readRDS of a VALID registered checkpoint -- the spec check would accept
+# this file, so nothing but the trace can refuse it, and it must do so inside
+# the worker.
+cat("\n== AC2: a bare readRDS inside an mclapply worker ==\n")
+valid_cell <- file.path(ckpt_dir, "cell-01.rds")
+stopifnot(file.exists(valid_cell))
+stopifnot(!is.null(ckpt_read(valid_cell, cell_spec(cell)))) # the spec accepts it
+forked <- parallel::mclapply(
+  1:2,
+  function(i) if (i == 2L) readRDS(valid_cell) else "no read",
+  mc.cores = 2L
+)
+fork_msgs <- vapply(
+  forked,
+  function(r) {
+    if (inherits(r, "try-error")) conditionMessage(attr(r, "condition")) else ""
+  },
+  character(1)
+)
+stopifnot(any(grepl("bypassed the checkpoint guard", fork_msgs, fixed = TRUE)))
+stopifnot(!nzchar(fork_msgs[1])) # the worker that read nothing is untouched
+pass(
+  "a bare readRDS inside a forked worker aborts in that worker, on a checkpoint the spec check would have accepted"
+)
+
+# And the spec check reaches inside a worker too: a stale checkpoint must be
+# refused there and surface to the parent as that cell's failure.
 cat("\n== AC2: a stale checkpoint refused inside an mclapply worker ==\n")
 saveRDS(list(nonsense = TRUE), file.path(ckpt_dir, "cell-02.rds"))
 worker_results <- parallel::mclapply(cells[1:2], run_cell, mc.cores = 2L)

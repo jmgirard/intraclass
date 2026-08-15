@@ -9,13 +9,21 @@
 #	script       path relative to the repo root
 #	params       the design parameters compared on resume, in the declared order;
 #	             the mismatch message names the EARLIEST differing one in this order
-#	block        functions whose deparsed bodies form the generating-block hash —
-#	             a change to any of them invalidates the cache; a comment or
-#	             formatting change elsewhere in the script does not
+#	block        names whose content forms the generating-block hash — functions
+#	             contribute their bodies, values their values. A change to any of
+#	             them invalidates the cache; a comment or formatting change
+#	             elsewhere in the script does not. Values are declared here because
+#	             not everything that decides a cached number is a function: the
+#	             seed-offset vectors, the sampler argument lists, and the formula
+#	             and prior each base fit is compiled from all do.
 #	unit         what one checkpoint entry covers
-script	params	block	unit
-data-raw/m111-fallback-sweep.R	rho,k,n,dist,n_rep,base_seed	gen_oneway,mc_ci,one_rep	cell
-data-raw/oracle-bayesian-fixed-replicates.R	n_subj,k,n_o,s2_s,mu_r,s2_sr,s2_e,n_rep,base_seed	simulate_fixed_replicates,one_rep	rep
-data-raw/oracle-bayesian-incomplete-oneway.R	n_subjects,k,s2_s,s2_res,missing_frac,n_rep,base_seed	make_incidence,simulate,one_rep	rep
-data-raw/oracle-bayesian-incomplete-fixed-nested.R	vsc,vres,nc,ns,theta2,p_keep,n_rep,base_seed	sim_ragged_d2_fixed,one_rep_summary,one_cell	cell
-data-raw/oracle-bayesian-multilevel-replicates.R	n_clusters,n_subj_per,k,n_o,s2_c,s2_sc,s2_r,s2_cr,s2_sr,s2_e,n_rep,base_seed	simulate,one_rep	rep
+#	api          the guard calls the site must make — ALL of them. A site that
+#	             keeps its file-level call and drops its per-entry one has stopped
+#	             checking the thing that goes stale, so no single call stands in
+#	             for the set
+script	params	block	unit	api
+data-raw/m111-fallback-sweep.R	rho,k,n,dist,n_rep,base_seed	gen_oneway,mc_ci,one_rep	cell	ckpt_read,ckpt_write
+data-raw/oracle-bayesian-fixed-replicates.R	n_subj,k,n_o,s2_s,mu_r,s2_sr,s2_e,n_rep,base_seed	simulate_fixed_replicates,one_rep,est_occ,base_formula,base_prior,brm_args	rep	ckpt_store_load,ckpt_store_get,ckpt_store_put,ckpt_store_save
+data-raw/oracle-bayesian-incomplete-oneway.R	n_subjects,k,s2_s,s2_res,missing_frac,n_rep,base_seed	make_incidence,simulate,one_rep,cell_offset,base_formula,base_prior,brm_args	rep	ckpt_store_load,ckpt_store_get,ckpt_store_put,ckpt_store_save
+data-raw/oracle-bayesian-incomplete-fixed-nested.R	vsc,vres,nc,ns,theta2,p_keep,n_rep,base_seed	sim_ragged_d2_fixed,one_rep_summary,one_cell,kc_of,base_formula,base_prior,brm_args	cell	ckpt_store_load,ckpt_store_get,ckpt_store_put,ckpt_store_save
+data-raw/oracle-bayesian-multilevel-replicates.R	n_clusters,n_subj_per,k,n_o,s2_c,s2_sc,s2_r,s2_cr,s2_sr,s2_e,n_rep,base_seed	simulate,one_rep,est_occ,cell_offset,designs,base_prior,brm_args	rep	ckpt_store_load,ckpt_store_get,ckpt_store_put,ckpt_store_save

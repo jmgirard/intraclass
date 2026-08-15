@@ -121,9 +121,63 @@ them.
 - 2026-08-14: status review.
 - 2026-08-14: review return 1 (defect) — AC2 fails on two counts: the trace's `guarded` set is permanent, so a swallowed bypass after any legitimate read is subtracted out and never reported (F1, 80); and the fork demonstration exercises the spec check, not the trace, so the bare-read-inside-a-worker scenario the trace fix was written for is demonstrated nowhere (F25, 85). AC4 fails because the routing checker matches raw text with no comment stripping (F14, 82) and accepts `ckpt_read` OR `ckpt_store_get` anywhere in the file, so an oracle site can drop its per-entry guard undetected (F15, 80). AC2 and AC4 unticked; status in-progress. F3, F4, F10 and F11 (85/82/85/85) are actioned alongside.
 - 2026-08-14: the AC2 evidence line recorded earlier in this same review claimed the fork case demonstrates the trace surviving `mclapply`; that claim was false and is corrected in the Review section rather than left standing.
+- 2026-08-14: return-1 gate chose hashing declared VALUES alongside function bodies (over comparing them as parameters) and a store file that records only its site (over a file-level design spec restricted to shared parameters, and over dropping per-entry checking); both are recorded in the Decisions section above.
+- 2026-08-14: F1 — the trace now records the BYPASS as an event rather than recording paths and subtracting the guarded ones; verified against the pre-fix guard that the demo's new case (a guarded read, then a swallowed bare read of the same path, no reset between) reported nothing there and aborts here.
+- 2026-08-14: F25 — the fork case now plants a bare `readRDS` of a VALID registered checkpoint inside an `mclapply` worker, so nothing but the trace can refuse it; isolated by mutation (suppressing the abort when the reading process is not the parent reds that case and no other). The pre-existing unspecced-cell case is retained and relabelled as what it is, the spec check reaching inside a worker.
+- 2026-08-14: F14/F15 — the routing checker strips R comments (quote-aware) before matching, and `checkpoint-sites.tsv` gained an `api` column declaring the guard calls each site must make, ALL of which are required; the self-test now probes every declared site and plants a reversion per declared call plus two comment-outs — the mutations `--self-test` prints, each detected.
+- 2026-08-14: F3 — declared block names resolve without inheriting past `globalenv()`, so a renamed block function aborts as "not found" instead of resolving to a same-named function on the search path; demonstrated on `simulate`, the name two sites share with `stats::`.
+- 2026-08-14: F4 — the four oracle sites now name their base formula, prior and sampler arguments (and their seed offsets, `est_occ` and `kc_of`) and declare them in the block; the base fits are compiled from the named objects, so the fit and the hashed declaration cannot drift apart.
+- 2026-08-14: F10/F11 — `ckpt_store_save()`/`ckpt_store_load()` replace the file-level design spec on all four store sites; the per-entry check is now the only design check on those files, and the partial-staleness form is exercised on a store the demo writes under the guard's own store API.
+- 2026-08-14: return-1 gate re-run green — `devtools::test()` `[ FAIL 0 | WARN 3 | SKIP 2 | PASS 7564 ]` (unchanged, as expected: every changed R file is under `data-raw/`), `air format --check` clean, `lintr::lint_package()` no lints, `cairn_validate` all checks passed, all six data-raw checkers and their self-tests exit 0, and the demonstration script exits 0. The AC5 declared file list is unchanged — this return adds no file.
 - 2026-08-14: audit finding 10 — the records-apparatus door needs a trigger in what the package computes; this milestone's deliverable guards numeric harness output, which that door's own carve-out leaves untouched ("guards that pin a NUMERIC result", "repairs to existing checkers surfaced as ordinary work"), and four of the five sites write committed oracle fixtures, so it is oracle discipline under #1 — no stale cache has yet produced a wrong shipped value, and the plan does not claim one.
 
 ## Decisions
+
+### 2026-08-14: A multi-entry store file records which site wrote it, never a design spec
+
+The four oracle sites checkpoint one file holding many entries. Until now that
+file was stamped with a full design spec — necessarily *some* entry's spec, and
+in the nested-fixed site literally cell 1's. Two costs, both realized: editing
+one entry discarded every valid sibling (~720 Stan refits there), and the
+file-level check always fired before the per-entry check could discriminate, so
+the per-entry machinery was inert on all four sites and its only demonstration
+ran on a stand-in.
+
+Alternatives weighed: a file-level spec restricted to entry-invariant
+parameters (on these sites nearly every parameter is invariant, so the file
+check would still pre-empt the entry check), and dropping per-entry checking
+altogether (whole-file staleness, the expensive-to-be-wrong option).
+
+Chosen: the file records only its site name and a container format version, and
+every design comparison happens per entry. The file-level check answers the one
+question a file-level record can answer — is this cache ours — and `ckpt_store_load()`
+refuses a foreign or non-store file on that basis alone.
+
+Falsified by a staleness class that is genuinely a property of the file rather
+than of any entry; the file record would then have to carry it.
+
+### 2026-08-14: The generating-block hash covers declared values, not only function bodies
+
+Four of the five sites have things that decide their cached numbers and are not
+functions: the seed-offset vectors, the sampler argument lists, and the formula
+and prior each base fit is compiled from. Hashing function bodies alone left all
+of them able to change with every cache still considered current.
+
+Alternative weighed: declare them as compared *parameters* instead, which gives
+a by-name refusal message. Rejected because it makes the parameter lists carry
+structured objects (a prior, a formula, a list of sampler settings) whose
+equality is less predictable under `all.equal` than deparsed text is under a
+hash, and because it splits one question — did the generating recipe change —
+across two mechanisms.
+
+Chosen: a declared block name may resolve to a function (its body is hashed) or
+to any other object (its value is hashed), and the four oracle sites name their
+formula, prior and sampler arguments so the guard can see them. Resolution stops
+at the global environment, so a renamed block entry is "not found" rather than
+silently resolving to a same-named function on the search path.
+
+Falsified by a generator whose determinant cannot be deparsed stably, which
+would need a value-specific digest rather than deparsed text.
 
 ## Review
 

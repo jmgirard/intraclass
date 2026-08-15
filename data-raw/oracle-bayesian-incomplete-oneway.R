@@ -145,13 +145,18 @@ simulate <- function(design) {
 # refits via update(recompile = FALSE), applying the SHIPPED reducers so this
 # validates the exact recipe fit_brms_oneway() + posterior_summary() use.
 message("Compiling the base Stan model once ...")
+# Named rather than inline so the checkpoint guard can hash them: the fit these
+# two define decides every cached number, and an edit to either must invalidate
+# the cache (M120).
+base_formula <- score ~ 1 + (1 | subject)
+base_prior <- brms::set_prior("student_t(4, 0, 1)", class = "sd")
 base_fit <- do.call(
   brms::brm,
   c(
     list(
-      formula = score ~ 1 + (1 | subject),
+      formula = base_formula,
       data = simulate("complete"),
-      prior = brms::set_prior("student_t(4, 0, 1)", class = "sd")
+      prior = base_prior
     ),
     brm_args
   )
@@ -226,6 +231,7 @@ cell_offset <- c(complete = 0L, ragged = 100000L)
 # M120: the resume was `i <= done` over a positional list, so a re-run after any
 # config edit -- or after the todo order changed -- served rows the current
 # design never computed, under the wrong design label.
+ckpt_site <- "oracle-bayesian-incomplete-oneway"
 rep_spec <- function() {
   ckpt_spec(
     params = list(
@@ -237,15 +243,23 @@ rep_spec <- function() {
       n_rep = n_rep,
       base_seed = base_seed
     ),
-    block = c("make_incidence", "simulate", "one_rep"),
-    site = "oracle-bayesian-incomplete-oneway"
+    block = c(
+      "make_incidence",
+      "simulate",
+      "one_rep",
+      "cell_offset",
+      "base_formula",
+      "base_prior",
+      "brm_args"
+    ),
+    site = ckpt_site
   )
 }
 
 store <- if (file.exists(ckpt)) {
-  ckpt_read(ckpt, rep_spec())
+  ckpt_store_load(ckpt, ckpt_site)
 } else {
-  ckpt_store_new()
+  ckpt_store_new(ckpt_site)
 }
 todo <- expand.grid(
   r = seq_len(n_rep),
@@ -267,11 +281,11 @@ for (i in seq_len(nrow(todo))) {
   rows[[i]] <- one_rep(design, seed = base_seed + cell_offset[[design]] + r)
   store <- ckpt_store_put(store, key, rows[[i]], rep_spec())
   if (i %% 20L == 0L) {
-    ckpt_write(ckpt, payload = store, spec = rep_spec())
+    ckpt_store_save(ckpt, store)
     message(sprintf("  ... %d / %d fits done", i, nrow(todo)))
   }
 }
-ckpt_write(ckpt, payload = store, spec = rep_spec())
+ckpt_store_save(ckpt, store)
 # Before the fixture write: no rep may have come from an unguarded read.
 ckpt_trace_assert()
 reps <- do.call(rbind, rows)

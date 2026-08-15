@@ -118,14 +118,15 @@ simulate_fixed_replicates <- function() {
 # fit_brms_replicates_fixed() uses.
 message("Compiling the base fixed-replicate Stan model once ...")
 d0 <- simulate_fixed_replicates()
+# Named rather than inline so the checkpoint guard can hash them: the fit these
+# two define decides every cached number, and an edit to either must invalidate
+# the cache (M120).
+base_formula <- score ~ 1 + rater + (1 | subject) + (1 | subject:rater)
+base_prior <- brms::set_prior("student_t(4, 0, 1)", class = "sd")
 base_fit <- do.call(
   brms::brm,
   c(
-    list(
-      formula = score ~ 1 + rater + (1 | subject) + (1 | subject:rater),
-      data = d0,
-      prior = brms::set_prior("student_t(4, 0, 1)", class = "sd")
-    ),
+    list(formula = base_formula, data = d0, prior = base_prior),
     brm_args
   )
 )
@@ -217,6 +218,7 @@ ckpt_trace_register(ckpt)
 # M120: the resume was keyed on the rep INDEX alone, so a re-run after any
 # config edit served rows the current design never computed -- and every pin
 # below would then have held against the wrong numbers.
+ckpt_site <- "oracle-bayesian-fixed-replicates"
 rep_spec <- function() {
   ckpt_spec(
     params = list(
@@ -230,15 +232,22 @@ rep_spec <- function() {
       n_rep = n_rep,
       base_seed = base_seed
     ),
-    block = c("simulate_fixed_replicates", "one_rep"),
-    site = "oracle-bayesian-fixed-replicates"
+    block = c(
+      "simulate_fixed_replicates",
+      "one_rep",
+      "est_occ",
+      "base_formula",
+      "base_prior",
+      "brm_args"
+    ),
+    site = ckpt_site
   )
 }
 
 store <- if (file.exists(ckpt)) {
-  ckpt_read(ckpt, rep_spec())
+  ckpt_store_load(ckpt, ckpt_site)
 } else {
-  ckpt_store_new()
+  ckpt_store_new(ckpt_site)
 }
 rows <- vector("list", n_rep)
 for (r in seq_len(n_rep)) {
@@ -252,10 +261,10 @@ for (r in seq_len(n_rep)) {
   store <- ckpt_store_put(store, key, rows[[r]], rep_spec())
   if (r %% 10L == 0L) {
     message(sprintf("  ... %d/%d reps", r, n_rep))
-    ckpt_write(ckpt, payload = store, spec = rep_spec())
+    ckpt_store_save(ckpt, store)
   }
 }
-ckpt_write(ckpt, payload = store, spec = rep_spec())
+ckpt_store_save(ckpt, store)
 # Before the fixture write: no rep may have come from an unguarded read.
 ckpt_trace_assert()
 reps <- do.call(rbind, rows)
