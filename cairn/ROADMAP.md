@@ -14,7 +14,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | M116 | Correct the falsified `"searle"`/`"burch"` width claims | done | — | normal | milestones/archive/M116-classical-width-claims.md |
 | M115 | Document the default interval's skew/kurtosis under-coverage — and withdraw the falsified `"burch"` advice | done | — | normal | milestones/archive/M115-skew-undercoverage-caveat.md |
 | M119 | Reconcile the shipped width claims with M118's third grid | done | M118 | normal | milestones/archive/M119-residual-grid-doc-reconcile.md |
-| M120 | Refuse a stale resume cache in the data-raw harnesses | review | — | normal | milestones/M120-checkpoint-staleness-guard.md |
+| M120 | Refuse a stale resume cache in the data-raw harnesses | in-progress | — | normal | milestones/M120-checkpoint-staleness-guard.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
 <!-- terminal-row retention: M119 done (2026-08-14) → M114 rotated out (oldest terminal by merge order; its archive file still resolves there). Kept: M119, M118, M117, M116, M115 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)

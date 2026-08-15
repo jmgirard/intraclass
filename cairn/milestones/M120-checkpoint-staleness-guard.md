@@ -1,6 +1,6 @@
 # M120: Refuse a stale resume cache in the data-raw harnesses
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -41,7 +41,7 @@ them.
       recorded spec differs from the current one signals an error naming the
       earliest differing entry in that declared order. A spec recording no
       entries is a failure of this criterion, not a satisfaction of it.
-- [x] AC2 During any run in which the guard's trace is installed, every
+- [ ] AC2 During any run in which the guard's trace is installed, every
       deserialization of a checkpoint path either went through the guard or
       aborts the run before the harness writes any output. Evidence is the
       trace's own report over the runs AC3 and AC4 perform — this criterion
@@ -54,7 +54,7 @@ them.
       not; a cache written by a different site at the same path; and a spec
       matching on every parameter but differing in the generating-block hash.
       Each aborts, and a matching cache resumes normally in the same script.
-- [x] AC4 The five sites in the Scope table source the guard, and the CI job
+- [ ] AC4 The five sites in the Scope table source the guard, and the CI job
       that already runs the repo's standalone `data-raw` checkers fails when a
       listed site's cache read bypasses it. Verified by reverting one site's
       guard call and observing that job red.
@@ -129,6 +129,9 @@ them.
 - 2026-08-14: F4 — the four oracle sites now name their base formula, prior and sampler arguments (and their seed offsets, `est_occ` and `kc_of`) and declare them in the block; the base fits are compiled from the named objects, so the fit and the hashed declaration cannot drift apart.
 - 2026-08-14: F10/F11 — `ckpt_store_save()`/`ckpt_store_load()` replace the file-level design spec on all four store sites; the per-entry check is now the only design check on those files, and the partial-staleness form is exercised on a store the demo writes under the guard's own store API.
 - 2026-08-14: return-1 gate re-run green — `devtools::test()` `[ FAIL 0 | WARN 3 | SKIP 2 | PASS 7564 ]` (unchanged, as expected: every changed R file is under `data-raw/`), `air format --check` clean, `lintr::lint_package()` no lints, `cairn_validate` all checks passed, all six data-raw checkers and their self-tests exit 0, and the demonstration script exits 0. The AC5 declared file list is unchanged — this return adds no file.
+- 2026-08-14: re-review — all six criteria re-executed with fresh evidence and the consistency gate green (`devtools::test()` 7564 passing, `devtools::document()` no diff, `pkgdown::check_pkgdown()` clean, `cairn_validate` 24 checks, CI green on `12bc264` including `R CMD check` on both platforms); AC1, AC3, AC5, AC6 hold.
+- 2026-08-14: review return 2 (defect) — AC2 fails on two new mechanisms: a checkpoint registered before it exists is never matched by the trace, because `normalizePath(mustWork = FALSE)` leaves a non-existent path relative while a later read resolves absolute (D3, 90), and a bypass a forked worker swallows with `tryCatch` reaches no assertion, the parent's state being a different process (D13, 90). AC4 fails because the routing checker's token test misses three reversions of a site's guard call — an assertion moved after the fixture write, `ckpt_trace_register(NULL)`, and a live per-entry read replaced while a dead one remains (D7, 92), the last being the F15 class again. AC2 and AC4 unticked; status in-progress. D2, D10, D5 and D11 (87/85/82/82) are actioned alongside; 18 findings are logged below the action bar.
+- 2026-08-14: thrash trigger (b) fired on both AC2 and AC4 — each has now failed twice by a new mechanism of the same shape. The plan gate's recorded falsifiers have both fired: "a checkpoint read the trace cannot observe" (D3, D13, D4) and "a generator change the declared block does not cover" (D11); the remedy is to reconsider those recorded alternatives rather than patch the next mechanism.
 - 2026-08-14: audit finding 10 — the records-apparatus door needs a trigger in what the package computes; this milestone's deliverable guards numeric harness output, which that door's own carve-out leaves untouched ("guards that pin a NUMERIC result", "repairs to existing checkers surfaced as ordinary work"), and four of the five sites write committed oracle fixtures, so it is oracle discipline under #1 — no stale cache has yet produced a wrong shipped value, and the plan does not claim one.
 
 ## Decisions
@@ -403,6 +406,97 @@ ubuntu-latest and windows-latest.
 **CI on PR #129** — every check green on the head commit: `R CMD check` on both
 platforms, `test-coverage`, `check-references`, `checkpoint-guard`, `lint`,
 `format-check`, `pkgdown` and both codecov legs.
+
+### Independent review — three lenses, then a scorer (re-review)
+
+The blame-history lens (Sonnet) and the prior-review lens (Sonnet) each reported
+no findings: no regression of a prior milestone's intent, no contradiction of a
+recorded decision or lesson, and no reintroduction of a point a past review
+raised. Both independently confirmed the four oracle rewrites preserve iteration
+order, seed derivation, base-fit compile-once placement, output positions and
+fixture contents, and that each of review 1's eight actioned findings is fixed in
+substance rather than moved. The diff-bug lens (Opus) reported 25 candidates,
+scored by a fresh Sonnet scorer holding the diff, this file and the plan.
+
+**Actioned (score >= 80), seven findings.** Three demonstrate an acceptance
+criterion failing as written and force the return; four are severe verified gaps
+that no criterion's literal text reaches.
+
+- **D7 (92, AC4 fails).** The routing checker tests only that a required token
+  appears somewhere in the file. Three reversions of a site's guard call were
+  verified undetected: moving `ckpt_trace_assert()` from its pre-write position
+  to end of file (the checker's own message says "before writing output", but
+  position is never checked); `ckpt_trace_register(ckpt` → `ckpt_trace_register(NULL`
+  on all five sites; and replacing a live `ckpt_store_get(...)` with direct
+  payload access while a dead `if (FALSE) { ckpt_store_get(a, b, c) }` remains.
+  The third is a live reproduction of the F15 class this return claimed to close.
+- **D3 (90, AC2 fails).** `normalizePath(..., mustWork = FALSE)` returns a
+  non-existent path unchanged and an existing one as an absolute path, so a
+  checkpoint registered before it exists is never matched by
+  `ckpt_under_registered()`. All four oracle sites register before the store
+  file exists. Verified: register a relative non-existent path, create it, then
+  bare-`readRDS` it — no abort, and `ckpt_trace_assert()` passes.
+- **D13 (90, AC2 fails).** `ckpt_trace_state$bypassed` is per-process and dies
+  with a fork, so a bare read whose abort a worker swallows with `tryCatch` is
+  invisible to the parent's assertion. Reproduced under `mclapply`. The guard's
+  own comment — that the end-of-run assertion is retained for a swallowed
+  bypass — is true only outside a fork.
+- **D2 (87).** The guard is sourced with `source()`'s default `local = FALSE`,
+  so its functions land in `globalenv()` and their internal `saveRDS`/`readRDS`
+  resolve to base — bypassing the `readRDS`/`saveRDS`/`file.exists` shadowing
+  `data-raw/rerun-oracle.R` installs in its `run_env`. Verified the shadow is
+  never called. A "fresh" re-run now writes the real on-disk checkpoint, which
+  is what that shadowing exists to prevent.
+- **D10 (85).** `n_rep` is a compared parameter of every per-entry spec, but each
+  rep's payload depends only on its seed, so raising `n_rep` refuses every
+  cached rep. The most common edit to these scripts still pays the mass-discard
+  cost the store decision above says it eliminated.
+- **D5 (82).** Five site comments state that sourcing the guard installs the
+  trace. It does not — every site calls `ckpt_trace_install()` explicitly, and
+  the milestone's own work log records self-install as the chosen design over
+  the per-harness opt-in that shipped.
+- **D11 (82).** m111's declared block omits `searle_f_ci_balanced()` and
+  `burch_reml_ci_balanced()`, both called by `one_rep()` and both determining
+  cached rows. F4 was actioned on the four oracle sites only; m111 has the same
+  gap.
+
+**Logged below the action bar (score < 80), 18 findings** — surfaced, not
+dropped: D1 install-removal undetected by the checker (78); D14 `all.equal`
+tolerance accepts a small-variance change (74); D18 the partial-staleness form
+is still demonstrated only on a stand-in site (72); D4 a pre-install alias is
+untraced (68); D12 the "M111 sweep end to end" claim overstates a one-cell run
+(62); D17 `in_guard` exempts a lazily-forced argument (55); D23 the AC6 checkbox
+was unticked despite its evidence — fixed in this pass (55); D16 the trace is
+never removed and registrations accumulate (52); D24 `m112-harness-demo.R` was
+not in the gate list, though it passes when run (52); D9 nothing pins the site
+count (45); D8 the bare-read regex is anchored to the name `ckpt` (42); D19
+`ckpt_store_get` conflates absent with NULL payload (38); D21 `strip_comments`
+resets quote state per line, failing safe (35); D15 reordering `params` reports a
+misleading message (32); D25 the multilevel site declares `designs` rather than a
+`base_formula` (30); D22 the spec-block regex is coupled to air's indentation
+(28); D20 mismatch messages elide values longer than four (22); D6 the false fork
+claim is left standing (15) — scored false, the correction below already stands.
+
+### Return (second defect return)
+
+AC2 and AC4 fail again and are unticked; AC1, AC3, AC5 and AC6 keep the evidence
+recorded above. D3 and D13 fail AC2 — a checkpoint registered before it exists is
+never watched, and a swallowed bypass inside a forked worker reaches no
+assertion. D7 fails AC4 — the routing checker's token test misses three
+reversions of a site's guard call, one of them the F15 class. D2, D10, D5 and D11
+are actioned in the same pass.
+
+**Thrash rule.** This is defect return 2 of this milestone; the third-return
+threshold has not been reached. Trigger (b) has fired, on both criteria: AC2
+failed in review 1 (F1, F25) and fails here (D3, D13), and AC4 failed in review 1
+(F14, F15) and fails here (D7) — each time by a new mechanism of the same shape,
+a hole in a scenario nobody demonstrated and a text match that admits a mutation
+it cannot see. The remedy is to reconsider the alternatives the plan gate
+recorded against, both of which the work log names with their falsifiers: the
+run-time trace was chosen over a source scan, falsified by "a checkpoint read the
+trace cannot observe" (D3, D13, D4 are three), and the narrow generating-block
+hash was chosen over a whole-file fingerprint, falsified by "a generator change
+the declared block does not cover" (D11). Both falsifiers have now fired.
 
 **Correction to review 1's record.** Review 1's AC2 paragraph above states that
 the fork case was "exercised directly" by an unspecced `cell-02.rds`. That claim
