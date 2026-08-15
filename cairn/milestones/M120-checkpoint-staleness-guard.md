@@ -41,7 +41,7 @@ them.
       recorded spec differs from the current one signals an error naming the
       earliest differing entry in that declared order. A spec recording no
       entries is a failure of this criterion, not a satisfaction of it.
-- [ ] AC2 During any run in which the guard's trace is installed, every
+- [x] AC2 During any run in which the guard's trace is installed, every
       deserialization of a checkpoint path either went through the guard or
       aborts the run before the harness writes any output. Evidence is the
       trace's own report over the runs AC3 and AC4 perform — this criterion
@@ -54,7 +54,7 @@ them.
       not; a cache written by a different site at the same path; and a spec
       matching on every parameter but differing in the generating-block hash.
       Each aborts, and a matching cache resumes normally in the same script.
-- [ ] AC4 The five sites in the Scope table source the guard, and the CI job
+- [x] AC4 The five sites in the Scope table source the guard, and the CI job
       that already runs the repo's standalone `data-raw` checkers fails when a
       listed site's cache read bypasses it. Verified by reverting one site's
       guard call and observing that job red.
@@ -516,7 +516,7 @@ assertion. D7 fails AC4 — the routing checker's token test misses three
 reversions of a site's guard call, one of them the F15 class. D2, D10, D5 and D11
 are actioned in the same pass.
 
-**Thrash rule.** This is defect return 2 of this milestone; the third-return
+**Thrash rule (return 2).** This is defect return 2 of this milestone; the third-return
 threshold has not been reached. Trigger (b) has fired, on both criteria: AC2
 failed in review 1 (F1, F25) and fails here (D3, D13), and AC4 failed in review 1
 (F14, F15) and fails here (D7) — each time by a new mechanism of the same shape,
@@ -536,3 +536,83 @@ section had not been touched. It is superseded here rather than edited: the fork
 evidence AC2 rests on is the bare-read-inside-a-worker case recorded in this
 block, and the unspecced-cell case stands only as evidence that the spec check
 also reaches inside a worker.
+
+## Third review (2026-08-14, after return 2)
+
+Third pass, on `m120-checkpoint-staleness-guard` at PR #129. `main` is level with
+origin and the branch not behind it, so no merge preceded this evidence. Every
+criterion is re-executed from scratch against the redesigned guard; the evidence
+above is superseded wherever it disagrees.
+
+**AC1 — spec recorded, mismatch names the earliest differing entry.** Fresh run
+of `Rscript data-raw/m120-checkpoint-guard-demo.R`, exit 0 over 34 passing cases.
+A matching cache returns its payload; a changed `rho` and a changed `dist` are
+each refused by name; with two differing at once the message names the earlier in
+declared order, shown both ways round. `ckpt_spec()` still refuses an empty
+parameter list at construction. New this pass: the generating block is derived
+rather than listed, and the demo shows an undeclared helper — reached only
+through the declared entry point — invalidating a cache when it is edited, while
+a comment inside a block function, an edit to a function outside the closure, and
+a restored declared value all leave the cache usable.
+
+**AC2 — no unguarded deserialization survives.** Same run. Each of the three
+reads that defeated the trace at return 2 now has its own case, and each case was
+verified to red when its own fix alone is reverted, and no other case with it:
+
+- *A relative path registered before it exists* (the first-run case on all four
+  oracle sites). Rooted outside any already-registered directory, because the
+  first version of this case passed for the wrong reason — the enclosing tempdir
+  was itself registered. Reverting the path resolver to plain `normalizePath()`
+  reds exactly this case.
+- *A bypass swallowed inside a forked worker.* The worker catches its own abort
+  and returns an ordinary value; the parent's assertion still reports the bypass,
+  read from the on-disk markers. Making the assertion read memory instead reds
+  exactly this case.
+- *An alias to `readRDS` bound by the caller*, bound at the top of the demo
+  before any install call it makes. Removing the guard's source-time install reds
+  exactly this case.
+
+The earlier cases still hold: a guarded run passes; bare and `base::`-qualified
+reads abort at the read; a swallowed bypass after a legitimate guarded read of
+the same path is still reported; a read outside any registered location is not
+flagged; and a bare read inside a forked worker, on a checkpoint the spec check
+would have accepted, aborts in that worker.
+
+**AC3 — every planted-defect form.** Same run, each on a cache the demo writes
+itself: two parameters mismatching individually; a spec absent entirely; a cache
+written by another site; a partially stale multi-entry store served and refused
+entry by entry through the store API; and a generating-block hash differing with
+every parameter matching. Clean resume is shown on the real M111 site, which
+computes a cell, resumes it, and then refuses it after `rho` is edited.
+
+**AC4 — the five sites route through the guard, and reverting one reds.**
+`Rscript data-raw/check-checkpoint-sites.R` exits 0 over the five declared sites.
+AC4's own procedure was run on a site neither earlier pass had reverted:
+replacing `oracle-bayesian-multilevel-replicates.R`'s per-entry
+`ckpt_store_get()` with direct payload access makes it exit 1 naming that file,
+and restoring returns exit 0 with an empty `git diff`. Its `--self-test` plants,
+on every one of the five sites, the three reversions that walked past the retired
+text-matching checker — an assertion moved after the output write, a
+`ckpt_trace_register(NULL)`, and every live call replaced while a dead
+`if (FALSE)` copy remains — plus a commented-out `source()` and one reversion per
+declared guard call: 38 checks, no failures. The retired Python checker was
+re-run on the dead-copy mutation and exits 0, so the replacement's advantage is
+measured rather than asserted. In CI the `checkpoint-guard` job runs the
+demonstration, the routing check and its self-test as three steps, so any of them
+exiting 1 fails the job; that job passes on this commit.
+
+**AC5 — nothing outside the declared file list.** `git diff --name-only
+main...HEAD` filtered for `tests/testthat/fixtures/`, `tests/testthat/_snaps/`,
+`R/sysdata.rda` and `*.rds` returns nothing, and the working tree is clean. The
+15 changed files are the list the work log declares, which this round turned over
+two entries of: `check-checkpoint-sites.py` retired for
+`check-checkpoint-sites.R`, and `rerun-oracle.R` newly declared.
+
+**AC6 — verify slot and the toolchain gate.** `devtools::test()` `[ FAIL 0 |
+WARN 3 | SKIP 2 | PASS 7564 ]`; `air format --check` exit 0;
+`lintr::lint_package()` no lints; the five python `data-raw` checkers and
+`check-record-claims.py` exit 0, and `m112-harness-demo.R` — which drives the
+changed `run_cell` read/write path — passes. Toolchain gate:
+`devtools::document()` produces no diff, `pkgdown::check_pkgdown()` reports no
+problems, `cairn_validate` passes every check with one advisory (the 13-task
+split tripwire, answered in the work log).
