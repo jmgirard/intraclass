@@ -10,12 +10,14 @@
 
 source("data-raw/checkpoint-guard.R")
 
-# Bound HERE, immediately after the guard is sourced and long before any
-# ckpt_trace_install() call this script makes, because that is the window the
-# alias case is about: trace() rebinds a name, so an alias captured while
-# readRDS is untraced stays untraced forever. Sourcing the guard installs the
-# trace, which is why this alias is caught; every site sources the guard as its
-# first act, so no site can bind an untraced alias either.
+# Bound HERE, AFTER the guard is sourced: trace() rebinds the name, so an alias
+# takes a copy of whatever readRDS was at BIND time. Bound after the source(),
+# the copy is the traced function and the alias is caught. An alias bound BEFORE
+# the source() copies the untraced original and is never caught -- that form is
+# outside AC3's enumeration, and the subprocess case near the end of this script
+# demonstrates it escaping rather than leaving the boundary asserted. It is not
+# hypothetical: m111-fallback-sweep.R sources the m76 prototype before the
+# guard, and every oracle site runs pkgload::load_all() and library(brms) first.
 aliased_read <- readRDS
 
 pass <- function(label) cat("PASS  ", label, "\n", sep = "")
@@ -465,8 +467,15 @@ expect_error(
   must_match = "not a guarded checkpoint store"
 )
 
-# ---- AC2: the run-scoped trace ----------------------------------------------
-cat("\n== AC2: unguarded deserialization of a registered checkpoint ==\n")
+# ---- AC3: the run-scoped trace, one registered path per form ----------------
+# Each form below reads a checkpoint registered for THAT FORM ALONE, under a
+# basename naming the form. An earlier design ran every form against one shared
+# path with ckpt_trace_reset() between them: ckpt_trace_bypassed() returns
+# unique PATHS, so one marker satisfied every form's reporting clause and
+# attribution rested entirely on the resets -- which no real site calls. With a
+# path per form the marker can only have come from the form that reads it, and
+# nothing between the forms is reset.
+cat("\n== AC3: unguarded deserialization of a registered checkpoint ==\n")
 ckpt_trace_install()
 ckpt_trace_register(tmp)
 
@@ -477,22 +486,66 @@ pass(
   "a run whose every checkpoint read went through the guard passes the trace"
 )
 
-# The abort lands AT THE READ, in whichever process performed it -- not only at
-# the end-of-run assertion. M111 maps its cells with mclapply, and a forked
-# worker's trace state never returns to the parent, so a parent-only check would
-# pass vacuously over exactly the harness this guard exists for.
-ckpt_trace_reset()
-expect_error(
-  readRDS(p), # the bare call the guard is meant to replace
-  "a bare readRDS of a registered checkpoint aborts at the read",
-  must_match = "bypassed the checkpoint guard"
-)
+# A valid guarded checkpoint at a path of its own, registered for one form.
+form_ckpt <- function(tag) {
+  d <- tempfile(paste0("m120-form-", tag, "-"))
+  dir.create(d)
+  fp <- file.path(d, paste0(tag, ".rds"))
+  ckpt_write(fp, payload = gen_demo(0.3, 10), spec = demo_spec())
+  ckpt_trace_register(fp)
+  fp
+}
 
-ckpt_trace_reset()
-expect_error(
-  base::readRDS(p), # the namespace-qualified spelling
+# The abort lands AT THE READ, in whichever process performed it -- not only at
+# the end-of-run assertion. Swallowed here so the run continues, and then the
+# bypass is required to be recorded against this form's own path.
+demo_form <- function(tag, label, read) {
+  fp <- form_ckpt(tag)
+  e <- tryCatch(
+    {
+      force(read(fp))
+      NULL
+    },
+    error = identity
+  )
+  if (is.null(e)) {
+    stop("expected an abort at the read, none was signalled: ", label)
+  }
+  msg <- conditionMessage(e)
+  if (!grepl("bypassed the checkpoint guard", msg, fixed = TRUE)) {
+    stop(
+      "aborted, but not as a guard bypass: ",
+      label,
+      "\n  got: ",
+      msg
+    )
+  }
+  if (!(ckpt_norm(fp) %in% ckpt_trace_bypassed())) {
+    stop("the bypass was not recorded against this form's own path: ", label)
+  }
+  cat("PASS  ", label, "\n        error: ", msg, "\n", sep = "")
+  invisible(fp)
+}
+
+demo_form(
+  "bare",
+  "a bare readRDS aborts at the read, recorded against its own path",
+  function(fp) readRDS(fp)
+)
+demo_form(
+  "namespaced",
   "the base:: spelling is caught too — the trace watches loads, not spellings",
-  must_match = "bypassed the checkpoint guard"
+  function(fp) base::readRDS(fp)
+)
+demo_form(
+  "alias-after",
+  "an alias bound after the guard was sourced is caught",
+  function(fp) aliased_read(fp)
+)
+demo_form(
+  "do-call",
+  "do.call on the name is caught — the callee is the traced function",
+  function(fp) do.call("readRDS", list(fp))
 )
 
 # And the end-of-run assertion still reports a bypass that was caught and
@@ -501,14 +554,15 @@ expect_error(
 # The guarded read FIRST, with no reset between, is the point of this case: a
 # real run reads each checkpoint through the guard before anything bypasses it,
 # and a trace that recorded paths and subtracted the guarded ones would let that
-# legitimate read cancel the bypass that follows it. Nothing is reset here.
-ckpt_trace_reset()
-invisible(ckpt_read(p, demo_spec()))
-invisible(tryCatch(readRDS(p), error = function(e) NULL))
+# legitimate read cancel the bypass that follows it. The assertion must name
+# THIS form's file, not one an earlier form left behind.
+after_guarded <- form_ckpt("after-guarded")
+invisible(ckpt_read(after_guarded, demo_spec()))
+invisible(tryCatch(readRDS(after_guarded), error = function(e) NULL))
 expect_error(
   ckpt_trace_assert(),
   "a bypass swallowed by a tryCatch is reported even after a guarded read of the same path",
-  must_match = "bypassed the checkpoint guard"
+  must_match = "after-guarded.rds"
 )
 
 # A checkpoint registered BEFORE it exists is still watched. Every oracle site
@@ -524,7 +578,7 @@ expect_error(
 # Deliberately rooted OUTSIDE `tmp`: `tmp` is already registered as a directory,
 # and a read under it would abort on that registration whatever the relative
 # path resolved to — the case would pass without testing anything.
-cat("\n== AC2: a relative checkpoint path registered before it exists ==\n")
+cat("\n== AC3: a relative checkpoint path registered before it exists ==\n")
 early_root <- tempfile("m120-early-")
 dir.create(early_root)
 owd <- setwd(early_root)
@@ -540,14 +594,6 @@ expect_error(
 setwd(owd)
 
 # The alias bound at the top of this script, before any install call it makes.
-cat("\n== AC2: an alias to readRDS, bound by the caller ==\n")
-ckpt_trace_reset()
-expect_error(
-  aliased_read(p),
-  "an alias bound by the caller is caught -- the trace is installed at source time",
-  must_match = "bypassed the checkpoint guard"
-)
-
 # Sourcing the guard a SECOND time in one process must leave the trace's
 # registrations and its recorded bypasses where they are. This is not a
 # hypothetical: this script sources the guard, then sources m111-fallback-sweep.R
@@ -555,33 +601,102 @@ expect_error(
 # scripts in one process. A re-source that rebuilt the state would leave the
 # trace watching nothing at all, and the run that follows would be unguarded
 # while every routing check still passed.
-cat("\n== AC2: the guard sourced a second time in one process ==\n")
-ckpt_trace_reset()
-invisible(tryCatch(readRDS(p), error = function(e) NULL)) # a swallowed bypass
+cat("\n== AC3: the guard sourced a second time in one process ==\n")
+pre_resource <- form_ckpt("pre-resource")
+invisible(tryCatch(readRDS(pre_resource), error = function(e) NULL))
 registered_before <- ckpt_trace_state$registered
 bypassed_before <- ckpt_trace_bypassed()
-stopifnot(length(registered_before) > 0L, length(bypassed_before) > 0L)
+stopifnot(
+  length(registered_before) > 0L,
+  ckpt_norm(pre_resource) %in% bypassed_before
+)
 source("data-raw/checkpoint-guard.R") # the second source
 stopifnot(identical(ckpt_trace_state$registered, registered_before))
 stopifnot(identical(ckpt_trace_bypassed(), bypassed_before))
 pass("re-sourcing the guard leaves registrations and recorded bypasses intact")
-expect_error(
-  readRDS(p),
+demo_form(
+  "post-resource",
   "a bare read after the guard was sourced a second time still aborts",
-  must_match = "bypassed the checkpoint guard"
+  function(fp) readRDS(fp)
 )
+# Named against the path bypassed BEFORE the re-source, so what is shown to
+# survive it is that bypass and not one recorded since.
 expect_error(
   ckpt_trace_assert(),
   "the bypass recorded before the re-source is still reported after it",
-  must_match = "bypassed the checkpoint guard"
+  must_match = "pre-resource.rds"
 )
 
+# A clean control: reset first, because every form above deliberately leaves its
+# marker standing. What this case must show is that a read outside every
+# registered location records nothing of its own.
 ckpt_trace_reset()
 outside <- file.path(tempdir(), "unregistered.rds")
 saveRDS(1, outside)
 invisible(readRDS(outside))
 ckpt_trace_assert()
 pass("a read outside any registered checkpoint location is not flagged")
+
+# ---- AC3: the excluded form, demonstrated escaping ---------------------------
+# AC3 promises the forms it enumerates and disclaims the rest. One excluded form
+# is shown escaping rather than left asserted: an alias bound BEFORE the guard
+# is sourced holds a copy of the untraced original, because trace() rebinds the
+# name and a copy taken earlier is a different object. It runs in its own
+# process -- this one already sourced the guard on line 11, and an uninstall /
+# reinstall here would assign a fresh marker directory and orphan every bypass
+# recorded above.
+#
+# The escape is paired with a positive control in the same subprocess: a
+# swallowed BARE read of the same path IS recorded. Without it, "not reported"
+# would be satisfied by a case that never ran at all.
+cat("\n== AC3: an alias bound BEFORE the guard is sourced (excluded) ==\n")
+pre_alias_script <- tempfile("m120-pre-alias-", fileext = ".R")
+writeLines(
+  c(
+    'pre_alias <- readRDS # bound while readRDS is still untraced',
+    'source("data-raw/checkpoint-guard.R")',
+    'gen <- function(x) x',
+    'd <- tempfile("m120-pre-alias-")',
+    'dir.create(d)',
+    'fp <- file.path(d, "pre-alias.rds")',
+    'spec <- ckpt_spec(',
+    '  params = list(a = 1), roots = "gen", site = "pre-alias"',
+    ')',
+    'ckpt_write(fp, payload = gen(1), spec = spec)',
+    'ckpt_trace_register(fp)',
+    '',
+    '# The excluded form: no abort, and the object comes back with no design',
+    '# comparison -- the whole file, spec envelope and all, not the payload.',
+    'got <- pre_alias(fp)',
+    'stopifnot(is.list(got), !is.null(got$ckpt_spec), !is.null(got$payload))',
+    'stopifnot(length(ckpt_trace_bypassed()) == 0L)',
+    'cat("ESCAPED-UNREPORTED\\n")',
+    '',
+    '# The control, same path, same process: a bare read IS recorded.',
+    'invisible(tryCatch(readRDS(fp), error = function(e) NULL))',
+    'stopifnot(ckpt_norm(fp) %in% ckpt_trace_bypassed())',
+    'cat("CONTROL-REPORTED\\n")'
+  ),
+  pre_alias_script
+)
+pre_alias_out <- system2(
+  file.path(R.home("bin"), "Rscript"),
+  pre_alias_script,
+  stdout = TRUE,
+  stderr = TRUE
+)
+if (!all(c("ESCAPED-UNREPORTED", "CONTROL-REPORTED") %in% pre_alias_out)) {
+  stop(
+    "the pre-source alias case did not run as written:\n",
+    paste(pre_alias_out, collapse = "\n")
+  )
+}
+pass(
+  "an alias bound before the guard was sourced reads unaborted and unreported"
+)
+pass(
+  "  ...while a swallowed bare read of the same path in that process IS reported"
+)
 
 ckpt_trace_remove()
 
@@ -632,7 +747,7 @@ expect_error(
 # bare readRDS of a VALID registered checkpoint -- the spec check would accept
 # this file, so nothing but the trace can refuse it, and it must do so inside
 # the worker.
-cat("\n== AC2: a bare readRDS inside an mclapply worker ==\n")
+cat("\n== unpromised: a bare readRDS inside an mclapply worker ==\n")
 valid_cell <- file.path(ckpt_dir, "cell-01.rds")
 stopifnot(file.exists(valid_cell))
 stopifnot(!is.null(ckpt_read(valid_cell, cell_spec(cell)))) # the spec accepts it
@@ -657,7 +772,7 @@ pass(
 # And the harder case: the worker SWALLOWS its own abort, so the parent sees a
 # perfectly ordinary return value. The worker's memory dies with it, so the
 # bypass is recorded to disk and the parent's assertion reads it there.
-cat("\n== AC2: a forked worker that swallows its own bypass ==\n")
+cat("\n== unpromised: a forked worker that swallows its own bypass ==\n")
 ckpt_trace_reset()
 swallowed <- parallel::mclapply(
   1:2,
@@ -680,7 +795,9 @@ ckpt_trace_reset()
 
 # And the spec check reaches inside a worker too: a stale checkpoint must be
 # refused there and surface to the parent as that cell's failure.
-cat("\n== AC2: a stale checkpoint refused inside an mclapply worker ==\n")
+cat(
+  "\n== unpromised: a stale checkpoint refused inside an mclapply worker ==\n"
+)
 saveRDS(list(nonsense = TRUE), file.path(ckpt_dir, "cell-02.rds"))
 worker_results <- parallel::mclapply(cells[1:2], run_cell, mc.cores = 2L)
 worker_msgs <- vapply(

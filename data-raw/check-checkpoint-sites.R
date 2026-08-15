@@ -894,7 +894,8 @@ mutations_for <- function(site, src, forms = read_directive("mutations")) {
   add(
     "assert-after-write",
     "moved ckpt_trace_assert() after the output write",
-    text = move_assert_after_write(site, src)
+    text = move_assert_after_write(site, src),
+    reason = "this site performs no output write"
   )
   add(
     "register-non-path",
@@ -941,6 +942,16 @@ mutations_for <- function(site, src, forms = read_directive("mutations")) {
       text = src,
       site = dropped
     )
+  } else {
+    # Reported, not omitted. A form that quietly does not apply to a site reads
+    # exactly like a form that passed on it, and the summary's count then says
+    # more sites were probed than were.
+    add(
+      "declaration-withdrawn",
+      "withdrew a declared determinant",
+      text = NA_character_,
+      reason = "this site declares no determinant the walk reaches"
+    )
   }
   # One call to each declared deserialization name, planted live at top level.
   # This is AC2's own procedure, run on every site rather than on a
@@ -970,6 +981,13 @@ mutations_for <- function(site, src, forms = read_directive("mutations")) {
         paste(readLines(sourced[[1]], warn = FALSE), collapse = "\n"),
         '\nreadRDS("planted.rds")\n'
       )
+    )
+  } else {
+    add(
+      "deserialization-planted",
+      "planted a live readRDS() call in a file the site sources",
+      text = NA_character_,
+      reason = "this site sources nothing but the guard"
     )
   }
 
@@ -1067,25 +1085,32 @@ self_test <- function() {
   sites <- read_sites()
   for (site in sites) {
     src <- paste(readLines(site$script, warn = FALSE), collapse = "\n")
+    site_planted <- 0L
+    site_na <- 0L
     for (m in mutations_for(site, src)) {
       planted <- planted + 1L
+      site_planted <- site_planted + 1L
       # A mutation plants either an edited SCRIPT or an edited DECLARATION; the
       # declaration ones leave the script alone by design.
       mutated_site <- m$site %||% site
       if (is.na(m$text)) {
-        # AC4: a site that performs no output write is REPORTED, never skipped
+        # AC4: a form that does not apply to a site is REPORTED, never skipped
         # in silence -- a form that quietly does not apply reads exactly like a
-        # form that passed.
+        # form that passed, and inflates nothing while the count says otherwise.
         cat(
           "N/A  self-test [",
           site$script,
           "]: ",
           m$label,
-          " -- this site performs no output write\n",
+          " -- ",
+          m$reason %||% "does not apply to this site",
+          "\n",
           sep = ""
         )
         planted <- planted - 1L
+        site_planted <- site_planted - 1L
         skipped <- skipped + 1L
+        site_na <- site_na + 1L
         next
       }
       if (identical(m$text, src) && is.null(m$site)) {
@@ -1152,6 +1177,21 @@ self_test <- function() {
         sep = ""
       )
     }
+    # The per-site count, printed rather than left to be totted up from the log:
+    # a form that did not apply here is in site_na, so this number counts what
+    # was actually planted on this site and never what the declaration offers.
+    cat(
+      "     self-test [",
+      site$script,
+      "]: ",
+      site_planted,
+      " planted over ",
+      length(split_decl(site$api)),
+      " declared guard call(s), ",
+      site_na,
+      " not applying\n",
+      sep = ""
+    )
   }
   # The quantification, stated rather than left to be counted off the log: this
   # probe is per site, per declared form, and per declared guard call, and a

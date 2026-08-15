@@ -19,9 +19,22 @@
 #	live top-level code and follows calls; a function handed BY NAME to one of
 #	these appliers is reached too, since m111's ckpt_read() is reached only
 #	through `mclapply(cells, run_cell)` and a direct-calls-only rule would go
-#	vacuous on exactly that site. The list WEAKENS nothing on its own — it can
-#	only make more code reachable — but it is declared rather than assumed so a
-#	handoff form outside it is a visible gap rather than a silent pass.
+#	vacuous on exactly that site. The list WEAKENS the check: marking a bare-name
+#	argument as reached is what turns a parked call into a reached one, and
+#	`lapply(character(0), parked)` runs zero times while satisfying it. It is
+#	declared rather than assumed so a handoff form outside it is a visible gap
+#	rather than a silent pass.
+#
+#	WHAT THE WALK ACTUALLY DOES, as implemented in check-checkpoint-sites.R and
+#	not as the paragraph above might be read. Only `if` carries liveness: any
+#	function literal the walk meets in walked code has its body walked as live.
+#	So these shapes are NOT parked, and a guard call reached only through one of
+#	them counts as reached: `while (FALSE)`, `for (i in seq_len(0))`,
+#	`repeat { break }`, `switch` on any selector, a function held in a list,
+#	`local({ ... })`, and `quote(...)`, which is not executable code at all. AC4
+#	claims coverage of the mutation forms it names and of nothing else; these
+#	shapes are the known remainder, recorded here rather than left to be
+#	rediscovered. A candidate ROADMAP row carries the work of parking them.
 #@appliers	lapply,sapply,vapply,mapply,Map,mclapply,parLapply,do.call,Reduce,Filter
 #
 #	Liveness. A branch counts only when its condition is literally TRUE or is one
