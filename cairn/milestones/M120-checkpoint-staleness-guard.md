@@ -1,6 +1,6 @@
 # M120: Refuse a stale resume cache in the data-raw harnesses
 
-- **Status:** in-progress
+- **Status:** blocked
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -229,6 +229,7 @@ adopting one. Out: harnesses that write a checkpoint but never read one back.
 - 2026-08-14: the two returns differ in track and the difference is recorded rather than collapsed — F1 is a defect return whose repair is a procedure fix, while F4 is an amendment return under the widening test, since no procedure can catch an alias bound before `trace()` rebinds the name and the only repair available widens AC3's author-recall exclusion list; its admissible repair narrows AC3's promise to what a procedure decides.
 - 2026-08-14: thrash — fourth defect return, the third-return threshold having been reached at return 3 and holding. Trigger (b) fired again on AC4, which has now failed in all four reviews by a new mechanism of the same shape each time. Both recorded plan alternatives are spent and a re-cut is already spent, so re-plan-or-split is not the remedy; no further retry is queued and the disposition goes to the maintainer.
 - 2026-08-14: the demo's comment claiming "every site sources the guard as its first act, so no site can bind an untraced alias either" is false as written and is what F4 turns on: m111 sources the prototype at line 38 before the guard at line 42, and every oracle site runs `pkgload::load_all()` and `library(brms)` first.
+- 2026-08-15: parked as `blocked` at the maintainer's decision at the return-4 routing gate, in preference to escalating via `/milestone-brief`, re-scoping to the run-time guard alone, or dropping. Blocker: a maintainer judgement on how M120 should be resolved, which no work on the branch can settle — four attempts at a source-reading check that no unforeseen code shape slips past have each been defeated by a new shape, and the rules bar a fifth retry under the current plan. Nothing is merged; the branch, its 21 changed files and all four review passes stand on disk. It stays parked until the maintainer reopens it.
 - 2026-08-14: audit finding 10 — the records-apparatus door needs a trigger in what the package computes; this milestone's deliverable guards numeric harness output, which that door's own carve-out leaves untouched ("guards that pin a NUMERIC result", "repairs to existing checkers surfaced as ordinary work"), and four of the five sites write committed oracle fixtures, so it is oracle discipline under #1 — no stale cache has yet produced a wrong shipped value, and the plan does not claim one.
 
 ## Decisions
