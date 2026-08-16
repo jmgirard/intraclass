@@ -45,13 +45,21 @@ D-entry.
       each pair `git merge-base --is-ancestor` exits 0 *and* the two SHAs differ.
       Checked at the review gate before the squash-merge, output recorded in
       `## Review`.
-- [ ] AC2 — Before any grid cell is read, the harness reproduces the
-      ukoumunne2003 Table I anchors U10/U30/U50 that
-      `data-raw/m75-npbootstrap-coverage.R` validates the shipped reducer
-      against, agreeing with the committed
-      `tests/testthat/fixtures/npbootstrap-coverage-oracle.rds` coverage at each
-      anchor within 2 binomial standard errors at that cell's `n_rep`, and
-      aborts classed without writing output if any anchor misses.
+- [ ] AC2 — Before any grid cell is read, the harness re-runs the `npbootstrap`
+      reducer at the two per-rep seed streams
+      `data-raw/m75-npbootstrap-coverage.R:82,88` uses for the ukoumunne2003
+      Table I anchors U10/U30/U50 (data `base + r`, resamples
+      `base + 3000000L + r`, with `base` 5e7 / 6e7 / 7e7), pinning
+      `n_rep = 2000` and `boot_samples = 999`, and requires each reproduced
+      `coverage_icc1` to fall within the ±0.03 that
+      `tests/testthat/test-ci-npbootstrap-coverage.R:31` pre-registers against
+      the Table I figures 0.938 / 0.944 / 0.9395 (ukoumunne2003 Table I,
+      k = 10 / 30 / 50, n = 10 ratings, rho = 0.05). It aborts
+      `intraclass_*`-classed without writing output if any anchor misses, and a
+      planted perturbation of the reducer's resample stream is shown to fire
+      that abort. Its difference from the committed
+      `tests/testthat/fixtures/npbootstrap-coverage-oracle.rds` value is
+      recorded beside the run as a delta, never a failure (D-024 clause 2).
 - [ ] AC3 — The harness regenerates every replicate of the M111 grid from its
       recorded seed scheme and recomputes the `searle` and `burch` legs: the
       compared-row count is asserted equal to 64 × 2000 × 2 = 128,000, every
@@ -124,6 +132,10 @@ D-entry.
 - 2026-08-15: plan gate chose `npbootstrap` alone over also sweeping `bootstrap` because the full grid costs ~114 h at 4 workers against ~2–8 h; falsified by a measured per-call cost that brings the parametric grid under a working day.
 - 2026-08-15: plan gate chose a 1e-12 tolerance plus the `meta$platform` gate over bit-exact `identical()` because exact equality is a property of the machine's summation order (M105) and the sole precedent used the tolerance form; falsified by a regenerated endpoint pair differing above 1e-12 on the recorded platform.
 - 2026-08-15: plan gate chose to freeze the verdict on `coverage_uncond` while requiring the failing cells split by abort rate over judging on `coverage_nonabort` alone, because the unconditional column is what D-027 judged the other three legs on; falsified by a split showing every failing cell sits above D-027's 0.1 abort boundary, which would make the verdict a restatement of D-026's already-adjudicated selection effect.
+
+- 2026-08-15: gated amendment — AC2 rewritten. Its plan-time bound ("2 binomial standard errors") was invented where the repo already pre-registers ±0.03 for these anchors (`test-ci-npbootstrap-coverage.R:31`), which is bar-setting against GP5. Fresh-context [O] audit of the redraft returned 10 findings, all actioned before writing: the two-leg form made the published-oracle leg vacuous (fixture sits 0.0005/0.0085/0.0030 from Table I against a proposed 0.005 slack); the replacement 0.005 was a tighter invented bound than the one it replaced; the resample-seed offset `base + 3000000L + r` was omitted, without which a conforming harness reds on a correct package; and making fixture drift terminal contradicts D-024 clause 2 ("a delta, never a failure"). Now: ±0.03 against Table I is the only operative gate, drift is recorded, the abort names its class and carries a probe.
+- 2026-08-15: AC2's anchors are gaussian cells at rho = 0.05 while the swept grid is the skew grid, so a green AC2 is evidence about the reducer and never about the swept domain (GP6). Recorded here rather than in the criterion, which does not overclaim.
+- 2026-08-15: gate chose to run the ~16–21 min anchor validation on every harness invocation including checkpoint resumes, over validating once and stamping, because a stamp is a second record that goes stale; falsified by the validation's share of total sweep runtime rising above the ~5–10% measured here.
 
 ## Decisions
 
