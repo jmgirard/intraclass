@@ -97,7 +97,6 @@
 #	             stands in for the set
 script	params	roots	values	exemptions	unit	api
 data-raw/m111-fallback-sweep.R	rho,k,n,dist,n_rep,base_seed	one_rep	 	 	cell	ckpt_read,ckpt_write
-data-raw/m121-npbootstrap-skew-sweep.R	rho,k,n,dist,n_rep,base_seed	one_rep	identity_tol,np_boot_samples,np_conf,np_seed_offset	 	cell	ckpt_read,ckpt_write
 data-raw/oracle-bayesian-fixed-replicates.R	n_subj,k,n_o,s2_s,mu_r,s2_sr,s2_e,base_seed	one_rep	base_formula,base_prior,brm_args,single_est,average_est,pop_single,pop_average,spec_frep	base_fit	rep	ckpt_store_load,ckpt_store_get,ckpt_store_put,ckpt_store_save
 data-raw/oracle-bayesian-incomplete-oneway.R	n_subjects,k,s2_s,s2_res,missing_frac,base_seed	one_rep,make_incidence	cell_offset,base_formula,base_prior,brm_args,inc,k_eff_ragged,spec_ow	base_fit	rep	ckpt_store_load,ckpt_store_get,ckpt_store_put,ckpt_store_save
 data-raw/oracle-bayesian-incomplete-fixed-nested.R	vsc,vres,nc,ns,theta2,p_keep,n_rep,base_seed	one_cell	base_formula,base_prior,brm_args,spec_sr	base_fit	cell	ckpt_store_load,ckpt_store_get,ckpt_store_put,ckpt_store_save

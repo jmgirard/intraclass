@@ -367,6 +367,10 @@ ckpt_read <- function(path, spec) {
 # registered checkpoint through this wrapper aborts exactly as a bare read would.
 # It launders the STATIC check and never the runtime one, which is the only
 # combination that keeps both surfaces meaning what they say (M121).
+# M122 delisted its only caller — data-raw/m121-npbootstrap-skew-sweep.R, whose
+# resume cache was removed — so no DECLARED site calls this today and that
+# caller could now hold a bare readRDS instead. It stays because the next site
+# needing a non-checkpoint read from under the static check is what it is for.
 ckpt_read_input <- function(path) {
   readRDS(path)
 }

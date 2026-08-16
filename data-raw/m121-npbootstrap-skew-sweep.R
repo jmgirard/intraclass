@@ -41,15 +41,21 @@
 # Self-test (plants a defect into a copy of each thing this harness asserts, and
 # requires each assertion to fire — a check that cannot fail is not a check):
 #   Rscript data-raw/m121-npbootstrap-skew-sweep.R --self-test
+#
+# One cell, recomputed and compared against its committed row (writes nothing;
+# minutes rather than hours). Use it to check the harness still produces the
+# committed numbers without regenerating the whole table:
+#   Rscript data-raw/m121-npbootstrap-skew-sweep.R --one-cell=4
 
 suppressMessages(devtools::load_all(quiet = TRUE))
 # Defines searle_f_ci_balanced() and burch_reml_ci_balanced() — the SAME
 # prototypes M111 recorded its classical legs with; sourcing skips the file's
 # `if (sys.nframe() == 0L)` oracle block.
 source("data-raw/m76-classical-oneway-prototype.R")
-# M120: the shared stale-checkpoint guard. Sourcing it installs the
-# deserialization trace, so a checkpoint read that bypasses the guard fails the
-# run rather than quietly seeding the table.
+# The shared guard file, sourced for ckpt_read_input() alone — the wrapper this
+# harness reads its committed inputs through. M122 removed this harness's resume
+# cache, so nothing here writes or reads a checkpoint and the guard's spec/trace
+# machinery is unused; every cell is recomputed on every run.
 source("data-raw/checkpoint-guard.R")
 
 # Paths are overridable so the self-test can never touch the committed inputs or
@@ -62,8 +68,6 @@ out_path <- Sys.getenv(
   "M121_OUT",
   "data-raw/m121-npbootstrap-skew-coverage.tsv"
 )
-# Uncommitted per-cell resume cache; a re-run picks up past finished cells.
-ckpt_dir <- Sys.getenv("M121_CKPT_DIR", "data-raw/m121-npbootstrap-checkpoints")
 n_workers <- 4L
 
 # The identity tolerance (plan gate 2026-08-15): 1e-12 rather than identical(),
@@ -469,9 +473,9 @@ one_rep <- function(cell, rep, fx_cell) {
   )
 }
 
-# One cell: every rep, plus the cell's identity evidence rolled up. The evidence
-# travels with the rows into the checkpoint, so a resumed cell contributes the
-# count it actually compared rather than an assumed one.
+# One cell: every rep, plus the cell's identity evidence rolled up. The counts
+# are summed from what each rep actually compared rather than derived from
+# n_rep, so a rep that contributed nothing is visible in the aggregate.
 cell_rows <- function(cell, fx) {
   fx_cell <- fx[fx$cell == cell$id, ]
   reps <- lapply(seq_len(cell$n_rep), function(rep) one_rep(cell, rep, fx_cell))
@@ -533,40 +537,16 @@ assert_identity_evidence <- function(evidence, cells) {
   invisible(max(vapply(evidence, function(e) e$max_delta, numeric(1))))
 }
 
-# ---- checkpointed sweep ------------------------------------------------------
-# M120: the resume cache is keyed on the cell's design parameters AND a hash of
-# the generating block, so a checkpoint written under any other grid or any
-# earlier version of one_rep() is refused rather than served.
-cell_spec <- function(cell) {
-  ckpt_spec(
-    params = list(
-      rho = cell$rho,
-      k = cell$k,
-      n = cell$n,
-      dist = cell$dist,
-      n_rep = cell$n_rep,
-      base_seed = cell$id * 1000000L
-    ),
-    roots = "one_rep",
-    values = c(
-      "identity_tol",
-      "np_boot_samples",
-      "np_conf",
-      "np_seed_offset"
-    ),
-    site = "m121-npbootstrap-skew-sweep",
-    envir = environment(gen_oneway)
-  )
-}
-
-run_cell <- function(cell, fx, ckpt_dir) {
-  ckpt <- file.path(ckpt_dir, sprintf("cell-%02d.rds", cell$id))
-  if (file.exists(ckpt)) {
-    return(ckpt_read(ckpt, cell_spec(cell)))
-  }
+# ---- the sweep's per-cell step ----------------------------------------------
+# M122: no resume cache. M121 kept a per-cell cache under a staleness guard that
+# compared the cell's design parameters and a hash of the generating block, but
+# not the CONTENT of the fixture the identity check verifies against — so an
+# edited endpoint left every cached cell servable and the run reported a match
+# against data nothing had been compared to. Recomputing is the fix: there is no
+# cache to go stale. The cost is that an interrupted run restarts from zero.
+run_cell <- function(cell, fx) {
   t0 <- Sys.time()
   res <- cell_rows(cell, fx)
-  ckpt_write(ckpt, payload = res, spec = cell_spec(cell))
   cat(sprintf(
     "cell %2d/64 done: rho=%.2f k=%d n=%d %-8s (%.1f min, %d aborts)\n",
     cell$id,
@@ -652,6 +632,154 @@ write_table <- function(tab, path) {
   )
   write.table(out, path, sep = "\t", quote = FALSE, row.names = FALSE)
   invisible(path)
+}
+
+# The same numeric rendering write_table() commits, applied to one row. formatC()
+# is elementwise, so a row formatted here is byte-identical to that row inside a
+# 256-row table -- which is what lets a one-cell run be compared to the committed
+# file without regenerating it.
+format_row <- function(row) {
+  num <- vapply(row, is.numeric, logical(1L))
+  row[num] <- lapply(
+    row[num],
+    function(x) trimws(formatC(x, digits = 10, format = "g"))
+  )
+  vapply(row, as.character, character(1L))
+}
+
+# ---- one cell ----------------------------------------------------------------
+# M122: the sweep is all-or-nothing by construction -- assert_anchors() runs
+# three 2000-rep anchor cells before any grid cell, and build_table() asserts the
+# full 64 x 2000 x 4 shape in its two stopifnot() calls. So verifying that the
+# un-cached script still produces the committed numbers needs a path that
+# computes ONE cell and renders its published row the way build_table() would,
+# which is this.
+#
+# It is a verification path, not a second way to produce the table: it writes
+# nothing. The anchor gate is deliberately skipped (it validates the reducer
+# against ukoumunne2003 for a whole run, and this run publishes nothing); the
+# platform gate is NOT, because the recorded endpoints this cell reproduces are a
+# property of the machine.
+one_cell_row <- function(id, fx_all) {
+  fx <- fx_all$raw
+  assert_platform(fx_all$meta)
+  cells <- cells_from_fixture(fx)
+  hit <- Filter(function(cl) identical(cl$id, as.integer(id)), cells)
+  if (length(hit) != 1L) {
+    stop(sprintf(
+      "cell %s is not in the fixture's grid (ids %d..%d)",
+      id,
+      min(vapply(cells, function(cl) cl$id, integer(1))),
+      max(vapply(cells, function(cl) cl$id, integer(1)))
+    ))
+  }
+  cell <- hit[[1L]]
+  res <- cell_rows(cell, fx)
+  row <- one_group(res$rows)
+  # width_ratio_vs_mc as build_table() derives it from mc_width: this cell's
+  # med_width over the mc leg's, the mc rows coming from the committed fixture
+  # rather than from this run -- the mc leg is not regenerated here.
+  mc <- fx[fx$cell == cell$id & fx$method == "mc", ]
+  if (!nrow(mc)) {
+    stop(sprintf("the fixture holds no mc rows for cell %d", cell$id))
+  }
+  row$width_ratio_vs_mc <- row$med_width / one_group(mc)$med_width
+  list(cell = cell, row = row, evidence = res)
+}
+
+# Compares that row against the committed table and aborts naming every column
+# that differs. Returns invisibly on a match.
+#
+# The id is normalized ONCE, here, and the integer it yields is what both the
+# grid lookup and the committed-row lookup use: normalizing in one place and
+# comparing the raw string in the other meant `--one-cell=04` selected cell 4,
+# spent 2000 reps on it, and only then failed to find row "04" (review F1).
+# And the committed row is resolved BEFORE the recompute, so a missing table, a
+# wrong M121_OUT or an out-of-grid id fails in a second rather than after the
+# cell has been paid for (review F2).
+compare_one_cell <- function(id, fixture = fixture_path, committed = out_path) {
+  if (length(id) != 1L || !grepl("^[0-9]+$", trimws(as.character(id)))) {
+    stop(sprintf(
+      "cell id must be a single whole number, got '%s'",
+      paste(id, collapse = " ")
+    ))
+  }
+  id <- as.integer(trimws(as.character(id)))
+  tab <- utils::read.delim(committed, colClasses = "character")
+  want <- tab[tab$cell == as.character(id) & tab$method == "npbootstrap", ]
+  if (nrow(want) != 1L) {
+    stop(sprintf(
+      "%s holds %d npbootstrap rows for cell %d (want exactly 1)",
+      committed,
+      nrow(want),
+      id
+    ))
+  }
+  got <- one_cell_row(id, ckpt_read_input(fixture))
+  # Assert the identity evidence rather than only printing it: the full sweep
+  # asserts these counts (assert_identity_evidence()), and a one-cell path that
+  # narrated them without checking would report evidence it had not verified —
+  # the shape this milestone exists to remove (review F10).
+  if (
+    !identical(got$evidence$n_compared, got$cell$n_rep * 2L) ||
+      !identical(got$evidence$n_endpoints, got$cell$n_rep * 4L)
+  ) {
+    stop(sprintf(
+      "cell %d compared %d rows / %d endpoints, want %d / %d (2 and 4 per rep)",
+      id,
+      got$evidence$n_compared,
+      got$evidence$n_endpoints,
+      got$cell$n_rep * 2L,
+      got$cell$n_rep * 4L
+    ))
+  }
+  mine <- format_row(got$row)
+  if (!identical(sort(names(mine)), sort(names(want)))) {
+    stop(sprintf(
+      "column sets differ: computed (%s), committed (%s)",
+      paste(sort(names(mine)), collapse = ", "),
+      paste(sort(names(want)), collapse = ", ")
+    ))
+  }
+  bad <- names(mine)[vapply(
+    names(mine),
+    function(nm) !identical(mine[[nm]], want[[nm]][[1L]]),
+    logical(1L)
+  )]
+  cat(sprintf(
+    "cell %d (rho=%.2f k=%d n=%d %s): %d reps recomputed, %d rows / %d endpoints identity-checked\n",
+    got$cell$id,
+    got$cell$rho,
+    got$cell$k,
+    got$cell$n,
+    got$cell$dist,
+    got$cell$n_rep,
+    got$evidence$n_compared,
+    got$evidence$n_endpoints
+  ))
+  if (length(bad)) {
+    stop(sprintf(
+      "cell %s does not reproduce its committed row; %d of %d columns differ: %s",
+      id,
+      length(bad),
+      length(mine),
+      paste(
+        sprintf(
+          "%s computed %s, committed %s",
+          bad,
+          mine[bad],
+          unlist(want[bad])
+        ),
+        collapse = "; "
+      )
+    ))
+  }
+  cat(sprintf(
+    "all %d columns of the npbootstrap row match %s\n",
+    length(mine),
+    committed
+  ))
+  invisible(TRUE)
 }
 
 # ---- self-test ---------------------------------------------------------------
@@ -949,8 +1077,7 @@ self_test <- function() {
 }
 
 # ---- the sweep ---------------------------------------------------------------
-# Called from live top-level code below so the checkpoint routing walk reaches
-# the guard calls inside it (data-raw/check-checkpoint-sites.R).
+# All 64 cells, computed fresh on every invocation (M122: no resume cache).
 run_sweep <- function() {
   fx_all <- ckpt_read_input(fixture_path)
   fx <- fx_all$raw
@@ -971,11 +1098,9 @@ run_sweep <- function() {
     length(cells),
     n_workers
   ))
-  dir.create(ckpt_dir, showWarnings = FALSE, recursive = TRUE)
-  ckpt_trace_register(ckpt_dir)
   evidence <- parallel::mclapply(
     cells,
-    function(cell) run_cell(cell, fx, ckpt_dir),
+    function(cell) run_cell(cell, fx),
     mc.cores = n_workers
   )
   lost <- mclapply_failures(
@@ -985,8 +1110,6 @@ run_sweep <- function() {
   if (length(lost)) {
     stop("cells errored: ", paste(lost, collapse = "; "))
   }
-  # Before anything is written: no cell may have come from an unguarded read.
-  ckpt_trace_assert()
   worst <- assert_identity_evidence(evidence, cells)
   cat(sprintf(
     "endpoint identity check: 256000 rows / 512000 endpoints match within %.0e (worst |delta| %.3g)\n",
@@ -1023,10 +1146,57 @@ run_sweep <- function() {
   invisible(TRUE)
 }
 
-if (sys.nframe() == 0L) {
-  if ("--self-test" %in% commandArgs(trailingOnly = TRUE)) {
-    self_test()
-    quit(save = "no")
+# Arguments are parsed STRICTLY: anything unrecognized aborts rather than
+# falling through. The bare invocation runs the full 64-cell sweep and OVERWRITES
+# the committed table, so a near-miss spelling of a flag must never reach it —
+# `--one-cell 4` (the space form of a flag documented in `--flag=value` style)
+# matched neither pattern and silently started a ~7 CPU-hour run over the
+# committed output (review F3). Two mode flags together abort for the same
+# reason: a run that quietly honours one and drops the other reports an exit
+# status for work that was never done.
+parse_args <- function(args) {
+  one <- grep("^--one-cell=", args, value = TRUE)
+  self <- args %in% "--self-test"
+  unknown <- setdiff(args[!self], one)
+  if (length(unknown)) {
+    stop(
+      "unrecognized argument(s): ",
+      paste(unknown, collapse = ", "),
+      ". Accepted: --self-test, --one-cell=<id> (no space before the id), ",
+      "or no argument to run the full sweep.",
+      call. = FALSE
+    )
   }
-  run_sweep()
+  if (length(one) > 1L) {
+    stop(
+      "--one-cell given ",
+      length(one),
+      " times; pass exactly one",
+      call. = FALSE
+    )
+  }
+  if (length(one) && any(self)) {
+    stop(
+      "--one-cell and --self-test are separate modes; pass one",
+      call. = FALSE
+    )
+  }
+  if (length(one)) {
+    return(list(mode = "one-cell", id = sub("^--one-cell=", "", one[[1L]])))
+  }
+  if (any(self)) {
+    return(list(mode = "self-test"))
+  }
+  list(mode = "sweep")
+}
+
+if (sys.nframe() == 0L) {
+  parsed <- parse_args(commandArgs(trailingOnly = TRUE))
+  switch(
+    parsed$mode,
+    "one-cell" = compare_one_cell(parsed$id),
+    "self-test" = self_test(),
+    "sweep" = run_sweep()
+  )
+  quit(save = "no")
 }
