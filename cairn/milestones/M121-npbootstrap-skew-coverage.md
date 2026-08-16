@@ -128,7 +128,7 @@ D-entry.
 - [x] T4 — Add the `npbootstrap` leg: classed-condition abort accounting, raise
       on non-finite-without-condition, per-cell checkpointing, and the site's row
       in `data-raw/checkpoint-sites.tsv`.
-- [ ] T5 — Run the sweep in the background (check for concurrent R sessions and
+- [x] T5 — Run the sweep in the background (check for concurrent R sessions and
       live R.INSTALL processes first — M107/M109) and write
       `data-raw/m121-npbootstrap-skew-coverage.tsv`.
 - [ ] T6 — Fill the page's Results and Disposition sections; write the D-entry
@@ -156,6 +156,7 @@ D-entry.
 - 2026-08-15: T3 — the anchor precondition aborts `intraclass_anchor_miss`/`intraclass_error` on a miss and records the committed fixture's delta beside the run rather than gating on it (D-024 clause 2).
 - 2026-08-15: T3 — AC2's plant had to be a perturbation of the resample DRAWS, not of the resample seed: measured on the U10 stream at 300 reps, colliding the resample stream with the data stream (0.9633) and holding it constant across reps (0.9533) both land inside the ±0.03 of the correct stream (0.9567), so a seed plant could not fire the abort. The plant masks `sample.int` in a child of the package namespace so every resample is the identity one; the pivot collapses and coverage goes to ~0.
 - 2026-08-15: T4 — npbootstrap leg added with per-cell checkpointing; smoke-tested fresh, on resume (byte-identical payload) and against a stale design (refused). Site declared in `data-raw/checkpoint-sites.tsv`; `check-checkpoint-sites.R` reports 6 routed sites and its 148-mutation self-test all detected.
+- 2026-08-15: T5 — sweep run (~2 h, 4 workers, after waiting out a concurrent R session per M107/M109). Anchors reproduced 0.9375/0.9355/0.9425 against Table I's 0.938/0.944/0.9395 (worst |delta| 0.0085 of the ±0.03 bound) and matched the committed oracle fixture **exactly** at all three — the first exercise of that path since the glmmTMB/TMB rebuild, which moved nothing. Identity check exact again over the full grid (worst |delta| 0). `npbootstrap` aborted on 0 of 128,000 replicates.
 - 2026-08-15: gate chose to run the ~16–21 min anchor validation on every harness invocation including checkpoint resumes, over validating once and stamping, because a stamp is a second record that goes stale; falsified by the validation's share of total sweep runtime rising above the ~5–10% measured here.
 
 ## Decisions
