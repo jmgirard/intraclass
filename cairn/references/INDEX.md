@@ -202,6 +202,13 @@ and milestones; never restate a value here.
   coverage re-derived from the committed M111 fixture. Results/disposition
   appended at T3.
 
+- [npbootstrap-skew-response-comparison.md](npbootstrap-skew-response-comparison.md)
+  — synthesis note (M121): the pre-registered (GP5) N1 disposition rule for
+  `ci_method = "npbootstrap"` on the same 64-cell one-way skew grid D-027 judged
+  the other three legs on, read over the unconditional per-cell coverage column,
+  with D-027's `replace-GO`/`no-GO` vocabulary reused unchanged.
+  Results/disposition appended at T6.
+
 - [mc-skew-warn-trigger.md](mc-skew-warn-trigger.md) — synthesis note (M114):
   the pre-registered (GP5) reliability criteria for a runtime skew/kurtosis
   warn trigger for the one-way MC default (48-candidate kurtosis/skewness
