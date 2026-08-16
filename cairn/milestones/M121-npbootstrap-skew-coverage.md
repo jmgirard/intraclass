@@ -1,11 +1,11 @@
 # M121: Measure the `npbootstrap` interval's coverage on the frozen skew grid
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP5, GP6
-- **Branch/PR:** —
+- **Branch/PR:** `m121-npbootstrap-skew-coverage`
 
 ## Goal
 
