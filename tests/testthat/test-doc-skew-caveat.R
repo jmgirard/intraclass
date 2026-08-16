@@ -249,6 +249,51 @@ expect_no_withdrawn_claim <- function(text, where) {
   }
 }
 
+# M123's withdrawn claims are CAPABILITY claims, not numeric ones: four
+# statements the docs made that the package's own code falsifies. They are kept
+# in their own set because their domain differs -- these sweep the READMEs too,
+# where a coverage figure would never appear.
+#
+# What this set promises is exactly the spellings listed and nothing wider. A
+# recall-fixed list of phrasings is the shape M118 watched lose four rounds
+# running, each to a spelling the previous round had not imagined, so no
+# criterion here quantifies over "any future rewording". The guarantee is: a
+# maintainer restoring one of THESE sentences, at any surface either walk
+# reaches and however the line wraps, reds.
+capability_claim_patterns <- c(
+  # (1) The brms engine has shipped -- `R/engine-brms.R`, `engine = "brms"` in
+  # `icc()`'s validated set, `ci_method = "posterior"` -- but the README kept
+  # promising it as future work. Three spellings: the one that actually
+  # shipped, plus two a plausible re-edit would reach for.
+  bayes_roadmap = "Bayesian engine is on the roadmap",
+  bayes_planned = "Bayesian engine is planned",
+  bayes_not_yet = "Bayesian engine is not yet",
+  # (2) The engine enumeration that omitted brms. Matched with the connective
+  # so it cannot fire on a legitimate two-engine sentence elsewhere; backticked
+  # and bare, since the Rd database and pkgdown strip the markup.
+  engines_omit_brms = "(`glmmTMB`, `lme4`) or an SEM engine",
+  engines_omit_brms_bare = "(glmmTMB, lme4) or an SEM engine",
+  # (3) The base-install list naming four of the six non-base Imports. Both a
+  # backticked and a bare spelling: the Rd database and the knitted README
+  # render the same sentence with and without the markup, so a single spelling
+  # would sweep one surface and miss the other.
+  install_four_marked = "only `glmmTMB`, `cli`, `rlang`, and `generics`",
+  install_four_bare = "only glmmTMB, cli, rlang, and generics",
+  # (4) The multilevel design claim, contradicted by the shipped `design`
+  # argument and by the same vignette's own later section.
+  design_never_declare = "you never declare it",
+  design_never_declare_alt = "you never declare the design"
+)
+
+expect_no_capability_claim <- function(text, where) {
+  for (nm in names(capability_claim_patterns)) {
+    testthat::expect_false(
+      grepl(capability_claim_patterns[[nm]], text, fixed = TRUE),
+      info = paste0("withdrawn claim '", nm, "' still present in ", where)
+    )
+  }
+}
+
 # The site set is decided by a WALK, never by a remembered list (M117). Six
 # hand-listed paths stood here through M115 and M116; a hand list is the shape
 # that ships a stale site the moment a surface is added, because nothing
@@ -297,6 +342,14 @@ installed_doc_surfaces <- function() {
   if (nzchar(news)) {
     out[["NEWS.md"]] <- squash(readLines(news, warn = FALSE))
   }
+
+  # M123: `README.md` ships in the tarball (it is not `.Rbuildignore`d) and is
+  # the pkgdown home page, so it is a user-facing surface on the installed side
+  # too, not only in the source tree.
+  readme <- system.file("README.md", package = "intraclass")
+  if (nzchar(readme)) {
+    out[["README.md"]] <- squash(readLines(readme, warn = FALSE))
+  }
   out
 }
 
@@ -323,7 +376,14 @@ source_doc_surfaces <- function() {
       pattern = "\\.Rmd$",
       full.names = TRUE
     ),
-    file.path(root, "NEWS.md")
+    file.path(root, "NEWS.md"),
+    # M123: both READMEs. `README.Rmd` is the SOURCE a maintainer edits and is
+    # `.Rbuildignore`d, so the installed leg can never see it -- a claim
+    # restored there and left un-knitted would pass every other check until the
+    # next `devtools::build_readme()` republished it. `README.md` is swept on
+    # both legs because it ships in the tarball AND is the pkgdown home page.
+    file.path(root, "README.Rmd"),
+    file.path(root, "README.md")
   )
   paths <- paths[file.exists(paths)]
   out <- lapply(paths, function(p) {
@@ -381,6 +441,40 @@ test_that("no source file still claims it either, however the line wraps", {
   for (nm in names(surfaces)) {
     expect_no_withdrawn_claim(surfaces[[nm]], nm)
   }
+})
+
+test_that("no source surface still makes a withdrawn capability claim", {
+  surfaces <- source_doc_surfaces()
+  skip_if(length(surfaces) == 0L, "source tree not present")
+
+  # Anti-vacuity: every `expect_false(grepl(...))` passes on an empty string
+  # (M116), so the sweep must be shown to have READ the two surfaces this
+  # milestone added before its silence means anything.
+  expect_true(all(c("README.Rmd", "README.md") %in% names(surfaces)))
+  expect_true(all(nzchar(unlist(surfaces[c("README.Rmd", "README.md")]))))
+
+  for (nm in names(surfaces)) {
+    expect_no_capability_claim(surfaces[[nm]], nm)
+  }
+})
+
+test_that("no installed surface still makes a withdrawn capability claim", {
+  surfaces <- installed_doc_surfaces()
+  skip_if(length(surfaces) == 0L, "no installed surfaces")
+  expect_true(all(nzchar(unlist(surfaces))))
+
+  for (nm in names(surfaces)) {
+    expect_no_capability_claim(surfaces[[nm]], nm)
+  }
+})
+
+test_that("the installed leg reaches README.md when the package is installed", {
+  # `README.md` is not `.Rbuildignore`d, so a real install carries it; under
+  # `load_all` there is no inst tree and this skips rather than passing on an
+  # absent surface.
+  readme <- system.file("README.md", package = "intraclass")
+  skip_if(!nzchar(readme), "README.md not installed (load_all has no inst)")
+  expect_true("README.md" %in% names(installed_doc_surfaces()))
 })
 
 test_that("the caveat names the worst cell the fixture actually records", {

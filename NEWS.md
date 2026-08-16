@@ -359,6 +359,17 @@
   limit can sit just *above* the reported point. Both numbers are zero to any
   reading where that happens, and **no reported value changed** — a committed
   sweep records the measurement the documentation cites.
+* The README no longer describes the Bayesian engine as forthcoming: `engine =
+  "brms"` ships, with `ci_method = "posterior"`, `posterior_summary`, and
+  `prior`/`brm_args` arguments, and it now appears in the README's list of
+  estimation engines alongside `glmmTMB`, `lme4`, and `lavaan`. The README's
+  base-install list was also two packages short — it now names every non-base
+  package the install pulls (`lifecycle` and `tibble` were missing).
+* The *Multilevel designs* vignette no longer says the multilevel design is
+  never declared by the user. `icc()` infers it from the crossing pattern on
+  complete data, but when missing cells leave that pattern ambiguous the
+  `design` argument is how you resolve it — as the same vignette's section on
+  incomplete data already explained.
 
 # intraclass 0.1.0
 
