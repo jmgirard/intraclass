@@ -791,8 +791,11 @@ def self_test(root=None):
     for pid in sorted(PROBES):
         if not any(route == pid for route, _ in PROBES[pid]()):
             problems.append(f"probe {pid!r} did not drive its route")
+        else:
+            print(f"PASS self-test: constructed probe {pid!r} input -> detected")
 
     for form, sample in sorted(REFUSED_SAMPLES.items()):
+        _before = len(problems)
         hits = {f for f, _ in refused_hits(sample)}
         if form not in hits:
             problems.append(
@@ -801,6 +804,11 @@ def self_test(root=None):
         row = _row(shape="grep", command=sample)
         if not any(route == "refused-form" for route, _ in validate_row(row)):
             problems.append(f"a ledger row carrying {sample!r} was not refused")
+        if len(problems) == _before:
+            print(
+                f"PASS self-test: refused-form sample {form!r} ({sample!r}) -> "
+                "detected"
+            )
 
     stated_routes = set(doc_list("route"))
     if stated_routes != set(PROBES):
@@ -855,6 +863,11 @@ def self_test(root=None):
                 problems.append(
                     f"excising route {pid!r} silenced {sorted(missed)}, expected "
                     f"exactly [{pid!r}] -- the probe is not load-bearing for its route"
+                )
+            else:
+                print(
+                    f"PASS self-test: excised route {pid!r} detection block -> "
+                    "detected"
                 )
     return _report(problems)
 

@@ -490,9 +490,16 @@ def self_test():
             problems.append(
                 f"inverting ledger:{r['line']} ({r['quote']!r}) did not red"
             )
+        else:
+            print(
+                f"PASS self-test: inverted assertion for ledger:{r['line']} "
+                f"({r['quote']!r}) -> detected"
+            )
     # 2. the superseded collided fixture must red
     if not run_check(fixture=COLLIDED, verbose=False):
         problems.append("collided run-1 fixture did not red the check")
+    else:
+        print(f"PASS self-test: superseded collided fixture {COLLIDED} -> detected")
     # 3. deleting each settled claim's sentence from the docs must red
     #    (a ledger row whose claim is gone)
     scopes0 = build_scopes()
@@ -507,6 +514,11 @@ def self_test():
             problems.append(
                 f"deleting the claim of ledger:{r['line']} did not red"
             )
+        else:
+            print(
+                f"PASS self-test: deleted claim sentence for ledger:{r['line']} "
+                f"({r['quote']!r}) -> detected"
+            )
     # 4. injecting a refused pattern must red
     for r in absent_rows:
         injected = dict(
@@ -515,11 +527,21 @@ def self_test():
         )
         if not run_check(scopes=injected, verbose=False):
             problems.append(f"injected refusal pattern (ledger:{r['line']}) did not red")
+        else:
+            print(
+                f"PASS self-test: injected refused pattern for ledger:{r['line']} "
+                f"in {r['file']} -> detected"
+            )
     # 5. an unledgered universal claim must red
     injected = dict(scopes0, **{"NEWS.md": scopes0["NEWS.md"] +
                                 " No cell anywhere ever misses."})
     if not run_check(scopes=injected, verbose=False):
         problems.append("an unledgered universal claim did not red")
+    else:
+        print(
+            "PASS self-test: injected unledgered universal claim into NEWS.md "
+            "-> detected"
+        )
     _report(problems)
     return problems
 

@@ -81,3 +81,34 @@ jobs:
 
       - name: Self-test the record-claims checker (route excision)
         run: python3 data-raw/check-record-claims.py --self-test
+
+  # M120: the guard's behaviour and its wiring. Runs the planted-defect
+  # demonstrations (including one M111 cell computed, resumed and refused at
+  # n_rep = 2), then the routing check over every declared site and that
+  # check's own mutation harness. Every path is redirected into a tempdir so no
+  # committed fixture can be reached. The routing check parses the R sources, so
+  # it needs R and cannot live in the R-free check-references job above.
+  checkpoint-guard:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: local::.
+          needs: check
+
+      - name: Demonstrate the stale-checkpoint guard fires
+        run: Rscript data-raw/m120-checkpoint-guard-demo.R
+
+      - name: Check the declared checkpoint sites still route through the guard
+        run: Rscript data-raw/check-checkpoint-sites.R
+
+      - name: Self-test the checkpoint-site check (mutation harness)
+        run: Rscript data-raw/check-checkpoint-sites.R --self-test

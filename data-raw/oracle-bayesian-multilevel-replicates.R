@@ -42,6 +42,10 @@
 
 pkgload::load_all(".", quiet = TRUE, export_all = FALSE)
 library(brms)
+# M120: the shared stale-checkpoint guard. Sourcing it installs the
+# deserialization trace, so a resume that bypasses the guard fails the run
+# instead of feeding a committed oracle fixture rows of unknown provenance.
+source("data-raw/checkpoint-guard.R")
 
 # --- Config ----------------------------------------------------------------
 n_clusters <- 15L
@@ -214,9 +218,59 @@ one_rep <- function(design, base_fit, spec, seed) {
 }
 
 # --- Run the simulation (compile once per design) --------------------------
-ckpt <- "data-raw/.oracle-bayesian-multilevel-replicates-checkpoint.rds"
-rows <- if (file.exists(ckpt)) readRDS(ckpt) else list()
+# Path overridable so a guard demonstration can never reach the real checkpoint
+# or the committed fixture (M120).
+ckpt <- Sys.getenv(
+  "ORACLE_MULTILEVEL_REPLICATES_CKPT",
+  "data-raw/.oracle-bayesian-multilevel-replicates-checkpoint.rds"
+)
+ckpt_trace_register(ckpt)
+
+# M120: the resume was keyed on the design/rep LABEL alone, so a re-run after
+# any config edit served rows the current design never computed.
+ckpt_site <- "oracle-bayesian-multilevel-replicates"
+# Declared above rep_spec() because the guard hashes it: these offsets decide
+# every cached rep's seed (M120).
 cell_offset <- c(crossed = 0L, nested = 100000L)
+# Named rather than inline for the same reason -- with designs[[dn]]$formula it
+# is what the per-design base fit is compiled from.
+base_prior <- brms::set_prior("student_t(4, 0, 1)", class = "sd")
+rep_spec <- function() {
+  ckpt_spec(
+    params = list(
+      n_clusters = n_clusters,
+      n_subj_per = n_subj_per,
+      k = k,
+      n_o = n_o,
+      s2_c = s2_c,
+      s2_sc = s2_sc,
+      s2_r = s2_r,
+      s2_cr = s2_cr,
+      s2_sr = s2_sr,
+      s2_e = s2_e,
+      base_seed = base_seed
+    ),
+    roots = "one_rep",
+    values = c(
+      "cell_offset",
+      "designs",
+      "base_prior",
+      "brm_args",
+      "single_est",
+      "average_est",
+      "pop_single",
+      "pop_average"
+    ),
+    site = ckpt_site
+  )
+}
+
+store <- if (file.exists(ckpt)) {
+  ckpt_store_load(ckpt, ckpt_site)
+} else {
+  ckpt_store_new(ckpt_site)
+}
+rows <- list()
 for (dn in c("crossed", "nested")) {
   message(sprintf("Compiling the %s base model once ...", dn))
   base_fit <- do.call(
@@ -225,14 +279,16 @@ for (dn in c("crossed", "nested")) {
       list(
         formula = designs[[dn]]$formula,
         data = simulate(dn),
-        prior = brms::set_prior("student_t(4, 0, 1)", class = "sd")
+        prior = base_prior
       ),
       brm_args
     )
   )
   for (r in seq_len(n_rep)) {
     key <- paste0(dn, "_", r)
-    if (!is.null(rows[[key]])) {
+    cached <- ckpt_store_get(store, key, rep_spec())
+    if (!is.null(cached)) {
+      rows[[key]] <- cached
       next
     }
     rows[[key]] <- one_rep(
@@ -241,14 +297,18 @@ for (dn in c("crossed", "nested")) {
       designs[[dn]]$spec,
       seed = base_seed + cell_offset[[dn]] + r
     )
+    store <- ckpt_store_put(store, key, rows[[key]], rep_spec())
     if (r %% 10L == 0L) {
       message(sprintf("  [%s] ... %d/%d reps", dn, r, n_rep))
-      saveRDS(rows, ckpt)
+      ckpt_store_save(ckpt, store)
     }
   }
   rm(base_fit)
   gc(verbose = FALSE)
 }
+ckpt_store_save(ckpt, store)
+# Before the fixture write: no rep may have come from an unguarded read.
+ckpt_trace_assert()
 reps <- do.call(rbind, rows)
 
 # --- Aggregate to per-design reference statistics --------------------------
@@ -277,11 +337,14 @@ agg <- do.call(
 print(agg)
 
 # --- Commit the reference (BEFORE the hard pins) ---------------------------
-out <- file.path(
-  "tests",
-  "testthat",
-  "fixtures",
-  "bayesian-multilevel-replicates-oracle.rds"
+out <- Sys.getenv(
+  "ORACLE_MULTILEVEL_REPLICATES_OUT",
+  file.path(
+    "tests",
+    "testthat",
+    "fixtures",
+    "bayesian-multilevel-replicates-oracle.rds"
+  )
 )
 dir.create(dirname(out), showWarnings = FALSE, recursive = TRUE)
 saveRDS(

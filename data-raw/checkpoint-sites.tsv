@@ -1,0 +1,103 @@
+#	M120 site declaration — every data-raw harness that RESUMES from a checkpoint.
+#	A site here reads a cache back and may therefore serve rows the current design
+#	never computed; harnesses that only WRITE a checkpoint are deliberately absent
+#	(they cannot serve a stale row). This file is the declared enumeration AC4
+#	quantifies over — it is not, and never claims to be, a discovery procedure over
+#	all harnesses. That job belongs to the run-time trace in checkpoint-guard.R,
+#	which observes deserializations rather than spellings.
+#
+#	The deserialization list AC2 quantifies over. A declared site, and every
+#	non-package file it source()s other than the guard, may call none of these:
+#	each returns an R object from bytes on disk, so each is a way to serve a
+#	cached row the current design never computed. The list is an ENUMERATION and
+#	says nothing about a name outside it; the checker refuses to run unless it
+#	contains at least the four required names, so it cannot be quietly shortened
+#	to whatever the sites happen not to use.
+#@deserializers	readRDS,load,unserialize,readr::read_rds
+#
+#	A guard call counts only where something REACHES it. Reachability starts at
+#	live top-level code and follows calls; a function handed BY NAME to one of
+#	these appliers is reached too, since m111's ckpt_read() is reached only
+#	through `mclapply(cells, run_cell)` and a direct-calls-only rule would go
+#	vacuous on exactly that site. The list WEAKENS the check: marking a bare-name
+#	argument as reached is what turns a parked call into a reached one, and
+#	`lapply(character(0), parked)` runs zero times while satisfying it. It is
+#	declared rather than assumed so a handoff form outside it is a visible gap
+#	rather than a silent pass.
+#
+#	WHAT THE WALK ACTUALLY DOES, as implemented in check-checkpoint-sites.R and
+#	not as the paragraph above might be read. Only `if` carries liveness: any
+#	function literal the walk meets in walked code has its body walked as live.
+#	So these shapes are NOT parked, and a guard call reached only through one of
+#	them counts as reached: `while (FALSE)`, `for (i in seq_len(0))`,
+#	`repeat { break }`, `switch` on any selector, a function held in a list,
+#	`local({ ... })`, and `quote(...)`, which is not executable code at all. AC4
+#	claims coverage of the mutation forms it names and of nothing else; these
+#	shapes are the known remainder, recorded here rather than left to be
+#	rediscovered. A candidate ROADMAP row carries the work of parking them.
+#@appliers	lapply,sapply,vapply,mapply,Map,mclapply,parLapply,do.call,Reduce,Filter
+#
+#	Liveness. A branch counts only when its condition is literally TRUE or is one
+#	of these declared idioms, each with its reason; `if (0)`, `if (FALSE ||
+#	FALSE)` and `if (getOption("x", FALSE))` are none of the three and park a
+#	call rather than make it. This list WEAKENS the check, so each entry states
+#	why the branch is a real execution path and not a disabling switch:
+#	  sys.nframe() == 0L — the run-as-a-script entry-point block every harness
+#	    here uses; by parse it is indistinguishable from a disabling condition,
+#	    which is why it must be declared rather than inferred.
+#	  file.exists(ckpt) — the resume path itself: a harness reads its cache only
+#	    when the cache is there, so this is the branch the guard exists to check.
+#@idioms	sys.nframe() == 0L,file.exists(ckpt)
+#
+#	The mutation forms the self-test plants, on every declared site and once per
+#	name in that site's api column. The checker refuses to self-test unless the
+#	list contains the forms AC4 requires, so the probe cannot shrink to the forms
+#	that happen to pass. Each form removes the site's live guard call and then
+#	tries to make the checker believe the call is still there:
+#	  deleted                — removed outright, nothing put back
+#	  dead-copy              — a copy kept in an `if (FALSE)` branch
+#	  parked-unreached       — a copy in a function nothing calls
+#	  parked-false-cond      — a copy under `if (0)`, `if (FALSE || FALSE)` and
+#	                           `if (getOption(...))`, none of them literally false
+#	  parked-idiom-unreached — a copy under a DECLARED idiom, inside a function
+#	                           nothing calls: the idiom must not rescue a call
+#	                           nothing reaches, or the idiom list would be a
+#	                           back door into the liveness rule
+#	  assert-after-write     — the pre-write assertion moved to just after the
+#	                           site's first output write, inside the same block
+#	  register-non-path      — the registration handed a literal NULL
+#	  source-commented       — the source() of the guard commented out
+#	  deserialization-planted — one live call of each declared deserialization name
+#	  declaration-withdrawn  — a determinant withdrawn from the DECLARATION, the
+#	                           script left untouched
+#@mutations	deleted,dead-copy,parked-unreached,parked-false-cond,parked-idiom-unreached,assert-after-write,register-non-path,source-commented,deserialization-planted,declaration-withdrawn
+#
+#	script       path relative to the repo root
+#	params       the design parameters compared on resume, in the declared order;
+#	             the mismatch message names the EARLIEST differing one in this order
+#	roots        the site's ENTRY POINTS into its own generating code. The hashed
+#	             block is the call closure of these — every function they reach
+#	             that the site itself defines — so a helper added later is covered
+#	             without anyone remembering to list it. Package functions stop the
+#	             walk: their behavior is pinned by the test suite, not by this hash
+#	values       the non-function determinants, which are declared rather than
+#	             derived: seed-offset vectors, sampler argument lists, and the
+#	             formula and prior each base fit is compiled from. Following data
+#	             references instead would drag in the compiled model object itself
+#	exemptions   determinants the walk reaches but cannot hash, each with its reason
+#	             below. Empty on a site with none. This list WEAKENS the check, so
+#	             it is the one place a determinant may go uncovered, and it is a
+#	             recorded decision rather than a silent omission.
+#	             base_fit — a compiled brms/Stan fit; not stably deparsable, and
+#	             what determines it (base_formula, base_prior, brm_args) is hashed.
+#	unit         what one checkpoint entry covers
+#	api          the guard calls the site must make — ALL of them, live. A site
+#	             that keeps its file-level call and drops its per-entry one has
+#	             stopped checking the thing that goes stale, so no single call
+#	             stands in for the set
+script	params	roots	values	exemptions	unit	api
+data-raw/m111-fallback-sweep.R	rho,k,n,dist,n_rep,base_seed	one_rep	 	 	cell	ckpt_read,ckpt_write
+data-raw/oracle-bayesian-fixed-replicates.R	n_subj,k,n_o,s2_s,mu_r,s2_sr,s2_e,base_seed	one_rep	base_formula,base_prior,brm_args,single_est,average_est,pop_single,pop_average,spec_frep	base_fit	rep	ckpt_store_load,ckpt_store_get,ckpt_store_put,ckpt_store_save
+data-raw/oracle-bayesian-incomplete-oneway.R	n_subjects,k,s2_s,s2_res,missing_frac,base_seed	one_rep,make_incidence	cell_offset,base_formula,base_prior,brm_args,inc,k_eff_ragged,spec_ow	base_fit	rep	ckpt_store_load,ckpt_store_get,ckpt_store_put,ckpt_store_save
+data-raw/oracle-bayesian-incomplete-fixed-nested.R	vsc,vres,nc,ns,theta2,p_keep,n_rep,base_seed	one_cell	base_formula,base_prior,brm_args,spec_sr	base_fit	cell	ckpt_store_load,ckpt_store_get,ckpt_store_put,ckpt_store_save
+data-raw/oracle-bayesian-multilevel-replicates.R	n_clusters,n_subj_per,k,n_o,s2_c,s2_sc,s2_r,s2_cr,s2_sr,s2_e,base_seed	one_rep	cell_offset,designs,base_prior,brm_args,single_est,average_est,pop_single,pop_average	 	rep	ckpt_store_load,ckpt_store_get,ckpt_store_put,ckpt_store_save
