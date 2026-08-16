@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-15 (audit pass: nothing changed since the M120 post-merge pass earlier the same day — all validate checks green, no advisories, tree clean, git reconciled, both GitHub inboxes empty, always-read governance frame complete. LESSONS sits at 49/50; M48 stays parked on the unopened window.)_
+_Last hygiene check: 2026-08-16 (post-merge pass for M121: row to done, archive summary written, one lesson captured on falsifying a bootstrap resample probe, F6/F7 candidate row added; M62's lintr lesson pruned for the cap (D-015) and M116's terminal row rotated out; all validate checks green, tree clean.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -11,10 +11,9 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 |---|---|---|---|---|---|
 | M118 | Measure Burch's leptokurtic width reversal on a both-components-non-normal grid | done | — | normal | milestones/archive/M118-width-reversal-grid.md |
 | M117 | State the `"burch"`/`"searle"` width relationship conditionally | done | — | normal | milestones/archive/M117-conditional-width-claim.md |
-| M116 | Correct the falsified `"searle"`/`"burch"` width claims | done | — | normal | milestones/archive/M116-classical-width-claims.md |
 | M119 | Reconcile the shipped width claims with M118's third grid | done | M118 | normal | milestones/archive/M119-residual-grid-doc-reconcile.md |
 | M120 | Refuse a stale resume cache in the data-raw harnesses | done | — | normal | milestones/archive/M120-checkpoint-staleness-guard.md |
-| M121 | Measure the `npbootstrap` interval's coverage on the frozen skew grid | review | — | normal | milestones/M121-npbootstrap-skew-coverage.md |
+| M121 | Measure the `npbootstrap` interval's coverage on the frozen skew grid | done | — | normal | milestones/archive/M121-npbootstrap-skew-coverage.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
 <!-- terminal-row retention: M120 done (2026-08-15) → M115 rotated out (oldest terminal by merge order; its archive file still resolves there). Kept: M118, M117, M116, M119, M120 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
