@@ -14,7 +14,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | M119 | Reconcile the shipped width claims with M118's third grid | done | M118 | normal | milestones/archive/M119-residual-grid-doc-reconcile.md |
 | M120 | Refuse a stale resume cache in the data-raw harnesses | done | — | normal | milestones/archive/M120-checkpoint-staleness-guard.md |
 | M121 | Measure the `npbootstrap` interval's coverage on the frozen skew grid | done | — | normal | milestones/archive/M121-npbootstrap-skew-coverage.md |
-| M122 | Remove the resume cache from the M121 npbootstrap sweep | planned | — | normal | milestones/M122-drop-m121-resume-cache.md |
+| M122 | Remove the resume cache from the M121 npbootstrap sweep | review | — | normal | milestones/M122-drop-m121-resume-cache.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
 <!-- terminal-row retention: M120 done (2026-08-15) → M115 rotated out (oldest terminal by merge order; its archive file still resolves there). Kept: M118, M117, M116, M119, M120 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)

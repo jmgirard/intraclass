@@ -1,11 +1,11 @@
 # M122: Remove the resume cache from the M121 npbootstrap sweep
 
-- **Status:** planned
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP7
-- **Branch/PR:** —
+- **Branch/PR:** `m122-drop-m121-resume-cache`
 
 ## Goal
 
@@ -89,23 +89,25 @@ passing identity check.
 
 ## Tasks
 
-- [ ] T1 Remove the cache from `data-raw/m121-npbootstrap-skew-sweep.R`: delete
+- [x] T1 Remove the cache from `data-raw/m121-npbootstrap-skew-sweep.R`: delete
       `cell_spec()` (:540-560), the `ckpt_dir` binding (:66), `run_cell()`'s
       checkpoint read/write (:562-581), and `dir.create`/`ckpt_trace_register`
       (:974-975) plus `ckpt_trace_assert()` (:989). Keep the guard `source()`
       (:53) and `ckpt_read_input()` (:257, :684, :955).
-- [ ] T2 Rewrite the falsified comments — the header's trace claim (:50-52),
+- [x] T2 Rewrite the falsified comments — the header's trace claim (:50-52),
       `cell_rows()`'s "travels with the rows into the checkpoint" (:473-474),
       `run_sweep()`'s routing-walk note (:951-952), and
       `data-raw/checkpoint-guard.R:365-372` — then run AC2's grep.
-- [ ] T3 Delete the m121 row at `data-raw/checkpoint-sites.tsv:100`; run the
+- [x] T3 Delete the m121 row at `data-raw/checkpoint-sites.tsv:100`; run the
       checker and its `--self-test`.
-- [ ] T4 Drop `.gitignore:18`; `rm -rf data-raw/m121-npbootstrap-checkpoints/`.
-- [ ] T5 Add a `--one-cell=<id>` entry point: platform gate, one cell via
+- [x] T4 Drop `.gitignore:18`; move `data-raw/m121-npbootstrap-checkpoints/` out
+      of the repo (see the work log — the maintainer chose to archive it rather
+      than delete it, which satisfies AC4 unchanged).
+- [x] T5 Add a `--one-cell=<id>` entry point: platform gate, one cell via
       `cell_rows()`, then that cell's published row from `one_group()` plus
       `width_ratio_vs_mc` derived as at :641. It skips `assert_anchors()` and
       `build_table()`, both of which are all-64-cells by construction (:628, :642).
-- [ ] T6 Run T5 on a named cell and diff its row against the committed TSV; run
+- [x] T6 Run T5 on a named cell and diff its row against the committed TSV; run
       `--self-test`, `air format .`, and the profile verify slot.
 
 ## Work log
@@ -114,6 +116,11 @@ passing identity check.
 - 2026-08-16: criteria audit ran twice ([O], fresh context, authored none of the criteria). Round 1 audited the digest approach: 8 findings, all five criteria unclean. Round 2 audited the removal approach: 9 findings — 7 fixed into the wording above, 1 dropped a criterion (F7), 1 a no-blocker D-021 note.
 - 2026-08-16: plan gate chose removing the resume cache over adding a fixture-content digest to `cell_spec()`, at the maintainer's direction under the checker-regress shape (a digest would have been the second hardening pass over M120's machinery); falsified by a need to resume this sweep after an interruption, which now costs a full ~7 CPU-hour restart.
 - 2026-08-16: plan gate chose re-running one named cell over a scope fence or a full 64-cell regeneration; the fence lost because the audit showed the drafted no-change criterion was satisfied by never touching the file; falsified by the one-cell row failing to reproduce, which would indict the removal rather than the criterion.
+- 2026-08-16: T1-T2 — cache removed from the sweep: `cell_spec()`, the `ckpt_dir` binding, `run_cell()`'s read/write, `dir.create`/`ckpt_trace_register` and `ckpt_trace_assert()` all gone; `run_cell(cell, fx)` now recomputes unconditionally. Guard `source()` and the three `ckpt_read_input()` sites kept. Four falsified comments rewritten, plus `checkpoint-guard.R`'s `ckpt_read_input()` header, which after delisting has no declared-site caller at all.
+- 2026-08-16: T3 — m121 row deleted from `checkpoint-sites.tsv` (`git diff`: one deletion, nothing else). Checker reports 5 declared sites and exits 0; its self-test plants 130 mutations over those 5 sites and detects each, exit 0.
+- 2026-08-16: T4 — implementation gate: the cache directory held the only copy of the replicate-level rows (64 files, 3.3 MB, 128,000 intervals the committed TSV only aggregates), so deleting it outright would have discarded ~7 CPU-hours of unreproduced data. At the maintainer's direction it was moved to `~/m121-npbootstrap-checkpoints-archive` instead of deleted; AC4 is unchanged and still satisfied (absent from the tree, `.gitignore` line dropped).
+- 2026-08-16: T5-T6 — `--one-cell=<id>` added; cell 4 (rho=0.05, k=10, n=5, chisq1) recomputed 2000 reps and matched all 14 committed columns. Falsified before being recorded: re-run against a copy of the table with `coverage_uncond` moved 0.939 -> 0.9391, the comparison aborts naming that one column and both values, so the match is discriminating rather than vacuous.
+- 2026-08-16: verify slot clean — `devtools::test()` FAIL 0 / WARN 3 / SKIP 2 / PASS 7564 (the 3 warns are asserted-warning tests, not new), `air format --check .` exit 0, `lintr::lint_package()` 0 lints, `--self-test` exit 0.
 - 2026-08-16: F7 (the truncation probe) dropped as falsified, not deferred — the audit found no reachable input distinguishes a counted `n_compared` from an assumed one (`one_rep()` contributes exactly 2 per rep or aborts, :390-435), so the proposed real-cell probe would pass equally under the defect, and the hand-built cases it would replace cover an `n_endpoints`-short branch (:522-528) a real truncated cell cannot express; falsified by an input on which the two counts differ.
 
 ## Decisions
