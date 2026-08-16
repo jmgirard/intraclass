@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M123: Correct the falsified capability claims in the shipped documentation
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -103,7 +103,7 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
 - [x] T7: Add the claim patterns and their `test_that()` blocks; run the
       mutation matrix (≥2 spellings × ≥2 surfaces per pattern) and record the
       red/green table.
-- [ ] T8: Full gate — profile verify, `air`, `lintr`, the four `data-raw`
+- [x] T8: Full gate — profile verify, `air`, `lintr`, the four `data-raw`
       checkers; open the PR and drive CI green.
 
 ## Work log
@@ -119,6 +119,7 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
 - 2026-08-16: T6 — both walk legs extended: `source_doc_surfaces()` gains `README.Rmd` and `README.md`, `installed_doc_surfaces()` gains `system.file("README.md")`. Census over the extended walk: 35 source surfaces, 9 installed, both README legs confirmed reached and non-empty, and 0 hits for any capability pattern — so no site needed a correct-as-written entry. The legacy numeric patterns now sweep the READMEs too and stay green there.
 - 2026-08-16: T7 — mutation matrix, 27 plants, all RED against a 0-failure baseline: 9 spellings (3 for the Bayesian-roadmap claim, 2 each for the engine enumeration, the install list, and the design claim) × 3 surfaces (`README.Rmd`, `R/icc.R` roxygen, `vignettes/multilevel-designs.Rmd`), with the `R/icc.R` and vignette plants WRAPPED across two lines — the M115 false-negative shape, which `squash()` reconstructs. Every claim therefore has ≥2 spellings and every spelling ≥2 surfaces, one wrapped. Harness restored the tree after each plant.
 - 2026-08-16: T8 — full suite green against the working tree: FAIL 0, PASS 8030, SKIP 2 (the two known dev-session installed-vignette skips), WARN 3 (the expected fixed-rater teaching warnings in the brms tests). `air format --check` clean, `lintr::lint_package()` clean, all four `data-raw` checkers OK, `cairn_validate` all checks passed.
+- 2026-08-16: T8 — full CI matrix green on 79ee887: all 10 checks success, including both R-CMD-check runners (ubuntu-latest release, windows-latest release), check-references, checkpoint-guard, lint, format-check, pkgdown and test-coverage. An earlier tracking-only push cancelled the in-flight run on 8033a0a (the M78 cancel-in-progress behaviour), so the green matrix is read off the current head.
 - 2026-08-16: T5 — `devtools::build_readme()` run twice; the second knit is byte-identical, so AC1's same-toolchain clause holds. The knit also moved four interval endpoints (e.g. `ICC(A,1)` upper 0.715 to 0.714) with every point estimate unchanged: the committed `README.md` was last knitted 2026-07-17 and predates the interval code shipped in M104-M119, so the rendered file was stale on main. This milestone's edits touch prose only and cannot move a number.
 
 ## Decisions
