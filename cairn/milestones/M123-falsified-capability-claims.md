@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M123: Correct the falsified capability claims in the shipped documentation
 
-- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -43,21 +43,21 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: `README.Rmd` states no Bayesian engine as unshipped or forthcoming,
+- [x] AC1: `README.Rmd` states no Bayesian engine as unshipped or forthcoming,
       and its engine enumeration names `brms` beside `glmmTMB`, `lme4` and
       `lavaan` (GP4's closed roster). `README.md` is re-knitted from it in the
       same commit; re-knitting on the same toolchain leaves `README.md`
       byte-identical.
-- [ ] AC2: the README's base-install sentence names exactly the **non-base**
+- [x] AC2: the README's base-install sentence names exactly the **non-base**
       packages in `DESCRIPTION`'s `Imports:` field, verified by a recorded
       command that reads both and subtracts
       `rownames(installed.packages(priority = "base"))` — today
       `cli`, `generics`, `glmmTMB`, `lifecycle`, `rlang`, `tibble`.
-- [ ] AC3: `vignettes/multilevel-designs.Rmd` no longer claims the design is
+- [x] AC3: `vignettes/multilevel-designs.Rmd` no longer claims the design is
       never declared; it states inference-by-default and names `design =` as
       the disambiguator on incomplete data, agreeing with the `@param design`
       roxygen at `R/icc.R:243-249` and with the vignette's own `:198`.
-- [ ] AC4: `cairn/DESIGN.md:69` and `CLAUDE.md:65` carry the AC2 install set,
+- [x] AC4: `cairn/DESIGN.md:69` and `CLAUDE.md:65` carry the AC2 install set,
       and `cairn/DESIGN.md:72` no longer lists `augment` among the shipped tidy
       S3 methods (`git grep -n augment -- NAMESPACE R/` returns nothing).
 - [ ] AC5: `source_doc_surfaces()` gains `README.Rmd` and `README.md`, and
@@ -70,7 +70,7 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
       and each is mutation-verified red on **≥2 spellings, one of them
       line-wrapped, at ≥2 distinct surfaces** (M115's wrapped-sentence false
       negative; M118's four-spellings lesson).
-- [ ] AC7: `cairn/PROFILE.md`'s verify slot clean, plus
+- [x] AC7: `cairn/PROFILE.md`'s verify slot clean, plus
       `air format --check`, `lintr::lint_package()`, and all four `data-raw`
       checkers (`check-references`'s set) run locally before push.
 
@@ -122,8 +122,98 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
 - 2026-08-16: T8 — full CI matrix green on 79ee887: all 10 checks success, including both R-CMD-check runners (ubuntu-latest release, windows-latest release), check-references, checkpoint-guard, lint, format-check, pkgdown and test-coverage. An earlier tracking-only push cancelled the in-flight run on 8033a0a (the M78 cancel-in-progress behaviour), so the green matrix is read off the current head.
 - 2026-08-16: T5 — `devtools::build_readme()` run twice; the second knit is byte-identical, so AC1's same-toolchain clause holds. The knit also moved four interval endpoints (e.g. `ICC(A,1)` upper 0.715 to 0.714) with every point estimate unchanged: the committed `README.md` was last knitted 2026-07-17 and predates the interval code shipped in M104-M119, so the rendered file was stale on main. This milestone's edits touch prose only and cannot move a number.
 
+- 2026-08-16: review attempt 1 RETURNED to `in-progress` (defect return 1). Two floor findings: the claim pin returns FALSE against the real pre-correction sentence because `squash()` leaves the markdown blockquote `>` mid-sentence, so the primary guarded claim is unguarded and AC6's 27-plant matrix never exercised that wrap; and the rewritten install sentence's new "installed only if you ask for them" clause is false, `glmmTMB` importing `lme4` unconditionally. AC1-AC4 and AC7 verified and ticked; AC5 and AC6 unticked. F3-F7 (tarball-layout floor failure, load_all masking the installed leg, the forked instrument against D-029, the uncommitted mutation harness, two unreachable spellings) ride the same fix round.
+
 ## Decisions
 <!-- owner: implement / review · append-only -->
 
 ## Review
 <!-- owner: review · exclusive -->
+
+### Attempt 1 (2026-08-16) — RETURNED to `in-progress`, defect return 1
+
+**Criteria evidence.** AC1 met: no roadmap/not-yet/forthcoming string in
+`README.Rmd`; `:42` names all four engines, matching `R/icc.R`'s validated set;
+a fresh `build_readme()` left `README.md` byte-identical. AC2 met: the install
+sentence's six backticked names are set-identical to `Imports:` minus base
+(`cli, generics, glmmTMB, lifecycle, rlang, tibble`), by command. AC3 met: no
+"never declare" string; `:110-113` names `design` and cross-references
+`#incomplete-ragged-multilevel-designs`, which resolves to the heading at
+`:149`. AC4 met: both records carry the AC2 set (verified whitespace-collapsed,
+since the DESIGN.md list wraps); `git grep -n augment -- NAMESPACE R/` and
+`-- cairn/DESIGN.md` both exit 1. AC7 met: `cairn_validate` all checks passed,
+`document()` no diff, README knit in sync, `pkgdown::check_pkgdown()` clean,
+`air` and `lintr` clean, four `data-raw` checkers OK, local suite FAIL 0 /
+PASS 8030, full CI matrix green on 79ee887. **AC5 and AC6 not ticked** — see
+F1 and F4.
+
+**Findings** (3 reviewers: [O] diff-bug, [S] blame-history, [S] prior-review).
+
+- **F1 — floor return. The pin does not match the sentence it exists to
+  catch.** `squash()` strips `#`/`#'` but not the markdown blockquote `>`, and
+  the withdrawn sentence lives in a `> [!NOTE]` block wrapping as
+  `A Bayesian engine` / `> is on the roadmap`. Reproduced: the two verbatim
+  pre-correction lines from `main` squash to `... A Bayesian engine > is on the
+  roadmap ...`, against which **all nine patterns return FALSE**. A maintainer
+  restoring that exact sentence to `README.Rmd` passes green — the precise
+  scenario the added comment says the `README.Rmd` leg exists to catch. The
+  27-plant matrix never exercised a blockquote wrap, so AC6's verification is
+  hollow where it matters. Fix: strip `^\s*>+\s?` before the join, on both
+  legs, and add the blockquote form to the mutation matrix.
+- **F2 — floor return. The milestone introduces a new falsehood of the class
+  it exists to withdraw.** The rewritten install sentence ends "engines live in
+  `Suggests`, installed only if you ask for them". `glmmTMB` `Imports:
+  lme4 (>= 1.1-18.9000)` (verified against the installed DESCRIPTION), so the
+  documented install path pulls `lme4` unconditionally; the reviewer resolved
+  the full closure at 60 non-base packages. AC2 holds as written — the clause
+  is new prose no criterion covers, and a defect inside an intentional change
+  is still a defect. Same "pulls only" framing now in `cairn/DESIGN.md:69` and
+  `CLAUDE.md:65`.
+- **F3 — fix now. The new anti-vacuity floor hard-fails in an unpacked source
+  tarball.** `source_doc_surfaces()` gates only on `R/*.R` existing; in a
+  tarball `R/` and `vignettes/` are present but `README.Rmd` is
+  `.Rbuildignore`d, so `expect_true(all(c("README.Rmd","README.md") %in%
+  names(surfaces)))` fails rather than skips. Reproduced in a synthetic tarball
+  layout. Green on CI only because `R CMD check` runs from `.Rcheck` (no `R/`)
+  and covr from a built package.
+- **F4 — fix now. Verification never exercised the real installed leg.** Every
+  local evidence run used `devtools::load_all()`, under which `system.file()`
+  resolves to the source tree (the M116 lesson), so the installed leg re-read
+  source. Running without `load_all` surfaced the stale installed copy
+  immediately. Re-verify with `test_dir(..., load_package = "installed")`.
+- **F5 — fix now. A forked instrument where D-029 asks for an extension.**
+  M115-M119 each appended into the one `claim_patterns` vector and reused
+  `expect_no_withdrawn_claim()`; this branch adds a parallel
+  `capability_claim_patterns` plus a parallel `expect_no_capability_claim()`.
+  The stated reason ("domain differs") does not hold — both sets sweep the same
+  walk, and a numeric pattern simply would not match README prose. Merge into
+  the existing vector and helper.
+- **F6 — fix now. No committed mutation harness, against clear precedent.**
+  `data-raw/m95-mutation-check.R`, `m117-width-pin-mutations.R` and
+  `m118-dgp-fence-mutations.R` are committed and auditable; M123's 27-plant
+  matrix ran from a throwaway script and leaves nothing re-runnable.
+- **F7 — fix now. Two spellings guard no reachable surface, on unbacked
+  rationales.** `engines_omit_brms_bare` and `install_four_bare` are justified
+  by comments claiming the Rd database and the knitted README strip the markup;
+  neither sentence appears in any `.Rd`, and the knitted `README.md` keeps its
+  backticks. They also inflate AC6's spelling count with unreachable forms.
+- **F8 — follow-up. `design_never_declare = "you never declare it"`** is four
+  words of ordinary English swept over all of `R/` including internal comments;
+  a future true sentence about any other inferred argument would red.
+- **F9 — reject (out of scope, disclosed).** The re-knit moved four interval
+  endpoints; correct, caused by the render predating M104-M119, and recorded in
+  the work log. No AC covers them, which the reviewer asks be acknowledged
+  rather than silently accepted — acknowledged here.
+- **F10 — reject.** The AC4 record sites are unpinned by either walk. True, and
+  AC5 does not require covering them; the install falsehood could return to
+  `CLAUDE.md`/`cairn/DESIGN.md` uncaught. Noted for the fix round, not a defect
+  in what shipped.
+- **[S] prior-review lens: no regressions.** Checked against M94/M102/M106/
+  M115-M119 findings and the four named lessons; the diff complies with each
+  (squash-based matching, ≥2 spellings, `skip_if` outside the loop, no ROADMAP
+  terminal-row rotation so `record-claims.tsv` correctly untouched). The GitHub
+  inline-comment probe returned empty, so that surface was skipped.
+
+**Disposition:** F1 and F2 qualify under the return floor — F1 as a
+load-bearing defect in the milestone's central deliverable, F2 as a false
+user-facing claim. Status to `in-progress`; F3-F7 ride the same fix round.
