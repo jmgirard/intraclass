@@ -150,6 +150,151 @@ assert_platform <- function(meta) {
   invisible(TRUE)
 }
 
+# ---- the published-oracle precondition (AC2) ---------------------------------
+# Before a single grid cell is read, the shipped reducer is re-run at the SAME
+# two per-rep seed streams data-raw/m75-npbootstrap-coverage.R:82,88 uses for the
+# ukoumunne2003 Table I anchors, and each reproduced coverage must land within
+# the +-0.03 that tests/testthat/test-ci-npbootstrap-coverage.R:31 already
+# pre-registers against those figures. The bound is the repo's published one, not
+# one invented here (GP5).
+#
+# What a green precondition does and does not license: the anchors are GAUSSIAN
+# cells at rho = 0.05, and the grid below is the skew grid, so passing them is
+# evidence about the REDUCER and never about the swept domain (GP6).
+anchor_tol <- 0.03
+anchor_n_rep <- 2000L
+anchor_boot <- 999L
+anchor_fixture <- "tests/testthat/fixtures/npbootstrap-coverage-oracle.rds"
+# ukoumunne2003 Table I, n = 10 ratings, rho = 0.05, transformed bootstrap-t.
+anchor_cells <- list(
+  U10 = list(k = 10, n = 10, rho = 0.05, base = 50000000L, table_i = 0.938),
+  U30 = list(k = 30, n = 10, rho = 0.05, base = 60000000L, table_i = 0.944),
+  U50 = list(k = 50, n = 10, rho = 0.05, base = 70000000L, table_i = 0.9395)
+)
+
+# VERBATIM from data-raw/m75-npbootstrap-coverage.R:28-36 (its `sim_oneway`) —
+# the anchors are only the anchors if the datasets are the ones M75 measured.
+sim_oneway_gaussian <- function(k, n, rho, seed) {
+  set.seed(seed)
+  a <- stats::rnorm(k, 0, sqrt(rho))
+  y <- rep(a, each = n) + stats::rnorm(k * n, 0, sqrt(1 - rho))
+  data.frame(
+    subject = factor(rep(seq_len(k), each = n)),
+    rater = factor(rep(seq_len(n), times = k)),
+    score = y
+  )
+}
+
+# `reducer` is a parameter so the self-test can hand in a perturbed resample
+# stream; every real call takes the shipped `npbootstrap_ci`.
+anchor_coverage <- function(cl, n_rep, reducer) {
+  ests <- list(
+    icc_estimand(unit = "single", k_eff = NA_real_, oneway = TRUE),
+    icc_estimand(unit = "average", k_eff = cl$n, oneway = TRUE)
+  )
+  covered <- logical(n_rep)
+  for (r in seq_len(n_rep)) {
+    d <- sim_oneway_gaussian(cl$k, cl$n, cl$rho, seed = cl$base + r)
+    iv <- reducer(
+      d,
+      ests,
+      conf_level = 0.95,
+      boot_samples = anchor_boot,
+      # The distinct per-rep resample stream (RR01 finding 2); omitting the
+      # offset would red a correct package.
+      seed = cl$base + 3000000L + r
+    )
+    covered[r] <- iv[[1]]$conf.low <= cl$rho && cl$rho <= iv[[1]]$conf.high
+  }
+  mean(covered)
+}
+
+# Returns the anchor table, or aborts classed. The committed fixture's value is
+# reported beside each anchor as a DELTA and never as a bar: D-024 clause 2 makes
+# oracle re-run divergence something to record and escalate, not to re-baseline
+# or to fail on, and the operative gate is the published figure.
+assert_anchors <- function(
+  n_rep = anchor_n_rep,
+  reducer = npbootstrap_ci,
+  cells = anchor_cells,
+  workers = 3L
+) {
+  fixture <- if (file.exists(anchor_fixture)) readRDS(anchor_fixture) else NULL
+  got <- parallel::mclapply(
+    names(cells),
+    function(nm) anchor_coverage(cells[[nm]], n_rep, reducer),
+    mc.cores = min(workers, length(cells))
+  )
+  failed <- vapply(got, inherits, logical(1), what = "try-error")
+  if (any(failed)) {
+    rlang::abort(
+      paste0(
+        "anchor validation errored at ",
+        paste(names(cells)[failed], collapse = ", "),
+        ": ",
+        conditionMessage(attr(got[[which(failed)[1]]], "condition"))
+      ),
+      class = c("intraclass_anchor_error", "intraclass_error")
+    )
+  }
+  tab <- data.frame(
+    anchor = names(cells),
+    k = vapply(cells, function(cl) cl$k, numeric(1)),
+    coverage = unlist(got),
+    table_i = vapply(cells, function(cl) cl$table_i, numeric(1)),
+    stringsAsFactors = FALSE
+  )
+  tab$delta_table_i <- tab$coverage - tab$table_i
+  tab$fixture <- vapply(
+    tab$anchor,
+    function(nm) {
+      if (is.null(fixture[[nm]])) NA_real_ else fixture[[nm]]$coverage_icc1
+    },
+    numeric(1)
+  )
+  tab$delta_fixture <- tab$coverage - tab$fixture
+  rownames(tab) <- NULL
+  miss <- which(abs(tab$delta_table_i) >= anchor_tol)
+  if (length(miss)) {
+    rlang::abort(
+      paste0(
+        "anchor validation failed: ",
+        paste(
+          sprintf(
+            "%s reproduced %.4f against ukoumunne2003 Table I %.4f (delta %+.4f, tolerance +-%.2f)",
+            tab$anchor[miss],
+            tab$coverage[miss],
+            tab$table_i[miss],
+            tab$delta_table_i[miss],
+            anchor_tol
+          ),
+          collapse = "; "
+        ),
+        " — the reducer does not reproduce its published oracle, so nothing is written"
+      ),
+      class = c("intraclass_anchor_miss", "intraclass_error")
+    )
+  }
+  tab
+}
+
+# A reducer whose RESAMPLE STREAM is degenerate: `sample.int` is masked in a
+# child of the package namespace, so every bootstrap resample is the identity
+# one. The pivot then has zero spread and the interval collapses to a point, so
+# coverage goes to ~0 and the anchors miss by a mile. A perturbation of the
+# resample SEED would not do: measured 2026-08-15 on the U10 stream at 300 reps,
+# colliding the resample stream with the data stream (0.9633) or holding it
+# constant across reps (0.9533) both land within the tolerance of the correct
+# stream (0.9567), because reseeding a correct resampler is statistically
+# neutral. The plant has to change the draws, not their seed.
+planted_stream_reducer <- function() {
+  f <- npbootstrap_ci
+  env <- new.env(parent = environment(f))
+  env$sample.int <- function(n, size, replace = FALSE, ...) seq_len(n)
+  environment(f) <- env
+  f
+}
+
 # ---- per-cell regeneration + identity check ----------------------------------
 # Returns the per-rep regenerated rows for one cell together with the identity
 # evidence (how many endpoint pairs were compared and the worst absolute
@@ -430,11 +575,59 @@ self_test <- function() {
     "a fixture with no recorded platform"
   )
 
+  # --- probe 4: the anchor precondition. Run at a reduced rep count (the gate
+  # itself pins 2000): the control has to pass and the plant has to miss, or the
+  # abort would prove only that something went wrong.
+  # U10 alone, at the cheapest rep count whose control clears the bound with
+  # margin on this platform (0.9400 against Table I's 0.938 — every rep is
+  # seeded, so this is a fixed number and not a coin flip). The gate itself runs
+  # all three anchors at 2000.
+  probe_reps <- 150L
+  probe_cells <- anchor_cells["U10"]
+  ctrl <- try(
+    assert_anchors(n_rep = probe_reps, cells = probe_cells),
+    silent = TRUE
+  )
+  if (inherits(ctrl, "try-error")) {
+    stop(
+      "self-test control failed: the shipped reducer misses its own anchors at ",
+      probe_reps,
+      " reps, so the planted miss below would prove nothing: ",
+      conditionMessage(attr(ctrl, "condition"))
+    )
+  }
+  planted <- try(
+    assert_anchors(
+      n_rep = probe_reps,
+      reducer = planted_stream_reducer(),
+      cells = probe_cells
+    ),
+    silent = TRUE
+  )
+  if (!inherits(planted, "try-error")) {
+    stop(
+      "self-test FAILED: a degenerate resample stream did not miss the anchors"
+    )
+  }
+  cond <- attr(planted, "condition")
+  if (!inherits(cond, "intraclass_anchor_miss")) {
+    stop(
+      "self-test FAILED: the planted run aborted with class ",
+      paste(class(cond), collapse = "/"),
+      ", not the anchor-miss condition the precondition is about: ",
+      conditionMessage(cond)
+    )
+  }
+
   cat(
     "self-test OK: control reproduces 40 rows / 80 endpoints exactly; four ",
     "leg x endpoint plants (two at 5e-12) each abort at their own row and a ",
     "5e-13 plant does not; both count assertions and the platform gate ",
-    "(each recorded field, and an absent one) fire on planted defects.\n",
+    "(each recorded field, and an absent one) fire on planted defects; the ",
+    "U10 anchor passes at ",
+    probe_reps,
+    " reps with the shipped reducer and abort intraclass_anchor_miss under a ",
+    "degenerate resample stream.\n",
     sep = ""
   )
   invisible(TRUE)
@@ -448,6 +641,16 @@ if (sys.nframe() == 0L) {
     fx <- fx_all$raw
     assert_platform(fx_all$meta)
     cells <- cells_from_fixture(fx)
+    # AC2: before any grid cell is read, and before anything is written.
+    cat("validating the ukoumunne2003 Table I anchors (n_rep = 2000)\n")
+    anchors <- assert_anchors()
+    print(anchors, row.names = FALSE, digits = 5)
+    cat(sprintf(
+      "anchors OK: worst |delta| vs Table I %.4f (tolerance %.2f); worst |delta| vs the committed fixture %.4f, recorded not gated (D-024 clause 2)\n",
+      max(abs(anchors$delta_table_i)),
+      anchor_tol,
+      max(abs(anchors$delta_fixture))
+    ))
     cat(sprintf(
       "regenerating %d cells from the M111 seed scheme (%d workers)\n",
       length(cells),

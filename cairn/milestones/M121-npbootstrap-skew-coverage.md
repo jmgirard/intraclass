@@ -123,7 +123,7 @@ D-entry.
       `data-raw/m111-fallback-sweep.R:294`), the `meta$platform` gate, the
       searle/burch identity check at 1e-12 with the 128,000-row count assertion,
       and a self-test that plants an endpoint drift and requires the abort.
-- [ ] T3 — Add the ukoumunne2003 U10/U30/U50 anchor precondition, run before any
+- [x] T3 — Add the ukoumunne2003 U10/U30/U50 anchor precondition, run before any
       grid cell and aborting classed on a miss.
 - [ ] T4 — Add the `npbootstrap` leg: classed-condition abort accounting, raise
       on non-finite-without-condition, per-cell checkpointing, and the site's row
@@ -153,6 +153,8 @@ D-entry.
 - 2026-08-15: amendment return: AC3 — "the compared-row count is asserted equal to 64 cells × 2000 reps × 2 legs = 256,000 and the compared-endpoint count to twice that, 512,000" — the plan-time clause multiplied out to 128,000, which is not the product; found by the assertion firing on the first full run.
 - 2026-08-15: criteria audit ([O], fresh context) of the amended AC3 returned 8 findings, 7 actioned into the wording before writing (stale 128,000 renderings in the harness, the endpoint count left unasserted, the control's 20-rep truncation unstated, the platform promise wider than the three recorded fields, a single-exemplar plant that a 1e-6 tolerance would also pass, and the count and platform assertions never shown to bite). Not actioned: AC3 says "abort" where AC2 says classed — `data-raw/` harnesses use bare `stop()` by M111 precedent and the classed-error rule governs the package's user-facing layer.
 - 2026-08-15: T2 — the M111 grid regenerates from its recorded seeds **bit-identically** on this platform: 256,000 rows / 512,000 endpoints, worst |delta| exactly 0, in 19 s at 4 workers. The 1e-12 tolerance is therefore slack the run never used.
+- 2026-08-15: T3 — the anchor precondition aborts `intraclass_anchor_miss`/`intraclass_error` on a miss and records the committed fixture's delta beside the run rather than gating on it (D-024 clause 2).
+- 2026-08-15: T3 — AC2's plant had to be a perturbation of the resample DRAWS, not of the resample seed: measured on the U10 stream at 300 reps, colliding the resample stream with the data stream (0.9633) and holding it constant across reps (0.9533) both land inside the ±0.03 of the correct stream (0.9567), so a seed plant could not fire the abort. The plant masks `sample.int` in a child of the package namespace so every resample is the identity one; the pivot collapses and coverage goes to ~0.
 - 2026-08-15: gate chose to run the ~16–21 min anchor validation on every harness invocation including checkpoint resumes, over validating once and stamping, because a stamp is a second record that goes stale; falsified by the validation's share of total sweep runtime rising above the ~5–10% measured here.
 
 ## Decisions
