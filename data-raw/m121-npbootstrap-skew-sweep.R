@@ -62,6 +62,8 @@ out_path <- Sys.getenv(
   "M121_OUT",
   "data-raw/m121-npbootstrap-skew-coverage.tsv"
 )
+# Uncommitted per-cell resume cache; a re-run picks up past finished cells.
+ckpt_dir <- Sys.getenv("M121_CKPT_DIR", "data-raw/m121-npbootstrap-checkpoints")
 n_workers <- 4L
 
 # The identity tolerance (plan gate 2026-08-15): 1e-12 rather than identical(),
@@ -219,7 +221,11 @@ assert_anchors <- function(
   cells = anchor_cells,
   workers = 3L
 ) {
-  fixture <- if (file.exists(anchor_fixture)) readRDS(anchor_fixture) else NULL
+  fixture <- if (file.exists(anchor_fixture)) {
+    ckpt_read_input(anchor_fixture)
+  } else {
+    NULL
+  }
   got <- parallel::mclapply(
     names(cells),
     function(nm) anchor_coverage(cells[[nm]], n_rep, reducer),
@@ -295,70 +301,159 @@ planted_stream_reducer <- function() {
   f
 }
 
-# ---- per-cell regeneration + identity check ----------------------------------
-# Returns the per-rep regenerated rows for one cell together with the identity
-# evidence (how many endpoint pairs were compared and the worst absolute
-# difference), so the aggregate count assertion is made over recorded evidence
-# rather than over an assumption about what the loop did.
-cell_rows <- function(cell, fx) {
-  fx_cell <- fx[fx$cell == cell$id, ]
+# ---- the npbootstrap leg -----------------------------------------------------
+np_boot_samples <- 999L
+np_conf <- 0.95
+# The npbootstrap resample stream, offset from the rep's data seed by 300000 —
+# inside the cell's own 1e6 block, so no two cells' streams can meet, and clear
+# of the +100000 offset M111's mc leg used on the same base.
+np_seed_offset <- 300000L
+
+# The abort caught here is any classed `intraclass_*` ERROR (every one carries
+# `intraclass_error`, R/abort.R:34), and the leg's `aborted` flag is set from
+# that condition — never from endpoint finiteness. A non-finite endpoint
+# arriving WITHOUT a condition is a defect, so it raises rather than being
+# quietly counted as an abort (the M112 T2 convention for the mc leg).
+np_ci <- function(d, seed) {
+  tryCatch(
+    {
+      td <- generics::tidy(icc(
+        d,
+        score,
+        subject,
+        rater,
+        model = "oneway",
+        ci_method = "npbootstrap",
+        boot_samples = np_boot_samples,
+        conf_level = np_conf,
+        seed = seed
+      ))
+      i1 <- td[td$index == "ICC(1)", ]
+      list(
+        status = "ok",
+        cond_class = NA_character_,
+        lower = i1$conf.low,
+        upper = i1$conf.high
+      )
+    },
+    intraclass_error = function(e) {
+      list(
+        status = "abort",
+        cond_class = class(e)[[1]],
+        lower = NA_real_,
+        upper = NA_real_
+      )
+    }
+  )
+}
+
+# ---- per-cell regeneration + identity check + npbootstrap leg ----------------
+# One rep: regenerate M111's dataset from its seed, re-verify the two classical
+# legs against the fixture, and run the npbootstrap leg on that same dataset.
+# Returns the np row and this rep's identity evidence.
+one_rep <- function(cell, rep, fx_cell) {
+  base <- cell$id * 1000000L + rep
+  d <- gen_oneway(cell$k, cell$n, cell$rho, cell$dist, seed = base)
   n_compared <- 0L
   n_endpoints <- 0L
   max_delta <- 0
-  for (rep in seq_len(cell$n_rep)) {
-    base <- cell$id * 1000000L + rep
-    d <- gen_oneway(cell$k, cell$n, cell$rho, cell$dist, seed = base)
-    for (m in c("searle", "burch")) {
-      recorded <- fx_cell[fx_cell$rep == rep & fx_cell$method == m, ]
-      if (nrow(recorded) != 1L) {
-        stop(sprintf(
-          "fixture holds %d %s rows for cell %d rep %d (want exactly 1)",
-          nrow(recorded),
-          m,
-          cell$id,
-          rep
-        ))
-      }
-      ci <- if (m == "searle") {
-        searle_f_ci_balanced(d)
-      } else {
-        burch_reml_ci_balanced(d)
-      }
-      deltas <- c(
-        abs(ci[["lower"]] - recorded$lower),
-        abs(ci[["upper"]] - recorded$upper)
-      )
-      if (!all(is.finite(deltas)) || any(deltas > identity_tol)) {
-        stop(sprintf(
-          paste0(
-            "endpoint identity check failed at cell %d rep %d leg %s: ",
-            "regenerated [%.17g, %.17g] vs recorded [%.17g, %.17g] ",
-            "(max |delta| %.3g > %.3g) — the regenerated dataset is not the ",
-            "one the fixture was computed from"
-          ),
-          cell$id,
-          rep,
-          m,
-          ci[["lower"]],
-          ci[["upper"]],
-          recorded$lower,
-          recorded$upper,
-          max(deltas),
-          identity_tol
-        ))
-      }
-      n_compared <- n_compared + 1L
-      # Counted from the vector actually compared, never as 2 * rows: the point
-      # of the second count is that it goes short when an endpoint is skipped.
-      n_endpoints <- n_endpoints + length(deltas)
-      max_delta <- max(max_delta, deltas)
+  for (m in c("searle", "burch")) {
+    recorded <- fx_cell[fx_cell$rep == rep & fx_cell$method == m, ]
+    if (nrow(recorded) != 1L) {
+      stop(sprintf(
+        "fixture holds %d %s rows for cell %d rep %d (want exactly 1)",
+        nrow(recorded),
+        m,
+        cell$id,
+        rep
+      ))
     }
+    ci <- if (m == "searle") {
+      searle_f_ci_balanced(d)
+    } else {
+      burch_reml_ci_balanced(d)
+    }
+    deltas <- c(
+      abs(ci[["lower"]] - recorded$lower),
+      abs(ci[["upper"]] - recorded$upper)
+    )
+    if (!all(is.finite(deltas)) || any(deltas > identity_tol)) {
+      stop(sprintf(
+        paste0(
+          "endpoint identity check failed at cell %d rep %d leg %s: ",
+          "regenerated [%.17g, %.17g] vs recorded [%.17g, %.17g] ",
+          "(max |delta| %.3g > %.3g) — the regenerated dataset is not the ",
+          "one the fixture was computed from"
+        ),
+        cell$id,
+        rep,
+        m,
+        ci[["lower"]],
+        ci[["upper"]],
+        recorded$lower,
+        recorded$upper,
+        max(deltas),
+        identity_tol
+      ))
+    }
+    n_compared <- n_compared + 1L
+    # Counted from the vector actually compared, never as 2 * rows: the point
+    # of the second count is that it goes short when an endpoint is skipped.
+    n_endpoints <- n_endpoints + length(deltas)
+    max_delta <- max(max_delta, deltas)
+  }
+  np <- np_ci(d, seed = base + np_seed_offset)
+  aborted <- identical(np$status, "abort")
+  finite_ci <- is.finite(np$lower) && is.finite(np$upper)
+  if (!aborted && !finite_ci) {
+    stop(sprintf(
+      paste0(
+        "npbootstrap leg returned a non-finite interval [%s, %s] without ",
+        "signalling a classed intraclass_* condition (cell %d, rep %d)"
+      ),
+      format(np$lower),
+      format(np$upper),
+      cell$id,
+      rep
+    ))
   }
   list(
-    id = cell$id,
+    row = data.frame(
+      cell = cell$id,
+      rho = cell$rho,
+      k = cell$k,
+      n = cell$n,
+      dist = cell$dist,
+      rep = rep,
+      method = "npbootstrap",
+      lower = np$lower,
+      upper = np$upper,
+      aborted = aborted,
+      covered = !aborted && np$lower <= cell$rho && cell$rho <= np$upper,
+      width = if (aborted) NA_real_ else np$upper - np$lower,
+      lo_miss = !aborted && cell$rho < np$lower,
+      hi_miss = !aborted && cell$rho > np$upper,
+      cond_class = np$cond_class,
+      stringsAsFactors = FALSE
+    ),
     n_compared = n_compared,
     n_endpoints = n_endpoints,
     max_delta = max_delta
+  )
+}
+
+# One cell: every rep, plus the cell's identity evidence rolled up. The evidence
+# travels with the rows into the checkpoint, so a resumed cell contributes the
+# count it actually compared rather than an assumed one.
+cell_rows <- function(cell, fx) {
+  fx_cell <- fx[fx$cell == cell$id, ]
+  reps <- lapply(seq_len(cell$n_rep), function(rep) one_rep(cell, rep, fx_cell))
+  list(
+    id = cell$id,
+    rows = do.call(rbind, lapply(reps, function(x) x$row)),
+    n_compared = sum(vapply(reps, function(x) x$n_compared, integer(1))),
+    n_endpoints = sum(vapply(reps, function(x) x$n_endpoints, integer(1))),
+    max_delta = max(vapply(reps, function(x) x$max_delta, numeric(1)))
   )
 }
 
@@ -411,6 +506,127 @@ assert_identity_evidence <- function(evidence, cells) {
   invisible(max(vapply(evidence, function(e) e$max_delta, numeric(1))))
 }
 
+# ---- checkpointed sweep ------------------------------------------------------
+# M120: the resume cache is keyed on the cell's design parameters AND a hash of
+# the generating block, so a checkpoint written under any other grid or any
+# earlier version of one_rep() is refused rather than served.
+cell_spec <- function(cell) {
+  ckpt_spec(
+    params = list(
+      rho = cell$rho,
+      k = cell$k,
+      n = cell$n,
+      dist = cell$dist,
+      n_rep = cell$n_rep,
+      base_seed = cell$id * 1000000L
+    ),
+    roots = "one_rep",
+    values = c(
+      "identity_tol",
+      "np_boot_samples",
+      "np_conf",
+      "np_seed_offset"
+    ),
+    site = "m121-npbootstrap-skew-sweep",
+    envir = environment(gen_oneway)
+  )
+}
+
+run_cell <- function(cell, fx, ckpt_dir) {
+  ckpt <- file.path(ckpt_dir, sprintf("cell-%02d.rds", cell$id))
+  if (file.exists(ckpt)) {
+    return(ckpt_read(ckpt, cell_spec(cell)))
+  }
+  t0 <- Sys.time()
+  res <- cell_rows(cell, fx)
+  ckpt_write(ckpt, payload = res, spec = cell_spec(cell))
+  cat(sprintf(
+    "cell %2d/64 done: rho=%.2f k=%d n=%d %-8s (%.1f min, %d aborts)\n",
+    cell$id,
+    cell$rho,
+    cell$k,
+    cell$n,
+    cell$dist,
+    as.numeric(difftime(Sys.time(), t0, units = "mins")),
+    sum(res$rows$aborted)
+  ))
+  res
+}
+
+# ---- the per-cell coverage table --------------------------------------------
+# Column semantics are data-raw/m113-skew-response-derivation.R's, unchanged, so
+# the fourth leg's row reads against the other three's without translation:
+#   coverage_uncond   — mean(covered), an aborted rep counting as a miss
+#   coverage_nonabort — mean(covered) among non-aborted reps
+#   lo_miss/hi_miss   — tail-miss rates among non-aborted reps
+#   width_ratio_vs_mc — med_width / the mc leg's med_width at that cell
+one_group <- function(g) {
+  data.frame(
+    cell = g$cell[[1L]],
+    rho = g$rho[[1L]],
+    k = g$k[[1L]],
+    n = g$n[[1L]],
+    dist = g$dist[[1L]],
+    method = g$method[[1L]],
+    n_rep = nrow(g),
+    n_abort = sum(g$aborted),
+    coverage_uncond = mean(g$covered),
+    coverage_nonabort = mean(g$covered[!g$aborted]),
+    lo_miss = mean(g$lo_miss[!g$aborted]),
+    hi_miss = mean(g$hi_miss[!g$aborted]),
+    med_width = stats::median(g$width[!g$aborted]),
+    stringsAsFactors = FALSE
+  )
+}
+
+build_table <- function(np_rows, fx) {
+  shared <- c(
+    "cell",
+    "rho",
+    "k",
+    "n",
+    "dist",
+    "rep",
+    "method",
+    "lower",
+    "upper",
+    "aborted",
+    "covered",
+    "width",
+    "lo_miss",
+    "hi_miss"
+  )
+  raw <- rbind(fx[shared], np_rows[shared])
+  stopifnot(
+    identical(nrow(raw), 64L * 2000L * 4L),
+    identical(
+      sort(unique(raw$method)),
+      c("burch", "mc", "npbootstrap", "searle")
+    )
+  )
+  tab <- do.call(
+    rbind,
+    lapply(split(raw, list(raw$cell, raw$method), drop = TRUE), one_group)
+  )
+  rownames(tab) <- NULL
+  mc_width <- tab$med_width[tab$method == "mc"]
+  names(mc_width) <- tab$cell[tab$method == "mc"]
+  tab$width_ratio_vs_mc <- tab$med_width / mc_width[as.character(tab$cell)]
+  stopifnot(identical(nrow(tab), 64L * 4L), all(tab$n_rep == 2000L))
+  tab[order(tab$cell, tab$method), ]
+}
+
+write_table <- function(tab, path) {
+  num <- vapply(tab, is.numeric, logical(1L))
+  out <- tab
+  out[num] <- lapply(
+    out[num],
+    function(x) trimws(formatC(x, digits = 10, format = "g"))
+  )
+  write.table(out, path, sep = "\t", quote = FALSE, row.names = FALSE)
+  invisible(path)
+}
+
 # ---- self-test ---------------------------------------------------------------
 # Plants a drift into a COPY of the fixture (one endpoint moved by 1e-9, three
 # orders of magnitude above the tolerance) and requires the identity check to
@@ -438,7 +654,7 @@ expect_abort <- function(expr, want, what) {
 }
 
 self_test <- function() {
-  fx_all <- readRDS(fixture_path)
+  fx_all <- ckpt_read_input(fixture_path)
   fx <- fx_all$raw
   assert_platform(fx_all$meta)
   cell <- cells_from_fixture(fx)[[1]]
@@ -619,6 +835,54 @@ self_test <- function() {
     )
   }
 
+  # --- probe 5: a non-finite npbootstrap endpoint arriving WITHOUT a classed
+  # condition must raise, not be counted as an abort (AC4). `np_ci` is masked in
+  # a child of the harness's own environment, so the reducer's return is planted
+  # without touching the leg's accounting.
+  planted_np <- function(result) {
+    f <- one_rep
+    env <- new.env(parent = environment(f))
+    env$np_ci <- function(d, seed) result
+    environment(f) <- env
+    f
+  }
+  fx_cell1 <- fx[fx$cell == cell$id, ]
+  ok_row <- planted_np(list(
+    status = "ok",
+    cond_class = NA_character_,
+    lower = 0.1,
+    upper = 0.2
+  ))(cell, 1L, fx_cell1)
+  if (!identical(ok_row$row$aborted, FALSE)) {
+    stop(
+      "self-test control failed: a finite planted interval was counted as an abort"
+    )
+  }
+  expect_abort(
+    planted_np(list(
+      status = "ok",
+      cond_class = NA_character_,
+      lower = NA_real_,
+      upper = 0.2
+    ))(cell, 1L, fx_cell1),
+    "without signalling a classed intraclass_* condition",
+    "a non-finite npbootstrap endpoint with no classed condition"
+  )
+  # And the converse: a classed condition IS counted, and from the class rather
+  # than from the endpoints.
+  ab_row <- planted_np(list(
+    status = "abort",
+    cond_class = "intraclass_singular_fit",
+    lower = NA_real_,
+    upper = NA_real_
+  ))(cell, 1L, fx_cell1)
+  if (
+    !identical(ab_row$row$aborted, TRUE) ||
+      !identical(ab_row$row$cond_class, "intraclass_singular_fit")
+  ) {
+    stop("self-test FAILED: a classed abort was not counted from its class")
+  }
+
   cat(
     "self-test OK: control reproduces 40 rows / 80 endpoints exactly; four ",
     "leg x endpoint plants (two at 5e-12) each abort at their own row and a ",
@@ -627,65 +891,106 @@ self_test <- function() {
     "U10 anchor passes at ",
     probe_reps,
     " reps with the shipped reducer and abort intraclass_anchor_miss under a ",
-    "degenerate resample stream.\n",
+    "degenerate resample stream; the npbootstrap leg raises on a non-finite ",
+    "endpoint carrying no classed condition and counts an abort from its ",
+    "condition class.\n",
     sep = ""
   )
+  invisible(TRUE)
+}
+
+# ---- the sweep ---------------------------------------------------------------
+# Called from live top-level code below so the checkpoint routing walk reaches
+# the guard calls inside it (data-raw/check-checkpoint-sites.R).
+run_sweep <- function() {
+  fx_all <- ckpt_read_input(fixture_path)
+  fx <- fx_all$raw
+  assert_platform(fx_all$meta)
+  cells <- cells_from_fixture(fx)
+  # AC2: before any grid cell is read, and before anything is written.
+  cat("validating the ukoumunne2003 Table I anchors (n_rep = 2000)\n")
+  anchors <- assert_anchors()
+  print(anchors, row.names = FALSE, digits = 5)
+  cat(sprintf(
+    "anchors OK: worst |delta| vs Table I %.4f (tolerance %.2f); worst |delta| vs the committed fixture %.4f, recorded not gated (D-024 clause 2)\n",
+    max(abs(anchors$delta_table_i)),
+    anchor_tol,
+    max(abs(anchors$delta_fixture))
+  ))
+  cat(sprintf(
+    "regenerating %d cells from the M111 seed scheme and adding the npbootstrap leg (%d workers)\n",
+    length(cells),
+    n_workers
+  ))
+  dir.create(ckpt_dir, showWarnings = FALSE, recursive = TRUE)
+  ckpt_trace_register(ckpt_dir)
+  evidence <- parallel::mclapply(
+    cells,
+    function(cell) run_cell(cell, fx, ckpt_dir),
+    mc.cores = n_workers
+  )
+  failed <- vapply(evidence, inherits, logical(1), what = "try-error")
+  if (any(failed)) {
+    stop(
+      "cells errored: ",
+      paste(
+        vapply(
+          which(failed),
+          function(i) {
+            sprintf(
+              "%d (%s)",
+              i,
+              conditionMessage(attr(evidence[[i]], "condition"))
+            )
+          },
+          character(1)
+        ),
+        collapse = "; "
+      )
+    )
+  }
+  # Before anything is written: no cell may have come from an unguarded read.
+  ckpt_trace_assert()
+  worst <- assert_identity_evidence(evidence, cells)
+  cat(sprintf(
+    "endpoint identity check: 256000 rows / 512000 endpoints match within %.0e (worst |delta| %.3g)\n",
+    identity_tol,
+    worst
+  ))
+  np_rows <- do.call(rbind, lapply(evidence, function(e) e$rows))
+  tab <- build_table(np_rows, fx)
+  write_table(tab, out_path)
+  cat(sprintf("wrote %s (%d rows)\n", out_path, nrow(tab)))
+  aborts <- np_rows$cond_class[np_rows$aborted]
+  cat("npbootstrap abort classes: ")
+  cat(
+    if (length(aborts)) {
+      paste(
+        sprintf("%s x %d", names(table(aborts)), as.integer(table(aborts))),
+        collapse = ", "
+      )
+    } else {
+      "none"
+    }
+  )
+  cat("\n")
+  np <- tab[tab$method == "npbootstrap", ]
+  cat(sprintf(
+    "npbootstrap: %d/64 cells below 0.93 coverage_uncond; worst %.4f at (rho=%.2f, k=%d, n=%d, %s)\n",
+    sum(np$coverage_uncond < 0.93),
+    min(np$coverage_uncond),
+    np$rho[which.min(np$coverage_uncond)],
+    np$k[which.min(np$coverage_uncond)],
+    np$n[which.min(np$coverage_uncond)],
+    np$dist[which.min(np$coverage_uncond)]
+  ))
   invisible(TRUE)
 }
 
 if (sys.nframe() == 0L) {
   if ("--self-test" %in% commandArgs(trailingOnly = TRUE)) {
     self_test()
-  } else {
-    fx_all <- readRDS(fixture_path)
-    fx <- fx_all$raw
-    assert_platform(fx_all$meta)
-    cells <- cells_from_fixture(fx)
-    # AC2: before any grid cell is read, and before anything is written.
-    cat("validating the ukoumunne2003 Table I anchors (n_rep = 2000)\n")
-    anchors <- assert_anchors()
-    print(anchors, row.names = FALSE, digits = 5)
-    cat(sprintf(
-      "anchors OK: worst |delta| vs Table I %.4f (tolerance %.2f); worst |delta| vs the committed fixture %.4f, recorded not gated (D-024 clause 2)\n",
-      max(abs(anchors$delta_table_i)),
-      anchor_tol,
-      max(abs(anchors$delta_fixture))
-    ))
-    cat(sprintf(
-      "regenerating %d cells from the M111 seed scheme (%d workers)\n",
-      length(cells),
-      n_workers
-    ))
-    evidence <- parallel::mclapply(
-      cells,
-      function(cell) cell_rows(cell, fx),
-      mc.cores = n_workers
-    )
-    failed <- vapply(evidence, inherits, logical(1), what = "try-error")
-    if (any(failed)) {
-      stop(
-        "cells errored: ",
-        paste(
-          vapply(
-            which(failed),
-            function(i) {
-              sprintf(
-                "%d (%s)",
-                i,
-                conditionMessage(attr(evidence[[i]], "condition"))
-              )
-            },
-            character(1)
-          ),
-          collapse = "; "
-        )
-      )
-    }
-    worst <- assert_identity_evidence(evidence, cells)
-    cat(sprintf(
-      "endpoint identity check: 256000 rows / 512000 endpoints match within %.0e (worst |delta| %.3g)\n",
-      identity_tol,
-      worst
-    ))
+    quit(save = "no")
   }
+  run_sweep()
 }

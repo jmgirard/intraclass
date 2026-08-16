@@ -121,11 +121,11 @@ D-entry.
 - [x] T2 — `data-raw/m121-npbootstrap-skew-sweep.R`: seed reconstruction from
       M111's scheme (`base_seed = cell$id * 1000000L`,
       `data-raw/m111-fallback-sweep.R:294`), the `meta$platform` gate, the
-      searle/burch identity check at 1e-12 with the 128,000-row count assertion,
+      searle/burch identity check at 1e-12 with the 256,000-row count assertion,
       and a self-test that plants an endpoint drift and requires the abort.
 - [x] T3 — Add the ukoumunne2003 U10/U30/U50 anchor precondition, run before any
       grid cell and aborting classed on a miss.
-- [ ] T4 — Add the `npbootstrap` leg: classed-condition abort accounting, raise
+- [x] T4 — Add the `npbootstrap` leg: classed-condition abort accounting, raise
       on non-finite-without-condition, per-cell checkpointing, and the site's row
       in `data-raw/checkpoint-sites.tsv`.
 - [ ] T5 — Run the sweep in the background (check for concurrent R sessions and
@@ -155,8 +155,11 @@ D-entry.
 - 2026-08-15: T2 — the M111 grid regenerates from its recorded seeds **bit-identically** on this platform: 256,000 rows / 512,000 endpoints, worst |delta| exactly 0, in 19 s at 4 workers. The 1e-12 tolerance is therefore slack the run never used.
 - 2026-08-15: T3 — the anchor precondition aborts `intraclass_anchor_miss`/`intraclass_error` on a miss and records the committed fixture's delta beside the run rather than gating on it (D-024 clause 2).
 - 2026-08-15: T3 — AC2's plant had to be a perturbation of the resample DRAWS, not of the resample seed: measured on the U10 stream at 300 reps, colliding the resample stream with the data stream (0.9633) and holding it constant across reps (0.9533) both land inside the ±0.03 of the correct stream (0.9567), so a seed plant could not fire the abort. The plant masks `sample.int` in a child of the package namespace so every resample is the identity one; the pivot collapses and coverage goes to ~0.
+- 2026-08-15: T4 — npbootstrap leg added with per-cell checkpointing; smoke-tested fresh, on resume (byte-identical payload) and against a stale design (refused). Site declared in `data-raw/checkpoint-sites.tsv`; `check-checkpoint-sites.R` reports 6 routed sites and its 148-mutation self-test all detected.
 - 2026-08-15: gate chose to run the ~16–21 min anchor validation on every harness invocation including checkpoint resumes, over validating once and stamping, because a stamp is a second record that goes stale; falsified by the validation's share of total sweep runtime rising above the ~5–10% measured here.
 
 ## Decisions
+
+- **2026-08-15 — a declared checkpoint site may hold no bare `readRDS`, so non-checkpoint inputs read through `ckpt_read_input()`.** `data-raw/check-checkpoint-sites.R` refuses any `readRDS`/`load`/`unserialize`/`read_rds` in a declared resume site, transitively through what it sources. This harness must read two inputs that are not checkpoints — the committed M111 fixture and the npbootstrap coverage oracle — so `checkpoint-guard.R` gains `ckpt_read_input()`, and the site calls that. The wrapper deliberately does **not** set `in_guard`: the runtime trace therefore still judges the path it is handed, so routing a *registered checkpoint* through it aborts exactly as a bare read would; what the wrapper relaxes is the static spelling check and never the runtime one. Considered and rejected: declaring the site without the reads (impossible — the fixture is the input), and leaving the site undeclared (AC6 requires the registration).
 
 ## Review
