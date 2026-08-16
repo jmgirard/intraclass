@@ -152,6 +152,38 @@ assert_platform <- function(meta) {
   invisible(TRUE)
 }
 
+# `parallel::mclapply` reports a worker killed by a signal or OOM as a NULL
+# element and keeps the list's full length, so an `inherits(., "try-error")`
+# test passes over a lost worker and the short result binds away silently
+# (M112 lesson, verified there against a SIGKILLed worker). Both mclapply sites
+# below route their results through this, so a lost worker is named where it
+# happened rather than surfacing later as an opaque shape error.
+mclapply_failures <- function(results, labels) {
+  bad <- vapply(
+    seq_along(results),
+    function(i) inherits(results[[i]], "try-error") || is.null(results[[i]]),
+    logical(1)
+  )
+  if (!any(bad)) {
+    return(character(0))
+  }
+  vapply(
+    which(bad),
+    function(i) {
+      if (is.null(results[[i]])) {
+        sprintf("%s (worker lost: NULL result)", labels[[i]])
+      } else {
+        sprintf(
+          "%s (%s)",
+          labels[[i]],
+          conditionMessage(attr(results[[i]], "condition"))
+        )
+      }
+    },
+    character(1)
+  )
+}
+
 # ---- the published-oracle precondition (AC2) ---------------------------------
 # Before a single grid cell is read, the shipped reducer is re-run at the SAME
 # two per-rep seed streams data-raw/m75-npbootstrap-coverage.R:82,88 uses for the
@@ -231,15 +263,10 @@ assert_anchors <- function(
     function(nm) anchor_coverage(cells[[nm]], n_rep, reducer),
     mc.cores = min(workers, length(cells))
   )
-  failed <- vapply(got, inherits, logical(1), what = "try-error")
-  if (any(failed)) {
+  lost <- mclapply_failures(got, names(cells))
+  if (length(lost)) {
     rlang::abort(
-      paste0(
-        "anchor validation errored at ",
-        paste(names(cells)[failed], collapse = ", "),
-        ": ",
-        conditionMessage(attr(got[[which(failed)[1]]], "condition"))
-      ),
+      paste0("anchor validation errored at ", paste(lost, collapse = "; ")),
       class = c("intraclass_anchor_error", "intraclass_error")
     )
   }
@@ -835,6 +862,28 @@ self_test <- function() {
     )
   }
 
+  # --- probe 6: a lost mclapply worker. A killed child arrives as NULL, not as a
+  # try-error, so the completeness test has to name it (M112). Planted directly
+  # on the result list, because killing a real worker is not reproducible.
+  if (length(mclapply_failures(list(1, 2), c("a", "b")))) {
+    stop("self-test FAILED: mclapply_failures flagged two healthy results")
+  }
+  lost_report <- mclapply_failures(list(1, NULL), c("cell 1", "cell 2"))
+  if (
+    !identical(length(lost_report), 1L) ||
+      !grepl("cell 2 (worker lost", lost_report[[1]], fixed = TRUE)
+  ) {
+    stop(
+      "self-test FAILED: a NULL mclapply element was not reported as a lost ",
+      "worker — got: ",
+      paste(lost_report, collapse = "; ")
+    )
+  }
+  errored <- try(stop("planted"), silent = TRUE)
+  if (!length(mclapply_failures(list(errored), "cell 1"))) {
+    stop("self-test FAILED: a try-error element was not reported")
+  }
+
   # --- probe 5: a non-finite npbootstrap endpoint arriving WITHOUT a classed
   # condition must raise, not be counted as an abort (AC4). `np_ci` is masked in
   # a child of the harness's own environment, so the reducer's return is planted
@@ -893,7 +942,7 @@ self_test <- function() {
     " reps with the shipped reducer and abort intraclass_anchor_miss under a ",
     "degenerate resample stream; the npbootstrap leg raises on a non-finite ",
     "endpoint carrying no classed condition and counts an abort from its ",
-    "condition class.\n",
+    "condition class; a lost (NULL) mclapply worker is reported as lost.\n",
     sep = ""
   )
   invisible(TRUE)
@@ -929,25 +978,12 @@ run_sweep <- function() {
     function(cell) run_cell(cell, fx, ckpt_dir),
     mc.cores = n_workers
   )
-  failed <- vapply(evidence, inherits, logical(1), what = "try-error")
-  if (any(failed)) {
-    stop(
-      "cells errored: ",
-      paste(
-        vapply(
-          which(failed),
-          function(i) {
-            sprintf(
-              "%d (%s)",
-              i,
-              conditionMessage(attr(evidence[[i]], "condition"))
-            )
-          },
-          character(1)
-        ),
-        collapse = "; "
-      )
-    )
+  lost <- mclapply_failures(
+    evidence,
+    vapply(cells, function(cell) sprintf("cell %d", cell$id), character(1))
+  )
+  if (length(lost)) {
+    stop("cells errored: ", paste(lost, collapse = "; "))
   }
   # Before anything is written: no cell may have come from an unguarded read.
   ckpt_trace_assert()
