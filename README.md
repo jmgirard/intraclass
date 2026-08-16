@@ -31,11 +31,11 @@ just call functions.
 > data, and multilevel designs (subject vs. cluster level, with raters
 > crossed with or nested in clusters/subjects) — each with
 > boundary-aware Monte-Carlo intervals. Fits run on mixed-model engines
-> (`glmmTMB`, `lme4`) or an SEM engine (`lavaan`). A [*Choosing an
+> (`glmmTMB`, `lme4`), a Bayesian engine (`brms`), or an SEM engine
+> (`lavaan`). A [*Choosing an
 > ICC*](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.html)
 > decision guide, the `choose_icc()` helper, D-study projection to other
-> rater counts (`d_study()`), and `autoplot()` plots have all shipped. A
-> Bayesian engine is on the roadmap; see `cairn/ROADMAP.md`.
+> rater counts (`d_study()`), and `autoplot()` plots have all shipped.
 
 ## Installation
 
@@ -47,8 +47,10 @@ You can install the development version from
 pak::pak("jmgirard/intraclass")
 ```
 
-The base install is light — only `glmmTMB`, `cli`, `rlang`, and
-`generics`. Optional Bayesian and SEM engines live in `Suggests`.
+The base install is light — only `glmmTMB`, `cli`, `generics`,
+`lifecycle`, `rlang`, and `tibble`. The alternate mixed-model (`lme4`),
+Bayesian (`brms`), and SEM (`lavaan`) engines live in `Suggests`,
+installed only if you ask for them.
 
 ## Example
 
@@ -68,11 +70,11 @@ icc(ratings, score, subject, rater, seed = 2024)
 #> 
 #>   index     estimate   95% CI
 #>   Absolute agreement
-#>   ICC(A,1)     0.290   [0.053, 0.715]
-#>   ICC(A,k)     0.620   [0.182, 0.910]
+#>   ICC(A,1)     0.290   [0.053, 0.714]
+#>   ICC(A,k)     0.620   [0.183, 0.909]
 #>   Consistency
-#>   ICC(C,1)     0.715   [0.341, 0.924]
-#>   ICC(C,k)     0.909   [0.674, 0.980]
+#>   ICC(C,1)     0.715   [0.334, 0.924]
+#>   ICC(C,k)     0.909   [0.667, 0.980]
 #> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)

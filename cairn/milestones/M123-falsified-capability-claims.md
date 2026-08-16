@@ -3,12 +3,12 @@
      Per-section owners are tagged below. -->
 # M123: Correct the falsified capability claims in the shipped documentation
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP1, GP4   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m123-falsified-capability-claims`   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -88,15 +88,15 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Rewrite `README.Rmd:42` and `:45-46` — engine enumeration gains
+- [x] T1: Rewrite `README.Rmd:42` and `:45-46` — engine enumeration gains
       `brms`; the roadmap sentence is withdrawn (brms ships:
       `R/engine-brms.R`, `R/icc.R:689`, `ci_method = "posterior"`).
-- [ ] T2: Rewrite `README.Rmd:57`'s install list to AC2's non-base set; record
+- [x] T2: Rewrite `README.Rmd:57`'s install list to AC2's non-base set; record
       the comparing command and its output in the work log.
-- [ ] T3: Rewrite `vignettes/multilevel-designs.Rmd:110-111` against
+- [x] T3: Rewrite `vignettes/multilevel-designs.Rmd:110-111` against
       `R/icc.R:243-249`.
-- [ ] T4: Correct `cairn/DESIGN.md:69,72` and `CLAUDE.md:65`.
-- [ ] T5: `devtools::build_readme()`; confirm the re-knit is byte-identical on
+- [x] T4: Correct `cairn/DESIGN.md:69,72` and `CLAUDE.md:65`.
+- [x] T5: `devtools::build_readme()`; confirm the re-knit is byte-identical on
       a second run.
 - [ ] T6: Extend both walk legs in `test-doc-skew-caveat.R` with the README
       surfaces; add the anti-vacuity floor; run the walk and log every hit.
@@ -114,6 +114,9 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
 - 2026-08-16: plan gate chose the minimal-diff README correction over also refreshing the feature blurb because every changed byte then traces to a verified falsehood; falsified by a user report that the README's omissions (opt-in `ci_method`s, replicates, tidy methods) mislead as much as its false sentences did.
 - 2026-08-16: plan gate chose a mutation-verified pin over a plain correction recorded in the work log because M115 recorded a claim criterion-met on a `fixed = TRUE` false negative against a line-wrapped sentence and shipped a sixth stale site; falsified by the pin costing a review return without ever having reddened on a real reintroduction.
 - 2026-08-16: plan gate chose extending `test-doc-skew-caveat.R` over a second checker because D-029's consequences clause bars a new doc-claim instrument absent D-021's trigger; falsified by that file's walk proving unable to carry the README surfaces.
+- 2026-08-16: T1-T4 — the four false claims withdrawn and the two records corrected; `git grep -n augment -- NAMESPACE R/` exits 1, so AC4's second clause holds.
+- 2026-08-16: T2 — AC2's comparing command run: `Imports` is `cli, generics, glmmTMB, lifecycle, rlang, stats, tibble`; subtracting `rownames(installed.packages(priority = "base"))` removes `stats` alone, leaving the six the README now names. The prior sentence named four of the six.
+- 2026-08-16: T5 — `devtools::build_readme()` run twice; the second knit is byte-identical, so AC1's same-toolchain clause holds. The knit also moved four interval endpoints (e.g. `ICC(A,1)` upper 0.715 to 0.714) with every point estimate unchanged: the committed `README.md` was last knitted 2026-07-17 and predates the interval code shipped in M104-M119, so the rendered file was stale on main. This milestone's edits touch prose only and cannot move a number.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
