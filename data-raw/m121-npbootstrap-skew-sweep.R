@@ -650,9 +650,10 @@ format_row <- function(row) {
 # ---- one cell ----------------------------------------------------------------
 # M122: the sweep is all-or-nothing by construction -- assert_anchors() runs
 # three 2000-rep anchor cells before any grid cell, and build_table() asserts the
-# full 64 x 2000 x 4 shape (:602, :617). So verifying that the un-cached script
-# still produces the committed numbers needs a path that computes ONE cell and
-# renders its published row the way build_table() would, which is this.
+# full 64 x 2000 x 4 shape in its two stopifnot() calls. So verifying that the
+# un-cached script still produces the committed numbers needs a path that
+# computes ONE cell and renders its published row the way build_table() would,
+# which is this.
 #
 # It is a verification path, not a second way to produce the table: it writes
 # nothing. The anchor gate is deliberately skipped (it validates the reducer
@@ -675,7 +676,7 @@ one_cell_row <- function(id, fx_all) {
   cell <- hit[[1L]]
   res <- cell_rows(cell, fx)
   row <- one_group(res$rows)
-  # width_ratio_vs_mc as build_table() derives it (:614-616): this cell's
+  # width_ratio_vs_mc as build_table() derives it from mc_width: this cell's
   # med_width over the mc leg's, the mc rows coming from the committed fixture
   # rather than from this run -- the mc leg is not regenerated here.
   mc <- fx[fx$cell == cell$id & fx$method == "mc", ]
@@ -688,16 +689,48 @@ one_cell_row <- function(id, fx_all) {
 
 # Compares that row against the committed table and aborts naming every column
 # that differs. Returns invisibly on a match.
+#
+# The id is normalized ONCE, here, and the integer it yields is what both the
+# grid lookup and the committed-row lookup use: normalizing in one place and
+# comparing the raw string in the other meant `--one-cell=04` selected cell 4,
+# spent 2000 reps on it, and only then failed to find row "04" (review F1).
+# And the committed row is resolved BEFORE the recompute, so a missing table, a
+# wrong M121_OUT or an out-of-grid id fails in a second rather than after the
+# cell has been paid for (review F2).
 compare_one_cell <- function(id, fixture = fixture_path, committed = out_path) {
-  got <- one_cell_row(id, ckpt_read_input(fixture))
+  if (length(id) != 1L || !grepl("^[0-9]+$", trimws(as.character(id)))) {
+    stop(sprintf(
+      "cell id must be a single whole number, got '%s'",
+      paste(id, collapse = " ")
+    ))
+  }
+  id <- as.integer(trimws(as.character(id)))
   tab <- utils::read.delim(committed, colClasses = "character")
   want <- tab[tab$cell == as.character(id) & tab$method == "npbootstrap", ]
   if (nrow(want) != 1L) {
     stop(sprintf(
-      "%s holds %d npbootstrap rows for cell %s (want exactly 1)",
+      "%s holds %d npbootstrap rows for cell %d (want exactly 1)",
       committed,
       nrow(want),
       id
+    ))
+  }
+  got <- one_cell_row(id, ckpt_read_input(fixture))
+  # Assert the identity evidence rather than only printing it: the full sweep
+  # asserts these counts (assert_identity_evidence()), and a one-cell path that
+  # narrated them without checking would report evidence it had not verified —
+  # the shape this milestone exists to remove (review F10).
+  if (
+    !identical(got$evidence$n_compared, got$cell$n_rep * 2L) ||
+      !identical(got$evidence$n_endpoints, got$cell$n_rep * 4L)
+  ) {
+    stop(sprintf(
+      "cell %d compared %d rows / %d endpoints, want %d / %d (2 and 4 per rep)",
+      id,
+      got$evidence$n_compared,
+      got$evidence$n_endpoints,
+      got$cell$n_rep * 2L,
+      got$cell$n_rep * 4L
     ))
   }
   mine <- format_row(got$row)
@@ -1113,16 +1146,57 @@ run_sweep <- function() {
   invisible(TRUE)
 }
 
-if (sys.nframe() == 0L) {
-  cli_args <- commandArgs(trailingOnly = TRUE)
-  one <- grep("^--one-cell=", cli_args, value = TRUE)
+# Arguments are parsed STRICTLY: anything unrecognized aborts rather than
+# falling through. The bare invocation runs the full 64-cell sweep and OVERWRITES
+# the committed table, so a near-miss spelling of a flag must never reach it —
+# `--one-cell 4` (the space form of a flag documented in `--flag=value` style)
+# matched neither pattern and silently started a ~7 CPU-hour run over the
+# committed output (review F3). Two mode flags together abort for the same
+# reason: a run that quietly honours one and drops the other reports an exit
+# status for work that was never done.
+parse_args <- function(args) {
+  one <- grep("^--one-cell=", args, value = TRUE)
+  self <- args %in% "--self-test"
+  unknown <- setdiff(args[!self], one)
+  if (length(unknown)) {
+    stop(
+      "unrecognized argument(s): ",
+      paste(unknown, collapse = ", "),
+      ". Accepted: --self-test, --one-cell=<id> (no space before the id), ",
+      "or no argument to run the full sweep.",
+      call. = FALSE
+    )
+  }
+  if (length(one) > 1L) {
+    stop(
+      "--one-cell given ",
+      length(one),
+      " times; pass exactly one",
+      call. = FALSE
+    )
+  }
+  if (length(one) && any(self)) {
+    stop(
+      "--one-cell and --self-test are separate modes; pass one",
+      call. = FALSE
+    )
+  }
   if (length(one)) {
-    compare_one_cell(sub("^--one-cell=", "", one[[1L]]))
-    quit(save = "no")
+    return(list(mode = "one-cell", id = sub("^--one-cell=", "", one[[1L]])))
   }
-  if ("--self-test" %in% cli_args) {
-    self_test()
-    quit(save = "no")
+  if (any(self)) {
+    return(list(mode = "self-test"))
   }
-  run_sweep()
+  list(mode = "sweep")
+}
+
+if (sys.nframe() == 0L) {
+  parsed <- parse_args(commandArgs(trailingOnly = TRUE))
+  switch(
+    parsed$mode,
+    "one-cell" = compare_one_cell(parsed$id),
+    "self-test" = self_test(),
+    "sweep" = run_sweep()
+  )
+  quit(save = "no")
 }
