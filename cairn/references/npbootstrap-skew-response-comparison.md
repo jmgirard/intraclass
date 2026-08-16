@@ -13,8 +13,8 @@ Extraction: derived — no external source of its own, only as current as its in
 Disposition filled at T6 from the committed table.
 
 **Scope.** The pre-registered disposition rule for `ci_method = "npbootstrap"`
-on the 64-cell one-way skew grid the M111 fixture holds, and (once T5/T6 land)
-the per-cell coverage table it is read against. Not a source summary; it builds
+on the 64-cell one-way skew grid the M111 fixture holds, and the per-cell
+coverage table it is read against. Not a source summary; it builds
 no new estimator and changes no user-facing behavior — any wording that follows
 from the verdict is a separate milestone (the M113 → M115 shape). This is a
 reference, not an authority — status lives in `ROADMAP.md`, decisions in
@@ -91,14 +91,54 @@ tag and is stated explicitly in the same D-entry. The verdict — one tag plus t
 reopening statement — is recorded as one D-entry, and no bracketed claim token is
 minted for it.
 
-## Results — filled at T6 from `data-raw/m121-npbootstrap-skew-coverage.tsv`
+## Results — derived 2026-08-15 from the M121 sweep
 
-_(pending — this section is written only after the sweep has run.)_
+Backing table `data-raw/m121-npbootstrap-skew-coverage.tsv` (256 rows = 64 cells
+× 4 legs), written by `data-raw/m121-npbootstrap-skew-sweep.R`; every figure
+below re-derives by re-running that script, whose own preconditions (the Table I
+anchors, the endpoint identity check) gate the run.
+
+- **N1 `npbootstrap`: no-GO.** 26/64 cells below the 0.93 `coverage_uncond`
+  floor; worst 0.8730 at (ρ = 0.60, k = 10, n = 5, chisq1). Coverage spans
+  0.8730–0.9555 across the grid.
+- **The abort-rate partition is degenerate, and that is the finding.** The leg
+  signalled no classed `intraclass_*` condition on any of the 128,000
+  replicates, so every cell's abort rate is 0, all 26 failing cells fall in the
+  ≤ 0.1 part, the > 0.1 part is empty, and `coverage_nonabort` equals
+  `coverage_uncond` at every cell. D-026's selection effect therefore explains
+  none of these failures — unlike the `mc` leg, whose 26 high-abort failing
+  cells were exactly that. Each of these 26 is a coverage failure on its own
+  terms.
+- **Where it fails.** By generator family: chisq1 11/16, t5 8/16, uniform 4/16,
+  gaussian 3/16 — so the failures are not confined to one nameable family. By
+  design: 16 of the 26 sit at k = 10 (10 of them at the k = 10, n = 2 corner),
+  6 at k = 30, 4 at k = 50. Within chisq1 the failure deepens with ρ, from
+  0.9260–0.9425 at ρ = 0.05 to 0.8730–0.9040 at ρ = 0.60.
+- **Its failures are far shallower than the other three legs'.** On the same
+  grid and column: `mc` fails 49/64 with a worst of 0.3935, `searle` 21/64 with
+  0.674, `burch` 16/64 with 0.6655. `npbootstrap` fails more cells than either
+  classical leg, and its worst cell still covers 0.873. Fewest-failing and
+  shallowest-failing are different orderings, and N1 reads neither: it is an
+  every-cell bar and all four legs miss it.
+- **Width (descriptive).** Median width ratio vs the `mc` leg 1.047 (range
+  0.718–1.720); by family, chisq1 1.355, t5 1.154, gaussian 1.017, uniform
+  0.917. The leg buys its comparatively shallow under-coverage with intervals
+  that run wider than the incumbent's exactly where the incumbent fails worst.
 
 ## Disposition
 
-_(pending T6.)_
+Verdict recorded as D-031: `npbootstrap` **no-GO** on N1 — no default-method
+change, and the D-001 fence untouched. D-027's S1 reopening condition (a method
+demonstrating every-cell floor coverage over this grid) is **not met**: 26 cells
+sit below the floor, so the classical-replacement question stays closed on the
+evidence D-027 recorded.
+
+What this milestone does not decide: whether a leg failing 26 cells at a worst
+of 0.873, with no aborts anywhere, warrants any user-facing wording. That is the
+M113 → M115 shape and belongs to a follow-on milestone, not to this rule.
 
 ## Open questions
 
-None at freeze.
+None — the rule was read exactly as frozen, and the zero-abort result made its
+abort-rate clause degenerate rather than ambiguous.
+

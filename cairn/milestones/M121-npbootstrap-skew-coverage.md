@@ -131,9 +131,9 @@ D-entry.
 - [x] T5 — Run the sweep in the background (check for concurrent R sessions and
       live R.INSTALL processes first — M107/M109) and write
       `data-raw/m121-npbootstrap-skew-coverage.tsv`.
-- [ ] T6 — Fill the page's Results and Disposition sections; write the D-entry
+- [x] T6 — Fill the page's Results and Disposition sections; write the D-entry
       with the floor count, the worst cell and the abort-rate split.
-- [ ] T7 — Records hygiene: INDEX line, triage rows for the page's generalizing
+- [x] T7 — Records hygiene: INDEX line, triage rows for the page's generalizing
       claims, all five checkers, `devtools::test()`.
 
 ## Work log
@@ -157,6 +157,8 @@ D-entry.
 - 2026-08-15: T3 — AC2's plant had to be a perturbation of the resample DRAWS, not of the resample seed: measured on the U10 stream at 300 reps, colliding the resample stream with the data stream (0.9633) and holding it constant across reps (0.9533) both land inside the ±0.03 of the correct stream (0.9567), so a seed plant could not fire the abort. The plant masks `sample.int` in a child of the package namespace so every resample is the identity one; the pivot collapses and coverage goes to ~0.
 - 2026-08-15: T4 — npbootstrap leg added with per-cell checkpointing; smoke-tested fresh, on resume (byte-identical payload) and against a stale design (refused). Site declared in `data-raw/checkpoint-sites.tsv`; `check-checkpoint-sites.R` reports 6 routed sites and its 148-mutation self-test all detected.
 - 2026-08-15: T5 — sweep run (~2 h, 4 workers, after waiting out a concurrent R session per M107/M109). Anchors reproduced 0.9375/0.9355/0.9425 against Table I's 0.938/0.944/0.9395 (worst |delta| 0.0085 of the ±0.03 bound) and matched the committed oracle fixture **exactly** at all three — the first exercise of that path since the glmmTMB/TMB rebuild, which moved nothing. Identity check exact again over the full grid (worst |delta| 0). `npbootstrap` aborted on 0 of 128,000 replicates.
+- 2026-08-15: T6 — N1 read as frozen: `npbootstrap` **no-GO**, 26/64 cells below the floor, worst 0.8730 at (0.60, 10, 5, chisq1), zero aborts anywhere, D-027's S1 reopening condition not met. Recorded as D-031.
+- 2026-08-15: T7 — INDEX line landed with the page at T1; 16 triage rows total for the page (6 at freeze, 10 for the Results section); all five checkers exit 0. Suite `FAIL 0 | WARN 2 | SKIP 25 | PASS 7302`, unchanged from the pre-sweep baseline; the 2 warnings are the pre-existing test-level ones at `test-icc-lavaan-multilevel.R:402` and `test-icc-type-vector.R:286`, and `library(glmmTMB)` loads silently, so AC7's tolerated load warning is absent rather than exercised.
 - 2026-08-15: gate chose to run the ~16–21 min anchor validation on every harness invocation including checkpoint resumes, over validating once and stamping, because a stamp is a second record that goes stale; falsified by the validation's share of total sweep runtime rising above the ~5–10% measured here.
 
 ## Decisions
