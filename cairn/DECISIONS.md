@@ -1387,3 +1387,53 @@ leaves that fence standing: it is that M118 makes no replacement verdict at all
 and no skewed-family disposition, which is what discharging the fence would
 require. The both-components condition was first named by Amendment 1, not by
 D-012.
+
+### D-031 (2026-08-15): M121 N1 verdict — `npbootstrap` no-GO on the skew grid; its failures are shallow and abort-free, and D-027's S1 reopening condition is not met
+
+**Context:** M121 measured `ci_method = "npbootstrap"` on the same 64-cell
+one-way skew grid D-027 judged the `mc`, `searle` and `burch` legs on, against
+rule N1 (GP5; `cairn/references/npbootstrap-skew-response-comparison.md`, frozen
+2026-08-15 before the harness existed). The M111 fixture holds no npbootstrap
+leg, so `data-raw/m121-npbootstrap-skew-sweep.R` regenerated every replicate from
+M111's recorded seeds — 512,000 endpoints reproduced exactly — and added the
+fourth leg. Derived table `data-raw/m121-npbootstrap-skew-coverage.tsv` (64 cells
+× 4 legs, n_rep = 2000, boot_samples = 999). The run is gated on reproducing the
+ukoumunne2003 Table I anchors: 0.9375 / 0.9355 / 0.9425 at k = 10 / 30 / 50
+against 0.938 / 0.944 / 0.9395, worst |delta| 0.0085 of the pre-registered
+±0.03, and exactly 0 against the committed oracle fixture.
+
+**Decision:**
+
+- **N1 `npbootstrap`: no-GO.** 26/64 cells below the 0.93 `coverage_uncond`
+  floor, worst 0.8730 at (ρ = 0.60, k = 10, n = 5, chisq1); grid range
+  0.8730–0.9555.
+- **The abort-rate partition is empty on one side.** No classed `intraclass_*`
+  condition was signalled on any of the 128,000 replicates, so every cell's
+  abort rate is 0: all 26 failing cells sit in the ≤ 0.1 part, the > 0.1 part is
+  empty, and `coverage_nonabort` equals `coverage_uncond` everywhere. D-026's
+  selection effect explains none of these: on this same `coverage_uncond`
+  column the `mc` leg has 31 of its 49 failures above that 0.1 abort boundary
+  (D-027 states the phenomenon on its own column, as 26 of the 36 cells failing
+  `coverage_nonabort`).
+- **Failures span every generator family**: chisq1 11/16, t5 8/16, uniform 4/16,
+  gaussian 3/16; 16 of the 26 at k = 10. Within chisq1 the failure deepens with
+  ρ (0.9260–0.9425 at ρ = 0.05 down to 0.8730–0.9040 at ρ = 0.60).
+- **Shallowest failures of the four legs, not the fewest.** On the same grid and
+  column: `mc` 49/64 (worst 0.3935), `searle` 21/64 (0.674), `burch` 16/64
+  (0.6655), `npbootstrap` 26/64 (0.873). It fails more cells than either
+  classical leg while its worst cell still covers 0.873. Width, descriptive:
+  median ratio 1.047 vs the `mc` leg (range 0.718–1.720), running widest on
+  chisq1 (1.355) where the incumbent fails worst.
+- **D-027's S1 reopening condition is NOT met.** That condition is a method
+  demonstrating every-cell floor coverage over this grid; 26 cells sit below the
+  floor, so the classical-replacement question stays closed on D-027's evidence.
+- **No default-method change:** nothing cleared N1, so the D-001 fence is
+  untouched and no supersession arises.
+
+**Consequences:** M121 ships no exported code. Whether a leg that fails 26 cells
+at a worst of 0.873 with no aborts warrants any user-facing wording is
+deliberately not decided here — that is the M113 → M115 shape and needs its own
+milestone. Reopening evidence class: this verdict reopens only on a method
+demonstrating every-cell floor coverage over this grid, or on a superseding
+frozen assessment of it; the zero-abort finding belongs to no reopening class of
+D-026's, which concerns the abort event this leg does not produce.

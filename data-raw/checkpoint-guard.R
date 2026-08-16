@@ -360,6 +360,17 @@ ckpt_read <- function(path, spec) {
   raw$payload
 }
 
+# Read an input that is NOT a checkpoint — a committed fixture, an oracle rds —
+# from a site that may hold no bare readRDS of its own (data-raw/check-checkpoint-
+# sites.R refuses one, transitively, in every declared site). Deliberately does
+# NOT set `in_guard`: the trace below still judges the path, so routing a
+# registered checkpoint through this wrapper aborts exactly as a bare read would.
+# It launders the STATIC check and never the runtime one, which is the only
+# combination that keeps both surfaces meaning what they say (M121).
+ckpt_read_input <- function(path) {
+  readRDS(path)
+}
+
 # ---- multi-entry stores ------------------------------------------------------
 # A harness that checkpoints one FILE holding many entries (a rep list, a
 # per-cell list) can go stale entry by entry: the early entries predate a design

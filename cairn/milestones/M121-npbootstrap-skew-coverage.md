@@ -1,11 +1,11 @@
 # M121: Measure the `npbootstrap` interval's coverage on the frozen skew grid
 
-- **Status:** planned
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP5, GP6
-- **Branch/PR:** —
+- **Branch/PR:** `m121-npbootstrap-skew-coverage` · https://github.com/jmgirard/intraclass/pull/130
 
 ## Goal
 
@@ -37,7 +37,7 @@ D-entry.
 
 ## Acceptance criteria
 
-- [ ] AC1 — `cairn/references/npbootstrap-skew-response-comparison.md` carries
+- [x] AC1 — `cairn/references/npbootstrap-skew-response-comparison.md` carries
       rule N1, naming `coverage_uncond` as the column N1 reads, plus its tag
       vocabulary; and the commit adding that frozen-rules content is a *strict*
       ancestor of both the commit adding `data-raw/m121-npbootstrap-skew-sweep.R`
@@ -45,21 +45,41 @@ D-entry.
       each pair `git merge-base --is-ancestor` exits 0 *and* the two SHAs differ.
       Checked at the review gate before the squash-merge, output recorded in
       `## Review`.
-- [ ] AC2 — Before any grid cell is read, the harness reproduces the
-      ukoumunne2003 Table I anchors U10/U30/U50 that
-      `data-raw/m75-npbootstrap-coverage.R` validates the shipped reducer
-      against, agreeing with the committed
-      `tests/testthat/fixtures/npbootstrap-coverage-oracle.rds` coverage at each
-      anchor within 2 binomial standard errors at that cell's `n_rep`, and
-      aborts classed without writing output if any anchor misses.
-- [ ] AC3 — The harness regenerates every replicate of the M111 grid from its
+- [x] AC2 — Before any grid cell is read, the harness re-runs the `npbootstrap`
+      reducer at the two per-rep seed streams
+      `data-raw/m75-npbootstrap-coverage.R:82,88` uses for the ukoumunne2003
+      Table I anchors U10/U30/U50 (data `base + r`, resamples
+      `base + 3000000L + r`, with `base` 5e7 / 6e7 / 7e7), pinning
+      `n_rep = 2000` and `boot_samples = 999`, and requires each reproduced
+      `coverage_icc1` to fall within the ±0.03 that
+      `tests/testthat/test-ci-npbootstrap-coverage.R:31` pre-registers against
+      the Table I figures 0.938 / 0.944 / 0.9395 (ukoumunne2003 Table I,
+      k = 10 / 30 / 50, n = 10 ratings, rho = 0.05). It aborts
+      `intraclass_*`-classed without writing output if any anchor misses, and a
+      planted perturbation of the reducer's resample stream is shown to fire
+      that abort. Its difference from the committed
+      `tests/testthat/fixtures/npbootstrap-coverage-oracle.rds` value is
+      recorded beside the run as a delta, never a failure (D-024 clause 2).
+- [x] AC3 — The harness regenerates every replicate of the M111 grid from its
       recorded seed scheme and recomputes the `searle` and `burch` legs: the
-      compared-row count is asserted equal to 64 × 2000 × 2 = 128,000, every
+      compared-row count is asserted equal to 64 cells × 2000 reps × 2 legs =
+      256,000 and the compared-endpoint count to twice that, 512,000; every
       compared endpoint matches `data-raw/m111-fallback-results.rds` within
-      1e-12, and the harness refuses to run when the platform differs from that
-      fixture's recorded `meta$platform`. A planted endpoint drift is shown to
-      abort the run.
-- [ ] AC4 — `data-raw/m121-npbootstrap-skew-coverage.tsv` is committed with one
+      1e-12; and the harness compares each field the fixture records under
+      `meta$platform` (`r_version`, `sysname`, `machine`) against the current
+      session, aborting and naming every differing field — platform axes the
+      fixture does not record (BLAS, compiler, TMB linkage) are outside that
+      gate and are not claimed. A self-test plants, one at a time, a drift on
+      each of the four (leg, endpoint) combinations of `{searle, burch} ×
+      {lower, upper}`, including one at 5e-12 just above the tolerance, and
+      requires each to abort naming its own planted row; a 5e-13 plant below the
+      tolerance is required *not* to abort; a truncated cell is required to fire
+      the row-count assertion; and a perturbation of each recorded
+      `meta$platform` field in turn, plus a `NULL` platform, is required to fire
+      the platform gate. Its control — a reduced 20-rep instance of the grid's
+      first cell, its own compared count asserted at 40 — reproduces cleanly
+      under no plant.
+- [x] AC4 — `data-raw/m121-npbootstrap-skew-coverage.tsv` is committed with one
       row per (cell, method) over the 64 cells and the four legs
       `npbootstrap`/`mc`/`searle`/`burch`, carrying the column set of
       `data-raw/m113-skew-response-coverage.tsv`; the `npbootstrap` leg's
@@ -67,19 +87,19 @@ D-entry.
       `intraclass_*` condition, read from the condition class and never from
       endpoint finiteness; a non-finite `npbootstrap` endpoint arriving without
       such a condition raises rather than being counted.
-- [ ] AC5 — A `cairn/DECISIONS.md` entry records the N1 disposition for
+- [x] AC5 — A `cairn/DECISIONS.md` entry records the N1 disposition for
       `npbootstrap`: the count of the 64 cells below the frozen 0.93
       `coverage_uncond` floor and the worst cell's coverage with its
       (rho, k, n, dist); the failing cells partitioned by abort rate at D-027's
       0.1 boundary with `coverage_nonabort` reported for each part; and whether
       D-027's S1 reopening condition is met. The entry names no bracketed claim
       token.
-- [ ] AC6 — `cairn/references/INDEX.md` carries the new page's line; the
+- [x] AC6 — `cairn/references/INDEX.md` carries the new page's line; the
       harness's checkpoint site is registered in `data-raw/checkpoint-sites.tsv`;
       and `enumerate-generalizing-claims.py --check`,
       `check-reference-observations.py`, `check-mpl-doc-claims.py`,
       `check-record-claims.py` and `check-checkpoint-sites.R` each exit 0.
-- [ ] AC7 — `Rscript -e 'devtools::test()'` reports 0 failures and 0 errors; the
+- [x] AC7 — `Rscript -e 'devtools::test()'` reports 0 failures and 0 errors; the
       glmmTMB/TMB build-version mismatch is the only warning tolerated at load,
       and is named in the evidence if present.
 
@@ -95,27 +115,26 @@ D-entry.
 
 ## Tasks
 
-- [ ] T1 — Author `cairn/references/npbootstrap-skew-response-comparison.md`
+- [x] T1 — Author `cairn/references/npbootstrap-skew-response-comparison.md`
       (rule N1 with its column named, tag vocabulary, known priors) and commit it
       alone, before any harness code exists.
-- [ ] T2 — `data-raw/m121-npbootstrap-skew-sweep.R`: seed reconstruction from
+- [x] T2 — `data-raw/m121-npbootstrap-skew-sweep.R`: seed reconstruction from
       M111's scheme (`base_seed = cell$id * 1000000L`,
       `data-raw/m111-fallback-sweep.R:294`), the `meta$platform` gate, the
-      searle/burch identity check at 1e-12 with the 128,000-row count assertion,
+      searle/burch identity check at 1e-12 with the 256,000-row count assertion,
       and a self-test that plants an endpoint drift and requires the abort.
-- [ ] T3 — Add the ukoumunne2003 U10/U30/U50 anchor precondition, run before any
+- [x] T3 — Add the ukoumunne2003 U10/U30/U50 anchor precondition, run before any
       grid cell and aborting classed on a miss.
-- [ ] T4 — Add the `npbootstrap` leg: classed-condition abort accounting, raise
+- [x] T4 — Add the `npbootstrap` leg: classed-condition abort accounting, raise
       on non-finite-without-condition, per-cell checkpointing, and the site's row
       in `data-raw/checkpoint-sites.tsv`.
-- [ ] T5 — Run the sweep in the background (check for concurrent R sessions and
+- [x] T5 — Run the sweep in the background (check for concurrent R sessions and
       live R.INSTALL processes first — M107/M109) and write
       `data-raw/m121-npbootstrap-skew-coverage.tsv`.
-- [ ] T6 — Fill the page's Results and Disposition sections; write the D-entry
+- [x] T6 — Fill the page's Results and Disposition sections; write the D-entry
       with the floor count, the worst cell and the abort-rate split.
-- [ ] T7 — Records hygiene: INDEX line, triage rows for the page's generalizing
+- [x] T7 — Records hygiene: INDEX line, triage rows for the page's generalizing
       claims, all five checkers, `devtools::test()`.
-
 ## Work log
 
 - 2026-08-15: created by /milestone-plan.
@@ -125,6 +144,143 @@ D-entry.
 - 2026-08-15: plan gate chose a 1e-12 tolerance plus the `meta$platform` gate over bit-exact `identical()` because exact equality is a property of the machine's summation order (M105) and the sole precedent used the tolerance form; falsified by a regenerated endpoint pair differing above 1e-12 on the recorded platform.
 - 2026-08-15: plan gate chose to freeze the verdict on `coverage_uncond` while requiring the failing cells split by abort rate over judging on `coverage_nonabort` alone, because the unconditional column is what D-027 judged the other three legs on; falsified by a split showing every failing cell sits above D-027's 0.1 abort boundary, which would make the verdict a restatement of D-026's already-adjudicated selection effect.
 
+- 2026-08-15: gated amendment — AC2 rewritten. Its plan-time bound ("2 binomial standard errors") was invented where the repo already pre-registers ±0.03 for these anchors (`test-ci-npbootstrap-coverage.R:31`), which is bar-setting against GP5. Fresh-context [O] audit of the redraft returned 10 findings, all actioned before writing: the two-leg form made the published-oracle leg vacuous (fixture sits 0.0005/0.0085/0.0030 from Table I against a proposed 0.005 slack); the replacement 0.005 was a tighter invented bound than the one it replaced; the resample-seed offset `base + 3000000L + r` was omitted, without which a conforming harness reds on a correct package; and making fixture drift terminal contradicts D-024 clause 2 ("a delta, never a failure"). Now: ±0.03 against Table I is the only operative gate, drift is recorded, the abort names its class and carries a probe.
+- 2026-08-15: AC2's anchors are gaussian cells at rho = 0.05 while the swept grid is the skew grid, so a green AC2 is evidence about the reducer and never about the swept domain (GP6). Recorded here rather than in the criterion, which does not overclaim.
+- 2026-08-15: rebuilt glmmTMB 1.1.14 from source against TMB 1.9.23, clearing the build-version mismatch that would otherwise have sat under T5's multi-hour sweep (M107/M109). Not a dependency change: CRAN's current glmmTMB is also 1.1.14, so the package set is unchanged and only the compiled linkage moved. Suite run before and after at `NOT_CRAN=true CI=true` is identical on both axes — `FAIL 0 | WARN 2 | SKIP 25 | PASS 7302` each time, and a per-test diff of the SKIP/WARNING lines is empty — so no pinned number moved. `library(glmmTMB)` now loads silently; AC7's tolerated-warning clause is consequently unexercised.
+- 2026-08-15: T1 — frozen rules page committed alone, before any harness code. Gate chose to reuse D-027's S1 `replace-GO`/`no-GO` vocabulary over neutral floor labels, so D-027's reopening condition reads off the tag; falsified by a reader taking `replace-GO` as a default-method change, which the page and D-001 both fence.
+- 2026-08-15: T1 known priors re-derived from the committed fixtures rather than recalled — `npbootstrap` on M76's 16-cell grid covers 0.9245–0.9495 with zero aborts (one cell under 0.93), and the three incumbents fail this grid's floor at 21/64, 16/64 and 49/64 (`coverage_uncond`).
+- 2026-08-15: amendment return: AC3 — "the compared-row count is asserted equal to 64 cells × 2000 reps × 2 legs = 256,000 and the compared-endpoint count to twice that, 512,000" — the plan-time clause multiplied out to 128,000, which is not the product; found by the assertion firing on the first full run.
+- 2026-08-15: criteria audit ([O], fresh context) of the amended AC3 returned 8 findings, 7 actioned into the wording before writing (stale 128,000 renderings in the harness, the endpoint count left unasserted, the control's 20-rep truncation unstated, the platform promise wider than the three recorded fields, a single-exemplar plant that a 1e-6 tolerance would also pass, and the count and platform assertions never shown to bite). Not actioned: AC3 says "abort" where AC2 says classed — `data-raw/` harnesses use bare `stop()` by M111 precedent and the classed-error rule governs the package's user-facing layer.
+- 2026-08-15: T2 — the M111 grid regenerates from its recorded seeds **bit-identically** on this platform: 256,000 rows / 512,000 endpoints, worst |delta| exactly 0, in 19 s at 4 workers. The 1e-12 tolerance is therefore slack the run never used.
+- 2026-08-15: T3 — the anchor precondition aborts `intraclass_anchor_miss`/`intraclass_error` on a miss and records the committed fixture's delta beside the run rather than gating on it (D-024 clause 2).
+- 2026-08-15: T3 — AC2's plant had to be a perturbation of the resample DRAWS, not of the resample seed: measured on the U10 stream at 300 reps, colliding the resample stream with the data stream (0.9633) and holding it constant across reps (0.9533) both land inside the ±0.03 of the correct stream (0.9567), so a seed plant could not fire the abort. The plant masks `sample.int` in a child of the package namespace so every resample is the identity one; the pivot collapses and coverage goes to ~0.
+- 2026-08-15: T4 — npbootstrap leg added with per-cell checkpointing; smoke-tested fresh, on resume (byte-identical payload) and against a stale design (refused). Site declared in `data-raw/checkpoint-sites.tsv`; `check-checkpoint-sites.R` reports 6 routed sites and its 148-mutation self-test all detected.
+- 2026-08-15: T5 — sweep run (~2 h, 4 workers, after waiting out a concurrent R session per M107/M109). Anchors reproduced 0.9375/0.9355/0.9425 against Table I's 0.938/0.944/0.9395 (worst |delta| 0.0085 of the ±0.03 bound) and matched the committed oracle fixture **exactly** at all three — the first exercise of that path since the glmmTMB/TMB rebuild, which moved nothing. Identity check exact again over the full grid (worst |delta| 0). `npbootstrap` aborted on 0 of 128,000 replicates.
+- 2026-08-15: T6 — N1 read as frozen: `npbootstrap` **no-GO**, 26/64 cells below the floor, worst 0.8730 at (0.60, 10, 5, chisq1), zero aborts anywhere, D-027's S1 reopening condition not met. Recorded as D-031.
+- 2026-08-15: review — F1 corrected at the user's direction before merge (it scored 62, below the action bar): both the page and D-031 stated D-027's `coverage_nonabort` partition (26 of 36) inside a `coverage_uncond` sentence; the figure on that column is 31 of 49, derived at the gate, and both sites now name which column each figure belongs to. D-031 had not yet reached the default branch, so the entry was corrected in place rather than superseded.
+- 2026-08-15: review — three fresh-context lenses returned 18 candidates (17 after dedup); scorer actioned 1 (F10, 85): a lost `mclapply` worker passed the `try-error` completeness test at both sites, regressing the M112 lesson. Fixed on the branch with a probe; the sweep's own checkpoint still validates under the patched script, so the committed table is unaffected. 16 below threshold logged in `## Review`; F6/F7 became a ROADMAP candidate row.
+- 2026-08-15: T7 — INDEX line landed with the page at T1; 16 triage rows total for the page (6 at freeze, 10 for the Results section); all five checkers exit 0. Suite `FAIL 0 | WARN 2 | SKIP 25 | PASS 7302`, unchanged from the pre-sweep baseline; the 2 warnings are the pre-existing test-level ones at `test-icc-lavaan-multilevel.R:402` and `test-icc-type-vector.R:286`, and `library(glmmTMB)` loads silently, so AC7's tolerated load warning is absent rather than exercised.
+- 2026-08-15: gate chose to run the ~16–21 min anchor validation on every harness invocation including checkpoint resumes, over validating once and stamping, because a stamp is a second record that goes stale; falsified by the validation's share of total sweep runtime rising above the ~5–10% measured here.
+
 ## Decisions
 
+- **2026-08-15 — a declared checkpoint site may hold no bare `readRDS`, so non-checkpoint inputs read through `ckpt_read_input()`.** `data-raw/check-checkpoint-sites.R` refuses any `readRDS`/`load`/`unserialize`/`read_rds` in a declared resume site, transitively through what it sources. This harness must read two inputs that are not checkpoints — the committed M111 fixture and the npbootstrap coverage oracle — so `checkpoint-guard.R` gains `ckpt_read_input()`, and the site calls that. The wrapper deliberately does **not** set `in_guard`: the runtime trace therefore still judges the path it is handed, so routing a *registered checkpoint* through it aborts exactly as a bare read would; what the wrapper relaxes is the static spelling check and never the runtime one. Considered and rejected: declaring the site without the reads (impossible — the fixture is the input), and leaving the site undeclared (AC6 requires the registration).
+
 ## Review
+
+_Fresh evidence gathered 2026-08-15 at the review gate; PR #130._
+
+- **AC1 — verified.** `git log --diff-filter=A` gives page `f4a7d31`, harness
+  `b1f0dc2`, table `4f651d2`. `git merge-base --is-ancestor` exits 0 for both
+  (page→harness, page→tsv) and the SHAs differ in both pairs, so the ancestry is
+  strict. `f4a7d31`'s own stat shows it added the page, its INDEX line and triage
+  rows and no harness or table. The page's N1 row names `coverage_uncond` as the
+  column it reads and carries the `replace-GO` | `no-GO` vocabulary.
+- **AC2 — verified.** The 2000-rep gate ran ahead of every grid cell in the T5
+  sweep: U10/U30/U50 reproduced 0.9375 / 0.9355 / 0.9425 against Table I's
+  0.938 / 0.944 / 0.9395 — worst |delta| 0.0085 inside the ±0.03 that
+  `test-ci-npbootstrap-coverage.R:31` pre-registers — with the committed
+  fixture's delta reported beside each anchor as 0 and gating nothing. Re-run of
+  `--self-test` at the gate: the U10 anchor passes at 150 reps with the shipped
+  reducer, and a degenerate resample stream aborts with class
+  `intraclass_anchor_miss`, asserted by class and not by message.
+- **AC3 — verified.** The T5 run reports `256000 rows / 512000 endpoints match
+  within 1e-12 (worst |delta| 0)`. Re-run of `--self-test` at the gate, exit 0:
+  the 20-rep control reproduces 40 rows / 80 endpoints exactly; each of the four
+  `{searle, burch} × {lower, upper}` plants (two at 5e-12) aborts naming its own
+  planted row; the 5e-13 plant does not abort; both count assertions fire on
+  planted evidence; and the platform gate fires on each recorded field
+  perturbed in turn and on an absent platform.
+- **AC4 — verified.** The committed table is 256 rows over 64 cells × 4 legs,
+  its column vector `identical()` to `m113-skew-response-coverage.tsv`'s, every
+  `n_rep` 2000. `n_abort` totals 0 across the npbootstrap leg, read from the
+  condition class: the self-test shows a planted classed condition counted as an
+  abort from its class, and a planted non-finite endpoint with no condition
+  raising instead. Independent cross-check: the three incumbent legs in the new
+  table reproduce the committed M113 table exactly (`all.equal`, tolerance 0),
+  so the aggregation is faithful to the one it claims to reuse.
+- **AC5 — verified.** `cairn/DECISIONS.md` D-031 records: 26/64 below the 0.93
+  `coverage_uncond` floor; worst 0.8730 with its (ρ = 0.60, k = 10, n = 5,
+  chisq1); the abort-rate partition at D-027's 0.1 boundary — all 26 in the
+  ≤ 0.1 part, the > 0.1 part empty, `coverage_nonabort` equal to
+  `coverage_uncond` at every cell; and that D-027's S1 reopening condition is
+  NOT met. `grep -oE "\[claim:[a-z0-9-]*\]"` over the entry returns 0 matches,
+  so it names no bracketed claim token.
+- **AC6 — verified.** `INDEX.md` carries the page's line (1 match); the harness
+  is registered in `data-raw/checkpoint-sites.tsv` (1 match). All five checkers
+  re-run at the gate, each exit 0: `enumerate-generalizing-claims.py --check`,
+  `check-reference-observations.py`, `check-mpl-doc-claims.py`,
+  `check-record-claims.py`, `check-checkpoint-sites.R`.
+- **AC7 — verified.** `NOT_CRAN=true CI=true Rscript -e 'devtools::test()'` at
+  the gate: `FAIL 0 | WARN 2 | SKIP 25 | PASS 7302`. The 2 warnings are the
+  pre-existing test-level ones at `test-icc-lavaan-multilevel.R:402` and
+  `test-icc-type-vector.R:286`, unchanged from the pre-sweep baseline; the
+  glmmTMB/TMB build-version mismatch the criterion tolerates is **absent** —
+  `library(glmmTMB)` loads silently since the T-series rebuild — so that clause
+  is unexercised rather than relied on.
+
+### Consistency gate
+
+- `cairn_validate`: all checks passed (exit 0) — 12 PASS, 8 advisories OK.
+- No `DESIGN.md` principle changed, so `cairn_impact` does not apply.
+- Profile `r-package` consistency-gate: `devtools::document()` leaves no diff;
+  the milestone touches no `R/`, `man/`, `NAMESPACE`, `DESCRIPTION` or `NEWS`
+  surface (verified by `git diff --name-only main..HEAD`), so the
+  generated-file, README, pkgdown-index and NEWS clauses are no-ops here;
+  `devtools::check()` run twice locally: the first reported 0 errors / 0
+  warnings / 0 notes, the second `Status: 1 NOTE` — the `spelling.R` test
+  diffing against its saved output (BCa, Chinn, Davison, Gulliford, Liu, MPL,
+  from `icc.Rd`, `NEWS.md`, `glossary.Rmd`, `interval-methods.Rmd`). Recorded
+  as pre-existing rather than clean: `git diff --name-only main..HEAD` shows the
+  branch touches none of that test's inputs (`man/`, `NEWS.md`, `vignettes/`,
+  `DESCRIPTION`, `R/`, `inst/WORDLIST`). CI's own R-CMD-check jobs are the
+  authoritative gate.
+
+### Independent fresh-context review
+
+Three reviewers with distinct evidence bases (diff / blame history / prior
+review record), then a Sonnet scorer holding the diff and this milestone file.
+18 candidate findings, deduplicating to 17 scored. The prior-review lens found
+the GitHub inline-comment probe empty and read the archived `## Review`
+sections instead.
+
+**Actioned (≥ 80) — 1 finding, fixed on the branch:**
+
+- **F10 (85) — a lost `mclapply` worker passed the completeness check.**
+  `parallel::mclapply` returns NULL, not a `try-error`, for a child killed by a
+  signal or OOM, so the `inherits(., "try-error")` tests in both
+  `assert_anchors()` and the main sweep loop passed over a lost worker; the
+  anchor path would then have died at `data.frame()` with an opaque shape error
+  instead of AC2's promised classed abort. This regresses the M112 lesson in
+  `cairn/LESSONS.md`, recorded against a SIGKILLed worker on this same harness
+  family. Fixed: both sites route through a new `mclapply_failures()` that
+  treats NULL as a lost worker and names it; self-test probe 6 plants a NULL
+  element, a healthy pair and a `try-error` element and requires each verdict.
+  The fix does not touch the checkpoint block: the sweep's own `cell-01.rds`
+  still validates under the patched script, so the committed table remains the
+  output of exactly this code path.
+
+**Logged below threshold (16), surfaced not dropped:**
+
+- F5 (72) no `DECISIONS.md` entry for the shared-guard change · F6 (75) a
+  resumed run reprints identity evidence it did not recompute (the fixture's
+  content is not in the checkpoint spec) · F7 (72) the truncation probe tests
+  the assertion function rather than a truncated cell · F3 (68) `ckpt_read_input()`
+  is invisible to the static deserialization scan · F1 (62) "26 `mc` cells" imports
+  D-027's `coverage_nonabort` partition into a `coverage_uncond` sentence (31 is
+  the uncond figure) · F11 (60) the anchors validate the reducer directly while
+  the grid goes through `icc()` · F8 (58) the self-test never reaches
+  `build_table`/`run_cell`/`write_table` · F9 (55) the platform gate passes on a
+  present-but-empty platform record · F17 (52) the guard header does not mention
+  the new read function · F2 (45) anchor seed bases overlap grid cells 50/53/60/63
+  (different k/n/dist, so no shared draws) · F4 (45) no mutation plants the new
+  wrapper · F12 (30) the identity-check wording is stronger than sufficient
+  statistics warrant · F13 (28) `n_rep` from `length(unique(rep))` · F14 (20) T2's
+  task text thinner than the amended AC3 · F16 (15) anchor constants deliberately
+  outside the checkpoint spec · F15 (10) stale — raised before this Review
+  section was written.
+
+None of the 16 demonstrates an acceptance criterion failing, and none reaches
+the ≥ 90 bar on user-facing deliverable behavior, so the return floor is not met
+and the milestone stays at `review`. F6 and F7 are the two worth a follow-up
+row; both bite only on a future re-run rather than on the committed artifact.
