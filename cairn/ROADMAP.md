@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-15 (post-merge pass for M120: archived to a 25-line summary, M115 rotated out of the terminal rows with its record-claims expectation updated in the same commit, one lesson extended rather than added (LESSONS at 49/50), all validate checks green. No milestone in progress or planned; M48 stays parked on the unopened window.)_
+_Last hygiene check: 2026-08-15 (audit pass: nothing changed since the M120 post-merge pass earlier the same day — all validate checks green, no advisories, tree clean, git reconciled, both GitHub inboxes empty, always-read governance frame complete. LESSONS sits at 49/50; M48 stays parked on the unopened window.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
