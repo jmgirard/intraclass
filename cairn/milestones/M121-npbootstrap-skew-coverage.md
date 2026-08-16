@@ -62,11 +62,23 @@ D-entry.
       recorded beside the run as a delta, never a failure (D-024 clause 2).
 - [ ] AC3 — The harness regenerates every replicate of the M111 grid from its
       recorded seed scheme and recomputes the `searle` and `burch` legs: the
-      compared-row count is asserted equal to 64 × 2000 × 2 = 128,000, every
+      compared-row count is asserted equal to 64 cells × 2000 reps × 2 legs =
+      256,000 and the compared-endpoint count to twice that, 512,000; every
       compared endpoint matches `data-raw/m111-fallback-results.rds` within
-      1e-12, and the harness refuses to run when the platform differs from that
-      fixture's recorded `meta$platform`. A planted endpoint drift is shown to
-      abort the run.
+      1e-12; and the harness compares each field the fixture records under
+      `meta$platform` (`r_version`, `sysname`, `machine`) against the current
+      session, aborting and naming every differing field — platform axes the
+      fixture does not record (BLAS, compiler, TMB linkage) are outside that
+      gate and are not claimed. A self-test plants, one at a time, a drift on
+      each of the four (leg, endpoint) combinations of `{searle, burch} ×
+      {lower, upper}`, including one at 5e-12 just above the tolerance, and
+      requires each to abort naming its own planted row; a 5e-13 plant below the
+      tolerance is required *not* to abort; a truncated cell is required to fire
+      the row-count assertion; and a perturbation of each recorded
+      `meta$platform` field in turn, plus a `NULL` platform, is required to fire
+      the platform gate. Its control — a reduced 20-rep instance of the grid's
+      first cell, its own compared count asserted at 40 — reproduces cleanly
+      under no plant.
 - [ ] AC4 — `data-raw/m121-npbootstrap-skew-coverage.tsv` is committed with one
       row per (cell, method) over the 64 cells and the four legs
       `npbootstrap`/`mc`/`searle`/`burch`, carrying the column set of
@@ -106,7 +118,7 @@ D-entry.
 - [x] T1 — Author `cairn/references/npbootstrap-skew-response-comparison.md`
       (rule N1 with its column named, tag vocabulary, known priors) and commit it
       alone, before any harness code exists.
-- [ ] T2 — `data-raw/m121-npbootstrap-skew-sweep.R`: seed reconstruction from
+- [x] T2 — `data-raw/m121-npbootstrap-skew-sweep.R`: seed reconstruction from
       M111's scheme (`base_seed = cell$id * 1000000L`,
       `data-raw/m111-fallback-sweep.R:294`), the `meta$platform` gate, the
       searle/burch identity check at 1e-12 with the 128,000-row count assertion,
@@ -138,6 +150,9 @@ D-entry.
 - 2026-08-15: rebuilt glmmTMB 1.1.14 from source against TMB 1.9.23, clearing the build-version mismatch that would otherwise have sat under T5's multi-hour sweep (M107/M109). Not a dependency change: CRAN's current glmmTMB is also 1.1.14, so the package set is unchanged and only the compiled linkage moved. Suite run before and after at `NOT_CRAN=true CI=true` is identical on both axes — `FAIL 0 | WARN 2 | SKIP 25 | PASS 7302` each time, and a per-test diff of the SKIP/WARNING lines is empty — so no pinned number moved. `library(glmmTMB)` now loads silently; AC7's tolerated-warning clause is consequently unexercised.
 - 2026-08-15: T1 — frozen rules page committed alone, before any harness code. Gate chose to reuse D-027's S1 `replace-GO`/`no-GO` vocabulary over neutral floor labels, so D-027's reopening condition reads off the tag; falsified by a reader taking `replace-GO` as a default-method change, which the page and D-001 both fence.
 - 2026-08-15: T1 known priors re-derived from the committed fixtures rather than recalled — `npbootstrap` on M76's 16-cell grid covers 0.9245–0.9495 with zero aborts (one cell under 0.93), and the three incumbents fail this grid's floor at 21/64, 16/64 and 49/64 (`coverage_uncond`).
+- 2026-08-15: amendment return: AC3 — "the compared-row count is asserted equal to 64 cells × 2000 reps × 2 legs = 256,000 and the compared-endpoint count to twice that, 512,000" — the plan-time clause multiplied out to 128,000, which is not the product; found by the assertion firing on the first full run.
+- 2026-08-15: criteria audit ([O], fresh context) of the amended AC3 returned 8 findings, 7 actioned into the wording before writing (stale 128,000 renderings in the harness, the endpoint count left unasserted, the control's 20-rep truncation unstated, the platform promise wider than the three recorded fields, a single-exemplar plant that a 1e-6 tolerance would also pass, and the count and platform assertions never shown to bite). Not actioned: AC3 says "abort" where AC2 says classed — `data-raw/` harnesses use bare `stop()` by M111 precedent and the classed-error rule governs the package's user-facing layer.
+- 2026-08-15: T2 — the M111 grid regenerates from its recorded seeds **bit-identically** on this platform: 256,000 rows / 512,000 endpoints, worst |delta| exactly 0, in 19 s at 4 workers. The 1e-12 tolerance is therefore slack the run never used.
 - 2026-08-15: gate chose to run the ~16–21 min anchor validation on every harness invocation including checkpoint resumes, over validating once and stamping, because a stamp is a second record that goes stale; falsified by the validation's share of total sweep runtime rising above the ~5–10% measured here.
 
 ## Decisions
