@@ -227,7 +227,14 @@ _Fresh evidence gathered 2026-08-15 at the review gate; PR #130._
   the milestone touches no `R/`, `man/`, `NAMESPACE`, `DESCRIPTION` or `NEWS`
   surface (verified by `git diff --name-only main..HEAD`), so the
   generated-file, README, pkgdown-index and NEWS clauses are no-ops here;
-  `devtools::check()` recorded below.
+  `devtools::check()` run twice locally: the first reported 0 errors / 0
+  warnings / 0 notes, the second `Status: 1 NOTE` — the `spelling.R` test
+  diffing against its saved output (BCa, Chinn, Davison, Gulliford, Liu, MPL,
+  from `icc.Rd`, `NEWS.md`, `glossary.Rmd`, `interval-methods.Rmd`). Recorded
+  as pre-existing rather than clean: `git diff --name-only main..HEAD` shows the
+  branch touches none of that test's inputs (`man/`, `NEWS.md`, `vignettes/`,
+  `DESCRIPTION`, `R/`, `inst/WORDLIST`). CI's own R-CMD-check jobs are the
+  authoritative gate.
 
 ### Independent fresh-context review
 
