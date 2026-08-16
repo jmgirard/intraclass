@@ -1411,8 +1411,10 @@ against 0.938 / 0.944 / 0.9395, worst |delta| 0.0085 of the pre-registered
   condition was signalled on any of the 128,000 replicates, so every cell's
   abort rate is 0: all 26 failing cells sit in the ≤ 0.1 part, the > 0.1 part is
   empty, and `coverage_nonabort` equals `coverage_uncond` everywhere. D-026's
-  selection effect — which accounted for 26 of the `mc` leg's failing cells —
-  explains none of these.
+  selection effect explains none of these: on this same `coverage_uncond`
+  column the `mc` leg has 31 of its 49 failures above that 0.1 abort boundary
+  (D-027 states the phenomenon on its own column, as 26 of the 36 cells failing
+  `coverage_nonabort`).
 - **Failures span every generator family**: chisq1 11/16, t5 8/16, uniform 4/16,
   gaussian 3/16; 16 of the 26 at k = 10. Within chisq1 the failure deepens with
   ρ (0.9260–0.9425 at ρ = 0.05 down to 0.8730–0.9040 at ρ = 0.60).

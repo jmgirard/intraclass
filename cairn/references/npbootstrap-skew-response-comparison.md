@@ -106,8 +106,10 @@ anchors, the endpoint identity check) gate the run.
   replicates, so every cell's abort rate is 0, all 26 failing cells fall in the
   ≤ 0.1 part, the > 0.1 part is empty, and `coverage_nonabort` equals
   `coverage_uncond` at every cell. D-026's selection effect therefore explains
-  none of these failures — unlike the `mc` leg, whose 26 high-abort failing
-  cells were exactly that. Each of these 26 is a coverage failure on its own
+  none of these failures — unlike the `mc` leg, where 31 of its 49
+  `coverage_uncond` failures sit above that same 0.1 abort boundary (D-027
+  states the phenomenon on its own column, as 26 of the 36 cells failing
+  `coverage_nonabort`). Each of these 26 is a coverage failure on its own
   terms.
 - **Where it fails.** By generator family: chisq1 11/16, t5 8/16, uniform 4/16,
   gaussian 3/16 — so the failures are not confined to one nameable family. By
