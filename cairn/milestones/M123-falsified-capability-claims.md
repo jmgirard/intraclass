@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M123: Correct the falsified capability claims in the shipped documentation
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -145,7 +145,7 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
 - [x] T20: simplify the pin per the plan gate — drop or narrow each spelling
       guarding no reachable surface or able to red on a future TRUE sentence
       (`install_four_alpha`, `design_never_declare`); log what went and why.
-- [ ] T19: Full gate; push; drive CI green.
+- [x] T19: Full gate; push; drive CI green.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
@@ -193,6 +193,7 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
 - 2026-08-16: T18 — AC7's differential run: `devtools::check()` on this branch and on `origin/main` in a detached worktree, same toolchain. It found a real ERROR in the new AC2 test, which read `../../DESCRIPTION`; under `R CMD check` the tests run from `.Rcheck/tests/testthat` and the package sits at `.Rcheck/intraclass/`, so the read failed and errored the whole check while every other layout stayed green — the same layout-blindness class as return 1's F3. Now reads `packageDescription("intraclass")` first and falls back to the source path.
 - 2026-08-16: T18 — and the differential falsified return 2's F15. `main` reports the `spelling.Rout`/`.Rout.save` NOTE as well, so this branch did not introduce it; F15 attributed a pre-existing NOTE to the new NEWS bullet on the strength of the word `README` appearing in the flagged list. The `inst/WORDLIST` entries stay (they remove two genuine flags) but they fix nothing this milestone broke. `main`'s second NOTE, `.git` under hidden files, is an artifact of checking from a worktree and is not a property of `main`.
 - 2026-08-16: T18 — re-run after the layout fix: `devtools::check()` on this branch reports 0 errors, 0 warnings and `Status: 1 NOTE`, that NOTE being the `spelling.Rout` comparison `main` also reports, so AC7's differential holds (no NOTE here that `main` does not also report). `main`'s extra `.git` hidden-files NOTE is a worktree artifact and does not bear on the branch. Gate: `air format --check` clean, `lintr::lint_package()` clean after fixing two `quotes_linter` hits in the harness, all four `data-raw` checkers OK, `cairn_validate` all checks passed (1 sizing advisory), `pkgdown::check_pkgdown()` clean, `document()` no diff. Worktree removed.
+- 2026-08-16: T19 — profile verify slot clean (FAIL 0, WARN 3, SKIP 2, PASS 8221 — the same known dev-session skips and fixed-rater teaching warnings as every prior pass), and the full CI matrix green on d4a397d, all 10 checks. Fix round for defect return 2 complete; status to `review`.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
