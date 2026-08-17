@@ -1471,3 +1471,23 @@ unenforceable.
 also proposes a checker over the records it compresses is outside this entry and
 still needs D-021's trigger. If this distinction is ever used to smuggle
 apparatus in as "hygiene", this is the entry to supersede.
+
+### D-033 (2026-08-17): `cairn/doctrine/` is a records home for graduated lesson families; GP8/GP9 join DESIGN.md
+
+**Context.** M125 graduated five stabilized `cairn/LESSONS.md` families under
+the maturation exit: two as DESIGN.md principles (GP8 — state a verified set
+procedurally; GP9 — exercise a degenerate guard at the reducer, assert the rule
+not the platform's arithmetic), three as pages under a new `cairn/doctrine/`
+directory.
+
+**Decision.** `cairn/doctrine/` is the home for doctrine modules — transferable
+craft graduated whole from `cairn/LESSONS.md` — distinct from `references/`
+(source and synthesis notes about external sources) and claiming no other
+file's ownership; each page opens by naming its own scope and is current
+knowledge, corrected in place. GP8/GP9 join the DESIGN.md guiding-principle
+set. D-001's enumeration (IP1–IP3 / GP1–GP7) records the interview-derived set
+as of 2026-07-12 and is not falsified by later graduations.
+
+**Consequences.** Future maturation exits may graduate a family into
+`cairn/doctrine/`; the DESIGN.md § Design Principles preamble names both
+lineages.

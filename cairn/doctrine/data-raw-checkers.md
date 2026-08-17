@@ -56,7 +56,8 @@ red when the fact changes (M91).
   that touches any non-ignored file: a `check-references` failure on a branch
   is therefore not evidence the branch caused it — re-run against a clean `git
   archive origin/main` before attributing, and fix a main-side stale record at
-  its own trivial tier on main (M111; recurrence history in the standing
+  its own trivial tier on main (rotation and job mechanics M111; the
+  attribution-and-remedy rule M114/M122 — recurrence history in the standing
   LESSONS line). The `no-citations-in-decisions` rule reds on a literal claim
   token quoted in `cairn/DECISIONS.md` or an archive summary — name the claim,
   never paste the bracket form (M111).

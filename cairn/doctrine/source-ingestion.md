@@ -4,23 +4,26 @@ This page owns the craft of verifying what a source PDF actually says before a
 `cairn/references/` extraction is stamped `verified` — the text-layer trap and
 the quotation-sweep discipline. It is a doctrine module graduated from
 `cairn/LESSONS.md` (the M66 line, reinforced at M67) under the maturation exit;
-the ingestion workflow itself is owned by the plugin's validation doctrine, and
-the source notes live under `cairn/references/` (cross-references only).
+the ingestion workflow itself is stated in the cairn plugin's validation
+doctrine (`skills/shared/validation-doctrine.md`, referenced from
+tracking-rules), and the source notes live under `cairn/references/`
+(cross-references only).
 
 ## The text layer is not the page
 
 A string absent from a PDF's **text layer** may still be **printed** on the
 page: `trevethan2017`'s `Published online:` footer is absent from `pdftotext`
 in `-layout`, `-raw`, and whole-document modes, yet is plainly printed on p. 1
-beside the publisher logo — an independent reviewer and the scorer both
+beside the Springer logo — an independent reviewer and the scorer both
 concluded (at score 92) that the note had fabricated it. Settle any "not in the
 PDF" claim with a high-DPI crop render —
 
     pdftoppm -r 400 -f N -l N -png -x X -y Y -W w -H h
 
 — never the text layer alone. A grep of the text layer can **undercount**; an
-absence claim built on it can be outright **false**, and the false absence is
-the more dangerous of the two (M66).
+absence claim built on it can be outright **false** — escalating M69's
+grep-undercounts lesson from a counting error to an absence error — and the
+false absence is the more dangerous of the two (M66).
 
 ## The quotation sweep is mechanical, per-note, and end-of-milestone
 

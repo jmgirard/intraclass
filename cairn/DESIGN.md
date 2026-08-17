@@ -99,9 +99,13 @@ vignettes, `cairn/estimand-specs/`). (Design interview, 2026-07-12.)
 - **Format with `air`** (`air format .`); CI enforces `air format --check`;
   `lintr` owns semantic linters only.
 - Tracking travels with code (cairn: same commit as the work).
-- **Data-raw record checkers:** what the `check-references` CI job runs, what
-  stales each ledger, and the run-all-four-before-push rule live in
-  [`doctrine/data-raw-checkers.md`](doctrine/data-raw-checkers.md).
+- **Doctrine modules** (`cairn/doctrine/`, graduated lesson families — D-033):
+  [`doc-claim-pins.md`](doctrine/doc-claim-pins.md) (pinning documentation
+  claims), [`data-raw-checkers.md`](doctrine/data-raw-checkers.md) (what the
+  `check-references` CI job runs, what stales each ledger, the
+  run-all-four-before-push rule), and
+  [`source-ingestion.md`](doctrine/source-ingestion.md) (verifying PDF
+  extractions).
 
 ## Design Principles
 
@@ -109,8 +113,9 @@ Two homes, one taxonomy (D-001): the founding constitution stays in
 [`PRINCIPLES.md`](PRINCIPLES.md) as `#1`–`#19`, strength-tagged **[IP]/[GP]** in
 place so its ~70 in-code `PRINCIPLES.md #N` citations stay valid (statistical
 core #1–#5, #12 and the Fable gate #19 are IP; #6–#10, #13, #18 are GP; #11
-amended by D-002; #14–#17 retired into cairn's rulebook by D-003). The
-principles below were derived by the 2026-07-12 design interview; numbers run
+amended by D-002; #14–#17 retired into cairn's rulebook by D-003). Of the
+principles below, IP1–IP3 / GP1–GP7 were derived by the 2026-07-12 design
+interview and GP8–GP9 graduated from `LESSONS.md` at M125 (D-033); numbers run
 within each type and are never reused or renumbered (retiring one takes a
 D-entry).
 
@@ -176,18 +181,21 @@ D-entry).
   actually run before it becomes a promise. (Graduated from LESSONS —
   M70/M110/M118/M124 — at M125.)
 - GP9: **Exercise a degenerate guard at the reducer; assert the rule, not the
-  platform's arithmetic.** Whether a degenerate fixture (SSE = 0, MSA at 0) even
-  reaches a guard through `icc()` is platform-dependent — the engine fit may
-  crash first, in more than one form — so fire a reducer's classed abort by
-  calling the reducer directly, match on the guard being unreached rather than
-  on an error string, and remember a green local suite is not evidence the
-  fixture reaches the guard (PR CI runs only ubuntu + windows; macOS is
-  push-to-main). Whether a quantity lands exactly on a boundary is a property of
-  the machine's summation order, not of the fixture: recompute it at test time
-  and assert the rule (exactly 0 aborts, else an interval), keep any recorded
-  column as provenance only, and make any anti-vacuity count a floor, never an
-  exact split. (Graduated from LESSONS — M84, corrected/extended M103/M105 — at
-  M125.)
+  platform's arithmetic.** Two rules, one family. *Reachability (M84/M103):*
+  whether a degenerate fixture (e.g. SSE = 0) even reaches a guard through
+  `icc()` is platform-dependent — the engine fit may crash first, in more than
+  one form — so fire a reducer's classed abort by calling the reducer directly
+  (`npbootstrap_ci(groups, ...)`, `classical_guard_observed(ss, ...)`, or a
+  stub `engine$simulate_refit` for `bootstrap_ci()`), match on the guard being
+  unreached rather than on an error string, and reserve the `icc()`-path test
+  for the SSA = 0 boundary the engine tolerates; a green local suite is not
+  evidence the fixture reaches the guard (PR CI runs only ubuntu + windows;
+  macOS is push-to-main). *Arithmetic (M105):* whether a quantity lands exactly
+  on a boundary (MSA at 0) is a property of the machine's summation order, not
+  of the fixture — recompute it at test time and assert the rule (exactly 0
+  aborts, else an interval), keep any recorded column as provenance only, and
+  make any anti-vacuity count a floor, never an exact split. (Graduated from
+  LESSONS — M84, corrected/extended M103/M105 — at M125.)
 
 ## Boundary-fit policy
 

@@ -85,5 +85,5 @@ only — this page owns none of their status or history).
 ## Always
 
 - **Mutation-verify every pin**: reintroduce the exact defect and require red
-  (M115), with the mutation matrix covering each markup regime and wrap form
-  the surfaces really use (M123).
+  (M115), with a blockquote form included in the mutation matrix (M123 — its
+  committed matrix covered 2 markup regimes × 4 wrap forms).
