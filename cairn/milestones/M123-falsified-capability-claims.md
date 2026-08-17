@@ -66,7 +66,7 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
 - [x] AC4: `cairn/DESIGN.md:69` and `CLAUDE.md:65` carry the AC2 install set,
       and `cairn/DESIGN.md:72` no longer lists `augment` among the shipped tidy
       S3 methods (`git grep -n augment -- NAMESPACE R/` returns nothing).
-- [ ] AC5: `source_doc_surfaces()` gains `README.Rmd` and `README.md`, and
+- [x] AC5: `source_doc_surfaces()` gains `README.Rmd` and `README.md`, and
       `installed_doc_surfaces()` gains `system.file("README.md")`; every site
       the extended walk reports for the claim patterns this milestone adds is
       corrected or recorded in the work log as correct-as-written. The
@@ -74,7 +74,7 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
       non-empty, and asserts of each of `README.Rmd` and `README.md` present in
       the layout the run executes in that the walk reached it and read it
       non-empty. What exits to the ROADMAP apparatus candidate row: MD-2.
-- [ ] AC6: each claim pattern this milestone adds — AC1–AC4's nine and AC8's two
+- [x] AC6: each claim pattern this milestone adds — AC1–AC4's nine and AC8's two
       — joins that file's existing `claim_patterns` machinery as new
       `test_that()` blocks; no second instrument (D-029). Every claim carries at
       least one backtick-free spelling (why, and the measurement: MD-2). Each of
@@ -85,7 +85,7 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
       `NEWS.md` and one installed vignette in the blockquote form, planted into
       a real install and never shadowed by `load_all`'s `system.file()`
       fallback. What exits to the ROADMAP apparatus candidate row: MD-2.
-- [ ] AC7: `cairn/PROFILE.md`'s verify slot clean, plus `air format --check`,
+- [x] AC7: `cairn/PROFILE.md`'s verify slot clean, plus `air format --check`,
       `lintr::lint_package()`, and all four `data-raw` checkers
       (`check-references`'s set) run locally before push; and
       `devtools::check()`, run locally on this branch and on `main` under the
@@ -201,6 +201,7 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
 - 2026-08-17: gate decisions on the three markers — fix the false reachability comment now rather than let it ride the candidate row, the milestone's own subject being withdrawn false claims; log the README `lme4` disclosure gap as a candidate row rather than reword the page here; and restore the unconditional installed-vignette floor rather than rename the glob-derived one, removing the coverage regression without taking back the descoped promise.
 - 2026-08-17: T22 — the false reachability comment at `test-doc-skew-caveat.R:278-279` corrected against measurement (0 backticks across all seven flattened Rd pages, 846 in `R/icc.R`; under `R CMD check` the installed leg is the only leg and reads `Rd:*`, `NEWS.md`, `README.md` and the installed vignettes). The installed-vignette floor restored to the unconditional two-name list `main` carried: the glob-derived form read as a widening but was a narrowing, `.Rcheck` having no `vignettes/`, so it skipped in the one layout CI runs. Duplicated floor `stopifnot` dropped from the harness.
 - 2026-08-17: T23 — mutation matrix re-run from the committed harness after a fresh `devtools::install(build_vignettes = TRUE)`: source leg 88 plants / 88 RED, installed leg 33 plants / 33 RED, both against 0-failure controls, tree restored clean. Gate: full suite FAIL 0 / ERROR 0 / WARN 3 / SKIP 2 / PASS 8221 (the known teaching warnings and dev-session skips), `air format --check` clean, `lintr::lint_package()` 0 lints, all four `data-raw` checkers OK, `cairn_validate` all checks passed (1 sizing advisory). Descope round complete; status to `review`.
+- 2026-08-17: review attempt 4 — all eight criteria met with fresh evidence and ticked; the check() differential re-run review-side (branch 1 NOTE, main 2 NOTEs, the branch's being one main also reports) and the mutation matrix re-run review-side (88/88 source, 33/33 installed, both controls 0). No finding qualifies under the return floor; the false-reachability failure mode that drove returns 2 and 3 is closed, every such comment probed true. F32-F36 and F40 fixed on the branch before the gate, F37/F38 recorded on the apparatus candidate row, F39 logged, F41 rejected.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
@@ -627,3 +628,107 @@ the pin's own reachability written into the pin file (return 2 F11, return 3
 F22). The work log already records a **split** spent on this milestone at the
 sizing gate, so a same-objective re-cut leaves the menu; descope-or-park is the
 recommended disposition, with `/milestone-brief` escalation offered per instance.
+
+### Attempt 4 (2026-08-17) — post-descope re-review
+
+**Criteria evidence** (all fresh, by command, on `59119bc` plus the fix-now
+commit `1cca4fc`; branch level with `origin/main`, tree clean).
+
+- **AC1 met.** `grep -nEi "roadmap|not yet|forthcoming|coming soon"` over
+  `README.Rmd` returns nothing; `:42` names `glmmTMB`, `lme4`, `brms`, `lavaan`,
+  set-identical to the validated roster at `R/icc.R:689`. `build_readme()` run
+  again left `README.md` byte-identical (md5 `61fe0850…` before and after, tree
+  clean afterwards).
+- **AC2 met.** Enumeration run in a fresh subprocess against the reinstalled
+  build, `system.file()` verified to resolve into the library tree: 52 surfaces,
+  28 after dropping `R/*.R`, **3 sentences** naming ≥3 non-base Imports
+  (`README.Rmd`, source `README.md`, installed `README.md`) — non-empty. All
+  three set-identical to `cli, generics, glmmTMB, lifecycle, rlang, tibble`, all
+  carrying `Imports` case-sensitively.
+- **AC3 met.** No "never declare" string; `:107-113` states that `icc()` infers
+  the layout and names `design` as the disambiguator on incomplete data,
+  cross-referencing a heading that resolves; agrees with `@param design` at
+  `R/icc.R:243-249` and with `abort_unidentified()` at `R/design.R:137,159`.
+- **AC4 met.** Both records carry the AC2 six; `git grep -n augment` exits 1
+  against `NAMESPACE R/` and against `cairn/DESIGN.md`.
+- **AC5 met.** Walk called directly against the installed package: 35 source
+  surfaces, 17 installed (7 `Rd:*`, 8 `vignette:*`, `NEWS.md`, `README.md`).
+  `README.Rmd` (5527 chars) and `README.md` (7543) present and non-empty on the
+  source leg, `README.md` (7715) on the installed leg; every surface on both
+  legs non-empty; **0 hits** for all 28 claim patterns, so no site is owed a
+  correct-as-written entry. Pin file against the installed package: FAIL 0,
+  ERROR 0, **SKIP 0**, PASS 2371.
+- **AC6 met.** Instrument: one `claim_patterns` vector, one
+  `expect_no_withdrawn_claim` helper, no second instrument; 11 spellings over
+  six claims, each claim carrying at least one backtick-free spelling. Mutation
+  matrix re-run review-side from the committed harness: source leg **88 plants,
+  88 RED**, installed leg **33 plants, 33 RED**, both against 0-failure
+  controls, tree restored. The [O] reviewer independently replayed all 88 source
+  plants through the pin's own matcher and got 88/88.
+- **AC7 met.** Verify slot FAIL 0 / ERROR 0 / WARN 3 / SKIP 2 / PASS 8221 (the
+  known teaching warnings and dev-session skips); `air format --check` exit 0;
+  `lintr::lint_package()` 0 lints; all four `data-raw` checkers OK; `document()`
+  no diff; README in sync; `pkgdown::check_pkgdown()` clean; NEWS entry present;
+  `cairn_validate` all checks passed (1 sizing advisory: 8 criteria vs the >7
+  tripwire). **The differential:** `devtools::check()` on this branch and on
+  `origin/main` in a detached worktree, same toolchain — branch `Status: 1 NOTE`,
+  `main` `Status: 2 NOTEs`. The branch's one NOTE is the `spelling.Rout`
+  comparison `main` also reports; `main`'s extra `.git` hidden-files NOTE is a
+  worktree artifact. So 0 errors, 0 warnings, and no NOTE here `main` does not
+  also report. Full CI matrix green on `59119bc`, all 10 checks.
+- **AC8 met.** Neither withdrawn phrasing survives on any swept surface;
+  both are pinned in the one `claim_patterns` vector, and both ran RED on both
+  legs of this attempt's matrix.
+
+**Findings** (3 fresh-context reviewers: [O] diff-bug, [S] blame-history,
+[S] prior-review). **No finding qualifies under the return floor** — the [O]
+reviewer's verdict is that no acceptance-criterion clause fails, and it probed
+every reachability/coverage comment in the pin file and harness and found each
+one true, closing the failure mode that drove returns 2 and 3. [S]
+blame-history: no regressions — the shared helpers cannot alter matching for any
+older M115-M119 pin (`squash` and `width_split` are byte-identical to `main`,
+and `README.Rmd`'s callout is the tree's only blockquoted line), and every
+pattern added-then-removed across the branch's own commits ends in a state its
+commit rationale supports. [S] prior-review: zero findings; every prior
+floor-return finding is fixed-and-verified or explicitly exited, and the GitHub
+inline-comment probe returned empty.
+
+- **F32 — fix now, done.** AC7's recorded evidence predated the branch's current
+  state (the T18 differential ran two commits before the vignette-floor
+  restoration). Closed by running the differential review-side; result above.
+- **F33 — fix now, done.** MD-2's exit paragraph enumerates five exits, calls
+  them six, and maps them onto the ROADMAP row's `(a)-(f)` when `(b)` is a
+  pre-existing sizing-gate deferral already on `main`. Corrected by MD-3
+  (append-only history is superseded, never edited).
+- **F34 — fix now, done.** The ROADMAP row claimed M123 ships "≥2 spellings at
+  ≥2 surfaces" flat, where AC6 itself excepts AC8's two claims at one spelling
+  each — the same over-claim shape this milestone exists to withdraw, in a
+  tracking file. Corrected in place, marked.
+- **F35 — fix now, done.** `data-raw/m123-capability-claim-mutations.R:24` said
+  "The four claims M123 withdrew" over a list covering six.
+- **F36 — fix now, done.** The pin file called AC8's patterns M123's "fifth and
+  sixth spellings"; they are its fifth and sixth *claims*, tenth and eleventh
+  spellings.
+- **F37 — follow-up, recorded.** The AC2 test greps each package name as a bare
+  substring (`cli` occurs inside ordinary English). Measured harmless today: 3
+  real hits and 8 excluded `R/*.R` blobs. Added as (h) of the apparatus
+  candidate row.
+- **F38 — follow-up, recorded (extends F19/F28).** The harness's RED verdict is
+  total pin-file failures rather than failures attributable to the claim pin,
+  and this branch widened the overlap by adding the AC2 test to the same file.
+  Latent rather than realised — the 88/88 independent replay confirms every
+  source-leg RED is genuinely the claim pin. Added as (g) of that row.
+- **F39 — logged, not actioned.** The Coverage map sends AC8 → T15 alone, where
+  AC8's mutation-verification sentence is delivered by T17/T23. Coverage is
+  plan-owned and amend-via-gate; `cairn_validate`'s coverage check passes, so
+  this is not review's to edit.
+- **F40 — fix now, done.** The new candidate row cited `README.Rmd:58-59`; the
+  clause now sits at `:59-60`.
+- **F41 — reject.** [S] blame-history read the harness header's "per the
+  m95/m117/m118 precedent" as claiming all three write committed record files
+  (only m95 does). The sentence cites the precedent of *being committed and
+  re-runnable*, which all three are; nothing false.
+
+**Disposition:** all eight criteria met with fresh evidence and ticked. F32-F36
+and F40 fixed on the branch before the gate; F37 and F38 recorded on the
+apparatus candidate row; F39 logged; F41 rejected. To the merge-approval gate.
