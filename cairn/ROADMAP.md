@@ -14,7 +14,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | M121 | Measure the `npbootstrap` interval's coverage on the frozen skew grid | done | — | normal | milestones/archive/M121-npbootstrap-skew-coverage.md |
 | M122 | Remove the resume cache from the M121 npbootstrap sweep | done | — | normal | milestones/archive/M122-drop-m121-resume-cache.md |
 | M123 | Correct the falsified capability claims in the shipped documentation | done | — | normal | milestones/archive/M123-falsified-capability-claims.md |
-| M124 | Demonstrate the exported surface no vignette shows | in-progress | — | normal | milestones/M124-undemonstrated-surface.md |
+| M124 | Demonstrate the exported surface no vignette shows | review | — | normal | milestones/M124-undemonstrated-surface.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
 <!-- terminal-row retention: M123 done (2026-08-17) → M117 rotated out (oldest terminal by merge order; its archive file still resolves there). Kept: M119, M120, M121, M122, M123 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)

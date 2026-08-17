@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M124: Demonstrate the exported surface no vignette shows
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -94,7 +94,7 @@ and a runnable numeric-`unit` projection → candidate row, this plan.
       renders both blocks.
 - [x] T5: Thread `seed` through a `d_study()` call in an evaluated chunk; name
       `conf_level` and `mc_samples` in the surrounding prose.
-- [ ] T6: Full gate — `devtools::check()`, the installed-package test run with
+- [x] T6: Full gate — `devtools::check()`, the installed-package test run with
       0 new skips, profile verify, `air`, `lintr`, the four `data-raw`
       checkers; open the PR and drive CI green.
 
@@ -103,6 +103,7 @@ and a runnable numeric-`unit` projection → candidate row, this plan.
 
 - 2026-08-16: created by /milestone-plan (assessment run over documentation and vignettes; two [S] audits + one [O] criteria audit).
 - 2026-08-16: criteria audit ran in FULL mode (user-facing tier) and returned findings F8-F11 against this milestone; fixed into the criteria before the gate — F8(i) the title and scope no longer call `summary()` "undemonstrated", since `R/data.R:58-59` already demonstrates it in a shipped Rd example, so the gap is vignette-only; F9 "live chunk" is defined against the vignettes' existing `requireNamespace` guard rather than as an unconditional chunk (ggplot2 is Suggests under GP1's light-install path), and `plot()` is fenced against rendering a duplicate figure; F10 the per-S3-method `\value` criterion was cut to a candidate row rather than shipped as a universal over (Rd page × alias) that no named procedure enumerates and that `man/reexports.Rd` cannot satisfy at all; F11 the demonstrate-or-describe disjunction was split, so `seed` must be executed and only `conf_level`/`mc_samples` may be prose.
+- 2026-08-17: T6 gate — `devtools::check()` 0 errors / 0 warnings / 1 NOTE (the pre-existing `Running 'testthat.R' [20m/13m]` runtime NOTE; both edited vignettes re-built OK). `devtools::test()` FAIL 0 | SKIP 2 | PASS 8221. Installed-package leg (M116 form): branch SKIP 110 | PASS 6413 | FAIL 0, against a same-command `main` baseline (`git archive main` into a scratch dir, installed and run there) of SKIP 110 | PASS 6413 | FAIL 0 — 0 new skips. `air format --check` clean, `lintr::lint_package()` 0 lints, and the four CI `data-raw` checkers (`check-reference-observations.py`, `check-mpl-doc-claims.py`, `check-record-claims.py`, `check-checkpoint-sites.R`) all pass. NEWS.md gains three Documentation bullets for the added demonstrations.
 - 2026-08-17: T4 — `autoplot.icc_dstudy` gains an `@examplesIf rlang::is_installed(c("ggplot2", "glmmTMB"))` example; `document()` regenerates `man/d_study.Rd` with the guarded block (`\dontshow{...withAutoprint...}`) followed by the pre-existing unguarded `d_study(fit, m = 1:8)` block. Example executed: returns a built ggplot.
 - 2026-08-17: T2/T3/T5 — `d-studies-and-replicates.Rmd` gains a "The projection as data" subsection (`tidy(proj)`/`glance(proj)` evaluated, prose identifying `m` per the amended AC2), `seed = 7` on the existing `d_study()` call with `conf_level`/`mc_samples`/`seed` named in the surrounding prose, and an `eval = FALSE` `plot(proj)` chunk. Rendered: the `plot()` call appears as code (block `cb5`) and the figure count stays at 3, so no duplicate curve.
 - 2026-08-17: T1 — `summary(fit)` demonstrated in `getting-started.Rmd` after the tidy/glance pair; prose derived from the executed output (report reprinted, then one interpretive note per error definition present plus the single-rating-per-cell note). Vignette renders clean.
