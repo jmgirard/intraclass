@@ -4,12 +4,12 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M125: Bring ROADMAP.md and LESSONS.md back under their byte budgets
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
-- **Principles touched:** —   <!-- owner: plan · create/amend-via-gate; GP8/GP9 are CREATED by T3/T4, so the slot cannot cite them until they exist in DESIGN.md (cairn_validate FAILs on a forward reference); implement fills it once they land -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Principles touched:** GP8, GP9   <!-- owner: plan · create/amend-via-gate; GP8/GP9 are CREATED by T3/T4, so the slot cannot cite them until they exist in DESIGN.md (cairn_validate FAILs on a forward reference); implement fills it once they land — filled 2026-08-17, T3/T4 -->
+- **Branch/PR:** `m125-tracking-budget-consolidation` · PR #134 https://github.com/jmgirard/intraclass/pull/134   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -47,36 +47,36 @@ Raising or lowering either budget → a tracking-rules change, not this repo's.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets. -->
 
-- [ ] **AC1.** At the merge commit `wc -c cairn/ROADMAP.md` reports fewer than
+- [x] **AC1.** At the merge commit `wc -c cairn/ROADMAP.md` reports fewer than
       24,000 bytes and `wc -c cairn/LESSONS.md` fewer than 20,000 bytes, and
       `python3 "$CAIRN/scripts/cairn_validate.py"`'s `weight caps` check still
       PASSes, so the 60- and 50-line caps are not traded away to buy bytes.
-- [ ] **AC2.** On the merge commit `python3 "$CAIRN/scripts/cairn_validate.py"`
+- [x] **AC2.** On the merge commit `python3 "$CAIRN/scripts/cairn_validate.py"`
       exits 0 with every check PASS, and all four checkers pass:
       `data-raw/check-record-claims.py`,
       `data-raw/check-reference-observations.py`,
       `data-raw/enumerate-generalizing-claims.py --check`,
       `data-raw/check-mpl-doc-claims.py`.
-- [ ] **AC3.** Every candidate row the merge diff removes — enumerated by
+- [x] **AC3.** Every candidate row the merge diff removes — enumerated by
       `git diff <base>..HEAD -- cairn/ROADMAP.md`, removed lines beginning
       `- ` below the `## Candidates` heading — is dispositioned in the work log
       as promoted-and-shipped (naming the `milestones/archive/` file that holds
       it), superseded (naming the superseding record), or dropped at the user's
       explicit direction.
-- [ ] **AC4.** Every candidate row the merge diff modifies — paired between
+- [x] **AC4.** Every candidate row the merge diff modifies — paired between
       sides by its leading bolded title, or by its first eight words where a row
       carries no bolded title — still states a promotion condition and a
       lineage clause on the head side.
-- [ ] **AC5.** Every `cairn/LESSONS.md` line the merge diff removes —
+- [x] **AC5.** Every `cairn/LESSONS.md` line the merge diff removes —
       enumerated by `git diff <base>..HEAD -- cairn/LESSONS.md` restricted to
       removed lines whose leading `YYYY-MM-DD (M<NN>` token appears nowhere in
       the head-side file — is named in the work log with the exit it took:
       enforcement, ownership, or maturation.
-- [ ] **AC6.** For every line AC5 enumerates, the work log carries one
+- [x] **AC6.** For every line AC5 enumerates, the work log carries one
       retired-line → destination row naming the `DESIGN.md` principle id or the
       `cairn/doctrine/` page section that received it, and each row cites the
       diff hunk that removed the line.
-- [ ] **AC7.** Each page the milestone adds under `cairn/doctrine/` opens with a
+- [x] **AC7.** Each page the milestone adds under `cairn/doctrine/` opens with a
       header sentence naming its own scope, and every other `cairn/` file its
       prose names is named as a cross-reference rather than as content it owns.
 
@@ -94,34 +94,34 @@ Raising or lowering either budget → a tracking-rules change, not this repo's.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] **T1.** Delete the five struck-through candidate rows
+- [x] **T1.** Delete the five struck-through candidate rows
       (`cairn/ROADMAP.md:30,32,33,37,55`), one at a time: read the
       `milestones/archive/` file each names, confirm the row's live remainder is
       carried there — row 30's two standing audit findings against the digest
       shape are the known case — and migrate any remainder into a surviving row
       before deleting. One work-log disposition line per row.
-- [ ] **T2.** Compress the widest live candidate rows to promotion condition +
+- [x] **T2.** Compress the widest live candidate rows to promotion condition +
       falsifier + lineage, heaviest first: `:46` (3,729 B), `:45`, `:42`, `:43`,
       `:34`, `:27`, `:29`, `:44`. Cite the milestone file holding each
       measurement narrative; never restate it.
-- [ ] **T3.** Graduate `LESSONS.md:17` (state a set procedurally) into
+- [x] **T3.** Graduate `LESSONS.md:17` (state a set procedurally) into
       `cairn/DESIGN.md` as **GP8**; delete the line; record the mapping.
-- [ ] **T4.** Graduate `LESSONS.md:30` (degenerate guards unreachable via
+- [x] **T4.** Graduate `LESSONS.md:30` (degenerate guards unreachable via
       `icc()`; platform-dependent arithmetic) into `cairn/DESIGN.md` as **GP9**;
       delete the line; record the mapping.
-- [ ] **T5.** Author `cairn/doctrine/doc-claim-pins.md` from `LESSONS.md:47`
+- [x] **T5.** Author `cairn/doctrine/doc-claim-pins.md` from `LESSONS.md:47`
       (wrapped-claim search, installed-vs-source surfaces, `rd_flat()`,
       blockquote stripping); delete the line; record the mapping.
-- [ ] **T6.** Author `cairn/doctrine/data-raw-checkers.md` from `LESSONS.md:31`
+- [x] **T6.** Author `cairn/doctrine/data-raw-checkers.md` from `LESSONS.md:31`
       (the four checkers, what stales each, the `check-references` CI job) and
       add one `DESIGN.md` Conventions bullet pointing at it; delete the line.
-- [ ] **T7.** Author `cairn/doctrine/source-ingestion.md` from `LESSONS.md:16`
+- [x] **T7.** Author `cairn/doctrine/source-ingestion.md` from `LESSONS.md:16`
       (PDF text layer vs printed page; per-note quotation sweeps); delete the
       line; record the mapping.
-- [ ] **T8.** Compress the leftover in-place extension blocks until
+- [x] **T8.** Compress the leftover in-place extension blocks until
       `wc -c cairn/LESSONS.md` is under 20,000; measure after each family and
       record the running figure, so a shortfall surfaces before review.
-- [ ] **T9.** Re-check `data-raw/record-claims.tsv` against the edited ROADMAP —
+- [x] **T9.** Re-check `data-raw/record-claims.tsv` against the edited ROADMAP —
       the `[claim:roadmap-terminal-rows]` expectation is the known trap
       (`LESSONS.md:45`, three prior recurrences) — and run `cairn_validate` plus
       all four `data-raw` checkers.
@@ -136,9 +136,40 @@ Raising or lowering either budget → a tracking-rules change, not this repo's.
 - 2026-08-17: plan gate chose graduating five families over the candidate row's two because measurement showed two reach only 28,257 bytes against a 20,000 budget; falsified by a family failing all three retirement exits at implement time, which returns here for a gated amendment rather than a forced retirement.
 - 2026-08-17: plan gate chose `cairn/doctrine/` pages over `cairn/references/` for the three craft families because `references/` is defined as owning source and synthesis notes about external sources; falsified by a maintainer ruling the extra-file boundary too thin to carry them.
 - 2026-08-17: plan gate chose per-row deletion checks over a blanket prune of the five struck rows because row 30 carries live audit findings its archive may not hold; falsified by the per-row check finding every remainder already archived.
+- 2026-08-17: implement start — status in-progress, branch m125-tracking-budget-consolidation cut from origin/main (c9c3bb9); pre-implementation question gate skipped, nothing left open by the plan.
+- 2026-08-17: T1 row "A resume cache can reprint identity evidence it did not recompute" — promoted-and-shipped (milestones/archive/M122-drop-m121-resume-cache.md); its live remainder, the two digest-shape audit findings absent from that archive summary, migrated into the surviving checkpoint blind-spots row before deletion.
+- 2026-08-17: T1 row "`burch`'s width advantage over `searle` is not flat in the true ICC" — promoted-and-shipped (milestones/archive/M117-conditional-width-claim.md); no live remainder, the unstated marginal rater contrast is measurement narrative held by M117's milestone file in git.
+- 2026-08-17: T1 row "Measure Burch's leptokurtic width reversal on a both-components-non-normal grid" — promoted-and-shipped (milestones/archive/M118-width-reversal-grid.md, verdict D-030); no live remainder, the doc reconciliation shipped as M119.
+- 2026-08-17: T1 row "Stale checkpoints can silently feed the M111 sweep the wrong rows" — promoted-and-shipped (milestones/archive/M120-checkpoint-staleness-guard.md); no live remainder, the walk's blind spots already hold their own surviving row.
+- 2026-08-17: T1 row "Cache CI R dependencies to cut per-run install time" — superseded (D-011; milestones/archive/M78-cut-ci-test-suite-wallclock.md records the falsified premise and the shipped lever).
+- 2026-08-17: T2 — the eight widest live rows compressed to promotion condition + falsifier + lineage, each citing its archive/references narrative holder (full pre-compression text at the T1 commit 52573c0); the kappa-worst-steps figures kept in place because the registered claim requires its citation in ROADMAP. ROADMAP now 22,687 bytes / 52 lines; all four data-raw checkers green.
+- 2026-08-17: T3 retired-line → destination: LESSONS line opening `2026-07-19 (M70` (maturation exit) → `cairn/DESIGN.md` **GP8**; hunk: this commit's cairn/LESSONS.md deletion of that line (T3/T4 checkpoint).
+- 2026-08-17: T4 retired-line → destination: LESSONS line opening `2026-07-23 (M84, corrected 2026-08-03` (maturation exit) → `cairn/DESIGN.md` **GP9**; hunk: this commit's cairn/LESSONS.md deletion of that line (T3/T4 checkpoint).
+- 2026-08-17: T3+T4 landed in one checkpoint commit (both edit the same DESIGN.md GP block); Principles-touched slot filled GP8, GP9 now that both exist. LESSONS at 30,657 bytes after the two retirements.
+- 2026-08-17: T5 retired-line → destination: LESSONS line opening `2026-08-08 (M115): a doc-claim pin` (maturation exit) → `cairn/doctrine/doc-claim-pins.md`, all sections; hunk: this commit's cairn/LESSONS.md deletion of that line. LESSONS at 26,008 bytes.
+- 2026-08-17: T6 retired-line → destination: LESSONS line opening `2026-07-23 (M85): the check-references CI job` (maturation exit) → `cairn/doctrine/data-raw-checkers.md`, all sections, with a DESIGN.md Conventions pointer bullet; hunk: this commit's cairn/LESSONS.md deletion of that line. LESSONS at 22,932 bytes.
+- 2026-08-17: T7 retired-line → destination: LESSONS line opening `2026-07-19 (M66): a string absent from a PDF's TEXT LAYER` (maturation exit) → `cairn/doctrine/source-ingestion.md`, both sections; hunk: this commit's cairn/LESSONS.md deletion of that line. LESSONS at 21,580 bytes / 44 lines — T8 still owes 1,581+.
+- 2026-08-17: T8 — six extension-block lines compressed in place, substance kept, no date token removed (M115-trend, M82, M107/M109, M77/M78, M86, then the M114 terminal-row line whose attribution/remedy tail now lives in doctrine/data-raw-checkers.md). Running figures: 20,030 after the first five, 19,701 / 44 lines after the sixth — under the 20,000 budget.
+- 2026-08-17: T9 — no terminal row touched, the roadmap-terminal-rows and kappa-worst-steps expectations both re-derive clean; cairn_validate all checks passed; all four data-raw checkers green. Final: ROADMAP 22,687 B / 52 lines, LESSONS 19,701 B / 44 lines.
+- 2026-08-17: all tasks done — status review. Profile verify slot: no R code or roxygen changed anywhere on the branch, so its per-task triggers never fired; the T9 gate (cairn_validate + four checkers) is the milestone's own check surface.
+- 2026-08-17: correction to the T8 line above — "no date token removed" holds for leading tokens only; three extension-internal dates (M78's 2026-07-21, M109's 2026-08-08, M116's 2026-08-09) were dropped in compression (review F11). T9's "22,687 B" was true at its commit; the head figure moved to 22,682 with the status flip (review F14).
+- 2026-08-17: review fix round — 17 findings fixed on the branch at the maintainer's gate selection (F1–F11, F13, F16–F20; D-033 appended), 3 rejected with reasons (F12/F14/F15); dispositions in the Review section.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
 
 ## Review
 <!-- owner: review · exclusive -->
+
+Review pass 1, 2026-08-17, branch head 8bd604d (+ header PR-URL edit), PR #134.
+
+- **AC1 evidence:** `wc -c` — cairn/ROADMAP.md 22,682 (< 24,000), cairn/LESSONS.md 19,701 (< 20,000); `cairn_validate.py` exit 0 with `weight caps` PASS, so the 60/50-line caps hold (ROADMAP 52 lines, LESSONS 44).
+- **AC2 evidence:** `cairn_validate.py` exit 0, 16/16 PASS; check-record-claims.py "OK: 6 registered claim(s) re-derived, 0 failure(s)"; check-reference-observations.py 0 unmarked / 0 falsified; enumerate-generalizing-claims.py --check in sync; check-mpl-doc-claims.py "46 claim candidates, 12 settled, 0 failure(s)".
+- **AC3 evidence:** scripted enumeration over `git diff main...HEAD -- cairn/ROADMAP.md` (removed `- ` rows below `## Candidates`, paired to head-side rows by bolded title / first eight words): 13 removed, 8 paired as modified, 5 unpaired deletions — the M122, M117, M118, M120 promotions and the M78-superseded CI-cache row; each has a T1 work-log disposition line naming its archive (M122/M117/M118/M120) or superseding record (D-011 + M78 archive).
+- **AC4 evidence:** same script, head side of all 8 modified rows: promotion condition present and `Lineage:` clause present on every row (8/8 OK).
+- **AC5 evidence:** scripted enumeration over `git diff main...HEAD -- cairn/LESSONS.md` per the criterion's token-absence rule: 3 lines enumerate (M66, M70, M85 — the retired M115 and M84 lines fall outside the enumeration because a surviving sibling line shares their leading token); each enumerated line has a work-log line naming its exit (maturation, all three).
+- **AC6 evidence:** for each of the 3 enumerated lines, one retired-line → destination work-log row exists naming the receiving record (M70 → DESIGN.md GP8; M66 → doctrine/source-ingestion.md; M85 → doctrine/data-raw-checkers.md), each citing the removing hunk by its commit's cairn/LESSONS.md deletion. (The M115/M84 retirements, though outside AC5's enumeration, carry the same rows — T5/T4.)
+- **AC7 evidence:** all three doctrine pages open with a header sentence naming the page's own scope (checked by `head`); each page's prose names other `cairn/` files only as cross-references ("cross-references only", "stay the reference", "owned by"), verified by read-through; independent reviewer confirms below.
+- **Consistency gate:** cairn_validate exit 0 (16 PASS); cairn_impact --changed — GP8/GP9 cited only by their own DESIGN.md definitions and this milestone's file, nothing to reconcile; `devtools::document()` no diff; `pkgdown::check_pkgdown()` no problems; `devtools::check()` 0 errors / 0 warnings / 0 notes (16m11s); README/NEWS untouched by the branch, no NEWS entry owed (nothing user-visible); no new top-level files.
+- **Independent review** ([O] fresh-context diff-bug lens; internal tier, docs-only diff → single reviewer): 20 ranked findings, none at the return floor (all seven ACs pass as written; no user-facing deliverable touched). Maintainer triage at the gate: **fixed now** — F1 (GP9 dropped the SSA=0-reachable qualifier, the three direct entry points, and the reachability/arithmetic distinction; reworded), F2 (doc-claim-pins and source-ingestion pages orphaned; DESIGN Conventions bullet now names all three, D-033), F3 (reachability row's archive cite over-promised; pointer fixed, (g) latent / (h) harmless dispositions restored), F4 (M106 fired-and-re-deferred promotion history restored), F5 (Design-Principles preamble universal corrected for GP8/GP9's lineage), F6 (D-033 records GP8/GP9 + cairn/doctrine/ as a records home), F7 (M94/M121 archive pointers corrected; mpl/posterior abort classes restored), F8 ("literal named argument" + checkpoint-guard.R:297 restored to the migrated digest finding), F9 (blind-spots (b)/(c) mechanisms restored), F10 (LESSONS terminal-row line's false "following review" uniform corrected to M111/M114/M122), F11 (T8 work-log over-claim corrected by appended line), F13 (kappa-dip SE ≈0.03–0.04 noise calibration restored), F16 (Springer logo + M69 escalation lineage restored; ownership claim softened to a cross-reference), F17 (data-raw-checkers attribution retagged M111 vs M114/M122), F18 (struck M125 row's cairn/references/ destination marked corrected), F19 (doc-claim-pins mutation-matrix obligation narrowed to M123's rule), F20 (CRAN nits row's "\value check passes" restored). **Rejected with reason** — F12 (figures dropped from compressed LESSONS lines: intentional compression per plan; LESSONS header designates git as the full record), F14 (T9's 22,687 B was true at its commit; the 5-byte delta is the later status flip — noted here, history not rewritten), F15 (AC5's token-absence enumeration structurally excludes the M84/M115 retirements: true; both carry work-log rows anyway and were verified by hand above — logged as a note on the criterion's reach, no repair without amending a satisfied criterion).
+- **Post-fix re-verification (AC1/AC2 at the merge head):** `wc -c` — ROADMAP.md 23,540 (< 24,000), LESSONS.md 19,703 (< 20,000), 52/44 lines; cairn_validate exit 0 all PASS; all four data-raw checkers green.
