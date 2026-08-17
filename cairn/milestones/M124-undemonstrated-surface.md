@@ -8,7 +8,7 @@
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP1   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** `m124-undemonstrated-surface`   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m124-undemonstrated-surface` · https://github.com/jmgirard/intraclass/pull/133   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
