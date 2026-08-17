@@ -1437,3 +1437,37 @@ milestone. Reopening evidence class: this verdict reopens only on a method
 demonstrating every-cell floor coverage over this grid, or on a superseding
 frozen assessment of it; the zero-abort finding belongs to no reopening class of
 D-026's, which concerns the abort event this leg does not produce.
+
+### D-032 (2026-08-17): D-021's door does not reach cap-driven hygiene compression of the tracking files themselves
+
+**Context:** the 2026-08-17 audit pass measured `cairn/ROADMAP.md` at 33,752
+bytes against a 24,000-byte budget and `cairn/LESSONS.md` at 35,296 against
+20,000. The remedies the tracking rulebook names for an over-budget file —
+compress the widest rows, then graduate or prune candidates; retire or prune
+lessons by the three exits — are edits to the repo's own records, so the
+question is whether D-021 bars a milestone that performs them. D-021 bars
+planning a milestone "whose deliverable is verification of this repo's own
+records, prose or messages — a ledger over tracking figures, a guard over doc
+claims, a truthfulness audit — unless its trigger is a defect in what the
+package computes for its users". D-029 already narrowed that door once, holding
+it governs "records-verification apparatus" and not the correction of what the
+package tells its users. This is a third shape neither entry addressed, and it
+will recur at every hygiene pass, so it is settled here rather than
+re-litigated.
+
+**Decision:** D-021 does not reach a scope whose deliverable is bringing a
+tracking file back under a budget the rulebook itself imposes. Three reasons.
+The deliverable is deletion and compression, not verification: such a milestone
+builds no checker, no ledger and no audit, which is the apparatus class D-029
+says D-021 governs. The self-feeding property D-021 was written to stop does not
+apply, because the trigger is a measured byte count against a fixed cap — it
+goes away when the file is under budget and cannot generate fresh subject matter
+the way a prose repair generates a new claim. And the alternative is worse than
+the disease: the caps exist because these files are read at every plan gate, so
+a door that forbids ever enforcing them makes the rulebook's own weight caps
+unenforceable.
+
+**Consequences:** M125 plans normally under this entry. A hygiene scope that
+also proposes a checker over the records it compresses is outside this entry and
+still needs D-021's trigger. If this distinction is ever used to smuggle
+apparatus in as "hygiene", this is the entry to supersede.
