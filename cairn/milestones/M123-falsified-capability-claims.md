@@ -48,11 +48,17 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
       `lavaan` (GP4's closed roster). `README.md` is re-knitted from it in the
       same commit; re-knitting on the same toolchain leaves `README.md`
       byte-identical.
-- [x] AC2: the README's base-install sentence names exactly the **non-base**
-      packages in `DESCRIPTION`'s `Imports:` field, verified by a recorded
-      command that reads both and subtracts
-      `rownames(installed.packages(priority = "base"))` — today
-      `cli`, `generics`, `glmmTMB`, `lifecycle`, `rlang`, `tibble`.
+- [ ] AC2: on every surface either walk reaches except `R/*.R` (source code, not
+      prose), each sentence — cut by the pin file's `width_split()` — naming
+      three or more non-base entries of `DESCRIPTION`'s `Imports:` names exactly
+      that set and carries, case-sensitively, `Imports` or `non-base` in the
+      same sentence. One recorded command enumerates them from the walk's own
+      output, reports the count (an empty enumeration fails), and asserts both,
+      run after `devtools::install()` so the installed leg reads this branch's
+      build. Non-base = `Imports:` minus
+      `rownames(installed.packages(priority = "base"))` — today `cli`,
+      `generics`, `glmmTMB`, `lifecycle`, `rlang`, `tibble`. What this does and
+      does not establish: MD-1.
 - [x] AC3: `vignettes/multilevel-designs.Rmd` no longer claims the design is
       never declared; it states inference-by-default and names `design =` as
       the disambiguator on incomplete data, agreeing with the `@param design`
@@ -60,30 +66,59 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
 - [x] AC4: `cairn/DESIGN.md:69` and `CLAUDE.md:65` carry the AC2 install set,
       and `cairn/DESIGN.md:72` no longer lists `augment` among the shipped tidy
       S3 methods (`git grep -n augment -- NAMESPACE R/` returns nothing).
-- [x] AC5: `source_doc_surfaces()` gains `README.Rmd` and `README.md`, and
+- [ ] AC5: `source_doc_surfaces()` gains `README.Rmd` and `README.md`, and
       `installed_doc_surfaces()` gains `system.file("README.md")`; every site
       the extended walk reports for the AC1–AC4 claim patterns is corrected or
-      recorded in the work log as correct-as-written, with an anti-vacuity
-      floor asserting both legs are non-empty.
-- [ ] AC6: each claim pattern is added to that file's existing `claim_patterns`
-      machinery as new `test_that()` blocks — no second instrument (D-029) —
-      and each is mutation-verified red on **≥2 spellings, one of them
-      line-wrapped, at ≥2 distinct surfaces** (M115's wrapped-sentence false
-      negative; M118's four-spellings lesson).
-- [x] AC7: `cairn/PROFILE.md`'s verify slot clean, plus
-      `air format --check`, `lintr::lint_package()`, and all four `data-raw`
-      checkers (`check-references`'s set) run locally before push.
+      recorded in the work log as correct-as-written. The anti-vacuity floor
+      asserts both legs non-empty; that each leg reaches every file its own glob
+      enumerates (all `vignettes/*.Rmd` and both READMEs on the source leg,
+      every installed vignette and `README.md` on the installed leg); and that
+      every plant target the committed harness declares appears in the walk's
+      output — each assertion gated on that file existing in the layout under
+      test.
+- [ ] AC6: each claim pattern this milestone adds — AC1–AC4's nine and AC8's two
+      — joins that file's existing `claim_patterns` machinery as new
+      `test_that()` blocks; no second instrument (D-029). A committed command
+      reports, per pattern, which of the walk's surface classes can match it,
+      computed by planting through the file that generates each class (`Rd:*`
+      through roxygen plus `document()`, never straight into `man/*.Rd`) and
+      leaving `man/` byte-identical (`git diff --exit-code -- man/`), never
+      asserted in prose; and no comment in the pin file or the committed harness
+      states a reachability that report contradicts. Every claim whose report
+      includes `Rd:*` carries at least one backtick-free spelling. Each pattern
+      is mutation-verified red on ≥2 spellings, at every class the report says
+      it reaches, in each wrap form the harness declares — declared set includes
+      a flat, a line-wrapped and a blockquote-wrapped form, the guarantee
+      bounded to that set. Source-leg cells run from the working tree; the
+      installed leg is planted into the installed copy at one
+      documented-and-reinstalled build per spelling in a single wrap form. The
+      class list and the `Rd:*` wrap-form gap this leaves: MD-1.
+- [ ] AC7: `cairn/PROFILE.md`'s verify slot clean, plus `air format --check`,
+      `lintr::lint_package()`, and all four `data-raw` checkers
+      (`check-references`'s set) run locally before push; and
+      `devtools::check()`, run locally on this branch and on `main` under the
+      same toolchain, reports 0 errors, 0 warnings, and no NOTE on this branch
+      that `main` does not also report.
+- [ ] AC8: the changelog's "every non-base package the install pulls" is
+      withdrawn from `NEWS.md` and pinned as a spelling in the same
+      `claim_patterns` vector; the README's transitive clause is withdrawn and
+      pinned by its misleading part — the singular "that one" beside "light" —
+      never by its true clause about what the default engine brings. The
+      guarantee is bounded to the spellings in that vector and nothing wider;
+      what no criterion here reaches: MD-1. Each pinned spelling is
+      mutation-verified red under AC6's procedure.
 
 ## Coverage
 <!-- owner: plan · create/amend-via-gate -->
 
 - AC1 → T1, T5
-- AC2 → T2, T5
+- AC2 → T2, T5, T14
 - AC3 → T3
 - AC4 → T4
-- AC5 → T6
-- AC6 → T7
-- AC7 → T8
+- AC5 → T6, T17
+- AC6 → T7, T16, T17
+- AC7 → T8, T18
+- AC8 → T15
 
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
@@ -118,6 +153,21 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
 - [x] T13: F4 — re-verify both walk legs against the INSTALLED package, not
       `load_all`; full gate; drive CI green.
 
+- [ ] T14: AC2 — rewrite the README install sentence to attribute the list to
+      `Imports:` (dropping "imports only"); re-knit; add the enumerate-and-assert
+      command as a `test_that()` block, run after a fresh install.
+- [ ] T15: AC8 — withdraw the NEWS transitive sentence and the README's
+      "that one"/"light" clause; pin both spellings in `claim_patterns`.
+- [ ] T16: AC6 — build the reachability-report command; add a backtick-free
+      spelling per `Rd:*`-reachable claim; correct the two false comments
+      (Rd markup, `load_all` skip) against the report.
+- [ ] T17: AC5/AC6 — extend the harness: plant at `README.md`, installed-leg
+      planting at one reinstall per spelling, `man/` byte-identical
+      post-condition; add the gated floors and the plant-target cross-check.
+- [ ] T18: AC7 — resolve the spelling NOTE; run `devtools::check()` on this
+      branch and on `main` under the same toolchain and compare.
+- [ ] T19: Full gate; push; drive CI green.
+
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
 
@@ -146,9 +196,42 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
 
 - 2026-08-16: T13 — full CI matrix green on b192efd: all 10 checks pass, including both `R CMD check` runners (ubuntu-latest release, windows-latest release), check-references, checkpoint-guard, lint, format-check, pkgdown, test-coverage and both codecov reports. The covr and `.Rcheck` layouts are the two F3 named as the reason the tarball floor failure went unseen, and both are green under the per-file floor. Fix round complete; status to `review` (defect return 1 answered).
 - 2026-08-16: review attempt 2 RETURNED to `in-progress` (defect return 2). Four floor findings: the fix round deleted the only spellings reaching the Rd surface and wrote a false rationale for doing so (flattened Rd carries 0 backticks); the "installed walk" block's comment claims a `load_all` skip that does not happen, so the committed 108-plant matrix never exercised the real installed leg; the new NEWS bullet repeats the transitive "the install pulls" framing F2 was returned for; and the corrected README sentence says "imports only" over six of seven `Imports:` entries while naming one extra arrival against a 63-package closure. AC1-AC5 and AC7 verified and ticked; AC6 unticked (mutation half not freshly re-run). F13-F15 (no README.md plant, no vignette presence floor, a new spelling NOTE from the NEWS bullet) ride the same fix round; F18-F20 are follow-ups.
+- 2026-08-16: amendment (substantive) after defect return 2 — AC2, AC5, AC6 and AC7 amended and AC8 added, because every finding of both returns fell OUTSIDE the domain of the procedure its nearest criterion named: AC2 subtracted base packages and could not see the word "only", AC6 required >=2 surfaces and could not see the Rd leg, and no criterion reached changelog prose or code comments at all. AC2 now binds attribution, not just the name set; AC5's floor is glob-derived and cross-checks the harness's plant targets; AC6 replaces "2 distinct surfaces" with a computed per-pattern reachability report and requires the installed leg to be planted into a real install; AC7 compares check() against `main`; AC8 pins the two transitive-install phrasings. Amended AC2/AC5/AC7 un-ticked — the wording they were verified against no longer stands.
+- 2026-08-16: criteria audit ran in FULL mode (user-facing tier) over the amended wording, twice, each round a fresh-context [O] reader that authored none of it. Round 1 returned 10 findings: AC2 as first drafted was unsatisfiable (8 `R/*.R` code blobs tripped it, zero prose), its sentence unit was unnamed, its qualifier test was case-ambiguous so the lowercase "imports only" would have survived untouched, "surface class" was undefined although the definition decides the Rd answer, the comment-consistency clause missed the harness, and "0 NOTEs" bound a whole-package global to a prose milestone; 7 had one clear right answer and were fixed before the gate, 3 went to it. Round 2 returned 12 over the gate-fixed text: AC2's token test admitted a sentence carrying `non-base` AND "the install pulls" (the returned F16 sentence itself), AC5's new plant-target clause had no existence gate and would have reproduced attempt 1's tarball hard-fail, AC2 did not say its command runs after a fresh install, and AC6's "each claim pattern" read over the whole legacy vector; 5 fixed directly, 4 disposed with the obvious reading, 3 to the gate.
+- 2026-08-16: measured at the round-2 audit — AC2's rule over the real walk catches 3 sentences (all the same README sentence, on `README.Rmd`, `README.md` and the installed `README.md`), and the token property FAILS on all three, so AC2 as amended is currently unmet. Including `R/*.R` would add 8 hits, every one source code and none prose, which is why the exclusion is drawn there.
+- 2026-08-16: gate decisions on the three judgment calls — pin the README's transitive clause by its misleading part ("that one" beside "light") rather than its true clause, since the sentence is incomplete and not false; state the rewording gap inside AC8 rather than lowering AC2's threshold into source code; and require a backtick-free spelling per `Rd:*`-reachable claim rather than merely disclosing the inertness.
+- 2026-08-16: attempt 2's F20 is DEFERRED explicitly rather than left silent — `design_never_declare = "you never declare it"` is four words of ordinary English swept over `R/` internal comments, an internal surface below this milestone's user-facing tier; no amended criterion covers it and a ROADMAP candidate row carries it.
+- 2026-08-16: the amendment takes the plan-owned body to 170 lines against the <150 cap. One compression pass on the heaviest section ran as the remedy prescribes — AC2/AC6/AC8's rationale moved verbatim into MD-1 and cross-referenced, promises unchanged — taking Acceptance criteria 85 to 68 and the body 187 to 170. Still 21 over, and all three split tripwires now fire (8 criteria, 19 tasks, no hope of the cap). Further compression would cut audited promises rather than prose, so the cap failure is left standing for a split decision rather than nibbled at. Committed in this state deliberately: `cairn_validate` FAILs `weight caps` until it is resolved.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
+
+### MD-1 (2026-08-16): what the amended criteria establish, and what they do not
+
+Moved here verbatim from AC2, AC6 and AC8 when the amendment took the plan-owned
+body past the 150-line cap; the criteria cite this entry rather than restate it.
+The promises themselves are unchanged from the audited wording.
+
+**AC2.** What this establishes is that the list is a complete and correct
+enumeration of the non-base entries this package *declares*, labelled as such;
+it does not establish that the sentence makes no further claim about what an
+installation retrieves — that is AC8's, bounded to the spellings named there and
+nothing wider.
+
+**AC6 — the surface classes.** `R/*.R`, `vignettes/*.Rmd`, `NEWS.md`,
+`README.Rmd` and `README.md` on the source leg; `Rd:*`, `vignette:*`, `NEWS.md`
+and `README.md` on the installed leg.
+
+**AC6 — the wrap-form gap.** The wrap-form sweep runs on the plain-text
+installed surfaces (`vignette:*`, `NEWS.md`, `README.md`) only. `Rd:*` is
+therefore exercised in a single wrap form. That class is also the one whose join
+differs most from the others — `rd_flat()` concatenates with `collapse = ""` and
+no blockquote strip runs on it — so this procedure makes no wrap-form guarantee
+for `Rd:*`, and a wrap-dependent false negative there would not be caught.
+
+**AC8 — what no criterion reaches.** No criterion here reaches a reworded
+transitive claim naming fewer than three packages: AC2 fires only at three or
+more names, AC8 only at the literal spellings it lists. Review is the net for one.
 
 ## Review
 <!-- owner: review · exclusive -->
