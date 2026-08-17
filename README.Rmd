@@ -39,11 +39,10 @@ are a place to learn ICC best practice, not just call functions.
 > incomplete (missing-cell) data, and multilevel designs (subject vs. cluster
 > level, with raters crossed with or nested in clusters/subjects) — each with
 > boundary-aware Monte-Carlo intervals. Fits run on mixed-model engines
-> (`glmmTMB`, `lme4`) or an SEM engine (`lavaan`). A
+> (`glmmTMB`, `lme4`), a Bayesian engine (`brms`), or an SEM engine (`lavaan`). A
 > [*Choosing an ICC*](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.html)
 > decision guide, the `choose_icc()` helper, D-study projection to other rater
-> counts (`d_study()`), and `autoplot()` plots have all shipped. A Bayesian engine
-> is on the roadmap; see `cairn/ROADMAP.md`.
+> counts (`d_study()`), and `autoplot()` plots have all shipped.
 
 ## Installation
 
@@ -54,8 +53,12 @@ You can install the development version from [GitHub](https://github.com/jmgirar
 pak::pak("jmgirard/intraclass")
 ```
 
-The base install is light — only `glmmTMB`, `cli`, `rlang`, and `generics`.
-Optional Bayesian and SEM engines live in `Suggests`.
+intraclass declares only six non-base packages in its `DESCRIPTION` `Imports:`
+field — `cli`, `generics`, `glmmTMB`, `lifecycle`, `rlang`, and `tibble`. The
+alternate mixed-model (`lme4`), Bayesian (`brms`), and SEM (`lavaan`) engines
+are in `Suggests`, so intraclass does not require them. What an installation
+actually retrieves is the full dependency closure of those declarations, which
+is considerably larger.
 
 ## Example
 

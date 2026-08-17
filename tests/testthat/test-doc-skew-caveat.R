@@ -191,6 +191,18 @@ test_that("the caveat quotes only methods the fixture measured", {
 # is worded so it need not quote the phrase it withdraws.
 squash <- function(x) gsub("[[:space:]]+", " ", paste(x, collapse = " "))
 
+# Line-leading markup is stripped BEFORE the join, never after. A markdown
+# blockquote is the case that got past M123's first pass: the README's
+# withdrawn Bayesian-roadmap sentence lives inside a `> [!NOTE]` callout and
+# wraps as `> ... A Bayesian engine` / `> is on the roadmap`, so joining first
+# leaves the marker mid-sentence -- `... A Bayesian engine > is on the roadmap
+# ...` -- against which every pattern below returned FALSE while the sentence
+# was plainly there. Same failure mode as the roxygen `#'` prefix the source
+# leg already strips, one markup character later.
+strip_blockquote <- function(lines) {
+  gsub("^[[:space:]]*>+[[:space:]]?", "", lines)
+}
+
 # Two withdrawn claims, not one. M115 withdrew "burch never under-covers"; M116
 # withdrew the width ranking that shipped beside it -- `"burch"` presented as the
 # broader interval and `"searle"` as the tightest on near-normal data -- which
@@ -237,7 +249,67 @@ claim_patterns <- c(
   residual_do_not_vary = "which those grids do not vary",
   residual_vary_only = "Both grids vary only the subject effect",
   residual_subject_only = "measured it only in the subject-effect-only case",
-  residual_draw_only = "both grids draw only the"
+  residual_draw_only = "both grids draw only the",
+  # M123 withdrew four CAPABILITY claims -- statements the docs made that the
+  # package's own code falsifies. They join this vector rather than start a
+  # second one: D-029 asks for an extension of the instrument M115-M119 each
+  # appended into, and a numeric pattern simply does not match README prose, so
+  # "the domain differs" buys nothing but a fork.
+  #
+  # What this set promises is exactly the spellings listed and nothing wider. A
+  # recall-fixed list of phrasings is the shape M118 watched lose four rounds
+  # running, each to a spelling the previous round had not imagined, so no
+  # criterion here quantifies over "any future rewording". The guarantee is: a
+  # maintainer restoring one of THESE sentences, at any surface either walk
+  # reaches and however the line wraps -- blockquote included -- reds.
+  #
+  # (1) The brms engine has shipped -- `R/engine-brms.R`, `engine = "brms"` in
+  # `icc()`'s validated set, `ci_method = "posterior"` -- but the README kept
+  # promising it as future work. Three spellings: the one that actually
+  # shipped, plus two a plausible re-edit would reach for.
+  bayes_roadmap = "Bayesian engine is on the roadmap",
+  bayes_planned = "Bayesian engine is planned",
+  bayes_not_yet = "Bayesian engine is not yet",
+  # (2) The engine enumeration that omitted brms. Matched with the connective
+  # so it cannot fire on a legitimate two-engine sentence elsewhere. Backticked
+  # AND bare, because `rd_flat()` is `rapply(as.character)` over the parsed Rd
+  # and discards `\code{}`: the flattened help database carries no backticks at
+  # all (measured across the whole flattened help database: 0 backticks on all
+  # seven pages, against 846 in `R/icc.R`), so a backticked-only pattern is
+  # inert on `Rd:*` -- and under `R CMD check` the source leg returns `list()`,
+  # leaving the installed leg the only leg. That leg reads `Rd:*` AND `NEWS.md`,
+  # `README.md` and the installed vignettes, which a comment here once denied.
+  # Two false comments have stood in this spot: one claiming no surface renders
+  # these sentences without their markup, one claiming `Rd:*` is the only class
+  # running under check. Both cost a review return.
+  engines_omit_brms = "(`glmmTMB`, `lme4`) or an SEM engine",
+  engines_omit_brms_bare = "(glmmTMB, lme4) or an SEM engine",
+  # (3) The base-install list naming four of the six non-base Imports. Same
+  # backticked/bare pair for the same reason. The alphabetised variant that
+  # stood here is gone: it encoded a PACKAGE SET rather than a falsehood, so
+  # dropping `lifecycle` or `tibble` from `Imports:` would have made the
+  # CORRECTED sentence match and be reported as a withdrawn claim.
+  install_four_marked = "only `glmmTMB`, `cli`, `rlang`, and `generics`",
+  install_four_bare = "only glmmTMB, cli, rlang, and generics",
+  # (4) The multilevel design claim, contradicted by the shipped `design`
+  # argument and by the same vignette's own later section. Anchored to the
+  # clause it shipped in: a bare "you never declare it" is four words of
+  # ordinary English swept over all of `R/` including internal comments, and
+  # would red on a future true sentence about any other inferred argument.
+  design_never_declare = "from the data — you never declare it",
+  design_never_declare_alt = "you never declare the design",
+  # M123's fifth and sixth CLAIMS (its tenth and eleventh spellings), added at
+  # its second review return: prose
+  # attributing the declared dependency list to what an installation
+  # RETRIEVES. Both shipped on this branch. Installing the package pulls the
+  # whole recursive closure of the six declared Imports -- `glmmTMB` alone
+  # brings `lme4` -- so "the install pulls" over a six-name list is false, and
+  # naming one further arrival beside the word "light" understates it. The
+  # second spelling deliberately takes only the singular clause: the statement
+  # that `glmmTMB` imports `lme4` is TRUE, and pinning that would report a true
+  # sentence as a withdrawn claim.
+  install_pulls_news = "package the install pulls",
+  install_arrives_readme = "so that one arrives with the default engine"
 )
 
 expect_no_withdrawn_claim <- function(text, where) {
@@ -288,14 +360,24 @@ installed_doc_surfaces <- function() {
     vigs <- list.files(doc_dir, pattern = "\\.(Rmd|md)$", full.names = TRUE)
     for (v in vigs) {
       out[[paste0("vignette:", basename(v))]] <- squash(
-        readLines(v, warn = FALSE)
+        strip_blockquote(readLines(v, warn = FALSE))
       )
     }
   }
 
   news <- system.file("NEWS.md", package = "intraclass")
   if (nzchar(news)) {
-    out[["NEWS.md"]] <- squash(readLines(news, warn = FALSE))
+    out[["NEWS.md"]] <- squash(strip_blockquote(readLines(news, warn = FALSE)))
+  }
+
+  # M123: `README.md` ships in the tarball (it is not `.Rbuildignore`d) and is
+  # the pkgdown home page, so it is a user-facing surface on the installed side
+  # too, not only in the source tree.
+  readme <- system.file("README.md", package = "intraclass")
+  if (nzchar(readme)) {
+    out[["README.md"]] <- squash(
+      strip_blockquote(readLines(readme, warn = FALSE))
+    )
   }
   out
 }
@@ -323,11 +405,21 @@ source_doc_surfaces <- function() {
       pattern = "\\.Rmd$",
       full.names = TRUE
     ),
-    file.path(root, "NEWS.md")
+    file.path(root, "NEWS.md"),
+    # M123: both READMEs. `README.Rmd` is the SOURCE a maintainer edits and is
+    # `.Rbuildignore`d, so the installed leg can never see it -- a claim
+    # restored there and left un-knitted would pass every other check until the
+    # next `devtools::build_readme()` republished it. `README.md` is swept on
+    # both legs because it ships in the tarball AND is the pkgdown home page.
+    file.path(root, "README.Rmd"),
+    file.path(root, "README.md")
   )
   paths <- paths[file.exists(paths)]
   out <- lapply(paths, function(p) {
-    squash(gsub("^\\s*#+'?\\s?", "", readLines(p, warn = FALSE)))
+    # Roxygen/comment prefix first, then the blockquote marker: a roxygen line
+    # can itself carry one (`#' > note`), never the reverse.
+    lines <- gsub("^\\s*#+'?\\s?", "", readLines(p, warn = FALSE))
+    squash(strip_blockquote(lines))
   })
   stats::setNames(out, sub(paste0("^", root, "/"), "", paths))
 }
@@ -360,6 +452,13 @@ test_that("the installed surfaces include both vignettes", {
     length(vig_names) == 0L,
     "vignettes not installed (install with build_vignettes)"
   )
+  # The names are hard-coded ON PURPOSE. M123 briefly derived them from the
+  # `vignettes/*.Rmd` glob, which reads as a widening but is a narrowing: under
+  # `R CMD check` the root is `<pkg>.Rcheck`, which carries no `vignettes/`, so
+  # the glob came back empty and the whole block skipped -- in the one layout
+  # CI runs. A hard list needs no source tree and cannot go vacuous. Deriving
+  # the list from the installed side instead (so a renamed vignette is caught)
+  # is deferred to the candidate row carrying the pin's reachability apparatus.
   for (v in c("interval-methods.Rmd", "glossary.Rmd")) {
     expect_true(paste0("vignette:", v) %in% vig_names, info = v)
   }
@@ -381,6 +480,52 @@ test_that("no source file still claims it either, however the line wraps", {
   for (nm in names(surfaces)) {
     expect_no_withdrawn_claim(surfaces[[nm]], nm)
   }
+})
+
+test_that("the source walk reads every README surface the layout carries", {
+  # Anti-vacuity for the two surfaces M123 added: every
+  # `expect_false(grepl(...))` passes on an empty string (M116), so the sweep
+  # must be shown to have READ them before its silence means anything.
+  #
+  # Asserted PER FILE against what is on disk, not as a flat membership pair.
+  # `README.Rmd` is `.Rbuildignore`d, so an unpacked source tarball carries
+  # `R/` and `vignettes/` (the leg runs) but no `README.Rmd` -- where a bare
+  # `all(c("README.Rmd", "README.md") %in% ...)` FAILS rather than skips. CI
+  # never caught that: `R CMD check` runs from `.Rcheck` with no `R/` at all.
+  root <- testthat::test_path("..", "..")
+  surfaces <- source_doc_surfaces()
+  skip_if(length(surfaces) == 0L, "source tree not present")
+
+  on_disk <- c("README.Rmd", "README.md")
+  on_disk <- on_disk[file.exists(file.path(root, on_disk))]
+  # A layout carrying neither README is not a layout this leg can vacuously
+  # pass in: `README.md` ships in the tarball, so at least one is always there.
+  expect_gt(length(on_disk), 0L)
+  expect_true(all(on_disk %in% names(surfaces)))
+  expect_true(all(nzchar(unlist(surfaces[on_disk]))))
+
+  for (nm in on_disk) {
+    expect_no_withdrawn_claim(surfaces[[nm]], nm)
+  }
+})
+
+test_that("the installed walk reads README.md when the package is installed", {
+  # `README.md` is not `.Rbuildignore`d, so a real install carries it.
+  #
+  # This block does NOT skip under `load_all`, and a comment here once said it
+  # did. `pkgload`'s `system.file()` shim falls back to the package ROOT, so
+  # `system.file("README.md")` returns the source file and this leg re-reads
+  # what the source leg already swept -- the M116 shadowing, one file over.
+  # Measured: under `load_all` it resolves to the checkout, under a real
+  # install to the library tree. So a dev-session pass here says nothing about
+  # the installed leg; only `test_dir(load_package = "installed")` does, which
+  # is what M123's evidence runs and what its harness plants against.
+  readme <- system.file("README.md", package = "intraclass")
+  skip_if(!nzchar(readme), "README.md not resolvable")
+  surfaces <- installed_doc_surfaces()
+  expect_true("README.md" %in% names(surfaces))
+  expect_true(nzchar(surfaces[["README.md"]]))
+  expect_no_withdrawn_claim(surfaces[["README.md"]], "README.md")
 })
 
 test_that("the caveat names the worst cell the fixture actually records", {
@@ -2184,4 +2329,96 @@ test_that("the residual clause's figure is the fixture cell it names", {
   expect_false(sh$ok(parts(
     "a median width ratio of 1.2963 at Cauchy with 100 subjects"
   )))
+})
+
+test_that("a dependency list on any swept surface is attributed to Imports", {
+  # M123 AC2. Two of this milestone's three returns were the same shape: a
+  # sentence listing the package's dependencies, correct in its membership and
+  # wrong about what the list MEANS -- "installed only if you ask for them",
+  # then "every non-base package the install pulls". Installing this package
+  # retrieves the whole recursive closure of its Imports, not the six names it
+  # declares, so a bare list reads as a claim about the install and is false.
+  #
+  # The rule: any sentence naming three or more of the non-base Imports must
+  # name exactly that set AND carry `Imports` or `non-base`, so the list is
+  # anchored to what the package DECLARES. Case-sensitive on purpose -- the
+  # sentence this criterion was written against read "imports only", lowercase,
+  # and a case-folding test would have passed it untouched.
+  #
+  # `R/*.R` is excluded: its squashed text is source code, not prose. Three
+  # engine files collapse to blobs naming `glmmTMB`, `cli` and `rlang` inside
+  # one function body, and the only way to satisfy the rule there would be to
+  # plant a dependency list into a fitting function.
+  # The `Imports:` field is read from the INSTALLED metadata first. Under
+  # `R CMD check` the tests run from `.Rcheck/tests/testthat`, where
+  # `../../DESCRIPTION` does not exist -- the package sits at
+  # `.Rcheck/intraclass/`. Reading the source path unconditionally errored the
+  # whole check, green everywhere else; `packageDescription()` resolves in
+  # every layout that has the package loaded at all.
+  imports_field <- tryCatch(
+    utils::packageDescription("intraclass")$Imports,
+    error = function(e) NULL
+  )
+  if (is.null(imports_field) || is.na(imports_field)) {
+    src <- testthat::test_path("..", "..", "DESCRIPTION")
+    if (file.exists(src)) imports_field <- read.dcf(src, "Imports")[1, 1]
+  }
+  skip_if(
+    is.null(imports_field) || is.na(imports_field),
+    "no Imports field reachable in this layout"
+  )
+  imports <- trimws(strsplit(imports_field, ",")[[1]])
+  imports <- sub("[[:space:]]*\\(.*", "", imports)
+  non_base <- sort(setdiff(
+    imports,
+    rownames(installed.packages(priority = "base"))
+  ))
+
+  surfaces <- c(source_doc_surfaces(), installed_doc_surfaces())
+  surfaces <- surfaces[!grepl("^R/.*\\.R$", names(surfaces))]
+  skip_if(length(surfaces) == 0L, "no swept surfaces in this layout")
+
+  hits <- list()
+  for (nm in names(surfaces)) {
+    for (sent in width_split(surfaces[[nm]])) {
+      named <- non_base[vapply(
+        non_base,
+        function(p) grepl(p, sent, fixed = TRUE),
+        logical(1)
+      )]
+      if (length(named) >= 3L) {
+        hits[[length(hits) + 1L]] <- list(
+          where = nm,
+          sent = sent,
+          named = named
+        )
+      }
+    }
+  }
+
+  # Anti-vacuity: the rule is worthless if it enumerates nothing. The README's
+  # install sentence is always one such sentence, on both legs.
+  expect_gt(length(hits), 0L)
+
+  for (h in hits) {
+    expect_identical(
+      h$named,
+      non_base,
+      info = paste0(
+        "dependency list in ",
+        h$where,
+        " is not exactly the non-base Imports set"
+      )
+    )
+    expect_true(
+      grepl("Imports", h$sent, fixed = TRUE) ||
+        grepl("non-base", h$sent, fixed = TRUE),
+      info = paste0(
+        "dependency list in ",
+        h$where,
+        " names no field -- it reads as a claim about what the install ",
+        "retrieves rather than what the package declares"
+      )
+    )
+  }
 })
