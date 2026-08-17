@@ -7,6 +7,9 @@
 
 #' @rdname d_study
 #' @param object An `icc_dstudy` object (the `autoplot()`/`plot()` argument).
+#' @examplesIf rlang::is_installed(c("ggplot2", "glmmTMB"))
+#' fit_ag <- icc(ratings, score, subject, rater, type = "agreement", seed = 1)
+#' ggplot2::autoplot(d_study(fit_ag, m = 1:12)) # the D-study reliability curve
 #' @importFrom rlang .data
 # S3 method for ggplot2::autoplot (a Suggests generic), lazily registered in
 # zzz.R; lintr does not see it as an S3 method (not a NAMESPACE export), so the

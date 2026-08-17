@@ -147,6 +147,10 @@ axis (the occasion-averaged ragged divisor is an open modeling question).
 }
 
 \examples{
+\dontshow{if (rlang::is_installed(c("ggplot2", "glmmTMB"))) withAutoprint(\{ # examplesIf}
+fit_ag <- icc(ratings, score, subject, rater, type = "agreement", seed = 1)
+ggplot2::autoplot(d_study(fit_ag, m = 1:12)) # the D-study reliability curve
+\dontshow{\}) # examplesIf}
 fit <- icc(ratings, score, subject, rater, seed = 1)
 d_study(fit, m = 1:8)
 
