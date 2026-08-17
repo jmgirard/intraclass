@@ -70,29 +70,24 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
       `installed_doc_surfaces()` gains `system.file("README.md")`; every site
       the extended walk reports for the AC1–AC4 claim patterns is corrected or
       recorded in the work log as correct-as-written. The anti-vacuity floor
-      asserts both legs non-empty; that each leg reaches every file its own glob
-      enumerates (all `vignettes/*.Rmd` and both READMEs on the source leg,
-      every installed vignette and `README.md` on the installed leg); and that
-      every plant target the committed harness declares appears in the walk's
-      output — each assertion gated on that file existing in the layout under
-      test.
+      asserts both legs non-empty and that each leg reaches every file its own
+      glob enumerates (all `vignettes/*.Rmd` and both READMEs on the source leg,
+      every installed vignette and `README.md` on the installed leg), each
+      assertion gated on that file existing in the layout under test.
 - [ ] AC6: each claim pattern this milestone adds — AC1–AC4's nine and AC8's two
       — joins that file's existing `claim_patterns` machinery as new
-      `test_that()` blocks; no second instrument (D-029). A committed command
-      reports, per pattern, which of the walk's surface classes can match it,
-      computed by planting through the file that generates each class (`Rd:*`
-      through roxygen plus `document()`, never straight into `man/*.Rd`) and
-      leaving `man/` byte-identical (`git diff --exit-code -- man/`), never
-      asserted in prose; and no comment in the pin file or the committed harness
-      states a reachability that report contradicts. Every claim whose report
-      includes `Rd:*` carries at least one backtick-free spelling. Each pattern
-      is mutation-verified red on ≥2 spellings, at every class the report says
-      it reaches, in each wrap form the harness declares — declared set includes
-      a flat, a line-wrapped and a blockquote-wrapped form, the guarantee
-      bounded to that set. Source-leg cells run from the working tree; the
-      installed leg is planted into the installed copy at one
-      documented-and-reinstalled build per spelling in a single wrap form. The
-      class list and the `Rd:*` wrap-form gap this leaves: MD-1.
+      `test_that()` blocks; no second instrument (D-029). Every claim carries at
+      least one backtick-free spelling, since `rd_flat()` discards `\code{}` and
+      `Rd:*` is the only class a built package's walk reads; and no comment in
+      the pin file or the committed harness states a reachability a recorded
+      probe contradicts. Each pattern is mutation-verified red on ≥2 spellings,
+      at ≥2 distinct surfaces, in each wrap form the harness declares — the
+      declared set includes a flat, a line-wrapped and a blockquote-wrapped
+      form, and the guarantee is bounded to that set — with the installed leg
+      exercised against a real install for the plain-text installed surfaces
+      (`README.md`, `vignette:*`, `NEWS.md`), never shadowed by `load_all`'s
+      `system.file()` fallback. Per-class reachability reporting and the `Rd:*`
+      wrap sweep are M125's.
 - [ ] AC7: `cairn/PROFILE.md`'s verify slot clean, plus `air format --check`,
       `lintr::lint_package()`, and all four `data-raw` checkers
       (`check-references`'s set) run locally before push; and
@@ -116,54 +111,35 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
 - AC3 → T3
 - AC4 → T4
 - AC5 → T6, T17
-- AC6 → T7, T16, T17
+- AC6 → T7, T16
 - AC7 → T8, T18
 - AC8 → T15
 
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [x] T1: Rewrite `README.Rmd:42` and `:45-46` — engine enumeration gains
-      `brms`; the roadmap sentence is withdrawn (brms ships:
-      `R/engine-brms.R`, `R/icc.R:689`, `ci_method = "posterior"`).
-- [x] T2: Rewrite `README.Rmd:57`'s install list to AC2's non-base set; record
-      the comparing command and its output in the work log.
-- [x] T3: Rewrite `vignettes/multilevel-designs.Rmd:110-111` against
-      `R/icc.R:243-249`.
-- [x] T4: Correct `cairn/DESIGN.md:69,72` and `CLAUDE.md:65`.
-- [x] T5: `devtools::build_readme()`; confirm the re-knit is byte-identical on
-      a second run.
-- [x] T6: Extend both walk legs in `test-doc-skew-caveat.R` with the README
-      surfaces; add the anti-vacuity floor; run the walk and log every hit.
-- [x] T7: Add the claim patterns and their `test_that()` blocks; run the
-      mutation matrix (≥2 spellings × ≥2 surfaces per pattern) and record the
-      red/green table.
-- [x] T8: Full gate — profile verify, `air`, `lintr`, the four `data-raw`
-      checkers; open the PR and drive CI green.
-- [x] T9: F1/F5/F7 — strip the markdown blockquote marker per line on both walk
-      legs before the join; merge the capability spellings into the existing
-      `claim_patterns`/`expect_no_withdrawn_claim`; replace the two unreachable
-      bare-markup spellings with reachable re-edits.
-- [x] T10: F3 — make the README anti-vacuity floor tarball-safe: assert per file
-      against what is on disk, requiring at least one README leg.
-- [x] T11: F2 — withdraw the "installed only if you ask for them" clause from
-      `README.Rmd`, `cairn/DESIGN.md` and `CLAUDE.md`; re-knit `README.md`.
-- [x] T12: F6 — commit `data-raw/m123-capability-claim-mutations.R` and run the
-      full matrix (spellings × surfaces × wrap forms) to a clean floor.
-- [x] T13: F4 — re-verify both walk legs against the INSTALLED package, not
-      `load_all`; full gate; drive CI green.
-
+- [x] T1-T5 (shipped, first pass): rewrite `README.Rmd`'s engine enumeration and
+      roadmap sentence and its install list; rewrite
+      `vignettes/multilevel-designs.Rmd:110-111` against `R/icc.R:243-249`;
+      correct `cairn/DESIGN.md:69,72` and `CLAUDE.md:65`; `build_readme()`
+      byte-identical on a second run.
+- [x] T6-T8 (shipped, first pass): extend both walk legs with the README
+      surfaces and the anti-vacuity floor; add the claim patterns and their
+      `test_that()` blocks with a mutation matrix; full gate, PR, CI green.
+- [x] T9-T13 (shipped, return-1 fix round): strip the blockquote marker per line
+      on both legs; merge the capability spellings into `claim_patterns`;
+      tarball-safe README floor; withdraw the "installed only if you ask" clause
+      and re-knit; commit `data-raw/m123-capability-claim-mutations.R` and run
+      its matrix; re-verify against the installed package.
 - [ ] T14: AC2 — rewrite the README install sentence to attribute the list to
       `Imports:` (dropping "imports only"); re-knit; add the enumerate-and-assert
       command as a `test_that()` block, run after a fresh install.
 - [ ] T15: AC8 — withdraw the NEWS transitive sentence and the README's
       "that one"/"light" clause; pin both spellings in `claim_patterns`.
-- [ ] T16: AC6 — build the reachability-report command; add a backtick-free
-      spelling per `Rd:*`-reachable claim; correct the two false comments
-      (Rd markup, `load_all` skip) against the report.
-- [ ] T17: AC5/AC6 — extend the harness: plant at `README.md`, installed-leg
-      planting at one reinstall per spelling, `man/` byte-identical
-      post-condition; add the gated floors and the plant-target cross-check.
+- [ ] T16: AC6 — add a backtick-free spelling per claim; correct the two false
+      comments (Rd markup, `load_all` skip) against a recorded probe.
+- [ ] T17: AC5/AC6 — plant at `README.md`; run the installed leg against a real
+      install for the plain-text surfaces; add the gated glob floors.
 - [ ] T18: AC7 — resolve the spelling NOTE; run `devtools::check()` on this
       branch and on `main` under the same toolchain and compare.
 - [ ] T19: Full gate; push; drive CI green.
@@ -202,6 +178,8 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
 - 2026-08-16: gate decisions on the three judgment calls — pin the README's transitive clause by its misleading part ("that one" beside "light") rather than its true clause, since the sentence is incomplete and not false; state the rewording gap inside AC8 rather than lowering AC2's threshold into source code; and require a backtick-free spelling per `Rd:*`-reachable claim rather than merely disclosing the inertness.
 - 2026-08-16: attempt 2's F20 is DEFERRED explicitly rather than left silent — `design_never_declare = "you never declare it"` is four words of ordinary English swept over `R/` internal comments, an internal surface below this milestone's user-facing tier; no amended criterion covers it and a ROADMAP candidate row carries it.
 - 2026-08-16: the amendment takes the plan-owned body to 170 lines against the <150 cap. One compression pass on the heaviest section ran as the remedy prescribes — AC2/AC6/AC8's rationale moved verbatim into MD-1 and cross-referenced, promises unchanged — taking Acceptance criteria 85 to 68 and the body 187 to 170. Still 21 over, and all three split tripwires now fire (8 criteria, 19 tasks, no hope of the cap). Further compression would cut audited promises rather than prose, so the cap failure is left standing for a split decision rather than nibbled at. Committed in this state deliberately: `cairn_validate` FAILs `weight caps` until it is resolved.
+- 2026-08-16: split decided at the sizing gate — M123 keeps the corrections and the pins that demonstrably catch the real sentences; the proof apparatus (per-class reachability reporting, installed-leg planting at one reinstall per spelling, the `Rd:*` wrap sweep, the harness plant-target cross-check) goes to M125, `Depends on: M123`. AC5 and AC6 narrowed accordingly — the backtick-free spelling per claim stays here, since it is a spelling and not machinery. Plan-owned body back to under the cap after compressing the completed T1-T13 into three done-lines (their detail is in this work log and in git); `cairn_validate` green, one sizing advisory left.
+- 2026-08-16: F15 settled by command against the round-2 audit's refutation of it. `R CMD check` on this branch reports `Status: 1 NOTE` — reproducible on a second full run — from the `spelling.Rout` vs `spelling.Rout.save` comparison, whose flagged-word list now includes `README`/`README's` from this branch's new NEWS bullet (`main`'s NEWS.md contains no occurrence of the word). The audit's ground for refusing F15 was that no `.Rout.save` exists in the repo, which is true of the checkout — `git ls-files tests/` lists only `spelling.R` and `testthat.R` — and does not settle the check environment, where the comparison demonstrably runs. `devtools::check()`'s own summary line filters that NOTE class and prints `0 notes`, which is why the two reports disagree. Whether the branch INTRODUCED it is what amended AC7's differential against `main` exists to decide; T18 runs it.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
