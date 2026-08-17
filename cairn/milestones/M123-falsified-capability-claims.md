@@ -111,9 +111,9 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
       bare-markup spellings with reachable re-edits.
 - [x] T10: F3 — make the README anti-vacuity floor tarball-safe: assert per file
       against what is on disk, requiring at least one README leg.
-- [ ] T11: F2 — withdraw the "installed only if you ask for them" clause from
+- [x] T11: F2 — withdraw the "installed only if you ask for them" clause from
       `README.Rmd`, `cairn/DESIGN.md` and `CLAUDE.md`; re-knit `README.md`.
-- [ ] T12: F6 — commit `data-raw/m123-capability-claim-mutations.R` and run the
+- [x] T12: F6 — commit `data-raw/m123-capability-claim-mutations.R` and run the
       full matrix (spellings × surfaces × wrap forms) to a clean floor.
 - [ ] T13: F4 — re-verify both walk legs against the INSTALLED package, not
       `load_all`; full gate; drive CI green.
@@ -139,6 +139,10 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
 - 2026-08-16: T9-T10 — F1 closed: both walk legs now strip `^\s*>+\s?` per line BEFORE the join, so a `> [!NOTE]` callout no longer leaves the marker mid-sentence; restoring `main`'s `README.Rmd` verbatim now reds with 6 failures across 2 blocks where it was green. F5 closed: `capability_claim_patterns` and `expect_no_capability_claim` deleted, the nine spellings merged into the existing `claim_patterns` vector and `expect_no_withdrawn_claim`. F7 closed: `engines_omit_brms_bare`/`install_four_bare` replaced by `engines_omit_brms_and` (connective swap) and `install_four_alpha` (same four names alphabetized) — both reachable re-edits, neither present on any corrected surface. F3 closed: the README floor asserts per file against what is on disk and requires at least one README leg, so an unpacked tarball skips the `.Rbuildignore`d `README.Rmd` instead of hard-failing.
 - 2026-08-16: T11 partial — F2's false clause withdrawn from `README.Rmd`, `cairn/DESIGN.md` and `CLAUDE.md`. `glmmTMB` declares `Imports: lme4 (>= 1.1-18.9000)` (read from the installed DESCRIPTION), so the prose now says intraclass never requires the `Suggests` engines and notes that `lme4` arrives with the default engine regardless. The `README.md` re-knit is still owed.
 - 2026-08-16: T12 in progress — `data-raw/m123-capability-claim-mutations.R` committed: 9 spellings × 3 surfaces × 4 wrap forms = 108 plants, the wrap forms including two blockquote shapes, with a control run and a floor requiring every plant RED. Control clean at 0 failures and the first 4 plants RED; the run was interrupted for this checkpoint and the full matrix has not yet completed.
+- 2026-08-16: T12 — full matrix run to completion from the committed harness: 108 plants, 108 RED, 0 GREEN, against a 0-failure control. Every spelling now reds at all three surfaces in all four wrap forms, the two blockquote shapes included — the form F1 showed unguarded and the first pass's 27-plant matrix never wore.
+- 2026-08-16: T11 — `devtools::build_readme()` re-run twice after the F2 correction; the second knit is byte-identical (md5 1564aa262e1ad45d17cc047812f52526 both times), so AC1's same-toolchain clause still holds. The diff is 6 insertions / 4 deletions, prose only: no point estimate and no interval endpoint moved, the endpoint refresh having already landed in the earlier T5 knit.
+- 2026-08-16: T13 — F4 closed. `devtools::install(build_vignettes = TRUE)` then `test_dir(..., load_package = "installed")` on the pin file: FAIL 0, ERROR 0, **SKIP 0**, PASS 2252 — the two dev-session skips are gone, so the installed vignette and README legs genuinely ran rather than re-reading the source tree through `load_all`'s `system.file()` (the M116 lesson). Discriminating control: appending the blockquote-wrapped roadmap sentence to the INSTALLED `README.md` reds exactly the two installed-leg blocks (FAIL 2), and the installed copy was restored after.
+- 2026-08-16: T13 — local gate: `devtools::document()` no diff, `air format --check` clean, `lintr::lint_package()` clean, all four `data-raw` checkers OK, full suite FAIL 0 / WARN 3 / SKIP 2 / PASS 8118 (the same known skips and teaching warnings as the first pass), `cairn_validate` all checks passed with one advisory — 13 tasks against the >10 split tripwire, which is a fix round appended to an already-shipped plan rather than a milestone wanting a split.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

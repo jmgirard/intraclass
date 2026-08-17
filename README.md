@@ -47,10 +47,12 @@ You can install the development version from
 pak::pak("jmgirard/intraclass")
 ```
 
-The base install is light — only `glmmTMB`, `cli`, `generics`,
-`lifecycle`, `rlang`, and `tibble`. The alternate mixed-model (`lme4`),
-Bayesian (`brms`), and SEM (`lavaan`) engines live in `Suggests`,
-installed only if you ask for them.
+The base install is light — intraclass itself imports only `cli`,
+`generics`, `glmmTMB`, `lifecycle`, `rlang`, and `tibble`. The alternate
+mixed-model (`lme4`), Bayesian (`brms`), and SEM (`lavaan`) engines live
+in `Suggests`, so intraclass never requires them; note that `glmmTMB`
+imports `lme4` itself, so that one arrives with the default engine
+either way.
 
 ## Example
 
