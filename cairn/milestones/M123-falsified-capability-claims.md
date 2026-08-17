@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M123: Correct the falsified capability claims in the shipped documentation
 
-- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -60,7 +60,7 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
 - [x] AC4: `cairn/DESIGN.md:69` and `CLAUDE.md:65` carry the AC2 install set,
       and `cairn/DESIGN.md:72` no longer lists `augment` among the shipped tidy
       S3 methods (`git grep -n augment -- NAMESPACE R/` returns nothing).
-- [ ] AC5: `source_doc_surfaces()` gains `README.Rmd` and `README.md`, and
+- [x] AC5: `source_doc_surfaces()` gains `README.Rmd` and `README.md`, and
       `installed_doc_surfaces()` gains `system.file("README.md")`; every site
       the extended walk reports for the AC1–AC4 claim patterns is corrected or
       recorded in the work log as correct-as-written, with an anti-vacuity
@@ -145,6 +145,7 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
 - 2026-08-16: T13 — local gate: `devtools::document()` no diff, `air format --check` clean, `lintr::lint_package()` clean, all four `data-raw` checkers OK, full suite FAIL 0 / WARN 3 / SKIP 2 / PASS 8118 (the same known skips and teaching warnings as the first pass), `cairn_validate` all checks passed with one advisory — 13 tasks against the >10 split tripwire, which is a fix round appended to an already-shipped plan rather than a milestone wanting a split.
 
 - 2026-08-16: T13 — full CI matrix green on b192efd: all 10 checks pass, including both `R CMD check` runners (ubuntu-latest release, windows-latest release), check-references, checkpoint-guard, lint, format-check, pkgdown, test-coverage and both codecov reports. The covr and `.Rcheck` layouts are the two F3 named as the reason the tarball floor failure went unseen, and both are green under the per-file floor. Fix round complete; status to `review` (defect return 1 answered).
+- 2026-08-16: review attempt 2 RETURNED to `in-progress` (defect return 2). Four floor findings: the fix round deleted the only spellings reaching the Rd surface and wrote a false rationale for doing so (flattened Rd carries 0 backticks); the "installed walk" block's comment claims a `load_all` skip that does not happen, so the committed 108-plant matrix never exercised the real installed leg; the new NEWS bullet repeats the transitive "the install pulls" framing F2 was returned for; and the corrected README sentence says "imports only" over six of seven `Imports:` entries while naming one extra arrival against a 63-package closure. AC1-AC5 and AC7 verified and ticked; AC6 unticked (mutation half not freshly re-run). F13-F15 (no README.md plant, no vignette presence floor, a new spelling NOTE from the NEWS bullet) ride the same fix round; F18-F20 are follow-ups.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
@@ -239,3 +240,143 @@ F1 and F4.
 **Disposition:** F1 and F2 qualify under the return floor — F1 as a
 load-bearing defect in the milestone's central deliverable, F2 as a false
 user-facing claim. Status to `in-progress`; F3-F7 ride the same fix round.
+
+### Attempt 2 (2026-08-16) — RETURNED to `in-progress`, defect return 2
+
+**Criteria evidence** (all fresh, by command, on `a1ad8c7`).
+
+- **AC1 met.** `grep -nEi "roadmap|not yet|forthcoming|planned|coming soon"` over
+  `README.Rmd` returns nothing; `:42` names `glmmTMB`, `lme4`, `brms`, `lavaan`,
+  set-identical to the validated engine roster at `R/icc.R:689`. A second
+  `build_readme()` left `README.md` byte-identical (md5 unchanged). The
+  `README.Rmd` edit and the `README.md` re-knit sit in different checkpoint
+  commits on the branch (`d9ab307`, `b192efd`); the squash-merge delivers both
+  in one commit, which is what "the same commit" governs — recorded here rather
+  than glossed.
+- **AC2 met.** By command: `Imports:` minus `installed.packages(priority = "base")`
+  is `cli, generics, glmmTMB, lifecycle, rlang, tibble`; the six backticked names
+  in the install sentence are set-identical, in `README.Rmd` and in the knitted
+  `README.md`. (The sentence's surrounding prose is a separate matter — F16, F17.)
+- **AC3 met.** No "never declare" string in the vignette; `:110-113` names the
+  `design` argument and cross-references `#incomplete-ragged-multilevel-designs`,
+  which resolves to the heading at `:149`; the prose agrees with `@param design`
+  at `R/icc.R:243-249`.
+- **AC4 met.** Both records carry the AC2 six; `git grep -n augment` exits 1
+  against `NAMESPACE R/` and against `cairn/DESIGN.md`. The blame lens confirmed
+  via `git log --all` that no `augment` method ever existed, so this withdraws an
+  unbacked claim rather than a shipped feature.
+- **AC5 met.** The walk, called directly: 35 source surfaces, 9 installed;
+  `README.Rmd` and `README.md` present on the source leg (5473 / 7489 chars),
+  `README.md` present on the installed leg; every surface non-empty on both legs;
+  **0 hits** for all nine capability patterns across both legs, so no site is
+  owed a correct-as-written entry.
+- **AC6 NOT ticked — fresh evidence incomplete.** The instrument half is verified:
+  one `claim_patterns` vector, one `expect_no_withdrawn_claim` helper, no second
+  instrument, two new `test_that()` blocks. The mutation half was not re-run this
+  attempt; the [O] reviewer independently reproduced `main`'s real pre-correction
+  sentences reddening on both legs for four patterns, which is one spelling per
+  claim, short of AC6's "≥2 spellings". The recorded 108-plant matrix stands in
+  the work log but is not fresh evidence, and F11-F13 below show it does not
+  cover the leg CI actually runs.
+- **AC7 met.** `cairn_validate` all checks passed (1 advisory: 13 tasks vs the
+  >10 split tripwire); `air format --check` exit 0; `lintr::lint_package()` clean;
+  all four `data-raw` checkers OK. Consistency gate: `document()` no diff, README
+  in sync, `pkgdown::check_pkgdown()` clean, NEWS entry present,
+  `devtools::check()` 0 errors / 0 warnings / **1 NOTE introduced by this branch**
+  (F15).
+
+**Findings** (3 fresh-context reviewers: [O] diff-bug, [S] blame-history,
+[S] prior-review; plus two found at the gate). [S] blame-history: no regressions
+— the shared blockquote strip cannot alter any interior substring an older
+`fixed = TRUE` pin depends on, and `README.Rmd` is the only blockquoted surface
+in the tree. [S] prior-review: no prior-review evidence of a regression, zero
+findings; the GitHub inline-comment probe returned empty.
+
+- **F11 — floor return. The fix round removed real Rd-surface coverage on a
+  rationale that is false, and wrote that rationale into the file.**
+  `tests/testthat/test-doc-skew-caveat.R:275-284` states that the backtick-free
+  variant "guarded nothing, since no surface either walk reaches renders this
+  sentence without its markup". Verified false: `rd_flat()` is
+  `rapply(as.character)` over the parsed Rd, which discards `\code{}`, and the
+  flattened `man/icc.Rd` contains **0 backticks** while the roxygen source at
+  `R/icc.R:251` carries them. So `engines_omit_brms`, `engines_omit_brms_and`,
+  `install_four_marked` and `install_four_alpha` cannot match any `Rd:*` surface
+  — and under `R CMD check` the source leg returns `list()` and skips, making the
+  installed leg the only leg. Four of nine patterns are inert in CI outside
+  `README.md`, vignettes and NEWS. F7's repair deleted the two spellings that did
+  reach Rd.
+- **F12 — floor return. The "installed walk" block does not do what its comment
+  says.** `:483-484` claims the block skips under `load_all` because there is no
+  inst tree. Verified false: `system.file("README.md", package = "intraclass")`
+  under `load_all` returns `/Users/jmgirard/github/intraclass/README.md` —
+  pkgload falls back to the package root — so the block runs and re-reads the
+  **source** file the source leg already swept. This is attempt 1's F4 defect
+  reproduced one file over. It matters concretely because the committed harness
+  runs under `pkgload::load_all`, so no cell of the 108-plant matrix ever
+  exercised the real installed leg; only T13's uncommitted hand-run did.
+- **F13 — fix now. The committed matrix never plants at `README.md`.** The
+  harness declares three surfaces — `README.Rmd`, `R/icc.R`,
+  `vignettes/multilevel-designs.Rmd` — omitting the one file that ships in the
+  tarball and is the only README surface visible under `R CMD check`. With F12,
+  "every planted claim reds at every surface" proves nothing about the leg CI runs.
+- **F14 — fix now. The vignette carrying claim (4) has no presence floor on
+  either leg.** `design_never_declare`/`_alt` live only in
+  `vignettes/multilevel-designs.Rmd`; `legacy_source_paths` and the installed
+  vignette floor both name `interval-methods.Rmd` and `glossary.Rmd` and not it.
+  Rename or drop that vignette and pattern (4) guards nothing, green throughout.
+  Related: CI's only README pin is `skip_if`-guarded with no floor, so if
+  `README.md` were ever `.Rbuildignore`d both README pins vanish silently.
+- **F15 — fix now. The branch introduces an `R CMD check` NOTE.** The new NEWS
+  bullet is the first occurrence of "README" in `NEWS.md` (`main` has none), and
+  `inst/WORDLIST` has no entry for it, so `spelling.Rout` no longer matches
+  `spelling.Rout.save`. CI does not see this — `tests/spelling.R` uses
+  `skip_on_cran = TRUE` — but the local consistency gate does.
+- **F16 — floor return. The NEWS bullet repeats the framing F2 was returned
+  for.** It reads: "it now names every non-base package the install pulls
+  (`lifecycle` and `tibble` were missing)". Installing intraclass pulls `lme4`
+  and its closure through `glmmTMB`, so "every non-base package the install
+  pulls" is the same transitive over-claim, in a user-facing file, uncovered by
+  any claim pattern.
+- **F17 — floor return. The corrected README sentence is itself imprecise in
+  two ways.** (i) "intraclass itself imports only `cli`, `generics`, `glmmTMB`,
+  `lifecycle`, `rlang`, and `tibble`" — `DESCRIPTION`'s `Imports:` field has
+  **seven** entries including `stats`; the records say "non-base Imports" and the
+  user-facing sentence dropped that qualifier. (ii) "note that `glmmTMB` imports
+  `lme4` itself, so that one arrives with the default engine either way" names
+  one extra arrival beside the word "light", where the recursive non-base closure
+  of the six is **63** packages (`tools::package_dependencies(..., recursive =
+  TRUE)`), including ggplot2, dplyr, forecast and Matrix.
+- **F18 — follow-up. `install_four_alpha` encodes a package set, not a
+  falsehood.** If `lifecycle` or `tibble` ever leaves `Imports`, the corrected
+  README sentence becomes exactly this string and the pin reds on a true
+  statement while reporting a "withdrawn claim".
+- **F19 — follow-up. Three hardening gaps in the committed harness.** Its
+  pin-file sync check greps only four name prefixes, so a future pattern under a
+  new prefix is silently never planted; its RED verdict is total suite failures
+  rather than attribution to the claim pin, so an unrelated assertion firing
+  would be recorded as "guarded"; and its restore path is `readLines`/`writeLines`,
+  which is not byte-faithful (trailing newline, line endings, locale re-encoding
+  of the em dashes these surfaces carry) and not crash-safe below the R level.
+- **F20 — follow-up, carried from attempt 1.** F8 stands unaddressed and
+  undisclosed by any task: `design_never_declare = "you never declare it"` is
+  four words of ordinary English swept over all of `R/` including internal
+  comments.
+- **F21 — reject.** AC5 and AC6 were unticked while status read `review`. That is
+  the correct state — attempt 1 unticked them, and ticking is review's act
+  against fresh evidence, not implement's.
+
+**Disposition:** F11, F12, F16 and F17 qualify under the return floor as
+load-bearing defects in what this milestone delivers to users — the milestone
+exists to stop the docs saying things the code falsifies, and the branch still
+carries a false NEWS sentence, an imprecise README sentence, and two false
+comments that mis-document the pin's own coverage. F11 and F12 additionally
+remove or overstate coverage the pin is the deliverable for. Status to
+`in-progress`; F13, F14 and F15 ride the same fix round; F18-F20 are follow-ups.
+
+**Note for the fix round.** Every finding here falls *outside* the domain of the
+procedure its nearest criterion names — AC2 subtracts base packages from
+`Imports:` and cannot see the word "only"; AC6 requires ≥2 surfaces and cannot
+see the Rd leg; no criterion reaches NEWS prose or code comments at all. The
+recurring shape across both attempts is un-criterioned prose next to a verified
+clause. Consider whether the repair is an acceptance-criterion amendment
+(widening what the criteria bind) rather than another round of spot fixes.
