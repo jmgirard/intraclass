@@ -62,11 +62,11 @@ and a runnable numeric-`unit` projection → candidate row, this plan.
 - [x] AC5: `d_study()`'s `seed` is passed in an evaluated chunk of
       `vignettes/d-studies-and-replicates.Rmd`; `conf_level` and `mc_samples`
       are named in that vignette's prose.
-- [ ] AC6: every vignette this milestone edits builds under
+- [x] AC6: every vignette this milestone edits builds under
       `devtools::check()` with no new warning, and the suite run against the
       **installed** package (`testthat::test_dir("tests/testthat", package =
       "intraclass", load_package = "installed")`, M116) reports 0 new skips.
-- [ ] AC7: `cairn/PROFILE.md`'s verify slot clean, plus `air format --check`,
+- [x] AC7: `cairn/PROFILE.md`'s verify slot clean, plus `air format --check`,
       `lintr::lint_package()`, and the four `data-raw` checkers.
 
 ## Coverage
@@ -193,6 +193,29 @@ nine findings; all were verified against the implementation before triage.
 - F8 (fixed now) — the guarded Rd example shadowed the unguarded block's `fit`
   and re-ran an identical projection. Renamed to `fit_ag` and changed to
   `m = 1:12`, so `?d_study` now shows two distinct examples.
+**Gate (re-run against the fixed tree, commit `3e8a9f9`).**
+
+- AC6 — local `devtools::check()`: Status 1 NOTE, 0 errors, 0 warnings; the NOTE
+  is the pre-existing `Running 'testthat.R' [21m/13m]` runtime NOTE, and both
+  edited vignettes re-built. CI on the same commit is green on every job,
+  including `ubuntu-latest (release)` (21m22s) and `windows-latest (release)`
+  (24m51s), which run `R CMD check` on two platforms. Installed-package leg
+  (M116 form) SKIP 110 | PASS 6413 | FAIL 0, matching the `main` baseline of
+  SKIP 110 | PASS 6413 | FAIL 0 measured the same day by the same command on an
+  unmoved `main` — 0 new skips.
+- AC7 — profile `verify` slot clean (`devtools::document()` produces no diff;
+  `devtools::test()` FAIL 0 | SKIP 2 | PASS 8221 at the pre-gate state, and the
+  suite ran clean again inside the final `check()`); `air format --check` clean;
+  `lintr::lint_package()` 0 lints; all four `data-raw` checkers pass
+  (`check-reference-observations.py`, `check-mpl-doc-claims.py`,
+  `check-record-claims.py`, `check-checkpoint-sites.R`).
+
+**Consistency gate.** `cairn_validate` all 16 checks PASS, 7 advisories OK.
+Toolchain slot: `document()` no-diff verified; `NAMESPACE`/`man/` regenerate
+cleanly; `README.Rmd`/`README.md` untouched by this milestone;
+`pkgdown::check_pkgdown()` "No problems found"; NEWS.md carries three
+Documentation bullets for the user-visible changes; no new top-level files.
+
 - F9 (rejected) — the new `summary()` chunk carries no `eval =` guard. AC1's
   gloss defines "evaluated" as the guard "the vignette already uses";
   `getting-started.Rmd` uses none on any chunk, including the pre-existing
