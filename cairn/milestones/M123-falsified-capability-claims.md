@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M123: Correct the falsified capability claims in the shipped documentation
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -143,7 +143,7 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
       `test-doc-skew-caveat.R:278-279`; restore the unconditional installed-
       vignette floor the glob rewrite made vacuous under `R CMD check`; drop the
       duplicated floor `stopifnot` in the harness.
-- [ ] T23: re-run the mutation matrix from the committed harness and the full
+- [x] T23: re-run the mutation matrix from the committed harness and the full
       gate; push; drive CI green.
 
 ## Work log
@@ -199,6 +199,8 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
 - 2026-08-17: amendment (substantive), executing the maintainer's return-3 descope. AC5 and AC6 narrowed to the evidence already demonstrated: AC5 keeps the walk extension, the correct-or-record duty and the README non-emptiness floor, and exits the vignette/README floor enumeration and its layout coverage; AC6 keeps the single-instrument requirement, the backtick-free spelling per claim and the mutation matrix as it actually ran, and exits the comment-consistency clause, `Rd:*` mutation verification in any form, per-class reachability reporting and the harness plant-target cross-check. AC1-AC4, AC7 and AC8 unchanged. Amended AC5/AC6 un-ticked.
 - 2026-08-17: criteria audit ran in FULL mode (user-facing tier) over the amended wording, by a fresh-context [O] reader that authored none of it. It returned 12 findings; 9 with one clear right answer were fixed before the gate (AC6's "≥2 spellings" incoherent against its own definition of a pattern and unmet for AC8's two, now stated per claim; `vignette:*` narrowed to one installed vignette, the harness planting `vig[1]` only; the `Rd:*` exit widened from a wrap sweep to verification in any form, the harness planting no Rd surface at all; the backtick clause attributed to measurement; AC5's "both legs non-empty" corrected to "each leg that runs", the source leg skipping rather than asserting; the exit widened to cover the README floor's identical layout gap; the wrap-form bounding sentence restored; AC5's duty widened to all patterns this milestone adds; the candidate row amended to actually carry the exits, having carried none of them). 3 went to the gate. 1 was a no-finding (proportionality).
 - 2026-08-17: gate decisions on the three markers — fix the false reachability comment now rather than let it ride the candidate row, the milestone's own subject being withdrawn false claims; log the README `lme4` disclosure gap as a candidate row rather than reword the page here; and restore the unconditional installed-vignette floor rather than rename the glob-derived one, removing the coverage regression without taking back the descoped promise.
+- 2026-08-17: T22 — the false reachability comment at `test-doc-skew-caveat.R:278-279` corrected against measurement (0 backticks across all seven flattened Rd pages, 846 in `R/icc.R`; under `R CMD check` the installed leg is the only leg and reads `Rd:*`, `NEWS.md`, `README.md` and the installed vignettes). The installed-vignette floor restored to the unconditional two-name list `main` carried: the glob-derived form read as a widening but was a narrowing, `.Rcheck` having no `vignettes/`, so it skipped in the one layout CI runs. Duplicated floor `stopifnot` dropped from the harness.
+- 2026-08-17: T23 — mutation matrix re-run from the committed harness after a fresh `devtools::install(build_vignettes = TRUE)`: source leg 88 plants / 88 RED, installed leg 33 plants / 33 RED, both against 0-failure controls, tree restored clean. Gate: full suite FAIL 0 / ERROR 0 / WARN 3 / SKIP 2 / PASS 8221 (the known teaching warnings and dev-session skips), `air format --check` clean, `lintr::lint_package()` 0 lints, all four `data-raw` checkers OK, `cairn_validate` all checks passed (1 sizing advisory). Descope round complete; status to `review`.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
