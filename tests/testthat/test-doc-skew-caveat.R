@@ -191,6 +191,18 @@ test_that("the caveat quotes only methods the fixture measured", {
 # is worded so it need not quote the phrase it withdraws.
 squash <- function(x) gsub("[[:space:]]+", " ", paste(x, collapse = " "))
 
+# Line-leading markup is stripped BEFORE the join, never after. A markdown
+# blockquote is the case that got past M123's first pass: the README's
+# withdrawn Bayesian-roadmap sentence lives inside a `> [!NOTE]` callout and
+# wraps as `> ... A Bayesian engine` / `> is on the roadmap`, so joining first
+# leaves the marker mid-sentence -- `... A Bayesian engine > is on the roadmap
+# ...` -- against which every pattern below returned FALSE while the sentence
+# was plainly there. Same failure mode as the roxygen `#'` prefix the source
+# leg already strips, one markup character later.
+strip_blockquote <- function(lines) {
+  gsub("^[[:space:]]*>+[[:space:]]?", "", lines)
+}
+
 # Two withdrawn claims, not one. M115 withdrew "burch never under-covers"; M116
 # withdrew the width ranking that shipped beside it -- `"burch"` presented as the
 # broader interval and `"searle"` as the tightest on near-normal data -- which
@@ -237,30 +249,20 @@ claim_patterns <- c(
   residual_do_not_vary = "which those grids do not vary",
   residual_vary_only = "Both grids vary only the subject effect",
   residual_subject_only = "measured it only in the subject-effect-only case",
-  residual_draw_only = "both grids draw only the"
-)
-
-expect_no_withdrawn_claim <- function(text, where) {
-  for (nm in names(claim_patterns)) {
-    testthat::expect_false(
-      grepl(claim_patterns[[nm]], text, fixed = TRUE),
-      info = paste0("withdrawn claim '", nm, "' still present in ", where)
-    )
-  }
-}
-
-# M123's withdrawn claims are CAPABILITY claims, not numeric ones: four
-# statements the docs made that the package's own code falsifies. They are kept
-# in their own set because their domain differs -- these sweep the READMEs too,
-# where a coverage figure would never appear.
-#
-# What this set promises is exactly the spellings listed and nothing wider. A
-# recall-fixed list of phrasings is the shape M118 watched lose four rounds
-# running, each to a spelling the previous round had not imagined, so no
-# criterion here quantifies over "any future rewording". The guarantee is: a
-# maintainer restoring one of THESE sentences, at any surface either walk
-# reaches and however the line wraps, reds.
-capability_claim_patterns <- c(
+  residual_draw_only = "both grids draw only the",
+  # M123 withdrew four CAPABILITY claims -- statements the docs made that the
+  # package's own code falsifies. They join this vector rather than start a
+  # second one: D-029 asks for an extension of the instrument M115-M119 each
+  # appended into, and a numeric pattern simply does not match README prose, so
+  # "the domain differs" buys nothing but a fork.
+  #
+  # What this set promises is exactly the spellings listed and nothing wider. A
+  # recall-fixed list of phrasings is the shape M118 watched lose four rounds
+  # running, each to a spelling the previous round had not imagined, so no
+  # criterion here quantifies over "any future rewording". The guarantee is: a
+  # maintainer restoring one of THESE sentences, at any surface either walk
+  # reaches and however the line wraps -- blockquote included -- reds.
+  #
   # (1) The brms engine has shipped -- `R/engine-brms.R`, `engine = "brms"` in
   # `icc()`'s validated set, `ci_method = "posterior"` -- but the README kept
   # promising it as future work. Three spellings: the one that actually
@@ -269,26 +271,28 @@ capability_claim_patterns <- c(
   bayes_planned = "Bayesian engine is planned",
   bayes_not_yet = "Bayesian engine is not yet",
   # (2) The engine enumeration that omitted brms. Matched with the connective
-  # so it cannot fire on a legitimate two-engine sentence elsewhere; backticked
-  # and bare, since the Rd database and pkgdown strip the markup.
+  # so it cannot fire on a legitimate two-engine sentence elsewhere. The second
+  # spelling swaps that connective: the backtick-free variant that stood here
+  # through M123's first pass guarded nothing, since no surface either walk
+  # reaches renders this sentence without its markup.
   engines_omit_brms = "(`glmmTMB`, `lme4`) or an SEM engine",
-  engines_omit_brms_bare = "(glmmTMB, lme4) or an SEM engine",
-  # (3) The base-install list naming four of the six non-base Imports. Both a
-  # backticked and a bare spelling: the Rd database and the knitted README
-  # render the same sentence with and without the markup, so a single spelling
-  # would sweep one surface and miss the other.
+  engines_omit_brms_and = "(`glmmTMB`, `lme4`) and an SEM engine",
+  # (3) The base-install list naming four of the six non-base Imports. The
+  # second spelling alphabetizes the same four -- the order a re-edit would
+  # most plausibly land on -- rather than un-backticking them, for the reason
+  # above.
   install_four_marked = "only `glmmTMB`, `cli`, `rlang`, and `generics`",
-  install_four_bare = "only glmmTMB, cli, rlang, and generics",
+  install_four_alpha = "only `cli`, `generics`, `glmmTMB`, and `rlang`",
   # (4) The multilevel design claim, contradicted by the shipped `design`
   # argument and by the same vignette's own later section.
   design_never_declare = "you never declare it",
   design_never_declare_alt = "you never declare the design"
 )
 
-expect_no_capability_claim <- function(text, where) {
-  for (nm in names(capability_claim_patterns)) {
+expect_no_withdrawn_claim <- function(text, where) {
+  for (nm in names(claim_patterns)) {
     testthat::expect_false(
-      grepl(capability_claim_patterns[[nm]], text, fixed = TRUE),
+      grepl(claim_patterns[[nm]], text, fixed = TRUE),
       info = paste0("withdrawn claim '", nm, "' still present in ", where)
     )
   }
@@ -333,14 +337,14 @@ installed_doc_surfaces <- function() {
     vigs <- list.files(doc_dir, pattern = "\\.(Rmd|md)$", full.names = TRUE)
     for (v in vigs) {
       out[[paste0("vignette:", basename(v))]] <- squash(
-        readLines(v, warn = FALSE)
+        strip_blockquote(readLines(v, warn = FALSE))
       )
     }
   }
 
   news <- system.file("NEWS.md", package = "intraclass")
   if (nzchar(news)) {
-    out[["NEWS.md"]] <- squash(readLines(news, warn = FALSE))
+    out[["NEWS.md"]] <- squash(strip_blockquote(readLines(news, warn = FALSE)))
   }
 
   # M123: `README.md` ships in the tarball (it is not `.Rbuildignore`d) and is
@@ -348,7 +352,9 @@ installed_doc_surfaces <- function() {
   # too, not only in the source tree.
   readme <- system.file("README.md", package = "intraclass")
   if (nzchar(readme)) {
-    out[["README.md"]] <- squash(readLines(readme, warn = FALSE))
+    out[["README.md"]] <- squash(
+      strip_blockquote(readLines(readme, warn = FALSE))
+    )
   }
   out
 }
@@ -387,7 +393,10 @@ source_doc_surfaces <- function() {
   )
   paths <- paths[file.exists(paths)]
   out <- lapply(paths, function(p) {
-    squash(gsub("^\\s*#+'?\\s?", "", readLines(p, warn = FALSE)))
+    # Roxygen/comment prefix first, then the blockquote marker: a roxygen line
+    # can itself carry one (`#' > note`), never the reverse.
+    lines <- gsub("^\\s*#+'?\\s?", "", readLines(p, warn = FALSE))
+    squash(strip_blockquote(lines))
   })
   stats::setNames(out, sub(paste0("^", root, "/"), "", paths))
 }
@@ -443,38 +452,43 @@ test_that("no source file still claims it either, however the line wraps", {
   }
 })
 
-test_that("no source surface still makes a withdrawn capability claim", {
+test_that("the source walk reads every README surface the layout carries", {
+  # Anti-vacuity for the two surfaces M123 added: every
+  # `expect_false(grepl(...))` passes on an empty string (M116), so the sweep
+  # must be shown to have READ them before its silence means anything.
+  #
+  # Asserted PER FILE against what is on disk, not as a flat membership pair.
+  # `README.Rmd` is `.Rbuildignore`d, so an unpacked source tarball carries
+  # `R/` and `vignettes/` (the leg runs) but no `README.Rmd` -- where a bare
+  # `all(c("README.Rmd", "README.md") %in% ...)` FAILS rather than skips. CI
+  # never caught that: `R CMD check` runs from `.Rcheck` with no `R/` at all.
+  root <- testthat::test_path("..", "..")
   surfaces <- source_doc_surfaces()
   skip_if(length(surfaces) == 0L, "source tree not present")
 
-  # Anti-vacuity: every `expect_false(grepl(...))` passes on an empty string
-  # (M116), so the sweep must be shown to have READ the two surfaces this
-  # milestone added before its silence means anything.
-  expect_true(all(c("README.Rmd", "README.md") %in% names(surfaces)))
-  expect_true(all(nzchar(unlist(surfaces[c("README.Rmd", "README.md")]))))
+  on_disk <- c("README.Rmd", "README.md")
+  on_disk <- on_disk[file.exists(file.path(root, on_disk))]
+  # A layout carrying neither README is not a layout this leg can vacuously
+  # pass in: `README.md` ships in the tarball, so at least one is always there.
+  expect_gt(length(on_disk), 0L)
+  expect_true(all(on_disk %in% names(surfaces)))
+  expect_true(all(nzchar(unlist(surfaces[on_disk]))))
 
-  for (nm in names(surfaces)) {
-    expect_no_capability_claim(surfaces[[nm]], nm)
+  for (nm in on_disk) {
+    expect_no_withdrawn_claim(surfaces[[nm]], nm)
   }
 })
 
-test_that("no installed surface still makes a withdrawn capability claim", {
-  surfaces <- installed_doc_surfaces()
-  skip_if(length(surfaces) == 0L, "no installed surfaces")
-  expect_true(all(nzchar(unlist(surfaces))))
-
-  for (nm in names(surfaces)) {
-    expect_no_capability_claim(surfaces[[nm]], nm)
-  }
-})
-
-test_that("the installed leg reaches README.md when the package is installed", {
+test_that("the installed walk reads README.md when the package is installed", {
   # `README.md` is not `.Rbuildignore`d, so a real install carries it; under
   # `load_all` there is no inst tree and this skips rather than passing on an
   # absent surface.
   readme <- system.file("README.md", package = "intraclass")
   skip_if(!nzchar(readme), "README.md not installed (load_all has no inst)")
-  expect_true("README.md" %in% names(installed_doc_surfaces()))
+  surfaces <- installed_doc_surfaces()
+  expect_true("README.md" %in% names(surfaces))
+  expect_true(nzchar(surfaces[["README.md"]]))
+  expect_no_withdrawn_claim(surfaces[["README.md"]], "README.md")
 })
 
 test_that("the caveat names the worst cell the fixture actually records", {

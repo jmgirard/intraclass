@@ -105,6 +105,18 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
       red/green table.
 - [x] T8: Full gate — profile verify, `air`, `lintr`, the four `data-raw`
       checkers; open the PR and drive CI green.
+- [x] T9: F1/F5/F7 — strip the markdown blockquote marker per line on both walk
+      legs before the join; merge the capability spellings into the existing
+      `claim_patterns`/`expect_no_withdrawn_claim`; replace the two unreachable
+      bare-markup spellings with reachable re-edits.
+- [x] T10: F3 — make the README anti-vacuity floor tarball-safe: assert per file
+      against what is on disk, requiring at least one README leg.
+- [ ] T11: F2 — withdraw the "installed only if you ask for them" clause from
+      `README.Rmd`, `cairn/DESIGN.md` and `CLAUDE.md`; re-knit `README.md`.
+- [ ] T12: F6 — commit `data-raw/m123-capability-claim-mutations.R` and run the
+      full matrix (spellings × surfaces × wrap forms) to a clean floor.
+- [ ] T13: F4 — re-verify both walk legs against the INSTALLED package, not
+      `load_all`; full gate; drive CI green.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
@@ -123,6 +135,10 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
 - 2026-08-16: T5 — `devtools::build_readme()` run twice; the second knit is byte-identical, so AC1's same-toolchain clause holds. The knit also moved four interval endpoints (e.g. `ICC(A,1)` upper 0.715 to 0.714) with every point estimate unchanged: the committed `README.md` was last knitted 2026-07-17 and predates the interval code shipped in M104-M119, so the rendered file was stale on main. This milestone's edits touch prose only and cannot move a number.
 
 - 2026-08-16: review attempt 1 RETURNED to `in-progress` (defect return 1). Two floor findings: the claim pin returns FALSE against the real pre-correction sentence because `squash()` leaves the markdown blockquote `>` mid-sentence, so the primary guarded claim is unguarded and AC6's 27-plant matrix never exercised that wrap; and the rewritten install sentence's new "installed only if you ask for them" clause is false, `glmmTMB` importing `lme4` unconditionally. AC1-AC4 and AC7 verified and ticked; AC5 and AC6 unticked. F3-F7 (tarball-layout floor failure, load_all masking the installed leg, the forked instrument against D-029, the uncommitted mutation harness, two unreachable spellings) ride the same fix round.
+
+- 2026-08-16: T9-T10 — F1 closed: both walk legs now strip `^\s*>+\s?` per line BEFORE the join, so a `> [!NOTE]` callout no longer leaves the marker mid-sentence; restoring `main`'s `README.Rmd` verbatim now reds with 6 failures across 2 blocks where it was green. F5 closed: `capability_claim_patterns` and `expect_no_capability_claim` deleted, the nine spellings merged into the existing `claim_patterns` vector and `expect_no_withdrawn_claim`. F7 closed: `engines_omit_brms_bare`/`install_four_bare` replaced by `engines_omit_brms_and` (connective swap) and `install_four_alpha` (same four names alphabetized) — both reachable re-edits, neither present on any corrected surface. F3 closed: the README floor asserts per file against what is on disk and requires at least one README leg, so an unpacked tarball skips the `.Rbuildignore`d `README.Rmd` instead of hard-failing.
+- 2026-08-16: T11 partial — F2's false clause withdrawn from `README.Rmd`, `cairn/DESIGN.md` and `CLAUDE.md`. `glmmTMB` declares `Imports: lme4 (>= 1.1-18.9000)` (read from the installed DESCRIPTION), so the prose now says intraclass never requires the `Suggests` engines and notes that `lme4` arrives with the default engine regardless. The `README.md` re-knit is still owed.
+- 2026-08-16: T12 in progress — `data-raw/m123-capability-claim-mutations.R` committed: 9 spellings × 3 surfaces × 4 wrap forms = 108 plants, the wrap forms including two blockquote shapes, with a control run and a floor requiring every plant RED. Control clean at 0 failures and the first 4 plants RED; the run was interrupted for this checkpoint and the full matrix has not yet completed.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

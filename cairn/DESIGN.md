@@ -67,8 +67,9 @@ vignettes, `cairn/estimand-specs/`). (Design interview, 2026-07-12.)
 - **Estimation engines** behind one interface: **glmmTMB** (default, `Imports`);
   **lme4**, **brms** (Bayesian), and **lavaan** (SEM) are alternate engines and
   independent oracles, all in `Suggests` behind `rlang::check_installed()` — never
-  `Imports` (light-install path pulls only the non-base Imports: glmmTMB, cli,
-  generics, lifecycle, rlang, tibble).
+  `Imports` (this package's own non-base Imports are just glmmTMB, cli,
+  generics, lifecycle, rlang, tibble; their dependency closures come along as
+  usual — glmmTMB imports lme4, so the default engine brings it regardless).
 - **Public surface:** `icc()` (fit → estimate → interval), `d_study()`
   (decision-study projection), and `choose_icc()` (selection helper), plus tidy S3
   methods (`print`/`summary`/`format`/`tidy`/`glance`/`autoplot`).

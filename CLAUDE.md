@@ -62,8 +62,9 @@ scaffolding, oracle-verification workflow) is not yet re-expressed in cairn term
 ## Engines & install
 - Default engine **glmmTMB** (Imports); **lme4** (Suggests) is an alternate engine
   and an independent oracle. See ADR-002.
-- Light-install path: base install pulls only the non-base Imports — `glmmTMB`,
-  `cli`, `generics`, `lifecycle`, `rlang`, `tibble`. Optional engines
+- Light-install path: this package's own non-base Imports are `glmmTMB`, `cli`,
+  `generics`, `lifecycle`, `rlang`, `tibble` — their own dependencies still
+  come along (`glmmTMB` imports `lme4`). Optional engines
   (Bayesian/SEM, M5) live in `Suggests` behind `rlang::check_installed()` —
   never `Imports`.
 
