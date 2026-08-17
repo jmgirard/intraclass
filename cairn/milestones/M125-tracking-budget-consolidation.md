@@ -118,7 +118,7 @@ Raising or lowering either budget → a tracking-rules change, not this repo's.
 - [x] **T7.** Author `cairn/doctrine/source-ingestion.md` from `LESSONS.md:16`
       (PDF text layer vs printed page; per-note quotation sweeps); delete the
       line; record the mapping.
-- [ ] **T8.** Compress the leftover in-place extension blocks until
+- [x] **T8.** Compress the leftover in-place extension blocks until
       `wc -c cairn/LESSONS.md` is under 20,000; measure after each family and
       record the running figure, so a shortfall surfaces before review.
 - [ ] **T9.** Re-check `data-raw/record-claims.tsv` against the edited ROADMAP —
@@ -149,6 +149,7 @@ Raising or lowering either budget → a tracking-rules change, not this repo's.
 - 2026-08-17: T5 retired-line → destination: LESSONS line opening `2026-08-08 (M115): a doc-claim pin` (maturation exit) → `cairn/doctrine/doc-claim-pins.md`, all sections; hunk: this commit's cairn/LESSONS.md deletion of that line. LESSONS at 26,008 bytes.
 - 2026-08-17: T6 retired-line → destination: LESSONS line opening `2026-07-23 (M85): the check-references CI job` (maturation exit) → `cairn/doctrine/data-raw-checkers.md`, all sections, with a DESIGN.md Conventions pointer bullet; hunk: this commit's cairn/LESSONS.md deletion of that line. LESSONS at 22,932 bytes.
 - 2026-08-17: T7 retired-line → destination: LESSONS line opening `2026-07-19 (M66): a string absent from a PDF's TEXT LAYER` (maturation exit) → `cairn/doctrine/source-ingestion.md`, both sections; hunk: this commit's cairn/LESSONS.md deletion of that line. LESSONS at 21,580 bytes / 44 lines — T8 still owes 1,581+.
+- 2026-08-17: T8 — six extension-block lines compressed in place, substance kept, no date token removed (M115-trend, M82, M107/M109, M77/M78, M86, then the M114 terminal-row line whose attribution/remedy tail now lives in doctrine/data-raw-checkers.md). Running figures: 20,030 after the first five, 19,701 / 44 lines after the sixth — under the 20,000 budget.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
