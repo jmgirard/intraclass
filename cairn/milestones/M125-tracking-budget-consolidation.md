@@ -100,7 +100,7 @@ Raising or lowering either budget → a tracking-rules change, not this repo's.
       carried there — row 30's two standing audit findings against the digest
       shape are the known case — and migrate any remainder into a surviving row
       before deleting. One work-log disposition line per row.
-- [ ] **T2.** Compress the widest live candidate rows to promotion condition +
+- [x] **T2.** Compress the widest live candidate rows to promotion condition +
       falsifier + lineage, heaviest first: `:46` (3,729 B), `:45`, `:42`, `:43`,
       `:34`, `:27`, `:29`, `:44`. Cite the milestone file holding each
       measurement narrative; never restate it.
@@ -142,6 +142,7 @@ Raising or lowering either budget → a tracking-rules change, not this repo's.
 - 2026-08-17: T1 row "Measure Burch's leptokurtic width reversal on a both-components-non-normal grid" — promoted-and-shipped (milestones/archive/M118-width-reversal-grid.md, verdict D-030); no live remainder, the doc reconciliation shipped as M119.
 - 2026-08-17: T1 row "Stale checkpoints can silently feed the M111 sweep the wrong rows" — promoted-and-shipped (milestones/archive/M120-checkpoint-staleness-guard.md); no live remainder, the walk's blind spots already hold their own surviving row.
 - 2026-08-17: T1 row "Cache CI R dependencies to cut per-run install time" — superseded (D-011; milestones/archive/M78-cut-ci-test-suite-wallclock.md records the falsified premise and the shipped lever).
+- 2026-08-17: T2 — the eight widest live rows compressed to promotion condition + falsifier + lineage, each citing its archive/references narrative holder (full pre-compression text at the T1 commit 52573c0); the kappa-worst-steps figures kept in place because the registered claim requires its citation in ROADMAP. ROADMAP now 22,687 bytes / 52 lines; all four data-raw checkers green.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
