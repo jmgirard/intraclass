@@ -83,7 +83,7 @@ and a runnable numeric-`unit` projection → candidate row, this plan.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Add the `summary()` demonstration — `getting-started.Rmd` is the
+- [x] T1: Add the `summary()` demonstration — `getting-started.Rmd` is the
       natural home, after the `tidy()`/`glance()` pair at `:87-89`; show the
       interpretive notes `R/icc-methods.R:302-345` produces.
 - [ ] T2: Add the `tidy()`/`glance()` chunk on a `d_study()` result in
@@ -103,6 +103,7 @@ and a runnable numeric-`unit` projection → candidate row, this plan.
 
 - 2026-08-16: created by /milestone-plan (assessment run over documentation and vignettes; two [S] audits + one [O] criteria audit).
 - 2026-08-16: criteria audit ran in FULL mode (user-facing tier) and returned findings F8-F11 against this milestone; fixed into the criteria before the gate — F8(i) the title and scope no longer call `summary()` "undemonstrated", since `R/data.R:58-59` already demonstrates it in a shipped Rd example, so the gap is vignette-only; F9 "live chunk" is defined against the vignettes' existing `requireNamespace` guard rather than as an unconditional chunk (ggplot2 is Suggests under GP1's light-install path), and `plot()` is fenced against rendering a duplicate figure; F10 the per-S3-method `\value` criterion was cut to a candidate row rather than shipped as a universal over (Rd page × alias) that no named procedure enumerates and that `man/reexports.Rd` cannot satisfy at all; F11 the demonstrate-or-describe disjunction was split, so `seed` must be executed and only `conf_level`/`mc_samples` may be prose.
+- 2026-08-17: T1 — `summary(fit)` demonstrated in `getting-started.Rmd` after the tidy/glance pair; prose derived from the executed output (report reprinted, then one interpretive note per error definition present plus the single-rating-per-cell note). Vignette renders clean.
 - 2026-08-17: substantive amendment at the implement question gate — AC2's parenthetical (`type`, `level`, `occasions`) was falsified: by enumeration of `tidy.icc` (`R/icc-methods.R:349`) and `tidy.icc_dstudy` (`R/d-study.R:640`), `m` is the only column the D-study tidy carries that the icc tidy does not — `type`/`level` are unconditional in `tidy.icc` (built at `R/icc.R:2397`) and `occasions` is gated on the same `isTRUE(x$design$replicates)` predicate on both sides; confirmed across 11 fit/projection configurations.
 - 2026-08-17: amended AC2 audited in FULL mode (user-facing tier) by a fresh-context [O] reader that did not author it; it returned findings on satisfiability (my draft was vacuous — the vignette already names `m` five times as a math symbol), bounded promise, probe variation (the gloss "projected rater count" is false on the occasion axis, where `m` is held constant), instrument-vs-deliverable and proportionality (the dated-measurement parenthetical bound the package's column sets, not the shipped vignette). All five fixed into the wording: the binding clause names its vignette and ties the naming to the chunk's tidy output, and the measurement moved here as rationale.
 - 2026-08-17: /milestone-implement opened; status in-progress on branch `m124-undemonstrated-surface`, cut from `main` at 9d2f8d2 (M123 merged, so the merge-conflict falsification logged below is moot).

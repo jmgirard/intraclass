@@ -89,6 +89,15 @@ tidy(fit)
 glance(fit)
 ```
 
+`summary()` is the other reading of the same fit: it reprints the report above and
+then appends a short **interpretive note for each error definition present**, plus
+one about what a single rating per cell can and cannot separate. Nothing is
+recomputed --- the notes are read off the design, so they track whatever you fitted:
+
+```{r summary}
+summary(fit)
+```
+
 ## Interpret
 
 **Single vs. the average of several raters.** `ICC(A,1)` = `r fmt(a1)` is the
