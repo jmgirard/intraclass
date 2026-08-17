@@ -38,7 +38,7 @@ so `d_study()` reuses the fit you already have — no refitting.
 
 ```{r dstudy, eval = requireNamespace("glmmTMB", quietly = TRUE)}
 fit <- icc(ratings, score, subject, rater, type = "agreement", seed = 1)
-proj <- d_study(fit, m = 1:8, seed = 7)
+proj <- d_study(fit, m = 1:8, seed = 1)
 proj
 ```
 
@@ -49,11 +49,11 @@ For a one-off value you can also ask `icc()` for it inline with a numeric `unit`
 e.g. `unit = c("single", "average", 6)`.
 
 The projection's own interval settings --- `conf_level`, `mc_samples` and `seed`
---- each default to the value stored on the fit, so a seeded fit already gives a
-reproducible projection. Pass any of them to `d_study()` to override it for this
-call alone; `seed = 7` above does exactly that.
-
-### The projection as data
+--- default to the fit's own whenever the fit carries them, which a default
+Monte-Carlo fit does; pass any of them to `d_study()` to override it for this
+call alone. The `seed = 1` above is the fit's own seed passed explicitly, which
+is why the `m = 4` row reproduces the fit's `ICC(A,k)` *interval* exactly, and
+not merely its estimate.
 
 `tidy()` turns the projection into one row per projected point, and `glance()`
 summarizes the projection as a whole:
@@ -87,8 +87,8 @@ autoplot(d_study(fit, m = 1:12))
 There is also a `plot()` method, for the console habit of drawing a picture as a
 side effect: `plot()` on a projection prints the very same ggplot that
 `autoplot()` builds from it, then returns the projection invisibly. We show the
-call rather than run it, since running it would render a second copy of the curve
-above:
+call rather than run it, since running it would render another reliability curve
+just like the one above:
 
 ```{r dstudy-plot-wrapper, eval = FALSE}
 plot(proj)

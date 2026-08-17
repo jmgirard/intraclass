@@ -373,15 +373,15 @@
   `design` argument is how you resolve it — as the same vignette's section on
   incomplete data already explained.
 * The *Getting started* vignette now shows `summary()` on a fitted `icc`. It
-  reprints the report and appends an interpretive note for each error definition
-  present, plus one on what a single rating per cell can and cannot separate —
-  output no vignette displayed before.
+  reprints the report and appends interpretive notes — for the default two-way
+  fit shown there, one per error definition reported plus one on what a single
+  rating per cell cannot separate — output no vignette displayed before.
 * The *D-studies and within-cell replicates* vignette now shows a projection as
   data: `tidy()` on a `d_study()` result — where `m`, the rater-count column, is
   the one column it carries that `tidy()` on the fit does not — `glance()` on the
-  same projection, the `plot()` wrapper for `autoplot()`, and `d_study()`'s own
-  `conf_level`, `mc_samples`, and `seed` settings, each of which defaults to the
-  value stored on the fit and can be overridden per call.
+  same projection, and `d_study()`'s own `conf_level`, `mc_samples`, and `seed`
+  settings, which take the fit's values whenever the fit carries them and can be
+  overridden per call. It also describes the `plot()` wrapper for `autoplot()`.
 * `autoplot()` on a `d_study()` result now carries a runnable example on
   `?d_study`, matching the one `autoplot()` on an `icc` fit already had.
 
