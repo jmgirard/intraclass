@@ -29,11 +29,13 @@ spellings <- list(
   bayes_planned = "A Bayesian engine is planned for a later release.",
   bayes_not_yet = "A Bayesian engine is not yet available.",
   engines_omit_brms = "Fits run on mixed-model engines (`glmmTMB`, `lme4`) or an SEM engine.",
-  engines_omit_brms_and = "Fits run on mixed-model engines (`glmmTMB`, `lme4`) and an SEM engine.",
+  engines_omit_brms_bare = "Fits run on mixed-model engines (glmmTMB, lme4) or an SEM engine.",
   install_four_marked = "The base install is light -- only `glmmTMB`, `cli`, `rlang`, and `generics`.",
-  install_four_alpha = "The base install is light -- only `cli`, `generics`, `glmmTMB`, and `rlang`.",
-  design_never_declare = "The design is inferred from the crossing pattern, so you never declare it.",
-  design_never_declare_alt = "The design is inferred, so you never declare the design yourself."
+  install_four_bare = "The base install is light -- only glmmTMB, cli, rlang, and generics.",
+  design_never_declare = "The layout is inferred from the data \u2014 you never declare it, ever.",
+  design_never_declare_alt = "The design is inferred, so you never declare the design yourself.",
+  install_pulls_news = "It now names every non-base package the install pulls, at last.",
+  install_arrives_readme = "Note that glmmTMB imports lme4, so that one arrives with the default engine anyway."
 )
 
 # Every spelling named in the pin file must appear above. This is what stops
@@ -44,7 +46,7 @@ pin_names <- sub(
   "^\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*=.*$",
   "\\1",
   grep(
-    "^\\s*(bayes|engines_omit|install_four|design_never)[A-Za-z0-9_]*\\s*=",
+    "^\\s*(bayes|engines_omit|install_|design_never)[A-Za-z0-9_]*\\s*=",
     pin_src,
     value = TRUE
   )
@@ -101,17 +103,15 @@ split_point <- function(sentence) {
   spaces[which.min(abs(spaces - nchar(sentence) / 2))]
 }
 
-# Surfaces, one per markup regime the two walks read: markdown prose that the
-# installed leg also sees, roxygen that only the source leg sees, and the
-# `README.Rmd` source that neither the installed leg nor a built tarball can
-# see. Each plant goes at the file's end, where no syntax is disturbed.
+# Source-leg surfaces: two markup regimes the source walk reads differently --
+# markdown prose, and roxygen, whose `#'` prefix is stripped per line before the
+# join. Two is AC6's floor; adding the vignette and `README.md` here would
+# double the matrix without varying the regime, and `README.md` is planted on
+# the installed leg below, where it is the surface that actually matters.
+# Each plant goes at the file's end, where no syntax is disturbed.
 surfaces <- list(
   "README.Rmd" = list(path = "README.Rmd", prefix = ""),
-  "R/icc.R" = list(path = "R/icc.R", prefix = "#' "),
-  "vignettes/multilevel-designs.Rmd" = list(
-    path = "vignettes/multilevel-designs.Rmd",
-    prefix = ""
-  )
+  "R/icc.R" = list(path = "R/icc.R", prefix = "#' ")
 )
 stopifnot(
   "a declared surface is missing" = all(vapply(
@@ -121,17 +121,101 @@ stopifnot(
   ))
 )
 
+# Installed-leg surfaces: the plain-text files a real install carries. These are
+# planted in the LIBRARY TREE, not in the source -- planting a source file and
+# running against the installed package would leave every installed-leg cell
+# green, since the installed copy is untouched. `Rd:*` is not here: the
+# installed help database is a binary lazy-load `.rdb`, so exercising it needs
+# document() + reinstall per plant, which is deferred with the rest of the
+# per-class reachability work (ROADMAP candidate row).
+#
+# `load_all` is deliberately NOT used for these cells. Its `system.file()` shim
+# falls back to the package root, which is exactly how M123's first two rounds
+# reported installed-leg coverage they did not have.
+installed_targets <- function() {
+  lib <- system.file(package = "intraclass")
+  if (!nzchar(lib) || identical(normalizePath(lib), normalizePath("."))) {
+    return(list())
+  }
+  out <- list()
+  readme <- file.path(lib, "README.md")
+  if (file.exists(readme)) {
+    out[["README.md"]] <- readme
+  }
+  news <- file.path(lib, "NEWS.md")
+  if (file.exists(news)) {
+    out[["NEWS.md"]] <- news
+  }
+  vig <- list.files(
+    file.path(lib, "doc"),
+    pattern = "[.]Rmd$",
+    full.names = TRUE
+  )
+  if (length(vig)) {
+    out[[paste0("vignette:", basename(vig[1]))]] <- vig[1]
+  }
+  out
+}
+
 run_pins <- function() {
   res <- testthat::test_file(pin_file, reporter = "silent", package = NULL)
   df <- as.data.frame(res)
   sum(df$failed) + sum(df$error)
 }
 
-plant_and_run <- function(path, lines) {
-  original <- readLines(path, warn = FALSE)
-  on.exit(writeLines(original, path), add = TRUE)
-  writeLines(c(original, lines), path)
-  run_pins()
+# The installed leg runs the pin file against the INSTALLED build, in a FRESH
+# SUBPROCESS. That is not fastidiousness: this process has already called
+# `pkgload::load_all()` for the source cells, and under a dev-loaded namespace
+# `system.file()` keeps resolving to the checkout no matter what
+# `load_package = "installed"` asks for -- so an in-process installed cell
+# would re-read the source file and report coverage it does not have, which is
+# the exact defect (M116's shadowing) this leg exists to rule out.
+run_pins_installed <- function() {
+  code <- paste(
+    'r <- as.data.frame(testthat::test_dir("tests/testthat",',
+    'package = "intraclass", load_package = "installed",',
+    'filter = "doc-skew-caveat", reporter = "silent",',
+    'stop_on_failure = FALSE));',
+    'cat(sum(r$failed) + sum(r$error))'
+  )
+  out <- suppressWarnings(system2(
+    "Rscript",
+    c("-e", shQuote(code)),
+    stdout = TRUE,
+    stderr = FALSE
+  ))
+  n <- suppressWarnings(as.integer(utils::tail(out, 1)))
+  stopifnot("installed-leg subprocess produced no count" = !is.na(n))
+  n
+}
+
+# And prove the subprocess really reads the library tree before trusting any
+# cell it reports. A harness that cannot tell the two apart is the thing that
+# shipped twice here already.
+assert_installed_leg_is_real <- function() {
+  out <- suppressWarnings(system2(
+    "Rscript",
+    c("-e", shQuote('cat(system.file("README.md", package = "intraclass"))')),
+    stdout = TRUE,
+    stderr = FALSE
+  ))
+  path <- utils::tail(out, 1)
+  stopifnot(
+    "installed leg resolves to the source tree, not the library" = nzchar(
+      path
+    ) &&
+      !identical(normalizePath(dirname(path)), normalizePath("."))
+  )
+  path
+}
+
+plant_and_run <- function(path, lines, runner = run_pins) {
+  original <- readBin(path, "raw", file.size(path))
+  on.exit(writeBin(original, path), add = TRUE)
+  con <- file(path, open = "ab")
+  writeLines(c("", lines), con)
+  close(con)
+  runner()
 }
 
 suppressMessages(pkgload::load_all(".", quiet = TRUE))
@@ -184,4 +268,57 @@ stopifnot(
     matrix_rows$verdict == "RED"
   )
 )
-cat("floor holds: every planted claim reds at every surface and wrap form.\n")
+stopifnot(
+  "a planted claim did not red -- that surface/wrap is unguarded" = all(
+    matrix_rows$verdict == "RED"
+  )
+)
+cat("source leg: every planted claim reds at every surface and wrap form.\n\n")
+
+# ---- installed leg -------------------------------------------------------
+# One wrap form per cell (the blockquote, the shape that defeated round 1),
+# across every plain-text surface a real install carries.
+targets <- installed_targets()
+if (!length(targets)) {
+  cat("installed leg SKIPPED: package not installed, or system.file resolves\n")
+  cat("to the source tree (run devtools::install() first).\n")
+} else {
+  assert_installed_leg_is_real()
+  ibase <- run_pins_installed()
+  cat(sprintf("installed control: %d failure(s)\n", ibase))
+  stopifnot("installed control reds" = ibase == 0L)
+  irows <- list()
+  for (sp in names(spellings)) {
+    for (tg in names(targets)) {
+      lines <- wrap_forms$blockquote(spellings[[sp]], "")
+      n <- plant_and_run(targets[[tg]], lines, runner = run_pins_installed)
+      irows[[length(irows) + 1L]] <- data.frame(
+        spelling = sp,
+        surface = tg,
+        failures = n,
+        verdict = if (n > ibase) "RED" else "GREEN",
+        stringsAsFactors = FALSE
+      )
+      cat(sprintf(
+        "%-26s %-28s %2d %s\n",
+        sp,
+        tg,
+        n,
+        if (n > ibase) "RED" else "GREEN <-- UNGUARDED"
+      ))
+    }
+  }
+  irows <- do.call(rbind, irows)
+  cat(sprintf(
+    "\ninstalled leg: %d plants, %d RED, %d GREEN\n",
+    nrow(irows),
+    sum(irows$verdict == "RED"),
+    sum(irows$verdict == "GREEN")
+  ))
+  stopifnot(
+    "a planted claim did not red on the installed leg" = all(
+      irows$verdict == "RED"
+    )
+  )
+  cat("installed leg: every planted claim reds at every plain-text surface.\n")
+}

@@ -131,18 +131,18 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
       tarball-safe README floor; withdraw the "installed only if you ask" clause
       and re-knit; commit `data-raw/m123-capability-claim-mutations.R` and run
       its matrix; re-verify against the installed package.
-- [ ] T14: AC2 — rewrite the README install sentence to attribute the list to
+- [x] T14: AC2 — rewrite the README install sentence to attribute the list to
       `Imports:` (dropping "imports only"); re-knit; add the enumerate-and-assert
       command as a `test_that()` block, run after a fresh install.
-- [ ] T15: AC8 — withdraw the NEWS transitive sentence and the README's
+- [x] T15: AC8 — withdraw the NEWS transitive sentence and the README's
       "that one"/"light" clause; pin both spellings in `claim_patterns`.
-- [ ] T16: AC6 — add a backtick-free spelling per claim; correct the two false
+- [x] T16: AC6 — add a backtick-free spelling per claim; correct the two false
       comments (Rd markup, `load_all` skip) against a recorded probe.
 - [ ] T17: AC5/AC6 — plant at `README.md`; run the installed leg against a real
       install for the plain-text surfaces; add the gated glob floors.
 - [ ] T18: AC7 — resolve the spelling NOTE; run `devtools::check()` on this
       branch and on `main` under the same toolchain and compare.
-- [ ] T20: simplify the pin per the plan gate — drop or narrow each spelling
+- [x] T20: simplify the pin per the plan gate — drop or narrow each spelling
       guarding no reachable surface or able to red on a future TRUE sentence
       (`install_four_alpha`, `design_never_declare`); log what went and why.
 - [ ] T19: Full gate; push; drive CI green.
@@ -184,6 +184,11 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
 - 2026-08-16: split decided at the sizing gate — M123 keeps the corrections and the pins that demonstrably catch the real sentences; the proof apparatus (per-class reachability reporting, installed-leg planting at one reinstall per spelling, the `Rd:*` wrap sweep, the harness plant-target cross-check) goes to M125, `Depends on: M123`. AC5 and AC6 narrowed accordingly — the backtick-free spelling per claim stays here, since it is a spelling and not machinery. Plan-owned body back to under the cap after compressing the completed T1-T13 into three done-lines (their detail is in this work log and in git); `cairn_validate` green, one sizing advisory left.
 - 2026-08-16: F15 settled by command against the round-2 audit's refutation of it. `R CMD check` on this branch reports `Status: 1 NOTE` — reproducible on a second full run — from the `spelling.Rout` vs `spelling.Rout.save` comparison, whose flagged-word list now includes `README`/`README's` from this branch's new NEWS bullet (`main`'s NEWS.md contains no occurrence of the word). The audit's ground for refusing F15 was that no `.Rout.save` exists in the repo, which is true of the checkout — `git ls-files tests/` lists only `spelling.R` and `testthat.R` — and does not settle the check environment, where the comparison demonstrably runs. `devtools::check()`'s own summary line filters that NOTE class and prints `0 notes`, which is why the two reports disagree. Whether the branch INTRODUCED it is what amended AC7's differential against `main` exists to decide; T18 runs it.
 - 2026-08-16: amendment — AC6's deferral pointer changed from `M125's` to the ROADMAP candidate row, executing the plan gate's refusal to plan that milestone: D-021 bars a milestone whose deliverable is a guard over this repo's own records absent a trigger in what the package computes, and D-029's consequences clause declines to exempt apparatus. The promise is unchanged; only the destination of the deferred work moved. T20 added for the simplification the same gate chose.
+- 2026-08-16: T14/T15 — README install sentence rewritten to attribute the list to the `Imports:` field and to say plainly that an installation retrieves the full closure of those declarations; the NEWS bullet's "every non-base package the install pulls" and the README's "so that one arrives with the default engine" both withdrawn, and both pinned as spellings. AC2's enumerate-and-assert test added: it drops `R/*.R`, `width_split()`s every remaining surface on both legs, selects sentences naming >=3 of the non-base Imports, fails on an empty enumeration, and requires each to name exactly the set and carry `Imports` or `non-base` case-sensitively.
+- 2026-08-16: T16/T20 — every claim now carries a backtick-free spelling, `engines_omit_brms_bare` and `install_four_bare` restored for the reason the second pass got backwards: `rd_flat()` discards `\code{}`, so the flattened help database has 0 backticks (measured against a roxygen source that has them) and a backticked-only pattern is inert on the one class a built package's walk reads. Two false comments corrected against measurement — the Rd-markup claim, and the "skips under `load_all`" claim on the installed-README block, which does not skip because pkgload's `system.file()` falls back to the package root. Simplification: `install_four_alpha` dropped (it encoded a package set, so dropping `lifecycle` or `tibble` from `Imports:` would have made the CORRECTED sentence read as a withdrawn claim) and `design_never_declare` narrowed from four words of ordinary English to the clause it actually shipped in.
+- 2026-08-16: T17 — AC5's vignette floor derived from the `vignettes/*.Rmd` glob instead of a two-name hand list, which had left `multilevel-designs.Rmd` — the sole home of one withdrawn claim — unfloored on both legs. Harness reworked: source surfaces cut to the two distinct markup regimes, `README.md`/`NEWS.md`/an installed vignette planted in the LIBRARY TREE for the installed leg, byte-faithful `readBin`/`writeBin` restore, and the installed cells run in a fresh subprocess with a pre-flight assertion that `system.file()` resolves outside the checkout — because this process has already called `load_all()`, under which an in-process installed cell would re-read the source and report coverage it does not have.
+- 2026-08-16: T18 (partial) — `README`/`README's` added to `inst/WORDLIST` (the first occurrence of the word in `NEWS.md` came from this branch's own bullet; `Revelle`/`Revelle's` show the file lists possessives separately). `spelling::spell_check_package()` no longer flags either. The `devtools::check()` differential against `main` that AC7 now requires runs at the gate.
+- 2026-08-16: process note — a `git stash` run while the mutation harness held a plant in `README.Rmd` captured the planted line into the stash and the pin caught it on the next run (`bayes_planned` present in `README.Rmd`). Removed, README re-knitted, suite green. Nothing touches the tree while that harness runs.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

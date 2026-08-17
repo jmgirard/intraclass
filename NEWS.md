@@ -363,8 +363,10 @@
   "brms"` ships, with `ci_method = "posterior"`, `posterior_summary`, and
   `prior`/`brm_args` arguments, and it now appears in the README's list of
   estimation engines alongside `glmmTMB`, `lme4`, and `lavaan`. The README's
-  base-install list was also two packages short — it now names every non-base
-  package the install pulls (`lifecycle` and `tibble` were missing).
+  base-install list was also two packages short, and described what an
+  installation retrieves rather than what the package declares; it now names
+  every non-base entry of the `Imports:` field (`lifecycle` and `tibble` were
+  missing).
 * The *Multilevel designs* vignette no longer says the multilevel design is
   never declared by the user. `icc()` infers it from the crossing pattern on
   complete data, but when missing cells leave that pattern ambiguous the
