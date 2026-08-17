@@ -2348,11 +2348,25 @@ test_that("a dependency list on any swept surface is attributed to Imports", {
   # engine files collapse to blobs naming `glmmTMB`, `cli` and `rlang` inside
   # one function body, and the only way to satisfy the rule there would be to
   # plant a dependency list into a fitting function.
-  imports <- trimws(strsplit(
-    read.dcf(testthat::test_path("..", "..", "DESCRIPTION"), "Imports")[1, 1],
-    ","
-  )[[1]])
-  skip_if(!length(imports) || is.na(imports[1]), "no Imports field")
+  # The `Imports:` field is read from the INSTALLED metadata first. Under
+  # `R CMD check` the tests run from `.Rcheck/tests/testthat`, where
+  # `../../DESCRIPTION` does not exist -- the package sits at
+  # `.Rcheck/intraclass/`. Reading the source path unconditionally errored the
+  # whole check, green everywhere else; `packageDescription()` resolves in
+  # every layout that has the package loaded at all.
+  imports_field <- tryCatch(
+    utils::packageDescription("intraclass")$Imports,
+    error = function(e) NULL
+  )
+  if (is.null(imports_field) || is.na(imports_field)) {
+    src <- testthat::test_path("..", "..", "DESCRIPTION")
+    if (file.exists(src)) imports_field <- read.dcf(src, "Imports")[1, 1]
+  }
+  skip_if(
+    is.null(imports_field) || is.na(imports_field),
+    "no Imports field reachable in this layout"
+  )
+  imports <- trimws(strsplit(imports_field, ",")[[1]])
   imports <- sub("[[:space:]]*\\(.*", "", imports)
   non_base <- sort(setdiff(
     imports,
