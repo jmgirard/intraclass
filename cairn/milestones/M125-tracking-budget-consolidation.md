@@ -112,7 +112,7 @@ Raising or lowering either budget → a tracking-rules change, not this repo's.
 - [x] **T5.** Author `cairn/doctrine/doc-claim-pins.md` from `LESSONS.md:47`
       (wrapped-claim search, installed-vs-source surfaces, `rd_flat()`,
       blockquote stripping); delete the line; record the mapping.
-- [ ] **T6.** Author `cairn/doctrine/data-raw-checkers.md` from `LESSONS.md:31`
+- [x] **T6.** Author `cairn/doctrine/data-raw-checkers.md` from `LESSONS.md:31`
       (the four checkers, what stales each, the `check-references` CI job) and
       add one `DESIGN.md` Conventions bullet pointing at it; delete the line.
 - [ ] **T7.** Author `cairn/doctrine/source-ingestion.md` from `LESSONS.md:16`
@@ -147,6 +147,7 @@ Raising or lowering either budget → a tracking-rules change, not this repo's.
 - 2026-08-17: T4 retired-line → destination: LESSONS line opening `2026-07-23 (M84, corrected 2026-08-03` (maturation exit) → `cairn/DESIGN.md` **GP9**; hunk: this commit's cairn/LESSONS.md deletion of that line (T3/T4 checkpoint).
 - 2026-08-17: T3+T4 landed in one checkpoint commit (both edit the same DESIGN.md GP block); Principles-touched slot filled GP8, GP9 now that both exist. LESSONS at 30,657 bytes after the two retirements.
 - 2026-08-17: T5 retired-line → destination: LESSONS line opening `2026-08-08 (M115): a doc-claim pin` (maturation exit) → `cairn/doctrine/doc-claim-pins.md`, all sections; hunk: this commit's cairn/LESSONS.md deletion of that line. LESSONS at 26,008 bytes.
+- 2026-08-17: T6 retired-line → destination: LESSONS line opening `2026-07-23 (M85): the check-references CI job` (maturation exit) → `cairn/doctrine/data-raw-checkers.md`, all sections, with a DESIGN.md Conventions pointer bullet; hunk: this commit's cairn/LESSONS.md deletion of that line. LESSONS at 22,932 bytes.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->

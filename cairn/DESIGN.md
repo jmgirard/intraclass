@@ -99,6 +99,9 @@ vignettes, `cairn/estimand-specs/`). (Design interview, 2026-07-12.)
 - **Format with `air`** (`air format .`); CI enforces `air format --check`;
   `lintr` owns semantic linters only.
 - Tracking travels with code (cairn: same commit as the work).
+- **Data-raw record checkers:** what the `check-references` CI job runs, what
+  stales each ledger, and the run-all-four-before-push rule live in
+  [`doctrine/data-raw-checkers.md`](doctrine/data-raw-checkers.md).
 
 ## Design Principles
 
