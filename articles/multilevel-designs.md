@@ -147,7 +147,14 @@ The classroom example above has every rater rate every pupil in every
 classroom, so raters are **crossed** with clusters (ten Hove et al.’s
 Design 1). Two other layouts are common, and
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
-**infers which one you have** from the data — you never declare it:
+**infers which one you have** from the crossing pattern, so on complete
+data you need not declare it. (When missing cells leave the pattern
+genuinely ambiguous,
+[`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
+refuses to guess and you say which you mean with the `design` argument —
+see [*Incomplete (ragged) multilevel
+designs*](#incomplete-ragged-multilevel-designs) below.) The two layouts
+are:
 
 - **Raters nested in clusters** (Design 2): each classroom has its *own*
   panel of raters. There is then no between-cluster reliability to
