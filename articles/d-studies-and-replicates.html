@@ -103,7 +103,7 @@ change of the averaging divisor,</p>
 refitting.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, type <span class="op">=</span> <span class="st">"agreement"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">proj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/d_study.html">d_study</a></span><span class="op">(</span><span class="va">fit</span>, m <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">8</span><span class="op">)</span></span>
+<span><span class="va">proj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/d_study.html">d_study</a></span><span class="op">(</span><span class="va">fit</span>, m <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">8</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">proj</span></span>
 <span><span class="co">#&gt; # D-study projection: two-way random, absolute agreement</span></span>
 <span><span class="co">#&gt; Observed raters: 4 | CI: 95% montecarlo (10000 draws)</span></span>
@@ -123,6 +123,43 @@ exactly the <code>ICC(A,k)</code> you would get from <code><a href="../reference
 directly. For a one-off value you can also ask <code><a href="../reference/icc.html">icc()</a></code> for it
 inline with a numeric <code>unit</code>,
 e.g. <code>unit = c("single", "average", 6)</code>.</p>
+<p>The projection’s own interval settings — <code>conf_level</code>,
+<code>mc_samples</code> and <code>seed</code> — default to the fit’s own
+whenever the fit carries them, which a default Monte-Carlo fit does;
+pass any of them to <code><a href="../reference/d_study.html">d_study()</a></code> to override it for this call
+alone. The <code>seed = 1</code> above is the fit’s own seed passed
+explicitly, which is why the <code>m = 4</code> row reproduces the fit’s
+<code>ICC(A,k)</code> <em>interval</em> exactly, and not merely its
+estimate.</p>
+<p><code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code> turns the projection into one row per projected
+point, and <code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code> summarizes the projection as a
+whole:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">proj</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 8 × 8</span></span></span>
+<span><span class="co">#&gt;       m index    estimate std.error conf.low conf.high conf.level method    </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1 ICC(A,1)    0.290     0.180   0.050<span style="text-decoration: underline;">3</span>     0.706       0.95 montecarlo</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2 ICC(A,2)    0.449     0.203   0.095<span style="text-decoration: underline;">9</span>     0.828       0.95 montecarlo</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     3 ICC(A,3)    0.550     0.205   0.137      0.878       0.95 montecarlo</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>     4 ICC(A,4)    0.620     0.202   0.175      0.906       0.95 montecarlo</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>     5 ICC(A,5)    0.671     0.196   0.210      0.923       0.95 montecarlo</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>     6 ICC(A,6)    0.710     0.189   0.241      0.935       0.95 montecarlo</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span>     7 ICC(A,7)    0.741     0.182   0.271      0.944       0.95 montecarlo</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span>     8 ICC(A,8)    0.765     0.176   0.298      0.950       0.95 montecarlo</span></span>
+<span></span>
+<span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">proj</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 9</span></span></span>
+<span><span class="co">#&gt;     n_m m_min m_max type      raters k_observed conf.level method     mc_samples</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     8     1     8 agreement random          4       0.95 montecarlo      <span style="text-decoration: underline;">10</span>000</span></span></code></pre></div>
+<p>The one column here that <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code> on the <em>fit</em> does
+not also give you is <strong><code>m</code></strong>, the rater-count
+column — which is the whole point of a D-study: the same coefficient,
+indexed by the rater count it is projected to. <code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code>
+describes the projection rather than the model, reporting the swept
+range (<code>n_m</code>, <code>m_min</code>, <code>m_max</code>)
+alongside the design and the interval settings.</p>
 <p>We fit with <code>type = "agreement"</code> here because the
 dependability coefficient above <em>is</em> the absolute-agreement
 projection. A default <code><a href="../reference/icc.html">icc()</a></code> reports both agreement and
@@ -133,10 +170,18 @@ picture clear.</p>
 <p>Read as a curve, this is the classic “how many raters?” picture —
 plot it with <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> (which needs
 <strong>ggplot2</strong>):</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="fu"><a href="../reference/d_study.html">d_study</a></span><span class="op">(</span><span class="va">fit</span>, m <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">12</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="d-studies-and-replicates_files/figure-html/dstudy-plot-1.png" class="r-plt" alt="Projected reliability rising with the number of raters, with a Monte-Carlo interval band." width="700"></p>
+<p>There is also a <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> method, for the console habit of
+drawing a picture as a side effect: <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> on a projection
+prints the very same ggplot that <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> builds from it,
+then returns the projection invisibly. We show the call rather than run
+it, since running it would render another reliability curve just like
+the one above:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">proj</span><span class="op">)</span></span></code></pre></div>
 <p><strong>Projection is extrapolation.</strong> The rater variance
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>σ</mi><mi>r</mi><mn>2</mn></msubsup><annotation encoding="application/x-tex">\sigma^2_r</annotation></semantics></math>
 is estimated from only as many raters as you observed, so projecting far
@@ -160,7 +205,7 @@ subject high or low — a <em>stable</em> disagreement?) and <strong>pure
 error</strong> (how much a rater’s repeat ratings of the same subject
 wobble). <code><a href="../reference/icc.html">icc()</a></code> detects the replicates and fits the
 interaction model automatically:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2025</span><span class="op">)</span></span>
 <span><span class="va">ns</span> <span class="op">&lt;-</span> <span class="fl">20</span></span>
 <span><span class="va">nr</span> <span class="op">&lt;-</span> <span class="fl">4</span></span>
@@ -217,7 +262,7 @@ multilevel-by-ragged corners.</p>
 asking “how reliable would each rater’s mean of <code>n_o</code> ratings
 be?”. Supply exactly one axis per call (<code>m</code>
 <strong>or</strong> <code>n_o</code>).</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_rep</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">reps</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, type <span class="op">=</span> <span class="st">"agreement"</span>, occasions <span class="op">=</span> <span class="st">"average"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/d_study.html">d_study</a></span><span class="op">(</span><span class="va">fit_rep</span>, n_o <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # D-study projection: two-way random, absolute agreement</span></span>
@@ -260,7 +305,7 @@ can never disagree with the printed table. They need
 plot</strong> — each ICC index as a point estimate with its Monte-Carlo
 interval. Reusing the two-way <code>ratings</code> fit from the D-study
 section above:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span> <span class="co"># `fit &lt;- icc(ratings, score, subject, rater, type = "agreement", seed = 1)`</span></span></code></pre></div>
 <p><img src="d-studies-and-replicates_files/figure-html/plot-coef-1.png" class="r-plt" alt="Forest plot of ICC(A,1) and ICC(A,k) for the ratings data, each a point estimate with a horizontal Monte-Carlo interval, ICC(A,k) both higher and tighter." width="700"></p>
@@ -270,7 +315,7 @@ from. It makes plain <em>why</em> absolute agreement is so much lower
 than the averaged coefficient on <code>ratings</code>: the
 <strong>rater</strong> component is large, and only absolute agreement
 counts between-rater differences as error:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">fit</span>, what <span class="op">=</span> <span class="st">"components"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="d-studies-and-replicates_files/figure-html/plot-comp-1.png" class="r-plt" alt="Bar chart of the estimated variance components for the ratings fit: subject, rater, and residual, with the rater component the largest." width="700"></p>
 <p>For a <strong>multilevel</strong> fit the forest plot facets by level

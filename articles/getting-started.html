@@ -184,6 +184,32 @@ one-row model summary including the variance components.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 10 more variables: k_eff &lt;dbl&gt;, k_c_eff &lt;dbl&gt;, var_cluster &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   var_subject &lt;dbl&gt;, var_rater &lt;dbl&gt;, var_cluster_rater &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   var_residual &lt;dbl&gt;, engine &lt;chr&gt;, ci_method &lt;chr&gt;, conf.level &lt;dbl&gt;</span></span></span></code></pre></div>
+<p><code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> is the other reading of the same fit: it
+reprints the report above and then appends a short <strong>interpretive
+note for each error definition present</strong>, plus one about what a
+single rating per cell cannot separate. Nothing is recomputed — the
+notes are read off the design, so they track whatever you fitted:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ── <span style="font-weight: bold;">Intraclass correlation: two-way random, absolute agreement &amp; consistency</span> ────</span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">  index     estimate   95% CI</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: bold;">  Absolute agreement</span></span></span>
+<span><span class="co">#&gt;   ICC(A,1)  <span style="font-weight: bold;">   0.290</span>   <span style="font-weight: 100;">[0.050, 0.713]</span></span></span>
+<span><span class="co">#&gt;   ICC(A,k)  <span style="font-weight: bold;">   0.620</span>   <span style="font-weight: 100;">[0.173, 0.909]</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: bold;">  Consistency</span></span></span>
+<span><span class="co">#&gt;   ICC(C,1)  <span style="font-weight: bold;">   0.715</span>   <span style="font-weight: 100;">[0.343, 0.924]</span></span></span>
+<span><span class="co">#&gt;   ICC(C,k)  <span style="font-weight: bold;">   0.909</span>   <span style="font-weight: 100;">[0.676, 0.980]</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Variance components: subject 2.556, rater 5.244, residual 1.019</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Absolute agreement counts the rater main effect (systematic differences in rater level) as error.</span></span>
+<span><span class="co">#&gt; Consistency ignores the rater main effect (systematic differences in rater level); only relative standing counts.</span></span>
+<span><span class="co">#&gt; A single rating per cell confounds the subject-by-rater interaction with</span></span>
+<span><span class="co">#&gt; residual error.</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="interpret">Interpret<a class="anchor" aria-label="anchor" href="#interpret"></a>
@@ -276,7 +302,7 @@ raters <em>rank</em> subjects the same way, not that they land on the
 same number — ask for <strong>consistency</strong> with
 <code>type = "consistency"</code>. It drops the rater main effect from
 the error, so it is never smaller than the agreement coefficient:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, type <span class="op">=</span> <span class="st">"consistency"</span>, seed <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Intraclass correlation: two-way random, consistency</span> ─────────────────────────</span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)</span></span></span>

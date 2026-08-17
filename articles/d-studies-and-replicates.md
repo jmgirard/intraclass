@@ -38,7 +38,7 @@ reuses the fit you already have — no refitting.
 ``` r
 
 fit <- icc(ratings, score, subject, rater, type = "agreement", seed = 1)
-proj <- d_study(fit, m = 1:8)
+proj <- d_study(fit, m = 1:8, seed = 1)
 proj
 #> # D-study projection: two-way random, absolute agreement
 #> Observed raters: 4 | CI: 95% montecarlo (10000 draws)
@@ -60,6 +60,50 @@ from [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
 directly. For a one-off value you can also ask
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) for it
 inline with a numeric `unit`, e.g. `unit = c("single", "average", 6)`.
+
+The projection’s own interval settings — `conf_level`, `mc_samples` and
+`seed` — default to the fit’s own whenever the fit carries them, which a
+default Monte-Carlo fit does; pass any of them to
+[`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)
+to override it for this call alone. The `seed = 1` above is the fit’s
+own seed passed explicitly, which is why the `m = 4` row reproduces the
+fit’s `ICC(A,k)` *interval* exactly, and not merely its estimate.
+
+[`tidy()`](https://generics.r-lib.org/reference/tidy.html) turns the
+projection into one row per projected point, and
+[`glance()`](https://generics.r-lib.org/reference/glance.html)
+summarizes the projection as a whole:
+
+``` r
+
+tidy(proj)
+#> # A tibble: 8 × 8
+#>       m index    estimate std.error conf.low conf.high conf.level method    
+#>   <int> <chr>       <dbl>     <dbl>    <dbl>     <dbl>      <dbl> <chr>     
+#> 1     1 ICC(A,1)    0.290     0.180   0.0503     0.706       0.95 montecarlo
+#> 2     2 ICC(A,2)    0.449     0.203   0.0959     0.828       0.95 montecarlo
+#> 3     3 ICC(A,3)    0.550     0.205   0.137      0.878       0.95 montecarlo
+#> 4     4 ICC(A,4)    0.620     0.202   0.175      0.906       0.95 montecarlo
+#> 5     5 ICC(A,5)    0.671     0.196   0.210      0.923       0.95 montecarlo
+#> 6     6 ICC(A,6)    0.710     0.189   0.241      0.935       0.95 montecarlo
+#> 7     7 ICC(A,7)    0.741     0.182   0.271      0.944       0.95 montecarlo
+#> 8     8 ICC(A,8)    0.765     0.176   0.298      0.950       0.95 montecarlo
+
+glance(proj)
+#> # A tibble: 1 × 9
+#>     n_m m_min m_max type      raters k_observed conf.level method     mc_samples
+#>   <int> <int> <int> <chr>     <chr>       <int>      <dbl> <chr>           <int>
+#> 1     8     1     8 agreement random          4       0.95 montecarlo      10000
+```
+
+The one column here that
+[`tidy()`](https://generics.r-lib.org/reference/tidy.html) on the *fit*
+does not also give you is **`m`**, the rater-count column — which is the
+whole point of a D-study: the same coefficient, indexed by the rater
+count it is projected to.
+[`glance()`](https://generics.r-lib.org/reference/glance.html) describes
+the projection rather than the model, reporting the swept range (`n_m`,
+`m_min`, `m_max`) alongside the design and the interval settings.
 
 We fit with `type = "agreement"` here because the dependability
 coefficient above *is* the absolute-agreement projection. A default
@@ -84,6 +128,20 @@ autoplot(d_study(fit, m = 1:12))
 ![Projected reliability rising with the number of raters, with a
 Monte-Carlo interval
 band.](d-studies-and-replicates_files/figure-html/dstudy-plot-1.png)
+
+There is also a [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
+method, for the console habit of drawing a picture as a side effect:
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) on a projection
+prints the very same ggplot that
+[`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
+builds from it, then returns the projection invisibly. We show the call
+rather than run it, since running it would render another reliability
+curve just like the one above:
+
+``` r
+
+plot(proj)
+```
 
 **Projection is extrapolation.** The rater variance $`\sigma^2_r`$ is
 estimated from only as many raters as you observed, so projecting far

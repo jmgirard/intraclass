@@ -183,11 +183,10 @@ also accepts a numeric `unit` for one-off projections.
 ## Examples
 
 ``` r
+fit_ag <- icc(ratings, score, subject, rater, type = "agreement", seed = 1)
+ggplot2::autoplot(d_study(fit_ag, m = 1:12)) # the D-study reliability curve
+
 fit <- icc(ratings, score, subject, rater, seed = 1)
-#> Warning: package version mismatch: 
-#> glmmTMB was built with TMB package version 1.9.21
-#> Current TMB package version is 1.9.23
-#> Please re-install glmmTMB from source or restore original ‘TMB’ package (see '?reinstalling' for more information)
 d_study(fit, m = 1:8)
 #> # D-study projection: two-way random, absolute agreement & consistency
 #> Observed raters: 4 | CI: 95% montecarlo (10000 draws)

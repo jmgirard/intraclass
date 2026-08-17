@@ -449,6 +449,36 @@
   cells leave that pattern ambiguous the `design` argument is how you
   resolve it — as the same vignette’s section on incomplete data already
   explained.
+- The *Getting started* vignette now shows
+  [`summary()`](https://rdrr.io/r/base/summary.html) on a fitted `icc`.
+  It reprints the report and appends interpretive notes — for the
+  default two-way fit shown there, one per error definition reported
+  plus one on what a single rating per cell cannot separate — output no
+  vignette displayed before.
+- The *D-studies and within-cell replicates* vignette now shows a
+  projection as data:
+  [`tidy()`](https://generics.r-lib.org/reference/tidy.html) on a
+  [`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)
+  result — where `m`, the rater-count column, is the one column it
+  carries that
+  [`tidy()`](https://generics.r-lib.org/reference/tidy.html) on the fit
+  does not —
+  [`glance()`](https://generics.r-lib.org/reference/glance.html) on the
+  same projection, and
+  [`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)’s
+  own `conf_level`, `mc_samples`, and `seed` settings, which take the
+  fit’s values whenever the fit carries them and can be overridden per
+  call. It also describes the
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) wrapper for
+  [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html).
+- [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
+  on a
+  [`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)
+  result now carries a runnable example on
+  [`?d_study`](https://jmgirard.github.io/intraclass/reference/d_study.md),
+  matching the one
+  [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
+  on an `icc` fit already had.
 
 ## intraclass 0.1.0
 
