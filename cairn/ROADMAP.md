@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-16 (post-merge pass for M122: row to done, archive summary written, M118's terminal row rotated out with its claim in the same commit; the M114 terminal-row lesson corrected in place on its third recurrence — M121's pass left that claim stale, leaving main red on check-references; LESSONS at cap, none added or pruned; validate green, tree clean.)_
+_Last hygiene check: 2026-08-17 (post-merge pass for M123: row to done, archive summary written, M117's terminal row rotated out with its record-claims expectation in the same commit; the M115 doc-claim-pin lesson extended in place with M123's four gotchas rather than adding a line, LESSONS being at its cap; validate green, tree clean.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,15 +9,14 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M117 | State the `"burch"`/`"searle"` width relationship conditionally | done | — | normal | milestones/archive/M117-conditional-width-claim.md |
 | M119 | Reconcile the shipped width claims with M118's third grid | done | M118 | normal | milestones/archive/M119-residual-grid-doc-reconcile.md |
 | M120 | Refuse a stale resume cache in the data-raw harnesses | done | — | normal | milestones/archive/M120-checkpoint-staleness-guard.md |
 | M121 | Measure the `npbootstrap` interval's coverage on the frozen skew grid | done | — | normal | milestones/archive/M121-npbootstrap-skew-coverage.md |
 | M122 | Remove the resume cache from the M121 npbootstrap sweep | done | — | normal | milestones/archive/M122-drop-m121-resume-cache.md |
-| M123 | Correct the falsified capability claims in the shipped documentation | review | — | normal | milestones/M123-falsified-capability-claims.md |
+| M123 | Correct the falsified capability claims in the shipped documentation | done | — | normal | milestones/archive/M123-falsified-capability-claims.md |
 | M124 | Demonstrate the exported surface no vignette shows | planned | — | normal | milestones/M124-undemonstrated-surface.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
-<!-- terminal-row retention: M122 done (2026-08-16) → M118 rotated out (oldest terminal by merge order; its archive file still resolves there). Kept: M117, M119, M120, M121, M122 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
+<!-- terminal-row retention: M123 done (2026-08-17) → M117 rotated out (oldest terminal by merge order; its archive file still resolves there). Kept: M119, M120, M121, M122, M123 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
