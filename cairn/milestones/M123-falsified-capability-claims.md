@@ -261,6 +261,19 @@ doc-claim pin", amended in the same commit as this entry.
 **AC6 — the four wrap forms.** The harness declares `flat`, `wrapped`,
 `blockquote` and `blockquote_indented`; the guarantee is bounded to those four.
 
+### MD-3 (2026-08-17): corrects MD-2's exit mapping
+
+MD-2's "AC5/AC6 — what exits to the candidate row" paragraph enumerates **five**
+exits and then calls them six, carried "as (a)-(f)" of the ROADMAP row. Both
+halves are wrong. The exits are five — the floor enumeration and the layouts in
+which those floors must not be vacuous, comment-consistency, `Rd:*` mutation
+verification in any form, per-class reachability reporting, and the harness
+plant-target cross-check — and they map onto that row's (a), (c), (d), (e) and
+(f). Item (b), installed-leg planting at one documented-and-reinstalled build
+per spelling, is a pre-existing sizing-gate deferral already carried on the
+default branch, not something this descope exited. The ROADMAP row's own text is
+correct; only MD-2's summary of it was not. Found at review attempt 4.
+
 ## Review
 <!-- owner: review · exclusive -->
 

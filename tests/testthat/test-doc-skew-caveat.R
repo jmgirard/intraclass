@@ -298,7 +298,8 @@ claim_patterns <- c(
   # would red on a future true sentence about any other inferred argument.
   design_never_declare = "from the data — you never declare it",
   design_never_declare_alt = "you never declare the design",
-  # M123's fifth and sixth spellings, added at its second review return: prose
+  # M123's fifth and sixth CLAIMS (its tenth and eleventh spellings), added at
+  # its second review return: prose
   # attributing the declared dependency list to what an installation
   # RETRIEVES. Both shipped on this branch. Installing the package pulls the
   # whole recursive closure of the six declared Imports -- `glmmTMB` alone

@@ -21,7 +21,8 @@
 pin_file <- "tests/testthat/test-doc-skew-caveat.R"
 stopifnot("run me from the package root" = file.exists(pin_file))
 
-# The four claims M123 withdrew, each with the spellings the pin vector names.
+# The six claims M123 withdrew -- AC1-AC4's four and AC8's two -- each with
+# the spellings the pin vector names.
 # Kept in sync by the two-way `stopifnot` below, which reads the spelling names
 # out of the pin file rather than trusting this list.
 spellings <- list(
