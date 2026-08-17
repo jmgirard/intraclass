@@ -52,7 +52,7 @@ data.frame(
 #>      index estimate           mc    bootstrap
 #> 1 ICC(A,1)    0.290 [0.05, 0.71] [0.02, 0.72]
 #> 2 ICC(A,k)    0.620 [0.17, 0.91] [0.09, 0.91]
-#> 3 ICC(C,1)    0.715 [0.33, 0.93] [0.15, 0.90]
+#> 3 ICC(C,1)    0.715 [0.34, 0.92] [0.15, 0.90]
 #> 4 ICC(C,k)    0.909 [0.67, 0.98] [0.41, 0.97]
 ```
 
@@ -329,7 +329,7 @@ data.frame(
 )
 #>      index estimate   montecarlo          mpl
 #> 1 ICC(A,1)    0.709 [0.47, 0.84] [0.42, 0.87]
-#> 2 ICC(A,k)    0.907 [0.78, 0.96] [0.75, 0.96]
+#> 2 ICC(A,k)    0.907 [0.78, 0.95] [0.75, 0.96]
 ```
 
 The two point estimates agree (same REML fit); the `"mpl"` interval is
