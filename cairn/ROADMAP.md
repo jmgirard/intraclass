@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-17 (post-merge pass for M124: row to done, archive summary written, M119's terminal row rotated out with its record-claims expectation in the same commit; the M70/M110/M118 pin-a-list-procedurally lesson extended in place with M124's acceptance-criterion instance rather than adding a line, LESSONS being at its 50-line cap. Standing overage, pre-existing and not M124's: LESSONS.md is 35,296 bytes against the 20,000-byte budget — a consolidation pass is owed and now carries a candidate row. Validate green, all four data-raw checkers pass, tree clean.)_
+_Last hygiene check: 2026-08-17 (audit pass, nothing in flight: validate green on all 16 checks, tree clean, both GitHub inboxes empty, M48 still parked on the maintainer's unopened release window. New finding this pass: ROADMAP.md is 33,857 bytes against its 24,000-byte budget — the same extend-in-place growth already recorded for LESSONS.md (35,296 against 20,000, candidate row standing); compressing the widest candidate rows is the remedy, awaiting the maintainer's call.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
