@@ -186,8 +186,8 @@ run_pins_installed <- function() {
     'r <- as.data.frame(testthat::test_dir("tests/testthat",',
     'package = "intraclass", load_package = "installed",',
     'filter = "doc-skew-caveat", reporter = "silent",',
-    'stop_on_failure = FALSE));',
-    'cat(sum(r$failed) + sum(r$error))'
+    "stop_on_failure = FALSE));",
+    "cat(sum(r$failed) + sum(r$error))"
   )
   out <- suppressWarnings(system2(
     "Rscript",

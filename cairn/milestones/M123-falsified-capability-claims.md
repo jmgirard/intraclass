@@ -140,7 +140,7 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
       comments (Rd markup, `load_all` skip) against a recorded probe.
 - [ ] T17: AC5/AC6 — plant at `README.md`; run the installed leg against a real
       install for the plain-text surfaces; add the gated glob floors.
-- [ ] T18: AC7 — resolve the spelling NOTE; run `devtools::check()` on this
+- [x] T18: AC7 — resolve the spelling NOTE; run `devtools::check()` on this
       branch and on `main` under the same toolchain and compare.
 - [x] T20: simplify the pin per the plan gate — drop or narrow each spelling
       guarding no reachable surface or able to red on a future TRUE sentence
@@ -192,6 +192,7 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
 - 2026-08-16: T17 — mutation matrix complete on both legs against 0-failure controls: source leg 88 plants (11 spellings × 2 markup regimes × 4 wrap forms) 88 RED; installed leg 33 plants (11 spellings × `README.md`, `NEWS.md`, an installed vignette, blockquote wrap) 33 RED. The installed leg SKIPPED on its first run and the harness said so rather than reporting coverage: `installed_targets()` resolved the library path in-process, where `load_all()` had already shimmed `system.file()` to the checkout, and the guard refused the source tree. Fixed by resolving that path in the subprocess too — the same defect the leg exists to detect, caught by its own pre-flight.
 - 2026-08-16: T18 — AC7's differential run: `devtools::check()` on this branch and on `origin/main` in a detached worktree, same toolchain. It found a real ERROR in the new AC2 test, which read `../../DESCRIPTION`; under `R CMD check` the tests run from `.Rcheck/tests/testthat` and the package sits at `.Rcheck/intraclass/`, so the read failed and errored the whole check while every other layout stayed green — the same layout-blindness class as return 1's F3. Now reads `packageDescription("intraclass")` first and falls back to the source path.
 - 2026-08-16: T18 — and the differential falsified return 2's F15. `main` reports the `spelling.Rout`/`.Rout.save` NOTE as well, so this branch did not introduce it; F15 attributed a pre-existing NOTE to the new NEWS bullet on the strength of the word `README` appearing in the flagged list. The `inst/WORDLIST` entries stay (they remove two genuine flags) but they fix nothing this milestone broke. `main`'s second NOTE, `.git` under hidden files, is an artifact of checking from a worktree and is not a property of `main`.
+- 2026-08-16: T18 — re-run after the layout fix: `devtools::check()` on this branch reports 0 errors, 0 warnings and `Status: 1 NOTE`, that NOTE being the `spelling.Rout` comparison `main` also reports, so AC7's differential holds (no NOTE here that `main` does not also report). `main`'s extra `.git` hidden-files NOTE is a worktree artifact and does not bear on the branch. Gate: `air format --check` clean, `lintr::lint_package()` clean after fixing two `quotes_linter` hits in the harness, all four `data-raw` checkers OK, `cairn_validate` all checks passed (1 sizing advisory), `pkgdown::check_pkgdown()` clean, `document()` no diff. Worktree removed.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
