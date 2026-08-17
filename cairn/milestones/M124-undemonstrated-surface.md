@@ -89,7 +89,7 @@ and a runnable numeric-`unit` projection → candidate row, this plan.
 - [x] T2: Add the `tidy()`/`glance()` chunk on a `d_study()` result in
       `d-studies-and-replicates.Rmd`, with prose naming a D-study-only column.
 - [x] T3: Add the `plot()` note per AC3's no-duplicate-figure rule.
-- [ ] T4: Add the `@examplesIf` example to `autoplot.icc_dstudy`
+- [x] T4: Add the `@examplesIf` example to `autoplot.icc_dstudy`
       (`R/autoplot.R:8-15`); `devtools::document()`; confirm `man/d_study.Rd`
       renders both blocks.
 - [x] T5: Thread `seed` through a `d_study()` call in an evaluated chunk; name
@@ -103,6 +103,7 @@ and a runnable numeric-`unit` projection → candidate row, this plan.
 
 - 2026-08-16: created by /milestone-plan (assessment run over documentation and vignettes; two [S] audits + one [O] criteria audit).
 - 2026-08-16: criteria audit ran in FULL mode (user-facing tier) and returned findings F8-F11 against this milestone; fixed into the criteria before the gate — F8(i) the title and scope no longer call `summary()` "undemonstrated", since `R/data.R:58-59` already demonstrates it in a shipped Rd example, so the gap is vignette-only; F9 "live chunk" is defined against the vignettes' existing `requireNamespace` guard rather than as an unconditional chunk (ggplot2 is Suggests under GP1's light-install path), and `plot()` is fenced against rendering a duplicate figure; F10 the per-S3-method `\value` criterion was cut to a candidate row rather than shipped as a universal over (Rd page × alias) that no named procedure enumerates and that `man/reexports.Rd` cannot satisfy at all; F11 the demonstrate-or-describe disjunction was split, so `seed` must be executed and only `conf_level`/`mc_samples` may be prose.
+- 2026-08-17: T4 — `autoplot.icc_dstudy` gains an `@examplesIf rlang::is_installed(c("ggplot2", "glmmTMB"))` example; `document()` regenerates `man/d_study.Rd` with the guarded block (`\dontshow{...withAutoprint...}`) followed by the pre-existing unguarded `d_study(fit, m = 1:8)` block. Example executed: returns a built ggplot.
 - 2026-08-17: T2/T3/T5 — `d-studies-and-replicates.Rmd` gains a "The projection as data" subsection (`tidy(proj)`/`glance(proj)` evaluated, prose identifying `m` per the amended AC2), `seed = 7` on the existing `d_study()` call with `conf_level`/`mc_samples`/`seed` named in the surrounding prose, and an `eval = FALSE` `plot(proj)` chunk. Rendered: the `plot()` call appears as code (block `cb5`) and the figure count stays at 3, so no duplicate curve.
 - 2026-08-17: T1 — `summary(fit)` demonstrated in `getting-started.Rmd` after the tidy/glance pair; prose derived from the executed output (report reprinted, then one interpretive note per error definition present plus the single-rating-per-cell note). Vignette renders clean.
 - 2026-08-17: substantive amendment at the implement question gate — AC2's parenthetical (`type`, `level`, `occasions`) was falsified: by enumeration of `tidy.icc` (`R/icc-methods.R:349`) and `tidy.icc_dstudy` (`R/d-study.R:640`), `m` is the only column the D-study tidy carries that the icc tidy does not — `type`/`level` are unconditional in `tidy.icc` (built at `R/icc.R:2397`) and `occasions` is gated on the same `isTRUE(x$design$replicates)` predicate on both sides; confirmed across 11 fit/projection configurations.
