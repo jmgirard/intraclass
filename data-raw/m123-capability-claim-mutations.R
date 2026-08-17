@@ -279,11 +279,6 @@ stopifnot(
     matrix_rows$verdict == "RED"
   )
 )
-stopifnot(
-  "a planted claim did not red -- that surface/wrap is unguarded" = all(
-    matrix_rows$verdict == "RED"
-  )
-)
 cat("source leg: every planted claim reds at every surface and wrap form.\n\n")
 
 # ---- installed leg -------------------------------------------------------

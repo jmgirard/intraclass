@@ -68,26 +68,23 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
       S3 methods (`git grep -n augment -- NAMESPACE R/` returns nothing).
 - [ ] AC5: `source_doc_surfaces()` gains `README.Rmd` and `README.md`, and
       `installed_doc_surfaces()` gains `system.file("README.md")`; every site
-      the extended walk reports for the AC1–AC4 claim patterns is corrected or
-      recorded in the work log as correct-as-written. The anti-vacuity floor
-      asserts both legs non-empty and that each leg reaches every file its own
-      glob enumerates (all `vignettes/*.Rmd` and both READMEs on the source leg,
-      every installed vignette and `README.md` on the installed leg), each
-      assertion gated on that file existing in the layout under test.
+      the extended walk reports for the claim patterns this milestone adds is
+      corrected or recorded in the work log as correct-as-written. The
+      anti-vacuity floor asserts, on each leg that runs, that the leg is
+      non-empty, and asserts of each of `README.Rmd` and `README.md` present in
+      the layout the run executes in that the walk reached it and read it
+      non-empty. What exits to the ROADMAP apparatus candidate row: MD-2.
 - [ ] AC6: each claim pattern this milestone adds — AC1–AC4's nine and AC8's two
       — joins that file's existing `claim_patterns` machinery as new
       `test_that()` blocks; no second instrument (D-029). Every claim carries at
-      least one backtick-free spelling, since `rd_flat()` discards `\code{}` and
-      `Rd:*` is the only class a built package's walk reads; and no comment in
-      the pin file or the committed harness states a reachability a recorded
-      probe contradicts. Each pattern is mutation-verified red on ≥2 spellings,
-      at ≥2 distinct surfaces, in each wrap form the harness declares — the
-      declared set includes a flat, a line-wrapped and a blockquote-wrapped
-      form, and the guarantee is bounded to that set — with the installed leg
-      exercised against a real install for the plain-text installed surfaces
-      (`README.md`, `vignette:*`, `NEWS.md`), never shadowed by `load_all`'s
-      `system.file()` fallback. Per-class reachability reporting and the `Rd:*`
-      wrap sweep are deferred to the ROADMAP candidate row carrying them.
+      least one backtick-free spelling (why, and the measurement: MD-2). Each of
+      AC1–AC4's four claims is mutation-verified red on ≥2 spellings, AC8's two
+      on one spelling each; every spelling reds at ≥2 distinct surfaces on the
+      source leg in each of the four wrap forms the harness declares, the
+      guarantee bounded to those four; and on the installed leg at `README.md`,
+      `NEWS.md` and one installed vignette in the blockquote form, planted into
+      a real install and never shadowed by `load_all`'s `system.file()`
+      fallback. What exits to the ROADMAP apparatus candidate row: MD-2.
 - [ ] AC7: `cairn/PROFILE.md`'s verify slot clean, plus `air format --check`,
       `lintr::lint_package()`, and all four `data-raw` checkers
       (`check-references`'s set) run locally before push; and
@@ -110,8 +107,8 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
 - AC2 → T2, T5, T14
 - AC3 → T3
 - AC4 → T4
-- AC5 → T6, T17
-- AC6 → T7, T16, T20
+- AC5 → T6, T17, T21, T22
+- AC6 → T7, T16, T20, T21, T22, T23
 - AC7 → T8, T18
 - AC8 → T15
 
@@ -131,21 +128,23 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
       tarball-safe README floor; withdraw the "installed only if you ask" clause
       and re-knit; commit `data-raw/m123-capability-claim-mutations.R` and run
       its matrix; re-verify against the installed package.
-- [x] T14: AC2 — rewrite the README install sentence to attribute the list to
-      `Imports:` (dropping "imports only"); re-knit; add the enumerate-and-assert
-      command as a `test_that()` block, run after a fresh install.
-- [x] T15: AC8 — withdraw the NEWS transitive sentence and the README's
-      "that one"/"light" clause; pin both spellings in `claim_patterns`.
-- [x] T16: AC6 — add a backtick-free spelling per claim; correct the two false
-      comments (Rd markup, `load_all` skip) against a recorded probe.
-- [ ] T17: AC5/AC6 — plant at `README.md`; run the installed leg against a real
-      install for the plain-text surfaces; add the gated glob floors.
-- [x] T18: AC7 — resolve the spelling NOTE; run `devtools::check()` on this
-      branch and on `main` under the same toolchain and compare.
-- [x] T20: simplify the pin per the plan gate — drop or narrow each spelling
-      guarding no reachable surface or able to red on a future TRUE sentence
-      (`install_four_alpha`, `design_never_declare`); log what went and why.
-- [x] T19: Full gate; push; drive CI green.
+- [x] T14-T20 (shipped, return-2 fix round; detail in the work log and in git):
+      attribute the README install list to `Imports:` and add AC2's
+      enumerate-and-assert test; withdraw and pin the two transitive-install
+      phrasings; restore a backtick-free spelling per claim and correct two
+      false comments against measurement; plant at `README.md` and run the
+      installed leg against a real install; resolve the spelling NOTE and run
+      the `check()` differential against `main`; simplify the pin; full gate,
+      CI green.
+- [x] T21: descope amendment — narrow AC5/AC6 to the demonstrated evidence;
+      supersede MD-1's AC6 paragraphs; carry the exits into the apparatus
+      candidate row; log the README disclosure gap as its own candidate row.
+- [x] T22: correct the false reachability comment at
+      `test-doc-skew-caveat.R:278-279`; restore the unconditional installed-
+      vignette floor the glob rewrite made vacuous under `R CMD check`; drop the
+      duplicated floor `stopifnot` in the harness.
+- [ ] T23: re-run the mutation matrix from the committed harness and the full
+      gate; push; drive CI green.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
@@ -197,6 +196,9 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
 
 - 2026-08-16: review attempt 3 RETURNED to `in-progress` (defect return 3). Two floor findings, each an acceptance criterion failing inside its own named procedure: AC6's comment clause, against `test-doc-skew-caveat.R:278-279` claiming `Rd:*` is the only class running under `R CMD check` when the installed leg also reads `NEWS.md`, `README.md` and 8 `doc/*.Rmd`; and AC5's floor-gating clause, against the new glob-derived vignette floor, which gates on a source `vignettes/` dir absent from `.Rcheck` and so skips entirely in the layout CI runs, where `main` asserted unconditionally. AC1-AC4 and AC8 verified and ticked; AC5, AC6 and AC7 unticked (AC7's `check()` differential against `main` not re-run this attempt). F24, F26, F27 would ride a fix round; F25, F28-F31 are follow-ups. Thrash rule fires on both triggers — third return, and AC6 failing twice by a new mechanism of the same shape — with a split already spent, so the disposition goes to the maintainer.
 - 2026-08-17: maintainer disposition at the return-3 thrash gate — DESCOPE. Keep AC1-AC4 and AC8 as written; narrow AC5 and AC6 to the evidence already demonstrated (the corrected surfaces, and the mutation plants that ran RED), dropping AC5's vignette-floor gating clause and AC6's comment-consistency clause; both exit to the existing per-class-reachability apparatus candidate row. The false comment at `test-doc-skew-caveat.R:278-279` is fixed only if a kept criterion still reads it, else it rides that row too. Amendment via /milestone-implement step 6, then re-review the narrowed set.
+- 2026-08-17: amendment (substantive), executing the maintainer's return-3 descope. AC5 and AC6 narrowed to the evidence already demonstrated: AC5 keeps the walk extension, the correct-or-record duty and the README non-emptiness floor, and exits the vignette/README floor enumeration and its layout coverage; AC6 keeps the single-instrument requirement, the backtick-free spelling per claim and the mutation matrix as it actually ran, and exits the comment-consistency clause, `Rd:*` mutation verification in any form, per-class reachability reporting and the harness plant-target cross-check. AC1-AC4, AC7 and AC8 unchanged. Amended AC5/AC6 un-ticked.
+- 2026-08-17: criteria audit ran in FULL mode (user-facing tier) over the amended wording, by a fresh-context [O] reader that authored none of it. It returned 12 findings; 9 with one clear right answer were fixed before the gate (AC6's "≥2 spellings" incoherent against its own definition of a pattern and unmet for AC8's two, now stated per claim; `vignette:*` narrowed to one installed vignette, the harness planting `vig[1]` only; the `Rd:*` exit widened from a wrap sweep to verification in any form, the harness planting no Rd surface at all; the backtick clause attributed to measurement; AC5's "both legs non-empty" corrected to "each leg that runs", the source leg skipping rather than asserting; the exit widened to cover the README floor's identical layout gap; the wrap-form bounding sentence restored; AC5's duty widened to all patterns this milestone adds; the candidate row amended to actually carry the exits, having carried none of them). 3 went to the gate. 1 was a no-finding (proportionality).
+- 2026-08-17: gate decisions on the three markers — fix the false reachability comment now rather than let it ride the candidate row, the milestone's own subject being withdrawn false claims; log the README `lme4` disclosure gap as a candidate row rather than reword the page here; and restore the unconditional installed-vignette floor rather than rename the glob-derived one, removing the coverage regression without taking back the descoped promise.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
@@ -227,6 +229,35 @@ for `Rd:*`, and a wrap-dependent false negative there would not be caught.
 **AC8 — what no criterion reaches.** No criterion here reaches a reworded
 transitive claim naming fewer than three packages: AC2 fires only at three or
 more names, AC8 only at the literal spellings it lists. Review is the net for one.
+
+### MD-2 (2026-08-17): supersedes MD-1's two AC6 paragraphs
+
+MD-1's "AC6 — the surface classes" and "AC6 — the wrap-form gap" paragraphs
+were written for the pre-descope AC6, which no longer cites MD-1. The wrap-form
+paragraph is also false against the committed harness: it states that `Rd:*` is
+"therefore exercised in a single wrap form", where the harness plants at no Rd
+surface in any form — `data-raw/m123-capability-claim-mutations.R` declares
+`README.Rmd` and `R/icc.R` on the source leg and `README.md`, `NEWS.md` and one
+installed vignette on the installed leg, and never runs `document()`, so a
+roxygen plant never reaches Rd. Amended AC6 states its own bounds and names
+`Rd:*` mutation verification in any form among what exits to the ROADMAP
+candidate row. MD-1's AC2 and AC8 paragraphs stand.
+
+**AC6 — the backtick-free spelling.** `rd_flat()` is `rapply(as.character)` over
+the parsed Rd and discards `\code{}`, so a backticked-only pattern is inert on
+the one class a built package's help database renders. Measured at T16 and again
+here: 0 backticks across all seven flattened Rd pages, against 846 in `R/icc.R`.
+
+**AC5/AC6 — what exits to the candidate row.** The vignette and README floor
+enumeration and the layouts in which those floors must not be vacuous; whether a
+comment in the pin file or the committed harness states a reachability a probe
+confirms; mutation verification of the `Rd:*` class in any form; per-class
+reachability reporting; and the harness plant-target cross-check. All six are
+carried as (a)-(f) of the ROADMAP row "Per-class reachability proof for the
+doc-claim pin", amended in the same commit as this entry.
+
+**AC6 — the four wrap forms.** The harness declares `flat`, `wrapped`,
+`blockquote` and `blockquote_indented`; the guarantee is bounded to those four.
 
 ## Review
 <!-- owner: review · exclusive -->

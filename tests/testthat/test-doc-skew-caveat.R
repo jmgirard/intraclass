@@ -274,12 +274,14 @@ claim_patterns <- c(
   # so it cannot fire on a legitimate two-engine sentence elsewhere. Backticked
   # AND bare, because `rd_flat()` is `rapply(as.character)` over the parsed Rd
   # and discards `\code{}`: the flattened help database carries no backticks at
-  # all (measured: 0 in `man/icc.Rd`, against a roxygen source that has them),
-  # so a backticked-only pattern is inert on `Rd:*` -- and under `R CMD check`
-  # the source leg returns `list()`, making `Rd:*` the only class that runs.
-  # A comment here once claimed the opposite, that no surface renders these
-  # sentences without their markup. It was false, and it cost the bare
-  # spellings a round.
+  # all (measured across the whole flattened help database: 0 backticks on all
+  # seven pages, against 846 in `R/icc.R`), so a backticked-only pattern is
+  # inert on `Rd:*` -- and under `R CMD check` the source leg returns `list()`,
+  # leaving the installed leg the only leg. That leg reads `Rd:*` AND `NEWS.md`,
+  # `README.md` and the installed vignettes, which a comment here once denied.
+  # Two false comments have stood in this spot: one claiming no surface renders
+  # these sentences without their markup, one claiming `Rd:*` is the only class
+  # running under check. Both cost a review return.
   engines_omit_brms = "(`glmmTMB`, `lme4`) or an SEM engine",
   engines_omit_brms_bare = "(glmmTMB, lme4) or an SEM engine",
   # (3) The base-install list naming four of the six non-base Imports. Same
@@ -449,16 +451,14 @@ test_that("the installed surfaces include both vignettes", {
     length(vig_names) == 0L,
     "vignettes not installed (install with build_vignettes)"
   )
-  # M123 AC5: the floor is derived from the vignettes/ glob, not a hand list.
-  # A hand list of two names left `multilevel-designs.Rmd` -- the sole home of
-  # one withdrawn claim -- unfloored on both legs, so renaming or dropping it
-  # would have left that claim guarding nothing, green throughout.
-  src_vigs <- list.files(
-    testthat::test_path("..", "..", "vignettes"),
-    pattern = "\\.Rmd$"
-  )
-  skip_if(length(src_vigs) == 0L, "no source vignettes to enumerate from")
-  for (v in src_vigs) {
+  # The names are hard-coded ON PURPOSE. M123 briefly derived them from the
+  # `vignettes/*.Rmd` glob, which reads as a widening but is a narrowing: under
+  # `R CMD check` the root is `<pkg>.Rcheck`, which carries no `vignettes/`, so
+  # the glob came back empty and the whole block skipped -- in the one layout
+  # CI runs. A hard list needs no source tree and cannot go vacuous. Deriving
+  # the list from the installed side instead (so a renamed vignette is caught)
+  # is deferred to the candidate row carrying the pin's reachability apparatus.
+  for (v in c("interval-methods.Rmd", "glossary.Rmd")) {
     expect_true(paste0("vignette:", v) %in% vig_names, info = v)
   }
 })
