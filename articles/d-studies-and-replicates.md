@@ -43,14 +43,14 @@ proj
 #> # D-study projection: two-way random, absolute agreement
 #> Observed raters: 4 | CI: 95% montecarlo (10000 draws)
 #>   m  estimate          95% CI
-#>   1     0.290  [0.050, 0.706]
-#>   2     0.449  [0.096, 0.828]
-#>   3     0.550  [0.137, 0.878]
-#>   4     0.620  [0.175, 0.906]
-#>   5     0.671  [0.210, 0.923]
-#>   6     0.710  [0.241, 0.935]
-#>   7     0.741  [0.271, 0.944]
-#>   8     0.765  [0.298, 0.950]
+#>   1     0.290  [0.050, 0.712]
+#>   2     0.449  [0.095, 0.831]
+#>   3     0.550  [0.136, 0.881]
+#>   4     0.620  [0.173, 0.908]
+#>   5     0.671  [0.207, 0.925]
+#>   6     0.710  [0.239, 0.937]
+#>   7     0.741  [0.268, 0.945]
+#>   8     0.765  [0.295, 0.952]
 ```
 
 Reliability climbs with more raters but with diminishing returns, and
@@ -80,14 +80,14 @@ tidy(proj)
 #> # A tibble: 8 × 8
 #>       m index    estimate std.error conf.low conf.high conf.level method    
 #>   <int> <chr>       <dbl>     <dbl>    <dbl>     <dbl>      <dbl> <chr>     
-#> 1     1 ICC(A,1)    0.290     0.180   0.0503     0.706       0.95 montecarlo
-#> 2     2 ICC(A,2)    0.449     0.203   0.0959     0.828       0.95 montecarlo
-#> 3     3 ICC(A,3)    0.550     0.205   0.137      0.878       0.95 montecarlo
-#> 4     4 ICC(A,4)    0.620     0.202   0.175      0.906       0.95 montecarlo
-#> 5     5 ICC(A,5)    0.671     0.196   0.210      0.923       0.95 montecarlo
-#> 6     6 ICC(A,6)    0.710     0.189   0.241      0.935       0.95 montecarlo
-#> 7     7 ICC(A,7)    0.741     0.182   0.271      0.944       0.95 montecarlo
-#> 8     8 ICC(A,8)    0.765     0.176   0.298      0.950       0.95 montecarlo
+#> 1     1 ICC(A,1)    0.290     0.181   0.0497     0.712       0.95 montecarlo
+#> 2     2 ICC(A,2)    0.449     0.204   0.0947     0.831       0.95 montecarlo
+#> 3     3 ICC(A,3)    0.550     0.206   0.136      0.881       0.95 montecarlo
+#> 4     4 ICC(A,4)    0.620     0.202   0.173      0.908       0.95 montecarlo
+#> 5     5 ICC(A,5)    0.671     0.196   0.207      0.925       0.95 montecarlo
+#> 6     6 ICC(A,6)    0.710     0.190   0.239      0.937       0.95 montecarlo
+#> 7     7 ICC(A,7)    0.741     0.183   0.268      0.945       0.95 montecarlo
+#> 8     8 ICC(A,8)    0.765     0.177   0.295      0.952       0.95 montecarlo
 
 glance(proj)
 #> # A tibble: 1 × 9
@@ -187,10 +187,10 @@ icc(reps, score, subject, rater, type = "agreement", occasions = c("single", "av
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   index     occasions estimate   95% CI
-#>   ICC(A,1)          1    0.263   [0.083, 0.489]
-#>   ICC(A,1)          3    0.300   [0.088, 0.562]
-#>   ICC(A,k)          1    0.588   [0.265, 0.793]
-#>   ICC(A,k)          3    0.631   [0.279, 0.837]
+#>   ICC(A,1)          1    0.263   [0.082, 0.490]
+#>   ICC(A,1)          3    0.300   [0.087, 0.564]
+#>   ICC(A,k)          1    0.588   [0.263, 0.794]
+#>   ICC(A,k)          3    0.631   [0.277, 0.838]
 #> 
 #> Variance components: subject 0.631, rater 0.901, subject:rater 0.428, residual 0.443
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
@@ -229,12 +229,12 @@ d_study(fit_rep, n_o = 1:6)
 #> # D-study projection: two-way random, absolute agreement
 #> Held raters: 4 (average) | projecting occasions | CI: 95% montecarlo (10000 draws)
 #>   n_o  m  estimate          95% CI
-#>     1  4     0.588  [0.265, 0.791]
-#>     2  4     0.620  [0.277, 0.824]
-#>     3  4     0.631  [0.280, 0.835]
-#>     4  4     0.637  [0.282, 0.841]
-#>     5  4     0.641  [0.283, 0.845]
-#>     6  4     0.643  [0.284, 0.847]
+#>     1  4     0.588  [0.274, 0.790]
+#>     2  4     0.620  [0.285, 0.822]
+#>     3  4     0.631  [0.288, 0.834]
+#>     4  4     0.637  [0.290, 0.840]
+#>     5  4     0.641  [0.292, 0.844]
+#>     6  4     0.643  [0.293, 0.846]
 ```
 
 Notice the curve **flattens**. Averaging more occasions only cancels
