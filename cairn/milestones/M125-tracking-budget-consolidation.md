@@ -94,7 +94,7 @@ Raising or lowering either budget → a tracking-rules change, not this repo's.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] **T1.** Delete the five struck-through candidate rows
+- [x] **T1.** Delete the five struck-through candidate rows
       (`cairn/ROADMAP.md:30,32,33,37,55`), one at a time: read the
       `milestones/archive/` file each names, confirm the row's live remainder is
       carried there — row 30's two standing audit findings against the digest
@@ -136,6 +136,12 @@ Raising or lowering either budget → a tracking-rules change, not this repo's.
 - 2026-08-17: plan gate chose graduating five families over the candidate row's two because measurement showed two reach only 28,257 bytes against a 20,000 budget; falsified by a family failing all three retirement exits at implement time, which returns here for a gated amendment rather than a forced retirement.
 - 2026-08-17: plan gate chose `cairn/doctrine/` pages over `cairn/references/` for the three craft families because `references/` is defined as owning source and synthesis notes about external sources; falsified by a maintainer ruling the extra-file boundary too thin to carry them.
 - 2026-08-17: plan gate chose per-row deletion checks over a blanket prune of the five struck rows because row 30 carries live audit findings its archive may not hold; falsified by the per-row check finding every remainder already archived.
+- 2026-08-17: implement start — status in-progress, branch m125-tracking-budget-consolidation cut from origin/main (c9c3bb9); pre-implementation question gate skipped, nothing left open by the plan.
+- 2026-08-17: T1 row "A resume cache can reprint identity evidence it did not recompute" — promoted-and-shipped (milestones/archive/M122-drop-m121-resume-cache.md); its live remainder, the two digest-shape audit findings absent from that archive summary, migrated into the surviving checkpoint blind-spots row before deletion.
+- 2026-08-17: T1 row "`burch`'s width advantage over `searle` is not flat in the true ICC" — promoted-and-shipped (milestones/archive/M117-conditional-width-claim.md); no live remainder, the unstated marginal rater contrast is measurement narrative held by M117's milestone file in git.
+- 2026-08-17: T1 row "Measure Burch's leptokurtic width reversal on a both-components-non-normal grid" — promoted-and-shipped (milestones/archive/M118-width-reversal-grid.md, verdict D-030); no live remainder, the doc reconciliation shipped as M119.
+- 2026-08-17: T1 row "Stale checkpoints can silently feed the M111 sweep the wrong rows" — promoted-and-shipped (milestones/archive/M120-checkpoint-staleness-guard.md); no live remainder, the walk's blind spots already hold their own surviving row.
+- 2026-08-17: T1 row "Cache CI R dependencies to cut per-run install time" — superseded (D-011; milestones/archive/M78-cut-ci-test-suite-wallclock.md records the falsified premise and the shipped lever).
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
