@@ -9,7 +9,7 @@
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP8, GP9   <!-- owner: plan · create/amend-via-gate; GP8/GP9 are CREATED by T3/T4, so the slot cannot cite them until they exist in DESIGN.md (cairn_validate FAILs on a forward reference); implement fills it once they land — filled 2026-08-17, T3/T4 -->
-- **Branch/PR:** `m125-tracking-budget-consolidation`   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m125-tracking-budget-consolidation` · PR #134 https://github.com/jmgirard/intraclass/pull/134   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -47,36 +47,36 @@ Raising or lowering either budget → a tracking-rules change, not this repo's.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets. -->
 
-- [ ] **AC1.** At the merge commit `wc -c cairn/ROADMAP.md` reports fewer than
+- [x] **AC1.** At the merge commit `wc -c cairn/ROADMAP.md` reports fewer than
       24,000 bytes and `wc -c cairn/LESSONS.md` fewer than 20,000 bytes, and
       `python3 "$CAIRN/scripts/cairn_validate.py"`'s `weight caps` check still
       PASSes, so the 60- and 50-line caps are not traded away to buy bytes.
-- [ ] **AC2.** On the merge commit `python3 "$CAIRN/scripts/cairn_validate.py"`
+- [x] **AC2.** On the merge commit `python3 "$CAIRN/scripts/cairn_validate.py"`
       exits 0 with every check PASS, and all four checkers pass:
       `data-raw/check-record-claims.py`,
       `data-raw/check-reference-observations.py`,
       `data-raw/enumerate-generalizing-claims.py --check`,
       `data-raw/check-mpl-doc-claims.py`.
-- [ ] **AC3.** Every candidate row the merge diff removes — enumerated by
+- [x] **AC3.** Every candidate row the merge diff removes — enumerated by
       `git diff <base>..HEAD -- cairn/ROADMAP.md`, removed lines beginning
       `- ` below the `## Candidates` heading — is dispositioned in the work log
       as promoted-and-shipped (naming the `milestones/archive/` file that holds
       it), superseded (naming the superseding record), or dropped at the user's
       explicit direction.
-- [ ] **AC4.** Every candidate row the merge diff modifies — paired between
+- [x] **AC4.** Every candidate row the merge diff modifies — paired between
       sides by its leading bolded title, or by its first eight words where a row
       carries no bolded title — still states a promotion condition and a
       lineage clause on the head side.
-- [ ] **AC5.** Every `cairn/LESSONS.md` line the merge diff removes —
+- [x] **AC5.** Every `cairn/LESSONS.md` line the merge diff removes —
       enumerated by `git diff <base>..HEAD -- cairn/LESSONS.md` restricted to
       removed lines whose leading `YYYY-MM-DD (M<NN>` token appears nowhere in
       the head-side file — is named in the work log with the exit it took:
       enforcement, ownership, or maturation.
-- [ ] **AC6.** For every line AC5 enumerates, the work log carries one
+- [x] **AC6.** For every line AC5 enumerates, the work log carries one
       retired-line → destination row naming the `DESIGN.md` principle id or the
       `cairn/doctrine/` page section that received it, and each row cites the
       diff hunk that removed the line.
-- [ ] **AC7.** Each page the milestone adds under `cairn/doctrine/` opens with a
+- [x] **AC7.** Each page the milestone adds under `cairn/doctrine/` opens with a
       header sentence naming its own scope, and every other `cairn/` file its
       prose names is named as a cross-reference rather than as content it owns.
 
@@ -158,3 +158,13 @@ Raising or lowering either budget → a tracking-rules change, not this repo's.
 
 ## Review
 <!-- owner: review · exclusive -->
+
+Review pass 1, 2026-08-17, branch head 8bd604d (+ header PR-URL edit), PR #134.
+
+- **AC1 evidence:** `wc -c` — cairn/ROADMAP.md 22,682 (< 24,000), cairn/LESSONS.md 19,701 (< 20,000); `cairn_validate.py` exit 0 with `weight caps` PASS, so the 60/50-line caps hold (ROADMAP 52 lines, LESSONS 44).
+- **AC2 evidence:** `cairn_validate.py` exit 0, 16/16 PASS; check-record-claims.py "OK: 6 registered claim(s) re-derived, 0 failure(s)"; check-reference-observations.py 0 unmarked / 0 falsified; enumerate-generalizing-claims.py --check in sync; check-mpl-doc-claims.py "46 claim candidates, 12 settled, 0 failure(s)".
+- **AC3 evidence:** scripted enumeration over `git diff main...HEAD -- cairn/ROADMAP.md` (removed `- ` rows below `## Candidates`, paired to head-side rows by bolded title / first eight words): 13 removed, 8 paired as modified, 5 unpaired deletions — the M122, M117, M118, M120 promotions and the M78-superseded CI-cache row; each has a T1 work-log disposition line naming its archive (M122/M117/M118/M120) or superseding record (D-011 + M78 archive).
+- **AC4 evidence:** same script, head side of all 8 modified rows: promotion condition present and `Lineage:` clause present on every row (8/8 OK).
+- **AC5 evidence:** scripted enumeration over `git diff main...HEAD -- cairn/LESSONS.md` per the criterion's token-absence rule: 3 lines enumerate (M66, M70, M85 — the retired M115 and M84 lines fall outside the enumeration because a surviving sibling line shares their leading token); each enumerated line has a work-log line naming its exit (maturation, all three).
+- **AC6 evidence:** for each of the 3 enumerated lines, one retired-line → destination work-log row exists naming the receiving record (M70 → DESIGN.md GP8; M66 → doctrine/source-ingestion.md; M85 → doctrine/data-raw-checkers.md), each citing the removing hunk by its commit's cairn/LESSONS.md deletion. (The M115/M84 retirements, though outside AC5's enumeration, carry the same rows — T5/T4.)
+- **AC7 evidence:** all three doctrine pages open with a header sentence naming the page's own scope (checked by `head`); each page's prose names other `cairn/` files only as cross-references ("cross-references only", "stay the reference", "owned by"), verified by read-through; independent reviewer confirms below.
