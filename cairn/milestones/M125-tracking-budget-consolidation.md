@@ -4,7 +4,7 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M125: Bring ROADMAP.md and LESSONS.md back under their byte budgets
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -121,7 +121,7 @@ Raising or lowering either budget → a tracking-rules change, not this repo's.
 - [x] **T8.** Compress the leftover in-place extension blocks until
       `wc -c cairn/LESSONS.md` is under 20,000; measure after each family and
       record the running figure, so a shortfall surfaces before review.
-- [ ] **T9.** Re-check `data-raw/record-claims.tsv` against the edited ROADMAP —
+- [x] **T9.** Re-check `data-raw/record-claims.tsv` against the edited ROADMAP —
       the `[claim:roadmap-terminal-rows]` expectation is the known trap
       (`LESSONS.md:45`, three prior recurrences) — and run `cairn_validate` plus
       all four `data-raw` checkers.
@@ -150,6 +150,8 @@ Raising or lowering either budget → a tracking-rules change, not this repo's.
 - 2026-08-17: T6 retired-line → destination: LESSONS line opening `2026-07-23 (M85): the check-references CI job` (maturation exit) → `cairn/doctrine/data-raw-checkers.md`, all sections, with a DESIGN.md Conventions pointer bullet; hunk: this commit's cairn/LESSONS.md deletion of that line. LESSONS at 22,932 bytes.
 - 2026-08-17: T7 retired-line → destination: LESSONS line opening `2026-07-19 (M66): a string absent from a PDF's TEXT LAYER` (maturation exit) → `cairn/doctrine/source-ingestion.md`, both sections; hunk: this commit's cairn/LESSONS.md deletion of that line. LESSONS at 21,580 bytes / 44 lines — T8 still owes 1,581+.
 - 2026-08-17: T8 — six extension-block lines compressed in place, substance kept, no date token removed (M115-trend, M82, M107/M109, M77/M78, M86, then the M114 terminal-row line whose attribution/remedy tail now lives in doctrine/data-raw-checkers.md). Running figures: 20,030 after the first five, 19,701 / 44 lines after the sixth — under the 20,000 budget.
+- 2026-08-17: T9 — no terminal row touched, the roadmap-terminal-rows and kappa-worst-steps expectations both re-derive clean; cairn_validate all checks passed; all four data-raw checkers green. Final: ROADMAP 22,687 B / 52 lines, LESSONS 19,701 B / 44 lines.
+- 2026-08-17: all tasks done — status review. Profile verify slot: no R code or roxygen changed anywhere on the branch, so its per-task triggers never fired; the T9 gate (cairn_validate + four checkers) is the milestone's own check surface.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
