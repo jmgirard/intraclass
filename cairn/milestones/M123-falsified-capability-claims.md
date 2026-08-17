@@ -87,7 +87,7 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
       exercised against a real install for the plain-text installed surfaces
       (`README.md`, `vignette:*`, `NEWS.md`), never shadowed by `load_all`'s
       `system.file()` fallback. Per-class reachability reporting and the `Rd:*`
-      wrap sweep are M125's.
+      wrap sweep are deferred to the ROADMAP candidate row carrying them.
 - [ ] AC7: `cairn/PROFILE.md`'s verify slot clean, plus `air format --check`,
       `lintr::lint_package()`, and all four `data-raw` checkers
       (`check-references`'s set) run locally before push; and
@@ -111,7 +111,7 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
 - AC3 → T3
 - AC4 → T4
 - AC5 → T6, T17
-- AC6 → T7, T16
+- AC6 → T7, T16, T20
 - AC7 → T8, T18
 - AC8 → T15
 
@@ -142,6 +142,9 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
       install for the plain-text surfaces; add the gated glob floors.
 - [ ] T18: AC7 — resolve the spelling NOTE; run `devtools::check()` on this
       branch and on `main` under the same toolchain and compare.
+- [ ] T20: simplify the pin per the plan gate — drop or narrow each spelling
+      guarding no reachable surface or able to red on a future TRUE sentence
+      (`install_four_alpha`, `design_never_declare`); log what went and why.
 - [ ] T19: Full gate; push; drive CI green.
 
 ## Work log
@@ -180,6 +183,7 @@ stamp, NEWS consolidation and `cran-comments.md` → M48.
 - 2026-08-16: the amendment takes the plan-owned body to 170 lines against the <150 cap. One compression pass on the heaviest section ran as the remedy prescribes — AC2/AC6/AC8's rationale moved verbatim into MD-1 and cross-referenced, promises unchanged — taking Acceptance criteria 85 to 68 and the body 187 to 170. Still 21 over, and all three split tripwires now fire (8 criteria, 19 tasks, no hope of the cap). Further compression would cut audited promises rather than prose, so the cap failure is left standing for a split decision rather than nibbled at. Committed in this state deliberately: `cairn_validate` FAILs `weight caps` until it is resolved.
 - 2026-08-16: split decided at the sizing gate — M123 keeps the corrections and the pins that demonstrably catch the real sentences; the proof apparatus (per-class reachability reporting, installed-leg planting at one reinstall per spelling, the `Rd:*` wrap sweep, the harness plant-target cross-check) goes to M125, `Depends on: M123`. AC5 and AC6 narrowed accordingly — the backtick-free spelling per claim stays here, since it is a spelling and not machinery. Plan-owned body back to under the cap after compressing the completed T1-T13 into three done-lines (their detail is in this work log and in git); `cairn_validate` green, one sizing advisory left.
 - 2026-08-16: F15 settled by command against the round-2 audit's refutation of it. `R CMD check` on this branch reports `Status: 1 NOTE` — reproducible on a second full run — from the `spelling.Rout` vs `spelling.Rout.save` comparison, whose flagged-word list now includes `README`/`README's` from this branch's new NEWS bullet (`main`'s NEWS.md contains no occurrence of the word). The audit's ground for refusing F15 was that no `.Rout.save` exists in the repo, which is true of the checkout — `git ls-files tests/` lists only `spelling.R` and `testthat.R` — and does not settle the check environment, where the comparison demonstrably runs. `devtools::check()`'s own summary line filters that NOTE class and prints `0 notes`, which is why the two reports disagree. Whether the branch INTRODUCED it is what amended AC7's differential against `main` exists to decide; T18 runs it.
+- 2026-08-16: amendment — AC6's deferral pointer changed from `M125's` to the ROADMAP candidate row, executing the plan gate's refusal to plan that milestone: D-021 bars a milestone whose deliverable is a guard over this repo's own records absent a trigger in what the package computes, and D-029's consequences clause declines to exempt apparatus. The promise is unchanged; only the destination of the deferred work moved. T20 added for the simplification the same gate chose.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
