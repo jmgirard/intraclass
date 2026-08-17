@@ -160,6 +160,31 @@ D-entry).
   statistical corner ships with a guard test plus an in-place comment naming its
   ADR/D-entry, so a future "simplification" fails a test instead of requiring
   archaeology. (E.g. the fixed-rater 2b moment correction.)
+- GP8: **State a verified set procedurally.** A count, list, or enumeration in a
+  record, criterion, or sweep the repo keeps editing is stated as the procedure
+  that derives it — "every quoted string swept", "the sites matched by
+  `<search>`", a computed `setdiff()` — never as a hand-pinned number or member
+  list, which goes stale the moment a fact is added. Correcting a stale pinned
+  figure means counting the artifact, never incrementing the recorded number —
+  and unpinning the count is the durable fix. Run the mechanical sweep once more
+  at milestone end over every touched artifact: a hand-list or a per-task check
+  goes stale between the writing and the checking, and an enumeration written
+  from a reading of code survives to implement unless the deriving comparison is
+  actually run before it becomes a promise. (Graduated from LESSONS —
+  M70/M110/M118/M124 — at M125.)
+- GP9: **Exercise a degenerate guard at the reducer; assert the rule, not the
+  platform's arithmetic.** Whether a degenerate fixture (SSE = 0, MSA at 0) even
+  reaches a guard through `icc()` is platform-dependent — the engine fit may
+  crash first, in more than one form — so fire a reducer's classed abort by
+  calling the reducer directly, match on the guard being unreached rather than
+  on an error string, and remember a green local suite is not evidence the
+  fixture reaches the guard (PR CI runs only ubuntu + windows; macOS is
+  push-to-main). Whether a quantity lands exactly on a boundary is a property of
+  the machine's summation order, not of the fixture: recompute it at test time
+  and assert the rule (exactly 0 aborts, else an interval), keep any recorded
+  column as provenance only, and make any anti-vacuity count a floor, never an
+  exact split. (Graduated from LESSONS — M84, corrected/extended M103/M105 — at
+  M125.)
 
 ## Boundary-fit policy
 

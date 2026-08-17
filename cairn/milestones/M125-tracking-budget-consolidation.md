@@ -8,7 +8,7 @@
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
-- **Principles touched:** —   <!-- owner: plan · create/amend-via-gate; GP8/GP9 are CREATED by T3/T4, so the slot cannot cite them until they exist in DESIGN.md (cairn_validate FAILs on a forward reference); implement fills it once they land -->
+- **Principles touched:** GP8, GP9   <!-- owner: plan · create/amend-via-gate; GP8/GP9 are CREATED by T3/T4, so the slot cannot cite them until they exist in DESIGN.md (cairn_validate FAILs on a forward reference); implement fills it once they land — filled 2026-08-17, T3/T4 -->
 - **Branch/PR:** `m125-tracking-budget-consolidation`   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
@@ -104,9 +104,9 @@ Raising or lowering either budget → a tracking-rules change, not this repo's.
       falsifier + lineage, heaviest first: `:46` (3,729 B), `:45`, `:42`, `:43`,
       `:34`, `:27`, `:29`, `:44`. Cite the milestone file holding each
       measurement narrative; never restate it.
-- [ ] **T3.** Graduate `LESSONS.md:17` (state a set procedurally) into
+- [x] **T3.** Graduate `LESSONS.md:17` (state a set procedurally) into
       `cairn/DESIGN.md` as **GP8**; delete the line; record the mapping.
-- [ ] **T4.** Graduate `LESSONS.md:30` (degenerate guards unreachable via
+- [x] **T4.** Graduate `LESSONS.md:30` (degenerate guards unreachable via
       `icc()`; platform-dependent arithmetic) into `cairn/DESIGN.md` as **GP9**;
       delete the line; record the mapping.
 - [ ] **T5.** Author `cairn/doctrine/doc-claim-pins.md` from `LESSONS.md:47`
@@ -143,6 +143,9 @@ Raising or lowering either budget → a tracking-rules change, not this repo's.
 - 2026-08-17: T1 row "Stale checkpoints can silently feed the M111 sweep the wrong rows" — promoted-and-shipped (milestones/archive/M120-checkpoint-staleness-guard.md); no live remainder, the walk's blind spots already hold their own surviving row.
 - 2026-08-17: T1 row "Cache CI R dependencies to cut per-run install time" — superseded (D-011; milestones/archive/M78-cut-ci-test-suite-wallclock.md records the falsified premise and the shipped lever).
 - 2026-08-17: T2 — the eight widest live rows compressed to promotion condition + falsifier + lineage, each citing its archive/references narrative holder (full pre-compression text at the T1 commit 52573c0); the kappa-worst-steps figures kept in place because the registered claim requires its citation in ROADMAP. ROADMAP now 22,687 bytes / 52 lines; all four data-raw checkers green.
+- 2026-08-17: T3 retired-line → destination: LESSONS line opening `2026-07-19 (M70` (maturation exit) → `cairn/DESIGN.md` **GP8**; hunk: this commit's cairn/LESSONS.md deletion of that line (T3/T4 checkpoint).
+- 2026-08-17: T4 retired-line → destination: LESSONS line opening `2026-07-23 (M84, corrected 2026-08-03` (maturation exit) → `cairn/DESIGN.md` **GP9**; hunk: this commit's cairn/LESSONS.md deletion of that line (T3/T4 checkpoint).
+- 2026-08-17: T3+T4 landed in one checkpoint commit (both edit the same DESIGN.md GP block); Principles-touched slot filled GP8, GP9 now that both exist. LESSONS at 30,657 bytes after the two retirements.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
