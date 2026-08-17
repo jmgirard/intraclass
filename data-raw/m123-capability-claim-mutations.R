@@ -133,7 +133,18 @@ stopifnot(
 # falls back to the package root, which is exactly how M123's first two rounds
 # reported installed-leg coverage they did not have.
 installed_targets <- function() {
-  lib <- system.file(package = "intraclass")
+  # The library path is resolved in a SUBPROCESS for the same reason the cells
+  # are run in one: this process has called `load_all()`, under which
+  # `system.file()` answers with the checkout. Asking in-process reports the
+  # source tree, the guard below then refuses it, and the whole installed leg
+  # silently skips -- which is what happened on this harness's first run.
+  out <- suppressWarnings(system2(
+    "Rscript",
+    c("-e", shQuote('cat(system.file(package = "intraclass"))')),
+    stdout = TRUE,
+    stderr = FALSE
+  ))
+  lib <- utils::tail(out, 1)
   if (!nzchar(lib) || identical(normalizePath(lib), normalizePath("."))) {
     return(list())
   }
