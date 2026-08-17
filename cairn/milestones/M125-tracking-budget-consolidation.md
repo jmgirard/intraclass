@@ -109,7 +109,7 @@ Raising or lowering either budget → a tracking-rules change, not this repo's.
 - [x] **T4.** Graduate `LESSONS.md:30` (degenerate guards unreachable via
       `icc()`; platform-dependent arithmetic) into `cairn/DESIGN.md` as **GP9**;
       delete the line; record the mapping.
-- [ ] **T5.** Author `cairn/doctrine/doc-claim-pins.md` from `LESSONS.md:47`
+- [x] **T5.** Author `cairn/doctrine/doc-claim-pins.md` from `LESSONS.md:47`
       (wrapped-claim search, installed-vs-source surfaces, `rd_flat()`,
       blockquote stripping); delete the line; record the mapping.
 - [ ] **T6.** Author `cairn/doctrine/data-raw-checkers.md` from `LESSONS.md:31`
@@ -146,6 +146,7 @@ Raising or lowering either budget → a tracking-rules change, not this repo's.
 - 2026-08-17: T3 retired-line → destination: LESSONS line opening `2026-07-19 (M70` (maturation exit) → `cairn/DESIGN.md` **GP8**; hunk: this commit's cairn/LESSONS.md deletion of that line (T3/T4 checkpoint).
 - 2026-08-17: T4 retired-line → destination: LESSONS line opening `2026-07-23 (M84, corrected 2026-08-03` (maturation exit) → `cairn/DESIGN.md` **GP9**; hunk: this commit's cairn/LESSONS.md deletion of that line (T3/T4 checkpoint).
 - 2026-08-17: T3+T4 landed in one checkpoint commit (both edit the same DESIGN.md GP block); Principles-touched slot filled GP8, GP9 now that both exist. LESSONS at 30,657 bytes after the two retirements.
+- 2026-08-17: T5 retired-line → destination: LESSONS line opening `2026-08-08 (M115): a doc-claim pin` (maturation exit) → `cairn/doctrine/doc-claim-pins.md`, all sections; hunk: this commit's cairn/LESSONS.md deletion of that line. LESSONS at 26,008 bytes.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
