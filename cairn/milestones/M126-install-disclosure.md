@@ -4,7 +4,7 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M126: Disclose what an installation actually retrieves
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -138,17 +138,17 @@ numeric-`unit` demonstrations → their own candidate row.
 - [x] T7: `devtools::spell_check()` (any new word → `inst/WORDLIST`); knit the
       vignettes; profile verify; `test_dir(load_package = "installed")` at 0 skips.
 - [x] T8: Record the membership-vs-cardinality asymmetry in the Decisions section.
-- [ ] T9 (return 1): Correct the engine-availability claim on all three surfaces
+- [x] T9 (return 1): Correct the engine-availability claim on all three surfaces
       (F1, F2), and with it the two NEWS defects that ride the same bullets — the
       apparent reversal of M123's adjacent bullet (F6) and the vignette's name
       (F8) — plus the over-long NEWS line (F9). Regenerate `README.md`.
-- [ ] T10 (return 1): Re-anchor `install_not_required_*`, `install_light_*` and
+- [x] T10 (return 1): Re-anchor `install_not_required_*`, `install_light_*` and
       `install_one_required_dep` to the contiguous clause each shipped in (F3,
       F4, F5), correct the entry-index comment (F10), update the harness plants
       to carry the lengthened patterns, and re-run the mutation matrix.
-- [ ] T11 (return 1): Amend AC2 and AC3 at the mini gate (F7 and the carried AC2
+- [x] T11 (return 1): Amend AC2 and AC3 at the mini gate (F7 and the carried AC2
       finding); correct T2's stale line citation.
-- [ ] T12 (return 1): Re-run the T7 gate against the corrected prose — profile
+- [x] T12 (return 1): Re-run the T7 gate against the corrected prose — profile
       verify, `air format --check`, `document()` no-diff, the installed suite at
       0 skips, and `devtools::check()`.
 
@@ -177,6 +177,9 @@ numeric-`unit` demonstrations → their own candidate row.
 - 2026-08-17: return 1, T11 — AC2 and AC3 amended at a mini gate (substantive; user-facing tier, so the amended wording went to a fresh-context [O] reader first). AC2 dropped the false parenthetical "requires to form an interval" and now cites `fit_lme4()`'s entry `check_installed("merDeriv")` by symbol rather than a line; the reader's load-bearing finding — that AC2's promise binds only the non-arrival disclosure, so no criterion in the set pins the engine-availability accuracy the return was about — was put to the user with the widening explicitly non-recommended per D-118, and the user selected the strictly-narrowing amendment. AC3 replaced the `:2334` citation (moved to `:2362` by this branch's own pin additions) with the rule's `test_that` description, verified verbatim and unique, and replaced its evidence clause with the numeral sweep review attempt 1 actually ran, so the four-file claim names a procedure that enumerates it. T2's `:2401` citation replaced the same way. The reader's remaining findings (AC2's Option B evidence gap, the `fit_lme4_ml_model()` counter-example to "each lme4 fitter") applied only to the option not taken.
 - 2026-08-17: return 1, T9 — the engine-availability defect (F1, F2) corrected on all three surfaces. Verified first by reading the code: `rlang::check_installed("merDeriv")` opens at `R/engine-lme4.R:52, 197, 324, 566, 590, 622, 647, 672, 705, 747, 882, 1013` — the entry of each of the 12 `fit_lme4*` entry points, before any `ci_method` branching. All three surfaces now say the lme4 PACKAGE arrives while the lme4 ENGINE still waits on `merDeriv`, and each names `glmmTMB` as the only engine a plain install leaves ready to use. Riding the same edits: the new NEWS bullet reframed so it extends M123's adjacent bullet instead of appearing to reverse it (F6), the vignette named *Estimation engines* per `NEWS.md:617` and the surrounding convention (F8), and every added NEWS line brought to ≤80 characters against a file wrapping at ~76–84 (F9). `README.md` regenerated via `devtools::build_readme()`. All four edited surfaces re-checked against all 33 `claim_patterns` spellings on squashed, blockquote-stripped text: 0 hits.
 - 2026-08-17: return 1, T10 (checkpoint) — the three over-broad pins re-anchored to the contiguous clause each shipped in, the `design_never_declare` precedent this file already sets. `install_not_required_*` now carries the `lme4`/`brms`/`lavaan` enumeration, without which the sentence is TRUE (F3); `install_light_*` carries the "Optional engines" scope that covers lme4 (F5); `install_one_required_dep` runs on to "and it is robust" so a future declaration-scoped true clause after the em dash cannot red it (F4). The recall cost — a reworded return of the same falsehood escapes — is recorded in the pin file's own comment. F10's entry-index comment corrected: the five are entries 29–33 of a 33-entry vector, measured by parsing the vector. Harness plants lengthened to carry the new patterns. Matrix re-run pending at this checkpoint.
+- 2026-08-17: return 1, T10 complete — mutation matrix re-run against the re-anchored pins: source leg 128 plants / 128 RED, installed leg 48 / 48 RED, both controls 0 failures, 0 GREEN cells; 55 of those cells are M126's five (40 source = 5 x 2 surfaces x 4 wrap forms, 15 installed = 5 x README.md/NEWS.md/one vignette). Attribution re-checked by parsing both vectors: each of the five plant sentences trips its own pattern and no other, so the lengthened patterns did not start matching each other. The pin vector is 33 entries and M126's five sit at 29-33, measured rather than counted by hand — the figure F10's comment now states.
+- 2026-08-17: return 1, AC3 evidence — numeral sweep over the four edited files. Every digit-bearing token is example code (`set.seed(1)`, `rnorm(12, ...)`, `rnorm(60, ...)`, `1:5`/`1:12`/`1:4`), printed `icc()` output (`95%`, `10000`, `4000`), markup or metadata (`height="139"`, `"100%"`, `%\VignetteEncoding{UTF-8}`, list markers `(1)`-`(4)`), design/reference names (`Design-3`, `Case-3A`, `chi-square(1)`, `t(5)`), interval supports (`[0, 1]`) or prior specifications (`half-t(4, 0, 1)`, `normal(0, ...)`). None is a count of retrieved packages, and the declared-set sentence carries no numeral.
+- 2026-08-17: return 1, T12 gate green against the corrected prose. `devtools::document()` no diff; `air format --check .` clean; `devtools::test()` FAIL 0 / SKIP 2 / PASS 8461 (the two vignette-install skips the installed run covers); installed-package suite at `NOT_CRAN=true` **FAIL 0, SKIP 0, PASS 8813** — the run AC9 asks for; `devtools::check()` 0 errors, 0 warnings, 0 notes in 12m 52s, R CMD check's own single NOTE being the testthat step's elapsed time as at T7. The first installed attempt exited 1 on `library("")` in the parallel workers — `test_dir()` invoked without `package = "intraclass"`, an invocation defect in the command, not the package; re-run named and green. Vignettes knit during the `build_vignettes = TRUE` install the installed leg requires.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
