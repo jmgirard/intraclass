@@ -7,7 +7,7 @@
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP1, GP8
-- **Branch/PR:** `m127-merderiv-requirement-message`
+- **Branch/PR:** `m127-merderiv-requirement-message` · https://github.com/jmgirard/intraclass/pull/136
 
 ## Goal
 
@@ -72,7 +72,7 @@ pin named outside `bayes|engines_omit|install_|design_never`.
       assertion repeated at two `cli.width` settings, because cli wraps the
       rendered message to the display width (measured to break at different
       points at widths 2000, 80 and 40).
-- [x] AC3. A maintainer restoring the withdrawn wording to a swept source file
+- [ ] AC3. A maintainer restoring the withdrawn wording to a swept source file
       reds: the string literal it shipped in —
       `"to compute lme4 Monte-Carlo confidence intervals."`, double quotes and
       terminal full stop included, recovered by
@@ -110,7 +110,7 @@ pin named outside `bayes|engines_omit|install_|design_never`.
       either, and each is reachable only through a dispatched function that has
       already checked.
       Evidence: the three listings and the `formals()` result, in the work log.
-- [x] AC5. `devtools::check()` clean (0 errors / 0 warnings / 0 notes) and
+- [ ] AC5. `devtools::check()` clean (0 errors / 0 warnings / 0 notes) and
       `air format --check .` clean.
 
 ## Coverage
@@ -177,6 +177,36 @@ pin named outside `bayes|engines_omit|install_|design_never`.
 - 2026-08-18: T5 complete; confirming `devtools::check()` on the final tree — summary 0 errors / 0 warnings / 0 notes, `R CMD check` Status 1 NOTE (the pre-existing spelling comparison, now at main's exact baseline). All five criteria checked; status -> review.
 - 2026-08-18: OPEN CONCERN for review, not actioned here. AC5's instrument is weaker than its wording implies: "`devtools::check()` clean (0 errors / 0 warnings / 0 notes)" reads as a promise about `R CMD check`, but devtools' summary does not surface the `checking tests` NOTE that `R CMD check`'s own Status line reports, so the two disagree on this tree and on main. Related: `tests/spelling.Rout.save` is EMPTY, so the saved-output comparison diffs as soon as any word is flagged, and main flags 28 — the repo's spelling gate has been non-green at the `R CMD check` level for some time. Not amended at this gate: AC5 is satisfied by the instrument it names, and rewriting a criterion to chase a pre-existing tooling gap is scope creep on an implement gate. Disposition belongs to review — a candidate row is the likely home.
 
+- 2026-08-18: review opened; draft PR #136. `origin/main` unmoved since the cut, so no merge and the evidence is not stale. FENCING SLIP CORRECTED: all five AC checkboxes had been ticked at the end of implement, which is not implement's to do — they were un-ticked and treated as unverified, and are re-ticked only against fresh evidence recorded in the Review section. AC1, AC2 and AC4 verified and re-ticked this session; AC3 and AC5 unticked, their evidence runs (mutation harness, `devtools::test()`, `devtools::check()`) still in flight at this checkpoint. Independent three-lens review not yet spawned — the diff touches executable surface and the tier is user-facing, so it takes the full fan-out, held until the harness stops mutating `R/icc.R` and `README.Rmd`.
+
 ## Decisions
 
 ## Review
+
+PR: https://github.com/jmgirard/intraclass/pull/136 (draft; CI running).
+Reviewed on `m127-merderiv-requirement-message`, 6 commits, `origin/main`
+unmoved since the cut so no merge was needed.
+
+**Fencing note.** The five AC checkboxes were ticked at the end of
+`/milestone-implement`, which is not implement's to do — under AC fencing a
+criterion is ticked only as review records its fresh evidence. All five were
+un-ticked at the start of this review and treated as unverified; each is
+re-ticked below only against the evidence line beside it.
+
+### Acceptance criteria — fresh evidence
+
+- **AC1 — verified.** `git grep -n -A2 'check_installed(' -- 'R/*.R'` filtered
+  to `"merDeriv"` returns 12 sites; all 12 pass `reason = merderiv_reason()`,
+  none a literal. `git grep -c 'to compute lme4 Monte-Carlo confidence
+  intervals' -- 'R/*.R'` returns 0.
+- **AC2 — verified.** `test-icc-lme4-engine.R` runs 0 failures / 124 passing /
+  1 skip. Rendered live at `cli.width = 2000`: `The package "merDeriv__probe"
+  is required to supply the lme4 parameter covariance; every lme4 fit checks
+  for it on entry, whatever interval method you ask for.` — the pinned
+  substring present verbatim, the surrounding frame rlang's own.
+- **AC4 — verified.** (a) `R/engine-lme4.R` defines 16 top-level functions,
+  0 with a `ci_method` formal. (b) The anchored dispatch enumeration returns
+  12; all 12 carry the merDeriv check as the second statement, def-line + 2,
+  none under a conditional. (c) `git grep -n 'lme4::' -- 'R/*.R'` returns 0
+  `lmer`/`bootMer` calls outside `R/engine-lme4.R`.
+
