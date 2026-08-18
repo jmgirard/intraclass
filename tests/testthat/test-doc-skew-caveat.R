@@ -309,7 +309,35 @@ claim_patterns <- c(
   # that `glmmTMB` imports `lme4` is TRUE, and pinning that would report a true
   # sentence as a withdrawn claim.
   install_pulls_news = "package the install pulls",
-  install_arrives_readme = "so that one arrives with the default engine"
+  install_arrives_readme = "so that one arrives with the default engine",
+  # M126's three claims (its twelfth through sixteenth spellings). All three
+  # described the install's FOOTPRINT from the `Suggests:` placement alone,
+  # which is what `glmmTMB`'s own `Imports: lme4` falsifies: an installation
+  # retrieves lme4 whatever this package declares, so "does not require them"
+  # and "stays light" both understate it, and glmmTMB is not "the one required
+  # dependency" in any sense a reader checking their library would recognise.
+  #
+  # The first two are anchored THROUGH the adjacent `Suggests` token, in a
+  # backticked and a bare form, for the reason the M123 pairs above exist:
+  # `Rd:*` flattening discards `\code{}` markup, so a backticked-only pattern
+  # is inert there. The bare clauses on their own are too short to anchor --
+  # "so the base install stays light" is ordinary English that a future TRUE
+  # sentence about some other package could carry.
+  #
+  # The third takes no pair: its shipped sentence carried no markup at all, so
+  # a backticked form would be byte-identical to the bare one. It is anchored
+  # through "the recommended default" for the same reason -- "it is the one
+  # required dependency" alone is six words that a true sentence about a
+  # genuinely single-dependency package would trip.
+  #
+  # All five are named `install_*` so the mutation harness's two-way name check
+  # (`data-raw/m123-capability-claim-mutations.R`) binds them without widening
+  # its own recall-fixed prefix list.
+  install_not_required_marked = "in `Suggests`, so intraclass does not require them",
+  install_not_required_bare = "in Suggests, so intraclass does not require them",
+  install_light_marked = "live in `Suggests`, so the base install stays light",
+  install_light_bare = "live in Suggests, so the base install stays light",
+  install_one_required_dep = "the recommended default \u2014 it is the one required dependency"
 )
 
 expect_no_withdrawn_claim <- function(text, where) {

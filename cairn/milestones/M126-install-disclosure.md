@@ -65,15 +65,16 @@ numeric-`unit` demonstrations → their own candidate row.
       carries the same disclosure; a second render leaves `git status` clean.
       Evidence: the rendered section quoted beside `README.Rmd`'s, and the
       `git status` output.
-- [ ] AC5: `claim_patterns` in `tests/testthat/test-doc-skew-caveat.R` gains the
-      spellings this milestone withdraws — `README.Rmd`'s "so intraclass does not
-      require them", `NEWS.md:502`'s "so the base install stays light", and
-      `vignettes/engines.Rmd:53`'s "it is the one required dependency" — each in a
-      backticked and a backtick-free form, and each mutation-verified by
-      reintroducing it into a shipped surface and requiring red across the
-      doctrine's matrix of 2 markup regimes × 4 wrap forms, the blockquote form
-      included (`cairn/doctrine/doc-claim-pins.md`, "Always"). Evidence: the
-      committed mutation matrix and its red/green record.
+- [ ] AC5: `claim_patterns` in `tests/testthat/test-doc-skew-caveat.R` gains five
+      spellings for the three clauses this milestone withdraws: `README.Rmd`'s "so
+      intraclass does not require them" and `NEWS.md`'s "so the base install stays
+      light", each anchored through the adjacent `Suggests` token in a backticked
+      and a backtick-free form; and `vignettes/engines.Rmd`'s "it is the one
+      required dependency", whose shipped sentence carries no markup, in one form.
+      Every one of the five is mutation-verified RED against a green control across
+      the source leg's 2 markup regimes × 4 wrap forms and the installed leg's
+      `README.md`, `NEWS.md` and one installed vignette, by
+      `data-raw/m123-capability-claim-mutations.R`. Evidence: the harness run.
 - [ ] AC6: `NEWS.md:502`'s clause no longer characterizes the install's footprint
       from the `Suggests` placement alone, and a development-version bullet
       records the README change — the GitHub README being a surface users read
@@ -150,6 +151,7 @@ numeric-`unit` demonstrations → their own candidate row.
 - 2026-08-17: T3 replaced the unreleased 0.1.0 section's "so the base install stays light" clause in place — it now names `brms`/`lavaan`/`merDeriv` as request-only and `lme4` as arriving via `glmmTMB` — and added a Documentation bullet to the development-version section recording the README change, beside M123's own README bullet. No bullet for the 0.1.0 clause: that section has never shipped. 0 `claim_patterns` hits across the four files.
 - 2026-08-17: T4 rewrote the engines vignette's mixed-model opening to say lme4 arrives with glmmTMB and merDeriv is the piece that may be absent, and replaced the `:53` "it is the one required dependency" clause — true of the DESCRIPTION, misleading about the install — with what it actually meant: glmmTMB is the declared engine and needs nothing an installation does not already bring. The `:39` chunk gate is left as-is; it is correct for merDeriv. 0 `claim_patterns` hits across the four files.
 - 2026-08-17: T5 regenerated README.md via `devtools::build_readme()`; the diff is 11 insertions / 6 deletions confined to the Installation paragraph, with no drift in any printed `icc()` output. A second render left `git diff README.md` empty — the no-op AC4 asks for.
+- 2026-08-17: AC5 amended at a mini gate (substantive; user-facing tier, so the amended wording went to a fresh-context [O] reader first, which returned 10 findings and judged the first draft a net widening). The planned "each in a backticked and a backtick-free form" is unsatisfiable for `vignettes/engines.Rmd`'s clause, which carries no markup — the two forms would be byte-identical. Amended to name the forms concretely per clause and to state the installed leg's probe domain as what the harness plants (README.md, NEWS.md, one vignette) rather than more. A conditional "where its clause carries markup" draft was rejected as self-scoping, and a clause binding the harness's internal name check was dropped under D-118. User selected the narrowed wording over widening the probe to all nine vignettes.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
