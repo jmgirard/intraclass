@@ -170,6 +170,8 @@ pin named outside `bayes|engines_omit|install_|design_never`.
 - 2026-08-18: T4 — NEWS bullet added under Bug fixes, carrying neither the pinned literal nor the bare `lme4 Monte-Carlo` adjacency (both `grep -c` = 0); the pin file runs 0 failures / 2347 passing against the amended `NEWS.md`.
 - 2026-08-18: Tasks section compressed in one pass to hold the 150-line cap (150 -> 146). Acceptance criteria (63 lines) is the heaviest plan-owned section but is amendment-gated, so compressing its prose would have meant a fourth gate for a mechanical shed; Tasks is implement-owned, where compression is a minor edit.
 
+- 2026-08-18: T5 partial — `air format --check .` clean; `devtools::document()` produces no diff; all seven data-raw checkers green (record-claims 6/6 re-derived, oracle-registry, reference-observations, checkpoint-sites, generalizing-claims `--check`, mpl-doc-claims, abort-remedy-verdicts). ROADMAP: the promoted M127 candidate pointer deleted; a standing-guard candidate row added for the AC4 snapshot gap; the per-class-reachability row narrowed — its `spellings` four-prefix piece is retired by this milestone, its `installed_targets()` `vig[1]` piece still stands. AC5's own evidence (`devtools::test()`, `devtools::check()`) was still running at this checkpoint, so AC5 stays unchecked and T5 is not yet complete.
+
 ## Decisions
 
 ## Review
