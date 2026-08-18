@@ -172,6 +172,8 @@ pin named outside `bayes|engines_omit|install_|design_never`.
 
 - 2026-08-18: T5 partial — `air format --check .` clean; `devtools::document()` produces no diff; all seven data-raw checkers green (record-claims 6/6 re-derived, oracle-registry, reference-observations, checkpoint-sites, generalizing-claims `--check`, mpl-doc-claims, abort-remedy-verdicts). ROADMAP: the promoted M127 candidate pointer deleted; a standing-guard candidate row added for the AC4 snapshot gap; the per-class-reachability row narrowed — its `spellings` four-prefix piece is retired by this milestone, its `installed_targets()` `vig[1]` piece still stands. AC5's own evidence (`devtools::test()`, `devtools::check()`) was still running at this checkpoint, so AC5 stays unchecked and T5 is not yet complete.
 
+- 2026-08-18: T5 — `NOT_CRAN=true CI=true devtools::test()`: 0 failures, 8250 passing, 25 skips, 2 warnings. `devtools::check()`: its summary reports 0 errors / 0 warnings / 0 notes, but `R CMD check`'s own Status line reports 1 NOTE, from the `spelling.Rout` / `spelling.Rout.save` comparison at `checking tests`. That NOTE is PRE-EXISTING, measured rather than assumed: a detached worktree at `origin/main` flags 28 words under `spelling::spell_check_package()`, and this branch first flagged 29 — the one addition being `misdescribed`, coined by this milestone's own NEWS bullet. The bullet was reworded to "got it wrong", returning the branch to main's exact baseline (28 flagged, 0 new, 0 gone). `inst/WORDLIST` was NOT padded: 28 words main already flags are absent from it, so adding one entry would have hidden this milestone's contribution inside a standing gap rather than removing it.
+
 ## Decisions
 
 ## Review

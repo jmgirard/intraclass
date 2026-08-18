@@ -300,7 +300,7 @@
   every lme4 fit checks for `merDeriv` on entry, before any interval method is
   chosen, because that is where the parameter covariance comes from. The
   previous message attributed the requirement to one interval method, which
-  misdescribed it for anyone who had asked for a different one.
+  got it wrong for anyone who had asked for a different one.
 
 * Three error messages raised on degenerate data told you to retry with
   `ci_method = "montecarlo"` on data where that method also fails. In the worst
