@@ -50,14 +50,16 @@ pak::pak("jmgirard/intraclass")
 intraclass declares `cli`, `generics`, `glmmTMB`, `lifecycle`, `rlang`,
 and `tibble` as its non-base `Imports:`. What an installation retrieves
 is the full dependency closure of those declarations, which is
-considerably larger — and the difference decides which engines you can
-use without installing anything further. `glmmTMB` names `lme4` in its
-own `Imports:`, so the alternate mixed-model engine is already present
-once the default engine is, whatever its `Suggests:` placement here
-implies. Genuinely optional are `brms` (Bayesian), `lavaan` (SEM), and
-`merDeriv` — which the `lme4` engine needs before it can form an
-interval — all in this package’s `Suggests:`, fetched only if you ask
-for them.
+considerably larger. One member of that closure is worth naming:
+`glmmTMB` lists `lme4` in its own `Imports:`, so the `lme4` package is
+already on your library path after a plain install, whatever its
+`Suggests:` placement here implies. Having the package is not the same
+as having the engine, though — `engine = "lme4"` also needs `merDeriv`,
+which every lme4 fit checks for on entry whatever interval method you
+ask for. `merDeriv` does not arrive: it sits in this package’s
+`Suggests:`, as do `brms` (Bayesian) and `lavaan` (SEM), and none of
+them is fetched unless you ask for it. `glmmTMB` is the only engine a
+plain install leaves you ready to use.
 
 ## Example
 

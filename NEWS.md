@@ -367,12 +367,14 @@
   installation retrieves rather than what the package declares; it now names
   every non-base entry of the `Imports:` field (`lifecycle` and `tibble` were
   missing).
-* The README's *Installation* section now says what an installation **retrieves**,
-  not only what the package declares. `glmmTMB` names `lme4` in its own `Imports:`,
-  so the alternate mixed-model engine is already present once the default one is
-  installed, whatever this package's `Suggests:` field implies; `merDeriv`, which
-  the `lme4` engine needs before it can form an interval, is not. The *Engines*
-  article draws the same distinction.
+* The README's *Installation* section and the *Estimation engines* article now
+  name the dependency the declared `Imports:` field does not reveal: `glmmTMB`
+  lists `lme4` in its own `Imports:`, so the `lme4` package is on the library
+  path after a plain install. Both surfaces also say what that does **not** buy
+  you — `engine = "lme4"` additionally needs `merDeriv`, which every lme4 fit
+  checks for on entry whatever interval method is asked for, and `merDeriv`
+  stays in `Suggests:`. `glmmTMB` is the only engine a plain install leaves
+  ready to use.
 * The *Multilevel designs* vignette no longer says the multilevel design is
   never declared by the user. `icc()` infers it from the crossing pattern on
   complete data, but when missing cells leave that pattern ambiguous the
@@ -505,8 +507,10 @@ alternate engines, and seeded simulations.
   options (e.g. `backend = "cmdstanr"`, `chains`, `iter`, `cores`) to `brms::brm()`.
   Chains sample sequentially on one core by default (matching brms); a periodic
   reminder suggests `brm_args = list(cores = ...)` for parallel sampling. Optional
-  engines live in `Suggests`: `brms`, `lavaan` and `merDeriv` are fetched only on
-  request, while `lme4` arrives regardless as a dependency of `glmmTMB`. The Bayesian engine
+  engines live in `Suggests`: `brms`, `lavaan` and `merDeriv` are fetched only
+  on request. `lme4` itself arrives regardless, as a dependency of `glmmTMB`,
+  but the lme4 engine also needs `merDeriv`, so it too waits on a further
+  install. The Bayesian engine
   also fits the **multilevel** designs at the subject level: the crossed Design 1
   (five components, subject and cluster levels) and the nested Design 2 (raters
   nested in clusters, four components, subject level), each under the same sourced

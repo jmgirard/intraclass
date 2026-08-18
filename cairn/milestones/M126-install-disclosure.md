@@ -45,9 +45,9 @@ numeric-`unit` demonstrations → their own candidate row.
       `glmmTMB`'s own `Imports:` declaration rather than asserting it as a bare
       fact about the install. Evidence: the section quoted verbatim in the work log.
 - [ ] AC2: The same section discloses that `merDeriv` — which the lme4 engine
-      requires to form an interval (`R/engine-lme4.R:52`, documented at
-      `R/icc.R:310`) — does not arrive, attributed to its `Suggests` placement in
-      this package's `DESCRIPTION`. Evidence: the quoted section, plus a
+      requires (`fit_lme4()`'s entry `rlang::check_installed("merDeriv")`,
+      documented at `R/icc.R:310`) — does not arrive, attributed to its
+      `Suggests` placement in this package's `DESCRIPTION`. Evidence: the quoted section, plus a
       work-logged measurement recording (a) `tools::package_dependencies()` over
       the non-base entries of the `Imports:` field read from `DESCRIPTION`, with
       `which = c("Depends","Imports","LinkingTo")`, recursive, showing `lme4`
@@ -58,9 +58,10 @@ numeric-`unit` demonstrations → their own candidate row.
 - [ ] AC3: None of the four edited files states a count of retrieved packages,
       and the README's declared-set sentence states its members without a
       numeral. Both counts AC2 measures move with CRAN and nothing in this repo
-      re-derives either, and the `:2334` rule checks set membership, never a
-      numeral (GP8). Evidence: the edited passages quoted whole in the work log;
-      reading those quotations settles it.
+      re-derives either, and `test-doc-skew-caveat.R`'s "a dependency list on any
+      swept surface is attributed to Imports" rule checks set membership, never a
+      numeral (GP8). Evidence: a numeral sweep over the four edited files, its
+      hits quoted and adjudicated in the work log.
 - [ ] AC4: `README.md` is regenerated from `README.Rmd` in the same commit and
       carries the same disclosure; a second render leaves `git status` clean.
       Evidence: the rendered section quoted beside `README.Rmd`'s, and the
@@ -119,8 +120,9 @@ numeric-`unit` demonstrations → their own candidate row.
       constraints: no count of retrieved packages, and no numeral on the declared
       set; the paragraph MUST retain a sentence naming exactly `cli`, `generics`,
       `glmmTMB`, `lifecycle`, `rlang`, `tibble` and carrying `Imports` or
-      `non-base`, because `test-doc-skew-caveat.R:2401`'s anti-vacuity floor
-      (`expect_gt(length(hits), 0L)`) has that sentence as its only supplier
+      `non-base`, because the `expect_gt(length(hits), 0L)` anti-vacuity floor
+      inside `test-doc-skew-caveat.R`'s "a dependency list on any swept surface
+      is attributed to Imports" rule has that sentence as its only supplier
       across `NEWS.md`, both READMEs and all nine vignettes; and the draft is
       checked against `claim_patterns` on whitespace-collapsed, blockquote-
       stripped text, never a raw grep (`doc-claim-pins.md`).
@@ -136,6 +138,19 @@ numeric-`unit` demonstrations → their own candidate row.
 - [x] T7: `devtools::spell_check()` (any new word → `inst/WORDLIST`); knit the
       vignettes; profile verify; `test_dir(load_package = "installed")` at 0 skips.
 - [x] T8: Record the membership-vs-cardinality asymmetry in the Decisions section.
+- [ ] T9 (return 1): Correct the engine-availability claim on all three surfaces
+      (F1, F2), and with it the two NEWS defects that ride the same bullets — the
+      apparent reversal of M123's adjacent bullet (F6) and the vignette's name
+      (F8) — plus the over-long NEWS line (F9). Regenerate `README.md`.
+- [ ] T10 (return 1): Re-anchor `install_not_required_*`, `install_light_*` and
+      `install_one_required_dep` to the contiguous clause each shipped in (F3,
+      F4, F5), correct the entry-index comment (F10), update the harness plants
+      to carry the lengthened patterns, and re-run the mutation matrix.
+- [ ] T11 (return 1): Amend AC2 and AC3 at the mini gate (F7 and the carried AC2
+      finding); correct T2's stale line citation.
+- [ ] T12 (return 1): Re-run the T7 gate against the corrected prose — profile
+      verify, `air format --check`, `document()` no-diff, the installed suite at
+      0 skips, and `devtools::check()`.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates. -->
@@ -158,6 +173,10 @@ numeric-`unit` demonstrations → their own candidate row.
 - 2026-08-17: AC9 amendment drafted and WITHDRAWN before it was written. The draft pinned the run to `NOT_CRAN=true CI=true` and narrowed the 0-skip promise to `test-doc-skew-caveat.R`, on the premise that a 0-skip full run was unsatisfiable by design. The fresh-context [O] reader falsified that premise: `skip_on_ci()` fires only on the `CI=true` the draft itself added, and M119's archive records this repo reaching 0 skips at `NOT_CRAN=true` with CI unset. AC9 stands as planned, satisfied by measurement rather than by narrowing. The reader's other findings stand recorded: the vignette sentinel names two vignettes and not `engines.Rmd`, so a build dropping that vignette would yield neither skip nor failure — the deferred installed-side floor on the per-class reachability candidate row, not closed here.
 - 2026-08-17: review attempt 1 RETURNED to in-progress (defect return 1). What failed: the corrected prose on all three surfaces tells users the lme4 ENGINE is usable on a stock install, when only the lme4 PACKAGE arrives — `fit_lme4()` calls `check_installed("merDeriv")` unconditionally at entry (`R/engine-lme4.R:51`, all 12 fitters), so `icc(engine = "lme4")` aborts without merDeriv for every `ci_method`. F1 and F2 are load-bearing defects in what the deliverable tells users, judged so by the maintainer at the gate; nine further findings triaged fix-now, one rejected as pre-existing. Full findings and dispositions in the Review section. PR #135 stays open as a draft.
 - 2026-08-17: the `devtools::check()` launched during review attempt 1 finished after the return — 0 errors, 0 warnings, 1 NOTE on the testthat step's elapsed time (13m 27s), which devtools' own summary reports as 0 notes. Recorded for context only: it ran against the prose the return invalidates, so re-review must run it again. PR #135 CI on the returned head: format-check, check-references, pkgdown and lint green; the R CMD check matrix and coverage still in flight when the return landed.
+
+- 2026-08-17: return 1, T11 — AC2 and AC3 amended at a mini gate (substantive; user-facing tier, so the amended wording went to a fresh-context [O] reader first). AC2 dropped the false parenthetical "requires to form an interval" and now cites `fit_lme4()`'s entry `check_installed("merDeriv")` by symbol rather than a line; the reader's load-bearing finding — that AC2's promise binds only the non-arrival disclosure, so no criterion in the set pins the engine-availability accuracy the return was about — was put to the user with the widening explicitly non-recommended per D-118, and the user selected the strictly-narrowing amendment. AC3 replaced the `:2334` citation (moved to `:2362` by this branch's own pin additions) with the rule's `test_that` description, verified verbatim and unique, and replaced its evidence clause with the numeral sweep review attempt 1 actually ran, so the four-file claim names a procedure that enumerates it. T2's `:2401` citation replaced the same way. The reader's remaining findings (AC2's Option B evidence gap, the `fit_lme4_ml_model()` counter-example to "each lme4 fitter") applied only to the option not taken.
+- 2026-08-17: return 1, T9 — the engine-availability defect (F1, F2) corrected on all three surfaces. Verified first by reading the code: `rlang::check_installed("merDeriv")` opens at `R/engine-lme4.R:52, 197, 324, 566, 590, 622, 647, 672, 705, 747, 882, 1013` — the entry of each of the 12 `fit_lme4*` entry points, before any `ci_method` branching. All three surfaces now say the lme4 PACKAGE arrives while the lme4 ENGINE still waits on `merDeriv`, and each names `glmmTMB` as the only engine a plain install leaves ready to use. Riding the same edits: the new NEWS bullet reframed so it extends M123's adjacent bullet instead of appearing to reverse it (F6), the vignette named *Estimation engines* per `NEWS.md:617` and the surrounding convention (F8), and every added NEWS line brought to ≤80 characters against a file wrapping at ~76–84 (F9). `README.md` regenerated via `devtools::build_readme()`. All four edited surfaces re-checked against all 33 `claim_patterns` spellings on squashed, blockquote-stripped text: 0 hits.
+- 2026-08-17: return 1, T10 (checkpoint) — the three over-broad pins re-anchored to the contiguous clause each shipped in, the `design_never_declare` precedent this file already sets. `install_not_required_*` now carries the `lme4`/`brms`/`lavaan` enumeration, without which the sentence is TRUE (F3); `install_light_*` carries the "Optional engines" scope that covers lme4 (F5); `install_one_required_dep` runs on to "and it is robust" so a future declaration-scoped true clause after the em dash cannot red it (F4). The recall cost — a reworded return of the same falsehood escapes — is recorded in the pin file's own comment. F10's entry-index comment corrected: the five are entries 29–33 of a 33-entry vector, measured by parsing the vector. Harness plants lengthened to carry the new patterns. Matrix re-run pending at this checkpoint.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

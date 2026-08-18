@@ -40,11 +40,19 @@ spellings <- list(
   # M126's five spellings. Each plant is a full sentence CARRYING the pattern,
   # not the pattern alone, so the wrap forms have text on both sides of the
   # match to break across.
-  install_not_required_marked = "The optional engines are in `Suggests`, so intraclass does not require them at all.",
-  install_not_required_bare = "The optional engines are in Suggests, so intraclass does not require them at all.",
+  install_not_required_marked = paste0(
+    "The alternate mixed-model (`lme4`), Bayesian (`brms`), and SEM ",
+    "(`lavaan`) engines are in `Suggests`, so intraclass does not require ",
+    "them at all."
+  ),
+  install_not_required_bare = paste0(
+    "The alternate mixed-model (lme4), Bayesian (brms), and SEM ",
+    "(lavaan) engines are in Suggests, so intraclass does not require ",
+    "them at all."
+  ),
   install_light_marked = "Optional engines live in `Suggests`, so the base install stays light indeed.",
   install_light_bare = "Optional engines live in Suggests, so the base install stays light indeed.",
-  install_one_required_dep = "glmmTMB is the recommended default \u2014 it is the one required dependency here."
+  install_one_required_dep = "glmmTMB is the default \u2014 it is the one required dependency and it is robust here."
 )
 
 # Every spelling named in the pin file must appear above. This is what stops

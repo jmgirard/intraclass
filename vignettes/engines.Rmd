@@ -30,11 +30,13 @@ distinction matters. Any unfamiliar term is defined in the [*Glossary*](glossary
 ## The mixed-model engines: glmmTMB and lme4
 
 By default `icc()` fits the variance components with **glmmTMB**. You can instead
-request **lme4** with `engine = "lme4"` for the random two-way design — and you
-already have it: glmmTMB names lme4 in its own `Imports:`, so installing this
-package retrieves lme4 too. What an lme4 fit can additionally need is
-**merDeriv**, which supplies the parameter covariance its interval is built from;
-that one sits in `Suggests:` and is fetched only on request. Both engines are
+request **lme4** with `engine = "lme4"` for the random two-way design. The lme4
+package itself arrives with the installation — glmmTMB names lme4 in its own
+`Imports:` — but the engine needs one piece more: **merDeriv**, which supplies
+the parameter covariance the interval is built from, and which every lme4 fit
+checks for on entry whatever interval method you ask for. merDeriv sits in
+`Suggests:` and is fetched only on request, so a plain install leaves you with
+the lme4 package but not the lme4 engine. Both engines are
 [REML](glossary.html#reml) mixed-model fits of the same model (REML — restricted
 maximum likelihood — is the standard way to estimate variance components), so on a
 given dataset they return the same coefficients to numerical tolerance — the choice is
