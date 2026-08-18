@@ -135,7 +135,7 @@ numeric-`unit` demonstrations → their own candidate row.
       across 2 markup regimes × 4 wrap forms, red required, then removed.
 - [ ] T7: `devtools::spell_check()` (any new word → `inst/WORDLIST`); knit the
       vignettes; profile verify; `test_dir(load_package = "installed")` at 0 skips.
-- [ ] T8: Record the membership-vs-cardinality asymmetry in the Decisions section.
+- [x] T8: Record the membership-vs-cardinality asymmetry in the Decisions section.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates. -->
@@ -153,9 +153,36 @@ numeric-`unit` demonstrations → their own candidate row.
 - 2026-08-17: T5 regenerated README.md via `devtools::build_readme()`; the diff is 11 insertions / 6 deletions confined to the Installation paragraph, with no drift in any printed `icc()` output. A second render left `git diff README.md` empty — the no-op AC4 asks for.
 - 2026-08-17: AC5 amended at a mini gate (substantive; user-facing tier, so the amended wording went to a fresh-context [O] reader first, which returned 10 findings and judged the first draft a net widening). The planned "each in a backticked and a backtick-free form" is unsatisfiable for `vignettes/engines.Rmd`'s clause, which carries no markup — the two forms would be byte-identical. Amended to name the forms concretely per clause and to state the installed leg's probe domain as what the harness plants (README.md, NEWS.md, one vignette) rather than more. A conditional "where its clause carries markup" draft was rejected as self-scoping, and a clause binding the harness's internal name check was dropped under D-118. User selected the narrowed wording over widening the probe to all nine vignettes.
 - 2026-08-17: T6 ran `data-raw/m123-capability-claim-mutations.R` to completion. Source leg 128 plants / 128 RED, installed leg 48 plants / 48 RED, both controls green, 0 GREEN cells; 55 of those cells are M126's five spellings (40 source = 5 x 2 surfaces x 4 wrap forms, 15 installed = 5 x README.md/NEWS.md/one vignette). Attribution checked per pin before the run: each of the five plant sentences trips its own pattern and no other, so the harness's aggregate failure count cannot credit one pin's RED to another. `air format --check .` clean.
+- 2026-08-17: T8 recorded the membership-vs-cardinality asymmetry in the Decisions section — the plan gate's answer and the plan-time audit's standing objection to it, settled on what each claim is set by rather than on how stale each could go.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
+
+### 2026-08-17 — Membership is shippable on a user-facing surface; a count is not
+
+The plan gate asked the README to name both facts — that `lme4` arrives and that
+`merDeriv` does not — while AC3 forbids any count of what an installation
+retrieves. The plan-time criteria audit objected that this is asymmetric: nothing
+in this repo re-derives either kind of claim, and both move with CRAN, so AC3's
+staleness argument appears to reach the membership claims too. It does not, and
+the difference is what each claim is *set by*.
+
+- `lme4`'s arrival is set by one declaration in one file: `glmmTMB`'s own
+  `Imports:`. The README states it as a consequence of that declaration rather
+  than as a fact about the install, so the sentence goes false only if glmmTMB
+  drops lme4 — a visible, attributable upstream event, not drift.
+- `merDeriv`'s non-arrival is set by this repo's own `DESCRIPTION`, where it sits
+  in `Suggests:`. That is a file we control; moving it is our own edit.
+- A count is set by neither. It is the size of a transitive closure over the whole
+  dependency graph, changing whenever any package anywhere in it gains or drops a
+  dependency, with no event this repo could notice. T1 measured the two obvious
+  procedures disagreeing on it today — 63 by `tools::package_dependencies()`, 60
+  by `pak::pkg_deps()` — so there is not even a single number to be right about.
+
+Pinning the membership claims would need apparatus D-021 bars, and this milestone
+adds none: `claim_patterns` guards *withdrawn wording* from returning to a shipped
+surface, which is a guard over user-facing prose, not a ledger over the repo's own
+records (D-029).
 
 ## Review
 <!-- owner: review · exclusive -->
