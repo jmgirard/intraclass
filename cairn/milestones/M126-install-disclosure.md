@@ -4,7 +4,7 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M126: Disclose what an installation actually retrieves
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -133,7 +133,7 @@ numeric-`unit` demonstrations → their own candidate row.
 - [x] T6: Append the three withdrawn spellings to `claim_patterns` (backticked +
       bare per claim) and commit the mutation matrix — each spelling reintroduced
       across 2 markup regimes × 4 wrap forms, red required, then removed.
-- [ ] T7: `devtools::spell_check()` (any new word → `inst/WORDLIST`); knit the
+- [x] T7: `devtools::spell_check()` (any new word → `inst/WORDLIST`); knit the
       vignettes; profile verify; `test_dir(load_package = "installed")` at 0 skips.
 - [x] T8: Record the membership-vs-cardinality asymmetry in the Decisions section.
 
@@ -154,6 +154,8 @@ numeric-`unit` demonstrations → their own candidate row.
 - 2026-08-17: AC5 amended at a mini gate (substantive; user-facing tier, so the amended wording went to a fresh-context [O] reader first, which returned 10 findings and judged the first draft a net widening). The planned "each in a backticked and a backtick-free form" is unsatisfiable for `vignettes/engines.Rmd`'s clause, which carries no markup — the two forms would be byte-identical. Amended to name the forms concretely per clause and to state the installed leg's probe domain as what the harness plants (README.md, NEWS.md, one vignette) rather than more. A conditional "where its clause carries markup" draft was rejected as self-scoping, and a clause binding the harness's internal name check was dropped under D-118. User selected the narrowed wording over widening the probe to all nine vignettes.
 - 2026-08-17: T6 ran `data-raw/m123-capability-claim-mutations.R` to completion. Source leg 128 plants / 128 RED, installed leg 48 plants / 48 RED, both controls green, 0 GREEN cells; 55 of those cells are M126's five spellings (40 source = 5 x 2 surfaces x 4 wrap forms, 15 installed = 5 x README.md/NEWS.md/one vignette). Attribution checked per pin before the run: each of the five plant sentences trips its own pattern and no other, so the harness's aggregate failure count cannot credit one pin's RED to another. `air format --check .` clean.
 - 2026-08-17: T8 recorded the membership-vs-cardinality asymmetry in the Decisions section — the plan gate's answer and the plan-time audit's standing objection to it, settled on what each claim is set by rather than on how stale each could go.
+- 2026-08-17: T7 gate green. `devtools::document()` produces no diff; `air format --check .` clean; `devtools::spell_check()` flags the same 28 words on this branch as on main, none of them introduced here (`merDeriv`, `glmmTMB`, `lavaan`, `brms`, `lme` were already in `inst/WORDLIST`), so no WORDLIST entry was needed; vignettes knit during the `build_vignettes = TRUE` install the installed leg requires. Installed-package suite via `test_dir(load_package = "installed")` measured in three environments: default 0/0 with 7010 passing and 108 `skip_on_cran` skips; `NOT_CRAN=true CI=true` 0/0 with 8551 passing and 23 `skip_on_ci` skips, all in `test-icc-brms.R`; and `NOT_CRAN=true` (CI unset, live Stan running) **0 failed, 0 error, 0 skipped, 8813 passing** — the run AC9 asks for. `test-doc-skew-caveat.R` reported 0 skips in all three.
+- 2026-08-17: AC9 amendment drafted and WITHDRAWN before it was written. The draft pinned the run to `NOT_CRAN=true CI=true` and narrowed the 0-skip promise to `test-doc-skew-caveat.R`, on the premise that a 0-skip full run was unsatisfiable by design. The fresh-context [O] reader falsified that premise: `skip_on_ci()` fires only on the `CI=true` the draft itself added, and M119's archive records this repo reaching 0 skips at `NOT_CRAN=true` with CI unset. AC9 stands as planned, satisfied by measurement rather than by narrowing. The reader's other findings stand recorded: the vignette sentinel names two vignettes and not `engines.Rmd`, so a build dropping that vignette would yield neither skip nor failure — the deferred installed-side floor on the per-class reachability candidate row, not closed here.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
