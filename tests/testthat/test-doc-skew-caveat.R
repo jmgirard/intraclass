@@ -367,7 +367,37 @@ claim_patterns <- c(
   ),
   install_light_marked = "Optional engines live in `Suggests`, so the base install stays light.",
   install_light_bare = "Optional engines live in Suggests, so the base install stays light.",
-  install_one_required_dep = "it is the one required dependency and it is robust"
+  install_one_required_dep = "it is the one required dependency and it is robust",
+  # M127's claim, in one spelling. The `reason` every lme4 entry point passed to
+  # `check_installed("merDeriv", ...)` attributed the requirement to one interval
+  # method -- but the check fires before any `ci_method` branching, so a caller
+  # who asked for `ci_method = "bootstrap"` was told the requirement belonged to
+  # a method they never requested.
+  #
+  # Anchored on the STRING LITERAL, both delimiters and the terminal full stop
+  # included, not on the bare fragment. Three reasons, all measured. The bare
+  # fragment `to compute lme4 Monte-Carlo confidence intervals` has zero hits on
+  # the corrected tree and would have caught the pre-correction one -- so it
+  # meets this file's usual bar -- but it also matches a FUTURE TRUE sentence
+  # ("the covariance used to compute lme4 Monte-Carlo confidence intervals"),
+  # including the natural wording of this change's own NEWS bullet; it is
+  # rejected on precision, the `install_*` precedent above. The `reason = `
+  # prefix was rejected too: after the twelve literals were folded into
+  # `merderiv_reason()`, the wording lives only in that function body, which
+  # carries no such prefix, so the prefixed form would guard sites that no
+  # longer exist and miss the one that does.
+  #
+  # Cost, stated rather than hidden: because the pinned bytes are R CODE, this
+  # entry reaches `.R` sources and is inert on the prose surfaces the walk also
+  # sweeps -- a prose return of the same framing escapes it. And as with every
+  # `fixed = TRUE` pattern here, a reworded return escapes; only a re-planted
+  # verbatim return is caught.
+  #
+  # Named `merderiv_*`, with `merderiv` added to the mutation harness's
+  # `spellings` extraction alternation in the same commit -- an entry outside
+  # that alternation is silently never planted and the harness's two-way name
+  # check passes vacuously.
+  merderiv_method_specific = "\"to compute lme4 Monte-Carlo confidence intervals.\""
 )
 
 expect_no_withdrawn_claim <- function(text, where) {

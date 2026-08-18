@@ -26,11 +26,10 @@ the user at the console.
 entry point in `R/engine-lme4.R`, sourced from one internal expression;
 rendering that condition in a test and pinning the text the user reads; adding
 the superseded phrase to the existing withdrawn-claim pin in
-`tests/testthat/test-doc-skew-caveat.R`; and the two repairs that pin needs to
-bite on this form — the four-prefix `spellings` extraction regex in
-`data-raw/m123-capability-claim-mutations.R:73` (which today silently skips any
-pin named outside `bayes|engines_omit|install_|design_never`) and the absence of
-a plant regime for a bare R string literal on a non-roxygen line.
+`tests/testthat/test-doc-skew-caveat.R`; and the one repair that pin needs to be
+planted at all — the four-prefix `spellings` extraction regex in
+`data-raw/m123-capability-claim-mutations.R:73`, which today silently skips any
+pin named outside `bayes|engines_omit|install_|design_never`.
 
 **Out:**
 - The `"lme4"` reasons at the sibling checks (`R/engine-lme4.R:50` and the
@@ -39,6 +38,9 @@ a plant regime for a bare R string literal on a non-roxygen line.
   D-029 requires extending the existing instrument, which is what T3 does.
 - The abort-remedy-truthfulness ledger → stays a ROADMAP candidate row, still
   barred by D-021.
+- A bare-code-line plant regime for the mutation harness → back to the
+  per-class-reachability candidate row; measured at the T3 gate to produce
+  swept text byte-identical to the existing `README.Rmd` prefix-`""` cell.
 - The remaining pieces of the per-class-reachability candidate row (installed-leg
   planting per spelling, `Rd:*` mutation verification, plant-target/walk
   cross-check, and the `installed_targets()` `vig[1]` truncation) → stay on that
@@ -66,19 +68,26 @@ a plant regime for a bare R string literal on a non-roxygen line.
       assertion repeated at two `cli.width` settings, because cli wraps the
       rendered message to the display width (measured to break at different
       points at widths 2000, 80 and 40).
-- [ ] AC3. The superseded phrase `to compute lme4 Monte-Carlo confidence
-      intervals` appears on no surface the existing pin's source walk sweeps
-      (all of `R/*.R`, `vignettes/`, `NEWS.md`, `README.Rmd`, `README.md`), and
-      would be detected if reintroduced in the form it takes here — a bare R
-      string literal on a non-roxygen line. Evidence: the phrase joins
-      `claim_patterns` in `tests/testthat/test-doc-skew-caveat.R`; the source-walk
-      test runs green; and the M123 mutation harness, with its `spellings`
-      extraction reaching the new entry and a bare-code-line plant regime added,
-      reports the planted phrase RED at every (surface × wrap-form) combination
-      it enumerates, per-plant verdicts recorded. Stated over a full source tree:
-      the source leg returns `list()` when `R/` is absent
-      (`tests/testthat/test-doc-skew-caveat.R:456-458`), so a green `R CMD check`
-      does not evidence it; the evidence run is `devtools::test()` on the tree.
+- [ ] AC3. A maintainer restoring the withdrawn wording to a swept source file
+      reds: the string literal it shipped in —
+      `"to compute lme4 Monte-Carlo confidence intervals."`, double quotes and
+      terminal full stop included, recovered by
+      `git show 26ef090:R/engine-lme4.R` — joins `claim_patterns` in
+      `tests/testthat/test-doc-skew-caveat.R`, and the pin's source walk runs
+      green on a full source tree. The bare fragment without quotes is rejected
+      on precision, not recall: it runs green on today's tree but would red a
+      future true sentence ("the covariance used to compute lme4 Monte-Carlo
+      confidence intervals"), this milestone's own NEWS bullet included — the
+      `install_*` anchoring precedent. Because the pinned bytes are R code the
+      entry reaches `.R` sources and not prose surfaces; that limit and the
+      recall cost are recorded beside the entry. Evidence: the M123 mutation
+      harness plants the new spelling through its existing 2 x 4
+      (surface x wrap-form) matrix, every cell RED, its two-way name check green
+      on the unmutated control, per-cell verdicts in the work log. Stated over a
+      full source tree: the source leg returns `list()` when `R/` is absent
+      (`tests/testthat/test-doc-skew-caveat.R:456-458`), so a green
+      `R CMD check` does not evidence it; the evidence run is `devtools::test()`
+      on the tree.
 - [ ] AC4. The corrected message's claim is true of the code: `ci_method` is not
       a parameter of any function in `R/engine-lme4.R`, and every entry point the
       procedure `git grep -n '^fit_lme4' -- R/engine-lme4.R` returns reaches its
@@ -107,12 +116,14 @@ a plant regime for a bare R string literal on a non-roxygen line.
       an absent probe package name, at two `cli.width` settings, and compare the
       rendered message by substring — not the internal expression, and not
       rlang's own frame.
-- [ ] T3. Add the superseded phrase to `claim_patterns` in
-      `tests/testthat/test-doc-skew-caveat.R`; widen the `spellings` extraction
-      regex at `data-raw/m123-capability-claim-mutations.R:73` so the new entry is
-      extracted rather than skipped; add a bare-code-line plant regime alongside
-      the existing wrap forms (`:88-115`); run the harness and record per-plant
-      verdicts.
+- [ ] T3. Add the quote-delimited literal to `claim_patterns` in
+      `tests/testthat/test-doc-skew-caveat.R` as a `merderiv_*` entry, with the
+      anchoring rationale, the `.R`-sources-only limit and the recall cost in the
+      comment beside it; add the one token `|merderiv` to the `spellings`
+      extraction alternation at `data-raw/m123-capability-claim-mutations.R:73`
+      (a general identifier widening reds the two-way check on the unmutated
+      control — it matches ~30 non-capability entries the harness does not
+      plant); run the harness and record per-cell verdicts.
 - [ ] T4. Record the AC4 listings in the work log; add the NEWS bullet, worded so
       it does not itself carry the withdrawn phrase — `NEWS.md` is swept by both
       pin legs, so quoting it would red AC3.
@@ -133,6 +144,10 @@ a plant regime for a bare R string literal on a non-roxygen line.
 
 - 2026-08-18: T1 — `merderiv_reason()` added to `R/engine-lme4.R`; all 12 merDeriv `check_installed()` sites repointed to it, no literals left (`git grep -n 'Monte-Carlo confidence intervals' -- R/` returns nothing).
 - 2026-08-18: T2 — AC2 rendering test added to `tests/testthat/test-icc-lme4-engine.R`; mutation-checked by substituting the withdrawn wording into `merderiv_reason()`, which reds 3 assertions (both widths and the anti-withdrawn check) and greens on restore. Full suite `NOT_CRAN=true CI=true devtools::test()`: 0 failures, 8202 passing.
+
+- 2026-08-18: AC3 and Scope amended (Substantive), narrowing. A fresh-context [O] reader measured that (i) after T1 the withdrawn wording lives only in `merderiv_reason()`'s body, which carries no `reason = ` prefix, so an anchor on that prefix would guard twelve sites that no longer exist and miss the one that does — the pin is the quote-delimited string literal instead; (ii) the bare fragment has zero hits on today's tree but would red a future true sentence, T4's own NEWS bullet included, so it is rejected on precision per the `install_*` precedent; (iii) a bare-code-line plant regime produces swept text byte-identical to the existing `README.Rmd` prefix-`""` cell, because `squash()` collapses indentation and the walk knows nothing of file type — the cell cannot fail independently, so it leaves Scope for the candidate row; (iv) a general identifier widening of the `spellings` alternation matches ~30 non-capability `claim_patterns` entries the harness deliberately does not plant and would red the two-way check on the unmutated control, so the widening is the single token `|merderiv`. Mini gate chose narrowing over building the regime, because the milestone's own plan-gate falsifier — "the harness repair proving larger than the message correction it serves" — was being met; falsified by the withdrawn wording returning to a swept `.R` source with the pin green. AC3's instrument clauses moved under an `Evidence:` label, so no criterion binds an instrument property.
+
+- 2026-08-18: T3 partial checkpoint — pin entry `merderiv_method_specific` added to `claim_patterns` with its anchoring rationale, `.R`-sources-only limit and recall cost in the adjacent comment; `|merderiv` added to the `spellings` extraction alternation and the matching plant sentence added to the harness. T3 is NOT complete: the mutation harness run that AC3 requires (every cell RED, two-way name check green on the unmutated control, per-cell verdicts) was still in flight at this checkpoint, so no verdicts are recorded yet and AC3 stays unchecked. `README.Rmd` was mid-plant and is deliberately excluded from this commit.
 
 ## Decisions
 

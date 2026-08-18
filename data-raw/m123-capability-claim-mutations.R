@@ -58,7 +58,15 @@ spellings <- list(
     "Optional engines live in Suggests, so the base install stays light. ",
     "Nothing else is fetched."
   ),
-  install_one_required_dep = "glmmTMB is the default \u2014 it is the one required dependency and it is robust here."
+  install_one_required_dep = "glmmTMB is the default \u2014 it is the one required dependency and it is robust here.",
+  # M127's one spelling. The pinned bytes are an R STRING LITERAL, quotes and
+  # all, so the plant carries the literal inside a sentence rather than the bare
+  # phrase -- the wrap forms then have text on both sides of the match, as with
+  # M126's five above.
+  merderiv_method_specific = paste0(
+    "The reason it passed was \"to compute lme4 Monte-Carlo confidence ",
+    "intervals.\" at every entry point."
+  )
 )
 
 # Every spelling named in the pin file must appear above. This is what stops
@@ -69,7 +77,7 @@ pin_names <- sub(
   "^\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*=.*$",
   "\\1",
   grep(
-    "^\\s*(bayes|engines_omit|install_|design_never)[A-Za-z0-9_]*\\s*=",
+    "^\\s*(bayes|engines_omit|install_|design_never|merderiv)[A-Za-z0-9_]*\\s*=",
     pin_src,
     value = TRUE
   )
