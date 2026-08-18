@@ -179,6 +179,7 @@ numeric-`unit` demonstrations → their own candidate row.
 - 2026-08-18: return 2, T14 — Acceptance criteria compressed at a mini gate (substantive; user-facing tier, so the amended wording went to a fresh-context [O] reader first, which ran the criteria audit in FULL mode and returned 7 findings, verdict "a hold on the criteria set — no criterion added, removed, or widened"). Two findings applied before the gate: AC5's quantifier restored to "Each of the five" (the draft's bare "Each" had three candidate antecedents), and AC3's pointer widened to name both places its dropped rationale lives — the Decisions entry and T2's `test_that` description, the anchor installed at the return-1 gate. The section sheds 8 lines by dropping rationale prose only (AC3's staleness argument, AC6's "surface users read today" clause, AC8's "the gate's answer" aside, AC5's no-markup reason, AC2's "the installer the section recommends") and by stating AC2's three measurements as T1's with every option and both verdicts kept; criterion lines wrap at 88 rather than the file's usual 85, recorded here because the reader found wrap width, not content, was carrying the earlier draft. Coverage amended to `AC3 → T2, T3, T4, T5, T13`, the reader having found AC3's numeral sweep produced by no task — review had been running it. The user selected the compression over restoring the rationale sentences and shedding the lines from finished task entries instead. T1, T2, T4, T6 and T9-T12 were compressed in the same pass (implement-owned; their detail is in this log). Plan-owned body now 145 against the <150 cap; `cairn_validate` passes every check.
 - 2026-08-18: return 2 — F10 recorded as a ROADMAP candidate row (the lme4 `merDeriv` abort message's interval-method-specific framing); F11 needs nothing, the review having rejected it as already recorded and met as written.
 - 2026-08-18: return 2, T14 gate green against the repaired prose. `devtools::document()` no diff; `air format --check .` clean; `devtools::build_readme()` a no-op (`git status --porcelain README.md` empty), the AC4 second render; `devtools::test()` FAIL 0 / SKIP 2 / PASS 8461 (the two vignette-install skips the installed run covers); installed-package suite at `NOT_CRAN=true` via `test_dir(package = "intraclass", load_package = "installed")` **FAIL 0, SKIP 0, PASS 8813** — the run AC9 asks for; `devtools::check()` 0 errors, 0 warnings, 0 notes in 13m 55s, R CMD check's own single NOTE being the testthat step's elapsed time as at T7 and T12; `devtools::spell_check()` flags 28 words, the count the return-1 gate measured against the default branch, none introduced here. The three WARNs both suites report are engine fitting warnings inside tests that assert errors or messages (lavaan negative lv variance, a glmmTMB Hessian note, the fixed-raters caution); this branch changes no file under `R/`. `cairn_validate` passes every check, the plan-owned body at 145 against the <150 cap. Status set to review.
+- 2026-08-18: review attempt 3 — gate green (`cairn_validate` 16 PASS; `document()` no diff, `air format --check` clean, README in sync, `pkgdown::check_pkgdown()` clean, `devtools::check()` 0/0/0; `devtools::test()` FAIL 0 / SKIP 2 / PASS 8461; installed suite FAIL 0 / SKIP 0 / PASS 8813; mutation matrix 128/128 and 48/48 RED with clean controls; PR #135 CI green on head e813102). Both [S] lenses returned zero findings; the [O] diff-bug lens returned 11, of which six are triaged FIX (F1-F4, F6, F7) and five rejected or not-findings (F5, F8-F11). F1 is the load-bearing one: `merDeriv`'s own `Depends:` names `lavaan`, so the branch-added README clause "none of them is fetched unless you ask for it" is false — asking for merDeriv fetches the SEM engine. Findings and dispositions in the Review section; going to the maintainer at the gate.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
@@ -423,3 +424,122 @@ to `README.Rmd`.
 and AC9 have evidence that would need re-gathering after the F2/F3/F6 prose
 changes; AC8 (the Decisions entry) stands from attempt 1 and is unaffected.
 
+### Review attempt 3 — 2026-08-18
+
+**Sync.** `origin/main` is unmoved since the branch was cut (`b910783`, 0 behind,
+17 ahead); local `main` matches origin. PR #135 (draft) CI **green on this exact
+head** (`e813102`) across all 10 checks, R CMD check matrix and coverage included.
+
+**Consistency gate — universal half.** `cairn_validate` exit 0: 16 checks PASS,
+two advisory WARNs (9 criteria, 14 tasks) that the plan gate accepted and logged.
+No `DESIGN.md` principle changed on this branch, so `cairn_impact` no-ops.
+
+**Consistency gate — toolchain half** (`r-package` profile's `consistency-gate`
+slot): `devtools::document()` no diff; `air format --check .` clean;
+`README.md` in sync — a second `devtools::build_readme()` left `git status
+--porcelain README.md` empty; `pkgdown::check_pkgdown()` no problems; `NEWS.md`
+carries the development-version entry; no new top-level files, so no
+`.Rbuildignore` addition is owed; `devtools::check()` **0 errors, 0 warnings, 0
+notes** in 13m 06s, R CMD check's own single NOTE being the testthat step's
+elapsed time as at T7 and T12. Vignettes built during that check — AC7's knit.
+
+**Fresh measurements this attempt.** `devtools::test()` FAIL 0 / SKIP 2 / PASS
+8461. Installed-package suite at `NOT_CRAN=true` via `test_dir(package =
+"intraclass", load_package = "installed")` **FAIL 0, SKIP 0, PASS 8813**.
+Mutation matrix (`data-raw/m123-capability-claim-mutations.R`): source leg 128
+plants / 128 RED, installed leg 48 / 48 RED, both controls 0 failures, 0 GREEN
+cells, 55 cells M126's five; working tree restored clean after the run.
+Dependency facts re-measured on R 4.6.1, 2026-08-18: `tools::package_dependencies()`
+over the six non-base `Imports:` read from `DESCRIPTION`, recursive, `which =
+c("Depends","Imports","LinkingTo")` gives a **72**-package closure with `lme4`
+TRUE and `merDeriv` FALSE; `pak::pkg_deps("jmgirard/intraclass")` at its default
+gives **61** with the same two verdicts; `packageDescription("glmmTMB")$Imports`
+names `lme4 (>= 1.1-18.9000)`. The two procedures disagree on size and agree on
+membership for the third measurement in a row (63/60 at T1, 71 at attempt 1, now
+72/61) — AC3's no-count rule measured again rather than argued.
+
+**Three fresh-context lenses ran.** **[S] blame-history: no concerning findings**
+— it established from history that M123's `install_four_marked` was deleted for
+encoding a package SET rather than a falsehood, and confirmed this branch's five
+pins anchor on the contiguous false clause instead, applying that lesson rather
+than reversing it; it also verified the merDeriv-covariance scoping against
+`R/engine-lme4.R:31`, that `# intraclass 0.1.0` is unreleased (no tags,
+`Version: 0.0.0.9000`), and that nothing here contradicts D-021 or D-029.
+**[S] prior-PR-comments: zero findings** — the inline-comment probe returned
+`[]`, and against the archives plus this file's own two Review sections it
+verified every return-1 and return-2 FIX landed and that F10/F11 were correctly
+left alone. **[O] diff-bug: 11 findings**, below with disposition. It also
+independently verified the 12 `check_installed("merDeriv")` entry points, zero
+`claim_patterns` hits across all four surfaces and all eight vignettes, harness
+name-set sync, each plant carrying its own pattern with the wrap split landing
+inside it, and zero cross-attribution.
+
+- **F1 — FIX (user-facing falsehood, branch-added).** `README.Rmd:64-65` /
+  `README.md:59-61`: "`merDeriv` does not arrive: it sits in this package's
+  `Suggests:`, as do `brms` (Bayesian) and `lavaan` (SEM), and none of them is
+  fetched unless you ask for it." Verified at review by reading `merDeriv`'s own
+  `DESCRIPTION`: `Depends: R (>= 3.2.3), lme4 (>= 1.1-10), stats, methods,
+  nonnest2, sandwich, lavaan`. Asking for `merDeriv` — the one thing this
+  paragraph tells an lme4 user to install — therefore fetches `lavaan`, the SEM
+  engine, unasked. The sentence reads a footprint off a `Suggests:` placement,
+  which is the failure class this milestone was convened to correct. The clause
+  is branch-added (`git diff main..HEAD -- README.Rmd`), so it is a defect inside
+  an intentional change, not pre-existing.
+- **F2 — FIX (same claim, milder).** `NEWS.md:509-510`: "`brms`, `lavaan` and
+  `merDeriv` live in `Suggests`, fetched only on request." True only if "request"
+  means any of the three; a `merDeriv` request fetches `lavaan`. Branch-added.
+- **F3 — FIX (a repair the last return demanded, mis-stated).**
+  `tests/testthat/test-doc-skew-caveat.R`'s new `install_light_*` comment lists
+  among the things the full stop cures that the stop-less pattern "reds the clause
+  even where a following sentence qualifies it". Measured at review with
+  `grepl(..., fixed = TRUE)` on the shipped pattern: the continuation case
+  ("...stays lighter than a Bayesian stack") is **FALSE** — cured — while the
+  qualified case ("...stays light. lme4 nonetheless arrives with glmmTMB.") is
+  **TRUE** — not cured, and inherently uncurable under `fixed = TRUE`, since
+  nothing after the matched span can un-match it. The comment therefore claims a
+  cure it does not deliver and leaves the surviving false positive unrecorded,
+  which is what return 2's F4 asked for.
+- **F4 — FIX (the F8 defect class, carried onto the vignette).**
+  `vignettes/engines.Rmd:60` is a 38-character stub line mid-paragraph
+  ("variance component sits exactly at the") against a file wrapping at ~74-88,
+  introduced by this round's re-flow; `main` had no stub there. Measured by line
+  length across `:55-63`.
+- **F6 — FIX (tracking record, off-by-two).** `cairn/ROADMAP.md`'s per-class
+  reachability row says "M126's own third spelling included" of the vignette's
+  clause; `install_one_required_dep` is M126's third *claim* and fifth
+  *spelling*.
+- **F7 — FIX (comment overstatement).** The same pin file calls "it is the one
+  required dependency" "literally true of `DESCRIPTION`"; `DESCRIPTION` declares
+  six non-base `Imports:`, so glmmTMB is the one required *engine*. The comment's
+  argument survives the correction.
+- **F5 — REJECT as an AC failure; recorded.** AC4 says `README.md` "is
+  regenerated from `README.Rmd` in the same commit"; checkpoint commits `3459d2d`
+  (T2, `README.Rmd` alone) and `addb524` (T5, `README.md` alone) split them, while
+  return 1's `0ebb627` changed both together and the end state is in sync. The
+  unit that reaches the default branch is the squash-merge, which lands both in
+  one commit; the criterion is read against that commit, not against checkpoints
+  the squash erases. No reinterpretation is needed for the promise (the two ship
+  in sync) and none is offered.
+- **F8 — REJECT (nit).** The vignette states the merDeriv mechanism at `:35-36`
+  and again at `:56-57`. Both true; the second is pre-existing and the first is
+  what AC7 requires.
+- **F9 — REJECT (not an AC3 failure).** "the engine needs one piece more" is a
+  count of what must be *requested*, not of what an installation *retrieves*,
+  which is what AC3 bans. Its accuracy concern is F1's and is fixed there.
+- **F10 — NOT A FINDING.** AC6's `NEWS.md:502` and AC7's `:53` citations name
+  pre-change positions; verified at review that each position on `main` holds
+  exactly the clause its criterion describes, and AC7 additionally quotes its
+  clause verbatim. Both criteria are satisfiable as written.
+- **F11 — REJECT (pre-existing, not introduced).** The harness's `split_point`
+  comment claims the wrap lands inside the matched phrase; measured, it lands
+  before the pattern for three pre-M126 spellings (`engines_omit_brms`,
+  `engines_omit_brms_bare`, `install_pulls_news`). All five of M126's spellings
+  split inside their pattern, so this diff does not worsen it. Belongs on the
+  standing per-class reachability row.
+
+**Criterion boxes.** None ticked at this point in the attempt. Every criterion's
+evidence was gathered and holds against head `e813102` (recorded above), but the
+F1-F4 repairs change `README.Rmd`, `README.md`, `NEWS.md`, the pin file's comment
+and the vignette — so the ticks wait on re-verification against the repaired
+head rather than being recorded twice. AC8 (the Decisions entry) is unaffected
+and stands from attempt 1.
