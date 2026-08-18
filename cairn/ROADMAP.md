@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-17 (M125 done pass: both byte budgets restored — see the wc figures in the M125 archive; validate green on all 16 checks, four data-raw checkers green, CI green on the merge. Terminal rows rotated M120 → out with the record-claims expectation updated in this same commit; the struck M125 candidate row deleted as shipped, promoted-and-shipped per its archive.)_
+_Last hygiene check: 2026-08-18 (M126 done pass: validate green on all 16 checks; `devtools::check()` 0/0/0 and the installed suite at 0 skips on the merged head; four data-raw checkers green, the `[claim:roadmap-terminal-rows]` expectation rotated M121 → out in this same commit. The struck M126 candidate pointer deleted as shipped; one candidate row added for the lme4 merDeriv abort message. LESSONS: two M126 lines added, the two stalest (M98, M99) pruned to hold the byte budget — no retirement exit applied, this milestone shipped no guard covering an existing lesson.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,21 +9,19 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M121 | Measure the `npbootstrap` interval's coverage on the frozen skew grid | done | — | normal | milestones/archive/M121-npbootstrap-skew-coverage.md |
 | M122 | Remove the resume cache from the M121 npbootstrap sweep | done | — | normal | milestones/archive/M122-drop-m121-resume-cache.md |
 | M123 | Correct the falsified capability claims in the shipped documentation | done | — | normal | milestones/archive/M123-falsified-capability-claims.md |
 | M124 | Demonstrate the exported surface no vignette shows | done | — | normal | milestones/archive/M124-undemonstrated-surface.md |
 | M125 | Bring ROADMAP.md and LESSONS.md back under their byte budgets | done | — | normal | milestones/archive/M125-tracking-budget-consolidation.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
-| M126 | Disclose what an installation actually retrieves | review | — | normal | milestones/M126-install-disclosure.md |
-<!-- terminal-row retention: M125 done (2026-08-17) → M120 rotated out (oldest terminal by merge order; its archive file still resolves there). Kept: M121, M122, M123, M124, M125 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
+| M126 | Disclose what an installation actually retrieves | done | — | normal | milestones/archive/M126-install-disclosure.md |
+<!-- terminal-row retention: M126 done (2026-08-18) → M121 rotated out (oldest terminal by merge order; its archive file still resolves there). Kept: M122, M123, M124, M125, M126 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
 
 ## Candidates
 
-- ~~**The README no longer discloses that `lme4` arrives with the default engine**~~ — promoted to **M126** (2026-08-17), scope widened at that plan gate to `NEWS.md:502` and `vignettes/engines.Rmd`. Full row text: git. Delete this pointer when M126 ships. Lineage: M123 review attempt 3 F24 → descope gate 2026-08-17 → M126.
 - **The lme4 `merDeriv` abort message frames the requirement as interval-method-specific** — `R/engine-lme4.R:52` and its 11 sibling entry points pass `reason = "to compute lme4 Monte-Carlo confidence intervals."` to `rlang::check_installed("merDeriv")`, but the check fires at the entry of every `fit_lme4*()` before any `ci_method` branching, so the requirement is engine-wide. The message is user-visible and carries the exact framing M126 withdrew from `README.Rmd`, `NEWS.md` and `vignettes/engines.Rmd`. Distinct from the abort-remedy-truthfulness row below, whose deliverable is a ledger + CI checker barred by D-021 and whose trigger is a misleading *remedy bullet*. Fenced out of M126 at its 2026-08-18 question gate: `R/` is outside that milestone's Scope. Promote on a user reading the message as method-specific, or on the next change to the lme4 engine's entry checks — never on the count of call sites. Lineage: M126 review attempt 2 F10 → question gate 2026-08-18.
 - **CRAN-reviewer documentation nits, promoted at M48** — two non-defects deferred at the M123/M124 plan gate (2026-08-16) to M48's own API/check pass; CRAN's `\value` check itself passes (the tag exists): (a) each Rd page's `\value` says nothing about what its co-documented S3 methods return (`man/icc.Rd`, `man/d_study.Rd`); a promotion states its enumeration — parse `\alias`/`\usage` from `man/*.Rd` — and scopes to pages with a `\usage` block, `man/reexports.Rd` carrying no `\value` as the standard usethis page. (b) `icc()`'s example re-defines `ratings` inline, shadowing the exported dataset with identical values, so the example never exercises the shipped data object. Full pre-M125 text: git. Promote at M48, or on a CRAN reviewer raising either. Lineage: M123/M124 plan gate.
 - **Two `icc()` argument values reachable only by inference or prose** — deferred at the M124 plan gate (2026-08-16) as absences rather than defects, both fenced out of that milestone's demonstration remit. (a) `design = "nested_in_subjects"` (`R/icc.R:2671`) is described at `vignettes/multilevel-designs.Rmd:117` but only ever *reached* by auto-inference (`:137`) — no vignette or README passes it, and `"nested_in_clusters"` appears only inside a printed message at `README.md:130`; M123 corrects the vignette's false "you never declare it" claim but adds no worked declaration. (b) The numeric-`unit` D-study projection inside `icc()` (`normalize_unit`, `R/icc.R:2701`) is prose-only at `d-studies-and-replicates.Rmd:49` (`unit = c("single", "average", 6)` in backticks, never run), and its `abort_fixed_agr_projection()` fence (`R/icc.R:2723`) is undocumented in any vignette. Promote on a user reporting either as unclear, or fold into the next multilevel or D-study vignette pass. Lineage: M124 plan gate.
