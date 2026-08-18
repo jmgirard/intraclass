@@ -30,7 +30,11 @@ distinction matters. Any unfamiliar term is defined in the [*Glossary*](glossary
 ## The mixed-model engines: glmmTMB and lme4
 
 By default `icc()` fits the variance components with **glmmTMB**. You can instead
-request **lme4** with `engine = "lme4"` for the random two-way design. Both are
+request **lme4** with `engine = "lme4"` for the random two-way design — and you
+already have it: glmmTMB names lme4 in its own `Imports:`, so installing this
+package retrieves lme4 too. What an lme4 fit can additionally need is
+**merDeriv**, which supplies the parameter covariance its interval is built from;
+that one sits in `Suggests:` and is fetched only on request. Both engines are
 [REML](glossary.html#reml) mixed-model fits of the same model (REML — restricted
 maximum likelihood — is the standard way to estimate variance components), so on a
 given dataset they return the same coefficients to numerical tolerance — the choice is
@@ -50,7 +54,8 @@ The two point estimates agree to well within rounding, and their Monte-Carlo
 intervals coincide to about `0.01`: the lme4 interval is built from the parameter
 covariance supplied by the **merDeriv** package, transformed onto the same
 boundary-aware log-scale glmmTMB uses. glmmTMB remains the recommended default —
-it is the one required dependency and it is robust when a variance component sits
+it is the engine this package declares, it needs nothing beyond what an
+installation already brings, and it is robust when a variance component sits
 exactly at the [zero boundary](glossary.html#zero-variance-boundary), where the lme4 route cannot form an interval and
 directs you back to glmmTMB. lme4 otherwise has full design parity with glmmTMB — the
 fixed-rater and every multilevel design, on balanced **and** incomplete/ragged data —

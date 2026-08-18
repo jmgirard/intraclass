@@ -125,7 +125,7 @@ numeric-`unit` demonstrations → their own candidate row.
       stripped text, never a raw grep (`doc-claim-pins.md`).
 - [x] T3: Rewrite `NEWS.md:501–502`'s clause in place; write the
       development-version bullet.
-- [ ] T4: Rewrite the `vignettes/engines.Rmd` mixed-model passage (:30–58),
+- [x] T4: Rewrite the `vignettes/engines.Rmd` mixed-model passage (:30–58),
       including the `:53` clause; leave the `:39` chunk gate correct for
       `merDeriv`.
 - [ ] T5: `devtools::build_readme()`; verify a second render is a no-op.
@@ -148,6 +148,7 @@ numeric-`unit` demonstrations → their own candidate row.
 - 2026-08-17: T1 measured on R 4.6.1 against the CRAN cloud mirror — `tools::package_dependencies()` over the six non-base `Imports:` read from `DESCRIPTION` gives a 63-package recursive closure with `lme4` present and `merDeriv` absent; `pak::pkg_deps("jmgirard/intraclass")` at its default gives 60 with the same two verdicts, and `brms`/`lavaan` absent too; `packageDescription("glmmTMB")$Imports` names `lme4 (>= 1.1-18.9000)`. The two procedures disagree on size, agree on membership — the AC3 rationale, measured rather than assumed.
 - 2026-08-17: T2 rewrote README.Rmd's Installation paragraph — the declared set now states its members with no numeral, `glmmTMB`'s own `Imports:` carries the lme4 disclosure, and `merDeriv` is named beside the `Suggests:` engines as the piece the lme4 interval needs. Checked against all 28 `claim_patterns` spellings parsed from the test file and matched on squashed, blockquote-stripped text: 0 hits. `test-doc-skew-caveat.R` green under `load_all` (2 vignette-install skips, covered at T7); the `:2334` dependency-list rule and its `:2401` anti-vacuity floor both pass on the new sentence.
 - 2026-08-17: T3 replaced the unreleased 0.1.0 section's "so the base install stays light" clause in place — it now names `brms`/`lavaan`/`merDeriv` as request-only and `lme4` as arriving via `glmmTMB` — and added a Documentation bullet to the development-version section recording the README change, beside M123's own README bullet. No bullet for the 0.1.0 clause: that section has never shipped. 0 `claim_patterns` hits across the four files.
+- 2026-08-17: T4 rewrote the engines vignette's mixed-model opening to say lme4 arrives with glmmTMB and merDeriv is the piece that may be absent, and replaced the `:53` "it is the one required dependency" clause — true of the DESCRIPTION, misleading about the install — with what it actually meant: glmmTMB is the declared engine and needs nothing an installation does not already bring. The `:39` chunk gate is left as-is; it is correct for merDeriv. 0 `claim_patterns` hits across the four files.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
