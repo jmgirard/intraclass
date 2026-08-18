@@ -367,6 +367,14 @@
   installation retrieves rather than what the package declares; it now names
   every non-base entry of the `Imports:` field (`lifecycle` and `tibble` were
   missing).
+* The README's *Installation* section and the *Estimation engines* article now
+  name the dependency the declared `Imports:` field does not reveal: `glmmTMB`
+  lists `lme4` in its own `Imports:`, so the `lme4` package is on the library
+  path after a plain install. Both surfaces also say what that does **not** buy
+  you — `engine = "lme4"` additionally needs `merDeriv`, which every lme4 fit
+  checks for on entry whatever interval method is asked for, and `merDeriv`
+  stays in `Suggests:`. `glmmTMB` is the only engine a plain install leaves
+  ready to use.
 * The *Multilevel designs* vignette no longer says the multilevel design is
   never declared by the user. `icc()` infers it from the crossing pattern on
   complete data, but when missing cells leave that pattern ambiguous the
@@ -498,9 +506,12 @@ alternate engines, and seeded simulations.
   consistency, single and average); a `brm_args` list forwards sampler/backend
   options (e.g. `backend = "cmdstanr"`, `chains`, `iter`, `cores`) to `brms::brm()`.
   Chains sample sequentially on one core by default (matching brms); a periodic
-  reminder suggests `brm_args = list(cores = ...)` for parallel sampling. Optional
-  engines live in `Suggests`, so the base install stays light. The Bayesian engine
-  also fits the **multilevel** designs at the subject level: the crossed Design 1
+  reminder suggests `brm_args = list(cores = ...)` for parallel sampling. `brms`,
+  `lavaan` and `merDeriv` live in `Suggests`, so a plain install fetches none of the
+  three (asking for `merDeriv` also brings `lavaan`, which it needs). `lme4` itself
+  arrives regardless, as a dependency of `glmmTMB`, but the lme4 engine also needs
+  `merDeriv`, so it too waits on a further install. The Bayesian engine also fits
+  the **multilevel** designs at the subject level: the crossed Design 1
   (five components, subject and cluster levels) and the nested Design 2 (raters
   nested in clusters, four components, subject level), each under the same sourced
   half-*t* prior with MAP + percentile credible intervals. Beyond the two-way random

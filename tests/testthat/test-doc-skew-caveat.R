@@ -309,7 +309,65 @@ claim_patterns <- c(
   # that `glmmTMB` imports `lme4` is TRUE, and pinning that would report a true
   # sentence as a withdrawn claim.
   install_pulls_news = "package the install pulls",
-  install_arrives_readme = "so that one arrives with the default engine"
+  install_arrives_readme = "so that one arrives with the default engine",
+  # M126's three claims, in five spellings -- the five `install_*` entries
+  # below: install_not_required_{marked,bare}, install_light_{marked,bare}
+  # and install_one_required_dep. No positional index is stated here; one
+  # went stale once already, and any insertion above breaks it again.
+  #
+  # All three described the install's FOOTPRINT from the `Suggests:` placement
+  # alone, which is what `glmmTMB`'s own `Imports: lme4` falsifies: an
+  # installation retrieves lme4 whatever this package declares, so "does not
+  # require them" and "stays light" both understate it, and glmmTMB is not
+  # "the one required dependency" in any sense a reader checking their library
+  # would recognise.
+  #
+  # The first two are anchored THROUGH the adjacent `Suggests` token, in a
+  # backticked and a bare form, for the reason the M123 pairs above exist:
+  # `Rd:*` flattening discards `\code{}` markup, so a backticked-only pattern
+  # is inert there. The third takes no pair: its shipped sentence carried no
+  # markup at all, so a backticked form would be byte-identical to the bare one.
+  #
+  # Each of the three is anchored to the CONTIGUOUS CLAUSE IT SHIPPED IN, the
+  # `design_never_declare` precedent above, and for the same reason. What made
+  # each sentence false is a member the shorter fragments do not carry: it is
+  # `lme4`'s presence in the enumeration that makes "intraclass does not
+  # require them" understate the install, and the word "Optional" covering lme4
+  # that does it for "stays light". Anchored on the fragment alone, each pin
+  # would red on a future TRUE sentence -- "brms, lavaan and merDeriv are in
+  # `Suggests`, so intraclass does not require them" is true and would trip the
+  # short form. Likewise "it is the one required dependency" is literally true
+  # of the ENGINES `DESCRIPTION` declares (its six non-base `Imports:` are not
+  # all engines); it was withdrawn for misleading about the INSTALL, so the
+  # pin runs on to "and it is robust", the clause it shipped in, rather than
+  # ending where a future declaration-scoped true sentence could continue. The
+  # cost is recall: a reworded return of the same falsehood escapes, and only a
+  # re-planted verbatim return is caught.
+  #
+  # `install_light_*` additionally ends at the withdrawn sentence's FULL STOP.
+  # That cures ONE hazard: a future TRUE sentence continuing past the word --
+  # "so the base install stays lighter than a Bayesian stack" -- no longer
+  # matches, measured. It cures nothing else, and cannot: matching is
+  # `fixed = TRUE`, so nothing after the matched span can un-match it. Two
+  # residual hazards therefore stand, both measured. A following sentence that
+  # qualifies the claim still reds ("stays light. lme4 nonetheless arrives with
+  # glmmTMB." matches), and -- the mirror of the recall cost above -- a return
+  # that repunctuates the same claim ("stays light, though ...") escapes.
+  #
+  # All five are named `install_*` so the mutation harness's two-way name check
+  # (`data-raw/m123-capability-claim-mutations.R`) binds them without widening
+  # its own recall-fixed prefix list.
+  install_not_required_marked = paste0(
+    "mixed-model (`lme4`), Bayesian (`brms`), and SEM (`lavaan`) engines are ",
+    "in `Suggests`, so intraclass does not require them"
+  ),
+  install_not_required_bare = paste0(
+    "mixed-model (lme4), Bayesian (brms), and SEM (lavaan) engines are ",
+    "in Suggests, so intraclass does not require them"
+  ),
+  install_light_marked = "Optional engines live in `Suggests`, so the base install stays light.",
+  install_light_bare = "Optional engines live in Suggests, so the base install stays light.",
+  install_one_required_dep = "it is the one required dependency and it is robust"
 )
 
 expect_no_withdrawn_claim <- function(text, where) {

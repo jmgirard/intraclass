@@ -36,7 +36,29 @@ spellings <- list(
   design_never_declare = "The layout is inferred from the data \u2014 you never declare it, ever.",
   design_never_declare_alt = "The design is inferred, so you never declare the design yourself.",
   install_pulls_news = "It now names every non-base package the install pulls, at last.",
-  install_arrives_readme = "Note that glmmTMB imports lme4, so that one arrives with the default engine anyway."
+  install_arrives_readme = "Note that glmmTMB imports lme4, so that one arrives with the default engine anyway.",
+  # M126's five spellings. Each plant is a full sentence CARRYING the pattern,
+  # not the pattern alone, so the wrap forms have text on both sides of the
+  # match to break across.
+  install_not_required_marked = paste0(
+    "The alternate mixed-model (`lme4`), Bayesian (`brms`), and SEM ",
+    "(`lavaan`) engines are in `Suggests`, so intraclass does not require ",
+    "them at all."
+  ),
+  install_not_required_bare = paste0(
+    "The alternate mixed-model (lme4), Bayesian (brms), and SEM ",
+    "(lavaan) engines are in Suggests, so intraclass does not require ",
+    "them at all."
+  ),
+  install_light_marked = paste0(
+    "Optional engines live in `Suggests`, so the base install stays light. ",
+    "Nothing else is fetched."
+  ),
+  install_light_bare = paste0(
+    "Optional engines live in Suggests, so the base install stays light. ",
+    "Nothing else is fetched."
+  ),
+  install_one_required_dep = "glmmTMB is the default \u2014 it is the one required dependency and it is robust here."
 )
 
 # Every spelling named in the pin file must appear above. This is what stops
