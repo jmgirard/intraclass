@@ -29,7 +29,14 @@ term is defined in the
 By default
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) fits
 the variance components with **glmmTMB**. You can instead request
-**lme4** with `engine = "lme4"` for the random two-way design. Both are
+**lme4** with `engine = "lme4"` for the random two-way design. The lme4
+package itself arrives with the installation — glmmTMB names lme4 in its
+own `Imports:` — but the engine needs one piece more: **merDeriv**,
+which supplies the parameter covariance the default Monte-Carlo interval
+is built from, and which every lme4 fit checks for on entry whatever
+interval method you ask for. merDeriv sits in `Suggests:` and is fetched
+only on request, so a plain install leaves you with the lme4 package but
+not the lme4 engine. Both engines are
 [REML](https://jmgirard.github.io/intraclass/articles/glossary.html#reml)
 mixed-model fits of the same model (REML — restricted maximum likelihood
 — is the standard way to estimate variance components), so on a given
@@ -60,9 +67,9 @@ The two point estimates agree to well within rounding, and their
 Monte-Carlo intervals coincide to about `0.01`: the lme4 interval is
 built from the parameter covariance supplied by the **merDeriv**
 package, transformed onto the same boundary-aware log-scale glmmTMB
-uses. glmmTMB remains the recommended default — it is the one required
-dependency and it is robust when a variance component sits exactly at
-the [zero
+uses. glmmTMB remains the recommended default — it is the engine this
+package declares in `Imports:`, and it is robust when a variance
+component sits exactly at the [zero
 boundary](https://jmgirard.github.io/intraclass/articles/glossary.html#zero-variance-boundary),
 where the lme4 route cannot form an interval and directs you back to
 glmmTMB. lme4 otherwise has full design parity with glmmTMB — the

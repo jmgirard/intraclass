@@ -442,6 +442,15 @@
   also two packages short, and described what an installation retrieves
   rather than what the package declares; it now names every non-base
   entry of the `Imports:` field (`lifecycle` and `tibble` were missing).
+- The README’s *Installation* section and the *Estimation engines*
+  article now name the dependency the declared `Imports:` field does not
+  reveal: `glmmTMB` lists `lme4` in its own `Imports:`, so the `lme4`
+  package is on the library path after a plain install. Both surfaces
+  also say what that does **not** buy you — `engine = "lme4"`
+  additionally needs `merDeriv`, which every lme4 fit checks for on
+  entry whatever interval method is asked for, and `merDeriv` stays in
+  `Suggests:`. `glmmTMB` is the only engine a plain install leaves ready
+  to use.
 - The *Multilevel designs* vignette no longer says the multilevel design
   is never declared by the user.
   [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
@@ -619,33 +628,36 @@ simulations.
   [`brms::brm()`](https://paulbuerkner.com/brms/reference/brm.html).
   Chains sample sequentially on one core by default (matching brms); a
   periodic reminder suggests `brm_args = list(cores = ...)` for parallel
-  sampling. Optional engines live in `Suggests`, so the base install
-  stays light. The Bayesian engine also fits the **multilevel** designs
-  at the subject level: the crossed Design 1 (five components, subject
-  and cluster levels) and the nested Design 2 (raters nested in
-  clusters, four components, subject level), each under the same sourced
-  half-*t* prior with MAP + percentile credible intervals. Beyond the
-  two-way random path it covers the single-level **one-way** random
-  design (`model = "oneway"` — `ICC(1)`/`ICC(1,k)`) and **fixed** raters
-  (`raters = "fixed"` — the McGraw & Wong finite-population read
-  directly from the posterior of the rater effects), both balanced and
-  complete. Fixed raters are also supported at the **multilevel**
-  subject level, balanced — the crossed Design 1 and the nested Design 2
-  — with / read per posterior draw and moment-corrected so the credible
-  interval covers the fixed-population coefficient (a bias correction
-  that matters when each cluster’s raters are estimated from few
-  subjects, and is boundary-aware at zero rater variance). The Bayesian
-  engine also reports the **conflated** diagnostic
-  (`level = "conflated"`, the biased ignore-the-clustering ICC of ten
-  Hove et al. 2022, Eq. 14): a variance-ratio push-forward composed off
-  the same crossed five-component posterior draws, with the frequentist
-  glmmTMB conflated point falling inside its credible interval. It also
-  fits **within-cell replicates** (more than one rating per
-  subject×rater cell): the residual splits into the subject×rater
-  interaction and pure error, and `occasions = "average"` reports the
-  reliability of the replicate mean (pure error divided per posterior
-  draw by the replicate count) — single-level two-way, random **or
-  fixed** raters (with fixed raters the rater slot carries the
+  sampling. `brms`, `lavaan` and `merDeriv` live in `Suggests`, so a
+  plain install fetches none of the three (asking for `merDeriv` also
+  brings `lavaan`, which it needs). `lme4` itself arrives regardless, as
+  a dependency of `glmmTMB`, but the lme4 engine also needs `merDeriv`,
+  so it too waits on a further install. The Bayesian engine also fits
+  the **multilevel** designs at the subject level: the crossed Design 1
+  (five components, subject and cluster levels) and the nested Design 2
+  (raters nested in clusters, four components, subject level), each
+  under the same sourced half-*t* prior with MAP + percentile credible
+  intervals. Beyond the two-way random path it covers the single-level
+  **one-way** random design (`model = "oneway"` — `ICC(1)`/`ICC(1,k)`)
+  and **fixed** raters (`raters = "fixed"` — the McGraw & Wong
+  finite-population read directly from the posterior of the rater
+  effects), both balanced and complete. Fixed raters are also supported
+  at the **multilevel** subject level, balanced — the crossed Design 1
+  and the nested Design 2 — with / read per posterior draw and
+  moment-corrected so the credible interval covers the fixed-population
+  coefficient (a bias correction that matters when each cluster’s raters
+  are estimated from few subjects, and is boundary-aware at zero rater
+  variance). The Bayesian engine also reports the **conflated**
+  diagnostic (`level = "conflated"`, the biased ignore-the-clustering
+  ICC of ten Hove et al. 2022, Eq. 14): a variance-ratio push-forward
+  composed off the same crossed five-component posterior draws, with the
+  frequentist glmmTMB conflated point falling inside its credible
+  interval. It also fits **within-cell replicates** (more than one
+  rating per subject×rater cell): the residual splits into the
+  subject×rater interaction and pure error, and `occasions = "average"`
+  reports the reliability of the replicate mean (pure error divided per
+  posterior draw by the replicate count) — single-level two-way, random
+  **or fixed** raters (with fixed raters the rater slot carries the
   finite-population read per posterior draw, equal to on balanced data),
   and **multilevel** designs (crossed Design 1, six components; nested
   Design 2, five components; random raters, subject level), all

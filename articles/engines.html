@@ -98,11 +98,18 @@ term is defined in the <a href="glossary.html"><em>Glossary</em></a>.</p>
 </h2>
 <p>By default <code><a href="../reference/icc.html">icc()</a></code> fits the variance components with
 <strong>glmmTMB</strong>. You can instead request <strong>lme4</strong>
-with <code>engine = "lme4"</code> for the random two-way design. Both
-are <a href="glossary.html#reml">REML</a> mixed-model fits of the same
-model (REML — restricted maximum likelihood — is the standard way to
-estimate variance components), so on a given dataset they return the
-same coefficients to numerical tolerance — the choice is about the
+with <code>engine = "lme4"</code> for the random two-way design. The
+lme4 package itself arrives with the installation — glmmTMB names lme4
+in its own <code>Imports:</code> — but the engine needs one piece more:
+<strong>merDeriv</strong>, which supplies the parameter covariance the
+default Monte-Carlo interval is built from, and which every lme4 fit
+checks for on entry whatever interval method you ask for. merDeriv sits
+in <code>Suggests:</code> and is fetched only on request, so a plain
+install leaves you with the lme4 package but not the lme4 engine. Both
+engines are <a href="glossary.html#reml">REML</a> mixed-model fits of
+the same model (REML — restricted maximum likelihood — is the standard
+way to estimate variance components), so on a given dataset they return
+the same coefficients to numerical tolerance — the choice is about the
 fitting backend, not the estimand.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">glmmtmb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, engine <span class="op">=</span> <span class="st">"glmmTMB"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
@@ -126,13 +133,14 @@ Monte-Carlo intervals coincide to about <code>0.01</code>: the lme4
 interval is built from the parameter covariance supplied by the
 <strong>merDeriv</strong> package, transformed onto the same
 boundary-aware log-scale glmmTMB uses. glmmTMB remains the recommended
-default — it is the one required dependency and it is robust when a
-variance component sits exactly at the <a href="glossary.html#zero-variance-boundary">zero boundary</a>, where the
-lme4 route cannot form an interval and directs you back to glmmTMB. lme4
-otherwise has full design parity with glmmTMB — the fixed-rater and
-every multilevel design, on balanced <strong>and</strong>
-incomplete/ragged data — degrading to glmmTMB only at that variance
-boundary.</p>
+default — it is the engine this package declares in
+<code>Imports:</code>, and it is robust when a variance component sits
+exactly at the <a href="glossary.html#zero-variance-boundary">zero
+boundary</a>, where the lme4 route cannot form an interval and directs
+you back to glmmTMB. lme4 otherwise has full design parity with glmmTMB
+— the fixed-rater and every multilevel design, on balanced
+<strong>and</strong> incomplete/ragged data — degrading to glmmTMB only
+at that variance boundary.</p>
 </div>
 <div class="section level2">
 <h2 id="a-structural-equation-engine-lavaan">A structural-equation engine (<code>lavaan</code>)<a class="anchor" aria-label="anchor" href="#a-structural-equation-engine-lavaan"></a>
