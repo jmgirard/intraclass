@@ -9,7 +9,7 @@
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP8   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** `m126-install-disclosure`   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m126-install-disclosure` / https://github.com/jmgirard/intraclass/pull/135   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -40,11 +40,11 @@ numeric-`unit` demonstrations → their own candidate row.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: `README.Rmd`'s Installation section discloses that `lme4` arrives with
+- [x] AC1: `README.Rmd`'s Installation section discloses that `lme4` arrives with
       an installation regardless of its `Suggests` placement, attributing that to
       `glmmTMB`'s own `Imports:` declaration rather than asserting it as a bare
       fact about the install. Evidence: the section quoted verbatim in the work log.
-- [ ] AC2: The same section discloses that `merDeriv` — which the lme4 engine
+- [x] AC2: The same section discloses that `merDeriv` — which the lme4 engine
       requires to form an interval (`R/engine-lme4.R:52`, documented at
       `R/icc.R:310`) — does not arrive, attributed to its `Suggests` placement in
       this package's `DESCRIPTION`. Evidence: the quoted section, plus a
@@ -55,17 +55,17 @@ numeric-`unit` demonstrations → their own candidate row.
       its default, showing the same, since `pak::pak()` is the installer the
       section recommends; (c) `packageDescription("glmmTMB")$Imports` naming
       `lme4`; each stamped with the R version and the date.
-- [ ] AC3: None of the four edited files states a count of retrieved packages,
+- [x] AC3: None of the four edited files states a count of retrieved packages,
       and the README's declared-set sentence states its members without a
       numeral. Both counts AC2 measures move with CRAN and nothing in this repo
       re-derives either, and the `:2334` rule checks set membership, never a
       numeral (GP8). Evidence: the edited passages quoted whole in the work log;
       reading those quotations settles it.
-- [ ] AC4: `README.md` is regenerated from `README.Rmd` in the same commit and
+- [x] AC4: `README.md` is regenerated from `README.Rmd` in the same commit and
       carries the same disclosure; a second render leaves `git status` clean.
       Evidence: the rendered section quoted beside `README.Rmd`'s, and the
       `git status` output.
-- [ ] AC5: `claim_patterns` in `tests/testthat/test-doc-skew-caveat.R` gains five
+- [x] AC5: `claim_patterns` in `tests/testthat/test-doc-skew-caveat.R` gains five
       spellings for the three clauses this milestone withdraws: `README.Rmd`'s "so
       intraclass does not require them" and `NEWS.md`'s "so the base install stays
       light", each anchored through the adjacent `Suggests` token in a backticked
@@ -75,17 +75,17 @@ numeric-`unit` demonstrations → their own candidate row.
       the source leg's 2 markup regimes × 4 wrap forms and the installed leg's
       `README.md`, `NEWS.md` and one installed vignette, by
       `data-raw/m123-capability-claim-mutations.R`. Evidence: the harness run.
-- [ ] AC6: `NEWS.md:502`'s clause no longer characterizes the install's footprint
+- [x] AC6: `NEWS.md:502`'s clause no longer characterizes the install's footprint
       from the `Suggests` placement alone, and a development-version bullet
       records the README change — the GitHub README being a surface users read
       today, where the unreleased `0.1.0` section is corrected in place with no
       bullet of its own. Evidence: both passages quoted before and after.
-- [ ] AC7: `vignettes/engines.Rmd`'s mixed-model section discloses that `lme4`
+- [x] AC7: `vignettes/engines.Rmd`'s mixed-model section discloses that `lme4`
       arrives with `glmmTMB` and that `merDeriv` is the dependency an installation
       may lack, and its "it is the one required dependency" clause (`:53`) no
       longer reads as a claim about what an installation retrieves. Evidence: the
       section quoted before and after; the vignette knits.
-- [ ] AC8: The milestone's Decisions section records why membership claims
+- [x] AC8: The milestone's Decisions section records why membership claims
       (`lme4` arrives, `merDeriv` does not) are shippable on a user-facing surface
       where a cardinality claim is not — the gate's answer, which would otherwise
       go unrecorded. Evidence: the entry.
@@ -188,3 +188,48 @@ records (D-029).
 
 ## Review
 <!-- owner: review · exclusive -->
+
+### Evidence per criterion (fresh, 2026-08-17, at PR #135 head)
+
+- **AC1 — met.** `README.Rmd:55-63` reads: "intraclass declares `cli`, `generics`,
+  `glmmTMB`, `lifecycle`, `rlang`, and `tibble` as its non-base `Imports:`. ...
+  `glmmTMB` names `lme4` in its own `Imports:`, so the alternate mixed-model engine
+  is already present once the default engine is, whatever its `Suggests:` placement
+  here implies." The disclosure is stated as a consequence of glmmTMB's declaration,
+  not as a bare fact about the install.
+- **AC2 — met.** Same section: "`merDeriv` — which the `lme4` engine needs before it
+  can form an interval — all in this package's `Suggests:`, fetched only if you ask
+  for them." Measurement re-run at review on R 4.6.1: `tools::package_dependencies()`
+  over the `Imports:` field read from `DESCRIPTION` gives a 63-package recursive
+  closure, `lme4` TRUE / `merDeriv` FALSE; `pak::pkg_deps()` at its default gives 60
+  with the same verdicts and `brms`/`lavaan` also absent;
+  `packageDescription("glmmTMB")$Imports` names `lme4 (>= 1.1-18.9000)`.
+  `R/engine-lme4.R:52` and `R/icc.R:310` confirm the merDeriv requirement.
+- **AC3 — met.** Swept the four edited files for a count of retrieved packages: the
+  only numerals matching are `rnorm(60, ...)` and "Subjects: 60 in 12 clusters" in
+  the unrelated multilevel example. The declared-set sentence names its members with
+  no numeral ("six" was removed at T2).
+- **AC4 — met.** `README.md` regenerated from `README.Rmd`; the branch diff is
+  confined to the Installation paragraph with no drift in any printed `icc()` output.
+  A second `devtools::build_readme()` at review left `git status --porcelain
+  README.md` empty.
+- **AC5 — met.** `tests/testthat/test-doc-skew-caveat.R:336-340` carries the five
+  spellings: `install_not_required_{marked,bare}` anchored through the adjacent
+  `Suggests` token, `install_light_{marked,bare}` likewise, and
+  `install_one_required_dep` in one form (its shipped sentence carried no markup).
+  `data-raw/m123-capability-claim-mutations.R` carries five matching plants. Matrix
+  result: source leg 128 plants / 128 RED, installed leg 48 plants / 48 RED, both
+  controls green, 0 GREEN cells; 55 cells are M126's five. `git diff 787d637..HEAD`
+  over the pin and harness is empty, so the matrix ran against the shipped content.
+- **AC6 — met.** `NEWS.md:507-509` now reads "Optional engines live in `Suggests`:
+  `brms`, `lavaan` and `merDeriv` are fetched only on request, while `lme4` arrives
+  regardless as a dependency of `glmmTMB`." — replacing "so the base install stays
+  light" in place, inside the unreleased `# intraclass 0.1.0` section. A
+  development-version Documentation bullet records the README change.
+- **AC7 — met.** `vignettes/engines.Rmd:32-37` discloses that installing the package
+  retrieves lme4 via glmmTMB's `Imports:` and that merDeriv sits in `Suggests:`; the
+  `:53` clause now reads "it is the engine this package declares, it needs nothing
+  beyond what an installation already brings" in place of "it is the one required
+  dependency". The vignette knits (built during the `build_vignettes = TRUE` install).
+- **AC8 — met.** The Decisions section carries the 2026-08-17 entry settling the
+  membership-vs-cardinality asymmetry the plan-time audit raised.
