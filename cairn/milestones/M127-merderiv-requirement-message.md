@@ -38,6 +38,10 @@ pin named outside `bayes|engines_omit|install_|design_never`.
   D-029 requires extending the existing instrument, which is what T3 does.
 - The abort-remedy-truthfulness ledger → stays a ROADMAP candidate row, still
   barred by D-021.
+- A standing guard that a future lme4 entry point cannot skip the check → a
+  ROADMAP candidate row; AC4 is a one-time audit, and a structural guard over
+  this repo's own source is apparatus under D-021 pressure, wanting its own
+  plan gate rather than a mid-implementation widening.
 - A bare-code-line plant regime for the mutation harness → back to the
   per-class-reachability candidate row; measured at the T3 gate to produce
   swept text byte-identical to the existing `README.Rmd` prefix-`""` cell.
@@ -88,11 +92,24 @@ pin named outside `bayes|engines_omit|install_|design_never`.
       (`tests/testthat/test-doc-skew-caveat.R:456-458`), so a green
       `R CMD check` does not evidence it; the evidence run is `devtools::test()`
       on the tree.
-- [ ] AC4. The corrected message's claim is true of the code: `ci_method` is not
-      a parameter of any function in `R/engine-lme4.R`, and every entry point the
-      procedure `git grep -n '^fit_lme4' -- R/engine-lme4.R` returns reaches its
-      merDeriv check before its fitting call. Evidence: that listing plus
-      `git grep -n 'ci_method' -- R/engine-lme4.R`, both quoted in the work log.
+- [ ] AC4. The corrected message's claim is true of the code, in three clauses,
+      each decided by a command whose output is its domain.
+      (a) No function in `R/engine-lme4.R` takes `ci_method`:
+      `git grep -n 'ci_method' -- R/engine-lme4.R` enumerates every line that
+      could carry such a formal, and sourcing the file and testing `formals()`
+      of every top-level function returns no `ci_method` argument.
+      (b) Every lme4 fit function `icc()` dispatches to — the set
+      `git grep -nE '^[[:space:]]+fit_lme4[A-Za-z0-9_]*\(' -- R/icc.R` returns —
+      checks for merDeriv as its second, unconditional statement
+      (check-line = definition-line + 2, no enclosing conditional).
+      (c) No lme4 fit occurs outside those functions:
+      `git grep -n 'lme4::' -- 'R/*.R'` returns no `lmer`/`bootMer` call outside
+      `R/engine-lme4.R`, and the two helpers there that fit without checking —
+      `fit_lme4_ml_model()` (`:457`) and `lme4_bootmer_refit()` (`:34`) — are
+      excluded by the (b) procedure rather than by judgment: `icc()` never calls
+      either, and each is reachable only through a dispatched function that has
+      already checked.
+      Evidence: the three listings and the `formals()` result, in the work log.
 - [ ] AC5. `devtools::check()` clean (0 errors / 0 warnings / 0 notes) and
       `air format --check .` clean.
 
@@ -106,30 +123,26 @@ pin named outside `bayes|engines_omit|install_|design_never`.
 
 ## Tasks
 
-- [x] T1. Add one internal expression in `R/engine-lme4.R` returning
-      `"to supply the lme4 parameter covariance; every lme4 fit checks for it on entry, whatever interval method you ask for."`
-      and repoint every merDeriv `check_installed()` site the AC1 enumeration
-      returns (today: `:53, :198, :325, :567, :591, :623, :648, :673, :706, :748,
-      :883, :1014`) to it, removing the literals.
-- [x] T2. Extend `tests/testthat/test-icc-lme4-engine.R` with the AC2 rendering
-      assertion: put `merderiv_reason()` through `rlang::check_installed()` under
-      an absent probe package name, at two `cli.width` settings, and compare the
-      rendered message by substring — not the internal expression, and not
-      rlang's own frame.
-- [ ] T3. Add the quote-delimited literal to `claim_patterns` in
+- [x] T1. One internal expression in `R/engine-lme4.R` (`merderiv_reason()`);
+      every merDeriv `check_installed()` site the AC1 enumeration returns
+      repointed to it, literals removed.
+- [x] T2. AC2 rendering assertion in `tests/testthat/test-icc-lme4-engine.R`:
+      `merderiv_reason()` through `rlang::check_installed()` under an absent
+      probe package name, at two `cli.width` settings, compared by substring —
+      not the internal expression, and not rlang's own frame.
+- [x] T3. Quote-delimited literal added to `claim_patterns` in
       `tests/testthat/test-doc-skew-caveat.R` as a `merderiv_*` entry, with the
-      anchoring rationale, the `.R`-sources-only limit and the recall cost in the
-      comment beside it; add the one token `|merderiv` to the `spellings`
-      extraction alternation at `data-raw/m123-capability-claim-mutations.R:73`
-      (a general identifier widening reds the two-way check on the unmutated
-      control — it matches ~30 non-capability entries the harness does not
-      plant); run the harness and record per-cell verdicts.
-- [ ] T4. Record the AC4 listings in the work log; add the NEWS bullet, worded so
-      it does not itself carry the withdrawn phrase — `NEWS.md` is swept by both
-      pin legs, so quoting it would red AC3.
-- [ ] T5. Gate hygiene: `air format .`, `devtools::check()`, the four data-raw
-      checkers; delete the promoted candidate row from `cairn/ROADMAP.md` and
-      narrow the per-class-reachability row to the pieces this milestone leaves.
+      anchoring rationale, `.R`-sources-only limit and recall cost beside it;
+      `|merderiv` added to the `spellings` alternation at
+      `data-raw/m123-capability-claim-mutations.R:73` (a general identifier
+      widening reds the two-way check on the unmutated control); harness run,
+      per-cell verdicts in the work log.
+- [x] T4. AC4 listings in the work log; NEWS bullet, worded so it carries
+      neither the pinned literal nor the bare `lme4 Monte-Carlo` adjacency —
+      `NEWS.md` is swept by both pin legs.
+- [ ] T5. Gate hygiene: `air format .`, `devtools::test()`, `devtools::check()`,
+      the four data-raw checkers; delete the promoted candidate row and add the
+      standing-guard row; narrow the per-class-reachability row.
 
 ## Work log
 
@@ -148,6 +161,14 @@ pin named outside `bayes|engines_omit|install_|design_never`.
 - 2026-08-18: AC3 and Scope amended (Substantive), narrowing. A fresh-context [O] reader measured that (i) after T1 the withdrawn wording lives only in `merderiv_reason()`'s body, which carries no `reason = ` prefix, so an anchor on that prefix would guard twelve sites that no longer exist and miss the one that does — the pin is the quote-delimited string literal instead; (ii) the bare fragment has zero hits on today's tree but would red a future true sentence, T4's own NEWS bullet included, so it is rejected on precision per the `install_*` precedent; (iii) a bare-code-line plant regime produces swept text byte-identical to the existing `README.Rmd` prefix-`""` cell, because `squash()` collapses indentation and the walk knows nothing of file type — the cell cannot fail independently, so it leaves Scope for the candidate row; (iv) a general identifier widening of the `spellings` alternation matches ~30 non-capability `claim_patterns` entries the harness deliberately does not plant and would red the two-way check on the unmutated control, so the widening is the single token `|merderiv`. Mini gate chose narrowing over building the regime, because the milestone's own plan-gate falsifier — "the harness repair proving larger than the message correction it serves" — was being met; falsified by the withdrawn wording returning to a swept `.R` source with the pin green. AC3's instrument clauses moved under an `Evidence:` label, so no criterion binds an instrument property.
 
 - 2026-08-18: T3 partial checkpoint — pin entry `merderiv_method_specific` added to `claim_patterns` with its anchoring rationale, `.R`-sources-only limit and recall cost in the adjacent comment; `|merderiv` added to the `spellings` extraction alternation and the matching plant sentence added to the harness. T3 is NOT complete: the mutation harness run that AC3 requires (every cell RED, two-way name check green on the unmutated control, per-cell verdicts) was still in flight at this checkpoint, so no verdicts are recorded yet and AC3 stays unchecked. `README.Rmd` was mid-plant and is deliberately excluded from this commit.
+
+- 2026-08-18: AC4 amended (Substantive), correcting a falsified procedure. `git grep -n '^fit_lme4' -- R/engine-lme4.R` returns 13 functions, not 12: `fit_lme4_ml_model()` (`:457`) is a shared helper with no merDeriv check, so "every entry point the procedure returns" made "entry point" a judgment layered on the procedure. A fresh-context [O] reader corrected four further points, each re-measured: `git grep -n 'fit_lme4' -- R/icc.R` returns 15 lines, 3 of them prose comments, so the dispatch enumeration needed anchoring to 12; `lme4_bootmer_refit()` (`:34`) is a SECOND lme4-fitting helper without a check, so naming one implied a false exclusivity; "before its first fitting call" is undefined for 9 of the 12, which contain no `lme4::lmer` line at all, and is replaced by the stronger mechanical claim that the check is the second unconditional statement; and a conjunct was missing entirely — that no lme4 fit occurs outside `R/engine-lme4.R` (verified: no `lmer`/`bootMer` call elsewhere in `R/`, `d_study()` fits nothing, no other file dispatches to `fit_lme4*`). Mini gate adopted the corrected text. No criterion was widened: AC4's domain is unchanged and each clause's decider moved from reading to a command.
+- 2026-08-18: mini gate routed the standing-guard gap to a candidate row rather than a new criterion — AC4 is a snapshot, so a 13th dispatched entry point skipping the check would leave the shipped message and the `R/engine-lme4.R:49-54` comment silently false, with AC3's pin blind to it (it reds only the withdrawn wording); chose the row over adding a structural-audit test, because that is apparatus under D-021 pressure and a mid-implementation widening; falsified by such an entry point being added before the row is promoted.
+- 2026-08-18: T3 evidence — mutation harness run captured in full (scratchpad `m127-harness.log`). Control (unmutated tree) 0 failures, so the two-way name check passed with the `|merderiv` alternation in place. Source leg 136 plants, 136 RED, 0 GREEN; `merderiv_method_specific` RED in all 8 cells (README.Rmd and R/icc.R x flat, wrapped, blockquote, blockquote_indented). Installed leg 51 plants, 51 RED, 0 GREEN; the new spelling RED at README.md, NEWS.md and vignette:choosing-an-icc.Rmd. Working tree verified clean after the run, so every plant restored.
+
+- 2026-08-18: T4 evidence — AC4(a): `git grep -c 'ci_method' -- R/engine-lme4.R` = 8 (one comment at `:50`, seven abort-hint `i =` bullets at `:98 :232 :357 :487 :752 :879 :1003`); sourcing the file gives 16 top-level functions, 0 with a `ci_method` formal. AC4(b): the anchored dispatch enumeration returns 12 lines, and all 12 functions carry `check_installed("merDeriv", ...)` as the second statement, def-line + 2, none under a conditional — `fit_lme4`@62, `_oneway`@204, `_fixed`@328, `_replicates`@567, `_multilevel`@588, `_nested_clusters`@617, `_nested_subjects`@639, `_ml_replicates`@661, `_nested_replicates`@691, `_multilevel_fixed`@730, `_replicates_fixed`@862, `_nested_fixed`@990. AC4(c): `git grep -n 'lme4::' -- 'R/*.R'` returns no `lmer`/`bootMer` call outside `R/engine-lme4.R`.
+- 2026-08-18: T4 — NEWS bullet added under Bug fixes, carrying neither the pinned literal nor the bare `lme4 Monte-Carlo` adjacency (both `grep -c` = 0); the pin file runs 0 failures / 2347 passing against the amended `NEWS.md`.
+- 2026-08-18: Tasks section compressed in one pass to hold the 150-line cap (150 -> 146). Acceptance criteria (63 lines) is the heaviest plan-owned section but is amendment-gated, so compressing its prose would have meant a fourth gate for a mechanical shed; Tasks is implement-owned, where compression is a minor edit.
 
 ## Decisions
 
