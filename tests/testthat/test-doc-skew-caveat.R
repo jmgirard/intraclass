@@ -310,12 +310,17 @@ claim_patterns <- c(
   # sentence as a withdrawn claim.
   install_pulls_news = "package the install pulls",
   install_arrives_readme = "so that one arrives with the default engine",
-  # M126's three claims (entries 29-33 of this vector). All three described the
-  # install's FOOTPRINT from the `Suggests:` placement alone, which is what
-  # `glmmTMB`'s own `Imports: lme4` falsifies: an installation retrieves lme4
-  # whatever this package declares, so "does not require them" and "stays
-  # light" both understate it, and glmmTMB is not "the one required dependency"
-  # in any sense a reader checking their library would recognise.
+  # M126's three claims, in five spellings -- the five `install_*` entries
+  # below: install_not_required_{marked,bare}, install_light_{marked,bare}
+  # and install_one_required_dep. No positional index is stated here; one
+  # went stale once already, and any insertion above breaks it again.
+  #
+  # All three described the install's FOOTPRINT from the `Suggests:` placement
+  # alone, which is what `glmmTMB`'s own `Imports: lme4` falsifies: an
+  # installation retrieves lme4 whatever this package declares, so "does not
+  # require them" and "stays light" both understate it, and glmmTMB is not
+  # "the one required dependency" in any sense a reader checking their library
+  # would recognise.
   #
   # The first two are anchored THROUGH the adjacent `Suggests` token, in a
   # backticked and a bare form, for the reason the M123 pairs above exist:
@@ -338,6 +343,15 @@ claim_patterns <- c(
   # cost is recall: a reworded return of the same falsehood escapes, and only a
   # re-planted verbatim return is caught.
   #
+  # `install_light_*` additionally ends at the withdrawn sentence's FULL STOP.
+  # Matching is `fixed = TRUE`, so nothing appended after the matched span can
+  # un-match it: without the stop, the pattern reds a future TRUE sentence that
+  # merely continues past the word -- "so the base install stays lighter than a
+  # Bayesian stack" -- and reds the clause even where a following sentence
+  # qualifies it. The residual hazard the stop leaves is the mirror of the
+  # recall cost above: a return that repunctuates the same claim ("stays light,
+  # though ...") escapes the pin.
+  #
   # All five are named `install_*` so the mutation harness's two-way name check
   # (`data-raw/m123-capability-claim-mutations.R`) binds them without widening
   # its own recall-fixed prefix list.
@@ -349,8 +363,8 @@ claim_patterns <- c(
     "mixed-model (lme4), Bayesian (brms), and SEM (lavaan) engines are ",
     "in Suggests, so intraclass does not require them"
   ),
-  install_light_marked = "Optional engines live in `Suggests`, so the base install stays light",
-  install_light_bare = "Optional engines live in Suggests, so the base install stays light",
+  install_light_marked = "Optional engines live in `Suggests`, so the base install stays light.",
+  install_light_bare = "Optional engines live in Suggests, so the base install stays light.",
   install_one_required_dep = "it is the one required dependency and it is robust"
 )
 

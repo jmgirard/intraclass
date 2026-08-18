@@ -50,8 +50,14 @@ spellings <- list(
     "(lavaan) engines are in Suggests, so intraclass does not require ",
     "them at all."
   ),
-  install_light_marked = "Optional engines live in `Suggests`, so the base install stays light indeed.",
-  install_light_bare = "Optional engines live in Suggests, so the base install stays light indeed.",
+  install_light_marked = paste0(
+    "Optional engines live in `Suggests`, so the base install stays light. ",
+    "Nothing else is fetched."
+  ),
+  install_light_bare = paste0(
+    "Optional engines live in Suggests, so the base install stays light. ",
+    "Nothing else is fetched."
+  ),
   install_one_required_dep = "glmmTMB is the default \u2014 it is the one required dependency and it is robust here."
 )
 

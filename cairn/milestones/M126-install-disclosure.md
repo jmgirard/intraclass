@@ -40,56 +40,49 @@ numeric-`unit` demonstrations → their own candidate row.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: `README.Rmd`'s Installation section discloses that `lme4` arrives with
-      an installation regardless of its `Suggests` placement, attributing that to
-      `glmmTMB`'s own `Imports:` declaration rather than asserting it as a bare
-      fact about the install. Evidence: the section quoted verbatim in the work log.
-- [ ] AC2: The same section discloses that `merDeriv` — which the lme4 engine
-      requires (`fit_lme4()`'s entry `rlang::check_installed("merDeriv")`,
-      documented at `R/icc.R:310`) — does not arrive, attributed to its
-      `Suggests` placement in this package's `DESCRIPTION`. Evidence: the quoted section, plus a
-      work-logged measurement recording (a) `tools::package_dependencies()` over
-      the non-base entries of the `Imports:` field read from `DESCRIPTION`, with
-      `which = c("Depends","Imports","LinkingTo")`, recursive, showing `lme4`
-      present and `merDeriv` absent; (b) `pak::pkg_deps("jmgirard/intraclass")` at
-      its default, showing the same, since `pak::pak()` is the installer the
-      section recommends; (c) `packageDescription("glmmTMB")$Imports` naming
-      `lme4`; each stamped with the R version and the date.
-- [ ] AC3: None of the four edited files states a count of retrieved packages,
-      and the README's declared-set sentence states its members without a
-      numeral. Both counts AC2 measures move with CRAN and nothing in this repo
-      re-derives either, and `test-doc-skew-caveat.R`'s "a dependency list on any
-      swept surface is attributed to Imports" rule checks set membership, never a
-      numeral (GP8). Evidence: a numeral sweep over the four edited files, its
-      hits quoted and adjudicated in the work log.
-- [ ] AC4: `README.md` is regenerated from `README.Rmd` in the same commit and
-      carries the same disclosure; a second render leaves `git status` clean.
-      Evidence: the rendered section quoted beside `README.Rmd`'s, and the
-      `git status` output.
+- [ ] AC1: `README.Rmd`'s Installation section discloses that `lme4` arrives with an
+      installation regardless of its `Suggests` placement, attributing that to
+      `glmmTMB`'s own `Imports:` rather than asserting it as a bare fact about the
+      install. Evidence: the section quoted verbatim in the work log.
+- [ ] AC2: The same section discloses that `merDeriv` — which the lme4 engine requires
+      (`fit_lme4()`'s entry `rlang::check_installed("merDeriv")`, documented at
+      `R/icc.R:310`) — does not arrive, attributed to its `Suggests` placement in this
+      package's `DESCRIPTION`. Evidence: the quoted section, plus T1's three
+      measurements work-logged — `tools::package_dependencies()` over the non-base
+      entries of the `Imports:` field read from `DESCRIPTION`, recursive, `which =
+      c("Depends","Imports","LinkingTo")`; `pak::pkg_deps("jmgirard/intraclass")` at its
+      default; and `packageDescription("glmmTMB")$Imports` — the first two showing
+      `lme4` present and `merDeriv` absent, the third naming `lme4`, each stamped with
+      the R version and the date.
+- [ ] AC3: None of the four edited files states a count of retrieved packages, and the
+      README's declared-set sentence states its members without a numeral (rationale:
+      the Decisions entry below; the pin rule at T2). Evidence: a numeral sweep over the
+      four edited files, its hits quoted and adjudicated in the work log.
+- [ ] AC4: `README.md` is regenerated from `README.Rmd` in the same commit and carries
+      the same disclosure; a second render leaves `git status` clean. Evidence: the
+      rendered section quoted beside `README.Rmd`'s, and the `git status` output.
 - [ ] AC5: `claim_patterns` in `tests/testthat/test-doc-skew-caveat.R` gains five
       spellings for the three clauses this milestone withdraws: `README.Rmd`'s "so
       intraclass does not require them" and `NEWS.md`'s "so the base install stays
-      light", each anchored through the adjacent `Suggests` token in a backticked
-      and a backtick-free form; and `vignettes/engines.Rmd`'s "it is the one
-      required dependency", whose shipped sentence carries no markup, in one form.
-      Every one of the five is mutation-verified RED against a green control across
-      the source leg's 2 markup regimes × 4 wrap forms and the installed leg's
-      `README.md`, `NEWS.md` and one installed vignette, by
+      light", each anchored through the adjacent `Suggests` token in a backticked and a
+      backtick-free form; and `vignettes/engines.Rmd`'s "it is the one required
+      dependency" in one form. Each of the five is mutation-verified RED against a green
+      control across the source leg's 2 markup regimes × 4 wrap forms and the installed
+      leg's `README.md`, `NEWS.md` and one installed vignette, by
       `data-raw/m123-capability-claim-mutations.R`. Evidence: the harness run.
-- [ ] AC6: `NEWS.md:502`'s clause no longer characterizes the install's footprint
-      from the `Suggests` placement alone, and a development-version bullet
-      records the README change — the GitHub README being a surface users read
-      today, where the unreleased `0.1.0` section is corrected in place with no
-      bullet of its own. Evidence: both passages quoted before and after.
-- [ ] AC7: `vignettes/engines.Rmd`'s mixed-model section discloses that `lme4`
-      arrives with `glmmTMB` and that `merDeriv` is the dependency an installation
-      may lack, and its "it is the one required dependency" clause (`:53`) no
-      longer reads as a claim about what an installation retrieves. Evidence: the
-      section quoted before and after; the vignette knits.
-- [x] AC8: The milestone's Decisions section records why membership claims
-      (`lme4` arrives, `merDeriv` does not) are shippable on a user-facing surface
-      where a cardinality claim is not — the gate's answer, which would otherwise
-      go unrecorded. Evidence: the entry.
+- [ ] AC6: `NEWS.md:502`'s clause no longer characterizes the install's footprint from
+      the `Suggests` placement alone, and a development-version bullet records the
+      README change, the unreleased `0.1.0` section being corrected in place with no
+      bullet of its own (rationale: the work log). Evidence: both passages quoted before
+      and after.
+- [ ] AC7: `vignettes/engines.Rmd`'s mixed-model section discloses that `lme4` arrives
+      with `glmmTMB` and that `merDeriv` is the dependency an installation may lack, and
+      its "it is the one required dependency" clause (`:53`) no longer reads as a claim
+      about what an installation retrieves. Evidence: the section quoted before and
+      after; the vignette knits.
+- [x] AC8: The milestone's Decisions section records why membership claims (`lme4`
+      arrives, `merDeriv` does not) are shippable on a user-facing surface where a
+      cardinality claim is not. Evidence: the entry.
 - [ ] AC9: `cairn/PROFILE.md`'s verify slot is clean, and the full suite is green
       against the **installed** package via `testthat::test_dir(load_package =
       "installed")` with **0 skips** across that run (`doc-claim-pins.md`, M116).
@@ -100,7 +93,7 @@ numeric-`unit` demonstrations → their own candidate row.
 
 - AC1 → T2, T5
 - AC2 → T1, T2
-- AC3 → T2, T3, T4, T5
+- AC3 → T2, T3, T4, T5, T13
 - AC4 → T5
 - AC5 → T6
 - AC6 → T3
@@ -111,46 +104,46 @@ numeric-`unit` demonstrations → their own candidate row.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [x] T1: Measure — `tools::package_dependencies()` over the `Imports:` field read
-      from `DESCRIPTION`, `pak::pkg_deps("jmgirard/intraclass")`, and
-      `packageDescription("glmmTMB")$Imports`. Set `repos` explicitly; a bare
-      `Rscript` with no mirror errors. Record `lme4` present / `merDeriv` absent,
-      the R version and the date in the work log.
-- [x] T2: Rewrite `README.Rmd`'s Installation paragraph (:55–63). Three
-      constraints: no count of retrieved packages, and no numeral on the declared
-      set; the paragraph MUST retain a sentence naming exactly `cli`, `generics`,
-      `glmmTMB`, `lifecycle`, `rlang`, `tibble` and carrying `Imports` or
-      `non-base`, because the `expect_gt(length(hits), 0L)` anti-vacuity floor
-      inside `test-doc-skew-caveat.R`'s "a dependency list on any swept surface
-      is attributed to Imports" rule has that sentence as its only supplier
-      across `NEWS.md`, both READMEs and all nine vignettes; and the draft is
-      checked against `claim_patterns` on whitespace-collapsed, blockquote-
-      stripped text, never a raw grep (`doc-claim-pins.md`).
+- [x] T1: Measure — `tools::package_dependencies()` over the `Imports:` field read from
+      `DESCRIPTION`, `pak::pkg_deps("jmgirard/intraclass")`, and
+      `packageDescription("glmmTMB")$Imports`, `repos` set explicitly (a bare `Rscript`
+      with no mirror errors). Record `lme4` present / `merDeriv` absent, the R version
+      and the date in the work log.
+- [x] T2: Rewrite `README.Rmd`'s Installation paragraph. No count of retrieved packages
+      and no numeral on the declared set; the paragraph MUST retain a sentence naming
+      exactly `cli`, `generics`, `glmmTMB`, `lifecycle`, `rlang`, `tibble` and carrying
+      `Imports` or `non-base` — its only supplier for the `expect_gt(length(hits), 0L)`
+      anti-vacuity floor in `test-doc-skew-caveat.R`'s "a dependency list on any swept
+      surface is attributed to Imports" rule, across `NEWS.md`, both READMEs and all nine
+      vignettes; check the draft against `claim_patterns` on whitespace-collapsed,
+      blockquote-stripped text, never a raw grep (`doc-claim-pins.md`).
 - [x] T3: Rewrite `NEWS.md:501–502`'s clause in place; write the
       development-version bullet.
-- [x] T4: Rewrite the `vignettes/engines.Rmd` mixed-model passage (:30–58),
-      including the `:53` clause; leave the `:39` chunk gate correct for
-      `merDeriv`.
+- [x] T4: Rewrite the `vignettes/engines.Rmd` mixed-model passage, including the `:53`
+      clause; leave the `:39` chunk gate correct for `merDeriv`.
 - [x] T5: `devtools::build_readme()`; verify a second render is a no-op.
-- [x] T6: Append the three withdrawn spellings to `claim_patterns` (backticked +
-      bare per claim) and commit the mutation matrix — each spelling reintroduced
-      across 2 markup regimes × 4 wrap forms, red required, then removed.
+- [x] T6: Append the three withdrawn spellings to `claim_patterns` (backticked + bare
+      per claim) and commit the mutation matrix — each spelling reintroduced across 2
+      markup regimes × 4 wrap forms, red required, then removed.
 - [x] T7: `devtools::spell_check()` (any new word → `inst/WORDLIST`); knit the
       vignettes; profile verify; `test_dir(load_package = "installed")` at 0 skips.
 - [x] T8: Record the membership-vs-cardinality asymmetry in the Decisions section.
-- [x] T9 (return 1): Correct the engine-availability claim on all three surfaces
-      (F1, F2), and with it the two NEWS defects that ride the same bullets — the
-      apparent reversal of M123's adjacent bullet (F6) and the vignette's name
-      (F8) — plus the over-long NEWS line (F9). Regenerate `README.md`.
+- [x] T9 (return 1): Correct the engine-availability claim on all three surfaces (F1,
+      F2), with the NEWS defects riding the same bullets (F6, F8, F9); regenerate
+      `README.md`.
 - [x] T10 (return 1): Re-anchor `install_not_required_*`, `install_light_*` and
-      `install_one_required_dep` to the contiguous clause each shipped in (F3,
-      F4, F5), correct the entry-index comment (F10), update the harness plants
-      to carry the lengthened patterns, and re-run the mutation matrix.
+      `install_one_required_dep` to the contiguous clause each shipped in (F3, F4, F5),
+      correct the entry-index comment (F10), update the harness plants, re-run the matrix.
 - [x] T11 (return 1): Amend AC2 and AC3 at the mini gate (F7 and the carried AC2
       finding); correct T2's stale line citation.
-- [x] T12 (return 1): Re-run the T7 gate against the corrected prose — profile
-      verify, `air format --check`, `document()` no-diff, the installed suite at
-      0 skips, and `devtools::check()`.
+- [x] T12 (return 1): Re-run the T7 gate against the corrected prose.
+- [x] T13 (return 2): Repair the deliverable and pin defects the return names (F2-F8) —
+      the vignette's `:53` clause and its merDeriv covariance scope, NEWS's engine/helper
+      misclassification and its short line, and the pin file's `install_light_*`
+      over-match, hand-counted index and claim/spelling parenthetical; update the harness
+      plants, re-run the mutation matrix, re-run the AC3 numeral sweep.
+- [ ] T14 (return 2): Compress the Acceptance criteria under the cap at a mini gate (G1),
+      record the lme4 abort-message framing as a candidate row (F10), re-run the T12 gate.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates. -->
@@ -181,6 +174,10 @@ numeric-`unit` demonstrations → their own candidate row.
 - 2026-08-17: return 1, AC3 evidence — numeral sweep over the four edited files. Every digit-bearing token is example code (`set.seed(1)`, `rnorm(12, ...)`, `rnorm(60, ...)`, `1:5`/`1:12`/`1:4`), printed `icc()` output (`95%`, `10000`, `4000`), markup or metadata (`height="139"`, `"100%"`, `%\VignetteEncoding{UTF-8}`, list markers `(1)`-`(4)`), design/reference names (`Design-3`, `Case-3A`, `chi-square(1)`, `t(5)`), interval supports (`[0, 1]`) or prior specifications (`half-t(4, 0, 1)`, `normal(0, ...)`). None is a count of retrieved packages, and the declared-set sentence carries no numeral.
 - 2026-08-17: return 1, T12 gate green against the corrected prose. `devtools::document()` no diff; `air format --check .` clean; `devtools::test()` FAIL 0 / SKIP 2 / PASS 8461 (the two vignette-install skips the installed run covers); installed-package suite at `NOT_CRAN=true` **FAIL 0, SKIP 0, PASS 8813** — the run AC9 asks for; `devtools::check()` 0 errors, 0 warnings, 0 notes in 12m 52s, R CMD check's own single NOTE being the testthat step's elapsed time as at T7. The first installed attempt exited 1 on `library("")` in the parallel workers — `test_dir()` invoked without `package = "intraclass"`, an invocation defect in the command, not the package; re-run named and green. Vignettes knit during the `build_vignettes = TRUE` install the installed leg requires.
 - 2026-08-18: review attempt 2 RETURNED to in-progress (defect return 2). Two independent reasons. (1) Consistency-gate failure: `cairn_validate` FAILs `weight caps` — the plan-owned body is 154 lines against the <150 cap, grown past it by the T9-T12 return tasks without the step-6 re-check; all 16 other checks PASS. (2) AC7 fails as literally written: it bans the `:53` clause reading as a claim about what an installation retrieves, and the replacement "it needs nothing beyond what an installation already brings" is precisely such a claim — true, but the criterion bans the form, and criteria are not reinterpreted at review. Eight further findings triaged fix-now (F3 a fresh inaccuracy this diff introduced on a shipped surface, F4-F8 pin and NEWS defects), one fixed at review (F1, the superseded evidence block), one not-a-finding (F9), one follow-up (F10, the 12 abort `reason` strings, out of scope in `R/`), one rejected (F11). Both [S] lenses returned zero findings. Full findings and dispositions in the Review section. PR #135 stays open as a draft.
+- 2026-08-18: return 2, question gate — two choices settled. (1) The lme4 `merDeriv` abort message (F10) is recorded as a ROADMAP candidate row rather than folded in: `R/` is outside this milestone's Scope, and the review's own sweep established the row is distinct from the standing abort-remedy-truthfulness row. (2) `install_light_*` (F4) is repaired by extending the pattern to the withdrawn sentence's full stop AND recording the residual hazard in the pin comment, rather than by comment alone.
+- 2026-08-18: return 2, T13 — deliverable and pin defects repaired. `vignettes/engines.Rmd`: the `:53`-origin clause is now declaration-scoped ("it is the engine this package declares in `Imports:`"), so it no longer states what an installation retrieves (F2), and the merDeriv covariance claim is scoped to the default Monte-Carlo interval, `R/engine-lme4.R:31` recording that the bootstrap forms none (F3). `NEWS.md`: `merDeriv` is no longer classed as an engine — the sentence names the three `Suggests` packages directly — and the paragraph is rewrapped with no short line left mid-paragraph (F6, F8). `tests/testthat/test-doc-skew-caveat.R`: `install_light_*` now ends at the withdrawn sentence's full stop, measured to still red the real withdrawn NEWS sentence and no longer to red "...stays lighter than a Bayesian stack" (F4); the hand-counted "entries 29-33" index is replaced by naming the five spellings (F5), and the claim/spelling parenthetical reads "three claims, in five spellings" (F7). Harness plants lengthened to carry the new patterns with text on both sides. Mutation matrix re-run: source leg 128 plants / 128 RED, installed leg 48 / 48 RED, both controls 0 failures, 0 GREEN; 55 cells are M126's five, and each of the five plants trips its own pattern and no other, checked by parsing both vectors. AC3 numeral sweep re-run over the four edited files: every digit-bearing token is example code, printed `icc()` output, a citation year, a coefficient or design name, a prior specification, or markup/metadata, and a whole-file sweep for a package-or-dependency count construction across all four returns no hits.
+- 2026-08-18: return 2, T14 — Acceptance criteria compressed at a mini gate (substantive; user-facing tier, so the amended wording went to a fresh-context [O] reader first, which ran the criteria audit in FULL mode and returned 7 findings, verdict "a hold on the criteria set — no criterion added, removed, or widened"). Two findings applied before the gate: AC5's quantifier restored to "Each of the five" (the draft's bare "Each" had three candidate antecedents), and AC3's pointer widened to name both places its dropped rationale lives — the Decisions entry and T2's `test_that` description, the anchor installed at the return-1 gate. The section sheds 8 lines by dropping rationale prose only (AC3's staleness argument, AC6's "surface users read today" clause, AC8's "the gate's answer" aside, AC5's no-markup reason, AC2's "the installer the section recommends") and by stating AC2's three measurements as T1's with every option and both verdicts kept; criterion lines wrap at 88 rather than the file's usual 85, recorded here because the reader found wrap width, not content, was carrying the earlier draft. Coverage amended to `AC3 → T2, T3, T4, T5, T13`, the reader having found AC3's numeral sweep produced by no task — review had been running it. The user selected the compression over restoring the rationale sentences and shedding the lines from finished task entries instead. T1, T2, T4, T6 and T9-T12 were compressed in the same pass (implement-owned; their detail is in this log). Plan-owned body now 145 against the <150 cap; `cairn_validate` passes every check.
+- 2026-08-18: return 2 — F10 recorded as a ROADMAP candidate row (the lme4 `merDeriv` abort message's interval-method-specific framing); F11 needs nothing, the review having rejected it as already recorded and met as written.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

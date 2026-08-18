@@ -506,12 +506,11 @@ alternate engines, and seeded simulations.
   consistency, single and average); a `brm_args` list forwards sampler/backend
   options (e.g. `backend = "cmdstanr"`, `chains`, `iter`, `cores`) to `brms::brm()`.
   Chains sample sequentially on one core by default (matching brms); a periodic
-  reminder suggests `brm_args = list(cores = ...)` for parallel sampling. Optional
-  engines live in `Suggests`: `brms`, `lavaan` and `merDeriv` are fetched only
-  on request. `lme4` itself arrives regardless, as a dependency of `glmmTMB`,
-  but the lme4 engine also needs `merDeriv`, so it too waits on a further
-  install. The Bayesian engine
-  also fits the **multilevel** designs at the subject level: the crossed Design 1
+  reminder suggests `brm_args = list(cores = ...)` for parallel sampling. `brms`,
+  `lavaan` and `merDeriv` live in `Suggests`, fetched only on request. `lme4` itself
+  arrives regardless, as a dependency of `glmmTMB`, but the lme4 engine also needs
+  `merDeriv`, so it too waits on a further install. The Bayesian engine also fits
+  the **multilevel** designs at the subject level: the crossed Design 1
   (five components, subject and cluster levels) and the nested Design 2 (raters
   nested in clusters, four components, subject level), each under the same sourced
   half-*t* prior with MAP + percentile credible intervals. Beyond the two-way random
