@@ -4,7 +4,7 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M126: Disclose what an installation actually retrieves
 
-- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -40,11 +40,11 @@ numeric-`unit` demonstrations → their own candidate row.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [x] AC1: `README.Rmd`'s Installation section discloses that `lme4` arrives with
+- [ ] AC1: `README.Rmd`'s Installation section discloses that `lme4` arrives with
       an installation regardless of its `Suggests` placement, attributing that to
       `glmmTMB`'s own `Imports:` declaration rather than asserting it as a bare
       fact about the install. Evidence: the section quoted verbatim in the work log.
-- [x] AC2: The same section discloses that `merDeriv` — which the lme4 engine
+- [ ] AC2: The same section discloses that `merDeriv` — which the lme4 engine
       requires to form an interval (`R/engine-lme4.R:52`, documented at
       `R/icc.R:310`) — does not arrive, attributed to its `Suggests` placement in
       this package's `DESCRIPTION`. Evidence: the quoted section, plus a
@@ -55,17 +55,17 @@ numeric-`unit` demonstrations → their own candidate row.
       its default, showing the same, since `pak::pak()` is the installer the
       section recommends; (c) `packageDescription("glmmTMB")$Imports` naming
       `lme4`; each stamped with the R version and the date.
-- [x] AC3: None of the four edited files states a count of retrieved packages,
+- [ ] AC3: None of the four edited files states a count of retrieved packages,
       and the README's declared-set sentence states its members without a
       numeral. Both counts AC2 measures move with CRAN and nothing in this repo
       re-derives either, and the `:2334` rule checks set membership, never a
       numeral (GP8). Evidence: the edited passages quoted whole in the work log;
       reading those quotations settles it.
-- [x] AC4: `README.md` is regenerated from `README.Rmd` in the same commit and
+- [ ] AC4: `README.md` is regenerated from `README.Rmd` in the same commit and
       carries the same disclosure; a second render leaves `git status` clean.
       Evidence: the rendered section quoted beside `README.Rmd`'s, and the
       `git status` output.
-- [x] AC5: `claim_patterns` in `tests/testthat/test-doc-skew-caveat.R` gains five
+- [ ] AC5: `claim_patterns` in `tests/testthat/test-doc-skew-caveat.R` gains five
       spellings for the three clauses this milestone withdraws: `README.Rmd`'s "so
       intraclass does not require them" and `NEWS.md`'s "so the base install stays
       light", each anchored through the adjacent `Suggests` token in a backticked
@@ -75,12 +75,12 @@ numeric-`unit` demonstrations → their own candidate row.
       the source leg's 2 markup regimes × 4 wrap forms and the installed leg's
       `README.md`, `NEWS.md` and one installed vignette, by
       `data-raw/m123-capability-claim-mutations.R`. Evidence: the harness run.
-- [x] AC6: `NEWS.md:502`'s clause no longer characterizes the install's footprint
+- [ ] AC6: `NEWS.md:502`'s clause no longer characterizes the install's footprint
       from the `Suggests` placement alone, and a development-version bullet
       records the README change — the GitHub README being a surface users read
       today, where the unreleased `0.1.0` section is corrected in place with no
       bullet of its own. Evidence: both passages quoted before and after.
-- [x] AC7: `vignettes/engines.Rmd`'s mixed-model section discloses that `lme4`
+- [ ] AC7: `vignettes/engines.Rmd`'s mixed-model section discloses that `lme4`
       arrives with `glmmTMB` and that `merDeriv` is the dependency an installation
       may lack, and its "it is the one required dependency" clause (`:53`) no
       longer reads as a claim about what an installation retrieves. Evidence: the
@@ -156,6 +156,7 @@ numeric-`unit` demonstrations → their own candidate row.
 - 2026-08-17: T8 recorded the membership-vs-cardinality asymmetry in the Decisions section — the plan gate's answer and the plan-time audit's standing objection to it, settled on what each claim is set by rather than on how stale each could go.
 - 2026-08-17: T7 gate green. `devtools::document()` produces no diff; `air format --check .` clean; `devtools::spell_check()` flags the same 28 words on this branch as on main, none of them introduced here (`merDeriv`, `glmmTMB`, `lavaan`, `brms`, `lme` were already in `inst/WORDLIST`), so no WORDLIST entry was needed; vignettes knit during the `build_vignettes = TRUE` install the installed leg requires. Installed-package suite via `test_dir(load_package = "installed")` measured in three environments: default 0/0 with 7010 passing and 108 `skip_on_cran` skips; `NOT_CRAN=true CI=true` 0/0 with 8551 passing and 23 `skip_on_ci` skips, all in `test-icc-brms.R`; and `NOT_CRAN=true` (CI unset, live Stan running) **0 failed, 0 error, 0 skipped, 8813 passing** — the run AC9 asks for. `test-doc-skew-caveat.R` reported 0 skips in all three.
 - 2026-08-17: AC9 amendment drafted and WITHDRAWN before it was written. The draft pinned the run to `NOT_CRAN=true CI=true` and narrowed the 0-skip promise to `test-doc-skew-caveat.R`, on the premise that a 0-skip full run was unsatisfiable by design. The fresh-context [O] reader falsified that premise: `skip_on_ci()` fires only on the `CI=true` the draft itself added, and M119's archive records this repo reaching 0 skips at `NOT_CRAN=true` with CI unset. AC9 stands as planned, satisfied by measurement rather than by narrowing. The reader's other findings stand recorded: the vignette sentinel names two vignettes and not `engines.Rmd`, so a build dropping that vignette would yield neither skip nor failure — the deferred installed-side floor on the per-class reachability candidate row, not closed here.
+- 2026-08-17: review attempt 1 RETURNED to in-progress (defect return 1). What failed: the corrected prose on all three surfaces tells users the lme4 ENGINE is usable on a stock install, when only the lme4 PACKAGE arrives — `fit_lme4()` calls `check_installed("merDeriv")` unconditionally at entry (`R/engine-lme4.R:51`, all 12 fitters), so `icc(engine = "lme4")` aborts without merDeriv for every `ci_method`. F1 and F2 are load-bearing defects in what the deliverable tells users, judged so by the maintainer at the gate; nine further findings triaged fix-now, one rejected as pre-existing. Full findings and dispositions in the Review section. PR #135 stays open as a draft.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
@@ -188,6 +189,78 @@ records (D-029).
 
 ## Review
 <!-- owner: review · exclusive -->
+
+### Review attempt 1 — RETURNED 2026-08-17 (defect return 1)
+
+Three fresh-context lenses ran. **[S] blame-history: no concerning findings** — it
+traced every candidate to a sanctioned origin and confirmed the five new pins anchor
+on claim-bearing prose rather than a package enumeration, so they do not repeat the
+mistake that got `install_four_marked` deleted. **[S] prior-PR-comments: clean
+no-op** — its existence probe returned `[]` (no real inline threads), and the
+archives show M123's return-3 descope explicitly deferred this disclosure to a
+follow-up row, so the diff executes that decision rather than contradicting it.
+**[O] diff-bug: 11 findings**, logged below with disposition. It also re-derived the
+recursive closure as **71** packages against the 63 measured at T1 — same procedure,
+days apart — which corroborates AC3's no-count rule more strongly than AC3's own
+argument.
+
+- **F1 — FIX (floor-qualifying; the reason for this return).** The corrected prose
+  says the lme4 *engine* is usable on a stock install; only the lme4 *package*
+  arrives. `fit_lme4()` calls `rlang::check_installed("merDeriv")` unconditionally at
+  entry (`R/engine-lme4.R:51`, and identically in all 12 fitters) before any
+  `ci_method` branching, so `icc(engine = "lme4")` aborts without merDeriv for every
+  interval method. Verified at review by reading the call sites. The framing "the
+  difference decides which engines you can use without installing anything further"
+  is false about the one engine the paragraph exists to discuss. The milestone
+  corrected an understatement of the footprint and shipped an overstatement of engine
+  availability — the same failure class it was convened to fix.
+- **F2 — FIX (floor-qualifying).** "which the `lme4` engine needs before it can form
+  an interval" (README) and "What an lme4 fit can additionally need is **merDeriv**"
+  (engines.Rmd) both imply a merDeriv-free lme4 path. There is none;
+  `R/engine-lme4.R:31` concedes it. Both corrected surfaces are now less accurate
+  than the untouched `?icc` (`R/icc.R:310`), which says the engine requires both.
+- **F3 — FIX.** `install_not_required_{marked,bare}` is not scoped to lme4, so the
+  true sentence "brms, lavaan and merDeriv are in `Suggests`, so intraclass does not
+  require them" would red. The `Suggests` anchor does not cure this — it is present
+  in the true sentence too. This is the "ordinary English" hazard the file's own
+  `design_never_declare` comment records.
+- **F4 — FIX.** `install_one_required_dep` pins a sentence literally true of
+  `DESCRIPTION`; it was withdrawn for being misleading about the install, not false.
+  Its anchor "the recommended default —" survives verbatim in the corrected vignette,
+  so a future declaration-scoped true clause after that em dash reds the pin.
+- **F5 — FIX.** `install_light_{marked,bare}` carries the same hazard, smaller: a
+  future sentence scoped only to brms/lavaan would red on a qualitative claim
+  nothing in the repo can adjudicate.
+- **F6 — FIX.** The two adjacent NEWS development-version bullets read as reversing
+  each other: M123's says the README now names what the package *declares* rather
+  than what an install *retrieves*; M126's, immediately below, says it now says what
+  an installation *retrieves*, not only what it declares.
+- **F7 — FIX, needs the amendment gate.** AC3 and T2 cite `:2334` and `:2401`; this
+  diff's own +29 lines to `claim_patterns` moved them to `:2362` and `:2429`. AC3 is
+  criterion text, so its correction goes through `/milestone-implement` step 6; T2 is
+  a task edit. Work-log citations are append-only history and stay.
+- **F8 — FIX.** The new NEWS bullet says "The *Engines* article"; the vignette is
+  titled "Estimation engines" and `NEWS.md:617` already uses that name, as the
+  surrounding convention does for every other vignette.
+- **F9 — FIX.** `NEWS.md:509` is 92 chars against a file wrapping at ~76–84.
+- **F10 — FIX.** The comment at `test-doc-skew-caveat.R:313` says "twelfth through
+  sixteenth spellings"; these are entries 29–33 of `claim_patterns` (12–16 is true
+  only of the harness's `spellings` list).
+- **F11 — REJECT (out of scope: pre-existing, not introduced by this diff).**
+  `CLAUDE.md:65` still heads its section "Light-install path". It is immediately
+  qualified in place, CLAUDE.md is not a swept surface, and the diff did not touch
+  it. Recorded here rather than actioned.
+
+**Also carried into the return, from the AC9 amendment audit at implement:** AC2's
+own parenthetical characterizes merDeriv as what the lme4 engine "requires to form an
+interval" — the same understatement as F2, inside criterion text. Correcting it needs
+the amendment gate alongside F7's AC3 fix.
+
+**Criterion boxes.** AC1–AC7 were ticked against evidence recorded earlier in this
+section; that evidence is stale for every surface this return will change, so those
+boxes are unticked and re-verified at re-review. AC8 (the Decisions entry) stands.
+AC9 was never ticked — `devtools::check()` and a fresh installed-suite run did not
+complete before the return, and both must run against the corrected prose anyway.
 
 ### Evidence per criterion (fresh, 2026-08-17, at PR #135 head)
 
