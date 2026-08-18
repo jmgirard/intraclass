@@ -4,12 +4,12 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M126: Disclose what an installation actually retrieves
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP8   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m126-install-disclosure`   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -109,7 +109,7 @@ numeric-`unit` demonstrations → their own candidate row.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Measure — `tools::package_dependencies()` over the `Imports:` field read
+- [x] T1: Measure — `tools::package_dependencies()` over the `Imports:` field read
       from `DESCRIPTION`, `pak::pkg_deps("jmgirard/intraclass")`, and
       `packageDescription("glmmTMB")$Imports`. Set `repos` explicitly; a bare
       `Rscript` with no mirror errors. Record `lme4` present / `merDeriv` absent,
@@ -145,6 +145,7 @@ numeric-`unit` demonstrations → their own candidate row.
 - 2026-08-17: plan gate chose a qualitative footprint clause over naming a figure, because `tools::package_dependencies()` and `pak::pkg_deps()` disagree on this package today (63 vs 60) and nothing in the repo re-derives either; falsified by a procedure landing in the repo that re-derives a closure count on every run.
 - 2026-08-17: `cairn_validate` sizing advisory (9 acceptance criteria > 7) accepted, not split. The only natural cut line is AC5 — the `claim_patterns` extension and its mutation matrix — and a milestone whose sole deliverable is a doc-claim pin is apparatus D-021 bars outright, which D-029 confirms by requiring the extension to ride along in the milestone that withdraws the spellings. The remaining criteria are one per shipped surface plus the record and the gate, none of which stands alone. Merging the audited criteria to clear an advisory was refused as shrink-to-fit.
 - 2026-08-17: plan gate chose correcting `NEWS.md`'s 0.1.0 clause in place with no bullet of its own, over a correction bullet for it, because 0.1.0 is unreleased (DESCRIPTION 0.0.0.9000, M48 blocked, no tags) so no user ever read it; falsified by 0.1.0 shipping before this milestone lands.
+- 2026-08-17: T1 measured on R 4.6.1 against the CRAN cloud mirror — `tools::package_dependencies()` over the six non-base `Imports:` read from `DESCRIPTION` gives a 63-package recursive closure with `lme4` present and `merDeriv` absent; `pak::pkg_deps("jmgirard/intraclass")` at its default gives 60 with the same two verdicts, and `brms`/`lavaan` absent too; `packageDescription("glmmTMB")$Imports` names `lme4 (>= 1.1-18.9000)`. The two procedures disagree on size, agree on membership — the AC3 rationale, measured rather than assumed.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
