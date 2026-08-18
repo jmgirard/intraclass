@@ -4,7 +4,7 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M126: Disclose what an installation actually retrieves
 
-- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -180,6 +180,7 @@ numeric-`unit` demonstrations → their own candidate row.
 - 2026-08-17: return 1, T10 complete — mutation matrix re-run against the re-anchored pins: source leg 128 plants / 128 RED, installed leg 48 / 48 RED, both controls 0 failures, 0 GREEN cells; 55 of those cells are M126's five (40 source = 5 x 2 surfaces x 4 wrap forms, 15 installed = 5 x README.md/NEWS.md/one vignette). Attribution re-checked by parsing both vectors: each of the five plant sentences trips its own pattern and no other, so the lengthened patterns did not start matching each other. The pin vector is 33 entries and M126's five sit at 29-33, measured rather than counted by hand — the figure F10's comment now states.
 - 2026-08-17: return 1, AC3 evidence — numeral sweep over the four edited files. Every digit-bearing token is example code (`set.seed(1)`, `rnorm(12, ...)`, `rnorm(60, ...)`, `1:5`/`1:12`/`1:4`), printed `icc()` output (`95%`, `10000`, `4000`), markup or metadata (`height="139"`, `"100%"`, `%\VignetteEncoding{UTF-8}`, list markers `(1)`-`(4)`), design/reference names (`Design-3`, `Case-3A`, `chi-square(1)`, `t(5)`), interval supports (`[0, 1]`) or prior specifications (`half-t(4, 0, 1)`, `normal(0, ...)`). None is a count of retrieved packages, and the declared-set sentence carries no numeral.
 - 2026-08-17: return 1, T12 gate green against the corrected prose. `devtools::document()` no diff; `air format --check .` clean; `devtools::test()` FAIL 0 / SKIP 2 / PASS 8461 (the two vignette-install skips the installed run covers); installed-package suite at `NOT_CRAN=true` **FAIL 0, SKIP 0, PASS 8813** — the run AC9 asks for; `devtools::check()` 0 errors, 0 warnings, 0 notes in 12m 52s, R CMD check's own single NOTE being the testthat step's elapsed time as at T7. The first installed attempt exited 1 on `library("")` in the parallel workers — `test_dir()` invoked without `package = "intraclass"`, an invocation defect in the command, not the package; re-run named and green. Vignettes knit during the `build_vignettes = TRUE` install the installed leg requires.
+- 2026-08-18: review attempt 2 RETURNED to in-progress (defect return 2). Two independent reasons. (1) Consistency-gate failure: `cairn_validate` FAILs `weight caps` — the plan-owned body is 154 lines against the <150 cap, grown past it by the T9-T12 return tasks without the step-6 re-check; all 16 other checks PASS. (2) AC7 fails as literally written: it bans the `:53` clause reading as a claim about what an installation retrieves, and the replacement "it needs nothing beyond what an installation already brings" is precisely such a claim — true, but the criterion bans the form, and criteria are not reinterpreted at review. Eight further findings triaged fix-now (F3 a fresh inaccuracy this diff introduced on a shipped surface, F4-F8 pin and NEWS defects), one fixed at review (F1, the superseded evidence block), one not-a-finding (F9), one follow-up (F10, the 12 abort `reason` strings, out of scope in `R/`), one rejected (F11). Both [S] lenses returned zero findings. Full findings and dispositions in the Review section. PR #135 stays open as a draft.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
@@ -285,7 +286,11 @@ boxes are unticked and re-verified at re-review. AC8 (the Decisions entry) stand
 AC9 was never ticked — `devtools::check()` and a fresh installed-suite run did not
 complete before the return, and both must run against the corrected prose anyway.
 
-### Evidence per criterion (fresh, 2026-08-17, at PR #135 head)
+### Evidence per criterion — review attempt 1, SUPERSEDED (see attempt 2 below)
+
+_Left readable as history (IP4). Every quotation below is attempt-1 prose the
+return withdrew; AC2's quotation is the F2 defect itself. Nothing here may be
+read as current evidence, and no criterion may be ticked from it._
 
 - **AC1 — met.** `README.Rmd:55-63` reads: "intraclass declares `cli`, `generics`,
   `glmmTMB`, `lifecycle`, `rlang`, and `tibble` as its non-base `Imports:`. ...
@@ -329,3 +334,94 @@ complete before the return, and both must run against the corrected prose anyway
   dependency". The vignette knits (built during the `build_vignettes = TRUE` install).
 - **AC8 — met.** The Decisions section carries the 2026-08-17 entry settling the
   membership-vs-cardinality asymmetry the plan-time audit raised.
+
+### Review attempt 2 — RETURNED 2026-08-18 (defect return 2)
+
+**Consistency gate.** `cairn_validate` FAILED `weight caps`: this file's plan-owned
+body is **154 lines against the <150 cap** (Acceptance criteria 58 · Tasks 44 ·
+Scope 20 · Coverage 13 · Goal 6). The T9–T12 return tasks grew the Tasks section
+past the cap and `/milestone-implement` step 6's re-check was not run. All 16
+other checks PASS; two advisory WARNs (9 criteria, 12 tasks) are not gate
+failures. Toolchain half clean: `document()` no diff, `air format --check` clean,
+`pkgdown::check_pkgdown()` no problems, `README.md` in sync, `devtools::check()`
+0/0/0, NEWS entry present.
+
+**Three fresh-context lenses ran.** **[S] prior-PR-comments: zero findings** — the
+inline-comment probe returned `[]`, and against the archives it independently
+confirmed every F1–F10 fix landed and F11 was correctly left untouched, and that
+M126 executes M123's recorded descope rather than contradicting it. **[S]
+blame-history: no concerning findings** — it established from history that M123
+shipped a membership-anchored pin and had to drop it precisely because such a
+fragment reds on a future true sentence, so this branch's re-anchoring applies
+that lesson rather than reversing it; it also verified the merDeriv claim against
+`R/engine-lme4.R` and confirmed `# intraclass 0.1.0` is unreleased draft, so
+editing it in place is not rewriting shipped history. **[O] diff-bug: 11
+findings**, below with disposition. It independently verified the return-1 fixes:
+the 12 `check_installed("merDeriv")` entry points, 0 pattern hits across the four
+files, all five plants containing their patterns with no cross-attribution, the
+33-entry vector with M126's five at 29–33, and `README.md` normalized-identical
+to `README.Rmd`.
+
+- **G1 — FIX (gate failure; a reason for this return).** The `weight caps` failure
+  above. Remedy is the stated one: compress the single heaviest plan-owned section
+  in one rewrite, never a nibble-and-recount loop.
+- **F2 — FIX (floor-qualifying; the other reason for this return).** AC7 as
+  literally written is not satisfied. It requires the `:53` clause to "no longer
+  read as a claim about what an installation retrieves"; the replacement at
+  `vignettes/engines.Rmd:59` is "it needs nothing beyond what an installation
+  already brings", which is precisely such a claim. True, but AC7 bans the form,
+  not the falsity, and criteria are never reinterpreted at review. Verified at
+  review by reading the line. Repair is on the deliverable, not the criterion: a
+  declaration-scoped clause ("it is the engine this package declares in
+  `Imports:`").
+- **F3 — FIX.** `vignettes/engines.Rmd:35-36` says merDeriv "supplies the parameter
+  covariance the interval is built from" as an engine-wide claim; `R/engine-lme4.R:31`
+  records that merDeriv is not needed for the bootstrap, where no covariance is
+  formed. A fresh inaccuracy introduced on a shipped surface by the edit meant to
+  remove one. Repair: scope it to the default Monte-Carlo interval.
+- **F4 — FIX.** `install_light_*` is only partly cured. `fixed = TRUE` matching means
+  "…so the base install stays light" still reds "…stays lighter than a Bayesian
+  stack" — verified at review by running the match, which returns TRUE — and reds the
+  clause even when a following sentence qualifies it. The pin's own comment claims
+  the "Optional" anchor cures this; it does not, since nothing appended after the
+  matched span changes it. Repair: a sentence-final anchor, or record the residual
+  hazard in the comment, which currently records only the recall cost.
+- **F5 — FIX.** `tests/testthat/test-doc-skew-caveat.R:313` re-pins a hand-counted
+  index ("entries 29-33"). Correct today and append-safe, but it breaks on any
+  insertion — exactly how "twelfth through sixteenth" went stale, which is what F10
+  was raised about. Repair: name the five spellings, or state the deriving procedure.
+- **F6 — FIX.** `NEWS.md:509-510` classes `merDeriv` as an engine ("Optional engines
+  live in `Suggests`: `brms`, `lavaan` and `merDeriv`"); it is the lme4 engine's
+  helper, as the next clause says. Repair: "Optional engines and their helpers".
+- **F7 — FIX.** `test-doc-skew-caveat.R:311` pairs a claim count with a spelling
+  range in one parenthetical ("M126's three claims (entries 29-33)"), reading as an
+  off-by-two. Repair: "three claims, in five spellings".
+- **F8 — FIX.** `NEWS.md:513` leaves a ~28-char line mid-paragraph after the rewrap,
+  against a file wrapping at ~76–84. Cosmetic; `air` does not format Markdown.
+- **F1 — FIXED AT REVIEW.** The attempt-1 "Evidence per criterion (**fresh**…)"
+  block read as current while quoting withdrawn prose — AC2's quotation is the F2
+  defect itself. Retitled SUPERSEDED in place with an explicit do-not-tick note,
+  rather than deleted (IP4). The Review section is review-exclusive, so this needed
+  no return.
+- **F9 — NOT A FINDING.** The lens flagged that it had not re-run the mutation
+  harness or `build_readme()` because both write. Both were run this session:
+  matrix 128/128 and 48/48 RED with clean controls, and a second `build_readme()`
+  left `git status --porcelain README.md` empty. Recorded so the gap is closed, not
+  carried.
+- **F10 — FOLLOW-UP (out of scope: `R/`, outside this milestone's Scope).**
+  `R/engine-lme4.R:52` and its 11 siblings give `reason = "to compute lme4
+  Monte-Carlo confidence intervals."` — the last surface still implying the merDeriv
+  requirement is interval-method-specific, the exact framing this milestone withdrew
+  from the docs, and user-visible as an error message. Swept ROADMAP first: the
+  standing `abort-remedy truthfulness` row is about a ledger and CI checker (barred
+  by D-021) and its trigger is a misleading *remedy bullet*, so this is distinct.
+  Needs a candidate row, or a scope amendment if the user wants it folded in here.
+- **F11 — REJECT (already recorded; met as written).** The harness plants only
+  `vig[1]`, so `engines.Rmd` is swept by the pin but never planted on the installed
+  leg. Recorded on the standing `Per-class reachability proof` candidate row, and
+  AC5 as amended promises only "one installed vignette".
+
+**Criterion boxes.** None ticked this attempt. AC7 fails as written (F2); AC1–AC6
+and AC9 have evidence that would need re-gathering after the F2/F3/F6 prose
+changes; AC8 (the Decisions entry) stands from attempt 1 and is unaffected.
+
