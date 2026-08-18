@@ -114,7 +114,7 @@ numeric-`unit` demonstrations → their own candidate row.
       `packageDescription("glmmTMB")$Imports`. Set `repos` explicitly; a bare
       `Rscript` with no mirror errors. Record `lme4` present / `merDeriv` absent,
       the R version and the date in the work log.
-- [ ] T2: Rewrite `README.Rmd`'s Installation paragraph (:55–63). Three
+- [x] T2: Rewrite `README.Rmd`'s Installation paragraph (:55–63). Three
       constraints: no count of retrieved packages, and no numeral on the declared
       set; the paragraph MUST retain a sentence naming exactly `cli`, `generics`,
       `glmmTMB`, `lifecycle`, `rlang`, `tibble` and carrying `Imports` or
@@ -146,6 +146,7 @@ numeric-`unit` demonstrations → their own candidate row.
 - 2026-08-17: `cairn_validate` sizing advisory (9 acceptance criteria > 7) accepted, not split. The only natural cut line is AC5 — the `claim_patterns` extension and its mutation matrix — and a milestone whose sole deliverable is a doc-claim pin is apparatus D-021 bars outright, which D-029 confirms by requiring the extension to ride along in the milestone that withdraws the spellings. The remaining criteria are one per shipped surface plus the record and the gate, none of which stands alone. Merging the audited criteria to clear an advisory was refused as shrink-to-fit.
 - 2026-08-17: plan gate chose correcting `NEWS.md`'s 0.1.0 clause in place with no bullet of its own, over a correction bullet for it, because 0.1.0 is unreleased (DESCRIPTION 0.0.0.9000, M48 blocked, no tags) so no user ever read it; falsified by 0.1.0 shipping before this milestone lands.
 - 2026-08-17: T1 measured on R 4.6.1 against the CRAN cloud mirror — `tools::package_dependencies()` over the six non-base `Imports:` read from `DESCRIPTION` gives a 63-package recursive closure with `lme4` present and `merDeriv` absent; `pak::pkg_deps("jmgirard/intraclass")` at its default gives 60 with the same two verdicts, and `brms`/`lavaan` absent too; `packageDescription("glmmTMB")$Imports` names `lme4 (>= 1.1-18.9000)`. The two procedures disagree on size, agree on membership — the AC3 rationale, measured rather than assumed.
+- 2026-08-17: T2 rewrote README.Rmd's Installation paragraph — the declared set now states its members with no numeral, `glmmTMB`'s own `Imports:` carries the lme4 disclosure, and `merDeriv` is named beside the `Suggests:` engines as the piece the lme4 interval needs. Checked against all 28 `claim_patterns` spellings parsed from the test file and matched on squashed, blockquote-stripped text: 0 hits. `test-doc-skew-caveat.R` green under `load_all` (2 vignette-install skips, covered at T7); the `:2334` dependency-list rule and its `:2401` anti-vacuity floor both pass on the new sentence.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
