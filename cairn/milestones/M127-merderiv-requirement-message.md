@@ -2,12 +2,12 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M127: Correct the lme4 merDeriv requirement message
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP1, GP8
-- **Branch/PR:** —
+- **Branch/PR:** `m127-merderiv-requirement-message`
 
 ## Goal
 
@@ -53,11 +53,19 @@ a plant regime for a bare R string literal on a non-roxygen line.
       package literal is `"merDeriv"`; the filtered listing is quoted in the work
       log.
 - [ ] AC2. The message the user reads names what merDeriv supplies and
-      attributes the requirement to the engine's entry check, not to an interval
-      method. Evidence: a test in `tests/testthat/test-icc-lme4-engine.R` renders
-      the real condition with `merDeriv` made to look uninstalled and asserts the
-      rendered text is, on one line:
-      `The "merDeriv" package is required to supply the lme4 parameter covariance; every lme4 fit checks for it on entry, whatever interval method you ask for.`
+      attributes the requirement to the engine's entry check, not to an
+      interval method. Evidence: a test in
+      `tests/testthat/test-icc-lme4-engine.R` puts `merderiv_reason()` through
+      the real `rlang::check_installed()` rendering path and asserts the
+      resulting `conditionMessage()`, with whitespace collapsed, contains
+      verbatim (`fixed = TRUE`):
+      `to supply the lme4 parameter covariance; every lme4 fit checks for it on entry, whatever interval method you ask for.`
+      The assertion is a substring, not full-string equality, because the
+      surrounding frame (`The package "X" is required …`) is rlang's prose and
+      not this package's (M93 lesson); whitespace is collapsed, and the
+      assertion repeated at two `cli.width` settings, because cli wraps the
+      rendered message to the display width (measured to break at different
+      points at widths 2000, 80 and 40).
 - [ ] AC3. The superseded phrase `to compute lme4 Monte-Carlo confidence
       intervals` appears on no surface the existing pin's source walk sweeps
       (all of `R/*.R`, `vignettes/`, `NEWS.md`, `README.Rmd`, `README.md`), and
@@ -89,14 +97,16 @@ a plant regime for a bare R string literal on a non-roxygen line.
 
 ## Tasks
 
-- [ ] T1. Add one internal expression in `R/engine-lme4.R` returning
+- [x] T1. Add one internal expression in `R/engine-lme4.R` returning
       `"to supply the lme4 parameter covariance; every lme4 fit checks for it on entry, whatever interval method you ask for."`
       and repoint every merDeriv `check_installed()` site the AC1 enumeration
       returns (today: `:53, :198, :325, :567, :591, :623, :648, :673, :706, :748,
       :883, :1014`) to it, removing the literals.
-- [ ] T2. Extend `tests/testthat/test-icc-lme4-engine.R` with the AC2 rendering
-      assertion — mock `rlang::is_installed` so the condition really fires, and
-      compare the rendered message, not the internal constant.
+- [x] T2. Extend `tests/testthat/test-icc-lme4-engine.R` with the AC2 rendering
+      assertion: put `merderiv_reason()` through `rlang::check_installed()` under
+      an absent probe package name, at two `cli.width` settings, and compare the
+      rendered message by substring — not the internal expression, and not
+      rlang's own frame.
 - [ ] T3. Add the superseded phrase to `claim_patterns` in
       `tests/testthat/test-doc-skew-caveat.R`; widen the `spellings` extraction
       regex at `data-raw/m123-capability-claim-mutations.R:73` so the new entry is
@@ -118,6 +128,11 @@ a plant regime for a bare R string literal on a non-roxygen line.
 - 2026-08-18: plan gate chose claiming the entry CHECK over claiming the covariance is formed, because a singular fit aborts at `R/engine-lme4.R:79-94` before any covariance exists, and the check framing is the one M126 already landed at `README.Rmd:63`; falsified by an lme4 path that does not check for merDeriv on entry.
 - 2026-08-18: plan gate chose extending the existing pin plus repairing its two blind spots over a standalone rendered-message assertion, because D-029 requires extending the existing instrument and D-021's Untouched clause permits checker repairs; falsified by the harness repair proving larger than the message correction it serves.
 - 2026-08-18: criteria audit ran in FULL mode (user-facing tier), fresh-context [O] reader, twelve findings returned. Fixed before writing: AC1 bound a hoist rather than the property and its grep could not show which sites were the domain (widened to all of `R/`, filtered by package literal); AC2 pinned an internal constant rather than the rendered message and its literal spanned three lines (now a one-line rendered text); AC4 named an "engine contract" `icc()` does not return and a `vcov` untied to merDeriv (replaced with the entry-order claim the message actually makes); AC3 overstated what a green run covers (layout now stated); the NEWS bullet was uncovered and would itself red the pin (now T4). Promoted to gate questions: the wording collision with the sibling reason, the boundary-abort falsifier, and the pin/harness extent. The plant matrix stayed evidence under AC3 rather than becoming its own criterion, so no criterion binds an instrument property.
+
+- 2026-08-18: AC2 amended (Substantive). The planned criterion pinned `The "merDeriv" package is required …` as a full string on one line; live measurement (rlang 1.3.0, cli 3.6.6) shows the template is `The package "X" is required …` and that cli wraps it to the display width, breaking at different points at widths 2000, 80 and 40. A fresh-context [O] reader then falsified the first repair too: `check_installed()` never calls `is_installed()` (it short-circuits on `.getNamespace()`, then calls `rlang:::detect_installed()`), and any mock is defeated when merDeriv's namespace is already loaded by earlier tests in the session. Mini gate chose the absent-probe package name over mocking `rlang:::detect_installed` (plus `unloadNamespace`) because the probe needs no unexported dependency internal, no cross-package mock — the repo's first — and no session-order assumption; falsified by the rendered reason diverging from what a real site renders. AC2 now pins by substring per the M93 lesson, so rlang's own frame is not hostage to this criterion. No criterion was widened: AC2's domain is unchanged and its promise narrowed to the clause this package owns.
+
+- 2026-08-18: T1 — `merderiv_reason()` added to `R/engine-lme4.R`; all 12 merDeriv `check_installed()` sites repointed to it, no literals left (`git grep -n 'Monte-Carlo confidence intervals' -- R/` returns nothing).
+- 2026-08-18: T2 — AC2 rendering test added to `tests/testthat/test-icc-lme4-engine.R`; mutation-checked by substituting the withdrawn wording into `merderiv_reason()`, which reds 3 assertions (both widths and the anti-withdrawn check) and greens on restore. Full suite `NOT_CRAN=true CI=true devtools::test()`: 0 failures, 8202 passing.
 
 ## Decisions
 

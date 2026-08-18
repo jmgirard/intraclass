@@ -1117,3 +1117,46 @@ test_that("lme4 nested multilevel reports the lme4 engine", {
     "lme4"
   )
 })
+
+# M127: the merDeriv requirement is engine-wide, not interval-method-specific --
+# `ci_method` is not a parameter of any function in `R/engine-lme4.R`, so every
+# entry point checks for merDeriv before it fits anything. The probe package name
+# below is absent by construction, so the real `rlang::check_installed()`
+# rendering path runs without mocking a dependency internal and without
+# depending on whether merDeriv's namespace happens to be loaded (check_installed
+# short-circuits on `.getNamespace()` before any installed-ness check). The
+# assertion is a substring: the surrounding "The package ... is required" frame is
+# rlang's prose, not ours, and pinning it would hold this test hostage to a
+# dependency's wording (the M93 lesson).
+test_that("the merDeriv requirement message names the entry check, not a method", {
+  render <- function(width) {
+    withr::with_options(list(cli.width = width), {
+      tryCatch(
+        rlang::check_installed(
+          "merDerivAbsentProbeM127",
+          reason = merderiv_reason()
+        ),
+        error = conditionMessage
+      )
+    })
+  }
+  # cli wraps the rendered message to the display width, so line breaks are a
+  # display concern: collapse whitespace and assert at two widths.
+  collapse <- function(x) gsub("\\s+", " ", trimws(x))
+  expected <- paste0(
+    "to supply the lme4 parameter covariance; every lme4 fit checks for it ",
+    "on entry, whatever interval method you ask for."
+  )
+  for (w in c(2000L, 80L)) {
+    expect_true(grepl(expected, collapse(render(w)), fixed = TRUE))
+  }
+  # The framing this milestone withdrew attributed the requirement to one
+  # interval method a caller may never have asked for.
+  expect_false(
+    grepl(
+      "Monte-Carlo confidence intervals",
+      collapse(render(80L)),
+      fixed = TRUE
+    )
+  )
+})

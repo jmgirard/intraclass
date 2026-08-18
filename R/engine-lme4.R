@@ -46,12 +46,22 @@ lme4_bootmer_refit <- function(fit, extract) {
   }
 }
 
+# The merDeriv requirement is engine-wide, not interval-method-specific (M127).
+# `ci_method` is not a parameter of any function in this file: every entry point
+# below checks for merDeriv before it fits anything, whatever interval the caller
+# asked for, so a message attributing the requirement to Monte-Carlo intervals is
+# false to a caller who asked for another method. One expression, so the entry
+# points cannot drift apart again.
+merderiv_reason <- function() {
+  paste0(
+    "to supply the lme4 parameter covariance; every lme4 fit checks for it ",
+    "on entry, whatever interval method you ask for."
+  )
+}
+
 fit_lme4 <- function(data, call = rlang::caller_env()) {
   rlang::check_installed("lme4", reason = "to fit the ICC model with lme4.")
-  rlang::check_installed(
-    "merDeriv",
-    reason = "to compute lme4 Monte-Carlo confidence intervals."
-  )
+  rlang::check_installed("merDeriv", reason = merderiv_reason())
 
   fit <- withCallingHandlers(
     lme4::lmer(
@@ -193,10 +203,7 @@ fit_lme4 <- function(data, call = rlang::caller_env()) {
 
 fit_lme4_oneway <- function(data, call = rlang::caller_env()) {
   rlang::check_installed("lme4", reason = "to fit the ICC model with lme4.")
-  rlang::check_installed(
-    "merDeriv",
-    reason = "to compute lme4 Monte-Carlo confidence intervals."
-  )
+  rlang::check_installed("merDeriv", reason = merderiv_reason())
 
   fit <- withCallingHandlers(
     lme4::lmer(
@@ -320,10 +327,7 @@ fit_lme4_oneway <- function(data, call = rlang::caller_env()) {
 # variance boundary aborts toward glmmTMB via the isSingular() guard above.
 fit_lme4_fixed <- function(data, call = rlang::caller_env()) {
   rlang::check_installed("lme4", reason = "to fit the ICC model with lme4.")
-  rlang::check_installed(
-    "merDeriv",
-    reason = "to compute lme4 Monte-Carlo confidence intervals."
-  )
+  rlang::check_installed("merDeriv", reason = merderiv_reason())
   k <- nlevels(data$rater)
 
   fit <- withCallingHandlers(
@@ -562,10 +566,7 @@ lme4_ml_contract <- function(fit, groups, call = rlang::caller_env()) {
 # through the shared multilevel contract; a singular boundary fit defers to glmmTMB.
 fit_lme4_replicates <- function(data, call = rlang::caller_env()) {
   rlang::check_installed("lme4", reason = "to fit the replicate ICC model.")
-  rlang::check_installed(
-    "merDeriv",
-    reason = "to compute lme4 Monte-Carlo confidence intervals."
-  )
+  rlang::check_installed("merDeriv", reason = merderiv_reason())
   fit <- fit_lme4_ml_model(
     score ~ 1 + (1 | subject) + (1 | rater) + (1 | subject:rater),
     data
@@ -586,10 +587,7 @@ fit_lme4_replicates <- function(data, call = rlang::caller_env()) {
 # cluster x rater, residual). Balanced/complete crossed random only in Slice 2.
 fit_lme4_multilevel <- function(data, call = rlang::caller_env()) {
   rlang::check_installed("lme4", reason = "to fit the multilevel ICC model.")
-  rlang::check_installed(
-    "merDeriv",
-    reason = "to compute lme4 Monte-Carlo confidence intervals."
-  )
+  rlang::check_installed("merDeriv", reason = merderiv_reason())
   fit <- fit_lme4_ml_model(
     score ~
       1 +
@@ -618,10 +616,7 @@ fit_lme4_multilevel <- function(data, call = rlang::caller_env()) {
 # Design 1 (spec M8 §3a); the estimand map is unchanged. Subject level only.
 fit_lme4_nested_clusters <- function(data, call = rlang::caller_env()) {
   rlang::check_installed("lme4", reason = "to fit the multilevel ICC model.")
-  rlang::check_installed(
-    "merDeriv",
-    reason = "to compute lme4 Monte-Carlo confidence intervals."
-  )
+  rlang::check_installed("merDeriv", reason = merderiv_reason())
   fit <- fit_lme4_ml_model(
     score ~ 1 + (1 | cluster) + (1 | cluster:subject) + (1 | cluster:rater),
     data
@@ -643,10 +638,7 @@ fit_lme4_nested_clusters <- function(data, call = rlang::caller_env()) {
 # (agreement-only): the rater variance is fully confounded into sigma^2_{r:s:c}.
 fit_lme4_nested_subjects <- function(data, call = rlang::caller_env()) {
   rlang::check_installed("lme4", reason = "to fit the multilevel ICC model.")
-  rlang::check_installed(
-    "merDeriv",
-    reason = "to compute lme4 Monte-Carlo confidence intervals."
-  )
+  rlang::check_installed("merDeriv", reason = merderiv_reason())
   fit <- fit_lme4_ml_model(
     score ~ 1 + (1 | cluster) + (1 | cluster:subject),
     data
@@ -668,10 +660,7 @@ fit_lme4_nested_subjects <- function(data, call = rlang::caller_env()) {
 # random raters only; a singular fit defers to glmmTMB via lme4_ml_contract().
 fit_lme4_ml_replicates <- function(data, call = rlang::caller_env()) {
   rlang::check_installed("lme4", reason = "to fit the multilevel ICC model.")
-  rlang::check_installed(
-    "merDeriv",
-    reason = "to compute lme4 Monte-Carlo confidence intervals."
-  )
+  rlang::check_installed("merDeriv", reason = merderiv_reason())
   fit <- fit_lme4_ml_model(
     score ~
       1 +
@@ -701,10 +690,7 @@ fit_lme4_ml_replicates <- function(data, call = rlang::caller_env()) {
 # five components; the rater slot holds sigma^2_{r:c}. Balanced/complete random only.
 fit_lme4_nested_replicates <- function(data, call = rlang::caller_env()) {
   rlang::check_installed("lme4", reason = "to fit the multilevel ICC model.")
-  rlang::check_installed(
-    "merDeriv",
-    reason = "to compute lme4 Monte-Carlo confidence intervals."
-  )
+  rlang::check_installed("merDeriv", reason = merderiv_reason())
   fit <- fit_lme4_ml_model(
     score ~
       1 +
@@ -743,10 +729,7 @@ fit_lme4_nested_replicates <- function(data, call = rlang::caller_env()) {
 # theta^2_r == sigma^2_r, so the subject-level ICCs equal the random-rater ones.
 fit_lme4_multilevel_fixed <- function(data, call = rlang::caller_env()) {
   rlang::check_installed("lme4", reason = "to fit the multilevel ICC model.")
-  rlang::check_installed(
-    "merDeriv",
-    reason = "to compute lme4 Monte-Carlo confidence intervals."
-  )
+  rlang::check_installed("merDeriv", reason = merderiv_reason())
   k <- nlevels(data$rater)
   fit <- fit_lme4_ml_model(
     score ~
@@ -878,10 +861,7 @@ fit_lme4_multilevel_fixed <- function(data, call = rlang::caller_env()) {
 # singular fit defers to glmmTMB (as every lme4 shape).
 fit_lme4_replicates_fixed <- function(data, call = rlang::caller_env()) {
   rlang::check_installed("lme4", reason = "to fit the replicate ICC model.")
-  rlang::check_installed(
-    "merDeriv",
-    reason = "to compute lme4 Monte-Carlo confidence intervals."
-  )
+  rlang::check_installed("merDeriv", reason = merderiv_reason())
   k <- nlevels(data$rater)
   fit <- fit_lme4_ml_model(
     score ~ 1 + rater + (1 | subject) + (1 | subject:rater),
@@ -1009,10 +989,7 @@ fit_lme4_replicates_fixed <- function(data, call = rlang::caller_env()) {
 # icc()); a singular boundary fit defers to glmmTMB as elsewhere (ADR-012).
 fit_lme4_nested_fixed <- function(data, call = rlang::caller_env()) {
   rlang::check_installed("lme4", reason = "to fit the multilevel ICC model.")
-  rlang::check_installed(
-    "merDeriv",
-    reason = "to compute lme4 Monte-Carlo confidence intervals."
-  )
+  rlang::check_installed("merDeriv", reason = merderiv_reason())
   fit <- fit_lme4_ml_model(score ~ 0 + rater + (1 | cluster:subject), data)
   if (lme4::isSingular(fit)) {
     abort_intraclass(
