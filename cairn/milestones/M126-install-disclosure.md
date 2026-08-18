@@ -130,7 +130,7 @@ numeric-`unit` demonstrations → their own candidate row.
       including the `:53` clause; leave the `:39` chunk gate correct for
       `merDeriv`.
 - [x] T5: `devtools::build_readme()`; verify a second render is a no-op.
-- [ ] T6: Append the three withdrawn spellings to `claim_patterns` (backticked +
+- [x] T6: Append the three withdrawn spellings to `claim_patterns` (backticked +
       bare per claim) and commit the mutation matrix — each spelling reintroduced
       across 2 markup regimes × 4 wrap forms, red required, then removed.
 - [ ] T7: `devtools::spell_check()` (any new word → `inst/WORDLIST`); knit the
@@ -152,6 +152,7 @@ numeric-`unit` demonstrations → their own candidate row.
 - 2026-08-17: T4 rewrote the engines vignette's mixed-model opening to say lme4 arrives with glmmTMB and merDeriv is the piece that may be absent, and replaced the `:53` "it is the one required dependency" clause — true of the DESCRIPTION, misleading about the install — with what it actually meant: glmmTMB is the declared engine and needs nothing an installation does not already bring. The `:39` chunk gate is left as-is; it is correct for merDeriv. 0 `claim_patterns` hits across the four files.
 - 2026-08-17: T5 regenerated README.md via `devtools::build_readme()`; the diff is 11 insertions / 6 deletions confined to the Installation paragraph, with no drift in any printed `icc()` output. A second render left `git diff README.md` empty — the no-op AC4 asks for.
 - 2026-08-17: AC5 amended at a mini gate (substantive; user-facing tier, so the amended wording went to a fresh-context [O] reader first, which returned 10 findings and judged the first draft a net widening). The planned "each in a backticked and a backtick-free form" is unsatisfiable for `vignettes/engines.Rmd`'s clause, which carries no markup — the two forms would be byte-identical. Amended to name the forms concretely per clause and to state the installed leg's probe domain as what the harness plants (README.md, NEWS.md, one vignette) rather than more. A conditional "where its clause carries markup" draft was rejected as self-scoping, and a clause binding the harness's internal name check was dropped under D-118. User selected the narrowed wording over widening the probe to all nine vignettes.
+- 2026-08-17: T6 ran `data-raw/m123-capability-claim-mutations.R` to completion. Source leg 128 plants / 128 RED, installed leg 48 plants / 48 RED, both controls green, 0 GREEN cells; 55 of those cells are M126's five spellings (40 source = 5 x 2 surfaces x 4 wrap forms, 15 installed = 5 x README.md/NEWS.md/one vignette). Attribution checked per pin before the run: each of the five plant sentences trips its own pattern and no other, so the harness's aggregate failure count cannot credit one pin's RED to another. `air format --check .` clean.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
