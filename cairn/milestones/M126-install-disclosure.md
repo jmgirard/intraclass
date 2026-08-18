@@ -123,7 +123,7 @@ numeric-`unit` demonstrations → their own candidate row.
       across `NEWS.md`, both READMEs and all nine vignettes; and the draft is
       checked against `claim_patterns` on whitespace-collapsed, blockquote-
       stripped text, never a raw grep (`doc-claim-pins.md`).
-- [ ] T3: Rewrite `NEWS.md:501–502`'s clause in place; write the
+- [x] T3: Rewrite `NEWS.md:501–502`'s clause in place; write the
       development-version bullet.
 - [ ] T4: Rewrite the `vignettes/engines.Rmd` mixed-model passage (:30–58),
       including the `:53` clause; leave the `:39` chunk gate correct for
@@ -147,6 +147,7 @@ numeric-`unit` demonstrations → their own candidate row.
 - 2026-08-17: plan gate chose correcting `NEWS.md`'s 0.1.0 clause in place with no bullet of its own, over a correction bullet for it, because 0.1.0 is unreleased (DESCRIPTION 0.0.0.9000, M48 blocked, no tags) so no user ever read it; falsified by 0.1.0 shipping before this milestone lands.
 - 2026-08-17: T1 measured on R 4.6.1 against the CRAN cloud mirror — `tools::package_dependencies()` over the six non-base `Imports:` read from `DESCRIPTION` gives a 63-package recursive closure with `lme4` present and `merDeriv` absent; `pak::pkg_deps("jmgirard/intraclass")` at its default gives 60 with the same two verdicts, and `brms`/`lavaan` absent too; `packageDescription("glmmTMB")$Imports` names `lme4 (>= 1.1-18.9000)`. The two procedures disagree on size, agree on membership — the AC3 rationale, measured rather than assumed.
 - 2026-08-17: T2 rewrote README.Rmd's Installation paragraph — the declared set now states its members with no numeral, `glmmTMB`'s own `Imports:` carries the lme4 disclosure, and `merDeriv` is named beside the `Suggests:` engines as the piece the lme4 interval needs. Checked against all 28 `claim_patterns` spellings parsed from the test file and matched on squashed, blockquote-stripped text: 0 hits. `test-doc-skew-caveat.R` green under `load_all` (2 vignette-install skips, covered at T7); the `:2334` dependency-list rule and its `:2401` anti-vacuity floor both pass on the new sentence.
+- 2026-08-17: T3 replaced the unreleased 0.1.0 section's "so the base install stays light" clause in place — it now names `brms`/`lavaan`/`merDeriv` as request-only and `lme4` as arriving via `glmmTMB` — and added a Documentation bullet to the development-version section recording the README change, beside M123's own README bullet. No bullet for the 0.1.0 clause: that section has never shipped. 0 `claim_patterns` hits across the four files.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
