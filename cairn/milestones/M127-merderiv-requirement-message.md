@@ -2,7 +2,7 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M127: Correct the lme4 merDeriv requirement message
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -52,13 +52,13 @@ pin named outside `bayes|engines_omit|install_|design_never`.
 
 ## Acceptance criteria
 
-- [ ] AC1. Every `rlang::check_installed()` call in `R/` whose package argument
+- [x] AC1. Every `rlang::check_installed()` call in `R/` whose package argument
       is `"merDeriv"` passes the corrected reason from one internal expression,
       and none passes a literal. Domain enumerated by
       `git grep -n -A2 'check_installed(' -- 'R/*.R'` filtered to the sites whose
       package literal is `"merDeriv"`; the filtered listing is quoted in the work
       log.
-- [ ] AC2. The message the user reads names what merDeriv supplies and
+- [x] AC2. The message the user reads names what merDeriv supplies and
       attributes the requirement to the engine's entry check, not to an
       interval method. Evidence: a test in
       `tests/testthat/test-icc-lme4-engine.R` puts `merderiv_reason()` through
@@ -72,7 +72,7 @@ pin named outside `bayes|engines_omit|install_|design_never`.
       assertion repeated at two `cli.width` settings, because cli wraps the
       rendered message to the display width (measured to break at different
       points at widths 2000, 80 and 40).
-- [ ] AC3. A maintainer restoring the withdrawn wording to a swept source file
+- [x] AC3. A maintainer restoring the withdrawn wording to a swept source file
       reds: the string literal it shipped in —
       `"to compute lme4 Monte-Carlo confidence intervals."`, double quotes and
       terminal full stop included, recovered by
@@ -92,7 +92,7 @@ pin named outside `bayes|engines_omit|install_|design_never`.
       (`tests/testthat/test-doc-skew-caveat.R:456-458`), so a green
       `R CMD check` does not evidence it; the evidence run is `devtools::test()`
       on the tree.
-- [ ] AC4. The corrected message's claim is true of the code, in three clauses,
+- [x] AC4. The corrected message's claim is true of the code, in three clauses,
       each decided by a command whose output is its domain.
       (a) No function in `R/engine-lme4.R` takes `ci_method`:
       `git grep -n 'ci_method' -- R/engine-lme4.R` enumerates every line that
@@ -110,7 +110,7 @@ pin named outside `bayes|engines_omit|install_|design_never`.
       either, and each is reachable only through a dispatched function that has
       already checked.
       Evidence: the three listings and the `formals()` result, in the work log.
-- [ ] AC5. `devtools::check()` clean (0 errors / 0 warnings / 0 notes) and
+- [x] AC5. `devtools::check()` clean (0 errors / 0 warnings / 0 notes) and
       `air format --check .` clean.
 
 ## Coverage
@@ -140,7 +140,7 @@ pin named outside `bayes|engines_omit|install_|design_never`.
 - [x] T4. AC4 listings in the work log; NEWS bullet, worded so it carries
       neither the pinned literal nor the bare `lme4 Monte-Carlo` adjacency —
       `NEWS.md` is swept by both pin legs.
-- [ ] T5. Gate hygiene: `air format .`, `devtools::test()`, `devtools::check()`,
+- [x] T5. Gate hygiene: `air format .`, `devtools::test()`, `devtools::check()`,
       the four data-raw checkers; delete the promoted candidate row and add the
       standing-guard row; narrow the per-class-reachability row.
 
@@ -173,6 +173,9 @@ pin named outside `bayes|engines_omit|install_|design_never`.
 - 2026-08-18: T5 partial — `air format --check .` clean; `devtools::document()` produces no diff; all seven data-raw checkers green (record-claims 6/6 re-derived, oracle-registry, reference-observations, checkpoint-sites, generalizing-claims `--check`, mpl-doc-claims, abort-remedy-verdicts). ROADMAP: the promoted M127 candidate pointer deleted; a standing-guard candidate row added for the AC4 snapshot gap; the per-class-reachability row narrowed — its `spellings` four-prefix piece is retired by this milestone, its `installed_targets()` `vig[1]` piece still stands. AC5's own evidence (`devtools::test()`, `devtools::check()`) was still running at this checkpoint, so AC5 stays unchecked and T5 is not yet complete.
 
 - 2026-08-18: T5 — `NOT_CRAN=true CI=true devtools::test()`: 0 failures, 8250 passing, 25 skips, 2 warnings. `devtools::check()`: its summary reports 0 errors / 0 warnings / 0 notes, but `R CMD check`'s own Status line reports 1 NOTE, from the `spelling.Rout` / `spelling.Rout.save` comparison at `checking tests`. That NOTE is PRE-EXISTING, measured rather than assumed: a detached worktree at `origin/main` flags 28 words under `spelling::spell_check_package()`, and this branch first flagged 29 — the one addition being `misdescribed`, coined by this milestone's own NEWS bullet. The bullet was reworded to "got it wrong", returning the branch to main's exact baseline (28 flagged, 0 new, 0 gone). `inst/WORDLIST` was NOT padded: 28 words main already flags are absent from it, so adding one entry would have hidden this milestone's contribution inside a standing gap rather than removing it.
+
+- 2026-08-18: T5 complete; confirming `devtools::check()` on the final tree — summary 0 errors / 0 warnings / 0 notes, `R CMD check` Status 1 NOTE (the pre-existing spelling comparison, now at main's exact baseline). All five criteria checked; status -> review.
+- 2026-08-18: OPEN CONCERN for review, not actioned here. AC5's instrument is weaker than its wording implies: "`devtools::check()` clean (0 errors / 0 warnings / 0 notes)" reads as a promise about `R CMD check`, but devtools' summary does not surface the `checking tests` NOTE that `R CMD check`'s own Status line reports, so the two disagree on this tree and on main. Related: `tests/spelling.Rout.save` is EMPTY, so the saved-output comparison diffs as soon as any word is flagged, and main flags 28 — the repo's spelling gate has been non-green at the `R CMD check` level for some time. Not amended at this gate: AC5 is satisfied by the instrument it names, and rewriting a criterion to chase a pre-existing tooling gap is scope creep on an implement gate. Disposition belongs to review — a candidate row is the likely home.
 
 ## Decisions
 
