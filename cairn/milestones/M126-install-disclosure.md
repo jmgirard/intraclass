@@ -128,7 +128,7 @@ numeric-`unit` demonstrations → their own candidate row.
 - [x] T4: Rewrite the `vignettes/engines.Rmd` mixed-model passage (:30–58),
       including the `:53` clause; leave the `:39` chunk gate correct for
       `merDeriv`.
-- [ ] T5: `devtools::build_readme()`; verify a second render is a no-op.
+- [x] T5: `devtools::build_readme()`; verify a second render is a no-op.
 - [ ] T6: Append the three withdrawn spellings to `claim_patterns` (backticked +
       bare per claim) and commit the mutation matrix — each spelling reintroduced
       across 2 markup regimes × 4 wrap forms, red required, then removed.
@@ -149,6 +149,7 @@ numeric-`unit` demonstrations → their own candidate row.
 - 2026-08-17: T2 rewrote README.Rmd's Installation paragraph — the declared set now states its members with no numeral, `glmmTMB`'s own `Imports:` carries the lme4 disclosure, and `merDeriv` is named beside the `Suggests:` engines as the piece the lme4 interval needs. Checked against all 28 `claim_patterns` spellings parsed from the test file and matched on squashed, blockquote-stripped text: 0 hits. `test-doc-skew-caveat.R` green under `load_all` (2 vignette-install skips, covered at T7); the `:2334` dependency-list rule and its `:2401` anti-vacuity floor both pass on the new sentence.
 - 2026-08-17: T3 replaced the unreleased 0.1.0 section's "so the base install stays light" clause in place — it now names `brms`/`lavaan`/`merDeriv` as request-only and `lme4` as arriving via `glmmTMB` — and added a Documentation bullet to the development-version section recording the README change, beside M123's own README bullet. No bullet for the 0.1.0 clause: that section has never shipped. 0 `claim_patterns` hits across the four files.
 - 2026-08-17: T4 rewrote the engines vignette's mixed-model opening to say lme4 arrives with glmmTMB and merDeriv is the piece that may be absent, and replaced the `:53` "it is the one required dependency" clause — true of the DESCRIPTION, misleading about the install — with what it actually meant: glmmTMB is the declared engine and needs nothing an installation does not already bring. The `:39` chunk gate is left as-is; it is correct for merDeriv. 0 `claim_patterns` hits across the four files.
+- 2026-08-17: T5 regenerated README.md via `devtools::build_readme()`; the diff is 11 insertions / 6 deletions confined to the Installation paragraph, with no drift in any printed `icc()` output. A second render left `git diff README.md` empty — the no-op AC4 asks for.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
