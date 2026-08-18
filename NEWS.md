@@ -507,7 +507,8 @@ alternate engines, and seeded simulations.
   options (e.g. `backend = "cmdstanr"`, `chains`, `iter`, `cores`) to `brms::brm()`.
   Chains sample sequentially on one core by default (matching brms); a periodic
   reminder suggests `brm_args = list(cores = ...)` for parallel sampling. `brms`,
-  `lavaan` and `merDeriv` live in `Suggests`, fetched only on request. `lme4` itself
+  `lavaan` and `merDeriv` live in `Suggests`, so a plain install fetches none of the
+  three (asking for `merDeriv` also brings `lavaan`, which it needs). `lme4` itself
   arrives regardless, as a dependency of `glmmTMB`, but the lme4 engine also needs
   `merDeriv`, so it too waits on a further install. The Bayesian engine also fits
   the **multilevel** designs at the subject level: the crossed Design 1

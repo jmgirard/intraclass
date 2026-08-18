@@ -40,11 +40,11 @@ numeric-`unit` demonstrations → their own candidate row.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: `README.Rmd`'s Installation section discloses that `lme4` arrives with an
+- [x] AC1: `README.Rmd`'s Installation section discloses that `lme4` arrives with an
       installation regardless of its `Suggests` placement, attributing that to
       `glmmTMB`'s own `Imports:` rather than asserting it as a bare fact about the
       install. Evidence: the section quoted verbatim in the work log.
-- [ ] AC2: The same section discloses that `merDeriv` — which the lme4 engine requires
+- [x] AC2: The same section discloses that `merDeriv` — which the lme4 engine requires
       (`fit_lme4()`'s entry `rlang::check_installed("merDeriv")`, documented at
       `R/icc.R:310`) — does not arrive, attributed to its `Suggests` placement in this
       package's `DESCRIPTION`. Evidence: the quoted section, plus T1's three
@@ -54,14 +54,14 @@ numeric-`unit` demonstrations → their own candidate row.
       default; and `packageDescription("glmmTMB")$Imports` — the first two showing
       `lme4` present and `merDeriv` absent, the third naming `lme4`, each stamped with
       the R version and the date.
-- [ ] AC3: None of the four edited files states a count of retrieved packages, and the
+- [x] AC3: None of the four edited files states a count of retrieved packages, and the
       README's declared-set sentence states its members without a numeral (rationale:
       the Decisions entry below; the pin rule at T2). Evidence: a numeral sweep over the
       four edited files, its hits quoted and adjudicated in the work log.
-- [ ] AC4: `README.md` is regenerated from `README.Rmd` in the same commit and carries
+- [x] AC4: `README.md` is regenerated from `README.Rmd` in the same commit and carries
       the same disclosure; a second render leaves `git status` clean. Evidence: the
       rendered section quoted beside `README.Rmd`'s, and the `git status` output.
-- [ ] AC5: `claim_patterns` in `tests/testthat/test-doc-skew-caveat.R` gains five
+- [x] AC5: `claim_patterns` in `tests/testthat/test-doc-skew-caveat.R` gains five
       spellings for the three clauses this milestone withdraws: `README.Rmd`'s "so
       intraclass does not require them" and `NEWS.md`'s "so the base install stays
       light", each anchored through the adjacent `Suggests` token in a backticked and a
@@ -70,12 +70,12 @@ numeric-`unit` demonstrations → their own candidate row.
       control across the source leg's 2 markup regimes × 4 wrap forms and the installed
       leg's `README.md`, `NEWS.md` and one installed vignette, by
       `data-raw/m123-capability-claim-mutations.R`. Evidence: the harness run.
-- [ ] AC6: `NEWS.md:502`'s clause no longer characterizes the install's footprint from
+- [x] AC6: `NEWS.md:502`'s clause no longer characterizes the install's footprint from
       the `Suggests` placement alone, and a development-version bullet records the
       README change, the unreleased `0.1.0` section being corrected in place with no
       bullet of its own (rationale: the work log). Evidence: both passages quoted before
       and after.
-- [ ] AC7: `vignettes/engines.Rmd`'s mixed-model section discloses that `lme4` arrives
+- [x] AC7: `vignettes/engines.Rmd`'s mixed-model section discloses that `lme4` arrives
       with `glmmTMB` and that `merDeriv` is the dependency an installation may lack, and
       its "it is the one required dependency" clause (`:53`) no longer reads as a claim
       about what an installation retrieves. Evidence: the section quoted before and
@@ -83,7 +83,7 @@ numeric-`unit` demonstrations → their own candidate row.
 - [x] AC8: The milestone's Decisions section records why membership claims (`lme4`
       arrives, `merDeriv` does not) are shippable on a user-facing surface where a
       cardinality claim is not. Evidence: the entry.
-- [ ] AC9: `cairn/PROFILE.md`'s verify slot is clean, and the full suite is green
+- [x] AC9: `cairn/PROFILE.md`'s verify slot is clean, and the full suite is green
       against the **installed** package via `testthat::test_dir(load_package =
       "installed")` with **0 skips** across that run (`doc-claim-pins.md`, M116).
       Evidence: both outputs.
@@ -180,6 +180,7 @@ numeric-`unit` demonstrations → their own candidate row.
 - 2026-08-18: return 2 — F10 recorded as a ROADMAP candidate row (the lme4 `merDeriv` abort message's interval-method-specific framing); F11 needs nothing, the review having rejected it as already recorded and met as written.
 - 2026-08-18: return 2, T14 gate green against the repaired prose. `devtools::document()` no diff; `air format --check .` clean; `devtools::build_readme()` a no-op (`git status --porcelain README.md` empty), the AC4 second render; `devtools::test()` FAIL 0 / SKIP 2 / PASS 8461 (the two vignette-install skips the installed run covers); installed-package suite at `NOT_CRAN=true` via `test_dir(package = "intraclass", load_package = "installed")` **FAIL 0, SKIP 0, PASS 8813** — the run AC9 asks for; `devtools::check()` 0 errors, 0 warnings, 0 notes in 13m 55s, R CMD check's own single NOTE being the testthat step's elapsed time as at T7 and T12; `devtools::spell_check()` flags 28 words, the count the return-1 gate measured against the default branch, none introduced here. The three WARNs both suites report are engine fitting warnings inside tests that assert errors or messages (lavaan negative lv variance, a glmmTMB Hessian note, the fixed-raters caution); this branch changes no file under `R/`. `cairn_validate` passes every check, the plan-owned body at 145 against the <150 cap. Status set to review.
 - 2026-08-18: review attempt 3 — gate green (`cairn_validate` 16 PASS; `document()` no diff, `air format --check` clean, README in sync, `pkgdown::check_pkgdown()` clean, `devtools::check()` 0/0/0; `devtools::test()` FAIL 0 / SKIP 2 / PASS 8461; installed suite FAIL 0 / SKIP 0 / PASS 8813; mutation matrix 128/128 and 48/48 RED with clean controls; PR #135 CI green on head e813102). Both [S] lenses returned zero findings; the [O] diff-bug lens returned 11, of which six are triaged FIX (F1-F4, F6, F7) and five rejected or not-findings (F5, F8-F11). F1 is the load-bearing one: `merDeriv`'s own `Depends:` names `lavaan`, so the branch-added README clause "none of them is fetched unless you ask for it" is false — asking for merDeriv fetches the SEM engine. Findings and dispositions in the Review section; going to the maintainer at the gate.
+- 2026-08-18: review attempt 3, fix-now — the user selected repairing all six FIX findings on the branch over merging as-is or returning. F1/F2 corrected the branch-added claim that none of the three `Suggests` packages is fetched unless asked for (`merDeriv`'s own `Depends:` names `lavaan`); F3 rewrote the `install_light_*` comment to state the one hazard the full stop cures and the two that stand, each measured; F4 re-flowed the vignette's closing paragraph; F6 and F7 corrected the ROADMAP off-by-two and the `DESCRIPTION` overstatement. Re-verified on the repaired tree: matrix 128/128 and 48/48 RED, installed suite FAIL 0 / SKIP 0 / PASS 8813, `check()` 0/0/0, `document()` no diff, `air` clean, README re-rendered and a second render a no-op. All nine criteria ticked against the evidence recorded in the Review section.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
@@ -543,3 +544,83 @@ F1-F4 repairs change `README.Rmd`, `README.md`, `NEWS.md`, the pin file's commen
 and the vignette — so the ticks wait on re-verification against the repaired
 head rather than being recorded twice. AC8 (the Decisions entry) is unaffected
 and stands from attempt 1.
+
+### Fix-now repairs and evidence per criterion — attempt 3, post-repair
+
+Six findings were triaged FIX at the gate and repaired on the branch. `README.Rmd`
+now reads "so a plain install fetches none of the three — though asking for
+`merDeriv` brings `lavaan` along, because `merDeriv` names it in its own
+`Depends:`" (F1), and `NEWS.md` "so a plain install fetches none of the three
+(asking for `merDeriv` also brings `lavaan`, which it needs)" (F2). The
+`install_light_*` comment now states that the full stop cures exactly one hazard
+and names the two that stand, each measured (F3). `vignettes/engines.Rmd`'s
+closing paragraph is re-flowed at 76–84 characters with no stub line and the
+`[zero boundary]` link intact (F4). `cairn/ROADMAP.md` reads "M126's own third
+claim (its fifth spelling) included" (F6), and the pin comment scopes "literally
+true" to the engines `DESCRIPTION` declares (F7).
+
+Re-verification against the repaired tree: `devtools::build_readme()` re-rendered
+`README.md`; `test-doc-skew-caveat.R` FAIL 0 / PASS 2299 under `load_all`;
+`air format --check .` clean; `devtools::document()` no diff; the package
+reinstalled with `build_vignettes = TRUE`; mutation matrix **128/128 and 48/48
+RED, both controls 0, 0 GREEN, 55 cells M126's five**; installed suite **FAIL 0,
+SKIP 0, PASS 8813**; `devtools::check()` **0 errors, 0 warnings, 0 notes** in
+12m 51s.
+
+- **AC1 — met.** `README.Rmd:55-66`: "`glmmTMB` lists `lme4` in its own
+  `Imports:`, so the `lme4` package is already on your library path after a plain
+  install, whatever its `Suggests:` placement here implies." The arrival is stated
+  as a consequence of glmmTMB's declaration, not as a bare fact about the install.
+- **AC2 — met.** Same section: "`engine = "lme4"` also needs `merDeriv`, which
+  every lme4 fit checks for on entry whatever interval method you ask for.
+  `merDeriv` does not arrive: it sits in this package's `Suggests:` ...". The
+  requirement is verified in code — `rlang::check_installed("merDeriv")` opens all
+  12 `fit_lme4*()` entry points before any `ci_method` branching. Measured afresh
+  on R 4.6.1, 2026-08-18: `tools::package_dependencies()` over the non-base
+  `Imports:` read from `DESCRIPTION`, recursive, `which =
+  c("Depends","Imports","LinkingTo")` → 72 packages, `lme4` TRUE, `merDeriv`
+  FALSE; `pak::pkg_deps("jmgirard/intraclass")` at its default → 61, same two
+  verdicts; `packageDescription("glmmTMB")$Imports` → `lme4 (>= 1.1-18.9000)`.
+- **AC3 — met.** Numeral sweep re-run over the four edited files after the
+  repairs: the only digit-bearing tokens the branch adds across the three prose
+  surfaces are `lme4` (a package name) and `Design 1` (a design label); a
+  whole-file sweep of all four for a package-or-dependency count construction
+  returns no hits. The declared-set sentence names its six members with no
+  numeral.
+- **AC4 — met.** `README.md` regenerated from `README.Rmd` by
+  `devtools::build_readme()` and committed with it; the rendered passage carries
+  the same disclosure verbatim (`README.md:50-62`). A second render left `git
+  status --porcelain README.md` empty. The branch's checkpoint commits split one
+  earlier edit across two commits; the unit reaching the default branch is the
+  squash-merge, which lands both files together (attempt-3 F5).
+- **AC5 — met.** `claim_patterns` carries the five spellings:
+  `install_not_required_{marked,bare}` and `install_light_{marked,bare}`, each
+  anchored through the adjacent `Suggests` token in a backticked and a bare form,
+  and `install_one_required_dep` in one form. Matrix on the repaired tree: source
+  leg 128 plants / 128 RED across 2 markup regimes × 4 wrap forms, installed leg
+  48 / 48 RED across `README.md`, `NEWS.md` and one installed vignette, both
+  controls 0 failures, 0 GREEN cells, 55 of them M126's five.
+- **AC6 — met.** `main`'s `NEWS.md:502` read "Optional engines live in
+  `Suggests`, so the base install stays light."; the same passage now reads
+  "`brms`, `lavaan` and `merDeriv` live in `Suggests`, so a plain install fetches
+  none of the three ... `lme4` itself arrives regardless, as a dependency of
+  `glmmTMB`, but the lme4 engine also needs `merDeriv`". Corrected in place inside
+  the unreleased `# intraclass 0.1.0` section, with no bullet of its own; the
+  development-version section carries the Documentation bullet recording the
+  README change.
+- **AC7 — met.** `main`'s `vignettes/engines.Rmd:53` read "it is the one required
+  dependency and it is robust when a variance component sits"; it now reads "it is
+  the engine this package declares in `Imports:`, and it is robust when a variance
+  component sits" — a declaration claim, not a claim about what an installation
+  retrieves. The section's opening discloses that "The lme4 package itself arrives
+  with the installation — glmmTMB names lme4 in its own `Imports:`" and that
+  "merDeriv sits in `Suggests:` ... so a plain install leaves you with the lme4
+  package but not the lme4 engine". The vignette knits: built during the
+  `build_vignettes = TRUE` install and again under `devtools::check()`.
+- **AC8 — met.** The Decisions section carries the 2026-08-17 entry settling the
+  membership-vs-cardinality asymmetry.
+- **AC9 — met.** The `r-package` profile's verify slot is clean —
+  `devtools::document()` no diff, `devtools::test()` FAIL 0 / SKIP 2 / PASS 8461 —
+  and the installed-package suite at `NOT_CRAN=true` via `test_dir(package =
+  "intraclass", load_package = "installed")` reports **FAIL 0, SKIP 0, PASS 8813**
+  across the whole run.

@@ -337,20 +337,22 @@ claim_patterns <- c(
   # would red on a future TRUE sentence -- "brms, lavaan and merDeriv are in
   # `Suggests`, so intraclass does not require them" is true and would trip the
   # short form. Likewise "it is the one required dependency" is literally true
-  # of `DESCRIPTION`; it was withdrawn for misleading about the INSTALL, so the
+  # of the ENGINES `DESCRIPTION` declares (its six non-base `Imports:` are not
+  # all engines); it was withdrawn for misleading about the INSTALL, so the
   # pin runs on to "and it is robust", the clause it shipped in, rather than
   # ending where a future declaration-scoped true sentence could continue. The
   # cost is recall: a reworded return of the same falsehood escapes, and only a
   # re-planted verbatim return is caught.
   #
   # `install_light_*` additionally ends at the withdrawn sentence's FULL STOP.
-  # Matching is `fixed = TRUE`, so nothing appended after the matched span can
-  # un-match it: without the stop, the pattern reds a future TRUE sentence that
-  # merely continues past the word -- "so the base install stays lighter than a
-  # Bayesian stack" -- and reds the clause even where a following sentence
-  # qualifies it. The residual hazard the stop leaves is the mirror of the
-  # recall cost above: a return that repunctuates the same claim ("stays light,
-  # though ...") escapes the pin.
+  # That cures ONE hazard: a future TRUE sentence continuing past the word --
+  # "so the base install stays lighter than a Bayesian stack" -- no longer
+  # matches, measured. It cures nothing else, and cannot: matching is
+  # `fixed = TRUE`, so nothing after the matched span can un-match it. Two
+  # residual hazards therefore stand, both measured. A following sentence that
+  # qualifies the claim still reds ("stays light. lme4 nonetheless arrives with
+  # glmmTMB." matches), and -- the mirror of the recall cost above -- a return
+  # that repunctuates the same claim ("stays light, though ...") escapes.
   #
   # All five are named `install_*` so the mutation harness's two-way name check
   # (`data-raw/m123-capability-claim-mutations.R`) binds them without widening

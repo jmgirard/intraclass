@@ -55,13 +55,13 @@ data.frame(
 The two point estimates agree to well within rounding, and their Monte-Carlo
 intervals coincide to about `0.01`: the lme4 interval is built from the parameter
 covariance supplied by the **merDeriv** package, transformed onto the same
-boundary-aware log-scale glmmTMB uses. glmmTMB remains the recommended default —
-it is the engine this package declares in `Imports:`, and it is robust when a
-variance component sits exactly at the
-[zero boundary](glossary.html#zero-variance-boundary), where the lme4 route cannot form an interval and
-directs you back to glmmTMB. lme4 otherwise has full design parity with glmmTMB — the
-fixed-rater and every multilevel design, on balanced **and** incomplete/ragged data —
-degrading to glmmTMB only at that variance boundary.
+boundary-aware log-scale glmmTMB uses. glmmTMB remains the recommended default — it
+is the engine this package declares in `Imports:`, and it is robust when a variance
+component sits exactly at the [zero boundary](glossary.html#zero-variance-boundary),
+where the lme4 route cannot form an interval and directs you back to glmmTMB. lme4
+otherwise has full design parity with glmmTMB — the fixed-rater and every multilevel
+design, on balanced **and** incomplete/ragged data — degrading to glmmTMB only at
+that variance boundary.
 
 ## A structural-equation engine (`lavaan`)
 

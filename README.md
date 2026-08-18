@@ -57,9 +57,10 @@ already on your library path after a plain install, whatever its
 as having the engine, though — `engine = "lme4"` also needs `merDeriv`,
 which every lme4 fit checks for on entry whatever interval method you
 ask for. `merDeriv` does not arrive: it sits in this package’s
-`Suggests:`, as do `brms` (Bayesian) and `lavaan` (SEM), and none of
-them is fetched unless you ask for it. `glmmTMB` is the only engine a
-plain install leaves you ready to use.
+`Suggests:`, as do `brms` (Bayesian) and `lavaan` (SEM), so a plain
+install fetches none of the three — though asking for `merDeriv` brings
+`lavaan` along, because `merDeriv` names it in its own `Depends:`.
+`glmmTMB` is the only engine a plain install leaves you ready to use.
 
 ## Example
 
