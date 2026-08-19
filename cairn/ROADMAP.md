@@ -13,6 +13,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | M124 | Demonstrate the exported surface no vignette shows | done | — | normal | milestones/archive/M124-undemonstrated-surface.md |
 | M125 | Bring ROADMAP.md and LESSONS.md back under their byte budgets | done | — | normal | milestones/archive/M125-tracking-budget-consolidation.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
+| M128 | Show the plotting surface in the README, and polish the front page | planned | — | normal | milestones/M128-readme-figures-polish.md |
 | M126 | Disclose what an installation actually retrieves | done | — | normal | milestones/archive/M126-install-disclosure.md |
 | M127 | Correct the lme4 merDeriv requirement message | done | — | normal | milestones/archive/M127-merderiv-requirement-message.md |
 <!-- terminal-row retention: M127 done (2026-08-18) → M122 rotated out (oldest terminal by merge order; its archive file still resolves there). Kept: M123, M124, M125, M126, M127 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
