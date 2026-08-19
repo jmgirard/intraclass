@@ -262,3 +262,20 @@ silently skipped); the NEWS bullet paraphrases rather than quoting the
 withdrawn phrase, avoiding M123's return-3 trap; and no stale expectation of
 the old message survives anywhere in the suite. GitHub probe returned `[]`, so
 the PR-thread walk was correctly skipped.
+
+**[S] blame-history lens — 0 severe findings, 1 informational.** Provenance
+established by `git blame`: the message dates to M5.5 (`f09e7415`, 2026-07-07)
+and M6, when Monte-Carlo was the ONLY interval method; M16 (`033501b2`,
+`9ebf5ad4`) then added the bootstrap `ci_method` and deliberately kept the
+merDeriv check unconditional and up-front. So the `reason=` string went stale
+at M16 — this milestone corrects drift, it does not overturn a decision. The
+adjacent M16 comment ("merDeriv is not needed for the bootstrap ... that
+requirement is unchanged") is untouched and still accurate about WHEN the check
+runs, and ADR-025 is reaffirmed rather than undone. M126's own archive
+(`M126-install-disclosure.md:7`) already stated the check fires "before any
+`ci_method` branching", so the engine-wide fact was established and only the
+string lagged. The `|merderiv` widening retires a gap M126 knowingly deferred,
+which its ROADMAP row recorded. INFORMATIONAL (rank 2, not actioned): the new
+pin could arguably have been folded into the `install_*` prefix, avoiding the
+regex change; the lens found no convention requiring that, and M126's
+`install_*` reuse was opportunistic rather than a stated rule.
