@@ -28,9 +28,10 @@
 # consumes. A refit that collapses to a singular (boundary) fit still yields a valid
 # draw with a component at 0 (KEPT, matching the MC boundary policy and the glmmTMB
 # path); only a genuine refit failure is NA-filled by bootMer and dropped upstream.
-# merDeriv is not needed for the bootstrap (no covariance is formed), but every
-# dispatched lme4 fit checks for it on entry whatever interval method the caller
-# asked for (see `merderiv_reason()` below); that requirement is unchanged.
+# This refit loop forms no covariance of its own, but merDeriv is required AND USED
+# on a bootstrap run all the same: every dispatched lme4 fit checks for it on entry
+# and then forms the SD-scale covariance eagerly in the fit body, whatever interval
+# method the caller asked for (see `merderiv_reason()` below); unchanged since M16.
 # Seeded via with_rng_seed() for RNG hygiene (#9, #12).
 lme4_bootmer_refit <- function(fit, extract) {
   function(boot_samples, seed = NULL) {
@@ -52,10 +53,10 @@ lme4_bootmer_refit <- function(fit, extract) {
 # `fit_lme4*()` functions `icc()` dispatches to checks for merDeriv as its second,
 # unconditional statement -- whatever interval the caller asked for -- so a message
 # attributing the requirement to Monte-Carlo intervals is false to a caller who
-# asked for another method. The two helpers here that fit WITHOUT checking,
-# `fit_lme4_ml_model()` and `lme4_bootmer_refit()`, are not dispatched to: each is
-# reachable only through one of those 12, which has already checked. One
-# expression, so the dispatched functions cannot drift apart again.
+# asked for another method. The helpers here that do not check -- `fit_lme4_ml_model()`
+# and `lme4_bootmer_refit()`, which fit, and `lme4_ml_contract()`, which consumes
+# merDeriv -- are not dispatched to: each is reachable only through one of those 12,
+# which has already checked. One expression, so the 12 cannot drift apart again.
 merderiv_reason <- function() {
   paste0(
     "to supply the lme4 parameter covariance; every lme4 fit checks for it ",
@@ -184,10 +185,10 @@ fit_lme4 <- function(data, call = rlang::caller_env()) {
   # a valid draw with a component at 0 (KEPT, matching the MC boundary policy and the
   # glmmTMB bootstrap path); only a genuine refit failure becomes NA (bootMer fills
   # it), dropped upstream. Returns the shared (component x resample) matrix.
-  # Note: merDeriv is not needed for the bootstrap (no covariance is formed), but
-  # fit_lme4() checks for it on entry whatever interval method the caller asked
-  # for; that requirement is unchanged here. Seeded via with_rng_seed() for RNG
-  # hygiene (#9, #12).
+  # Note: the bootMer refit loop forms no covariance of its own, but fit_lme4() has
+  # already checked for merDeriv on entry and formed `vcov` above, whatever interval
+  # method the caller asked for; that requirement is unchanged here. Seeded via
+  # with_rng_seed() for RNG hygiene (#9, #12).
   list(
     fit = fit,
     engine = "lme4",

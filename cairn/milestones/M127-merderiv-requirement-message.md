@@ -191,6 +191,7 @@ pin named outside `bayes|engines_omit|install_|design_never`.
 
 - 2026-08-18: return round complete; status -> review. Verify slot green on the amended tree: `NOT_CRAN=true CI=true devtools::test()` 0 failures / 8250 passing / 25 skips / 2 warnings, `devtools::check()` summary 0 errors / 0 warnings / 0 notes, `air format --check .` clean, `cairn_validate` all checks pass. The AC5 divergence recorded before this round is unchanged and unaffected: `spelling::spell_check_package()` flags 28 words on this tree, `origin/main`'s exact baseline, and this round touched only R/test comments and tracking, which that check does not read. AC3 stays UNTICKED for review to re-tick against its own fresh evidence; the four ticks already in place are review's own from the prior session.
 - 2026-08-18: review resumed after the return round. `origin/main` still `26ef090`, unmoved since the cut, so no merge and no stale evidence. AC1-AC4 re-executed on the current head and re-ticked against the evidence block recorded this round; AC5 UNTICKED pending its own fresh `devtools::check()`, which was still running at this checkpoint. Consistency gate re-run green on both halves. Three-lens fan-out re-spawned over the two return-round commits, still in flight — no findings recorded yet.
+- 2026-08-18: return-round fan-out complete (0 / 0 severe / 6). F1, F2, F4, F5 fixed on the branch; F3 and the Scope pointer half of F6 go to the maintainer at the gate as amendment-gated text. SUPERSEDES the count in the amendment-return line above: it says "Nine further [O] findings (F1, F3, F5-F10)" and enumerates eight ids — eight is right, and the seven fixed in the return round are those eight less F8, which was a Review-section record and was corrected there.
 
 ## Decisions
 
@@ -386,3 +387,72 @@ OTHER FINDINGS, carried to the return round for disposition:
 - F10 (pre-existing): a `ci_method = "bootstrap"` caller is still forced to
   install merDeriv for a covariance that path never consumes. M127 makes the
   message honest; it does not make the check necessary. Candidate-row material.
+
+### Independent review — three-lens fan-out, return round
+
+Re-spawned over `cc2efb8..HEAD`, the two commits the return round added; each
+lens fresh-context with a distinct evidence base.
+
+**[S] prior-PR-comments lens — 0 findings.** The return round applies the M117
+match-set/enforcement-set lesson (the corrected ROADMAP row re-states that the
+alternation is still hard-coded), the M126 `fixed = TRUE` narrowing lesson
+(both directions measured and recorded as live hazards), M93 (the AC2 test
+still asserts by substring against the live render, not rlang's frame) and
+M123 (the NEWS bullet still avoids the pinned literal). GitHub probe returned
+`[]`, so the thread walk was correctly skipped.
+
+**[S] blame-history lens — 0 severe, 4 informational.** `git blame` on the
+replaced comment lines: the M16-era observation survives the rewrite, and only
+the "for the Monte-Carlo default" clause changed. The pin cost-note reversal is
+the recorded AC3 amendment, not a silent regression. RETIRED -> NARROWED is the
+accurate characterization. No D-021/D-029 conflict.
+
+**[O] diff-bug lens — 6 findings.** Verified correct by execution: the 12
+dispatched `fit_lme4*()` each carry the check as their second unconditional
+statement; every `fit_lme4_ml_model()` and `lme4_bootmer_refit()` call site is
+inside those 12; no behavior smuggled into the comment-only edits (filtering
+the diff to non-comment lines over `R/` and `tests/` yields exactly one hunk,
+the `info =` addition); AC3's two measured cost clauses hold; the pinned
+literal matches `git show 26ef090:R/engine-lme4.R` byte-for-byte.
+
+Findings and dispositions:
+
+- **F1 — FIXED (new false claim, mine, from the last round).** The candidate
+  row I added asserted "the bootstrap path forms no parameter covariance" and
+  that the 7 `merDeriv::` sites are "every one a Monte-Carlo call". Both false:
+  `vcov_sd <- as.matrix(merDeriv::vcov.lmerMod(...))` is unconditional in each
+  dispatched fit body. Re-measured here by tracing: a
+  `ci_method = "bootstrap"` run calls `merDeriv::vcov.lmerMod()` once. The row
+  is rewritten — merDeriv is USED on that path, so sparing a bootstrap caller
+  means making the covariance conditional, not moving the check.
+- **F2 — FIXED (false half-sentence in lines this round edited).** `:31` and
+  `:187` still read "merDeriv is not needed for the bootstrap (no covariance is
+  formed)", contradicted by `:127` of the same function. Both now scope the
+  claim to the refit loop and say the fit body forms the covariance regardless.
+  Pre-existing wording, but the return round rewrote the other half of each of
+  these very sentences, so it is not an untouched line.
+- **F3 — NOT FIXED; goes to the user (second amendment return on AC3).** AC3
+  cites `test-doc-skew-caveat.R:486-488` for the source-leg `list()` guard; the
+  guard is at `:491-493` (486-488 are comment lines). The range was right at
+  `cc2efb8` and was shifted 5 lines by the T6 comment expansion in the same
+  commit that corrected it. Criterion text is amendment-gated, and AC3 has
+  already taken one amendment return, so the disposition is the maintainer's.
+- **F4 — FIXED.** The standing-guard candidate row cited
+  `R/engine-lme4.R:49-54` for a comment that now spans `:50-58`; repointed and
+  marked corrected.
+- **F5 — FIXED (informational).** The engine comment named two non-checking
+  helpers; `lme4_ml_contract()` is a third, and it consumes merDeriv. The
+  sentence was true as scoped ("that fit") but read as an inventory; it now
+  names all three and says which does what.
+- **F6 — PARTLY; the rest goes to the user.** The work-log line at the
+  amendment return says "Nine further [O] findings (F1, F3, F5-F10)", which
+  enumerates eight ids; superseded by the line below rather than edited (IP4).
+  The Scope citations the lens also flagged
+  (`data-raw/m123-capability-claim-mutations.R:73`, now `:80`; the sibling
+  `"lme4"` reason at `R/engine-lme4.R:50`, now `:67`) sit in amendment-gated
+  plan text and are surfaced at the gate with F3.
+
+None of the six demonstrates an acceptance criterion failing inside its named
+procedure's domain, so none meets the return floor; F3 is criterion-text
+evidence and takes the amendment track, where its second occurrence on AC3
+stops for the maintainer.
