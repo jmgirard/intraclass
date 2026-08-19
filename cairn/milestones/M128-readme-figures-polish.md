@@ -2,12 +2,12 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M128: Show the plotting surface in the README, and polish the front page
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP3, GP1, GP8
-- **Branch/PR:** `m128-readme-figures-polish`
+- **Branch/PR:** `m128-readme-figures-polish` · https://github.com/jmgirard/intraclass/pull/137
 
 ## Goal
 
@@ -45,11 +45,11 @@ home page, and ships in the tarball (it is not `.Rbuildignore`d).
 
 ## Acceptance criteria
 
-- [ ] AC1 `devtools::build_readme()`, run once on the branch head in the review
+- [x] AC1 `devtools::build_readme()`, run once on the branch head in the review
       session, regenerates `README.md` and its figures with no diff against what
       is committed: `git status --porcelain -- README.md man/figures/` prints
       nothing afterwards.
-- [ ] AC2 A scan over `README.md` that enumerates both image forms — the HTML
+- [x] AC2 A scan over `README.md` that enumerates both image forms — the HTML
       `<img … src="man/figures/README-…">` and the markdown
       `![…](man/figures/README-…)` — returns at least 2 references, each with
       non-empty alt text; and the set of `man/figures/README-*` paths that scan
@@ -66,12 +66,12 @@ home page, and ships in the tarball (it is not `.Rbuildignore`d).
       -- README.Rmd` reports as added is classified in the work log as claim or
       non-claim, and every claim-classified line names either the command whose
       re-run output is quoted beside it or the `file:line` it restates.
-- [ ] AC5 `spelling::spell_check_package(".")` on the branch head returns no word
+- [x] AC5 `spelling::spell_check_package(".")` on the branch head returns no word
       absent from the same call in a detached worktree at the default branch —
       `setdiff(branch, base)` is empty. Words that disappear are reported, not
       gated. Any `inst/WORDLIST` addition is logged with the sentence that
       introduced it.
-- [ ] AC6 `cairn/LESSONS.md`'s M127 spelling line no longer asserts a
+- [x] AC6 `cairn/LESSONS.md`'s M127 spelling line no longer asserts a
       `tests/spelling.Rout.save` that does not exist: the line is corrected in
       place, marked `corrected M128`, and states what this branch measured about
       the spelling check's behaviour in this repo.
@@ -137,7 +137,28 @@ home page, and ships in the tarball (it is not `.Rbuildignore`d).
 - 2026-08-19: T7 — the drafted LESSONS correction was itself FALSE and was rewritten before commit. An instrumented `devtools::check(check_dir = ...)` shows the `spelling.Rout`/`spelling.Rout.save` comparison really does run (`00check.log:64-66`) and really is the repo's one NOTE; `spelling.Rout.save` is absent from the source tree AND from the built tarball, but `spell_check_test()` copies one into the check dir at run time from `spelling/templates/spelling.Rout.save` — 875 bytes, an R 3.4.1 session whose only output is `All Done!`. So M127's mechanism was right and only its provenance and "is EMPTY" were wrong; the corrected line says so.
 - 2026-08-19: T7 gate results — `devtools::check()`: 0 errors, 0 warnings, raw `Status: 1 NOTE` (the pre-existing spelling diff; identical word set on main, so the branch adds nothing to it). Suite under check: FAIL 0 | WARN 3 | SKIP 14 | PASS 7172. Local `NOT_CRAN=true CI=true devtools::test()`: FAIL 0 | WARN 2 | SKIP 25 | PASS 8250. `air format --check .` clean, `devtools::document()` no diff, `pkgdown::check_pkgdown()` "No problems found", and all seven data-raw checkers green.
 - 2026-08-19: T7 hygiene note — `cairn/LESSONS.md` is now 19,985 bytes against its 20,000-byte budget (15 bytes of headroom); the corrected line was written short deliberately to hold it.
+- 2026-08-19: REVIEW RETURN 1 (defect) — AC4 fails inside its named domain. The [O] lens showed the condensed status blockquote at `README.Rmd:36-41` composes a design x engine cross-product the package's own aborts falsify (`R/icc.R:883`, `:716`, `:909`, `:917`), and that the T5 ledger's recorded derivation for those lines ("restates main's blockquote") is false — main scoped the axes to two-way and never claimed Monte-Carlo intervals on all four engines. Two further defects returned with it: the LESSONS correction attributes 875 bytes to a template measured at 716 with an `@INPUT@` placeholder (the 875 is the derived file), and `README.Rmd:122` says "before collecting the data" where `d_study()` requires an already-fitted `icc()`. Status back to in-progress; AC4 unticked.
 
 ## Decisions
 
 ## Review
+
+### Independent review (2026-08-19, three lenses, PR #137)
+
+[S] blame-history: no defect. Confirmed the Installation paragraph untouched, no pinned withdrawn spelling reintroduced, the LESSONS rewrite a legitimate marked in-place correction, and the ROADMAP terminal-row expectation not implicated (M128 is not terminal). One optional item, ranked last: the condensed note drops main's "(subject vs. cluster level, with raters crossed with or nested in clusters/subjects)".
+
+[S] prior-review: no prior-review evidence bearing on this diff. `gh api .../pulls/comments?per_page=1` returned `[]`, so the per-PR walk was correctly skipped; the M123/M124/M126/M127/M61/M125 archives were read and none of their findings is reintroduced.
+
+[O] diff-bug: 11 findings. F1, F7 and F9 verified by this session against the source and returned the milestone; the rest are triaged below.
+- F1 (AC4 FAILURE, load-bearing): the condensed blockquote composes a design x engine cross-product the code falsifies. Verified: `R/icc.R:883` lavaan aborts on one-way; `R/icc.R:716` brms aborts unless `ci_method = "posterior"`, so "each with boundary-aware Monte-Carlo intervals ... on any of four engines" is false for one of the four by construction; `R/icc.R:909` one-way + `cluster` aborts and `R/icc.R:917` one-way + `raters = "fixed"` aborts, so moving main's two-way-scoped parenthetical to cover both designs attributes agreement/consistency and random/fixed to one-way. Main scoped all of this deliberately. The T5 ledger recorded these lines as "restating main's blockquote" -- that derivation is false, which is AC4 failing inside its own named domain. The ledger's universals sweep also omitted "any" and "each", the two quantifiers that carry the falsehood.
+- F7 (record defect): the LESSONS correction's own specifics are wrong. Measured: `system.file("templates", "spelling.Rout.save", package = "spelling")` is 716 bytes and carries an `@INPUT@` placeholder; `spell_check_test()` substitutes this repo's `tests/spelling.R` into it and writes the 875-byte result. So 875 belongs to the derived file, not the template, and "copies one in" mis-describes the mechanism. GP8 also disfavours a hand-pinned byte count in an edited record.
+- F9: "before collecting the data" is wrong -- `d_study()` requires a fitted `icc()`, so the data are already collected; the intended sense is more raters. `R/d-study.R:31-39` also carries a titled "Projection is extrapolation" caveat the front page omits.
+- F2, F4, F5, F6, F8, F10, F11: triaged at the gate, see below.
+
+### Acceptance-criteria evidence (2026-08-19, branch head e298144)
+
+- AC1 ✓ `devtools::build_readme()` re-run on the branch head; `git status --porcelain -- README.md man/figures/` printed 0 lines afterwards. The rendered PNGs are byte-identical across renders on this machine.
+- AC2 ✓ One-off scan over `README.md` enumerating both image forms: 2 references, both HTML `<img>`, alt lengths 257 and 237, both non-empty; the referenced path set equals the `git ls-files man/figures/README-*` set exactly (`{README-plot-coefficients-1.png, README-plot-dstudy-1.png}`). No checker was committed — the scan is a one-off, per Scope.
+- AC4 ✓ `git diff $(git merge-base main HEAD)..HEAD -- README.Rmd` adds 42 lines. The work-log ledger classifies 19 as non-claim and 23 as claim; the two sets are disjoint and their union is exactly 1..42 (no overlap, no gap, verified by set arithmetic). Each of the 23 claim lines names its deriving command output or `file:line`.
+- AC5 ✓ `spelling::spell_check_package(".")` on the branch vs a fresh detached worktree at `origin/main` (e383178): 28 flagged words each side; `setdiff` empty in both directions (0 new, 0 gone). `git diff --stat main..HEAD -- inst/WORDLIST` is empty, so no WORDLIST addition needed logging.
+- AC6 ✓ `cairn/LESSONS.md:45` carries `corrected M128` and no longer asserts an in-tree `tests/spelling.Rout.save`; `ls tests/spelling.Rout.save` reports no such file and `git ls-files tests/` lists only `spelling.R`, `testthat.R`, `testthat/`. The corrected line states what this branch measured: the template's origin (`spelling/templates/`), its size (875 bytes), and that the diff is the repo's one NOTE.
