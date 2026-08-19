@@ -194,6 +194,7 @@ pin named outside `bayes|engines_omit|install_|design_never`.
 - 2026-08-18: return-round fan-out complete (0 / 0 severe / 6). F1, F2, F4, F5 fixed on the branch; F3 and the Scope pointer half of F6 go to the maintainer at the gate as amendment-gated text. SUPERSEDES the count in the amendment-return line above: it says "Nine further [O] findings (F1, F3, F5-F10)" and enumerates eight ids — eight is right, and the seven fixed in the return round are those eight less F8, which was a Review-section record and was corrected there.
 - 2026-08-18: all five criteria verified with return-round evidence (AC5 on the final tree after the F1/F2/F4/F5 fixes). Approval gate reached and PAUSED at the user's selection, before the F3 disposition and before any merge authorization: no `cairn/.merge-approved` marker was written and PR #136 stays a draft. Open for the maintainer: whether AC3's stale `:486-488` citation (guard now at `:491-493`) and the two stale Scope pointers take a second amendment round or are left recorded as false in the Review section. Status stays `review`.
 - 2026-08-18: gate resumed and approved. Maintainer chose to leave the three drifted citations recorded rather than convene a second amendment round; merge of PR #136 authorized. CI green on 13c5862 (10/10).
+- 2026-08-18: approval marker written for PR #136 and the PR marked ready; the disposition commit re-triggered CI, so the merge waits on a fresh run (3 pass, 5 pending; `checkpoint-guard` ~66m is the long pole). Nothing merged yet.
 
 ## Decisions
 
