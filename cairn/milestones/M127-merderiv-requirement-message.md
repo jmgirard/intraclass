@@ -2,7 +2,7 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M127: Correct the lme4 merDeriv requirement message
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -143,7 +143,7 @@ pin named outside `bayes|engines_omit|install_|design_never`.
 - [x] T5. Gate hygiene: `air format .`, `devtools::test()`, `devtools::check()`,
       the data-raw checkers; delete the promoted candidate row, add the
       standing-guard row, narrow the per-class-reachability row.
-- [ ] T6. The cost note beside the pin entry rewritten to AC3's amended text:
+- [x] T6. The cost note beside the pin entry rewritten to AC3's amended text:
       recall (only a byte-identical straight-double-quoted return is caught) and
       precision (prose quoting the message reds; the entry is not `.R`-only).
 
@@ -188,6 +188,8 @@ pin named outside `bayes|engines_omit|install_|design_never`.
 - 2026-08-18: the amended AC3 wording went to a fresh-context [O] reader that did not author it; criteria audit in FULL mode (user-facing tier). Six findings, each re-measured here and each fixed before the text was written: the source-leg `list()` guard is at `test-doc-skew-caveat.R:486-488`, not `:456-458` (that range is the installed leg's NEWS block); `NEWS.md` has 0 hits of the bare fragment because T4 avoided the wording, so "this milestone's own NEWS bullet included" was false as written; the prose clause needed scoping to the straight-double-quote form, since typographic quotes and backticks escape; the headline needed byte-scoping, being falsified by the criterion's own body; "recorded beside the entry" binds an instrument property, so it moved under `Evidence:` and the comment rewrite became T6; and the recorded evidence is 11 RED cells (8 source + 3 installed), not the 2 x 4 source matrix alone.
 - 2026-08-18: T6 — the cost note beside the pin entry rewritten: the disproven `.R`-sources-only limit deleted, and both real costs stated beside the `grepl` form that decides each (review F3, F5).
 - 2026-08-18: return-round dispositions — all seven findings fixed on the branch at the user's selection. F1 (defect in the shipped diff): `R/engine-lme4.R:31` and `:187` no longer say the lme4 fits require merDeriv "for the Monte-Carlo default"; both now say the fit checks on entry whatever interval method the caller asked for. F6: the comment at `:50` and its counterpart at `test-icc-lme4-engine.R:1122` define "entry point" mechanically — the 12 dispatched `fit_lme4*()` — and name the two helpers that fit without checking as reachable only through them. F9: the two-width loop now asserts with `info = paste0("cli.width = ", w)`. F7: the ROADMAP per-class-reachability row claimed the `spellings` defect class was RETIRED; corrected in place to NARROWED, since the alternation is still a hard-coded list. F10: candidate row added for the bootstrap caller still made to install merDeriv. F8 is a Review-section record and stays review's to fix.
+
+- 2026-08-18: return round complete; status -> review. Verify slot green on the amended tree: `NOT_CRAN=true CI=true devtools::test()` 0 failures / 8250 passing / 25 skips / 2 warnings, `devtools::check()` summary 0 errors / 0 warnings / 0 notes, `air format --check .` clean, `cairn_validate` all checks pass. The AC5 divergence recorded before this round is unchanged and unaffected: `spelling::spell_check_package()` flags 28 words on this tree, `origin/main`'s exact baseline, and this round touched only R/test comments and tracking, which that check does not read. AC3 stays UNTICKED for review to re-tick against its own fresh evidence; the four ticks already in place are review's own from the prior session.
 
 ## Decisions
 
