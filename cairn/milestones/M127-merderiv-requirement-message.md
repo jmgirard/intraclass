@@ -244,3 +244,21 @@ re-ticked below only against the evidence line beside it.
 
 
 - 2026-08-18: AC3 and AC5 verified with fresh evidence and ticked; all five criteria now carry Review-section evidence lines. Consistency gate green on both halves — universal (`cairn_validate` exit 0) and the r-package toolchain slot (`document()` no diff, `pkgdown::check_pkgdown()` clean, `air format --check` clean, NEWS entry present). Three-lens independent review spawned (full fan-out: executable surface touched, user-facing tier). Pre-gate checkpoint.
+
+### Independent review — three-lens fan-out
+
+Full fan-out (executable surface touched, user-facing tier); each lens
+fresh-context with a distinct evidence base.
+
+**[S] prior-PR-comments lens — 0 findings.** Confirms lineage: M126's own
+Review section deferred this exact item ("the 12 `check_installed("merDeriv")`
+`reason` strings still framing the requirement as interval-method-specific"),
+so M127 resolves a recorded deferral rather than regressing anything. Verified
+four non-regressions: the M126 `fixed = TRUE` narrowing lesson is applied
+correctly (the pin anchors on both delimiting quotes and the trailing full
+stop); the M117 match-set-vs-enforcement-set lesson holds (the `|merderiv`
+alternation feeds the two-way `stopifnot`, so the new pin IS exercised, not
+silently skipped); the NEWS bullet paraphrases rather than quoting the
+withdrawn phrase, avoiding M123's return-3 trap; and no stale expectation of
+the old message survives anywhere in the suite. GitHub probe returned `[]`, so
+the PR-thread walk was correctly skipped.
