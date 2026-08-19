@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-18 (M126 done pass: validate green on all 16 checks; `devtools::check()` 0/0/0 and the installed suite at 0 skips on the merged head; four data-raw checkers green, the `[claim:roadmap-terminal-rows]` expectation rotated M121 → out in this same commit. The struck M126 candidate pointer deleted as shipped; one candidate row added for the lme4 merDeriv abort message. LESSONS: two M126 lines added, the two stalest (M98, M99) pruned to hold the byte budget — no retirement exit applied, this milestone shipped no guard covering an existing lesson.)_
+_Last hygiene check: 2026-08-18 (M127 done pass: `cairn_validate` exit 0 on all 16 checks; `devtools::check()` 0/0/0, `NOT_CRAN=true CI=true devtools::test()` 0 failures / 8250 passing, `air format --check .` clean, all seven data-raw checkers green on the merged head. Terminal rows rotated M122 out, M127 in, with the `[claim:roadmap-terminal-rows]` expectation in this same commit. LESSONS: two M127 lines added, the two stalest (M63, M68 advisory-wording) pruned to hold the byte budget — no retirement exit applied, this milestone shipped no guard covering an existing lesson.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,14 +9,13 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M122 | Remove the resume cache from the M121 npbootstrap sweep | done | — | normal | milestones/archive/M122-drop-m121-resume-cache.md |
 | M123 | Correct the falsified capability claims in the shipped documentation | done | — | normal | milestones/archive/M123-falsified-capability-claims.md |
 | M124 | Demonstrate the exported surface no vignette shows | done | — | normal | milestones/archive/M124-undemonstrated-surface.md |
 | M125 | Bring ROADMAP.md and LESSONS.md back under their byte budgets | done | — | normal | milestones/archive/M125-tracking-budget-consolidation.md |
-| M127 | Correct the lme4 merDeriv requirement message | review | — | normal | milestones/M127-merderiv-requirement-message.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
 | M126 | Disclose what an installation actually retrieves | done | — | normal | milestones/archive/M126-install-disclosure.md |
-<!-- terminal-row retention: M126 done (2026-08-18) → M121 rotated out (oldest terminal by merge order; its archive file still resolves there). Kept: M122, M123, M124, M125, M126 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
+| M127 | Correct the lme4 merDeriv requirement message | done | — | normal | milestones/archive/M127-merderiv-requirement-message.md |
+<!-- terminal-row retention: M127 done (2026-08-18) → M122 rotated out (oldest terminal by merge order; its archive file still resolves there). Kept: M123, M124, M125, M126, M127 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
