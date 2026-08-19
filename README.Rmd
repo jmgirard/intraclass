@@ -34,11 +34,14 @@ are a place to learn ICC best practice, not just call functions.
 
 > [!NOTE]
 > This package is approaching its first release. The full interrater-reliability
-> ICC family is implemented — one-way and two-way designs (absolute agreement vs.
-> consistency, single vs. average, random vs. fixed raters), imbalanced,
-> incomplete (missing-cell) and multilevel data — each with boundary-aware
-> Monte-Carlo intervals, on any of four engines: `glmmTMB`, `lme4`, `brms`
-> (Bayesian) and `lavaan` (SEM).
+> ICC family is implemented — two-way designs (absolute agreement vs.
+> consistency, single vs. average, random vs. fixed raters) and one-way designs,
+> imbalanced and incomplete (missing-cell) data, and multilevel designs (subject
+> vs. cluster level, with raters crossed with or nested in clusters/subjects) —
+> each with boundary-aware Monte-Carlo intervals. Fits run on `glmmTMB` (the
+> default) or `lme4`, and on `brms` (Bayesian) or `lavaan` (SEM); the
+> [engines article](https://jmgirard.github.io/intraclass/articles/engines.html)
+> says which designs each one supports.
 
 ## Installation
 
@@ -120,7 +123,8 @@ icc(school, score, subject = pupil, rater = rater, cluster = classroom, seed = 2
 
 `d_study()` projects the variance components of a fit to other rater counts,
 carrying the interval with them — so you can ask what reliability two raters
-would buy, or ten, before collecting the data:
+would buy, or ten, without running the study again. Projecting to a rater count
+you did not run is an extrapolation, and the interval widens accordingly:
 
 ```{r plot-dstudy, fig.width = 9, fig.height = 5, fig.alt = "Projected reliability against the number of raters, from 1 to 10, as two rising curves with Monte-Carlo interval bands: consistency above, absolute agreement below, both climbing steeply from one to four raters and flattening after that."}
 autoplot(d_study(fit, m = 1:10))
@@ -141,8 +145,8 @@ autoplot(d_study(fit, m = 1:10))
 
 | Approach | Packages | What you get |
 |---|---|---|
-| Classical ANOVA / mean squares | `psych`, `irr`, `irrNA`, `irrICC`, `ICCDesign` | The ICC family from mean squares, mostly assuming balanced data |
-| Model-based variance partition | `performance::icc`, `misty` | A variance-partition coefficient from a fitted model — not the full interrater-reliability family, the error-variance framing, or a selection framework |
-| **intraclass** | — | Mixed-model estimation of the full family, boundary-aware Monte-Carlo intervals, and decision guidance |
+| Classical ANOVA / mean squares | `psych`, `irr`, `irrNA`, `irrICC`, `ICCDesign` | ANOVA / mean-squares based, mostly assuming balanced data |
+| Model-based variance partition | `performance::icc`, `misty` | A variance-partition coefficient, but not the full interrater-reliability ICC family, the error-variance framing, or a selection framework |
+| **intraclass** | — | Mixed-model estimation, Monte-Carlo confidence intervals, and decision guidance |
 
-The decision guidance follows ten Hove, Jorgensen & van der Ark.
+**intraclass** fills that gap, following ten Hove, Jorgensen & van der Ark.

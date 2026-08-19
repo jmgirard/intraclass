@@ -138,8 +138,23 @@ home page, and ships in the tarball (it is not `.Rbuildignore`d).
 - 2026-08-19: T7 gate results — `devtools::check()`: 0 errors, 0 warnings, raw `Status: 1 NOTE` (the pre-existing spelling diff; identical word set on main, so the branch adds nothing to it). Suite under check: FAIL 0 | WARN 3 | SKIP 14 | PASS 7172. Local `NOT_CRAN=true CI=true devtools::test()`: FAIL 0 | WARN 2 | SKIP 25 | PASS 8250. `air format --check .` clean, `devtools::document()` no diff, `pkgdown::check_pkgdown()` "No problems found", and all seven data-raw checkers green.
 - 2026-08-19: T7 hygiene note — `cairn/LESSONS.md` is now 19,985 bytes against its 20,000-byte budget (15 bytes of headroom); the corrected line was written short deliberately to hold it.
 - 2026-08-19: REVIEW RETURN 1 (defect) — AC4 fails inside its named domain. The [O] lens showed the condensed status blockquote at `README.Rmd:36-41` composes a design x engine cross-product the package's own aborts falsify (`R/icc.R:883`, `:716`, `:909`, `:917`), and that the T5 ledger's recorded derivation for those lines ("restates main's blockquote") is false — main scoped the axes to two-way and never claimed Monte-Carlo intervals on all four engines. Two further defects returned with it: the LESSONS correction attributes 875 bytes to a template measured at 716 with an `@INPUT@` placeholder (the 875 is the derived file), and `README.Rmd:122` says "before collecting the data" where `d_study()` requires an already-fitted `icc()`. Status back to in-progress; AC4 unticked.
+- 2026-08-19: return 1 repairs — F1: the blockquote restored to main's own scoping (axes back under two-way, one-way listed separately, the multilevel structure detail restored at the maintainer's call) and the engine sentence replaced by a cross-reference to the engines article rather than a composed availability claim. F9: "before collecting the data" → "without running the study again", plus one sentence restating `R/d-study.R:31-39`'s "Projection is extrapolation" caveat. F4/F5: the *Related work* rows and the ten Hove attribution restored to main's wording. F7/F8 (maintainer's call): the LESSONS line drops the byte figure entirely, describes the template substitution rather than a copy, and now records that the NOTE fires only under `NOT_CRAN`. F3 (maintainer's call, pre-existing): `vignettes/d-studies-and-replicates.Rmd:186`'s "higher and tighter" corrected to "higher ... and its interval slightly wider" — measured independently this session on that vignette's own fit (`type = "agreement", seed = 1`): ICC(A,1) width 0.6613, ICC(A,k) width 0.7309. F2 and F11 rejected: F2 is F1 restated, and F11's "four engines" count is gone with the rewrite.
+- 2026-08-19: return 1 re-verification — `NOT_CRAN=true CI=true devtools::test()` FAIL 0 / PASS 8250; spelling 28 vs 28, 0 new / 0 gone against a fresh detached worktree at `origin/main`; `air format --check .` clean; all five python data-raw checkers plus `enumerate-generalizing-claims.py --check` green.
 
 ## Decisions
+
+### 2026-08-19: The README plot chunks stay unguarded, unlike the vignettes'
+
+The vignette plot chunks carry
+`eval = requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("glmmTMB", quietly = TRUE)`
+because they are evaluated at build and check time, on machines that may lack a
+Suggests package. `README.md` is different in kind: a committed artifact
+regenerated only by a maintainer running `devtools::build_readme()`. A guard
+there would silently emit a README with its figures missing, and AC1 would then
+red that as a diff against the committed file — the guard would convert a loud,
+correct failure into a quiet wrong result. So the convention is deliberately not
+carried over. Raised as F6 by the [O] review lens; the call was delegated to this
+session at the return gate.
 
 ## Review
 

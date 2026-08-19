@@ -183,7 +183,7 @@ The default, `what = "coefficients"`, is a **forest plot** — each ICC index as
 point estimate with its Monte-Carlo interval. Reusing the two-way `ratings` fit from
 the D-study section above:
 
-```{r plot-coef, eval = requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("glmmTMB", quietly = TRUE), fig.alt = "Forest plot of ICC(A,1) and ICC(A,k) for the ratings data, each a point estimate with a horizontal Monte-Carlo interval, ICC(A,k) both higher and tighter."}
+```{r plot-coef, eval = requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("glmmTMB", quietly = TRUE), fig.alt = "Forest plot of ICC(A,1) and ICC(A,k) for the ratings data, each a point estimate with a horizontal Monte-Carlo interval, ICC(A,k) higher than ICC(A,1), and its interval slightly wider."}
 library(ggplot2)
 autoplot(fit) # `fit <- icc(ratings, score, subject, rater, type = "agreement", seed = 1)`
 ```
