@@ -176,8 +176,7 @@ icc(school, score, subject = pupil, rater = rater, cluster = classroom, seed = 2
 `d_study()` projects the variance components of a fit to other rater
 counts, carrying the interval with them — so you can ask what
 reliability two raters would buy, or ten, without running the study
-again. Projecting to a rater count you did not run is an extrapolation,
-and the interval widens accordingly:
+again:
 
 ``` r
 autoplot(d_study(fit, m = 1:10))
