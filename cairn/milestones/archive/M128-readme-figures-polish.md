@@ -1,0 +1,11 @@
+# M128: Show the plotting surface in the README, and polish the front page
+
+**Status:** done (2026-08-19, PR #137 https://github.com/jmgirard/intraclass/pull/137)
+
+**Goal:** A first-time reader of the README sees what this package's plots actually look like — two rendered `autoplot()` figures — on a front page whose prose has been tightened around them.
+
+**Outcome:** two evaluated `README.Rmd` chunks at `fig.width = 9` (the default width clipped the forest title): `plot-coefficients`, the `autoplot()` forest of the default `ratings` fit, and `plot-dstudy`, `autoplot(d_study(fit, m = 1:10))` under a new *How many raters do you need?* heading — the first README use of `d_study()`. Both carry `fig.alt`; PNGs at `man/figures/README-plot-*.png`. Prose: status blockquote condensed while keeping main's design scoping, an eight-article *Learn more* list, *Related work* as a table, Installation untouched. Also corrected `vignettes/d-studies-and-replicates.Rmd:186`'s alt string (ICC(A,k)'s interval is wider — 0.7309 vs 0.6613 — not "tighter") and the M127 spelling lesson, which named an in-tree `tests/spelling.Rout.save` that does not exist: `spell_check_test()` builds one into the check dir from `spelling`'s own `@INPUT@` template, and the diff fires only under `NOT_CRAN`.
+
+**Decisions:** the README plot chunks stay unguarded, unlike the vignettes' — a `requireNamespace` guard would emit a README with its figures silently missing, which AC1 would then red; a hard failure is the honest outcome.
+
+**Review:** three-lens fan-out; blame-history and prior-review found no defect. [O] diff-bug: 11 findings, two defect returns, both on AC4. Return 1 — the condensed blockquote composed a design x engine cross-product falsified by `R/icc.R:716`, `:883`, `:909`, `:917`. Return 2 — the return-1 repair added "the interval widens accordingly", false against the figure below it (consistency widths fall 0.590 → 0.158 over m = 1..10); cut outright at the maintainer's call and the ledger re-run. F6 became the decision above; F2 and F11 rejected. Hygiene: the M72 universals lesson corrected to widen its sweep set (omitting `any` and `each` caused both returns); the M80 line trimmed to its remainder.
