@@ -72,7 +72,7 @@ pin named outside `bayes|engines_omit|install_|design_never`.
       assertion repeated at two `cli.width` settings, because cli wraps the
       rendered message to the display width (measured to break at different
       points at widths 2000, 80 and 40).
-- [ ] AC3. A maintainer restoring the withdrawn wording to a swept source file
+- [x] AC3. A maintainer restoring the withdrawn wording to a swept source file
       in the exact bytes it shipped in reds: the string literal
       `"to compute lme4 Monte-Carlo confidence intervals."`, both delimiters
       and the terminal full stop included, recovered by
@@ -112,7 +112,7 @@ pin named outside `bayes|engines_omit|install_|design_never`.
       either, and each is reachable only through a dispatched function that has
       already checked.
       Evidence: the three listings and the `formals()` result, in the work log.
-- [x] AC5. `devtools::check()` clean (0 errors / 0 warnings / 0 notes) and
+- [ ] AC5. `devtools::check()` clean (0 errors / 0 warnings / 0 notes) and
       `air format --check .` clean.
 
 ## Coverage
@@ -190,6 +190,7 @@ pin named outside `bayes|engines_omit|install_|design_never`.
 - 2026-08-18: return-round dispositions — all seven findings fixed on the branch at the user's selection. F1 (defect in the shipped diff): `R/engine-lme4.R:31` and `:187` no longer say the lme4 fits require merDeriv "for the Monte-Carlo default"; both now say the fit checks on entry whatever interval method the caller asked for. F6: the comment at `:50` and its counterpart at `test-icc-lme4-engine.R:1122` define "entry point" mechanically — the 12 dispatched `fit_lme4*()` — and name the two helpers that fit without checking as reachable only through them. F9: the two-width loop now asserts with `info = paste0("cli.width = ", w)`. F7: the ROADMAP per-class-reachability row claimed the `spellings` defect class was RETIRED; corrected in place to NARROWED, since the alternation is still a hard-coded list. F10: candidate row added for the bootstrap caller still made to install merDeriv. F8 is a Review-section record and stays review's to fix.
 
 - 2026-08-18: return round complete; status -> review. Verify slot green on the amended tree: `NOT_CRAN=true CI=true devtools::test()` 0 failures / 8250 passing / 25 skips / 2 warnings, `devtools::check()` summary 0 errors / 0 warnings / 0 notes, `air format --check .` clean, `cairn_validate` all checks pass. The AC5 divergence recorded before this round is unchanged and unaffected: `spelling::spell_check_package()` flags 28 words on this tree, `origin/main`'s exact baseline, and this round touched only R/test comments and tracking, which that check does not read. AC3 stays UNTICKED for review to re-tick against its own fresh evidence; the four ticks already in place are review's own from the prior session.
+- 2026-08-18: review resumed after the return round. `origin/main` still `26ef090`, unmoved since the cut, so no merge and no stale evidence. AC1-AC4 re-executed on the current head and re-ticked against the evidence block recorded this round; AC5 UNTICKED pending its own fresh `devtools::check()`, which was still running at this checkpoint. Consistency gate re-run green on both halves. Three-lens fan-out re-spawned over the two return-round commits, still in flight — no findings recorded yet.
 
 ## Decisions
 
@@ -256,6 +257,57 @@ re-ticked below only against the evidence line beside it.
 
 
 - 2026-08-18: AC3 and AC5 verified with fresh evidence and ticked; all five criteria now carry Review-section evidence lines. Consistency gate green on both halves — universal (`cairn_validate` exit 0) and the r-package toolchain slot (`document()` no diff, `pkgdown::check_pkgdown()` clean, `air format --check` clean, NEWS entry present). Three-lens independent review spawned (full fan-out: executable surface touched, user-facing tier). Pre-gate checkpoint.
+
+### Acceptance criteria — re-verified after the return round
+
+The evidence above was taken before the amendment round's two commits, which
+touched `R/engine-lme4.R`, both test files, the criterion text and the ROADMAP.
+Every criterion is therefore re-executed here on the current head, and each box
+re-ticked only against the line beside it. `origin/main` is still `26ef090`,
+unmoved since the cut, so no merge was needed and none of this is stale.
+
+- **AC1 — verified.** `git grep -n -A2 'check_installed(' -- 'R/*.R'` filtered
+  to `"merDeriv"` returns 12 sites; all 12 pass `reason = merderiv_reason()`.
+  `git grep -c 'to compute lme4 Monte-Carlo confidence intervals' -- 'R/*.R'`
+  returns 0.
+- **AC2 — verified.** `test-icc-lme4-engine.R`: 0 failures / 125 passing /
+  0 skips. Rendered live through the real `rlang::check_installed()` path at
+  `cli.width` 2000, 120, 80, 40 and 20 — the pinned substring present verbatim
+  at every width; at 2000 the full message reads `The package
+  "merDerivAbsentProbeM127" is required to supply the lme4 parameter
+  covariance; every lme4 fit checks for it on entry, whatever interval method
+  you ask for.`, the frame around it rlang's own.
+  SUPERSEDES the "124 passing / 1 skip" recorded in the block above (review
+  F8): this environment measures 125/0, matching the diff-bug lens, so that
+  skip is environment-dependent and neither figure is wrong.
+- **AC3 — verified, on the amended wording.** `claim_patterns` carries
+  `merderiv_method_specific` = the quote-delimited literal, and the note beside
+  it now records both real costs. Pin source walk green on the full source
+  tree: `test-doc-skew-caveat.R` 0 failures / 2347 passing / 2 skips.
+  Mutation harness re-run whole: control (unmutated tree) 0 failures, so the
+  two-way name check passes with the `|merderiv` alternation in place; source
+  leg 136 plants / 136 RED / 0 GREEN; installed leg 51 plants / 51 RED /
+  0 GREEN. The new spelling RED in all 11 of its cells — 8 source (README.Rmd
+  and R/icc.R x flat, wrapped, blockquote, blockquote_indented) and 3 installed
+  (README.md, NEWS.md, vignette:choosing-an-icc.Rmd). Tree verified clean after
+  the run, so every plant restored. The amended criterion's two cost clauses
+  were themselves measured: under `grepl(pat, x, fixed = TRUE)` the pinned
+  bytes requoted in single quotes return FALSE, prose carrying them in straight
+  double quotes returns TRUE.
+- **AC4 — verified.** (a) `git grep -c 'ci_method' -- R/engine-lme4.R` = 8, all
+  comment or abort-hint lines; sourcing the file gives 16 top-level functions,
+  0 with a `ci_method` formal. (b) The anchored dispatch enumeration returns
+  12. (c) `git grep -n 'lme4::' -- 'R/*.R'` returns exactly one hit outside
+  `R/engine-lme4.R` — `R/icc.R:358`, a roxygen line naming `lme4::bootMer` in
+  prose — and no `lmer`/`bootMer` CALL outside that file.
+
+### Consistency gate — re-run after the return round
+
+- `cairn_validate.py`: exit 0, all checks pass.
+- `devtools::document()`: no diff. `pkgdown::check_pkgdown()`: no problems.
+- `air format --check .`: clean.
+- `NEWS.md` carries its user-visible entry, no milestone numbers in the text.
+- No `DESIGN.md` principle changed, so `cairn_impact --changed` stays a no-op.
 
 ### Independent review — three-lens fan-out
 
