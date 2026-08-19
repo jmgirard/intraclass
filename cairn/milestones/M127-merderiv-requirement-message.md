@@ -179,21 +179,6 @@ pin named outside `bayes|engines_omit|install_|design_never`.
 
 - 2026-08-18: review opened; draft PR #136. `origin/main` unmoved since the cut, so no merge and the evidence is not stale. FENCING SLIP CORRECTED: all five AC checkboxes had been ticked at the end of implement, which is not implement's to do — they were un-ticked and treated as unverified, and are re-ticked only against fresh evidence recorded in the Review section. AC1, AC2 and AC4 verified and re-ticked this session; AC3 and AC5 unticked, their evidence runs (mutation harness, `devtools::test()`, `devtools::check()`) still in flight at this checkpoint. Independent three-lens review not yet spawned — the diff touches executable surface and the tier is user-facing, so it takes the full fan-out, held until the harness stops mutating `R/icc.R` and `README.Rmd`.
 
-### Consistency gate
-
-- `cairn_validate.py`: exit 0, all checks pass (16 checks, 0 advisories).
-- `devtools::document()`: no diff. `pkgdown::check_pkgdown()`: no problems found.
-- `air format --check .`: clean. `NAMESPACE`/`man/` regenerate cleanly.
-- `NEWS.md` carries a user-visible entry, no milestone numbers in its text.
-- No new top-level files, so no `.Rbuildignore` additions needed.
-- No `DESIGN.md` principle changed, so `cairn_impact --changed` is a no-op;
-  the header's `Principles touched:` slot (GP1, GP8) records principles this
-  milestone works UNDER, not ones it alters.
-- `devtools::check()`: 0/0/0 by its own summary; see the AC5 divergence note.
-
-
-- 2026-08-18: AC3 and AC5 verified with fresh evidence and ticked; all five criteria now carry Review-section evidence lines. Consistency gate green on both halves — universal (`cairn_validate` exit 0) and the r-package toolchain slot (`document()` no diff, `pkgdown::check_pkgdown()` clean, `air format --check` clean, NEWS entry present). Three-lens independent review spawned (full fan-out: executable surface touched, user-facing tier). Pre-gate checkpoint.
-
 ## Decisions
 
 ## Review
@@ -245,4 +230,17 @@ re-ticked below only against the evidence line beside it.
   between the two instruments is surfaced at the approval gate, not silently
   absorbed.
 
+### Consistency gate
 
+- `cairn_validate.py`: exit 0, all checks pass (16 checks, 0 advisories).
+- `devtools::document()`: no diff. `pkgdown::check_pkgdown()`: no problems found.
+- `air format --check .`: clean. `NAMESPACE`/`man/` regenerate cleanly.
+- `NEWS.md` carries a user-visible entry, no milestone numbers in its text.
+- No new top-level files, so no `.Rbuildignore` additions needed.
+- No `DESIGN.md` principle changed, so `cairn_impact --changed` is a no-op;
+  the header's `Principles touched:` slot (GP1, GP8) records principles this
+  milestone works UNDER, not ones it alters.
+- `devtools::check()`: 0/0/0 by its own summary; see the AC5 divergence note.
+
+
+- 2026-08-18: AC3 and AC5 verified with fresh evidence and ticked; all five criteria now carry Review-section evidence lines. Consistency gate green on both halves — universal (`cairn_validate` exit 0) and the r-package toolchain slot (`document()` no diff, `pkgdown::check_pkgdown()` clean, `air format --check` clean, NEWS entry present). Three-lens independent review spawned (full fan-out: executable surface touched, user-facing tier). Pre-gate checkpoint.
