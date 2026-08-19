@@ -24,7 +24,8 @@ Monte-Carlo confidence intervals. The
 [`summary()`](https://rdrr.io/r/base/summary.html),
 [`tidy()`](https://generics.r-lib.org/reference/tidy.html),
 [`glance()`](https://generics.r-lib.org/reference/glance.html),
-`autoplot()` (coefficient forest / variance-component decomposition) and
+[`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
+(coefficient forest / variance-component decomposition) and
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) methods are
 documented on this page.
 
@@ -42,7 +43,7 @@ documented on this page.
 
 Project a fitted ICC’s reliability to other numbers of raters and plot
 the curve, plus its
-[`tidy()`](https://generics.r-lib.org/reference/tidy.html)/[`glance()`](https://generics.r-lib.org/reference/glance.html)/`autoplot()`/[`plot()`](https://rdrr.io/r/graphics/plot.default.html)
+[`tidy()`](https://generics.r-lib.org/reference/tidy.html)/[`glance()`](https://generics.r-lib.org/reference/glance.html)/[`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)/[`plot()`](https://rdrr.io/r/graphics/plot.default.html)
 methods.
 
 - [`autoplot.icc_dstudy()`](https://jmgirard.github.io/intraclass/reference/d_study.md)

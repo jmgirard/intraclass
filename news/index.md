@@ -407,6 +407,15 @@
 
 ### Documentation
 
+- The README now shows what the plots look like: the
+  [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
+  forest plot of a default
+  [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) fit,
+  and a
+  [`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)
+  reliability curve projecting that fit to other rater counts. Both
+  figures carry alt text. The front page also gains a *Learn more* index
+  of the articles and a *Related work* comparison table.
 - The [`?icc`](https://jmgirard.github.io/intraclass/reference/icc.md)
   documentation of the classical closed forms no longer claims that
   `"searle"` and `"burch"` give a finite interval on every dataset: on

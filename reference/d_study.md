@@ -49,7 +49,7 @@ glance(x, ...)
 - object:
 
   An `icc_dstudy` object (the
-  `autoplot()`/[`plot()`](https://rdrr.io/r/graphics/plot.default.html)
+  [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)/[`plot()`](https://rdrr.io/r/graphics/plot.default.html)
   argument).
 
 - ...:
@@ -94,7 +94,8 @@ per definition** and
 curve. A multilevel projection adds a `level` column (one curve per
 level). Use [tidy()](https://generics.r-lib.org/reference/tidy.html),
 [glance()](https://generics.r-lib.org/reference/glance.html), and
-`autoplot()` (the reliability curve).
+[`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
+(the reliability curve).
 
 ## Projection is extrapolation
 
@@ -120,17 +121,18 @@ is no "average of `m` freshly sampled raters" to project to, and
 For a multilevel fit (a `cluster` column), `d_study()` projects the
 rater count `m` for each correctly-partitioned level on the object — the
 **subject** and/or **cluster** level — returning one reliability curve
-per level (the result gains a `level` column, and `autoplot()` facets by
-it). This is the paper-sanctioned rater projection (ten Hove et al.
-2022): `m` is the number of raters per cluster, and the cluster-level
-coefficient does **not** average over subjects, so there is no "subjects
-per cluster" projection — that is a sample-size question, not a
-reliability one. Nested designs project the subject level only. The
-conflated diagnostic (`level = "conflated"`) is not projected. On
-**incomplete** data the **subject** level projects (projection moves
-only the divisor); the **cluster** level is dropped with a note, because
-projecting `m` raters is the averaged `ICC(c,k)` case whose ragged
-divisor is an open modeling question (M9).
+per level (the result gains a `level` column, and
+[`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
+facets by it). This is the paper-sanctioned rater projection (ten Hove
+et al. 2022): `m` is the number of raters per cluster, and the
+cluster-level coefficient does **not** average over subjects, so there
+is no "subjects per cluster" projection — that is a sample-size
+question, not a reliability one. Nested designs project the subject
+level only. The conflated diagnostic (`level = "conflated"`) is not
+projected. On **incomplete** data the **subject** level projects
+(projection moves only the divisor); the **cluster** level is dropped
+with a note, because projecting `m` raters is the averaged `ICC(c,k)`
+case whose ragged divisor is an open modeling question (M9).
 
 ## Within-cell replicate fits
 
@@ -191,20 +193,20 @@ d_study(fit, m = 1:8)
 #> # D-study projection: two-way random, absolute agreement & consistency
 #> Observed raters: 4 | CI: 95% montecarlo (10000 draws)
 #>          type  m  estimate          95% CI
-#>     agreement  1     0.290  [0.050, 0.712]
-#>     agreement  2     0.449  [0.095, 0.831]
-#>     agreement  3     0.550  [0.136, 0.881]
-#>     agreement  4     0.620  [0.173, 0.908]
-#>     agreement  5     0.671  [0.207, 0.925]
-#>     agreement  6     0.710  [0.239, 0.937]
-#>     agreement  7     0.741  [0.268, 0.945]
-#>     agreement  8     0.765  [0.295, 0.952]
-#>   consistency  1     0.715  [0.335, 0.925]
-#>   consistency  2     0.834  [0.502, 0.961]
-#>   consistency  3     0.883  [0.601, 0.974]
-#>   consistency  4     0.909  [0.668, 0.980]
-#>   consistency  5     0.926  [0.716, 0.984]
-#>   consistency  6     0.938  [0.751, 0.987]
-#>   consistency  7     0.946  [0.779, 0.989]
-#>   consistency  8     0.953  [0.801, 0.990]
+#>     agreement  1     0.290  [0.050, 0.706]
+#>     agreement  2     0.449  [0.096, 0.828]
+#>     agreement  3     0.550  [0.137, 0.878]
+#>     agreement  4     0.620  [0.175, 0.906]
+#>     agreement  5     0.671  [0.210, 0.923]
+#>     agreement  6     0.710  [0.241, 0.935]
+#>     agreement  7     0.741  [0.271, 0.944]
+#>     agreement  8     0.765  [0.298, 0.950]
+#>   consistency  1     0.715  [0.339, 0.924]
+#>   consistency  2     0.834  [0.507, 0.961]
+#>   consistency  3     0.883  [0.606, 0.973]
+#>   consistency  4     0.909  [0.672, 0.980]
+#>   consistency  5     0.926  [0.720, 0.984]
+#>   consistency  6     0.938  [0.755, 0.987]
+#>   consistency  7     0.946  [0.782, 0.988]
+#>   consistency  8     0.953  [0.804, 0.990]
 ```

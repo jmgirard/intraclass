@@ -13,20 +13,16 @@ why** — the docs and website are a place to learn ICC best practice, not
 just call functions.
 
 > \[!NOTE\] This package is approaching its first release. The full
-> interrater-reliability ICC family is implemented — two-way (absolute
-> agreement vs. consistency, single vs. average, random vs. fixed
-> raters) and one-way designs, imbalanced and incomplete (missing-cell)
-> data, and multilevel designs (subject vs. cluster level, with raters
-> crossed with or nested in clusters/subjects) — each with
-> boundary-aware Monte-Carlo intervals. Fits run on mixed-model engines
-> (`glmmTMB`, `lme4`), a Bayesian engine (`brms`), or an SEM engine
-> (`lavaan`). A [*Choosing an
-> ICC*](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.html)
-> decision guide, the
-> [`choose_icc()`](https://jmgirard.github.io/intraclass/reference/choose_icc.md)
-> helper, D-study projection to other rater counts
-> ([`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)),
-> and `autoplot()` plots have all shipped.
+> interrater-reliability ICC family is implemented — two-way designs
+> (absolute agreement vs. consistency, single vs. average, random
+> vs. fixed raters) and one-way designs, imbalanced and incomplete
+> (missing-cell) data, and multilevel designs (subject vs. cluster
+> level, with raters crossed with or nested in clusters/subjects) — each
+> with boundary-aware Monte-Carlo intervals. Fits run on `glmmTMB` (the
+> default) or `lme4`, and on `brms` (Bayesian) or `lavaan` (SEM); the
+> [engines
+> article](https://jmgirard.github.io/intraclass/articles/engines.html)
+> says which designs each one supports.
 
 ## Installation
 
@@ -66,7 +62,8 @@ Monte-Carlo interval:
 
 library(intraclass)
 
-icc(ratings, score, subject, rater, seed = 2024)
+fit <- icc(ratings, score, subject, rater, seed = 2024)
+fit
 #> ── Intraclass correlation: two-way random, absolute agreement & consistency ────
 #> Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
@@ -82,6 +79,22 @@ icc(ratings, score, subject, rater, seed = 2024)
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
 ```
+
+[`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
+draws the same fit as a forest plot (it needs **ggplot2**):
+
+``` r
+
+library(ggplot2)
+
+autoplot(fit)
+```
+
+![Forest plot of the four coefficients from the ratings fit: ICC(A,1),
+ICC(A,k), ICC(C,1) and ICC(C,k), each a labelled point with a horizontal
+Monte-Carlo interval, and the average-rater coefficients further to the
+right than their single-rater
+counterparts.](reference/figures/README-plot-coefficients-1.png)
 
 Which coefficient you want — agreement vs. consistency, single
 vs. average, fixed vs. random raters, complete vs. incomplete — is a
@@ -160,22 +173,57 @@ icc(school, score, subject = pupil, rater = rater, cluster = classroom, seed = 2
 #> This message is displayed once per session.
 ```
 
-The [*Multilevel
-designs*](https://jmgirard.github.io/intraclass/articles/multilevel-designs.html)
-article works through incomplete and nested multilevel designs; separate
-articles cover the [estimation
-engines](https://jmgirard.github.io/intraclass/articles/engines.html),
-[interval
-methods](https://jmgirard.github.io/intraclass/articles/interval-methods.html),
-and [D-studies and within-cell
-replicates](https://jmgirard.github.io/intraclass/articles/d-studies-and-replicates.html).
+## How many raters do you need?
+
+[`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)
+projects the variance components of a fit to other rater counts,
+carrying the interval with them — so you can ask what reliability two
+raters would buy, or ten, without running the study again:
+
+``` r
+
+autoplot(d_study(fit, m = 1:10))
+```
+
+![Projected reliability against the number of raters, from 1 to 10, as
+two rising curves with Monte-Carlo interval bands: consistency above,
+absolute agreement below, both climbing steeply from one to four raters
+and flattening after that.](reference/figures/README-plot-dstudy-1.png)
+
+## Learn more
+
+- [*Getting
+  started*](https://jmgirard.github.io/intraclass/articles/getting-started.html)
+  — the guided tour
+- [*Choosing an
+  ICC*](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.html)
+  — the decision guide behind
+  [`choose_icc()`](https://jmgirard.github.io/intraclass/reference/choose_icc.md)
+- [*Multilevel
+  designs*](https://jmgirard.github.io/intraclass/articles/multilevel-designs.html)
+  — incomplete and nested multilevel data
+- [*Estimation
+  engines*](https://jmgirard.github.io/intraclass/articles/engines.html)
+  — what each engine buys you
+- [*Confidence-interval
+  methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.html)
+  — the `ci_method` menu
+- [*D-studies and
+  replicates*](https://jmgirard.github.io/intraclass/articles/d-studies-and-replicates.html)
+  — projection and within-cell replicates
+- [*Comparison with other
+  packages*](https://jmgirard.github.io/intraclass/articles/comparison-with-other-packages.html)
+  — how the numbers line up
+- [*Glossary*](https://jmgirard.github.io/intraclass/articles/glossary.html)
+  — the vocabulary in one place
 
 ## Related work
 
-Classical tools (`psych`, `irr`, `irrNA`, `irrICC`, `ICCDesign`) are
-ANOVA / mean-squares based and mostly assume balanced data; model-based
-tools (`performance::icc`, `misty`) extract a variance-partition
-coefficient but not the full interrater-reliability ICC family, the
-error-variance framing, or a selection framework. **intraclass** fills
-that gap with mixed-model estimation, Monte-Carlo confidence intervals,
-and decision guidance (following ten Hove, Jorgensen & van der Ark).
+| Approach | Packages | What you get |
+|----|----|----|
+| Classical ANOVA / mean squares | `psych`, `irr`, `irrNA`, `irrICC`, `ICCDesign` | ANOVA / mean-squares based, mostly assuming balanced data |
+| Model-based variance partition | `performance::icc`, `misty` | A variance-partition coefficient, but not the full interrater-reliability ICC family, the error-variance framing, or a selection framework |
+| **intraclass** | — | Mixed-model estimation, Monte-Carlo confidence intervals, and decision guidance |
+
+**intraclass** fills that gap, following ten Hove, Jorgensen & van der
+Ark.
