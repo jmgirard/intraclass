@@ -28,8 +28,9 @@
 # consumes. A refit that collapses to a singular (boundary) fit still yields a valid
 # draw with a component at 0 (KEPT, matching the MC boundary policy and the glmmTMB
 # path); only a genuine refit failure is NA-filled by bootMer and dropped upstream.
-# merDeriv is not needed for the bootstrap (no covariance is formed), but the lme4
-# fits require it up front for the Monte-Carlo default; that requirement is unchanged.
+# merDeriv is not needed for the bootstrap (no covariance is formed), but every
+# dispatched lme4 fit checks for it on entry whatever interval method the caller
+# asked for (see `merderiv_reason()` below); that requirement is unchanged.
 # Seeded via with_rng_seed() for RNG hygiene (#9, #12).
 lme4_bootmer_refit <- function(fit, extract) {
   function(boot_samples, seed = NULL) {
@@ -47,11 +48,14 @@ lme4_bootmer_refit <- function(fit, extract) {
 }
 
 # The merDeriv requirement is engine-wide, not interval-method-specific (M127).
-# `ci_method` is not a parameter of any function in this file: every entry point
-# below checks for merDeriv before it fits anything, whatever interval the caller
-# asked for, so a message attributing the requirement to Monte-Carlo intervals is
-# false to a caller who asked for another method. One expression, so the entry
-# points cannot drift apart again.
+# `ci_method` is not a parameter of any function in this file, and each of the 12
+# `fit_lme4*()` functions `icc()` dispatches to checks for merDeriv as its second,
+# unconditional statement -- whatever interval the caller asked for -- so a message
+# attributing the requirement to Monte-Carlo intervals is false to a caller who
+# asked for another method. The two helpers here that fit WITHOUT checking,
+# `fit_lme4_ml_model()` and `lme4_bootmer_refit()`, are not dispatched to: each is
+# reachable only through one of those 12, which has already checked. One
+# expression, so the dispatched functions cannot drift apart again.
 merderiv_reason <- function() {
   paste0(
     "to supply the lme4 parameter covariance; every lme4 fit checks for it ",
@@ -181,8 +185,9 @@ fit_lme4 <- function(data, call = rlang::caller_env()) {
   # glmmTMB bootstrap path); only a genuine refit failure becomes NA (bootMer fills
   # it), dropped upstream. Returns the shared (component x resample) matrix.
   # Note: merDeriv is not needed for the bootstrap (no covariance is formed), but
-  # fit_lme4() requires it up front for the Monte-Carlo default; that requirement is
-  # unchanged here. Seeded via with_rng_seed() for RNG hygiene (#9, #12).
+  # fit_lme4() checks for it on entry whatever interval method the caller asked
+  # for; that requirement is unchanged here. Seeded via with_rng_seed() for RNG
+  # hygiene (#9, #12).
   list(
     fit = fit,
     engine = "lme4",

@@ -1119,8 +1119,9 @@ test_that("lme4 nested multilevel reports the lme4 engine", {
 })
 
 # M127: the merDeriv requirement is engine-wide, not interval-method-specific --
-# `ci_method` is not a parameter of any function in `R/engine-lme4.R`, so every
-# entry point checks for merDeriv before it fits anything. The probe package name
+# `ci_method` is not a parameter of any function in `R/engine-lme4.R`, and each of
+# the 12 `fit_lme4*()` functions `icc()` dispatches to checks for merDeriv as its
+# second, unconditional statement, before it fits anything. The probe package name
 # below is absent by construction, so the real `rlang::check_installed()`
 # rendering path runs without mocking a dependency internal and without
 # depending on whether merDeriv's namespace happens to be loaded (check_installed
@@ -1148,7 +1149,10 @@ test_that("the merDeriv requirement message names the entry check, not a method"
     "on entry, whatever interval method you ask for."
   )
   for (w in c(2000L, 80L)) {
-    expect_true(grepl(expected, collapse(render(w)), fixed = TRUE))
+    expect_true(
+      grepl(expected, collapse(render(w)), fixed = TRUE),
+      info = paste0("cli.width = ", w)
+    )
   }
   # The framing this milestone withdrew attributed the requirement to one
   # interval method a caller may never have asked for.

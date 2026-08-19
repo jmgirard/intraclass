@@ -73,25 +73,27 @@ pin named outside `bayes|engines_omit|install_|design_never`.
       rendered message to the display width (measured to break at different
       points at widths 2000, 80 and 40).
 - [ ] AC3. A maintainer restoring the withdrawn wording to a swept source file
-      reds: the string literal it shipped in —
-      `"to compute lme4 Monte-Carlo confidence intervals."`, double quotes and
-      terminal full stop included, recovered by
+      in the exact bytes it shipped in reds: the string literal
+      `"to compute lme4 Monte-Carlo confidence intervals."`, both delimiters
+      and the terminal full stop included, recovered by
       `git show 26ef090:R/engine-lme4.R` — joins `claim_patterns` in
       `tests/testthat/test-doc-skew-caveat.R`, and the pin's source walk runs
       green on a full source tree. The bare fragment without quotes is rejected
       on precision, not recall: it runs green on today's tree but would red a
       future true sentence ("the covariance used to compute lme4 Monte-Carlo
-      confidence intervals"), this milestone's own NEWS bullet included — the
-      `install_*` anchoring precedent. Because the pinned bytes are R code the
-      entry reaches `.R` sources and not prose surfaces; that limit and the
-      recall cost are recorded beside the entry. Evidence: the M123 mutation
-      harness plants the new spelling through its existing 2 x 4
-      (surface x wrap-form) matrix, every cell RED, its two-way name check green
-      on the unmutated control, per-cell verdicts in the work log. Stated over a
-      full source tree: the source leg returns `list()` when `R/` is absent
-      (`tests/testthat/test-doc-skew-caveat.R:456-458`), so a green
-      `R CMD check` does not evidence it; the evidence run is `devtools::test()`
-      on the tree.
+      confidence intervals") — the natural wording of this milestone's own NEWS
+      bullet, which T4 accordingly avoided; the `install_*` precedent. The entry
+      matches bytes, not wording, and the walk matches with no file-type
+      awareness: a restore requoted in any other style, single quotes included,
+      escapes it, and prose reproducing the message with straight double quotes
+      reds wherever it sits. Evidence: both costs recorded beside the entry;
+      the M123 mutation harness plants the new spelling through its existing
+      2 x 4 (surface x wrap-form) source matrix plus the 3 installed cells,
+      11 RED, its two-way name check green on the unmutated control, per-cell
+      verdicts in the work log. Stated over a full source tree: the source leg
+      returns `list()` when `R/` is absent (`test-doc-skew-caveat.R:486-488`),
+      so a green `R CMD check` does not evidence it; the evidence run is
+      `devtools::test()` on the tree.
 - [x] AC4. The corrected message's claim is true of the code, in three clauses,
       each decided by a command whose output is its domain.
       (a) No function in `R/engine-lme4.R` takes `ci_method`:
@@ -117,7 +119,7 @@ pin named outside `bayes|engines_omit|install_|design_never`.
 
 - AC1 → T1
 - AC2 → T1, T2
-- AC3 → T3
+- AC3 → T3, T6
 - AC4 → T1, T4
 - AC5 → T5
 
@@ -128,21 +130,22 @@ pin named outside `bayes|engines_omit|install_|design_never`.
       repointed to it, literals removed.
 - [x] T2. AC2 rendering assertion in `tests/testthat/test-icc-lme4-engine.R`:
       `merderiv_reason()` through `rlang::check_installed()` under an absent
-      probe package name, at two `cli.width` settings, compared by substring —
-      not the internal expression, and not rlang's own frame.
+      probe package name, at two `cli.width` settings, by substring — not the
+      internal expression, and not rlang's own frame.
 - [x] T3. Quote-delimited literal added to `claim_patterns` in
-      `tests/testthat/test-doc-skew-caveat.R` as a `merderiv_*` entry, with the
-      anchoring rationale, `.R`-sources-only limit and recall cost beside it;
-      `|merderiv` added to the `spellings` alternation at
-      `data-raw/m123-capability-claim-mutations.R:73` (a general identifier
-      widening reds the two-way check on the unmutated control); harness run,
-      per-cell verdicts in the work log.
-- [x] T4. AC4 listings in the work log; NEWS bullet, worded so it carries
-      neither the pinned literal nor the bare `lme4 Monte-Carlo` adjacency —
-      `NEWS.md` is swept by both pin legs.
+      `tests/testthat/test-doc-skew-caveat.R` as a `merderiv_*` entry, its
+      anchoring rationale beside it; `|merderiv` added to the `spellings`
+      alternation at `data-raw/m123-capability-claim-mutations.R:73` (a general
+      identifier widening reds the two-way check on the unmutated control);
+      harness run, per-cell verdicts in the work log.
+- [x] T4. AC4 listings in the work log; NEWS bullet carrying neither the pinned
+      literal nor the bare `lme4 Monte-Carlo` adjacency — swept by both legs.
 - [x] T5. Gate hygiene: `air format .`, `devtools::test()`, `devtools::check()`,
-      the four data-raw checkers; delete the promoted candidate row and add the
-      standing-guard row; narrow the per-class-reachability row.
+      the data-raw checkers; delete the promoted candidate row, add the
+      standing-guard row, narrow the per-class-reachability row.
+- [ ] T6. The cost note beside the pin entry rewritten to AC3's amended text:
+      recall (only a byte-identical straight-double-quoted return is caught) and
+      precision (prose quoting the message reds; the entry is not `.R`-only).
 
 ## Work log
 
@@ -180,6 +183,11 @@ pin named outside `bayes|engines_omit|install_|design_never`.
 - 2026-08-18: review opened; draft PR #136. `origin/main` unmoved since the cut, so no merge and the evidence is not stale. FENCING SLIP CORRECTED: all five AC checkboxes had been ticked at the end of implement, which is not implement's to do — they were un-ticked and treated as unverified, and are re-ticked only against fresh evidence recorded in the Review section. AC1, AC2 and AC4 verified and re-ticked this session; AC3 and AC5 unticked, their evidence runs (mutation harness, `devtools::test()`, `devtools::check()`) still in flight at this checkpoint. Independent three-lens review not yet spawned — the diff touches executable surface and the tier is user-facing, so it takes the full fan-out, held until the harness stops mutating `R/icc.R` and `README.Rmd`.
 
 - 2026-08-18: AMENDMENT RETURN from review — AC3. Its clause "Because the pinned bytes are R code the entry reaches `.R` sources and not prose surfaces" is false: prose quoting the withdrawn message with straight double quotes reds, verified directly, and AC3's own evidence already recorded the spelling RED at `README.md`, `NEWS.md` and a vignette. The criterion contradicts itself, so this is evidence about the promise, not the work; it routes to the gated criterion-amendment protocol, status -> in-progress for that amendment, review stops. AC3 un-ticked. This is the first amendment return on M127; amendment returns count on their own track and do not increment the defect-return count. Compounding it: AC3 had been ticked against evidence that disproves its own limit clause, a review-side fencing failure. Nine further [O] findings (F1, F3, F5-F10) are recorded in the Review section for disposition in the return round; F1 is a defect in the shipped diff — `R/engine-lme4.R:32` and `:184` still carry the withdrawn "for the Monte-Carlo default" framing.
+
+- 2026-08-18: amendment return: AC3 — "The entry matches bytes, not wording, and the walk matches with no file-type awareness: a restore requoted in any other style, single quotes included, escapes it, and prose reproducing the message with straight double quotes reds wherever it sits." Both halves measured before the wording was written: under `grepl(pat, x, fixed = TRUE)` the pin's own bytes requoted in single quotes return FALSE, and prose carrying them in straight double quotes returns TRUE. The false limit clause is deleted and the recording obligation moved under `Evidence:`; no criterion added and no promise reaching a new domain, so the amendment holds rather than widens.
+- 2026-08-18: the amended AC3 wording went to a fresh-context [O] reader that did not author it; criteria audit in FULL mode (user-facing tier). Six findings, each re-measured here and each fixed before the text was written: the source-leg `list()` guard is at `test-doc-skew-caveat.R:486-488`, not `:456-458` (that range is the installed leg's NEWS block); `NEWS.md` has 0 hits of the bare fragment because T4 avoided the wording, so "this milestone's own NEWS bullet included" was false as written; the prose clause needed scoping to the straight-double-quote form, since typographic quotes and backticks escape; the headline needed byte-scoping, being falsified by the criterion's own body; "recorded beside the entry" binds an instrument property, so it moved under `Evidence:` and the comment rewrite became T6; and the recorded evidence is 11 RED cells (8 source + 3 installed), not the 2 x 4 source matrix alone.
+- 2026-08-18: T6 — the cost note beside the pin entry rewritten: the disproven `.R`-sources-only limit deleted, and both real costs stated beside the `grepl` form that decides each (review F3, F5).
+- 2026-08-18: return-round dispositions — all seven findings fixed on the branch at the user's selection. F1 (defect in the shipped diff): `R/engine-lme4.R:31` and `:187` no longer say the lme4 fits require merDeriv "for the Monte-Carlo default"; both now say the fit checks on entry whatever interval method the caller asked for. F6: the comment at `:50` and its counterpart at `test-icc-lme4-engine.R:1122` define "entry point" mechanically — the 12 dispatched `fit_lme4*()` — and name the two helpers that fit without checking as reachable only through them. F9: the two-width loop now asserts with `info = paste0("cli.width = ", w)`. F7: the ROADMAP per-class-reachability row claimed the `spellings` defect class was RETIRED; corrected in place to NARROWED, since the alternation is still a hard-coded list. F10: candidate row added for the bootstrap caller still made to install merDeriv. F8 is a Review-section record and stays review's to fix.
 
 ## Decisions
 

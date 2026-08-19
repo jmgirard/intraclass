@@ -387,11 +387,16 @@ claim_patterns <- c(
   # carries no such prefix, so the prefixed form would guard sites that no
   # longer exist and miss the one that does.
   #
-  # Cost, stated rather than hidden: because the pinned bytes are R CODE, this
-  # entry reaches `.R` sources and is inert on the prose surfaces the walk also
-  # sweeps -- a prose return of the same framing escapes it. And as with every
-  # `fixed = TRUE` pattern here, a reworded return escapes; only a re-planted
-  # verbatim return is caught.
+  # Costs, both measured and stated rather than hidden. RECALL: this is
+  # `fixed = TRUE` on a literal carrying both delimiters, so only a byte-identical
+  # straight-double-quoted return is caught -- the same bytes requoted in single
+  # quotes escape (`grepl(pat, x, fixed = TRUE)` on that form returns FALSE), as
+  # does any rewording. PRECISION: the walk matches bytes and knows nothing of
+  # file type, so this entry is NOT confined to `.R` sources -- prose reproducing
+  # the message with straight double quotes reds too (the same `grepl` on that
+  # form returns TRUE), honest historical quotation of the withdrawn message
+  # included. The mutation harness plants it RED on prose surfaces accordingly:
+  # `README.md`, `NEWS.md` and `vignette:choosing-an-icc.Rmd`.
   #
   # Named `merderiv_*`, with `merderiv` added to the mutation harness's
   # `spellings` extraction alternation in the same commit -- an entry outside
