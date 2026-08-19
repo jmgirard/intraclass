@@ -2,7 +2,7 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M128: Show the plotting surface in the README, and polish the front page
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -106,10 +106,10 @@ home page, and ships in the tarball (it is not `.Rbuildignore`d).
       record its deriving command or source; grep the new prose for bare counts
       and universals ("only", "every", "exactly", "all") and re-check each against
       its source (the M72 lesson).
-- [ ] T6 Run the one-off checks: the AC2 parity scan, the two doc-claim walks, and
+- [x] T6 Run the one-off checks: the AC2 parity scan, the two doc-claim walks, and
       the AC5 spelling measurement against a detached worktree at the default
       branch. No new committed checker.
-- [ ] T7 Correct `cairn/LESSONS.md:45` in place; run the profile `verify` slot and
+- [x] T7 Correct `cairn/LESSONS.md:45` in place; run the profile `verify` slot and
       the review-time consistency gate.
 
 ## Work log
@@ -131,6 +131,12 @@ home page, and ships in the tarball (it is not `.Rbuildignore`d).
 - 2026-08-18: T5 ledger, lines 28-35 (*Learn more*) — the eight entries are the eight files `ls vignettes/*.Rmd` reports; each link text was checked against that file's own `title:` field, and "Interval methods" was corrected to "Confidence-interval methods" to match `vignettes/interval-methods.Rmd`.
 - 2026-08-18: T5 ledger, lines 38-40 and 42 (*Related work* table and the attribution) — a restatement of main's own `README.Rmd:122-128` paragraph, re-read on main this session; no package name, claim, or attribution was added to or removed from what that paragraph carried.
 - 2026-08-18: T5 universals sweep (M72 lesson) — an `grep -nEi "\b(every|all|only|exactly|never|always|full)\b"` over the added lines returns exactly two hits, both "full", both in the *Related work* table (lines 39-40: "the full interrater-reliability family", "the full family") and both restating main's own paragraph rather than composed here. The one bare count added is "four engines", derived at `R/icc.R:686-691` above.
+- 2026-08-19: T6 figure parity (AC2) — a one-off scan over `README.md` enumerating both image forms found 2 references, alt lengths 257 and 237, both non-empty; the referenced set equals the `git ls-files man/figures/README-*` set exactly. No checker was committed.
+- 2026-08-19: T6 doc-claim walks (AC3) — source leg: the walk's path list reaches 35 surfaces including both `README.Rmd` and `README.md`. Installed leg: `devtools::install(quick = TRUE, build_vignettes = FALSE)` then `test_dir(package = "intraclass", load_package = "installed", filter = "doc-skew-caveat|vignette-claims")` → 0 failed / 0 error / 2410 passed / 2 skipped. The README-reaching block (`test-doc-skew-caveat.R:605`) is not among the skips, so it ran and its `"README.md" %in% names(surfaces)` assertion held; both skips are the vignette blocks (`:544`, `:663`), skipped because this install carried no built vignettes.
+- 2026-08-19: T6 spelling (AC5) — `spelling::spell_check_package()` on the branch vs a detached worktree at `origin/main` (e383178): 28 flagged on each side, `setdiff` empty in BOTH directions — 0 new, 0 gone. `inst/WORDLIST` untouched.
+- 2026-08-19: T7 — the drafted LESSONS correction was itself FALSE and was rewritten before commit. An instrumented `devtools::check(check_dir = ...)` shows the `spelling.Rout`/`spelling.Rout.save` comparison really does run (`00check.log:64-66`) and really is the repo's one NOTE; `spelling.Rout.save` is absent from the source tree AND from the built tarball, but `spell_check_test()` copies one into the check dir at run time from `spelling/templates/spelling.Rout.save` — 875 bytes, an R 3.4.1 session whose only output is `All Done!`. So M127's mechanism was right and only its provenance and "is EMPTY" were wrong; the corrected line says so.
+- 2026-08-19: T7 gate results — `devtools::check()`: 0 errors, 0 warnings, raw `Status: 1 NOTE` (the pre-existing spelling diff; identical word set on main, so the branch adds nothing to it). Suite under check: FAIL 0 | WARN 3 | SKIP 14 | PASS 7172. Local `NOT_CRAN=true CI=true devtools::test()`: FAIL 0 | WARN 2 | SKIP 25 | PASS 8250. `air format --check .` clean, `devtools::document()` no diff, `pkgdown::check_pkgdown()` "No problems found", and all seven data-raw checkers green.
+- 2026-08-19: T7 hygiene note — `cairn/LESSONS.md` is now 19,985 bytes against its 20,000-byte budget (15 bytes of headroom); the corrected line was written short deliberately to hold it.
 
 ## Decisions
 
