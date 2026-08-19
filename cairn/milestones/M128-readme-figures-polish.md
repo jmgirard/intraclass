@@ -2,12 +2,12 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M128: Show the plotting surface in the README, and polish the front page
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP3, GP1, GP8
-- **Branch/PR:** —
+- **Branch/PR:** `m128-readme-figures-polish`
 
 ## Goal
 
@@ -90,17 +90,17 @@ home page, and ships in the tarball (it is not `.Rbuildignore`d).
 
 ## Tasks
 
-- [ ] T1 Add the coefficient forest chunk to `README.Rmd` under the `example`
+- [x] T1 Add the coefficient forest chunk to `README.Rmd` under the `example`
       chunk (`README.Rmd:77-81`), reusing that fit; set `fig.alt` describing what
       the plot shows, in the register `vignettes/d-studies-and-replicates.Rmd:186`
       already uses. Under IP3 the alt text describes the picture, never grades the
       coefficient.
-- [ ] T2 Add a short *How many raters?* section running `d_study()` on the same
+- [x] T2 Add a short *How many raters?* section running `d_study()` on the same
       fit, with its `autoplot()` chunk and `fig.alt`.
-- [ ] T3 Prose polish: condense the status blockquote (`README.Rmd:35-45`), give
+- [x] T3 Prose polish: condense the status blockquote (`README.Rmd:35-45`), give
       the article links their own *Learn more* heading (`:114-118`), turn *Related
       work* into a table (`:120-128`). Installation (`:56-68`) is not touched.
-- [ ] T4 `devtools::build_readme()`; commit `README.md`, both PNGs, and a NEWS
+- [x] T4 `devtools::build_readme()`; commit `README.md`, both PNGs, and a NEWS
       line for the docs change in the same commit.
 - [ ] T5 Derivation ledger for AC4 — classify each added `README.Rmd` line and
       record its deriving command or source; grep the new prose for bare counts
@@ -119,6 +119,9 @@ home page, and ships in the tarball (it is not `.Rbuildignore`d).
 - 2026-08-18: plan gate chose two figures (coefficient forest + d-study curve) over all three views and over the forest alone, because the d-study leg also demonstrates a function the README names but never runs; falsified by a reader reporting the front page as too long or the d-study section as unclear.
 - 2026-08-18: plan gate chose leaving the Installation paragraph untouched over condensing it, because M126 landed it only on the third review attempt and every sentence is verified against the packages' own metadata; falsified by a user reporting the paragraph as unreadable.
 - 2026-08-18: plan gate chose a one-off review-session parity scan over a committed figure-reference checker, because a committed instrument over the repo's own records needs D-021's trigger and D-029 declines to waive it for docs work; falsified by a README figure reference going stale on the default branch.
+- 2026-08-18: T1/T2 — forest and d-study figure chunks added to `README.Rmd`, both with `fig.alt`. The first render clipped the forest title at the default 7in width, and the draft alt text called the average-rater coefficients "tighter", false for the agreement pair (ICC(A,k) interval width 0.726 vs ICC(A,1) 0.661 on the seed = 2024 fit); repaired with `fig.width = 9` and by rewording to "further to the right", both re-verified against the re-rendered PNGs.
+- 2026-08-18: T3 — status blockquote condensed to six lines; the inline article sentence replaced by a *Learn more* list of the eight vignettes `ls vignettes/` reports; *Related work* turned into a three-row table. The Installation paragraph is byte-identical to main.
+- 2026-08-18: T4 — `devtools::build_readme()` run; `README.md`, both PNGs and a NEWS *Documentation* bullet committed together. `testthat::test_local(filter = "doc-skew-caveat|vignette-claims")` green (2 pre-existing skips, vignettes not installed).
 
 ## Decisions
 

@@ -339,6 +339,10 @@
 
 ## Documentation
 
+* The README now shows what the plots look like: the `autoplot()` forest plot of
+  a default `icc()` fit, and a `d_study()` reliability curve projecting that fit
+  to other rater counts. Both figures carry alt text. The front page also gains a
+  *Learn more* index of the articles and a *Related work* comparison table.
 * The `?icc` documentation of the classical closed forms no longer claims that
   `"searle"` and `"burch"` give a finite interval on every dataset: on data with
   no between-subject variance at all, `"burch"` aborts with a classed error (its
