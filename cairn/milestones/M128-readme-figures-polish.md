@@ -2,12 +2,12 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M128: Show the plotting surface in the README, and polish the front page
 
-- **Status:** planned
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP3, GP1, GP8
-- **Branch/PR:** —
+- **Branch/PR:** `m128-readme-figures-polish` · https://github.com/jmgirard/intraclass/pull/137
 
 ## Goal
 
@@ -45,37 +45,37 @@ home page, and ships in the tarball (it is not `.Rbuildignore`d).
 
 ## Acceptance criteria
 
-- [ ] AC1 `devtools::build_readme()`, run once on the branch head in the review
+- [x] AC1 `devtools::build_readme()`, run once on the branch head in the review
       session, regenerates `README.md` and its figures with no diff against what
       is committed: `git status --porcelain -- README.md man/figures/` prints
       nothing afterwards.
-- [ ] AC2 A scan over `README.md` that enumerates both image forms — the HTML
+- [x] AC2 A scan over `README.md` that enumerates both image forms — the HTML
       `<img … src="man/figures/README-…">` and the markdown
       `![…](man/figures/README-…)` — returns at least 2 references, each with
       non-empty alt text; and the set of `man/figures/README-*` paths that scan
       yields equals, as a set of paths and at any extension, the set of
       `man/figures/README-*` files `git ls-files` reports as tracked.
-- [ ] AC3 No pinned withdrawn-claim spelling reappears in the README: the source
+- [x] AC3 No pinned withdrawn-claim spelling reappears in the README: the source
       walk and the installed walk in `tests/testthat/test-doc-skew-caveat.R` both
       pass on the branch head, with the evidence showing each walk reached the
       README surfaces rather than skipping (the `"README.md" %in% names(...)`
       assertion at `tests/testthat/test-doc-skew-caveat.R:619`). This claims what
       those walks settle — a hand-pinned `fixed = TRUE` spelling vector
       (`:217-406`, bounded by its own comment at `:263-266`) — and nothing wider.
-- [ ] AC4 Every line that `git diff $(git merge-base <default-branch> HEAD)..HEAD
+- [x] AC4 Every line that `git diff $(git merge-base <default-branch> HEAD)..HEAD
       -- README.Rmd` reports as added is classified in the work log as claim or
       non-claim, and every claim-classified line names either the command whose
       re-run output is quoted beside it or the `file:line` it restates.
-- [ ] AC5 `spelling::spell_check_package(".")` on the branch head returns no word
+- [x] AC5 `spelling::spell_check_package(".")` on the branch head returns no word
       absent from the same call in a detached worktree at the default branch —
       `setdiff(branch, base)` is empty. Words that disappear are reported, not
       gated. Any `inst/WORDLIST` addition is logged with the sentence that
       introduced it.
-- [ ] AC6 `cairn/LESSONS.md`'s M127 spelling line no longer asserts a
+- [x] AC6 `cairn/LESSONS.md`'s M127 spelling line no longer asserts a
       `tests/spelling.Rout.save` that does not exist: the line is corrected in
       place, marked `corrected M128`, and states what this branch measured about
       the spelling check's behaviour in this repo.
-- [ ] AC7 The profile's `verify` slot is clean on the branch head
+- [x] AC7 The profile's `verify` slot is clean on the branch head
       (`devtools::test()`), and the review-time consistency gate passes.
 
 ## Coverage
@@ -90,26 +90,26 @@ home page, and ships in the tarball (it is not `.Rbuildignore`d).
 
 ## Tasks
 
-- [ ] T1 Add the coefficient forest chunk to `README.Rmd` under the `example`
+- [x] T1 Add the coefficient forest chunk to `README.Rmd` under the `example`
       chunk (`README.Rmd:77-81`), reusing that fit; set `fig.alt` describing what
       the plot shows, in the register `vignettes/d-studies-and-replicates.Rmd:186`
       already uses. Under IP3 the alt text describes the picture, never grades the
       coefficient.
-- [ ] T2 Add a short *How many raters?* section running `d_study()` on the same
+- [x] T2 Add a short *How many raters?* section running `d_study()` on the same
       fit, with its `autoplot()` chunk and `fig.alt`.
-- [ ] T3 Prose polish: condense the status blockquote (`README.Rmd:35-45`), give
+- [x] T3 Prose polish: condense the status blockquote (`README.Rmd:35-45`), give
       the article links their own *Learn more* heading (`:114-118`), turn *Related
       work* into a table (`:120-128`). Installation (`:56-68`) is not touched.
-- [ ] T4 `devtools::build_readme()`; commit `README.md`, both PNGs, and a NEWS
+- [x] T4 `devtools::build_readme()`; commit `README.md`, both PNGs, and a NEWS
       line for the docs change in the same commit.
-- [ ] T5 Derivation ledger for AC4 — classify each added `README.Rmd` line and
+- [x] T5 Derivation ledger for AC4 — classify each added `README.Rmd` line and
       record its deriving command or source; grep the new prose for bare counts
       and universals ("only", "every", "exactly", "all") and re-check each against
       its source (the M72 lesson).
-- [ ] T6 Run the one-off checks: the AC2 parity scan, the two doc-claim walks, and
+- [x] T6 Run the one-off checks: the AC2 parity scan, the two doc-claim walks, and
       the AC5 spelling measurement against a detached worktree at the default
       branch. No new committed checker.
-- [ ] T7 Correct `cairn/LESSONS.md:45` in place; run the profile `verify` slot and
+- [x] T7 Correct `cairn/LESSONS.md:45` in place; run the profile `verify` slot and
       the review-time consistency gate.
 
 ## Work log
@@ -119,7 +119,79 @@ home page, and ships in the tarball (it is not `.Rbuildignore`d).
 - 2026-08-18: plan gate chose two figures (coefficient forest + d-study curve) over all three views and over the forest alone, because the d-study leg also demonstrates a function the README names but never runs; falsified by a reader reporting the front page as too long or the d-study section as unclear.
 - 2026-08-18: plan gate chose leaving the Installation paragraph untouched over condensing it, because M126 landed it only on the third review attempt and every sentence is verified against the packages' own metadata; falsified by a user reporting the paragraph as unreadable.
 - 2026-08-18: plan gate chose a one-off review-session parity scan over a committed figure-reference checker, because a committed instrument over the repo's own records needs D-021's trigger and D-029 declines to waive it for docs work; falsified by a README figure reference going stale on the default branch.
+- 2026-08-18: T1/T2 — forest and d-study figure chunks added to `README.Rmd`, both with `fig.alt`. The first render clipped the forest title at the default 7in width, and the draft alt text called the average-rater coefficients "tighter", false for the agreement pair (ICC(A,k) interval width 0.726 vs ICC(A,1) 0.661 on the seed = 2024 fit); repaired with `fig.width = 9` and by rewording to "further to the right", both re-verified against the re-rendered PNGs.
+- 2026-08-18: T3 — status blockquote condensed to six lines; the inline article sentence replaced by a *Learn more* list of the eight vignettes `ls vignettes/` reports; *Related work* turned into a three-row table. The Installation paragraph is byte-identical to main.
+- 2026-08-18: T4 — `devtools::build_readme()` run; `README.md`, both PNGs and a NEWS *Documentation* bullet committed together. `testthat::test_local(filter = "doc-skew-caveat|vignette-claims")` green (2 pre-existing skips, vignettes not installed).
+- 2026-08-18: T5 derivation ledger — `git diff $(git merge-base main HEAD)..HEAD -- README.Rmd` adds 42 lines, numbered here in diff order. NON-CLAIM (code, fences, blank lines, headings, table delimiter): 6-9, 11, 13-17, 21, 23-27, 36, 37, 41. The rest are claim lines, derived as follows.
+- 2026-08-18: T5 ledger, lines 1-5 (status note) — "one-way and two-way designs" from `R/icc.R:685` (`validate_choice(model, c("twoway", "oneway"))`); "four engines: glmmTMB, lme4, brms, lavaan" from `R/icc.R:686-691` (`validate_choice(engine, c("glmmTMB", "lme4", "lavaan", "brms"))`); the agreement/consistency, single/average, random/fixed, imbalanced, incomplete and multilevel clauses and the boundary-aware Monte-Carlo clause restate main's own blockquote at `README.Rmd:36-45`, re-read on main this session.
+- 2026-08-18: T5 ledger, line 10 (`autoplot()` draws the same fit as a forest plot; needs ggplot2) — from `R/autoplot.R:161` (`autoplot.icc(object, what = c("coefficients", "components"))`, so the default view is the forest) and the `check_installed("ggplot2")` guard those methods sit behind (`R/autoplot-theme.R:5-7`); observed by rendering the chunk.
+- 2026-08-18: T5 ledger, line 12 (forest `fig.alt`) — derived from the rendered `man/figures/README-plot-coefficients-1.png`, read back this session: four labelled points ICC(A,1) 0.29, ICC(A,k) 0.62, ICC(C,1) 0.71, ICC(C,k) 0.91, each with a horizontal interval, so each average-rater point sits further RIGHT than its single-rater counterpart. "Tighter" was withdrawn before commit: A,k's interval is wider (0.726) than A,1's (0.661).
+- 2026-08-18: T5 ledger, lines 18-20 (`d_study()` projects to other rater counts, carrying the interval) — from the observed `d_study(fit, m = 1:10)` print: 20 rows, each `m` carrying an estimate and a 95% interval, and m = 2 and m = 10 both present, which is what "what two raters would buy, or ten" states.
+- 2026-08-18: T5 ledger, line 22 (d-study `fig.alt`) — derived from the rendered `man/figures/README-plot-dstudy-1.png`, read back this session, cross-checked against the printed projection: consistency above agreement at every m; agreement climbs 0.290 -> 0.620 over m = 1..4 and 0.620 -> 0.803 over m = 4..10, which is the "steep then flattening" the alt text describes.
+- 2026-08-18: T5 ledger, lines 28-35 (*Learn more*) — the eight entries are the eight files `ls vignettes/*.Rmd` reports; each link text was checked against that file's own `title:` field, and "Interval methods" was corrected to "Confidence-interval methods" to match `vignettes/interval-methods.Rmd`.
+- 2026-08-18: T5 ledger, lines 38-40 and 42 (*Related work* table and the attribution) — a restatement of main's own `README.Rmd:122-128` paragraph, re-read on main this session; no package name, claim, or attribution was added to or removed from what that paragraph carried.
+- 2026-08-18: T5 universals sweep (M72 lesson) — an `grep -nEi "\b(every|all|only|exactly|never|always|full)\b"` over the added lines returns exactly two hits, both "full", both in the *Related work* table (lines 39-40: "the full interrater-reliability family", "the full family") and both restating main's own paragraph rather than composed here. The one bare count added is "four engines", derived at `R/icc.R:686-691` above.
+- 2026-08-19: T6 figure parity (AC2) — a one-off scan over `README.md` enumerating both image forms found 2 references, alt lengths 257 and 237, both non-empty; the referenced set equals the `git ls-files man/figures/README-*` set exactly. No checker was committed.
+- 2026-08-19: T6 doc-claim walks (AC3) — source leg: the walk's path list reaches 35 surfaces including both `README.Rmd` and `README.md`. Installed leg: `devtools::install(quick = TRUE, build_vignettes = FALSE)` then `test_dir(package = "intraclass", load_package = "installed", filter = "doc-skew-caveat|vignette-claims")` → 0 failed / 0 error / 2410 passed / 2 skipped. The README-reaching block (`test-doc-skew-caveat.R:605`) is not among the skips, so it ran and its `"README.md" %in% names(surfaces)` assertion held; both skips are the vignette blocks (`:544`, `:663`), skipped because this install carried no built vignettes.
+- 2026-08-19: T6 spelling (AC5) — `spelling::spell_check_package()` on the branch vs a detached worktree at `origin/main` (e383178): 28 flagged on each side, `setdiff` empty in BOTH directions — 0 new, 0 gone. `inst/WORDLIST` untouched.
+- 2026-08-19: T7 — the drafted LESSONS correction was itself FALSE and was rewritten before commit. An instrumented `devtools::check(check_dir = ...)` shows the `spelling.Rout`/`spelling.Rout.save` comparison really does run (`00check.log:64-66`) and really is the repo's one NOTE; `spelling.Rout.save` is absent from the source tree AND from the built tarball, but `spell_check_test()` copies one into the check dir at run time from `spelling/templates/spelling.Rout.save` — 875 bytes, an R 3.4.1 session whose only output is `All Done!`. So M127's mechanism was right and only its provenance and "is EMPTY" were wrong; the corrected line says so.
+- 2026-08-19: T7 gate results — `devtools::check()`: 0 errors, 0 warnings, raw `Status: 1 NOTE` (the pre-existing spelling diff; identical word set on main, so the branch adds nothing to it). Suite under check: FAIL 0 | WARN 3 | SKIP 14 | PASS 7172. Local `NOT_CRAN=true CI=true devtools::test()`: FAIL 0 | WARN 2 | SKIP 25 | PASS 8250. `air format --check .` clean, `devtools::document()` no diff, `pkgdown::check_pkgdown()` "No problems found", and all seven data-raw checkers green.
+- 2026-08-19: T7 hygiene note — `cairn/LESSONS.md` is now 19,985 bytes against its 20,000-byte budget (15 bytes of headroom); the corrected line was written short deliberately to hold it.
+- 2026-08-19: REVIEW RETURN 1 (defect) — AC4 fails inside its named domain. The [O] lens showed the condensed status blockquote at `README.Rmd:36-41` composes a design x engine cross-product the package's own aborts falsify (`R/icc.R:883`, `:716`, `:909`, `:917`), and that the T5 ledger's recorded derivation for those lines ("restates main's blockquote") is false — main scoped the axes to two-way and never claimed Monte-Carlo intervals on all four engines. Two further defects returned with it: the LESSONS correction attributes 875 bytes to a template measured at 716 with an `@INPUT@` placeholder (the 875 is the derived file), and `README.Rmd:122` says "before collecting the data" where `d_study()` requires an already-fitted `icc()`. Status back to in-progress; AC4 unticked.
+- 2026-08-19: return 1 repairs — F1: the blockquote restored to main's own scoping (axes back under two-way, one-way listed separately, the multilevel structure detail restored at the maintainer's call) and the engine sentence replaced by a cross-reference to the engines article rather than a composed availability claim. F9: "before collecting the data" → "without running the study again", plus one sentence restating `R/d-study.R:31-39`'s "Projection is extrapolation" caveat. F4/F5: the *Related work* rows and the ten Hove attribution restored to main's wording. F7/F8 (maintainer's call): the LESSONS line drops the byte figure entirely, describes the template substitution rather than a copy, and now records that the NOTE fires only under `NOT_CRAN`. F3 (maintainer's call, pre-existing): `vignettes/d-studies-and-replicates.Rmd:186`'s "higher and tighter" corrected to "higher ... and its interval slightly wider" — measured independently this session on that vignette's own fit (`type = "agreement", seed = 1`): ICC(A,1) width 0.6613, ICC(A,k) width 0.7309. F2 and F11 rejected: F2 is F1 restated, and F11's "four engines" count is gone with the rewrite.
+- 2026-08-19: return 1 re-verification — `NOT_CRAN=true CI=true devtools::test()` FAIL 0 / PASS 8250; spelling 28 vs 28, 0 new / 0 gone against a fresh detached worktree at `origin/main`; `air format --check .` clean; all five python data-raw checkers plus `enumerate-generalizing-claims.py --check` green.
+- 2026-08-19: REVIEW RETURN 2 (defect) — AC4 fails again, by a new mechanism of the same shape, in a line the return-1 repair itself added. `README.Rmd:127` says "Projecting to a rater count you did not run is an extrapolation, and the interval widens accordingly"; measured on the README's own projection, interval widths mostly NARROW as m grows — consistency 0.590 (m=1) → 0.313 (m=4) → 0.158 (m=10) monotonically, agreement peaking at 0.738 (m=3) then falling to 0.602 (m=10) — and the figure directly below the sentence shows it. `R/d-study.R:31-39`, the cited source, says only that the Monte-Carlo interval propagates rater-variance uncertainty rather than plugging in a point value, and is honestly wide when raters are few; it never says width grows with m. Second defect returned with it: the T5 derivation ledger still certifies text the return-1 repair deleted ("four engines", `R/icc.R:686-691`), so AC4's own instrument is stale against the current diff.
+- 2026-08-19: thrash trigger (b) FIRES — the same criterion (AC4) has now failed twice, each time by a composed generalization whose recorded derivation its cited source does not support. The plan gate recorded no alternative for the prose-polish leg (its three recorded alternatives concern the figure set, the Installation paragraph, and the parity scan), so the disposition goes to the maintainer per the thrash rule rather than to a third patch by this session.
+- 2026-08-19: return 2 repair (maintainer's call: cut the sentence) — the extrapolation clause is deleted outright rather than restated; the d-study prose now ends at "without running the study again", which the executed projection supports. No caveat sentence of this session's own composition replaces it.
+- 2026-08-19: T5 ledger RE-RUN, superseding the 2026-08-18 ledger entries above (append-only: those entries stand as history and no longer describe the current diff). `git diff $(git merge-base main HEAD)..HEAD -- README.Rmd` now adds 45 lines. NON-CLAIM (code, fences, blanks, headings, table delimiter): 9, 10, 11, 12, 14, 16, 17, 18, 19, 20, 24, 26, 27, 28, 29, 30, 39, 40, 44 — 19 lines. CLAIM: 1-8, 13, 15, 21, 22, 23, 25, 31-38, 41, 42, 43, 45 — 26 lines. Disjoint, union exactly 1..45.
+- 2026-08-19: T5 ledger, claim derivations — lines 1-5 and 41-43, 45 restate `git show main:README.Rmd` in substance, re-read this session (main's own scoping at its lines 37 and 40, and its closing paragraph). Lines 5-8: "`glmmTMB` (the default)" from `R/icc.R:660`; the rest is an existence claim plus a cross-reference to the engines article, which does state per-engine design coverage (`vignettes/engines.Rmd:121` lavaan one-way, `:195-196` brms) — no availability claim is composed here. Line 13 from `R/autoplot.R:161` (default view is the forest) and the `check_installed("ggplot2")` guard. Lines 15 and 25 from the rendered PNGs, read back this session. Lines 21-23 from the observed `d_study(fit, m = 1:10)` print (m = 2 and m = 10 both present). Lines 31-38 from `ls vignettes/*.Rmd` and each file's own `title:`.
+- 2026-08-19: T5 universals sweep RE-RUN with the set WIDENED to include the quantifiers the first sweep missed — `any|each|every|all|only|both|full|never|always|exactly|four|three|two`. Eight hits, each checked: L1 "two-way designs" and L5 "each with boundary-aware Monte-Carlo intervals" are main's own clauses (`main:README.Rmd:37`, `:40`); L5 "the default" is `R/icc.R:660`; L8 "which designs each one supports" is a claim about the article, verified above; L15 "four coefficients" is the observed row count of the printed fit; L22 "two raters ... or ten" and L25 "from 1 to 10 ... two rising curves" are the observed projection; L34 describes the engines article; L42 "the full interrater-reliability ICC family" is main's wording. "any" now appears nowhere in the added prose.
 
 ## Decisions
 
+### 2026-08-19: The README plot chunks stay unguarded, unlike the vignettes'
+
+The vignette plot chunks carry
+`eval = requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("glmmTMB", quietly = TRUE)`
+because they are evaluated at build and check time, on machines that may lack a
+Suggests package. `README.md` is different in kind: a committed artifact
+regenerated only by a maintainer running `devtools::build_readme()`. A guard
+there would silently emit a README with its figures missing, and AC1 would then
+red that as a diff against the committed file — the guard would convert a loud,
+correct failure into a quiet wrong result. So the convention is deliberately not
+carried over. Raised as F6 by the [O] review lens; the call was delegated to this
+session at the return gate.
+
 ## Review
+
+### Independent review (2026-08-19, three lenses, PR #137)
+
+[S] blame-history: no defect. Confirmed the Installation paragraph untouched, no pinned withdrawn spelling reintroduced, the LESSONS rewrite a legitimate marked in-place correction, and the ROADMAP terminal-row expectation not implicated (M128 is not terminal). One optional item, ranked last: the condensed note drops main's "(subject vs. cluster level, with raters crossed with or nested in clusters/subjects)".
+
+[S] prior-review: no prior-review evidence bearing on this diff. `gh api .../pulls/comments?per_page=1` returned `[]`, so the per-PR walk was correctly skipped; the M123/M124/M126/M127/M61/M125 archives were read and none of their findings is reintroduced.
+
+[O] diff-bug: 11 findings. F1, F7 and F9 verified by this session against the source and returned the milestone; the rest are triaged below.
+- F1 (AC4 FAILURE, load-bearing): the condensed blockquote composes a design x engine cross-product the code falsifies. Verified: `R/icc.R:883` lavaan aborts on one-way; `R/icc.R:716` brms aborts unless `ci_method = "posterior"`, so "each with boundary-aware Monte-Carlo intervals ... on any of four engines" is false for one of the four by construction; `R/icc.R:909` one-way + `cluster` aborts and `R/icc.R:917` one-way + `raters = "fixed"` aborts, so moving main's two-way-scoped parenthetical to cover both designs attributes agreement/consistency and random/fixed to one-way. Main scoped all of this deliberately. The T5 ledger recorded these lines as "restating main's blockquote" -- that derivation is false, which is AC4 failing inside its own named domain. The ledger's universals sweep also omitted "any" and "each", the two quantifiers that carry the falsehood.
+- F7 (record defect): the LESSONS correction's own specifics are wrong. Measured: `system.file("templates", "spelling.Rout.save", package = "spelling")` is 716 bytes and carries an `@INPUT@` placeholder; `spell_check_test()` substitutes this repo's `tests/spelling.R` into it and writes the 875-byte result. So 875 belongs to the derived file, not the template, and "copies one in" mis-describes the mechanism. GP8 also disfavours a hand-pinned byte count in an edited record.
+- F9: "before collecting the data" is wrong -- `d_study()` requires a fitted `icc()`, so the data are already collected; the intended sense is more raters. `R/d-study.R:31-39` also carries a titled "Projection is extrapolation" caveat the front page omits.
+- F2, F4, F5, F6, F8, F10, F11: triaged at the gate, see below.
+
+### Acceptance-criteria evidence (2026-08-19, branch head e298144)
+
+- AC1 ✓ `devtools::build_readme()` re-run on the branch head; `git status --porcelain -- README.md man/figures/` printed 0 lines afterwards. The rendered PNGs are byte-identical across renders on this machine.
+- AC2 ✓ One-off scan over `README.md` enumerating both image forms: 2 references, both HTML `<img>`, alt lengths 257 and 237, both non-empty; the referenced path set equals the `git ls-files man/figures/README-*` set exactly (`{README-plot-coefficients-1.png, README-plot-dstudy-1.png}`). No checker was committed — the scan is a one-off, per Scope.
+- AC4 ✓ `git diff $(git merge-base main HEAD)..HEAD -- README.Rmd` adds 42 lines. The work-log ledger classifies 19 as non-claim and 23 as claim; the two sets are disjoint and their union is exactly 1..42 (no overlap, no gap, verified by set arithmetic). Each of the 23 claim lines names its deriving command output or `file:line`.
+- AC5 ✓ `spelling::spell_check_package(".")` on the branch vs a fresh detached worktree at `origin/main` (e383178): 28 flagged words each side; `setdiff` empty in both directions (0 new, 0 gone). `git diff --stat main..HEAD -- inst/WORDLIST` is empty, so no WORDLIST addition needed logging.
+- AC6 ✓ `cairn/LESSONS.md:45` carries `corrected M128` and no longer asserts an in-tree `tests/spelling.Rout.save`; `ls tests/spelling.Rout.save` reports no such file and `git ls-files tests/` lists only `spelling.R`, `testthat.R`, `testthat/`. The corrected line states what this branch measured: the template's origin (`spelling/templates/`), its size (875 bytes), and that the diff is the repo's one NOTE.
+
+### Post-return evidence (2026-08-19, branch head dda5bc2)
+
+All seven criteria re-executed on the repaired head; the pre-return evidence above stands for AC1/AC2/AC5/AC6 and was re-run here.
+
+- AC1 ✓ `devtools::build_readme()` re-run; `git status --porcelain -- README.md man/figures/` printed 0 lines.
+- AC2 ✓ Re-scanned: 2 references, both alt-texted, referenced set == `git ls-files man/figures/README-*`.
+- AC3 ✓ Source walk reaches `README.Rmd` and `README.md` among 35 surfaces. Installed leg, re-installed at this head: `test_dir(package = "intraclass", load_package = "installed", filter = "doc-skew-caveat|vignette-claims")` → 0 failed / 0 error / 2410 passed / 2 skipped, the two skips being the vignette blocks (this install carried no built vignettes), NOT the README block — so `test-doc-skew-caveat.R:605`'s `"README.md" %in% names(surfaces)` ran and held.
+- AC4 ✓ Re-run over the current 45-line diff (the 2026-08-19 ledger entries, superseding the 2026-08-18 ones): 19 non-claim + 26 claim, disjoint, union exactly 1..45; every claim line names its deriving command output, `file:line`, or the `main:README.Rmd` clause it restates. The universals sweep was widened to `any|each|every|all|only|both|full|never|always|exactly|four|three|two` — the omission of `any` and `each` is what let both returns through — and all eight hits were checked individually.
+- AC5 ✓ 28 flagged on the branch, 28 on a fresh detached worktree at `origin/main`; 0 new, 0 gone. `inst/WORDLIST` untouched.
+- AC6 ✓ `cairn/LESSONS.md:45` marked `corrected M128`, drops the wrong byte figure, describes the `@INPUT@` template substitution rather than a copy, and records the `NOT_CRAN` condition. File 19,993 bytes, inside its 20,000-byte budget.
+- AC7 ✓ `NOT_CRAN=true CI=true devtools::test()` FAIL 0 / WARN 2 / SKIP 25 / PASS 8250. `devtools::check()` on this head: 0 errors, 0 warnings, raw `Status: 1 NOTE` — the pre-existing spelling diff, whose word set is identical on main; suite under check FAIL 0 / PASS 7172. Consistency gate: `cairn_validate` 16/16 PASS, `devtools::document()` no diff, README.md in sync (AC1), `pkgdown::check_pkgdown()` "No problems found", NEWS entry present, no new top-level files, `air format --check .` clean, all seven data-raw checkers green.
