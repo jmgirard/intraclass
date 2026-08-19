@@ -2,7 +2,7 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M128: Show the plotting surface in the README, and polish the front page
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -55,14 +55,14 @@ home page, and ships in the tarball (it is not `.Rbuildignore`d).
       non-empty alt text; and the set of `man/figures/README-*` paths that scan
       yields equals, as a set of paths and at any extension, the set of
       `man/figures/README-*` files `git ls-files` reports as tracked.
-- [ ] AC3 No pinned withdrawn-claim spelling reappears in the README: the source
+- [x] AC3 No pinned withdrawn-claim spelling reappears in the README: the source
       walk and the installed walk in `tests/testthat/test-doc-skew-caveat.R` both
       pass on the branch head, with the evidence showing each walk reached the
       README surfaces rather than skipping (the `"README.md" %in% names(...)`
       assertion at `tests/testthat/test-doc-skew-caveat.R:619`). This claims what
       those walks settle — a hand-pinned `fixed = TRUE` spelling vector
       (`:217-406`, bounded by its own comment at `:263-266`) — and nothing wider.
-- [ ] AC4 Every line that `git diff $(git merge-base <default-branch> HEAD)..HEAD
+- [x] AC4 Every line that `git diff $(git merge-base <default-branch> HEAD)..HEAD
       -- README.Rmd` reports as added is classified in the work log as claim or
       non-claim, and every claim-classified line names either the command whose
       re-run output is quoted beside it or the `file:line` it restates.
@@ -75,7 +75,7 @@ home page, and ships in the tarball (it is not `.Rbuildignore`d).
       `tests/spelling.Rout.save` that does not exist: the line is corrected in
       place, marked `corrected M128`, and states what this branch measured about
       the spelling check's behaviour in this repo.
-- [ ] AC7 The profile's `verify` slot is clean on the branch head
+- [x] AC7 The profile's `verify` slot is clean on the branch head
       (`devtools::test()`), and the review-time consistency gate passes.
 
 ## Coverage
@@ -183,3 +183,15 @@ session at the return gate.
 - AC4 ✓ `git diff $(git merge-base main HEAD)..HEAD -- README.Rmd` adds 42 lines. The work-log ledger classifies 19 as non-claim and 23 as claim; the two sets are disjoint and their union is exactly 1..42 (no overlap, no gap, verified by set arithmetic). Each of the 23 claim lines names its deriving command output or `file:line`.
 - AC5 ✓ `spelling::spell_check_package(".")` on the branch vs a fresh detached worktree at `origin/main` (e383178): 28 flagged words each side; `setdiff` empty in both directions (0 new, 0 gone). `git diff --stat main..HEAD -- inst/WORDLIST` is empty, so no WORDLIST addition needed logging.
 - AC6 ✓ `cairn/LESSONS.md:45` carries `corrected M128` and no longer asserts an in-tree `tests/spelling.Rout.save`; `ls tests/spelling.Rout.save` reports no such file and `git ls-files tests/` lists only `spelling.R`, `testthat.R`, `testthat/`. The corrected line states what this branch measured: the template's origin (`spelling/templates/`), its size (875 bytes), and that the diff is the repo's one NOTE.
+
+### Post-return evidence (2026-08-19, branch head dda5bc2)
+
+All seven criteria re-executed on the repaired head; the pre-return evidence above stands for AC1/AC2/AC5/AC6 and was re-run here.
+
+- AC1 ✓ `devtools::build_readme()` re-run; `git status --porcelain -- README.md man/figures/` printed 0 lines.
+- AC2 ✓ Re-scanned: 2 references, both alt-texted, referenced set == `git ls-files man/figures/README-*`.
+- AC3 ✓ Source walk reaches `README.Rmd` and `README.md` among 35 surfaces. Installed leg, re-installed at this head: `test_dir(package = "intraclass", load_package = "installed", filter = "doc-skew-caveat|vignette-claims")` → 0 failed / 0 error / 2410 passed / 2 skipped, the two skips being the vignette blocks (this install carried no built vignettes), NOT the README block — so `test-doc-skew-caveat.R:605`'s `"README.md" %in% names(surfaces)` ran and held.
+- AC4 ✓ Re-run over the current 45-line diff (the 2026-08-19 ledger entries, superseding the 2026-08-18 ones): 19 non-claim + 26 claim, disjoint, union exactly 1..45; every claim line names its deriving command output, `file:line`, or the `main:README.Rmd` clause it restates. The universals sweep was widened to `any|each|every|all|only|both|full|never|always|exactly|four|three|two` — the omission of `any` and `each` is what let both returns through — and all eight hits were checked individually.
+- AC5 ✓ 28 flagged on the branch, 28 on a fresh detached worktree at `origin/main`; 0 new, 0 gone. `inst/WORDLIST` untouched.
+- AC6 ✓ `cairn/LESSONS.md:45` marked `corrected M128`, drops the wrong byte figure, describes the `@INPUT@` template substitution rather than a copy, and records the `NOT_CRAN` condition. File 19,993 bytes, inside its 20,000-byte budget.
+- AC7 ✓ `NOT_CRAN=true CI=true devtools::test()` FAIL 0 / WARN 2 / SKIP 25 / PASS 8250. `devtools::check()` on this head: 0 errors, 0 warnings, raw `Status: 1 NOTE` — the pre-existing spelling diff, whose word set is identical on main; suite under check FAIL 0 / PASS 7172. Consistency gate: `cairn_validate` 16/16 PASS, `devtools::document()` no diff, README.md in sync (AC1), `pkgdown::check_pkgdown()` "No problems found", NEWS entry present, no new top-level files, `air format --check .` clean, all seven data-raw checkers green.
