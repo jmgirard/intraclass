@@ -193,7 +193,7 @@ autoplot(d_study(fit, m = 1:10))
 - [*Estimation
   engines*](https://jmgirard.github.io/intraclass/articles/engines.html)
   — what each engine buys you
-- [*Interval
+- [*Confidence-interval
   methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.html)
   — the `ci_method` menu
 - [*D-studies and

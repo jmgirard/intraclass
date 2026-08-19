@@ -132,7 +132,7 @@ autoplot(d_study(fit, m = 1:10))
 - [*Choosing an ICC*](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.html) — the decision guide behind `choose_icc()`
 - [*Multilevel designs*](https://jmgirard.github.io/intraclass/articles/multilevel-designs.html) — incomplete and nested multilevel data
 - [*Estimation engines*](https://jmgirard.github.io/intraclass/articles/engines.html) — what each engine buys you
-- [*Interval methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.html) — the `ci_method` menu
+- [*Confidence-interval methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.html) — the `ci_method` menu
 - [*D-studies and replicates*](https://jmgirard.github.io/intraclass/articles/d-studies-and-replicates.html) — projection and within-cell replicates
 - [*Comparison with other packages*](https://jmgirard.github.io/intraclass/articles/comparison-with-other-packages.html) — how the numbers line up
 - [*Glossary*](https://jmgirard.github.io/intraclass/articles/glossary.html) — the vocabulary in one place
