@@ -2,7 +2,7 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M127: Correct the lme4 merDeriv requirement message
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -72,7 +72,7 @@ pin named outside `bayes|engines_omit|install_|design_never`.
       assertion repeated at two `cli.width` settings, because cli wraps the
       rendered message to the display width (measured to break at different
       points at widths 2000, 80 and 40).
-- [x] AC3. A maintainer restoring the withdrawn wording to a swept source file
+- [ ] AC3. A maintainer restoring the withdrawn wording to a swept source file
       reds: the string literal it shipped in —
       `"to compute lme4 Monte-Carlo confidence intervals."`, double quotes and
       terminal full stop included, recovered by
@@ -179,6 +179,8 @@ pin named outside `bayes|engines_omit|install_|design_never`.
 
 - 2026-08-18: review opened; draft PR #136. `origin/main` unmoved since the cut, so no merge and the evidence is not stale. FENCING SLIP CORRECTED: all five AC checkboxes had been ticked at the end of implement, which is not implement's to do — they were un-ticked and treated as unverified, and are re-ticked only against fresh evidence recorded in the Review section. AC1, AC2 and AC4 verified and re-ticked this session; AC3 and AC5 unticked, their evidence runs (mutation harness, `devtools::test()`, `devtools::check()`) still in flight at this checkpoint. Independent three-lens review not yet spawned — the diff touches executable surface and the tier is user-facing, so it takes the full fan-out, held until the harness stops mutating `R/icc.R` and `README.Rmd`.
 
+- 2026-08-18: AMENDMENT RETURN from review — AC3. Its clause "Because the pinned bytes are R code the entry reaches `.R` sources and not prose surfaces" is false: prose quoting the withdrawn message with straight double quotes reds, verified directly, and AC3's own evidence already recorded the spelling RED at `README.md`, `NEWS.md` and a vignette. The criterion contradicts itself, so this is evidence about the promise, not the work; it routes to the gated criterion-amendment protocol, status -> in-progress for that amendment, review stops. AC3 un-ticked. This is the first amendment return on M127; amendment returns count on their own track and do not increment the defect-return count. Compounding it: AC3 had been ticked against evidence that disproves its own limit clause, a review-side fencing failure. Nine further [O] findings (F1, F3, F5-F10) are recorded in the Review section for disposition in the return round; F1 is a defect in the shipped diff — `R/engine-lme4.R:32` and `:184` still carry the withdrawn "for the Monte-Carlo default" framing.
+
 ## Decisions
 
 ## Review
@@ -279,3 +281,46 @@ which its ROADMAP row recorded. INFORMATIONAL (rank 2, not actioned): the new
 pin could arguably have been folded into the `install_*` prefix, avoiding the
 regex change; the lens found no convention requiring that, and M126's
 `install_*` reuse was opportunistic rather than a stated rule.
+
+**[O] diff-bug lens — 10 findings.** Mechanical core verified correct by
+execution: 12 sites all on `merderiv_reason()`, 0 literals; pinned substring
+present at `cli.width` 2000/120/80/60/40/30/20; the `|merderiv` widening green
+on the two-way check (17 names both sides); `merDeriv::vcov.lmerMod()` called
+unconditionally at `:123 :252 :388 :508 :787 :913 :1030`, so the message clause
+is true. Nothing found in: `merderiv_reason()` correctness, rendering
+fragility, `fixed = TRUE`/escaping/`paste0` byte hazards, D-021/D-029 conflict,
+NEWS accuracy.
+
+RETURN-TRIGGERING (F2). AC3's own clause "Because the pinned bytes are R code
+the entry reaches `.R` sources and not prose surfaces" is FALSE, verified here
+directly: prose quoting the old message with straight double quotes reds
+(TRUE), and AC3's own recorded evidence already shows the spelling RED at
+`README.md`, `NEWS.md` and `vignette:choosing-an-icc.Rmd`. The criterion
+contradicts itself, and it was ticked against evidence that disproves its own
+limit clause — a fencing failure on this reviewer's part as well as a wrong
+criterion. AC3 un-ticked; routed to the amendment gate.
+
+OTHER FINDINGS, carried to the return round for disposition:
+- F1 (defect in the diff): `R/engine-lme4.R:32` and `:184` still read "the lme4
+  fits require it up front for the Monte-Carlo default", the exact framing the
+  new comment at `:49-52` declares false — the file contradicts itself and the
+  pin is blind to it (different wording). Verified present.
+- F3: the pin false-positives on honest historical quotation — prose quoting
+  the withdrawn message to document this very fix reds. Precision cost never
+  recorded; only the recall cost was.
+- F5: a byte-identical restore written with SINGLE quotes escapes the pin
+  (verified FALSE). The comment records only that "a reworded return escapes".
+- F6: `R/engine-lme4.R:50-51` says "every entry point below checks" without
+  defining "entry point"; `fit_lme4_ml_model()` (`:457`) is below and fits
+  without checking. GP7 makes this comment load-bearing.
+- F7: the ROADMAP row overclaims — the alternation is still hard-coded, so the
+  defect class is not "RETIRED"; one token was added. The Scope wording is
+  accurate; the ROADMAP wording is not.
+- F8: recorded "124 passing / 1 skip" vs the lens's 125/0 — re-measured here as
+  124/1, so the figure is right in this environment and the skip is
+  environment-dependent; the record should say so.
+- F9 (style): the two-width loop asserts without `info =`, so a failure cannot
+  be attributed to a width.
+- F10 (pre-existing): a `ci_method = "bootstrap"` caller is still forced to
+  install merDeriv for a covariance that path never consumes. M127 makes the
+  message honest; it does not make the check necessary. Candidate-row material.
