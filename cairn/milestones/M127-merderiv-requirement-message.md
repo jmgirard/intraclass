@@ -112,7 +112,7 @@ pin named outside `bayes|engines_omit|install_|design_never`.
       either, and each is reachable only through a dispatched function that has
       already checked.
       Evidence: the three listings and the `formals()` result, in the work log.
-- [ ] AC5. `devtools::check()` clean (0 errors / 0 warnings / 0 notes) and
+- [x] AC5. `devtools::check()` clean (0 errors / 0 warnings / 0 notes) and
       `air format --check .` clean.
 
 ## Coverage
@@ -301,6 +301,17 @@ unmoved since the cut, so no merge was needed and none of this is stale.
   12. (c) `git grep -n 'lme4::' -- 'R/*.R'` returns exactly one hit outside
   `R/engine-lme4.R` — `R/icc.R:358`, a roxygen line naming `lme4::bootMer` in
   prose — and no `lmer`/`bootMer` CALL outside that file.
+- **AC5 — verified on the final tree, against the instrument it names.**
+  `devtools::check()` (12m 17s, after the F1/F2/F4/F5 fixes): 0 errors /
+  0 warnings / 0 notes. `air format --check .` clean.
+  `NOT_CRAN=true CI=true devtools::test()`: 0 failures, 8250 passing, 25 skips,
+  2 warnings. The divergence recorded in the first evidence block stands and is
+  unchanged: `R CMD check`'s own Status line reports the `spelling.Rout`
+  comparison NOTE where devtools' summary reports none. Pre-existing and
+  re-measured: `spelling::spell_check_package()` flags 28 words on this tree,
+  `origin/main`'s exact baseline, 0 new / 0 gone. AC5 names `devtools::check()`
+  and is met by it; the instrument gap is surfaced at the approval gate, not
+  absorbed.
 
 ### Consistency gate — re-run after the return round
 
