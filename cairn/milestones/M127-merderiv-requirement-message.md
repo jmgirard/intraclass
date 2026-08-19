@@ -193,6 +193,7 @@ pin named outside `bayes|engines_omit|install_|design_never`.
 - 2026-08-18: review resumed after the return round. `origin/main` still `26ef090`, unmoved since the cut, so no merge and no stale evidence. AC1-AC4 re-executed on the current head and re-ticked against the evidence block recorded this round; AC5 UNTICKED pending its own fresh `devtools::check()`, which was still running at this checkpoint. Consistency gate re-run green on both halves. Three-lens fan-out re-spawned over the two return-round commits, still in flight — no findings recorded yet.
 - 2026-08-18: return-round fan-out complete (0 / 0 severe / 6). F1, F2, F4, F5 fixed on the branch; F3 and the Scope pointer half of F6 go to the maintainer at the gate as amendment-gated text. SUPERSEDES the count in the amendment-return line above: it says "Nine further [O] findings (F1, F3, F5-F10)" and enumerates eight ids — eight is right, and the seven fixed in the return round are those eight less F8, which was a Review-section record and was corrected there.
 - 2026-08-18: all five criteria verified with return-round evidence (AC5 on the final tree after the F1/F2/F4/F5 fixes). Approval gate reached and PAUSED at the user's selection, before the F3 disposition and before any merge authorization: no `cairn/.merge-approved` marker was written and PR #136 stays a draft. Open for the maintainer: whether AC3's stale `:486-488` citation (guard now at `:491-493`) and the two stale Scope pointers take a second amendment round or are left recorded as false in the Review section. Status stays `review`.
+- 2026-08-18: gate resumed and approved. Maintainer chose to leave the three drifted citations recorded rather than convene a second amendment round; merge of PR #136 authorized. CI green on 13c5862 (10/10).
 
 ## Decisions
 
@@ -468,3 +469,19 @@ None of the six demonstrates an acceptance criterion failing inside its named
 procedure's domain, so none meets the return floor; F3 is criterion-text
 evidence and takes the amendment track, where its second occurrence on AC3
 stops for the maintainer.
+
+### Gate disposition
+
+The maintainer selected **leave recorded** for the three drifted line-number
+citations (2026-08-18): AC3's `test-doc-skew-caveat.R:486-488` (guard now at
+`:491-493`), and Scope's `data-raw/m123-capability-claim-mutations.R:73` (now
+`:80`) and `R/engine-lme4.R:50` (now `:67`). All three re-verified stale at the
+gate and all three are pointers, not promises — every criterion's substance is
+verified, and the correct locations are recorded here. No second amendment
+round was convened: AC3 had already taken one, which stops further rounds and
+sends the disposition to the maintainer, which is what happened.
+
+Final tally: 16 findings across two three-lens rounds. 1 amendment return
+(AC3), 11 fixed on the branch, 1 informational not actioned (the blame lens's
+`install_*` prefix observation), 3 left recorded as above. Merge authorized at
+the gate; CI green on `13c5862` (10/10 checks).
