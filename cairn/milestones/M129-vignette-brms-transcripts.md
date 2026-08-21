@@ -7,7 +7,7 @@
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP5, GP7   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** m129-vignette-brms-transcripts   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m129-vignette-brms-transcripts · https://github.com/jmgirard/intraclass/pull/138   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create -->
@@ -54,7 +54,7 @@ attempted, the M52 offline-fixture constraint stands; regenerating any other
 - [x] AC4: For each block AC2 pins, a planted edit of each of these forms reds
       the test: a changed digit, a changed word of message text, a removed
       line, and an added line. Each planted run is recorded in the work log.
-- [x] AC5: `NOT_CRAN=true CI=true devtools::test()` 0 failures;
+- [ ] AC5: `NOT_CRAN=true CI=true devtools::test()` 0 failures;
       `air format --check .` clean; `R CMD check`'s raw `Status:` line no worse
       than main's (read the raw line, never `devtools::check()`'s 0/0/0
       summary — M127/M128 lesson); `pkgdown::check_pkgdown()` clean;
@@ -110,9 +110,31 @@ attempted, the M52 offline-fixture constraint stands; regenerating any other
 - 2026-08-21: T6 done — AC4's matrix is 16 plants (4 blocks x 4 forms: changed digit, changed word, removed line, added line). Baseline GREEN, all 16 RED, `git status vignettes/` clean afterwards with no residue.
 - 2026-08-21: T6 DEFECT IN THIS MILESTONE'S OWN GUARD, found by the gate and fixed — the first `R CMD check --as-cran` returned `Status: 1 ERROR`, worse than main's `1 NOTE`. `R CMD check` runs the suite against the INSTALLED package, where `../../vignettes` does not exist, so `list.files()` returned empty and `readLines()` errored: four failures and the ERROR from one cause. The pins written to protect the vignettes would have turned CI red. Fixed with the repo's existing idiom (`test-brms-oracle-map.R` skips the same way when `data-raw/` is absent) and the resulting coverage limit written into the test header: the guard bites on local `devtools::test()`, at the review gate, and in the coverage job (which runs from source), but NOT inside the CI `R CMD check` job.
 - 2026-08-21: AC5 evidence — `NOT_CRAN=true CI=true` full suite FAIL 0 / ERROR 0 / PASS 8263 (main: 8250; the 13 new assertions account for the difference); `air format --check .` clean; `pkgdown::check_pkgdown()` "No problems found"; `cairn_validate` exit 0 on all 16 checks; `R CMD check --as-cran` at `NOT_CRAN=false` **Status: OK** with `Running 'testthat.R' [245s/123s] OK`. Note for review: `OK` beats main's recorded `1 NOTE`, but the two were measured at different `NOT_CRAN` settings — main's NOTE is the `spelling.Rout` diff, which only fires under `NOT_CRAN=true` (M128 lesson); `OK` cannot be worse than any baseline, so the criterion holds either way.
+- 2026-08-21: review checkpoint — AC1-AC4 verified with fresh evidence; AC5 partial (suite re-run and post-fix CI in flight). Fix-now: the CI `lint` failure this gate found (UPPER_CASE constants, renamed to snake_case, fixture byte-identical after regeneration) and blame-history F1 (`data-raw/README.md:86` "15 of 20" -> "15 of 21", stale from this milestone's 21st script). F2 (Unicode bullets vs M35's recorded ASCII choice) and F3 (map widening) go to the maintainer at the approval gate.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
 
 ## Review
 <!-- owner: review · exclusive -->
+
+### Acceptance-criteria evidence (fresh, 2026-08-21)
+
+- AC1 — VERIFIED. `data-raw/oracle-bayesian-vignette.R` (199 lines) is committed and seeded (`fit_seed <- 1L`); `tests/testthat/fixtures/bayesian-vignette-oracle.rds` is 1.3 KB. `test-brms-oracle-map.R` passes 5 assertions including both `expect_setequal` directions. Regenerating after the lint rename produced a BYTE-IDENTICAL fixture (`cmp` clean; `fits`, `custom_prior_warning`, `render_options` all `identical()`), so the generator is deterministic on a fixed seed.
+- AC2 — VERIFIED. `grep -rnE '^[[:space:]]*#>' vignettes/` returns 38 lines (engines.Rmd 18, interval-methods.Rmd 20) and every one falls in a block the test compares whole against a re-render; `test-vignette-transcripts.R` passes 13 assertions. (A first count of 37 was taken while the AC4 plant matrix had a line temporarily deleted; re-measured on a stable tree it is 38.)
+- AC3 — VERIFIED. The two sweeps return 16 digit-bearing lines outside the pinned fences. Ten carry no figure about brms output (citation years/sections, chunk code). The six that do were re-checked mechanically and all agree: MAP 0.241 -> "about 0.24"; glmmTMB REML 0.290 -> "(0.29)"; MAP < REML; HPDI [0.040, 0.601] -> "[0.04, 0.60]"; percentile [0.066, 0.649] -> "[0.07, 0.65]"; HPDI width 0.561 <= percentile 0.583.
+- AC4 — VERIFIED. Plant matrix re-run fresh: baseline GREEN, 16/16 plants RED (4 blocks x changed digit, changed word, removed line, added line), `git status vignettes/` clean afterwards.
+- AC5 — PARTIAL at this checkpoint. `cairn_validate` exit 0 (all checks passed); `air format --check .` clean; `devtools::document()` no diff; `pkgdown::check_pkgdown()` "No problems found"; `lintr::lint_package()` 0 lints; all four `data-raw` checkers exit 0. `R CMD check --as-cran` at `NOT_CRAN=false` returned raw `Status: OK` (implement phase, pre-rename). Full-suite re-run and post-fix CI still in flight.
+
+### Consistency gate
+
+`cairn_validate` exit 0. Toolchain slot: `devtools::document()` no diff; generated files unedited; `pkgdown::check_pkgdown()` clean; `air format --check` clean; `lintr::lint_package()` 0 lints. NEWS.md: no entry -- see finding F4 below, pending triage.
+
+### Findings (independent fresh-context review, 3 lenses)
+
+- [S] prior-PR-comments lens: NO prior-review regression. GitHub inline-comment probe returned `[]`, so the archive was the primary surface; M52's guard-vacuity fix, M118's no-hand-list lesson and M127/M128's raw-Status lesson are all honored rather than unlearned.
+- [S] blame-history F1 -- FIXED NOW. `data-raw/README.md:86` read "the long-sweep scripts (15 of 20)"; this milestone's 21st script made it stale. Verified independently (21 scripts match the guard glob, 15 contain checkpoint logic, the new one does not) and corrected to "15 of 21". Not a registered `record-claims` row, so no checker would have caught it.
+- [S] blame-history F2 -- MAINTAINER CALL, surfaced at the gate. The ASCII->Unicode bullet correction overturns a choice M35 recorded in its commit message ("cli glyphs shown in ASCII fallback", d69f39e).
+- [S] blame-history F3 -- surfaced at the gate. Adding a vignette-transcript fixture to `brms_oracle_map` widens a map M52 built for coverage/bias oracles.
+- CI lint failure (found by this gate, not by a lens) -- FIXED NOW. `lintr::lint_package()` rejected four UPPER_CASE constants in the new generator; every sibling oracle script uses snake_case and `.lintr`'s UPPER_CASE exclusion covers only `data-raw/reviews`. Renamed to `fit_seed`/`out_path`/`render_options`/`render_elements` rather than widening the exclusion; 0 lints, fixture byte-identical.
+

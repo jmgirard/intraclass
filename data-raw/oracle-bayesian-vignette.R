@@ -59,8 +59,8 @@
 stopifnot(requireNamespace("brms", quietly = TRUE))
 devtools::load_all(".", quiet = TRUE)
 
-SEED <- 1L
-OUT <- "tests/testthat/fixtures/bayesian-vignette-oracle.rds"
+fit_seed <- 1L
+out_path <- "tests/testthat/fixtures/bayesian-vignette-oracle.rds"
 
 # The cli rendering mode, not just the width. `print.icc()` draws a cli rule
 # padded to the console width AND uses Unicode box-drawing and bullet glyphs;
@@ -68,7 +68,7 @@ OUT <- "tests/testthat/fixtures/bayesian-vignette-oracle.rds"
 # would compare the vignette's "──" against a rendered "--" and fail for a
 # reason that has nothing to do with the transcript. The fixture carries this
 # set so the generator and the test cannot drift apart.
-RENDER_OPTIONS <- list(
+render_options <- list(
   cli.width = 80L,
   width = 80L,
   cli.unicode = TRUE,
@@ -77,7 +77,7 @@ RENDER_OPTIONS <- list(
 )
 
 # `format.icc()` reads exactly these; nothing else survives into the fixture.
-RENDER_ELEMENTS <- c(
+render_elements <- c(
   "estimates",
   "components",
   "design",
@@ -93,11 +93,11 @@ RENDER_ELEMENTS <- c(
 # strip check below compare two empty vectors and pass vacuously. `cli::cli_fmt()`
 # captures the real print() path.
 render <- function(x) {
-  withr::with_options(RENDER_OPTIONS, cli::cli_fmt(print(x)))
+  withr::with_options(render_options, cli::cli_fmt(print(x)))
 }
 
 strip_to_render_elements <- function(x) {
-  out <- x[RENDER_ELEMENTS]
+  out <- x[render_elements]
   class(out) <- class(x)
   # The stripped object must render identically to the full one, or the fixture
   # would pin something the package never shows a user. The length check is an
@@ -118,7 +118,7 @@ fit_percentile <- suppressWarnings(icc(
   rater,
   engine = "brms",
   type = "agreement",
-  seed = SEED
+  seed = fit_seed
 ))
 
 message("Fitting the HPDI transcript (interval-methods.Rmd) ...")
@@ -130,7 +130,7 @@ fit_hpdi <- suppressWarnings(icc(
   engine = "brms",
   type = "agreement",
   posterior_summary = "hpdi",
-  seed = SEED
+  seed = fit_seed
 ))
 
 # The custom-prior warning fires in icc()'s argument handling, BEFORE the Stan
@@ -141,7 +141,7 @@ message("Capturing the custom-prior warning (engines.Rmd) ...")
 # is rendered, so the options have to wrap the icc() call itself -- rendering a
 # already-built condition under them changes nothing.
 custom_prior_cond <- NULL
-withr::with_options(RENDER_OPTIONS, {
+withr::with_options(render_options, {
   tryCatch(
     withCallingHandlers(
       icc(
@@ -151,7 +151,7 @@ withr::with_options(RENDER_OPTIONS, {
         rater,
         engine = "brms",
         prior = brms::set_prior("normal(0, 0.1)", class = "sd"),
-        seed = SEED
+        seed = fit_seed
       ),
       intraclass_custom_prior = function(w) {
         custom_prior_cond <<- w
@@ -175,8 +175,8 @@ custom_prior_warning <- strsplit(
 fixture <- list(
   generated = Sys.Date(),
   generator = "data-raw/oracle-bayesian-vignette.R",
-  seed = SEED,
-  render_options = RENDER_OPTIONS,
+  seed = fit_seed,
+  render_options = render_options,
   r_version = R.version.string,
   brms_version = as.character(utils::packageVersion("brms")),
   rstan_version = as.character(utils::packageVersion("rstan")),
@@ -188,8 +188,8 @@ fixture <- list(
   custom_prior_classes = class(custom_prior_cond)
 )
 
-saveRDS(fixture, OUT, compress = "xz")
-message(sprintf("wrote %s (%.1f KB)", OUT, file.size(OUT) / 1024))
+saveRDS(fixture, out_path, compress = "xz")
+message(sprintf("wrote %s (%.1f KB)", out_path, file.size(out_path) / 1024))
 
 cat("\n--- percentile render ---\n")
 cat(render(fixture$fits$percentile), sep = "\n")
