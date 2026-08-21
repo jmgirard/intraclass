@@ -54,7 +54,7 @@ attempted, the M52 offline-fixture constraint stands; regenerating any other
 - [x] AC4: For each block AC2 pins, a planted edit of each of these forms reds
       the test: a changed digit, a changed word of message text, a removed
       line, and an added line. Each planted run is recorded in the work log.
-- [ ] AC5: `NOT_CRAN=true CI=true devtools::test()` 0 failures;
+- [x] AC5: `NOT_CRAN=true CI=true devtools::test()` 0 failures;
       `air format --check .` clean; `R CMD check`'s raw `Status:` line no worse
       than main's (read the raw line, never `devtools::check()`'s 0/0/0
       summary — M127/M128 lesson); `pkgdown::check_pkgdown()` clean;
@@ -139,7 +139,7 @@ attempted, the M52 offline-fixture constraint stands; regenerating any other
 - AC2 — VERIFIED. `grep -rnE '^[[:space:]]*#>' vignettes/` returns 38 lines (engines.Rmd 18, interval-methods.Rmd 20) and every one falls in a block the test compares whole against a re-render; `test-vignette-transcripts.R` passes 13 assertions. (A first count of 37 was taken while the AC4 plant matrix had a line temporarily deleted; re-measured on a stable tree it is 38.)
 - AC3 — VERIFIED. The two sweeps return 16 digit-bearing lines outside the pinned fences. Ten carry no figure about brms output (citation years/sections, chunk code). The six that do were re-checked mechanically and all agree: MAP 0.241 -> "about 0.24"; glmmTMB REML 0.290 -> "(0.29)"; MAP < REML; HPDI [0.040, 0.601] -> "[0.04, 0.60]"; percentile [0.066, 0.649] -> "[0.07, 0.65]"; HPDI width 0.561 <= percentile 0.583.
 - AC4 — VERIFIED. Plant matrix re-run fresh: baseline GREEN, 16/16 plants RED (4 blocks x changed digit, changed word, removed line, added line), `git status vignettes/` clean afterwards.
-- AC5 — PARTIAL at this checkpoint. `cairn_validate` exit 0 (all checks passed); `air format --check .` clean; `devtools::document()` no diff; `pkgdown::check_pkgdown()` "No problems found"; `lintr::lint_package()` 0 lints; all four `data-raw` checkers exit 0. `R CMD check --as-cran` at `NOT_CRAN=false` returned raw `Status: OK` (implement phase, pre-rename). Full-suite re-run and post-fix CI still in flight.
+- AC5 — VERIFIED (final, post-fix). `cairn_validate` exit 0 (all checks passed); `air format --check .` clean; `devtools::document()` no diff; `pkgdown::check_pkgdown()` "No problems found"; `lintr::lint_package()` 0 lints; all four `data-raw` checkers exit 0. `R CMD check --as-cran` at `NOT_CRAN=false` re-run on the final branch state: raw `Status: OK`, with `Running 'testthat.R' [584s/393s]` and `checking code files for non-ASCII characters ... OK`. Full suite re-run post-fix: FAIL 0 / ERROR 0 / SKIP 25 / PASS 8263. CI on the PR head: `lint`, `format-check`, `check-references`, `checkpoint-guard`, `pkgdown` all pass; the R-CMD-check matrix and `test-coverage` were still running at gate time and are required green before merge. Note for the record: `OK` beats main's recorded `1 NOTE`, but the two were measured at different `NOT_CRAN` settings — main's NOTE is the `spelling.Rout` diff, which fires only under `NOT_CRAN=true` (M128 lesson); `OK` cannot be worse than any baseline, so the criterion holds either way.
 
 ### Consistency gate
 
