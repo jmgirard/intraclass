@@ -9,7 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M129 | Back the hand-pasted engine transcripts in the vignettes | planned | — | high | milestones/M129-vignette-brms-transcripts.md |
+| M129 | Back the hand-pasted engine transcripts in the vignettes | in-progress | — | high | milestones/M129-vignette-brms-transcripts.md |
 | M130 | Back the interval-methods vignette's claims, and read it through | planned | M129 | high | milestones/M130-interval-methods-claims.md |
 | M131 | Say what each documented method returns, and stop shadowing the shipped dataset | planned | — | high | milestones/M131-rd-value-and-shadowed-example.md |
 | M132 | Make the two prose-only `icc()` argument values reachable from the docs | planned | — | normal | milestones/M132-prose-only-icc-arguments.md |

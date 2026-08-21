@@ -34,7 +34,8 @@ brms_oracle_map <- c(
   "oracle-bayesian-nested.R" = "bayesian-nested-oracle.rds",
   "oracle-bayesian-nested-fixed.R" = "bayesian-nested-fixed-oracle.rds",
   "oracle-bayesian-oneway.R" = "bayesian-oneway-oracle.rds",
-  "oracle-bayesian-replicates.R" = "bayesian-replicates-oracle.rds"
+  "oracle-bayesian-replicates.R" = "bayesian-replicates-oracle.rds",
+  "oracle-bayesian-vignette.R" = "bayesian-vignette-oracle.rds"
 )
 
 data_raw_dir <- testthat::test_path("..", "..", "data-raw")

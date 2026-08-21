@@ -145,3 +145,4 @@ while `multilevel-fixed` / `multilevel-replicates` stay unabbreviated.
 | oracle-bayesian-nested-fixed.R | bayesian-nested-fixed-oracle.rds |
 | oracle-bayesian-oneway.R | bayesian-oneway-oracle.rds |
 | oracle-bayesian-replicates.R | bayesian-replicates-oracle.rds |
+| oracle-bayesian-vignette.R | bayesian-vignette-oracle.rds |
