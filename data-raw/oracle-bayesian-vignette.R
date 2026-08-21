@@ -78,7 +78,14 @@ RENDER_OPTIONS <- list(
 
 # `format.icc()` reads exactly these; nothing else survives into the fixture.
 RENDER_ELEMENTS <- c(
-  "estimates", "components", "design", "k_eff", "k_c_eff", "engine", "ci", "n"
+  "estimates",
+  "components",
+  "design",
+  "k_eff",
+  "k_c_eff",
+  "engine",
+  "ci",
+  "n"
 )
 
 # `print.icc()` emits through cli, and cli writes to its OWN output connection --
@@ -101,17 +108,29 @@ strip_to_render_elements <- function(x) {
   out
 }
 
-message("Fitting the percentile transcript (engines.Rmd, interval-methods.Rmd) ...")
+message(
+  "Fitting the percentile transcript (engines.Rmd, interval-methods.Rmd) ..."
+)
 fit_percentile <- suppressWarnings(icc(
-  ratings, score, subject, rater,
-  engine = "brms", type = "agreement", seed = SEED
+  ratings,
+  score,
+  subject,
+  rater,
+  engine = "brms",
+  type = "agreement",
+  seed = SEED
 ))
 
 message("Fitting the HPDI transcript (interval-methods.Rmd) ...")
 fit_hpdi <- suppressWarnings(icc(
-  ratings, score, subject, rater,
-  engine = "brms", type = "agreement",
-  posterior_summary = "hpdi", seed = SEED
+  ratings,
+  score,
+  subject,
+  rater,
+  engine = "brms",
+  type = "agreement",
+  posterior_summary = "hpdi",
+  seed = SEED
 ))
 
 # The custom-prior warning fires in icc()'s argument handling, BEFORE the Stan
@@ -126,7 +145,10 @@ withr::with_options(RENDER_OPTIONS, {
   tryCatch(
     withCallingHandlers(
       icc(
-        ratings, score, subject, rater,
+        ratings,
+        score,
+        subject,
+        rater,
         engine = "brms",
         prior = brms::set_prior("normal(0, 0.1)", class = "sd"),
         seed = SEED
@@ -145,7 +167,9 @@ stopifnot(!is.null(custom_prior_cond))
 # condition carries a call and a backtrace whose environments would drag the
 # whole fitting frame into the fixture.
 custom_prior_warning <- strsplit(
-  rlang::cnd_message(custom_prior_cond), "\n", fixed = TRUE
+  rlang::cnd_message(custom_prior_cond),
+  "\n",
+  fixed = TRUE
 )[[1]]
 
 fixture <- list(
@@ -167,6 +191,9 @@ fixture <- list(
 saveRDS(fixture, OUT, compress = "xz")
 message(sprintf("wrote %s (%.1f KB)", OUT, file.size(OUT) / 1024))
 
-cat("\n--- percentile render ---\n"); cat(render(fixture$fits$percentile), sep = "\n")
-cat("\n--- hpdi render ---\n"); cat(render(fixture$fits$hpdi), sep = "\n")
-cat("\n--- custom-prior warning ---\n"); cat(custom_prior_warning, sep = "\n")
+cat("\n--- percentile render ---\n")
+cat(render(fixture$fits$percentile), sep = "\n")
+cat("\n--- hpdi render ---\n")
+cat(render(fixture$fits$hpdi), sep = "\n")
+cat("\n--- custom-prior warning ---\n")
+cat(custom_prior_warning, sep = "\n")

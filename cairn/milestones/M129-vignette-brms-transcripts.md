@@ -2,7 +2,7 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M129: Back the hand-pasted engine transcripts in the vignettes
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -37,24 +37,24 @@ attempted, the M52 offline-fixture constraint stands; regenerating any other
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: A seeded, committed `data-raw/` script generates a committed fixture
+- [x] AC1: A seeded, committed `data-raw/` script generates a committed fixture
       under `tests/testthat/fixtures/` holding the brms fit(s) the vignettes'
       pasted blocks display, and `brms_oracle_map`
       (`tests/testthat/test-brms-oracle-map.R:17`) carries the script↔fixture
       pair — that guard's two-sided `expect_setequal` (`:55`, `:58`) fails when
       either side is missing.
-- [ ] AC2: Every line that `grep -rnE '^[[:space:]]*#>' vignettes/` returns
+- [x] AC2: Every line that `grep -rnE '^[[:space:]]*#>' vignettes/` returns
       belongs to a fenced block that a test renders from the committed fixture
       and compares to the vignette source verbatim, as a whole block.
-- [ ] AC3: Every line containing a digit that
+- [x] AC3: Every line containing a digit that
       `sed -n '124,/^## /p' vignettes/engines.Rmd | grep -nE '[0-9]'` and
       `sed -n '307,/^## /p' vignettes/interval-methods.Rmd | grep -nE '[0-9]'`
       return, excluding the fenced blocks AC2 pins, states either no figure
       about brms output or a figure agreeing with those blocks as shipped.
-- [ ] AC4: For each block AC2 pins, a planted edit of each of these forms reds
+- [x] AC4: For each block AC2 pins, a planted edit of each of these forms reds
       the test: a changed digit, a changed word of message text, a removed
       line, and an added line. Each planted run is recorded in the work log.
-- [ ] AC5: `NOT_CRAN=true CI=true devtools::test()` 0 failures;
+- [x] AC5: `NOT_CRAN=true CI=true devtools::test()` 0 failures;
       `air format --check .` clean; `R CMD check`'s raw `Status:` line no worse
       than main's (read the raw line, never `devtools::check()`'s 0/0/0
       summary — M127/M128 lesson); `pkgdown::check_pkgdown()` clean;
@@ -84,9 +84,9 @@ attempted, the M52 offline-fixture constraint stands; regenerating any other
       deliberately wrong block before making it green.
 - [x] T4: Reconcile — correct every vignette block the fixture falsifies,
       correcting the vignette and never the fixture; log each before/after value.
-- [ ] T5: Prose read of the two brms sections; reconcile every digit-bearing
+- [x] T5: Prose read of the two brms sections; reconcile every digit-bearing
       prose line against the corrected blocks.
-- [ ] T6: Planted-defect runs (AC4) and the full gate-lite sweep (AC5).
+- [x] T6: Planted-defect runs (AC4) and the full gate-lite sweep (AC5).
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
@@ -104,6 +104,12 @@ attempted, the M52 offline-fixture constraint stands; regenerating any other
 - 2026-08-21: T3 deliberate narrowing — the LIVE custom-prior warning check compares whitespace-normalized text, not the wrap column, because where rlang breaks lines depends on the rendering context even at a fixed width (the M93 format_inline/format_message distinction). The vignette-vs-fixture comparison stays verbatim; only the extra live drift-guard is normalized.
 - 2026-08-21: T4 done — reconciliation found the three `icc()` transcripts already exact against a fresh fit on a new machine (nothing stale), and ONE real discrepancy in the custom-prior warning block: `vignettes/engines.Rmd` pasted ASCII `i` bullets on two lines where the package emits Unicode `ℹ` (its `!` bullet already matched). Corrected the vignette, not the fixture: `#> i A vague or flat SD prior...` -> `#> ℹ A vague or flat SD prior...` and `#> i Leave \`prior\` unset...` -> `#> ℹ Leave \`prior\` unset...`.
 - 2026-08-21: implement gate chose, per the maintainer's three answers — re-render the stored fits through the package's CURRENT `print()` (over storing rendered text, which would pin only that two frozen files agree); pin the custom-prior warning from the fixture AND additionally assert the live render (over a live-only pin needing an AC2 amendment); and add a prose note that sampler divergences are omitted (over pasting a seed- and platform-dependent divergence count into the blocks).
+- 2026-08-21: T5 done — AC3's two sweeps return 16 digit-bearing lines (9 in `engines.Rmd`'s brms section, 7 in `interval-methods.Rmd`'s posterior section). Ten are citation years/sections or code inside the chunks; six state figures, and all six agree, verified mechanically rather than by eye: brms MAP ICC(A,1) 0.241 -> "about 0.24"; glmmTMB REML ICC(A,1) 0.290 -> "(0.29)"; MAP below REML (0.241 < 0.290); HPDI [0.040, 0.601] -> "[0.04, 0.60]"; percentile [0.066, 0.649] -> "[0.07, 0.65]"; HPDI no wider than percentile (width 0.561 vs 0.583).
+- 2026-08-21: T5 prose read — added the maintainer's chosen divergence note to `vignettes/engines.Rmd` (both fits emit "There were 1 divergent transitions after warmup" and "Examine the pairs() plot", which the blocks do not show); no count is stated, since divergences are seed- and platform-dependent.
+- 2026-08-21: T5 prose read, out-of-AC finding VERIFIED not changed — `engines.Rmd`'s "collapsing the ICC to nearly nothing" describes a fit whose output no block shows, so no criterion reaches it and the fixture cannot check it (the generator unwinds before that fit completes). Ran it once: with `normal(0, 0.1)` the subject and rater components are both exactly 0 and all four ICCs are 0 (intervals [1.29e-06, 0.00798] and [5.14e-06, 0.0312]). The claim is true and if anything understates. Permanently backing it would need a third Stan fit and an AC2 widening; left as prose, offered to the review as a candidate row.
+- 2026-08-21: T6 done — AC4's matrix is 16 plants (4 blocks x 4 forms: changed digit, changed word, removed line, added line). Baseline GREEN, all 16 RED, `git status vignettes/` clean afterwards with no residue.
+- 2026-08-21: T6 DEFECT IN THIS MILESTONE'S OWN GUARD, found by the gate and fixed — the first `R CMD check --as-cran` returned `Status: 1 ERROR`, worse than main's `1 NOTE`. `R CMD check` runs the suite against the INSTALLED package, where `../../vignettes` does not exist, so `list.files()` returned empty and `readLines()` errored: four failures and the ERROR from one cause. The pins written to protect the vignettes would have turned CI red. Fixed with the repo's existing idiom (`test-brms-oracle-map.R` skips the same way when `data-raw/` is absent) and the resulting coverage limit written into the test header: the guard bites on local `devtools::test()`, at the review gate, and in the coverage job (which runs from source), but NOT inside the CI `R CMD check` job.
+- 2026-08-21: AC5 evidence — `NOT_CRAN=true CI=true` full suite FAIL 0 / ERROR 0 / PASS 8263 (main: 8250; the 13 new assertions account for the difference); `air format --check .` clean; `pkgdown::check_pkgdown()` "No problems found"; `cairn_validate` exit 0 on all 16 checks; `R CMD check --as-cran` at `NOT_CRAN=false` **Status: OK** with `Running 'testthat.R' [245s/123s] OK`. Note for review: `OK` beats main's recorded `1 NOTE`, but the two were measured at different `NOT_CRAN` settings — main's NOTE is the `spelling.Rout` diff, which only fires under `NOT_CRAN=true` (M128 lesson); `OK` cannot be worse than any baseline, so the criterion holds either way.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

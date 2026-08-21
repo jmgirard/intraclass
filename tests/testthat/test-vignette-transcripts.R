@@ -23,9 +23,25 @@
 # such run is hand-pasted by construction. A new unpinned block therefore fails
 # here instead of being silently skipped (the M118 hand-list lesson).
 
-fixture <- readRDS(testthat::test_path("fixtures", "bayesian-vignette-oracle.rds"))
+fixture <- readRDS(testthat::test_path(
+  "fixtures",
+  "bayesian-vignette-oracle.rds"
+))
 
+# The vignette SOURCES live in the source tree only. `R CMD check` runs the
+# suite against the installed package, where `../../vignettes` does not exist,
+# so this file skips there -- the same tier `test-brms-oracle-map.R` uses for
+# `data-raw/`. It therefore bites on every local `devtools::test()` run, at the
+# review gate, and in the coverage job (which runs from source), but NOT inside
+# the CI `R CMD check` job.
 vignette_dir <- testthat::test_path("..", "..", "vignettes")
+
+skip_without_vignette_sources <- function() {
+  testthat::skip_if_not(
+    dir.exists(vignette_dir),
+    "vignettes/ not present (running against the built package)"
+  )
+}
 
 # Every maximal run of consecutive `#>` lines in a vignette source, with the
 # comment prefix stripped. Returns a list of character vectors.
@@ -52,16 +68,21 @@ render_under_fixture_options <- function(x) {
 # The expected transcripts, each named for the block it pins.
 expected_transcripts <- function() {
   list(
-    "engines.Rmd / interval-methods.Rmd: percentile credible interval" =
-      render_under_fixture_options(fixture$fits$percentile),
-    "interval-methods.Rmd: HPDI credible interval" =
-      render_under_fixture_options(fixture$fits$hpdi),
-    "engines.Rmd: the custom-prior warning" =
-      c("Warning message:", fixture$custom_prior_warning)
+    "engines.Rmd / interval-methods.Rmd: percentile credible interval" = render_under_fixture_options(
+      fixture$fits$percentile
+    ),
+    "interval-methods.Rmd: HPDI credible interval" = render_under_fixture_options(
+      fixture$fits$hpdi
+    ),
+    "engines.Rmd: the custom-prior warning" = c(
+      "Warning message:",
+      fixture$custom_prior_warning
+    )
   )
 }
 
 test_that("every hand-pasted vignette block matches a rendered transcript", {
+  skip_without_vignette_sources()
   skip_if_not_installed("withr")
 
   vignettes <- list.files(vignette_dir, pattern = "\\.Rmd$", full.names = TRUE)
@@ -76,7 +97,9 @@ test_that("every hand-pasted vignette block matches a rendered transcript", {
     expect_true(
       any(vapply(expected, identical, logical(1), y = b)),
       label = paste0(
-        "pasted block starting \"", b[[1]], "\" matches no rendered transcript"
+        "pasted block starting \"",
+        b[[1]],
+        "\" matches no rendered transcript"
       )
     )
   }
@@ -93,6 +116,7 @@ test_that("every hand-pasted vignette block matches a rendered transcript", {
 })
 
 test_that("the percentile transcript appears in both articles that show it", {
+  skip_without_vignette_sources()
   # engines.Rmd's `brms` chunk and interval-methods.Rmd's `posterior` chunk are
   # the SAME call, so they must show the same output; a correction applied to
   # one and not the other is the failure this pins.
@@ -122,7 +146,10 @@ test_that("the fixture's custom-prior warning is still what the package emits", 
     tryCatch(
       withCallingHandlers(
         icc(
-          ratings, score, subject, rater,
+          ratings,
+          score,
+          subject,
+          rater,
           engine = "brms",
           prior = brms::set_prior("normal(0, 0.1)", class = "sd"),
           seed = fixture$seed
@@ -150,5 +177,8 @@ test_that("the fixture's custom-prior warning is still what the package emits", 
   normalize_ws <- function(x) {
     gsub("[[:space:]]+", " ", trimws(paste(x, collapse = " ")))
   }
-  expect_identical(normalize_ws(live), normalize_ws(fixture$custom_prior_warning))
+  expect_identical(
+    normalize_ws(live),
+    normalize_ws(fixture$custom_prior_warning)
+  )
 })
