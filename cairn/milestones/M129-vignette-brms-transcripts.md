@@ -112,6 +112,21 @@ attempted, the M52 offline-fixture constraint stands; regenerating any other
 - 2026-08-21: AC5 evidence — `NOT_CRAN=true CI=true` full suite FAIL 0 / ERROR 0 / PASS 8263 (main: 8250; the 13 new assertions account for the difference); `air format --check .` clean; `pkgdown::check_pkgdown()` "No problems found"; `cairn_validate` exit 0 on all 16 checks; `R CMD check --as-cran` at `NOT_CRAN=false` **Status: OK** with `Running 'testthat.R' [245s/123s] OK`. Note for review: `OK` beats main's recorded `1 NOTE`, but the two were measured at different `NOT_CRAN` settings — main's NOTE is the `spelling.Rout` diff, which only fires under `NOT_CRAN=true` (M128 lesson); `OK` cannot be worse than any baseline, so the criterion holds either way.
 - 2026-08-21: review checkpoint — AC1-AC4 verified with fresh evidence; AC5 partial (suite re-run and post-fix CI in flight). Fix-now: the CI `lint` failure this gate found (UPPER_CASE constants, renamed to snake_case, fixture byte-identical after regeneration) and blame-history F1 (`data-raw/README.md:86` "15 of 20" -> "15 of 21", stale from this milestone's 21st script). F2 (Unicode bullets vs M35's recorded ASCII choice) and F3 (map widening) go to the maintainer at the approval gate.
 
+- [O] diff-bug F1 -- FIXED NOW. Blocks were matched as an unordered multiset, so swapping `interval-methods.Rmd`'s percentile and HPDI blocks left the multiset unchanged and the suite green, showing HPDI numbers under a percentile call. Verified the premise (the two files' first blocks are byte-identical, so equality matching cannot distinguish position), rewrote to per-file ORDERED matching, planted that exact swap and confirmed it now reds.
+- [O] diff-bug F2 -- FIXED NOW. `tryCatch(error = function(e) NULL)` swallowed every error, so renaming the `intraclass_custom_prior` class would have let `icc()` proceed to a live Stan compile inside the suite, reported as "cond is NULL". Both test and generator now re-raise anything that is not their own sentinel.
+- [O] diff-bug F3 -- FIXED NOW. The test enumerated vignettes with a non-recursive, case-sensitive `list.files()` while AC2's domain is a recursive grep; a `vignettes/children/*.Rmd` or `*.Rmd.orig` would have escaped the pin. Now `recursive = TRUE`, `\\.[Rr]md$`.
+- [O] diff-bug F4 -- FIXED NOW, and it is a CONSISTENCY-GATE MISS from the implement phase, not a lens nicety: the profile's gate slot requires a `NEWS.md` entry for user-visible changes and this diff ships vignette prose. Added under `## Documentation`, no milestone numbers in user-facing text.
+- [O] diff-bug F6 -- FIXED NOW. Missing `skip_if_not_installed("withr")`.
+- [O] diff-bug F5/F7 -- FIXED NOW (comment accuracy). The header claimed the test matches every line against a rendered transcript, untrue of the `Warning message:` banner (R's console framing, a literal in both article and expectation); and the wrap comment overstated what is pinned, since both compared artifacts are frozen. Both reworded to state the real limit.
+- [O] diff-bug F8 -- LOGGED, no change. The eight-element strip is verified in the generator, not the suite; a future ninth element read by `format.icc()` would red with a confusing transcript diff rather than a clear message. Fail-loud, so a note.
+- [O] diff-bug F9 -- LOGGED (stated here at the lens's request). The pins do not run inside the CI `R CMD check` job; coverage is local `devtools::test()`, this review gate, and the source-run coverage job.
+- [O] diff-bug F10 -- LOGGED. `engines.Rmd`'s "collapsing the ICC to nearly nothing" remains unbacked by any criterion or fixture; verified once by hand this milestone (components exactly 0). Offered to the maintainer as a candidate row.
+- [O] diff-bug F11 -- RESOLVED. Working-tree drift versus HEAD; the rename was committed at f4fd05b.
+
+### Post-fix verification (2026-08-21)
+
+`air format --check .` clean; `lintr::lint_package()` 0 lints; AC4 plant matrix re-run against the REWRITTEN test 16/16 RED with 0 probes failing to bite; full suite `NOT_CRAN=true CI=true` FAIL 0 / ERROR 0 / SKIP 25 / PASS 8263; `cairn_validate` all checks passed. The F1 swap probe (not part of the 16) reds on the rewritten test and passed on the old one.
+
 ## Decisions
 <!-- owner: implement / review · append-only -->
 

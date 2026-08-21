@@ -140,6 +140,7 @@ message("Capturing the custom-prior warning (engines.Rmd) ...")
 # cli formats a condition's message when the condition is CREATED, not when it
 # is rendered, so the options have to wrap the icc() call itself -- rendering a
 # already-built condition under them changes nothing.
+sentinel <- "m129: captured the prior warning, unwinding before the fit"
 custom_prior_cond <- NULL
 withr::with_options(render_options, {
   tryCatch(
@@ -155,10 +156,16 @@ withr::with_options(render_options, {
       ),
       intraclass_custom_prior = function(w) {
         custom_prior_cond <<- w
-        stop("captured; unwinding before the fit", call. = FALSE)
+        stop(sentinel, call. = FALSE)
       }
     ),
-    error = function(e) NULL
+    # Re-raise anything that is not our own unwind: swallowing every error would
+    # hide a real abort behind the stopifnot() below.
+    error = function(e) {
+      if (!identical(conditionMessage(e), sentinel)) {
+        stop(e)
+      }
+    }
   )
 })
 stopifnot(!is.null(custom_prior_cond))
