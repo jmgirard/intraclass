@@ -1033,6 +1033,7 @@ test_that("interval-methods.Rmd: the lavaan bootstrap's fences are the ones the 
   # Available: single-level complete, at either rater mode.
   for (rm in c("random", "fixed")) {
     td <- lv(ratings, raters = rm)
+    expect_gt(nrow(td), 0L) # anti-vacuity: a zero-row tidy passes both below free
     expect_true(all(td$method == "bootstrap"), info = rm)
     expect_false(any(is.na(td$conf.low)), info = rm)
   }
@@ -1050,6 +1051,7 @@ test_that("interval-methods.Rmd: the lavaan bootstrap's fences are the ones the 
 
   # Available: two-level, balanced clusters, random raters.
   td_ml <- lv(ml, cluster = cluster)
+  expect_gt(nrow(td_ml), 0L) # anti-vacuity, as above
   expect_true(all(td_ml$method == "bootstrap"))
   expect_false(any(is.na(td_ml$conf.low)))
 
@@ -1268,6 +1270,10 @@ test_that("interval-methods.Rmd: the default under-covers silently -- no abort, 
   # verdict is not monotone in that variance, so the mismatch would not show
   # up in the comparison itself. Assert the match (M130 return 2, T13: the
   # planted `sqrt(2)` -> `sqrt(0.2)` change survived the width comparison).
+  # `tolerance` is RELATIVE here, testthat 3e's sense -- not an absolute 0.1.
+  # Measured on this seed pair: 0.0844 relative difference at the matched
+  # `sqrt(2)`, against 0.704 under the `sqrt(0.2)` plant, so the plant sits
+  # an order of magnitude outside the bar (M130 review pass 3, P4).
   expect_equal(td_n$estimate[1], td$estimate[1], tolerance = 0.1)
   expect_lte(
     td$conf.high[1] - td$conf.low[1],
@@ -1630,8 +1636,12 @@ test_that("interval-methods.Rmd: the between-grid gap is mostly design points, w
   # "Restricting the larger grid to the smaller one's design points closes most
   # of that gap" ...
   expect_lt(gap_restricted, gap_pooled / 2)
-  # ... "and leaves a remainder": the gap does not vanish.
-  expect_gt(gap_restricted, 0)
+  # ... "and leaves a remainder": the gap does not merely fail to be zero, it
+  # stays substantial. The floor is decades below the measured 0.005987 rather
+  # than the bare `> 0` any floating-point difference satisfies, the same
+  # realization-vs-property distinction the separation floor below draws
+  # (M130 review pass 3, P7).
+  expect_gt(gap_restricted, 1e-4)
 
   # "two separate simulations that mostly disagree at the design points they
   # share, agreeing closely at only a couple of them". Two things are claimed
@@ -1655,11 +1665,15 @@ test_that("interval-methods.Rmd: the between-grid gap is mostly design points, w
   expect_gt(min(d[d >= 1e-9]), 1e-6)
 })
 
-# Every random-generator function called anywhere inside `expr`, namespace-
-# qualified calls included (`stats::rnorm` resolves to "rnorm"). Mirrors the
-# walker `data-raw/m116-classical-width-comparison.R` and
+# Every random-generator function called anywhere inside `expr` whose name
+# matches `^r[a-z]+$`, namespace-qualified calls included (`stats::rnorm`
+# resolves to "rnorm"). Mirrors the walker
+# `data-raw/m116-classical-width-comparison.R` and
 # `test-m118-both-components-dgp.R` use; kept local so this file's assertion
-# does not depend on either of them loading.
+# does not depend on either of them loading. The name filter is a HEURISTIC,
+# not a proof: `sample()` and `arima.sim()` are invisible to it, so a count of
+# zero means "no `r*`-spelled draw", never "no draw at all"
+# (M130 review pass 3, P8).
 vc_rng_calls <- function(expr) {
   out <- character(0)
   walk <- function(e) {
@@ -1702,8 +1716,9 @@ test_that("interval-methods.Rmd: the two subject-effect grids draw their errors 
   )
   # `data-raw/` is `.Rbuildignore`d, so this leg cannot run inside a built
   # package. That is structural for a claim ABOUT a generating script, and it
-  # is the same fence `test-m118-both-components-dgp.R` sits behind; the leg
-  # below, which reads a committed fixture, does ship.
+  # is the same fence `test-m118-both-components-dgp.R` sits behind. The
+  # committed-fixture cross-check is its own unfenced block two tests below,
+  # so the third-grid claim keeps one assertion inside a built package.
   skip_if_not(all(file.exists(paths)), "data-raw/ absent from a built package")
 
   for (path in paths) {
@@ -1744,11 +1759,11 @@ test_that("interval-methods.Rmd: the two subject-effect grids draw their errors 
     err_calls <- vc_rng_calls(error_rhs)
     expect_gt(length(err_calls), 0L)
     expect_setequal(unique(err_calls), "rnorm")
-    # Nothing outside those two right-hand sides smuggles in a third draw. The
-    # scan is over the WHOLE body, not only its assignments: the earlier form
-    # could not see a draw inside a trailing bare `data.frame(...)` return, a
-    # blind spot in a check whose own comment called itself exhaustive
-    # (M130 return 2, O11).
+    # Nothing outside those two right-hand sides smuggles in a third
+    # `r*`-spelled draw. The scan is over the WHOLE body, not only its
+    # assignments: the earlier form could not see a draw inside a trailing bare
+    # `data.frame(...)` return (M130 return 2, O11). It is bounded by the
+    # walker's name filter, not exhaustive over every generator (P8).
     all_calls <- vc_rng_calls(body(eval(gen)))
     expect_identical(
       length(all_calls),
@@ -1804,10 +1819,18 @@ test_that("interval-methods.Rmd: the third grid draws both components from the f
   for (nm in c("a", "e")) {
     expect_match(rhs(nm), "draw_standard\\([^)]*\\bdist\\b", info = nm)
   }
-  # And no draw anywhere in the body bypasses `draw_standard()`.
+  # And no `r*`-spelled draw anywhere in the body bypasses `draw_standard()`
+  # -- the fence the local walker's name filter can carry, no wider.
   expect_length(vc_rng_calls(body(eval(gen))), 0L)
+})
 
-  # Cross-check: the shipped fixture's header states what the body does.
+test_that("interval-methods.Rmd: the third grid's shipped fixture states both components", {
+  # The one leg of the third-grid claim that runs inside a BUILT package. Both
+  # blocks above are fenced behind `.Rbuildignore`d `data-raw/`, so while they
+  # were fenced together article lines 207-212 had no shipped assertion at all
+  # (M130 review pass 3, P3). This leg asserts what the committed fixture's
+  # header SAYS -- weaker than the parsed-body fence above, which is why it is
+  # a cross-check and not a replacement, and why it carries no `skip_if_not()`.
   res <- utils::head(
     readLines(
       testthat::test_path("fixtures", "width-reversal-by-cell.tsv"),

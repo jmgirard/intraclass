@@ -394,9 +394,12 @@
 #'   otherwise). Both return a finite interval at the near-zero-ICC boundary
 #'   where the Monte-Carlo default aborts -- with one asymmetry: on data with no
 #'   between-subject variance at all, `"burch"` aborts (its kurtosis
-#'   standardization divides by zero there) while `"searle"` still returns its
-#'   attained minimum -- and neither resamples, so `mc_samples`, `boot_samples`,
-#'   and `seed` do not apply.
+#'   standardization divides by zero there) while `"searle"` still returns an
+#'   interval. Read that interval carefully: the single-rater coefficient gets
+#'   the attained minimum, while the averaged projection carries that minimum
+#'   through the Spearman-Brown pole to `-Inf`, which a default call prints
+#'   beside it. Neither resamples, so `mc_samples`, `boot_samples`, and `seed`
+#'   do not apply.
 #'   `"searle"` is the exact-F pivot (Searle 1971, Table 9.14; McGraw & Wong
 #'   1996, Table 7): **exact under normality**, and best-calibrated when the data
 #'   are approximately normal. `"burch"` is the REML-based, kurtosis-adjusted

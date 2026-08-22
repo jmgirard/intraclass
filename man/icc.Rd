@@ -285,9 +285,12 @@ intervals, also \strong{only for the balanced one-way random design} (they abort
 otherwise). Both return a finite interval at the near-zero-ICC boundary
 where the Monte-Carlo default aborts -- with one asymmetry: on data with no
 between-subject variance at all, \code{"burch"} aborts (its kurtosis
-standardization divides by zero there) while \code{"searle"} still returns its
-attained minimum -- and neither resamples, so \code{mc_samples}, \code{boot_samples},
-and \code{seed} do not apply.
+standardization divides by zero there) while \code{"searle"} still returns an
+interval. Read that interval carefully: the single-rater coefficient gets
+the attained minimum, while the averaged projection carries that minimum
+through the Spearman-Brown pole to \code{-Inf}, which a default call prints
+beside it. Neither resamples, so \code{mc_samples}, \code{boot_samples}, and \code{seed}
+do not apply.
 \code{"searle"} is the exact-F pivot (Searle 1971, Table 9.14; McGraw & Wong
 1996, Table 7): \strong{exact under normality}, and best-calibrated when the data
 are approximately normal. \code{"burch"} is the REML-based, kurtosis-adjusted

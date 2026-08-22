@@ -414,9 +414,10 @@
   `?d_study`, matching the one `autoplot()` on an `icc` fit already had.
 * The *Confidence-interval methods* article's quantified claims are now backed
   by tests, and reading it through found three of them wrong. It said the
-  Monte-Carlo and parametric-bootstrap intervals in its side-by-side table agree
-  on ICC(A,k) as a pair, where only the two upper bounds round alike at the
-  table's own two decimals. It said the `"lavaan"` engine offers Monte-Carlo
+  Monte-Carlo and parametric-bootstrap upper bounds in its side-by-side table
+  coincide, where at the table's own two decimals only ICC(A,k)'s round alike,
+  and the bootstrap's upper bounds do not all fall on the same side of the
+  Monte-Carlo ones. It said the `"lavaan"` engine offers Monte-Carlo
   intervals only, where that engine bootstraps complete data, and a multilevel
   lavaan fit needs balanced clusters and random raters besides. And it described
   `"searle"` at zero between-subject variance as returning its attained minimum,
