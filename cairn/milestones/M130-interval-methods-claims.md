@@ -2,7 +2,7 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M130: Back the interval-methods vignette's claims, and read it through
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate -->
 - **Depends on:** M129   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -186,6 +186,7 @@ and the checker-regress shape; the other six vignettes' prose → M48's check pa
 - 2026-08-21: T14 AC1 FINAL LEDGER, disposition (f) — incidental, 3 of the 6 permitted — "the cost of a full refit per resample, so it is far slower." [full] (L42); "drawn from most of all — and you should not pick between" [all] (L224); "rater = factor(rep(seq_len(n_r), each = n_s))," [each] (L303). Reasons unchanged: "full" modifies "refit" and quantifies nothing about package behaviour; "all" sits in the idiom "most of all"; "each" is the `rep(..., each = n_s)` argument inside a code chunk, the only matched line inside one. No line takes (c), (d) or (e).
 - 2026-08-21: T14 gate on return 2, all clean. `NOT_CRAN=true CI=true devtools::test()`: 0 failures, 0 errors, 8497 passing, 25 skipped; the only 2 warnings are the same pre-existing pair outside this diff (`test-icc-lavaan-multilevel.R:402`, `test-icc-type-vector.R:286`). `air format --check .` clean. `lintr::lint_package()` 0 lints. `pkgdown::check_pkgdown()` "No problems found"; `docs/` deleted and `build_site()` re-run from scratch, exit 0. AC4 re-resolved against that HTML: the sweep returns the same 17 unique targets and all 17 resolve as emitted `id=` attributes. `urlchecker::url_check()` all 15 URLs correct. `cairn_validate` exit 0, all checks passed, one advisory (14 tasks against the >10 split tripwire — the two defect returns' repair tasks, not new scope).
 - 2026-08-21: T14 `R CMD check --as-cran` at `NOT_CRAN=false`, TinyTeX on PATH: 0 ERRORs, 0 WARNINGs, raw `Status: 1 NOTE`. The NOTE is the `checking tests` leg comparing `spelling.Rout` against a `spelling.Rout.save` that a prior `spelling::spell_check_test()` run left in the check directory; it is NOT this branch's. Measured: `spelling::spell_check_package(vignettes = TRUE)` returns the same 28 words on this branch and on an `origin/main` tree extracted with `git archive` — identical sets, no word added by the NEWS bullet or the article rewords. The M117 width guard passes on the return's article change: the O3 reword adds no figure to a width neighbourhood. `origin/main` is being checked in this same shell for the raw-`Status` comparison AC6 asks for.
+- 2026-08-21: T14 `origin/main` checked in this SAME shell for the AC6 comparison — extracted with `git archive` into a scratch tree and run at `NOT_CRAN=false` with `--as-cran` and TinyTeX on PATH — raw `Status: 1 NOTE`, the identical result the branch returns, and its log carries the same `spelling.Rout`/`spelling.Rout.save` diff. So the branch is no worse than main, measured rather than reasoned, and the single NOTE is the environment's, not this work's. All tasks checked; status to review.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
