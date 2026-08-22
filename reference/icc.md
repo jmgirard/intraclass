@@ -350,8 +350,11 @@ icc(
   interval at the near-zero-ICC boundary where the Monte-Carlo default
   aborts – with one asymmetry: on data with no between-subject variance
   at all, `"burch"` aborts (its kurtosis standardization divides by zero
-  there) while `"searle"` still returns its attained minimum – and
-  neither resamples, so `mc_samples`, `boot_samples`, and `seed` do not
+  there) while `"searle"` still returns an interval. Read that interval
+  carefully: the single-rater coefficient gets the attained minimum,
+  while the averaged projection carries that minimum through the
+  Spearman-Brown pole to `-Inf`, which a default call prints beside it.
+  Neither resamples, so `mc_samples`, `boot_samples`, and `seed` do not
   apply. `"searle"` is the exact-F pivot (Searle 1971, Table 9.14;
   McGraw & Wong 1996, Table 7): **exact under normality**, and
   best-calibrated when the data are approximately normal. `"burch"` is
@@ -860,11 +863,11 @@ icc(ratings, score, subject, rater, seed = 1)
 #> 
 #>   index     estimate   95% CI
 #>   Absolute agreement
-#>   ICC(A,1)     0.290   [0.050, 0.712]
-#>   ICC(A,k)     0.620   [0.173, 0.908]
+#>   ICC(A,1)     0.290   [0.050, 0.706]
+#>   ICC(A,k)     0.620   [0.175, 0.906]
 #>   Consistency
-#>   ICC(C,1)     0.715   [0.335, 0.925]
-#>   ICC(C,k)     0.909   [0.668, 0.980]
+#>   ICC(C,1)     0.715   [0.339, 0.924]
+#>   ICC(C,k)     0.909   [0.672, 0.980]
 #> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)

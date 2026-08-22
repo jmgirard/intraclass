@@ -120,19 +120,26 @@ slower.</p>
 <span><span class="co">#&gt;      index estimate           mc    bootstrap</span></span>
 <span><span class="co">#&gt; 1 ICC(A,1)    0.290 [0.05, 0.71] [0.02, 0.72]</span></span>
 <span><span class="co">#&gt; 2 ICC(A,k)    0.620 [0.17, 0.91] [0.09, 0.91]</span></span>
-<span><span class="co">#&gt; 3 ICC(C,1)    0.715 [0.33, 0.93] [0.15, 0.90]</span></span>
+<span><span class="co">#&gt; 3 ICC(C,1)    0.715 [0.34, 0.92] [0.15, 0.90]</span></span>
 <span><span class="co">#&gt; 4 ICC(C,k)    0.909 [0.67, 0.98] [0.41, 0.97]</span></span></code></pre></div>
-<p>The point estimates are identical (same fit) and the upper bounds
-coincide; the bootstrap’s lower bounds run a little lower here, because
-this is a very small design (six subjects) and the bootstrap’s lower
-tail is noisier than the covariance-based Monte-Carlo draw. The two
-methods can diverge more where the asymptotics are strained — near the
-zero-variance boundary, and for the multilevel designs (more variance
-components, often few clusters), where the bootstrap’s cluster-level
-interval in particular carries more resampling noise. The bootstrap is
-available for every design the <code>"glmmTMB"</code> and
-<code>"lme4"</code> engines fit; <code>"lavaan"</code> supports
-Monte-Carlo only. Raise <code>boot_samples</code> (default
+<p>The point estimates are identical (same fit). The bootstrap’s lower
+bounds run markedly lower, because this is a very small design (six
+subjects) and the bootstrap’s lower tail is noisier than the
+covariance-based Monte-Carlo draw. Its upper bounds sit close to the
+Monte-Carlo ones — close enough that ICC(A,k)’s two upper bounds round
+alike above — but they are not identical, and they do not all fall on
+the same side. The two methods can diverge more where the asymptotics
+are strained — near the <a href="glossary.html#zero-variance-boundary">zero-variance boundary</a>,
+and for the multilevel designs (more <a href="glossary.html#variance-component">variance components</a>, often
+few clusters), where the bootstrap’s cluster-level interval in
+particular carries more resampling noise. The bootstrap is available for
+every design the <code>"glmmTMB"</code> and <code>"lme4"</code> engines
+fit. The <code>"lavaan"</code> engine bootstraps complete data, and a
+multilevel lavaan fit needs balanced clusters and random raters besides;
+anywhere off those fences lavaan is Monte-Carlo only — resamples cannot
+reproduce a missingness pattern, the two-level factory reads the raw
+rater component and is random-only, and the two-level bootstrap was
+validated on balanced clusters. Raise <code>boot_samples</code> (default
 <code>999</code>) for a smoother interval at proportionally more
 cost.</p>
 <div class="section level3">
@@ -228,9 +235,9 @@ through the same Spearman-Brown image as <code>"npbootstrap"</code>. The
 interval</strong></a> (<code>"searle"</code>; Searle 1971, the McGraw
 &amp; Wong 1996 Table 7 limits) is exact under normality and
 best-calibrated when the data are approximately normal. The <a href="glossary.html#burch-interval"><strong>Burch interval</strong></a>
-(<code>"burch"</code>; Burch 2011) is REML-based and kurtosis-adjusted:
-its width tracks the data’s tail weight, which buys it some robustness
-to mild non-normality. It is not, however, a remedy for heavy tails: on
+(<code>"burch"</code>; Burch 2011) is <a href="glossary.html#reml">REML</a>-based and kurtosis-adjusted: its
+width tracks the data’s tail weight, which buys it some robustness to
+mild non-normality. It is not, however, a remedy for heavy tails: on
 strongly skewed subject effects it under-covers about as badly as the
 default (see <a href="#when-the-default-under-covers">When the default
 under-covers</a>).</p>
@@ -331,17 +338,18 @@ normal, and that is not an incidental detail. Burch’s own
 expected-length comparison — which is against this very exact-F interval
 — is kurtosis-conditional: he finds his interval shorter for
 light-tailed data but <em>wider</em> for symmetric heavy-tailed data,
-measuring with both the subject effects and the errors non-normal. A
-third grid now measures that case here. What <code>"burch"</code> does
-against <code>"searle"</code> depends on what the residual is drawn
-from, and the three grids now measure that: the two grids that vary only
-the subject effect put it narrower nearly everywhere, while the third,
-which draws the residual from the same family as the subject effect,
-puts it wider at every symmetric heavy-tailed family measured (a median
-width ratio of 1.2963 at t(5) with 100 subjects) and narrower at every
-lighter-tailed one, the normal included. So the honest summary is that
-the ordering depends on the data — on what the residual is drawn from
-most of all — and you should not pick between them on width.</p>
+measuring with the subject effects and the errors alike drawn from the
+studied family. A third grid now measures that case here. What
+<code>"burch"</code> does against <code>"searle"</code> depends on what
+the residual is drawn from, and the three grids now measure that: the
+two grids that vary only the subject effect put it narrower nearly
+everywhere, while the third, which draws the residual from the same
+family as the subject effect, puts it wider at every symmetric
+heavy-tailed family measured (a median width ratio of 1.2963 at t(5)
+with 100 subjects) and narrower at every lighter-tailed one, the normal
+included. So the honest summary is that the ordering depends on the data
+— on what the residual is drawn from most of all — and you should not
+pick between them on width.</p>
 <p>Prefer <code>"searle"</code>: across every distribution family in
 that skew study it landed closer to nominal coverage in most cells,
 heavy-tailed ones included. What <code>"burch"</code> buys is dipping
@@ -351,8 +359,11 @@ default is a finite, well-calibrated interval at the near-zero-ICC
 boundary where the Monte-Carlo default aborts. One asymmetry between the
 siblings: on data with <em>no</em> between-subject variance at all,
 <code>"burch"</code> aborts (its kurtosis standardization divides by
-zero there) while <code>"searle"</code> still returns its attained
-minimum.</p>
+zero there) while <code>"searle"</code> still returns an interval. Read
+that interval carefully: the single-rater coefficient gets the attained
+minimum, and the averaged projection carries that minimum through the
+Spearman-Brown pole to negative infinity, which a default call prints
+beside it.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, model <span class="op">=</span> <span class="st">"oneway"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>,</span>
@@ -394,7 +405,7 @@ profile-likelihood interval</strong></a> of Xiao &amp; Liu (2013) is the
 two-way counterpart: it serves the <strong>balanced, complete two-way
 random absolute-agreement</strong> ICC(A,1), with ICC(A,k) and any
 numeric-<code>unit</code> projection its pole-safe Spearman-Brown image,
-and aborts on any other design, on consistency or fixed raters, and on
+and aborts on any other design, on <a href="glossary.html#consistency">consistency</a> or fixed raters, and on
 unbalanced or incomplete data. It is a deterministic closed form — no
 resampling, no <code>seed</code>. Its calibration fixes two fences:
 <code>conf_level</code> must be 0.90, 0.95, or 0.99 (each level carries
@@ -435,7 +446,7 @@ balanced two-way design inside it:</p>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt;      index estimate   montecarlo          mpl</span></span>
 <span><span class="co">#&gt; 1 ICC(A,1)    0.709 [0.47, 0.84] [0.42, 0.87]</span></span>
-<span><span class="co">#&gt; 2 ICC(A,k)    0.907 [0.78, 0.96] [0.75, 0.96]</span></span></code></pre></div>
+<span><span class="co">#&gt; 2 ICC(A,k)    0.907 [0.78, 0.95] [0.75, 0.96]</span></span></code></pre></div>
 <p>The two point estimates agree (same REML fit); the <code>"mpl"</code>
 interval is the wider of the pair at this comfortably interior cell —
 the conservatism described above, visible on ordinary data.</p>
@@ -448,7 +459,7 @@ the conservatism described above, visible on ordinary data.</p>
 <p>When the fit is Bayesian (<code>engine = "brms"</code>, see <a href="engines.html#a-bayesian-engine-brms"><em>Estimation
 engines</em></a>), the interval is neither a Monte-Carlo nor a bootstrap
 <em>confidence</em> interval but a <strong>credible</strong> interval
-read directly off the posterior draws of the ICC — a <a href="glossary.html#confidence-interval-vs.-credible-interval">different
+read directly off the posterior draws of the ICC — a <a href="glossary.html#confidence-interval-vs--credible-interval">different
 kind of statement</a> about where the ICC lies.
 <code>ci_method = "posterior"</code> is automatic — and required — for
 that engine.</p>

@@ -431,8 +431,11 @@
   `"searle"` and `"burch"` give a finite interval on every dataset: on
   data with no between-subject variance at all, `"burch"` aborts with a
   classed error (its kurtosis standardization divides by zero there)
-  while `"searle"` still returns its attained minimum — the asymmetry
-  the vignette already states.
+  while `"searle"` still returns an interval — the asymmetry the
+  vignette already states. For the single-rater coefficient that
+  interval is the attained minimum; the averaged projection carries that
+  minimum through the Spearman-Brown pole and reports `-Inf`, which a
+  default call prints beside it.
 - The [`?icc`](https://jmgirard.github.io/intraclass/reference/icc.md)
   reference entry for Burch (2011) now cites the correct article —
   “Assessing the performance of normal-based and REML-based confidence
@@ -514,6 +517,22 @@
   matching the one
   [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
   on an `icc` fit already had.
+- The *Confidence-interval methods* article’s quantified claims are now
+  backed by tests, and reading it through found three of them wrong. It
+  said the Monte-Carlo and parametric-bootstrap upper bounds in its
+  side-by-side table coincide, where at the table’s own two decimals
+  only ICC(A,k)’s round alike, and the bootstrap’s upper bounds do not
+  all fall on the same side of the Monte-Carlo ones. It said the
+  `"lavaan"` engine offers Monte-Carlo intervals only, where that engine
+  bootstraps complete data, and a multilevel lavaan fit needs balanced
+  clusters and random raters besides. And it described `"searle"` at
+  zero between-subject variance as returning its attained minimum, which
+  is true of the single-rater coefficient and not of the averaged
+  projection (above). All three are corrected. A link to the glossary’s
+  *Confidence interval vs. credible interval* entry pointed at an anchor
+  the built site does not emit and is fixed, and the terms
+  *consistency*, *REML* and *variance component* are now linked to their
+  glossary definitions where the article first uses them.
 
 ## intraclass 0.1.0
 
