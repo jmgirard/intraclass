@@ -2,7 +2,7 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M130: Back the interval-methods vignette's claims, and read it through
 
-- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate -->
 - **Depends on:** M129   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -36,7 +36,7 @@ and the checker-regress shape; the other six vignettes' prose → M48's check pa
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [x] AC1: Every line that
+- [ ] AC1: Every line that
       `grep -nE '\b(any|each|every|all|only|both|exactly|never|always|full)\b' vignettes/interval-methods.Rmd`
       returns (39 on 2026-08-21) states a claim that is (a) backed by a
       test in `tests/testthat/test-vignette-claims.R`; (b) backed by an
@@ -147,6 +147,9 @@ and the checker-regress shape; the other six vignettes' prose → M48's check pa
 - 2026-08-21: /milestone-review opened draft PR #139 and executed all six criteria with fresh evidence (recorded in the Review section); all six PASS and are ticked against their evidence lines.
 - 2026-08-21: review found AC3's evidence incomplete as gathered at implementation — the 33 perturbation runs covered T2's 11 tests, and T3's 5 later tests had none. Ran the 2 applicable forms against each of the 5 (the `ci_method` form is inapplicable: they read committed fixtures and never call `icc()`); 10 runs, 10 red. AC3's domain is AC2's 11 tests, AC2 scoping itself to tests "run on the article's own data", which the 5 fixture readers are not; the extra runs are supplementary, not domain.
 - 2026-08-21: review fan-out spawned three fresh-context lenses ([O] diff-bug, [S] blame-history, [S] prior-PR-comments) per the user-facing tier. The blame-history lens reported no finding: no modified line undoes a deliberate past decision or contradicts a D-entry, and the verbatim `residual_template()` clause encoding D-030 is untouched by this diff. The prior-review lens reported no regression; its probe found the repo carries no inline PR review comments at all, so `cairn/milestones/archive/` was the only surface with signal.
+- 2026-08-21: REVIEW RETURN (defect return 1). The [O] diff-bug lens returned 17 findings; every one is logged with its verdict in the Review section. Three are floor-qualifying and AC1 is unticked as failed. (i) Article line 69's reworded lavaan sentence is STILL FALSE: `R/engine-lavaan.R:573-575` nulls `simulate_refit` when `identical(raters, "fixed")` on the multilevel path independent of balance, verified by running a balanced complete 40x10x5 multilevel fit — `raters = "random"` returns `method == "bootstrap"`, `raters = "fixed"` aborts `intraclass_unsupported`. The sentence names only unbalanced/incomplete as the fence. (ii) Article line 61's "close enough that ICC(A,k) rounds to the same pair above" is false: the rendered pairs are MC `[0.18, 0.91]` against bootstrap `[0.09, 0.91]` — the upper bounds round alike, the pair does not. (iii) AC1's recording form is not met: it requires dispositions "keyed by the matched line's quoted text, its line number provenance only", and the T6 final ledger records bare line numbers while the T1 ledger quoted only the matched word. Lines 61 and 69 also defeat their own disposition (a) — a false claim is not backed by a test.
+- 2026-08-21: review return, further confirmed findings, none floor-qualifying on their own. Test `at zero between-subject variance` asserts `intraclass_singular_fit` for `"burch"` while its comment claims the kurtosis-standardization mechanism; measured on the same data, `"montecarlo"` and `"npbootstrap"` abort with that identical class, so the assertion does not identify which failure it is about (the failure-identity rule) — only `"searle"` returning `[-0.333, -0.333]` discriminates. The two-vs-five-rater test's abort-rate assertion compares 16 two-rater cells (all at 10 subjects) against 48 five-rater cells (10/30/50 subjects) — the unstratified marginal article line 188 itself calls confounded; restricted to the shared 10-subject cells the claim still holds, 0.269 against 0.177, so the repair is to restrict. The `no widening` assertion bounds width at 0.5 where the measured value is 0.180, a 2.8x margin that a real inflation would still pass. The errors-drawn-from-a-normal test greps a `#` comment rather than the DGP and sits behind a `skip_if_not(file.exists())` on `.Rbuildignore`d `data-raw/`, so it never runs in the built package and article line 206 is effectively unbacked.
+- 2026-08-21: review return, record defects the lens found in this milestone's own work log. The T2 entry says "T2 added nine tests" where the file carries 11 attributed to that task (16 total, 5 added at T3). The T5 AC5 entry's arithmetic does not close, and its linked list names "Burch interval", which the term intersection does not contain. AC5's "appears verbatim" was satisfied by a case-folded match — a literal `fixed = TRUE` match of the 32 headings returns 4, not 13 — and the log does not say the match was folded. These are superseded here, not edited (append-only).
 
 ## Review
 <!-- owner: review · exclusive -->
@@ -211,4 +214,30 @@ terms, padding the count with "and the in-page targets" — in-page anchors are
 not glossary terms. The measured figure is nine linked and four recorded, which
 is what AC5's evidence above states. The work log is append-only, so this
 supersedes that clause rather than editing it.
+
+### Review findings (2026-08-21, three fresh-context lenses)
+
+[S] blame-history: no findings. [S] prior-PR-comments: no findings; its probe
+(`gh api .../pulls/comments?per_page=1`) returned empty, so `cairn/milestones/archive/`
+was the only surface with signal. [O] diff-bug: 17 findings, all logged below
+with the verdict this session reached by re-running them. F1, F3 and F4 are
+floor-qualifying and return the milestone; the rest are actioned on the return.
+
+- **F1 CONFIRMED (floor).** `vignettes/interval-methods.Rmd:67-70` — the reworded lavaan sentence is still false; balanced complete multilevel data with `raters = "fixed"` refuses the bootstrap. Fix the sentence and cover the case.
+- **F2 CONFIRMED.** `tests/testthat/test-vignette-claims.R:1361-1387` — tests a `#` comment string, not the DGP, and skips under `R CMD check` because `data-raw/` is `.Rbuildignore`d. Article line 206 is unbacked.
+- **F3 CONFIRMED (floor).** `vignettes/interval-methods.Rmd:57-61` — "rounds to the same pair" is false; only the upper bounds round alike.
+- **F4 CONFIRMED (floor).** AC1's recording form — the ledger keys on line numbers, not the matched line's quoted text.
+- **F5 PARTLY CONFIRMED.** AC3's domain is ambiguous: AC2 scopes its tests to those "run on the article's own data", which the 5 fixture readers are not, but they do serve AC2's named under-coverage topic. The 2 applicable forms were run against all 5 (10/10 red); the `ci_method` form is structurally inapplicable. The wording goes to the maintainer.
+- **F6 CONFIRMED.** `:1086` — `expect_lt(width, 0.5)` against a measured 0.180 does not discriminate a widening.
+- **F7 CONFIRMED.** `:1311` — the abort-rate comparison is the unstratified marginal the article itself calls confounded; restrict to the shared 10-subject cells (0.269 against 0.177).
+- **F8 CONFIRMED.** `:1128-1133` — `intraclass_singular_fit` is also raised by `"montecarlo"` and `"npbootstrap"` on that data, so the class does not identify burch's mechanism.
+- **F9 CONFIRMED.** `:1356-1358` — `sum(d < 1e-9) == 2L` and a `1e-4` floor with 1.5e-5 of headroom encode a realization, not a contract.
+- **F10 CONFIRMED.** `:1321` — `expect_identical(nrow(small), 16L)` pins a fixture row count.
+- **F11 CONFIRMED.** `:841` — the opt-in enumerator parses a user-facing `cli` message; note that the message is being treated as contract.
+- **F12 CONFIRMED.** `:1294` — dead assignment `cell <- paste(...)`, never used.
+- **F13 CONFIRMED.** `:871-950` — "every design" is backed by three designs on one dataset; the structural check that would establish it is what would have caught F1.
+- **F14 CONFIRMED.** `:1147-1266`, `:1089-1118` — no numeric `unit` is ever passed, so the "any numeric-`unit` projection" clauses are untested.
+- **F15 CONFIRMED.** `:985-1030` — `"mpl"` is not shown seed-invariant, and the `conf_level` claim for `"searle"`/`"burch"` has no test.
+- **F16 CONFIRMED.** Work-log arithmetic: "nine tests" against 11; the AC5 list does not close and names a term outside the intersection.
+- **F17 CONFIRMED.** AC5's "verbatim" was satisfied case-insensitively; a literal match returns 4 of 32, and the log does not say the match was folded.
 
