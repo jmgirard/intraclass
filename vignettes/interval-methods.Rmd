@@ -54,14 +54,22 @@ data.frame(
 )
 ```
 
-The point estimates are identical (same fit) and the upper bounds coincide; the
-bootstrap's lower bounds run a little lower here, because this is a very small design
-(six subjects) and the bootstrap's lower tail is noisier than the covariance-based
-Monte-Carlo draw. The two methods can diverge more where the asymptotics are strained
-— near the zero-variance boundary, and for the multilevel designs (more variance
-components, often few clusters), where the bootstrap's cluster-level interval in
+The point estimates are identical (same fit). The bootstrap's lower bounds run
+markedly lower, because this is a very small design (six subjects) and the
+bootstrap's lower tail is noisier than the covariance-based Monte-Carlo draw. Its
+upper bounds sit close to the Monte-Carlo ones — close enough that ICC(A,k)'s two
+upper bounds round alike above — but they are not identical, and they do not all
+fall on the same side. The two methods can diverge more where the asymptotics are strained
+— near the [zero-variance boundary](glossary.html#zero-variance-boundary), and
+for the multilevel designs (more [variance
+components](glossary.html#variance-component), often few clusters), where the
+bootstrap's cluster-level interval in
 particular carries more resampling noise. The bootstrap is available for every design
-the `"glmmTMB"` and `"lme4"` engines fit; `"lavaan"` supports Monte-Carlo only. Raise
+the `"glmmTMB"` and `"lme4"` engines fit. The `"lavaan"` engine bootstraps complete
+data, and a multilevel lavaan fit needs balanced clusters and random raters besides;
+anywhere off those fences lavaan is Monte-Carlo only — resamples cannot reproduce a
+missingness pattern, the two-level factory reads the raw rater component and is
+random-only, and the two-level bootstrap was validated on balanced clusters. Raise
 `boot_samples` (default `999`) for a smoother interval at proportionally more cost.
 
 ### When the default under-covers
@@ -142,7 +150,8 @@ Spearman-Brown image as `"npbootstrap"`. The [**exact-F
 interval**](glossary.html#exact-f-interval) (`"searle"`; Searle 1971, the McGraw &
 Wong 1996 Table 7 limits) is exact under normality and best-calibrated when the
 data are approximately normal. The [**Burch
-interval**](glossary.html#burch-interval) (`"burch"`; Burch 2011) is REML-based
+interval**](glossary.html#burch-interval) (`"burch"`; Burch 2011) is
+[REML](glossary.html#reml)-based
 and kurtosis-adjusted: its width tracks the data's tail weight, which buys it
 some robustness to mild non-normality. It is not, however, a remedy for heavy
 tails: on strongly skewed subject effects it under-covers about as badly as the
@@ -200,7 +209,8 @@ family and always draw the errors from a normal, and that is not an incidental
 detail. Burch's own expected-length comparison — which is
 against this very exact-F interval — is kurtosis-conditional: he finds his
 interval shorter for light-tailed data but *wider* for symmetric heavy-tailed
-data, measuring with both the subject effects and the errors non-normal. A third
+data, measuring with the subject effects and the errors alike drawn from the
+studied family. A third
 grid now measures that case here.
 What `"burch"` does against `"searle"` depends on what the residual is
 drawn from, and the three grids now measure that:
@@ -222,7 +232,10 @@ the default is a finite, well-calibrated interval at the near-zero-ICC boundary
 where the Monte-Carlo default aborts. One asymmetry
 between the siblings: on data with *no* between-subject variance at all,
 `"burch"` aborts (its kurtosis standardization divides by zero there) while
-`"searle"` still returns its attained minimum.
+`"searle"` still returns an interval. Read that interval carefully: the
+single-rater coefficient gets the attained minimum, and the averaged projection
+carries that minimum through the Spearman-Brown pole to negative infinity, which
+a default call prints beside it.
 
 ```{r ci-oneway-optin, eval = requireNamespace("glmmTMB", quietly = TRUE)}
 mc <- tidy(icc(ratings, score, subject, rater, model = "oneway", seed = 1))
@@ -261,7 +274,8 @@ interval**](glossary.html#modified-profile-likelihood) of Xiao & Liu (2013) is
 the two-way counterpart: it serves the **balanced, complete two-way random
 absolute-agreement** ICC(A,1), with ICC(A,k) and any numeric-`unit` projection
 its pole-safe Spearman-Brown image, and aborts on any other design, on
-consistency or fixed raters, and on unbalanced or incomplete data. It is a
+[consistency](glossary.html#consistency) or fixed raters, and on unbalanced or
+incomplete data. It is a
 deterministic closed form — no resampling, no `seed`. Its calibration fixes two
 fences: `conf_level` must be 0.90, 0.95, or 0.99 (each level carries its own
 calibrated correction constant, never interpolated between levels), and the
@@ -310,7 +324,7 @@ When the fit is Bayesian (`engine = "brms"`, see [*Estimation
 engines*](engines.html#a-bayesian-engine-brms)), the interval is neither a Monte-Carlo
 nor a bootstrap *confidence* interval but a **credible** interval read directly off the
 posterior draws of the ICC — a [different kind of
-statement](glossary.html#confidence-interval-vs.-credible-interval) about where the ICC
+statement](glossary.html#confidence-interval-vs--credible-interval) about where the ICC
 lies. `ci_method = "posterior"` is automatic — and required — for
 that engine.
 
