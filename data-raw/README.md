@@ -83,7 +83,7 @@ overridden and the suite then flakes on MCMC noise.
    DGP, and the guardrails (#4/#18: divergences from the source are
    *reported*, never tuned away; the MAP estimator is fixed a priori and
    independent of the source's tool).
-2. **Checkpoint**: the long-sweep scripts (15 of 20) write a gitignored
+2. **Checkpoint**: the long-sweep scripts (15 of 21) write a gitignored
    `data-raw/.oracle-*-checkpoint.rds` after each rep so a crashed run
    resumes instead of restarting.
 3. **Fixture written *before* the hard assertions** — so a long run is never
@@ -145,3 +145,4 @@ while `multilevel-fixed` / `multilevel-replicates` stay unabbreviated.
 | oracle-bayesian-nested-fixed.R | bayesian-nested-fixed-oracle.rds |
 | oracle-bayesian-oneway.R | bayesian-oneway-oracle.rds |
 | oracle-bayesian-replicates.R | bayesian-replicates-oracle.rds |
+| oracle-bayesian-vignette.R | bayesian-vignette-oracle.rds |
