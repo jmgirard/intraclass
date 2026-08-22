@@ -354,7 +354,10 @@
   `"searle"` and `"burch"` give a finite interval on every dataset: on data with
   no between-subject variance at all, `"burch"` aborts with a classed error (its
   kurtosis standardization divides by zero there) while `"searle"` still returns
-  its attained minimum — the asymmetry the vignette already states.
+  an interval — the asymmetry the vignette already states. For the single-rater
+  coefficient that interval is the attained minimum; the averaged projection
+  carries that minimum through the Spearman-Brown pole and reports `-Inf`, which
+  a default call prints beside it.
 * The `?icc` reference entry for Burch (2011) now cites the correct article —
   "Assessing the performance of normal-based and REML-based confidence intervals
   for the intraclass correlation coefficient", *Computational Statistics and Data
@@ -409,6 +412,20 @@
   overridden per call. It also describes the `plot()` wrapper for `autoplot()`.
 * `autoplot()` on a `d_study()` result now carries a runnable example on
   `?d_study`, matching the one `autoplot()` on an `icc` fit already had.
+* The *Confidence-interval methods* article's quantified claims are now backed
+  by tests, and reading it through found three of them wrong. It said the
+  Monte-Carlo and parametric-bootstrap intervals in its side-by-side table agree
+  on ICC(A,k) as a pair, where only the two upper bounds round alike at the
+  table's own two decimals. It said the `"lavaan"` engine offers Monte-Carlo
+  intervals only, where that engine bootstraps complete data, and a multilevel
+  lavaan fit needs balanced clusters and random raters besides. And it described
+  `"searle"` at zero between-subject variance as returning its attained minimum,
+  which is true of the single-rater coefficient and not of the averaged
+  projection (above). All three are corrected. A link to the glossary's
+  *Confidence interval vs. credible interval* entry pointed at an anchor the
+  built site does not emit and is fixed, and the terms *consistency*, *REML* and
+  *variance component* are now linked to their glossary definitions where the
+  article first uses them.
 
 # intraclass 0.1.0
 
