@@ -190,6 +190,7 @@ and the checker-regress shape; the other six vignettes' prose → M48's check pa
 
 - 2026-08-22: /milestone-review third pass executed all six criteria with fresh evidence (recorded in the Review section); all six PASS and are ticked against their evidence lines, the consistency gate passes including the NEWS entry the second pass failed on, and no finding qualifies for the return floor.
 - 2026-08-22: review third pass, gate triage — the maintainer actioned 7 of 13 findings as fix-now (P1, P2, P3, P4, P6, P7, P8), rejected 2 as out-of-scope (P5, P10) and noted 3 (P9, P11, P13); the fixes are on this branch, the suite is 0 failures / 8500 passing, and `R CMD check` stays level with main at raw `Status: 2 NOTEs`.
+- 2026-08-22: review third pass — CI `check-references` red on the fix-now commit (the P1 roxygen edit staled one M94 doc-claims ledger key and added an uncovered sentence); ledger re-triaged on the branch, all four `data-raw/` checkers and self-tests now exit 0 locally.
 ## Decisions
 <!-- owner: implement / review · append-only -->
 - 2026-08-21: /milestone-review opened draft PR #139 and executed all six criteria with fresh evidence (recorded in the Review section); all six PASS and are ticked against their evidence lines.
@@ -382,3 +383,18 @@ the same 2 pre-existing warnings outside this diff. `air format --check .` clean
 the intended `man/icc.Rd`); `cairn_validate` exit 0. `R CMD check --as-cran` on a
 clean tarball of the fixed tree: raw `Status: 2 NOTEs`, the same two NOTEs
 `origin/main` returns, so "no worse than main" still holds with `R/` touched.
+
+**CI red after the fix-now commit, repaired on the branch.** `check-references`
+failed: the P1 roxygen edit split the classical-closed-forms sentence, so the M94
+MPL doc-claims ledger carried a stale key for it and had no row for the new
+trailing sentence — `data-raw/check-mpl-doc-claims.py` reporting exactly that,
+with the expected key. This is the promotion condition the plan gate recorded
+for the `check-mpl-doc-claims.py` hardening candidate firing a second time; the
+checker did its job, and the repair is the re-triage it asks for, not a change to
+the checker. `data-raw/mpl-doc-claims.tsv:51` re-keyed to `2586410d17be`, and a
+new `out` row `b39982b4c4cb` added for "Neither resamples, so …", its reason
+citing the `test-vignette-claims.R` expectation that pins searle/burch endpoint
+identity across seeds. Checker back to `OK: 47 claim candidates, 12 settled,
+0 failure(s)`. All four `data-raw/` checkers and their self-tests were then run
+locally and exit 0 — a gate step this review had not run before pushing, which is
+how CI saw it first.
