@@ -165,7 +165,11 @@ and needs the `brms` package (an optional `Suggests` dependency).
 
 The examples below are shown with pre-computed output: fitting a Stan
 model needs a toolchain not available when this site is built, so these
-chunks are not evaluated at knit time.
+chunks are not evaluated at knit time. What they show is
+[`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)’s own
+printed output; on a design this small the sampler may additionally
+report divergent transitions, and whether it does depends on the seed
+and the platform, so those warnings are not reproduced here.
 
 ``` r
 
@@ -216,9 +220,9 @@ icc(ratings, score, subject, rater, engine = "brms",
 #> Using a custom `prior` instead of the sourced half-t(4, 0, 1).
 #> ! This VOIDS the package's coverage guarantees: the credible-interval coverage
 #>   results (ten Hove et al. 2020) hold only for the sourced prior.
-#> i A vague or flat SD prior can WORSEN small-`k` boundary bias -- the half-t is
+#> ℹ A vague or flat SD prior can WORSEN small-`k` boundary bias -- the half-t is
 #>   weakly informative on purpose (Principle #3's regime).
-#> i Leave `prior` unset for the sourced default unless you are running
+#> ℹ Leave `prior` unset for the sourced default unless you are running
 #>   prior-sensitivity or method-comparison work.
 ```
 

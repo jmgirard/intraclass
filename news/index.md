@@ -407,6 +407,16 @@
 
 ### Documentation
 
+- The *Estimation engines* and *Confidence-interval methods* articles
+  show the `brms` engine’s output in pre-computed blocks, because
+  knitting them would need a Stan toolchain. Those blocks are now
+  generated from a committed fit and checked against it, so they cannot
+  drift from what the engine really prints. Two bullet glyphs in the
+  custom-prior warning are corrected to the characters
+  [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
+  actually emits, and the engines article now says that a design this
+  small may also report sampler divergences, which the shown output
+  omits.
 - The README now shows what the plots look like: the
   [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
   forest plot of a default
