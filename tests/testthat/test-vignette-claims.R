@@ -868,15 +868,86 @@ test_that("interval-methods.Rmd: exactly four opt-in methods, each fenced and cl
   }
 })
 
-test_that("interval-methods.Rmd: the bootstrap spans the mixed-model designs, and lavaan bootstraps complete data only", {
-  skip_if_not_installed("glmmTMB")
+# A balanced, complete two-level Design-1 dataset (the multilevel path both
+# mixed-model engines and the lavaan engine take). Mirrors the generator in
+# `test-icc-lavaan-multilevel.R`; small, because only bootstrap AVAILABILITY is
+# under test here, never the interval's smoothness.
+vc_sim_multilevel <- function(nc, ns, k, seed) {
+  set.seed(seed)
+  cl <- stats::rnorm(nc, 0, sqrt(0.4))
+  rt <- stats::rnorm(k, 0, sqrt(0.16))
+  d <- expand.grid(
+    subj = seq_len(ns),
+    cluster = seq_len(nc),
+    rater = seq_len(k)
+  )
+  d$sc <- stats::rnorm(nc * ns, 0, 1)[(d$cluster - 1) * ns + d$subj]
+  d$cr <- stats::rnorm(nc * k, 0, sqrt(0.16))[(d$cluster - 1) * k + d$rater]
+  d$score <- 10 +
+    cl[d$cluster] +
+    d$sc +
+    rt[d$rater] +
+    d$cr +
+    stats::rnorm(nrow(d), 0, sqrt(0.5))
+  d$cluster <- factor(d$cluster)
+  d$rater <- factor(d$rater)
+  d$subject <- factor(paste(d$cluster, d$subj, sep = "_"))
+  d
+}
 
-  # Article lines 63-64. `boot_samples` is small here: the claim under test is
-  # availability, not the interval's smoothness.
+test_that("interval-methods.Rmd: the bootstrap spans every design the mixed-model engines fit", {
+  skip_if_not_installed("glmmTMB")
+  skip_on_cran()
+
+  # Article lines 67-68: "available for every design the `\"glmmTMB\"` and
+  # `\"lme4\"` engines fit". A three-design probe on one dataset does not
+  # establish a promise quantified over designs, and its silence is what let the
+  # lavaan fence go unnoticed (M130 return, F1/F13). So the probe is a MATRIX
+  # over the design axes `icc()` exposes -- model, type, rater mode, balance,
+  # completeness, replicate averaging, and the two-level path -- run against
+  # each mixed-model engine. A new axis that the bootstrap does not serve fails
+  # here rather than in a reader's console.
+  set.seed(7)
+  g <- expand.grid(subject = 1:15, rater = 1:4, occ = 1:2)
+  reps <- data.frame(
+    subject = factor(g$subject),
+    rater = factor(g$rater),
+    score = 10 +
+      stats::rnorm(15, sd = 1.2)[g$subject] +
+      stats::rnorm(4, sd = 0.8)[g$rater] +
+      stats::rnorm(nrow(g), sd = 0.7)
+  )
+  ml <- vc_sim_multilevel(20, 8, 4, seed = 20260716)
+
   designs <- list(
-    list(model = "oneway", type = "agreement"),
-    list(model = "twoway", type = "agreement"),
-    list(model = "twoway", type = "consistency")
+    list(nm = "oneway balanced", d = ratings, a = list(model = "oneway")),
+    list(
+      nm = "twoway agreement",
+      d = ratings,
+      a = list(model = "twoway", type = "agreement")
+    ),
+    list(
+      nm = "twoway consistency",
+      d = ratings,
+      a = list(model = "twoway", type = "consistency")
+    ),
+    list(
+      nm = "twoway fixed raters",
+      d = ratings,
+      a = list(model = "twoway", type = "agreement", raters = "fixed")
+    ),
+    list(
+      nm = "oneway unbalanced",
+      d = ratings_incomplete,
+      a = list(model = "oneway")
+    ),
+    list(
+      nm = "twoway incomplete",
+      d = ratings_incomplete,
+      a = list(model = "twoway", type = "agreement")
+    ),
+    list(nm = "replicate averaging", d = reps, a = list(occasions = "average")),
+    list(nm = "two-level", d = ml, a = list(cluster = quote(cluster)))
   )
   engines <- "glmmTMB"
   if (
@@ -887,42 +958,63 @@ test_that("interval-methods.Rmd: the bootstrap spans the mixed-model designs, an
   }
   for (eng in engines) {
     for (d in designs) {
-      td <- tidy(icc(
-        ratings,
-        score,
-        subject,
-        rater,
-        model = d$model,
-        type = d$type,
-        engine = eng,
-        ci_method = "bootstrap",
-        boot_samples = 19,
-        seed = 1
-      ))
-      expect_gt(nrow(td), 0L)
-      expect_false(
-        any(is.na(td$conf.low)),
-        info = paste(eng, d$model, d$type)
+      args <- c(
+        list(d$d, quote(score), quote(subject), quote(rater)),
+        d$a,
+        list(
+          engine = eng,
+          ci_method = "bootstrap",
+          boot_samples = 19,
+          seed = 1
+        )
       )
+      td <- suppressWarnings(tidy(do.call(icc, args)))
+      lab <- paste(eng, d$nm)
+      expect_gt(nrow(td), 0L)
+      expect_true(all(td$method == "bootstrap"), info = lab)
+      expect_false(any(is.na(td$conf.low)), info = lab)
     }
   }
+})
 
-  # `"lavaan"` bootstraps balanced, complete data (M21 Slice 1, ADR-031) and
-  # refuses -- classed -- on incomplete data, which is what `?icc` documents and
-  # what the article's line 64 now says. Its bootstrap is a real one: it does
-  # not return the Monte-Carlo interval under another name.
+test_that("interval-methods.Rmd: the lavaan bootstrap's fences are the ones the article names", {
+  skip_if_not_installed("glmmTMB")
   skip_if_not_installed("lavaan")
-  lv_bs <- tidy(icc(
-    ratings,
-    score,
-    subject,
-    rater,
-    engine = "lavaan",
-    ci_method = "bootstrap",
-    boot_samples = 19,
-    seed = 1
-  ))
-  lv_mc <- tidy(icc(
+  skip_on_cran()
+
+  # Article lines 68-72, as reworded on the M130 return (F1). The engine has two
+  # bootstrap routes with DIFFERENT fences, and the article now states both:
+  # single-level lavaan bootstraps complete data (either rater mode), while the
+  # two-level route additionally needs balanced clusters and random raters --
+  # `R/engine-lavaan.R:573-575` nulls `simulate_refit` on
+  # `identical(raters, "fixed") || has_missing || unbalanced`, against `:770`
+  # nulling it on `has_missing` alone. Each cell below is asserted in BOTH
+  # directions: an available cell returns a real bootstrap (not the Monte-Carlo
+  # interval under another name), a fenced cell raises
+  # `intraclass_unsupported`, the classed refusal `?icc` documents.
+  ml <- vc_sim_multilevel(20, 8, 4, seed = 20260716)
+  lv <- function(d, ...) {
+    suppressWarnings(tidy(icc(
+      d,
+      score,
+      subject,
+      rater,
+      ...,
+      engine = "lavaan",
+      ci_method = "bootstrap",
+      boot_samples = 19,
+      seed = 1
+    )))
+  }
+
+  # Available: single-level complete, at either rater mode.
+  for (rm in c("random", "fixed")) {
+    td <- lv(ratings, raters = rm)
+    expect_true(all(td$method == "bootstrap"), info = rm)
+    expect_false(any(is.na(td$conf.low)), info = rm)
+  }
+  # It is a real bootstrap: its endpoints differ from the Monte-Carlo ones.
+  mc <- tidy(icc(
     ratings,
     score,
     subject,
@@ -931,19 +1023,21 @@ test_that("interval-methods.Rmd: the bootstrap spans the mixed-model designs, an
     ci_method = "montecarlo",
     seed = 1
   ))
-  expect_true(all(lv_bs$method == "bootstrap"))
-  expect_false(isTRUE(all.equal(lv_bs$conf.low, lv_mc$conf.low)))
+  expect_false(isTRUE(all.equal(lv(ratings)$conf.low, mc$conf.low)))
+
+  # Available: two-level, balanced clusters, random raters.
+  td_ml <- lv(ml, cluster = cluster)
+  expect_true(all(td_ml$method == "bootstrap"))
+  expect_false(any(is.na(td_ml$conf.low)))
+
+  # Fenced, each way the article names, each classed.
+  expect_error(lv(ratings_incomplete), class = "intraclass_unsupported")
   expect_error(
-    suppressWarnings(icc(
-      ratings_incomplete,
-      score,
-      subject,
-      rater,
-      engine = "lavaan",
-      ci_method = "bootstrap",
-      boot_samples = 19,
-      seed = 1
-    )),
+    lv(ml, cluster = cluster, raters = "fixed"),
+    class = "intraclass_unsupported"
+  )
+  expect_error(
+    lv(ml[-(1:3), ], cluster = cluster),
     class = "intraclass_unsupported"
   )
 })
@@ -1051,12 +1145,17 @@ test_that("interval-methods.Rmd: the `ci-bootstrap` chunk's own comparison holds
   expect_true(all(bs$conf.low < mc$conf.low))
   # Its upper bounds are close but not identical, and not uniformly higher --
   # the article says so because rounding them to the chunk's own two decimals
-  # leaves only ICC(A,k) coinciding.
+  # leaves ICC(A,k) as the one index whose UPPER bound coincides.
   expect_true(all(abs(bs$conf.high - mc$conf.high) < 0.05))
   expect_false(all(bs$conf.high >= mc$conf.high))
   rounded_equal <- round(bs$conf.high, 2) == round(mc$conf.high, 2)
-  expect_true(any(rounded_equal))
-  expect_false(all(rounded_equal))
+  expect_identical(mc$index[rounded_equal], "ICC(A,k)")
+  # And it is the upper bound alone, never the pair: at that same rendering
+  # ICC(A,k)'s lower bounds do not agree. This is the claim the article got
+  # wrong once (M130 return, F3) -- an assertion on the upper bounds alone
+  # would pass with "the pair rounds alike" back in the prose.
+  ak <- mc$index == "ICC(A,k)"
+  expect_false(round(bs$conf.low[ak], 2) == round(mc$conf.low[ak], 2))
 })
 
 test_that("interval-methods.Rmd: the default under-covers silently -- no abort, no warning, no widening", {

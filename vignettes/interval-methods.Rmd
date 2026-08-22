@@ -57,17 +57,19 @@ data.frame(
 The point estimates are identical (same fit). The bootstrap's lower bounds run
 markedly lower, because this is a very small design (six subjects) and the
 bootstrap's lower tail is noisier than the covariance-based Monte-Carlo draw. Its
-upper bounds sit close to the Monte-Carlo ones — close enough that ICC(A,k) rounds
-to the same pair above — but they are not identical, and they do not all fall on
-the same side. The two methods can diverge more where the asymptotics are strained
+upper bounds sit close to the Monte-Carlo ones — close enough that ICC(A,k)'s two
+upper bounds round alike above — but they are not identical, and they do not all
+fall on the same side. The two methods can diverge more where the asymptotics are strained
 — near the [zero-variance boundary](glossary.html#zero-variance-boundary), and
 for the multilevel designs (more [variance
 components](glossary.html#variance-component), often few clusters), where the
 bootstrap's cluster-level interval in
 particular carries more resampling noise. The bootstrap is available for every design
-the `"glmmTMB"` and `"lme4"` engines fit, and for `"lavaan"` on balanced, complete
-data; where lavaan's data are unbalanced or incomplete it is Monte-Carlo only,
-because resamples cannot reproduce a missingness pattern. Raise
+the `"glmmTMB"` and `"lme4"` engines fit. The `"lavaan"` engine bootstraps complete
+data, and a multilevel lavaan fit needs balanced clusters and random raters besides;
+anywhere off those fences lavaan is Monte-Carlo only — resamples cannot reproduce a
+missingness pattern, the two-level factory reads the raw rater component and is
+random-only, and the two-level bootstrap was validated on balanced clusters. Raise
 `boot_samples` (default `999`) for a smoother interval at proportionally more cost.
 
 ### When the default under-covers
