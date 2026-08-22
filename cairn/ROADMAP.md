@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-19 (M128 done pass: `cairn_validate` exit 0 on all 16 checks; `devtools::check()` 0 errors / 0 warnings with the raw `Status: 1 NOTE` being the pre-existing spelling diff (same 28 words as main), `NOT_CRAN=true CI=true devtools::test()` 0 failures / 8250 passing, `air format --check .` clean, `pkgdown::check_pkgdown()` clean, all seven data-raw checkers green, PR #137 all 10 CI checks green. Terminal rows rotated M123 out, M128 in, with the `[claim:roadmap-terminal-rows]` expectation in this same commit. LESSONS: no new line — the M72 universals lesson was CORRECTED in place to widen its sweep set (`any` and `each`, the two quantifiers whose omission caused both of M128's defect returns) and the M80 line trimmed to its remainder, M86 already carrying its generalization; no retirement exit applied, this milestone shipped no guard.)_
+_Last hygiene check: 2026-08-21 (M129 done pass: `cairn_validate` exit 0 on all 16 checks, no advisories; `R CMD check --as-cran` at `NOT_CRAN=false` raw `Status: OK`; `NOT_CRAN=true CI=true` suite 0 failures / 0 errors / 8263 passing; `air format --check .` clean; `lintr::lint_package()` 0 lints; `pkgdown::check_pkgdown()` clean; all four data-raw checkers exit 0; PR #138 all 10 CI checks green. Terminal rows rotated M124 out, M129 in, with the `[claim:roadmap-terminal-rows]` expectation in this same commit. LESSONS: two M129 lines added (cli capture vacuity; vignettes absent under R CMD check); the M68 line RETIRED as graduated into `/milestone-plan`'s criteria audit, and the M77 paths-ignore line pruned to meet the byte cap — 33 lines, 19,838 bytes.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,18 +9,17 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M129 | Back the hand-pasted engine transcripts in the vignettes | review | — | high | milestones/M129-vignette-brms-transcripts.md |
 | M130 | Back the interval-methods vignette's claims, and read it through | planned | M129 | high | milestones/M130-interval-methods-claims.md |
 | M131 | Say what each documented method returns, and stop shadowing the shipped dataset | planned | — | high | milestones/M131-rd-value-and-shadowed-example.md |
 | M132 | Make the two prose-only `icc()` argument values reachable from the docs | planned | — | normal | milestones/M132-prose-only-icc-arguments.md |
 | M133 | Tell users which interval method is trustworthy for their design | planned | M130 | high | milestones/M133-ci-method-trustworthiness-table.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68, M129, M130, M131, M132, M133 | high | milestones/M48-release-v010.md |
-| M124 | Demonstrate the exported surface no vignette shows | done | — | normal | milestones/archive/M124-undemonstrated-surface.md |
 | M125 | Bring ROADMAP.md and LESSONS.md back under their byte budgets | done | — | normal | milestones/archive/M125-tracking-budget-consolidation.md |
 | M126 | Disclose what an installation actually retrieves | done | — | normal | milestones/archive/M126-install-disclosure.md |
 | M127 | Correct the lme4 merDeriv requirement message | done | — | normal | milestones/archive/M127-merderiv-requirement-message.md |
 | M128 | Show the plotting surface in the README, and polish the front page | done | — | normal | milestones/archive/M128-readme-figures-polish.md |
-<!-- terminal-row retention: M128 done (2026-08-19) → M123 rotated out (oldest terminal by merge order; its archive file still resolves there). Kept: M124, M125, M126, M127, M128 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
+| M129 | Back the hand-pasted engine transcripts in the vignettes | done | — | high | milestones/archive/M129-vignette-brms-transcripts.md |
+<!-- terminal-row retention: M129 done (2026-08-21) → M124 rotated out (oldest terminal by merge order; its archive file still resolves there). Kept: M125, M126, M127, M128, M129 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
