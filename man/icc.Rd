@@ -729,12 +729,8 @@ fit <- icc(ratings, score, subject, rater, unit = c("single", "average"), seed =
 ggplot2::autoplot(fit) # coefficient forest plot (the default)
 ggplot2::autoplot(fit, what = "components") # variance-component decomposition
 \dontshow{\}) # examplesIf}
-ratings <- data.frame(
-  subject = factor(rep(1:6, 4)),
-  rater = factor(rep(1:4, each = 6)),
-  score = c(9, 6, 8, 7, 10, 6, 2, 1, 4, 1, 5, 2,
-            5, 3, 6, 2, 6, 4, 8, 2, 8, 6, 9, 7)
-)
+# `ratings` is the shipped Shrout & Fleiss (1979) worked example: six
+# subjects rated by all four raters, one rating per row.
 icc(ratings, score, subject, rater, seed = 1)
 
 }
