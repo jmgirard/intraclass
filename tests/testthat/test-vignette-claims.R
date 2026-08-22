@@ -952,7 +952,25 @@ test_that("interval-methods.Rmd: the bootstrap spans every design the mixed-mode
       a = list(model = "twoway", type = "agreement")
     ),
     list(nm = "replicate averaging", d = reps, a = list(occasions = "average")),
-    list(nm = "two-level", d = ml, a = list(cluster = quote(cluster)))
+    list(nm = "two-level", d = ml, a = list(cluster = quote(cluster))),
+    # The `level` and `design` axes: the comment above claims the matrix
+    # sweeps the design axes `icc()` exposes, and these two were missing from
+    # it (M130 return 2, O5).
+    list(
+      nm = "two-level cluster",
+      d = ml,
+      a = list(cluster = quote(cluster), level = "cluster")
+    ),
+    list(
+      nm = "two-level declared crossed",
+      d = ml,
+      a = list(cluster = quote(cluster), design = "crossed")
+    ),
+    list(
+      nm = "two-level declared nested in clusters",
+      d = ml,
+      a = list(cluster = quote(cluster), design = "nested_in_clusters")
+    )
   )
   engines <- "glmmTMB"
   if (
@@ -1035,14 +1053,45 @@ test_that("interval-methods.Rmd: the lavaan bootstrap's fences are the ones the 
   expect_true(all(td_ml$method == "bootstrap"))
   expect_false(any(is.na(td_ml$conf.low)))
 
-  # Fenced, each way the article names, each classed.
+  # Fenced, each way the article names, each classed. The three refusals carry
+  # a BYTE-IDENTICAL message, so pinning the message cannot say which fence
+  # fired; what identifies each one is that its cell differs from a cell
+  # asserted to succeed above in exactly the one attribute the fence names
+  # (the failure-identity rule; M130 return 2, O2).
+  #
+  # Completeness: `ratings_incomplete` against the complete `ratings` that
+  # bootstraps at both rater modes above.
+  expect_true(
+    anyNA(ratings_incomplete$score) ||
+      nrow(ratings_incomplete) <
+        nlevels(factor(ratings_incomplete$subject)) *
+          nlevels(factor(ratings_incomplete$rater))
+  )
   expect_error(lv(ratings_incomplete), class = "intraclass_unsupported")
+  # Rater mode: the same balanced `ml` that bootstraps at random raters above.
   expect_error(
     lv(ml, cluster = cluster, raters = "fixed"),
     class = "intraclass_unsupported"
   )
+  # Balance: drop a whole SUBJECT, not three ratings. The earlier cell
+  # `ml[-(1:3), ]` left cells-per-subject at 3-4 and so tripped the
+  # completeness fence, never the balance one. Dropping subject "1_1" leaves
+  # every remaining subject with all four raters -- the frame is COMPLETE and
+  # only the cluster sizes differ (7 against 8), which is the fence the article
+  # names, and the only attribute separating this cell from the passing
+  # balanced one above.
+  unb <- ml[ml$subject != "1_1", ]
+  expect_setequal(unique(table(droplevels(unb$subject))), 4L)
+  expect_setequal(
+    sort(unique(tapply(
+      unb$subject,
+      unb$cluster,
+      function(x) length(unique(x))
+    ))),
+    c(7L, 8L)
+  )
   expect_error(
-    lv(ml[-(1:3), ], cluster = cluster),
+    lv(unb, cluster = cluster),
     class = "intraclass_unsupported"
   )
 })
@@ -1163,7 +1212,11 @@ test_that("interval-methods.Rmd: the `ci-bootstrap` chunk's own comparison holds
   # the article says so because rounding them to the chunk's own two decimals
   # leaves ICC(A,k) as the one index whose UPPER bound coincides.
   expect_true(all(abs(bs$conf.high - mc$conf.high) < 0.05))
+  # "They do not all fall on the same side" is a TWO-sided claim: neither
+  # `all(>=)` nor `all(<=)` may hold. Asserting only the first left half the
+  # sentence unbacked (M130 return 2, O4).
   expect_false(all(bs$conf.high >= mc$conf.high))
+  expect_false(all(bs$conf.high <= mc$conf.high))
   rounded_equal <- round(bs$conf.high, 2) == round(mc$conf.high, 2)
   expect_identical(mc$index[rounded_equal], "ICC(A,k)")
   # And it is the upper bound alone, never the pair: at that same rendering
@@ -1288,24 +1341,33 @@ test_that("interval-methods.Rmd: at zero between-subject variance `\"burch\"` ab
     regexp = "divides by sqrt\\(MSA\\)",
     class = "intraclass_singular_fit"
   )
+  # The discriminating control: `"searle"` does not merely avoid the abort, it
+  # returns an interval. The call is the DEFAULT one, over both units, because
+  # that is the call the article's reader makes and the two units answer
+  # differently -- pinning `unit = "single"` here is what let the article claim
+  # an attained minimum for a call that also prints `-Inf` (M130 return 2, O3).
   se <- tidy(icc(
     flat,
     score,
     subject,
     rater,
     model = "oneway",
-    ci_method = "searle",
-    unit = "single"
+    ci_method = "searle"
   ))
-  # The discriminating control: `"searle"` does not merely avoid the abort, it
-  # returns the finite degenerate endpoints the exact-F form gives at MSA = 0
-  # -- both limits at -1/(k - 1) = -1/3 for these four raters. That is the
-  # asymmetry the article names, and it is what separates `"searle"` from the
-  # other three methods, all of which abort here.
-  expect_false(is.na(se$conf.low))
-  expect_false(is.na(se$conf.high))
-  expect_equal(se$conf.low, -1 / 3, tolerance = 1e-8)
-  expect_equal(se$conf.high, -1 / 3, tolerance = 1e-8)
+  single <- se[se$index == "ICC(1)", ]
+  avg <- se[se$index == "ICC(k)", ]
+  expect_identical(nrow(single), 1L)
+  expect_identical(nrow(avg), 1L)
+  # Single-rater: the finite degenerate endpoints the exact-F form gives at
+  # MSA = 0 -- both limits at -1/(k - 1) = -1/3 for these four raters.
+  expect_false(is.na(single$conf.low))
+  expect_false(is.na(single$conf.high))
+  expect_equal(single$conf.low, -1 / 3, tolerance = 1e-8)
+  expect_equal(single$conf.high, -1 / 3, tolerance = 1e-8)
+  # Averaged: the Spearman-Brown image of -1/(k - 1) is the pole, so both
+  # limits are -Inf. Not `NA`, not an abort -- the article says so.
+  expect_identical(avg$conf.low, -Inf)
+  expect_identical(avg$conf.high, -Inf)
 })
 
 test_that("interval-methods.Rmd: the `\"mpl\"` fences are the ones the article names", {
@@ -1383,8 +1445,17 @@ test_that("interval-methods.Rmd: the `\"mpl\"` fences are the ones the article n
   expect_identical(one(1), one(99))
 
   # Off the fence, each way the article names (line 263), classed each time.
+  # The design fence and the rater-mode fence raise a BYTE-IDENTICAL message,
+  # so pinning it cannot say which of the two fired (M130 return 2, O10). Both
+  # are pinned to that shared message -- it is the design fence's message and
+  # not some other refusal -- and each is then identified by differing from the
+  # `sim` call asserted to RETURN an interval above in exactly one attribute:
+  # here the model, below the rater mode. The unbalanced cell has a message of
+  # its own and is pinned to it.
+  fence_msg <- "available only for the two-way random"
   expect_error(
     icc(sim, score, subject, rater, model = "oneway", ci_method = "mpl"),
+    regexp = fence_msg,
     class = "intraclass_unsupported"
   )
   # Warns before it aborts (the undefined type is dropped first); the message is
@@ -1411,6 +1482,7 @@ test_that("interval-methods.Rmd: the `\"mpl\"` fences are the ones the article n
       raters = "fixed",
       ci_method = "mpl"
     )),
+    regexp = fence_msg,
     class = "intraclass_unsupported"
   )
   expect_error(
@@ -1422,6 +1494,7 @@ test_that("interval-methods.Rmd: the `\"mpl\"` fences are the ones the article n
       type = "agreement",
       ci_method = "mpl"
     ),
+    regexp = "requires balanced, complete two-way data",
     class = "intraclass_unsupported"
   )
 
@@ -1566,7 +1639,13 @@ test_that("interval-methods.Rmd: the between-grid gap is mostly design points, w
     small$ratio[match(shared, key(small))] -
       large$ratio[match(shared, key(large))]
   )
-  expect_identical(sum(d < 1e-9), 2L)
+  # "A couple" is a small minority, not a pinned count: the earlier
+  # `sum(d < 1e-9) == 2L` pinned the realization the same way the 1e-4 floor
+  # did, which is what F9 named and the first repair left standing
+  # (M130 return 2, O7).
+  n_close <- sum(d < 1e-9)
+  expect_gt(n_close, 0L)
+  expect_lt(n_close, length(d) / 4)
   expect_gt(min(d[d >= 1e-9]), 1e-6)
 })
 
@@ -1626,6 +1705,7 @@ test_that("interval-methods.Rmd: the two subject-effect grids draw their errors 
     for (e in parse(path)) {
       if (
         is.call(e) &&
+          is.name(e[[1]]) &&
           as.character(e[[1]]) %in% c("<-", "=") &&
           identical(as.character(e[[2]]), "gen_oneway")
       ) {
@@ -1635,7 +1715,9 @@ test_that("interval-methods.Rmd: the two subject-effect grids draw their errors 
     expect_false(is.null(gen), label = paste("gen_oneway() found in", path))
 
     assigns <- Filter(
-      function(e) is.call(e) && as.character(e[[1]]) %in% c("<-", "="),
+      function(e) {
+        is.call(e) && is.name(e[[1]]) && as.character(e[[1]]) %in% c("<-", "=")
+      },
       as.list(body(eval(gen)))
     )
     named <- function(nm) {
@@ -1656,8 +1738,12 @@ test_that("interval-methods.Rmd: the two subject-effect grids draw their errors 
     err_calls <- vc_rng_calls(error_rhs)
     expect_gt(length(err_calls), 0L)
     expect_setequal(unique(err_calls), "rnorm")
-    # Nothing outside those two right-hand sides smuggles in a third draw.
-    all_calls <- unlist(lapply(assigns, function(e) vc_rng_calls(e[[3]])))
+    # Nothing outside those two right-hand sides smuggles in a third draw. The
+    # scan is over the WHOLE body, not only its assignments: the earlier form
+    # could not see a draw inside a trailing bare `data.frame(...)` return, a
+    # blind spot in a check whose own comment called itself exhaustive
+    # (M130 return 2, O11).
+    all_calls <- vc_rng_calls(body(eval(gen)))
     expect_identical(
       length(all_calls),
       length(c(vc_rng_calls(subject_rhs), err_calls)),
@@ -1668,8 +1754,54 @@ test_that("interval-methods.Rmd: the two subject-effect grids draw their errors 
 
 test_that("interval-methods.Rmd: the third grid draws both components from the family", {
   # The other half of article lines 207-212: the third grid is the one that
-  # does otherwise, and it says so in its own committed header -- a fixture
-  # that ships, so unlike the leg above this one runs under `R CMD check`.
+  # does otherwise. Asserted on the generator's PARSED body, like the leg
+  # above. The earlier form grepped the committed fixture's `#` header, which
+  # is the very shape F2 condemned -- it asserts what a header SAYS, and a
+  # generator that reverted one component to a normal while leaving its header
+  # alone passed it (M130 return 2, O6). The header line is checked too, but
+  # only as a consistency cross-check against what the body does; the
+  # structural fence with its own mutation harness behind it is
+  # `test-m118-both-components-dgp.R`, which this mirrors rather than replaces.
+  path <- testthat::test_path(
+    "..",
+    "..",
+    "data-raw",
+    "m118-width-reversal-sweep.R"
+  )
+  skip_if_not(file.exists(path), "data-raw/ absent from a built package")
+
+  gen <- NULL
+  for (e in parse(path)) {
+    if (
+      is.call(e) &&
+        is.name(e[[1]]) &&
+        as.character(e[[1]]) %in% c("<-", "=") &&
+        identical(as.character(e[[2]]), "gen_oneway")
+    ) {
+      gen <- e[[3]]
+    }
+  }
+  expect_false(is.null(gen))
+  assigns <- Filter(
+    function(e) {
+      is.call(e) && is.name(e[[1]]) && as.character(e[[1]]) %in% c("<-", "=")
+    },
+    as.list(body(eval(gen)))
+  )
+  rhs <- function(nm) {
+    hit <- Filter(function(e) identical(as.character(e[[2]]), nm), assigns)
+    expect_identical(length(hit), 1L, label = nm)
+    paste(deparse(hit[[1]][[3]]), collapse = " ")
+  }
+  # BOTH components go through the same family-valued draw, and neither names
+  # a distribution of its own -- that is what "both components" means here.
+  for (nm in c("a", "e")) {
+    expect_match(rhs(nm), "draw_standard\\([^)]*\\bdist\\b", info = nm)
+  }
+  # And no draw anywhere in the body bypasses `draw_standard()`.
+  expect_length(vc_rng_calls(body(eval(gen))), 0L)
+
+  # Cross-check: the shipped fixture's header states what the body does.
   res <- utils::head(
     readLines(
       testthat::test_path("fixtures", "width-reversal-by-cell.tsv"),
