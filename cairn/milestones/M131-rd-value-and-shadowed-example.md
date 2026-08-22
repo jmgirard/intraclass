@@ -2,7 +2,7 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M131: Say what each documented method returns, and stop shadowing the shipped dataset
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -88,7 +88,7 @@ prose → M129/M130/M132.
 - [x] T3: Enumerate example-bound names against the exported data; rewrite
       `icc()`'s example to use the shipped `ratings`, checking the printed
       output is unchanged in value.
-- [ ] T4: `run_examples()`; `R CMD check --as-cran` on `R CMD build` tarballs of
+- [x] T4: `run_examples()`; `R CMD check --as-cran` on `R CMD build` tarballs of
       the branch tip and of the merge-base with `origin/main`, recording both
       `Status:` lines and their NOTE headings, and noting as a dated observation
       whether any check heading mentions `\value`; the gate-lite sweep.
@@ -105,6 +105,10 @@ prose → M129/M130/M132.
 - 2026-08-22: T3 — enumerating top-level `<-`/`=`/`assign()` bindings in every `man/*.Rd` `\examples` block against `data(package = "intraclass")$results[, "Item"]` (`ratings`, `ratings_incomplete`) found exactly one shadowing binding, `ratings` in `man/icc.Rd`; the hand-built frame was `identical()` to the shipped `ratings`. `icc()`'s example now calls the shipped object directly, with a two-line comment naming it as the Shrout & Fleiss (1979) worked example. Printed output before and after the rewrite `diff`s empty (both captured this session under `seed = 1`); the enumeration now returns 0 shadowing bindings. `man/d_study.Rd`'s `fit` binding is outside the domain (not exported data).
 - 2026-08-22: amendment (substantive, mini gate) — AC3 and T4 amended together, the Coverage row AC3 → T4 unchanged. Motivation: AC3 required quoting the heading of `R CMD check --as-cran`'s `\value`-section check, and no such heading exists — the run's Rd-related headings are `checking Rd files`, `Rd metadata`, `Rd line widths`, `Rd cross-references`, `for missing documentation entries`, `for code/documentation mismatches`, `Rd \usage sections`, `Rd contents`, all OK, and none mentions `\value` (observed 2026-08-22 on R 4.6.1). Amended AC3 narrows: it drops that unsatisfiable clause and replaces the `Status:`-line comparison with per-NOTE-heading set containment against the merge-base run, defining `NOTE heading` and pinning the invocation. No criterion was added and no existing promise extended. Two fresh-context [O] readers audited the wording in FULL mode before it was written: the first rejected an earlier draft as widening (an inert heading-census clause, `Rd-related` enumerated by no procedure, `no worse than main's` indeterminate, T4 left contradicting AC3); the second cleared the direction and caught one widening the draft still carried (an absolute no-WARNING bar where the original was relative to main), fixed before writing. Subagent use was user-approved at the gate, this session otherwise being told not to spawn agents unattended.
 - 2026-08-22: `run_examples()` left a stray `Rplots.pdf` in the repo root and the T4 amendment commit's `git add -A` swept it in; the AC3 comparison caught it as a `checking top-level files` NOTE present on the branch and absent from the merge-base. Removed from the index and the tree, and added to `.gitignore` and `.Rbuildignore` so a future example run cannot reintroduce it.
+- 2026-08-22: T4 (AC3) — `_R_CHECK_CRAN_INCOMING_REMOTE_=false R CMD check --as-cran --no-manual <tarball>` on `R CMD build` tarballs, run back-to-back under R version 4.6.1 (2026-06-24): branch tip c4f3414 `Status: 1 NOTE`, merge-base 53f77a1 `Status: 1 NOTE`; the sole NOTE heading on both sides is `checking CRAN incoming feasibility` (maintainer name plus the 0.0.0.9000 version-components line), no WARNING heading on either, so the branch adds no heading the base does not have. No `--as-cran` check heading mentions `\value` — observed 2026-08-22 on R 4.6.1.
+- 2026-08-22: T4 (AC4) — `devtools::run_examples(document = FALSE)` exit 0. The one changed example, `?icc`'s, prints the same report as before the rewrite: `two-way random, absolute agreement & consistency`, 6 subjects / 4 random raters / 24 of 24 cells, glmmTMB REML, 95% montecarlo, ICC(A,1) 0.290 [0.051, 0.712], ICC(A,k) 0.620 [0.177, 0.908], ICC(C,1) 0.715 [0.337, 0.926], ICC(C,k) 0.909 [0.670, 0.980], components subject 2.556 / rater 5.244 / residual 1.019. No other example was changed.
+- 2026-08-22: T4 (AC5) — `NOT_CRAN=true CI=true devtools::test()` 0 failures / 8500 passing / 25 skipped; `air format --check .` clean; `devtools::document()` leaves no delta; `pkgdown::check_pkgdown()` no problems found; `cairn_validate` exit 0, all checks passed. The four python `data-raw/` checkers also exit 0 (`check-mpl-doc-claims.py`, `check-oracle-registry.py`, `check-record-claims.py`, `check-reference-observations.py`); `check-abort-remedy-verdicts.R` was not run here (it refits models and exceeded the session command timeout) and is left to review.
+- 2026-08-22: NEWS.md gains two Documentation bullets — the per-method Value sections on `?icc` / `?d_study` / `?choose_icc`, and `?icc`'s example now calling the shipped `ratings`. Every `R/` line this branch changes is a roxygen comment line (`git diff origin/main -- R/` has zero non-roxygen changed lines), so no computed value moves.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
