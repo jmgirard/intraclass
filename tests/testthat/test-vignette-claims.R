@@ -1263,6 +1263,12 @@ test_that("interval-methods.Rmd: the default under-covers silently -- no abort, 
     score = rep(rnorm(n_s, sd = sqrt(2)), times = n_r) + rnorm(n_s * n_r)
   )
   td_n <- tidy(icc(matched, score, subject, rater, model = "oneway", seed = 1))
+  # "Matched" is load-bearing: comparing against a normal fit at some OTHER
+  # subject-effect variance would compare two different designs, and the width
+  # verdict is not monotone in that variance, so the mismatch would not show
+  # up in the comparison itself. Assert the match (M130 return 2, T13: the
+  # planted `sqrt(2)` -> `sqrt(0.2)` change survived the width comparison).
+  expect_equal(td_n$estimate[1], td$estimate[1], tolerance = 0.1)
   expect_lte(
     td$conf.high[1] - td$conf.low[1],
     td_n$conf.high[1] - td_n$conf.low[1]
