@@ -868,7 +868,7 @@ test_that("interval-methods.Rmd: exactly four opt-in methods, each fenced and cl
   }
 })
 
-test_that("interval-methods.Rmd: the bootstrap spans the mixed-model designs, and lavaan is Monte-Carlo only", {
+test_that("interval-methods.Rmd: the bootstrap spans the mixed-model designs, and lavaan bootstraps complete data only", {
   skip_if_not_installed("glmmTMB")
 
   # Article lines 63-64. `boot_samples` is small here: the claim under test is
@@ -1258,4 +1258,130 @@ test_that("interval-methods.Rmd: the `\"mpl\"` fences are the ones the article n
       info = format(cl)
     )
   }
+})
+
+# The article's study-restatement claims -----------------------------------
+# The skew coverage figures and the searle/burch width ratios are pinned
+# against the committed fixtures by `test-doc-skew-caveat.R`. These blocks
+# cover the structural claims the article makes ABOUT those studies that no
+# existing expectation asserts -- each read off the same committed fixtures, so
+# a regenerated study reds the article's reading of it, not just its numerals.
+
+test_that("interval-methods.Rmd: near-normal and uniform effects under-cover only where runs abort", {
+  f <- utils::read.delim(
+    testthat::test_path("fixtures", "skew-undercoverage.tsv"),
+    stringsAsFactors = FALSE
+  )
+  mc <- f[f$source == "m113" & f$method == "mc", , drop = FALSE]
+  benign <- mc[mc$dist %in% c("gaussian", "uniform"), , drop = FALSE]
+  expect_gt(nrow(benign), 0L) # anti-vacuity
+
+  # The article's claim: among the near-normal families, an under-covering cell
+  # is always a high-abort cell -- so wherever the default almost always
+  # returned an interval, those distributions were fine.
+  quiet <- benign[benign$abort_rate <= 0.1, , drop = FALSE]
+  expect_gt(nrow(quiet), 0L)
+  expect_true(all(quiet$coverage_nonabort >= 0.93))
+})
+
+test_that("interval-methods.Rmd: two raters cover worse than five in every paired cell", {
+  f <- utils::read.delim(
+    testthat::test_path("fixtures", "skew-undercoverage.tsv"),
+    stringsAsFactors = FALSE
+  )
+  # In this fixture `k` is the SUBJECT count and `n` the RATER count.
+  mc <- f[f$source == "m113" & f$method == "mc", , drop = FALSE]
+  cell <- paste(mc$rho, mc$k, mc$dist, sep = "\r")
+  two <- mc[mc$n == 2L, , drop = FALSE]
+  five <- mc[mc$n == 5L, , drop = FALSE]
+  shared <- intersect(
+    paste(two$rho, two$k, two$dist, sep = "\r"),
+    paste(five$rho, five$k, five$dist, sep = "\r")
+  )
+  expect_gt(length(shared), 0L) # anti-vacuity
+  for (s in shared) {
+    a <- two$coverage_nonabort[paste(two$rho, two$k, two$dist, sep = "\r") == s]
+    b <- five$coverage_nonabort[
+      paste(five$rho, five$k, five$dist, sep = "\r") == s
+    ]
+    expect_lt(a, b, label = paste("2-rater coverage at", s))
+  }
+  # And the article's reason it is not a recommendation: the 2-rater cells
+  # abort far more often, so their failure is the visible kind.
+  expect_gt(mean(two$abort_rate), mean(five$abort_rate))
+})
+
+test_that("interval-methods.Rmd: the smaller grid carries only the two lowest true-ICC values", {
+  w <- utils::read.delim(
+    testthat::test_path("fixtures", "classical-width-by-cell.tsv"),
+    stringsAsFactors = FALSE
+  )
+  small <- w[w$grid == "m76", , drop = FALSE]
+  large <- w[w$grid == "m113", , drop = FALSE]
+  expect_identical(nrow(small), 16L) # the article's "16 cells"
+  levels_large <- sort(unique(large$rho))
+  expect_setequal(unique(small$rho), utils::head(levels_large, 2L))
+  expect_gt(length(levels_large), 2L) # the larger grid really does reach further
+})
+
+test_that("interval-methods.Rmd: the between-grid gap is mostly design points, with a remainder", {
+  w <- utils::read.delim(
+    testthat::test_path("fixtures", "classical-width-by-cell.tsv"),
+    stringsAsFactors = FALSE
+  )
+  key <- function(d) paste(d$rho, d$k, d$n, d$dist, sep = "\r")
+  small <- w[w$grid == "m76", , drop = FALSE]
+  large <- w[w$grid == "m113", , drop = FALSE]
+  shared <- intersect(key(small), key(large))
+  expect_identical(length(shared), nrow(small)) # the smaller grid is contained
+
+  gap_pooled <- abs(stats::median(small$ratio) - stats::median(large$ratio))
+  restricted <- large$ratio[key(large) %in% shared]
+  gap_restricted <- abs(stats::median(small$ratio) - stats::median(restricted))
+
+  # "Restricting the larger grid to the smaller one's design points closes most
+  # of that gap" ...
+  expect_lt(gap_restricted, gap_pooled / 2)
+  # ... "and leaves a remainder": the gap does not vanish.
+  expect_gt(gap_restricted, 0)
+
+  # "two separate simulations that mostly disagree at the design points they
+  # share, agreeing closely at only a couple of them": exactly two of the
+  # sixteen shared cells agree to within 1e-9 (they are the same underlying
+  # run); the other fourteen differ by between 1e-4 and 8.3e-3.
+  d <- abs(
+    small$ratio[match(shared, key(small))] -
+      large$ratio[match(shared, key(large))]
+  )
+  expect_identical(sum(d < 1e-9), 2L)
+  expect_gt(min(d[d >= 1e-9]), 1e-4)
+  expect_lt(max(d), 0.01)
+})
+
+test_that("interval-methods.Rmd: the two subject-effect grids draw their errors from a normal", {
+  # The article's line about what the grids vary is a claim about the
+  # generating scripts, which the M116 generator asserts against their source
+  # before it writes the comparison table's header.
+  tsv <- testthat::test_path(
+    "..",
+    "..",
+    "data-raw",
+    "m116-classical-width-comparison.tsv"
+  )
+  skip_if_not(file.exists(tsv), "data-raw/ absent from a built package")
+  head_lines <- utils::head(readLines(tsv, warn = FALSE), 40L)
+  dgp <- grep("^#", head_lines, value = TRUE)
+  expect_true(
+    any(grepl("SUBJECT EFFECT", dgp, fixed = TRUE)) &&
+      any(grepl("error always from", dgp, fixed = TRUE))
+  )
+  # The third grid is the one that does otherwise, and says so in its own header.
+  res <- utils::head(
+    readLines(
+      testthat::test_path("fixtures", "width-reversal-by-cell.tsv"),
+      warn = FALSE
+    ),
+    5L
+  )
+  expect_true(any(grepl("Both A_i and e_ij are drawn", res, fixed = TRUE)))
 })

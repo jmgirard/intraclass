@@ -60,8 +60,10 @@ bootstrap's lower tail is noisier than the covariance-based Monte-Carlo draw. It
 upper bounds sit close to the Monte-Carlo ones — close enough that ICC(A,k) rounds
 to the same pair above — but they are not identical, and they do not all fall on
 the same side. The two methods can diverge more where the asymptotics are strained
-— near the zero-variance boundary, and for the multilevel designs (more variance
-components, often few clusters), where the bootstrap's cluster-level interval in
+— near the [zero-variance boundary](glossary.html#zero-variance-boundary), and
+for the multilevel designs (more [variance
+components](glossary.html#variance-component), often few clusters), where the
+bootstrap's cluster-level interval in
 particular carries more resampling noise. The bootstrap is available for every design
 the `"glmmTMB"` and `"lme4"` engines fit, and for `"lavaan"` on balanced, complete
 data; where lavaan's data are unbalanced or incomplete it is Monte-Carlo only,
@@ -146,7 +148,8 @@ Spearman-Brown image as `"npbootstrap"`. The [**exact-F
 interval**](glossary.html#exact-f-interval) (`"searle"`; Searle 1971, the McGraw &
 Wong 1996 Table 7 limits) is exact under normality and best-calibrated when the
 data are approximately normal. The [**Burch
-interval**](glossary.html#burch-interval) (`"burch"`; Burch 2011) is REML-based
+interval**](glossary.html#burch-interval) (`"burch"`; Burch 2011) is
+[REML](glossary.html#reml)-based
 and kurtosis-adjusted: its width tracks the data's tail weight, which buys it
 some robustness to mild non-normality. It is not, however, a remedy for heavy
 tails: on strongly skewed subject effects it under-covers about as badly as the
@@ -204,7 +207,8 @@ family and always draw the errors from a normal, and that is not an incidental
 detail. Burch's own expected-length comparison — which is
 against this very exact-F interval — is kurtosis-conditional: he finds his
 interval shorter for light-tailed data but *wider* for symmetric heavy-tailed
-data, measuring with both the subject effects and the errors non-normal. A third
+data, measuring with both the subject effects and the errors non-normal
+(Burch 2011, §3, eq. 18, pp. 1023–1024). A third
 grid now measures that case here.
 What `"burch"` does against `"searle"` depends on what the residual is
 drawn from, and the three grids now measure that:
@@ -265,7 +269,8 @@ interval**](glossary.html#modified-profile-likelihood) of Xiao & Liu (2013) is
 the two-way counterpart: it serves the **balanced, complete two-way random
 absolute-agreement** ICC(A,1), with ICC(A,k) and any numeric-`unit` projection
 its pole-safe Spearman-Brown image, and aborts on any other design, on
-consistency or fixed raters, and on unbalanced or incomplete data. It is a
+[consistency](glossary.html#consistency) or fixed raters, and on unbalanced or
+incomplete data. It is a
 deterministic closed form — no resampling, no `seed`. Its calibration fixes two
 fences: `conf_level` must be 0.90, 0.95, or 0.99 (each level carries its own
 calibrated correction constant, never interpolated between levels), and the
