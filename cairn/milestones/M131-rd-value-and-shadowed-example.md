@@ -2,12 +2,12 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M131: Say what each documented method returns, and stop shadowing the shipped dataset
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP2   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m131-rd-value-and-shadowed-example`   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create -->
@@ -91,6 +91,7 @@ prose → M129/M130/M132.
 - 2026-08-21: created by /milestone-plan (pre-M48 CRAN-readiness slate; user selected this item at the plan gate). Promotes the "CRAN-reviewer documentation nits, promoted at M48" candidate row, whose stated promotion condition is "Promote at M48, or on a CRAN reviewer raising either" — the plan gate chose ahead of M48 so the fix is not competing with the release checklist.
 - 2026-08-21: criteria audit ran in FULL mode (user-facing tier), two rounds, fresh-context [O] reader. Round 1 found AC1's `reexports.Rd` exclusion clause inert (that page has no `\usage`, so the stated filter never selects it) and AC2's "object names assigned in each `\examples` block" enumerated by no procedure. Round 2 confirmed the page set and alias counts (3/7/8), confirmed the data intersection returns exactly `ratings` and `ratings_incomplete`, noted `man/intraclass-package.Rd` missing from AC1's parenthetical, and flagged AC3's `checking Rd \value sections` heading as unconfirmable on this machine's R 4.6.1 — AC3 was rewritten to quote the real heading from an actual run rather than assert one. All fixed before writing.
 - 2026-08-21: plan gate chose documenting the existing return contract over changing any return shape to make it uniform, because GP2's one-way door closes at submission and a shape change is M48 T1's escalation, not a doc milestone's; falsified by a method whose return shape cannot be described honestly without changing it.
+- 2026-08-22: /milestone-implement opened on branch `m131-rd-value-and-shadowed-example`, cut from `origin/main` at 53f77a1; status set to in-progress.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
