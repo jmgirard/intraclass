@@ -744,3 +744,518 @@ test_that("comparison.Rmd: incomplete data collapses classical tools but not int
   expect_gt(fit_inc$k_eff, 1)
   expect_lt(fit_inc$k_eff, 4)
 })
+
+# Vignette claims (interval-methods.Rmd) ----------------------------------
+# The interval-methods article is the surface carrying every `ci_method` claim.
+# Its study figures (the skew under-coverage cells, the searle/burch width
+# ratios) are pinned against committed fixtures by `test-doc-skew-caveat.R`;
+# what that file cannot see is whether the *behavioural* claims the article
+# makes about the shipped API are true. Those are backed here, on the article's
+# own data and at the article's own arguments (PRINCIPLES.md #1/#4).
+
+test_that("interval-methods.Rmd: every coefficient carries an interval, never a bare number", {
+  skip_if_not_installed("glmmTMB")
+
+  # The opening claim (article lines 19-20): `icc()` reports an interval for
+  # every coefficient it returns, whatever the method. Sweep the designs and
+  # methods the article names as reachable.
+  cases <- list(
+    list(model = "twoway", type = "agreement", ci_method = "montecarlo"),
+    list(model = "twoway", type = "consistency", ci_method = "montecarlo"),
+    list(model = "oneway", type = "agreement", ci_method = "montecarlo"),
+    list(model = "oneway", type = "agreement", ci_method = "searle"),
+    list(model = "oneway", type = "agreement", ci_method = "burch")
+  )
+  for (cs in cases) {
+    td <- tidy(icc(
+      ratings,
+      score,
+      subject,
+      rater,
+      model = cs$model,
+      type = cs$type,
+      ci_method = cs$ci_method,
+      unit = c("single", "average"),
+      seed = 1
+    ))
+    expect_gt(nrow(td), 0L) # anti-vacuity: a zero-row tidy passes the sweep free
+    expect_false(any(is.na(td$conf.low)), info = cs$ci_method)
+    expect_false(any(is.na(td$conf.high)), info = cs$ci_method)
+  }
+})
+
+test_that("interval-methods.Rmd: `ci_method` selects the interval, never the estimator", {
+  skip_if_not_installed("glmmTMB")
+
+  # Article line 249, read off the `ci-oneway-optin` chunk: all four columns
+  # share one point estimate. Run the chunk's own calls.
+  mc <- tidy(icc(ratings, score, subject, rater, model = "oneway", seed = 1))
+  se <- tidy(icc(
+    ratings,
+    score,
+    subject,
+    rater,
+    model = "oneway",
+    ci_method = "searle"
+  ))
+  bu <- tidy(icc(
+    ratings,
+    score,
+    subject,
+    rater,
+    model = "oneway",
+    ci_method = "burch"
+  ))
+  np <- tidy(icc(
+    ratings,
+    score,
+    subject,
+    rater,
+    model = "oneway",
+    ci_method = "npbootstrap",
+    boot_samples = 199,
+    seed = 1
+  ))
+  for (other in list(se, bu, np)) {
+    expect_equal(other$estimate, mc$estimate, tolerance = 1e-8)
+  }
+
+  # And the article's reading of that chunk (line 249-252): the three opt-in
+  # lower limits dip below zero on these data while the Monte-Carlo one does not.
+  for (other in list(se, bu, np)) {
+    expect_lt(min(other$conf.low), 0)
+  }
+  expect_gte(min(mc$conf.low), 0)
+})
+
+test_that("interval-methods.Rmd: exactly four opt-in methods, each fenced and classed", {
+  skip_if_not_installed("glmmTMB")
+
+  # Article line 113: "Four opt-in methods serve exactly that terrain". The
+  # enumerator is the validator's own accepted set, not a hand list: an
+  # unrecognized value aborts with the allowed values spelled out, so ask it.
+  msg <- tryCatch(
+    icc(ratings, score, subject, rater, ci_method = "not-a-method", seed = 1),
+    error = conditionMessage
+  )
+  all_methods <- regmatches(msg, gregexpr('"[^"]+"', msg))[[1]]
+  all_methods <- gsub('"', "", all_methods, fixed = TRUE)
+  expect_gt(length(all_methods), 0L) # anti-vacuity: an empty set passes free
+  optin <- setdiff(all_methods, c("montecarlo", "bootstrap", "posterior"))
+  expect_setequal(optin, c("npbootstrap", "searle", "burch", "mpl"))
+  expect_identical(length(optin), 4L)
+
+  # Article line 114: each aborts with a classed error off its fence. The
+  # two-way consistency design is off the fence of all four (the three one-way
+  # methods refuse the two-way; `"mpl"` refuses consistency).
+  # `"mpl"` warns before it aborts (it drops the undefined type first), so the
+  # warning is muffled here; the assertion is about which failure is raised.
+  for (m in optin) {
+    expect_error(
+      suppressWarnings(icc(
+        ratings,
+        score,
+        subject,
+        rater,
+        model = "twoway",
+        type = "consistency",
+        ci_method = m,
+        seed = 1
+      )),
+      class = "intraclass_unsupported",
+      info = m
+    )
+  }
+})
+
+test_that("interval-methods.Rmd: the bootstrap spans the mixed-model designs, and lavaan is Monte-Carlo only", {
+  skip_if_not_installed("glmmTMB")
+
+  # Article lines 63-64. `boot_samples` is small here: the claim under test is
+  # availability, not the interval's smoothness.
+  designs <- list(
+    list(model = "oneway", type = "agreement"),
+    list(model = "twoway", type = "agreement"),
+    list(model = "twoway", type = "consistency")
+  )
+  engines <- "glmmTMB"
+  if (
+    requireNamespace("lme4", quietly = TRUE) &&
+      requireNamespace("merDeriv", quietly = TRUE)
+  ) {
+    engines <- c(engines, "lme4")
+  }
+  for (eng in engines) {
+    for (d in designs) {
+      td <- tidy(icc(
+        ratings,
+        score,
+        subject,
+        rater,
+        model = d$model,
+        type = d$type,
+        engine = eng,
+        ci_method = "bootstrap",
+        boot_samples = 19,
+        seed = 1
+      ))
+      expect_gt(nrow(td), 0L)
+      expect_false(
+        any(is.na(td$conf.low)),
+        info = paste(eng, d$model, d$type)
+      )
+    }
+  }
+
+  # `"lavaan"` bootstraps balanced, complete data (M21 Slice 1, ADR-031) and
+  # refuses -- classed -- on incomplete data, which is what `?icc` documents and
+  # what the article's line 64 now says. Its bootstrap is a real one: it does
+  # not return the Monte-Carlo interval under another name.
+  skip_if_not_installed("lavaan")
+  lv_bs <- tidy(icc(
+    ratings,
+    score,
+    subject,
+    rater,
+    engine = "lavaan",
+    ci_method = "bootstrap",
+    boot_samples = 19,
+    seed = 1
+  ))
+  lv_mc <- tidy(icc(
+    ratings,
+    score,
+    subject,
+    rater,
+    engine = "lavaan",
+    ci_method = "montecarlo",
+    seed = 1
+  ))
+  expect_true(all(lv_bs$method == "bootstrap"))
+  expect_false(isTRUE(all.equal(lv_bs$conf.low, lv_mc$conf.low)))
+  expect_error(
+    suppressWarnings(icc(
+      ratings_incomplete,
+      score,
+      subject,
+      rater,
+      engine = "lavaan",
+      ci_method = "bootstrap",
+      boot_samples = 19,
+      seed = 1
+    )),
+    class = "intraclass_unsupported"
+  )
+})
+
+test_that("interval-methods.Rmd: `\"npbootstrap\"` is the only opt-in method that serves unbalanced one-way data", {
+  skip_if_not_installed("glmmTMB")
+
+  # Article line 122. `ratings_incomplete` is the shipped unbalanced dataset.
+  np <- tidy(icc(
+    ratings_incomplete,
+    score,
+    subject,
+    rater,
+    model = "oneway",
+    ci_method = "npbootstrap",
+    boot_samples = 199,
+    seed = 1
+  ))
+  expect_gt(nrow(np), 0L)
+  expect_false(any(is.na(np$conf.low)))
+
+  for (m in c("searle", "burch", "mpl")) {
+    expect_error(
+      icc(
+        ratings_incomplete,
+        score,
+        subject,
+        rater,
+        model = "oneway",
+        ci_method = m,
+        seed = 1
+      ),
+      class = "intraclass_unsupported",
+      info = m
+    )
+  }
+})
+
+test_that("interval-methods.Rmd: `\"npbootstrap\"` alone takes a seed, and any conf_level in (0, 1)", {
+  skip_if_not_installed("glmmTMB")
+
+  # Article lines 124-125. The three deterministic opt-ins are unmoved by the
+  # seed; `"npbootstrap"` resamples, so it moves.
+  one <- function(m, ...) {
+    tidy(icc(
+      ratings,
+      score,
+      subject,
+      rater,
+      model = "oneway",
+      ci_method = m,
+      ...
+    ))$conf.low[1]
+  }
+  for (m in c("searle", "burch")) {
+    expect_identical(one(m, seed = 1), one(m, seed = 99), info = m)
+  }
+  expect_false(identical(
+    one("npbootstrap", boot_samples = 199, seed = 1),
+    one("npbootstrap", boot_samples = 199, seed = 99)
+  ))
+
+  # "Any `conf_level` in (0, 1) is accepted", and the interval widens with it.
+  lo <- vapply(
+    c(0.5, 0.8, 0.95, 0.995),
+    function(cl) {
+      td <- tidy(icc(
+        ratings,
+        score,
+        subject,
+        rater,
+        model = "oneway",
+        ci_method = "npbootstrap",
+        conf_level = cl,
+        boot_samples = 199,
+        seed = 1
+      ))
+      td$conf.high[1] - td$conf.low[1]
+    },
+    numeric(1)
+  )
+  expect_true(all(diff(lo) > 0))
+})
+
+test_that("interval-methods.Rmd: the `ci-bootstrap` chunk's own comparison holds", {
+  skip_if_not_installed("glmmTMB")
+  skip_on_cran()
+
+  # Article lines 44-65, run at the chunk's own arguments (999 resamples,
+  # `seed = 1`) because the prose reads the table those arguments render.
+  mc <- tidy(icc(ratings, score, subject, rater, seed = 1))
+  bs <- tidy(icc(
+    ratings,
+    score,
+    subject,
+    rater,
+    ci_method = "bootstrap",
+    boot_samples = 999,
+    seed = 1
+  ))
+
+  # Same fit, so the point estimates are identical.
+  expect_equal(bs$estimate, mc$estimate, tolerance = 1e-8)
+  # The bootstrap's lower bounds run markedly lower on this six-subject design.
+  expect_true(all(bs$conf.low < mc$conf.low))
+  # Its upper bounds are close but not identical, and not uniformly higher --
+  # the article says so because rounding them to the chunk's own two decimals
+  # leaves only ICC(A,k) coinciding.
+  expect_true(all(abs(bs$conf.high - mc$conf.high) < 0.05))
+  expect_false(all(bs$conf.high >= mc$conf.high))
+  rounded_equal <- round(bs$conf.high, 2) == round(mc$conf.high, 2)
+  expect_true(any(rounded_equal))
+  expect_false(all(rounded_equal))
+})
+
+test_that("interval-methods.Rmd: the default under-covers silently -- no abort, no warning, no widening", {
+  skip_if_not_installed("glmmTMB")
+
+  # Article lines 76-80. The study's coverage figures are pinned against the
+  # committed fixture by `test-doc-skew-caveat.R`; what is backed here is the
+  # behavioural half the fixture cannot show -- that a skewed-subject-effect fit
+  # returns quietly, so the shortfall is invisible in the interval itself.
+  set.seed(130)
+  n_s <- 50
+  n_r <- 5
+  subj <- rchisq(n_s, df = 1) # the study's worst-cell subject-effect family
+  skewed <- data.frame(
+    subject = factor(rep(seq_len(n_s), times = n_r)),
+    rater = factor(rep(seq_len(n_r), each = n_s)),
+    score = rep(subj, times = n_r) + rnorm(n_s * n_r)
+  )
+  expect_no_warning(
+    fit <- icc(skewed, score, subject, rater, model = "oneway", seed = 1)
+  )
+  td <- tidy(fit)
+  expect_false(any(is.na(td$conf.low)))
+  # Not widened: the reported interval is the ordinary Monte-Carlo one, no
+  # skew-driven inflation, so nothing in the output flags the shortfall.
+  expect_true(all(td$method == "montecarlo"))
+  expect_lt(td$conf.high[1] - td$conf.low[1], 0.5)
+})
+
+test_that("interval-methods.Rmd: `\"searle\"` and `\"burch\"` project through the same Spearman-Brown image", {
+  skip_if_not_installed("glmmTMB")
+
+  # Article line 140: both closed forms project ICC(k) -- and a numeric `unit` --
+  # through the same map `"npbootstrap"` uses. Check the map itself on the
+  # endpoints, which is what "the same image" means.
+  sb <- function(p, k) k * p / (1 + (k - 1) * p)
+  for (m in c("searle", "burch", "npbootstrap")) {
+    args <- list(
+      ratings,
+      quote(score),
+      quote(subject),
+      quote(rater),
+      model = "oneway",
+      ci_method = m,
+      unit = c("single", "average")
+    )
+    if (m == "npbootstrap") {
+      args <- c(args, list(boot_samples = 199, seed = 1))
+    }
+    td <- tidy(do.call(icc, args))
+    single <- td[td$index == "ICC(1)", ]
+    average <- td[td$index == "ICC(k)", ]
+    k <- 4 # `ratings` has four raters
+    expect_equal(average$estimate, sb(single$estimate, k), tolerance = 1e-8)
+    expect_equal(average$conf.low, sb(single$conf.low, k), tolerance = 1e-8)
+    expect_equal(average$conf.high, sb(single$conf.high, k), tolerance = 1e-8)
+  }
+})
+
+test_that("interval-methods.Rmd: at zero between-subject variance `\"burch\"` aborts and `\"searle\"` does not", {
+  skip_if_not_installed("glmmTMB")
+
+  # Article lines 222-225, the stated asymmetry between the siblings (D-022).
+  flat <- data.frame(
+    subject = factor(rep(1:8, each = 4)),
+    rater = factor(rep(1:4, times = 8)),
+    score = rep(c(1, 2, 3, 4), times = 8) # identical profile for every subject
+  )
+  # The abort is classed `intraclass_singular_fit` -- the kurtosis
+  # standardization divides by a between-subject variance of exactly zero.
+  expect_error(
+    icc(flat, score, subject, rater, model = "oneway", ci_method = "burch"),
+    class = "intraclass_singular_fit"
+  )
+  se <- tidy(icc(
+    flat,
+    score,
+    subject,
+    rater,
+    model = "oneway",
+    ci_method = "searle",
+    unit = "single"
+  ))
+  expect_false(is.na(se$conf.low))
+  expect_false(is.na(se$conf.high))
+})
+
+test_that("interval-methods.Rmd: the `\"mpl\"` fences are the ones the article names", {
+  skip_if_not_installed("glmmTMB")
+
+  # Article lines 257-275, run on the article's own simulated design (the
+  # `ci-mpl` chunk's data, rebuilt at its seed -- `ratings` is too small for
+  # the calibration grid).
+  set.seed(88)
+  n_s <- 20
+  n_r <- 4
+  subj_eff <- rnorm(n_s, sd = sqrt(0.6))
+  rater_eff <- rnorm(n_r, sd = sqrt(0.1))
+  noise <- matrix(rnorm(n_s * n_r, sd = sqrt(0.2)), n_s, n_r)
+  sim <- data.frame(
+    subject = factor(rep(seq_len(n_s), times = n_r)),
+    rater = factor(rep(seq_len(n_r), each = n_s)),
+    score = as.numeric(
+      outer(subj_eff, rep(1, n_r)) +
+        outer(rep(1, n_s), rater_eff) +
+        noise
+    )
+  )
+
+  # On the fence: balanced, complete, two-way random absolute agreement.
+  ml <- tidy(icc(
+    sim,
+    score,
+    subject,
+    rater,
+    type = "agreement",
+    ci_method = "mpl",
+    unit = c("single", "average")
+  ))
+  expect_false(any(is.na(ml$conf.low)))
+
+  # ICC(A,k) is the pole-safe Spearman-Brown image of ICC(A,1) (line 262).
+  sb <- function(p, k) k * p / (1 + (k - 1) * p)
+  a1 <- ml[ml$index == "ICC(A,1)", ]
+  ak <- ml[ml$index == "ICC(A,k)", ]
+  expect_equal(ak$conf.low, sb(a1$conf.low, n_r), tolerance = 1e-8)
+  expect_equal(ak$conf.high, sb(a1$conf.high, n_r), tolerance = 1e-8)
+
+  # Off the fence, each way the article names (line 263), classed each time.
+  expect_error(
+    icc(sim, score, subject, rater, model = "oneway", ci_method = "mpl"),
+    class = "intraclass_unsupported"
+  )
+  # Warns before it aborts (the undefined type is dropped first); the message is
+  # pinned too, so this asserts the consistency fence and not any refusal.
+  expect_error(
+    suppressWarnings(icc(
+      sim,
+      score,
+      subject,
+      rater,
+      type = "consistency",
+      ci_method = "mpl"
+    )),
+    regexp = "does not\\s+define a consistency",
+    class = "intraclass_unsupported"
+  )
+  expect_error(
+    suppressWarnings(icc(
+      sim,
+      score,
+      subject,
+      rater,
+      type = "agreement",
+      raters = "fixed",
+      ci_method = "mpl"
+    )),
+    class = "intraclass_unsupported"
+  )
+  expect_error(
+    icc(
+      sim[-1, ],
+      score,
+      subject,
+      rater,
+      type = "agreement",
+      ci_method = "mpl"
+    ),
+    class = "intraclass_unsupported"
+  )
+
+  # `conf_level` is fenced to the three calibrated levels, never interpolated
+  # between them (lines 266-267).
+  for (cl in c(0.90, 0.95, 0.99)) {
+    td <- tidy(icc(
+      sim,
+      score,
+      subject,
+      rater,
+      type = "agreement",
+      ci_method = "mpl",
+      conf_level = cl,
+      unit = "single"
+    ))
+    expect_false(is.na(td$conf.low), info = format(cl))
+  }
+  for (cl in c(0.925, 0.80, 0.995)) {
+    expect_error(
+      icc(
+        sim,
+        score,
+        subject,
+        rater,
+        type = "agreement",
+        ci_method = "mpl",
+        conf_level = cl
+      ),
+      class = "intraclass_unsupported",
+      info = format(cl)
+    )
+  }
+})
