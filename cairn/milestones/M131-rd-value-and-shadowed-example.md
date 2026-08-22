@@ -7,7 +7,7 @@
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP2   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** `m131-rd-value-and-shadowed-example`   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m131-rd-value-and-shadowed-example` · https://github.com/jmgirard/intraclass/pull/140   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create -->
@@ -38,7 +38,7 @@ prose → M129/M130/M132.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: For every `man/*.Rd` page containing a `\usage` block and more than
+- [x] AC1: For every `man/*.Rd` page containing a `\usage` block and more than
       one `\alias`, the page's `\value` section names each topic in that page's
       `\alias` set and says what that topic returns. The page set and each
       page's alias set are enumerated by parsing `\alias` and `\usage` from
@@ -46,7 +46,7 @@ prose → M129/M130/M132.
       selects exactly `man/choose_icc.Rd`, `man/d_study.Rd`, `man/icc.Rd`;
       `man/reexports.Rd` and `man/intraclass-package.Rd` carry aliases but no
       `\usage`, so the filter never selects them.)
-- [ ] AC2: No `\examples` block in `man/*.Rd` binds a name the package exports
+- [x] AC2: No `\examples` block in `man/*.Rd` binds a name the package exports
       as data. The domain is enumerated by `parse()`-ing each `\examples` block
       and collecting every name bound by a top-level `<-`, `=`, or `assign()`
       call, intersected with `data(package = "intraclass")$results[, "Item"]`
@@ -62,9 +62,9 @@ prose → M129/M130/M132.
       <tarball>`, with no intervening toolchain change. One work-log line
       summarizes that command, `R.version.string`, the two commit ids, both
       `Status:` lines and both heading sets -- summarized, never pasted output.
-- [ ] AC4: `devtools::run_examples()` completes with no error, and each changed
+- [x] AC4: `devtools::run_examples()` completes with no error, and each changed
       example's output is recorded in the work log.
-- [ ] AC5: `NOT_CRAN=true CI=true devtools::test()` 0 failures;
+- [x] AC5: `NOT_CRAN=true CI=true devtools::test()` 0 failures;
       `air format --check .` clean; `devtools::document()` leaves no delta;
       `pkgdown::check_pkgdown()` clean; `cairn_validate` exit 0.
 
@@ -115,3 +115,12 @@ prose → M129/M130/M132.
 
 ## Review
 <!-- owner: review · exclusive -->
+
+**Fresh evidence, 2026-08-22, PR #140, branch tip re-verified this session.**
+
+- AC1 — `tools::parse_Rd()` over `man/*.Rd` selects the three pages with a `\usage` block and >1 `\alias`, and every alias in each page's set appears as `<alias>()` in that page's `\value`: `choose_icc.Rd` 3/3, `d_study.Rd` 7/7, `icc.Rd` 8/8, 18 of 18 overall, no misses. Script exit 0.
+- AC2 — `parse()`-ing every `man/*.Rd` `\examples` block and intersecting its top-level `<-`/`=`/`assign()` bindings with `data(package = "intraclass")$results[, "Item"]` (`ratings`, `ratings_incomplete`) returns 0 shadowing bindings; the only remaining example binding anywhere is `fit` in `man/d_study.Rd`, which is not exported data.
+- AC4 — `devtools::run_examples(document = FALSE)` re-run at the branch tip, exit 0, no error in the 180-line log. The one changed example, `?icc`'s, prints the same report as before the rewrite: 6 subjects / 4 random raters / 24 of 24 cells, glmmTMB REML, 95% montecarlo, ICC(A,1) 0.290 [0.051, 0.712], ICC(A,k) 0.620 [0.177, 0.908], ICC(C,1) 0.715 [0.337, 0.926], ICC(C,k) 0.909 [0.670, 0.980], components subject 2.556 / rater 5.244 / residual 1.019.
+- AC5 — `NOT_CRAN=true CI=true devtools::test()` 0 failures / 8500 passing / 25 skipped; `air format --check .` clean; `devtools::document()` leaves the tree unchanged apart from this tracking file; `pkgdown::check_pkgdown()` no problems found; `cairn_validate` exit 0, all checks passed.
+
+**Consistency gate (r-package profile).** `cairn_validate` exit 0 (coverage complete, binding criteria, weight caps all PASS); no `DESIGN.md` principle changed, so `cairn_impact` is skipped. `document()` no diff; `NAMESPACE`, `man/`, and `data/*.rda` regenerate; README.Rmd/README.md untouched by this diff and last knitted together in 6d51207; `pkgdown::check_pkgdown()` clean; NEWS.md carries two Documentation bullets for the user-visible change, with no milestone number in the user-facing text; the diff adds no new top-level file (it adds `.gitignore` and `.Rbuildignore` entries for a stray `Rplots.pdf`).
