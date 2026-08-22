@@ -438,10 +438,11 @@ fitted model, and the call.
 
 The methods documented on this page return:
 \itemize{
-\item \code{tidy.icc()}: a tibble with one row per estimated coefficient
-and the columns \code{index}, \code{type}, \code{level}, \code{sf_index}, \code{estimate},
+\item \code{tidy.icc()}: a tibble with one row per estimated coefficient carrying
+the columns \code{index}, \code{type}, \code{level}, \code{sf_index}, \code{estimate},
 \code{std.error}, \code{conf.low}, \code{conf.high}, \code{conf.level}, and \code{method}, plus an
-\code{occasions} column when the design has within-cell replicates.
+\code{occasions} column -- inserted after \code{index}, so the list above is not a
+column order -- when the design has within-cell replicates.
 \item \code{glance.icc()}: a one-row tibble of model-level summaries --
 the sample sizes, the design flags, the effective rater counts, the
 variance components, and the engine and interval settings.
@@ -454,6 +455,9 @@ followed by the interpretive notes.
 variance-component decomposition when \code{what = "components"}.
 \item \code{plot.icc()}: the \code{icc} object invisibly, having drawn that same plot.
 }
+
+\code{tidy.icc()} and \code{glance.icc()} implement the \link[generics:tidy]{tidy()} and
+\link[generics:glance]{glance()} generics.
 }
 \description{
 Estimates interrater-reliability intraclass correlation coefficients (ICCs)
@@ -730,7 +734,10 @@ ggplot2::autoplot(fit) # coefficient forest plot (the default)
 ggplot2::autoplot(fit, what = "components") # variance-component decomposition
 \dontshow{\}) # examplesIf}
 # `ratings` is the shipped Shrout & Fleiss (1979) worked example: six
-# subjects rated by all four raters, one rating per row.
+# subjects rated by all four raters, in the long layout `icc()` expects --
+# one rating per row, with the subject, the rater, and the score in columns.
+head(ratings)
+
 icc(ratings, score, subject, rater, seed = 1)
 
 }

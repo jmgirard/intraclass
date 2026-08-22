@@ -346,9 +346,12 @@
   sections described only the object the main function returns; each now lists
   the main function and every method sharing the page, naming the method in
   full. What these functions return is unchanged.
-* `?icc`'s example now calls the shipped `ratings` dataset directly. It
-  previously rebuilt an identical data frame by hand under the same name, so the
-  example that appeared to demonstrate the packaged data never touched it.
+
+* `?icc`'s example now calls the shipped `ratings` dataset directly, and shows
+  its first rows so the long, one-rating-per-row layout `icc()` expects is
+  visible on the page. The example previously rebuilt an identical data frame by
+  hand under the same name, shadowing the shipped object for the rest of the
+  page.
 
 * The *Estimation engines* and *Confidence-interval methods* articles show the
   `brms` engine's output in pre-computed blocks, because knitting them would need
