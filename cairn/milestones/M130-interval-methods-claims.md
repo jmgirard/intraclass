@@ -7,7 +7,7 @@
 - **Depends on:** M129   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP5   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** `m130-interval-methods-claims`   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m130-interval-methods-claims` · https://github.com/jmgirard/intraclass/pull/139   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create -->
@@ -36,7 +36,7 @@ and the checker-regress shape; the other six vignettes' prose → M48's check pa
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: Every line that
+- [x] AC1: Every line that
       `grep -nE '\b(any|each|every|all|only|both|exactly|never|always|full)\b' vignettes/interval-methods.Rmd`
       returns (39 on 2026-08-21) states a claim that is (a) backed by a
       test in `tests/testthat/test-vignette-claims.R`; (b) backed by an
@@ -56,27 +56,27 @@ and the checker-regress shape; the other six vignettes' prose → M48's check pa
       run's lines are the domain, and no more than 6 of them may take
       (f). The promise is exactly what this sweep returns; it is not a
       claim about every claim in the file.
-- [ ] AC2: `tests/testthat/test-vignette-claims.R` gains tests attributed to
+- [x] AC2: `tests/testthat/test-vignette-claims.R` gains tests attributed to
       `interval-methods.Rmd` covering the Monte-Carlo vs parametric-bootstrap
       comparison, the under-coverage caveat, and each opt-in method the article
       names as reachable (`"npbootstrap"`, `"searle"`, `"burch"`, `"mpl"`), run
       on the article's own data. `grep -c 'interval-methods' tests/testthat/test-vignette-claims.R`
       returns 0 before this milestone.
-- [ ] AC3: For each test AC2 adds, a planted perturbation of each of these
+- [x] AC3: For each test AC2 adds, a planted perturbation of each of these
       forms reds it: a changed expected numeral, an inverted comparison
       direction, and a changed `ci_method` argument. Each run is logged.
-- [ ] AC4: Every link target that
+- [x] AC4: Every link target that
       `grep -oE '\]\([^)]+\)|<https?://[^>]+>|\]\[[^]]+\]' vignettes/interval-methods.Rmd`
       returns (14 unique today) resolves — an in-page or cross-vignette
       `#anchor` to a heading `pkgdown::build_site()` actually emits in the built
       HTML, a `man/` topic to an installed topic, a URL to a live URL — with
       each target and its resolution recorded in the work log.
-- [ ] AC5: For every term that `grep -n '^## ' vignettes/glossary.Rmd` returns
+- [x] AC5: For every term that `grep -n '^## ' vignettes/glossary.Rmd` returns
       (32 headings) and that appears verbatim in `vignettes/interval-methods.Rmd`
       — the intersection enumerated by looping the 32 headings against the
       article — the article links that term to its glossary anchor on first use,
       or the work log records why it does not.
-- [ ] AC6: `NOT_CRAN=true CI=true devtools::test()` 0 failures;
+- [x] AC6: `NOT_CRAN=true CI=true devtools::test()` 0 failures;
       `air format --check .` clean; `R CMD check`'s raw `Status:` line no worse
       than main's; `pkgdown::check_pkgdown()` and `build_site()` clean;
       `urlchecker::url_check()` all-correct; `cairn_validate` exit 0.
@@ -144,6 +144,71 @@ and the checker-regress shape; the other six vignettes' prose → M48's check pa
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
+- 2026-08-21: /milestone-review opened draft PR #139 and executed all six criteria with fresh evidence (recorded in the Review section); all six PASS and are ticked against their evidence lines.
+- 2026-08-21: review found AC3's evidence incomplete as gathered at implementation — the 33 perturbation runs covered T2's 11 tests, and T3's 5 later tests had none. Ran the 2 applicable forms against each of the 5 (the `ci_method` form is inapplicable: they read committed fixtures and never call `icc()`); 10 runs, 10 red. AC3's domain is AC2's 11 tests, AC2 scoping itself to tests "run on the article's own data", which the 5 fixture readers are not; the extra runs are supplementary, not domain.
+- 2026-08-21: review fan-out spawned three fresh-context lenses ([O] diff-bug, [S] blame-history, [S] prior-PR-comments) per the user-facing tier. The blame-history lens reported no finding: no modified line undoes a deliberate past decision or contradicts a D-entry, and the verbatim `residual_template()` clause encoding D-030 is untouched by this diff. The prior-review lens reported no regression; its probe found the repo carries no inline PR review comments at all, so `cairn/milestones/archive/` was the only surface with signal.
 
 ## Review
 <!-- owner: review · exclusive -->
+
+**Verified 2026-08-21 on `m130-interval-methods-claims` at PR #139.** Evidence
+by command, gathered fresh at review; no result below is carried from
+implementation.
+
+- **AC1 — PASS.** The sweep re-run on the final file returns 39 lines. The
+  work-log ledger partitions them exactly: 27 take (a), 9 take (b), 3 take (f);
+  set-compared against the sweep, no line is unledgered, none is ledgered
+  outside the sweep, and no line carries two dispositions. Incidental use is 3
+  against the cap of 6, and only line 298 sits inside a code chunk. Each (b)
+  line's cited expectation was inverted once, alone: 10 inversions across the
+  9 lines, all red. No line takes (c) or (d).
+- **AC2 — PASS.** `git show origin/main:tests/testthat/test-vignette-claims.R |
+  grep -c 'interval-methods'` returns 0, so the stated precondition holds
+  against the merge base. The file now carries 16 `test_that("interval-methods.Rmd: ...")`
+  blocks. AC2's three named topics are each covered on the article's own data:
+  the Monte-Carlo vs parametric-bootstrap comparison at the chunk's own
+  `boot_samples = 999, seed = 1`; the under-coverage caveat by its behavioural
+  half (a chi-square(1) subject-effect fit returns with no warning and no
+  widening); and all four opt-in methods, each reachable-case and each fence.
+- **AC3 — PASS.** AC2 scopes its tests to those "run on the article's own
+  data", which is the 11 tests calling `icc()`; the 5 fixture-reading tests
+  read committed study TSVs, never call `icc()`, and are AC1(a) tests rather
+  than AC2's. Over AC2's 11, all three forms were planted one at a time with
+  the file restored after each — changed expected numeral, inverted comparison
+  direction, changed `ci_method` argument — 33 runs, 33 red, none survived.
+  Supplementary: the 5 AC1(a) tests took the two applicable forms, 10 runs, 10
+  red; the `ci_method` form is inapplicable to a test that takes no such
+  argument.
+- **AC4 — PASS.** `pkgdown::build_site()` exit 0, rerun at review so the HTML
+  post-dates the anchor fix. The target grep returns 17 unique targets, not the
+  14 the criterion records as its dated count — this milestone's own AC5
+  linking added `#consistency`, `#reml` and `#variance-component`; the promise
+  quantifies over what the grep returns, so the domain is the 17. All 17
+  resolve against the emitted HTML: 14 cross-vignette anchors, 1 cross-vignette
+  page, 2 in-page anchors. No `man/` topics and no URLs among them.
+- **AC5 — PASS.** `grep -n '^## ' vignettes/glossary.Rmd` returns 32 headings;
+  looping them against the article gives 13 terms appearing verbatim in its
+  prose (a 14th, "Absolute agreement", occurs only inside a pasted transcript
+  block). Nine are linked to their glossary anchor on first use — Burch
+  interval, Consistency, Credible interval, Exact-F interval, Monte-Carlo
+  interval, Posterior mode (MAP), REML, Variance component, Zero-variance
+  boundary. Four are recorded in the work log with the reason they are not:
+  Parametric bootstrap, Transformed bootstrap-*t* and Modified profile
+  likelihood first appear in the opening signpost paragraph and are linked at
+  the section defining each; Engine is used throughout as an ordinary noun.
+- **AC6 — PASS.** `NOT_CRAN=true CI=true devtools::test()`: 0 failures, 8383
+  passing, 25 skipped; its 2 warnings are pre-existing
+  (`test-icc-lavaan-multilevel.R:402`, `test-icc-type-vector.R:286`), both in
+  files outside this diff. `air format --check .` clean. `R CMD check --as-cran`
+  at `NOT_CRAN=false`: 0 ERRORs, 0 WARNINGs, 2 NOTEs, both environmental (new
+  submission at 0.0.0.9000; no recent HTML Tidy, no V8) — no worse than main by
+  any reading. `pkgdown::check_pkgdown()` clean and `build_site()` exit 0.
+  `urlchecker::url_check()` all 15 URLs correct. `cairn_validate` exit 0.
+
+**Correction to a record this milestone wrote.** The T5 work-log entry says
+"Ten are linked to their glossary anchor on first use" and then names nine
+terms, padding the count with "and the in-page targets" — in-page anchors are
+not glossary terms. The measured figure is nine linked and four recorded, which
+is what AC5's evidence above states. The work log is append-only, so this
+supersedes that clause rather than editing it.
+
