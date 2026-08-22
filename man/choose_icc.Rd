@@ -48,10 +48,18 @@ generalization). Required for a two-way design.}
 \item{...}{Unused, for method consistency.}
 }
 \value{
-An \code{icc_recommendation} object (a list) with a \code{\link[=print]{print()}} method. It
+\code{choose_icc()} returns an \code{icc_recommendation} object (a list). It
 carries the recommended coefficient rows (\verb{$rows}), the exact \code{icc()} call as
 a string (\verb{$call}), the per-decision rationale (\verb{$rationale}), and any notes
 (\verb{$notes}).
+
+The methods documented on this page return:
+\itemize{
+\item \code{format.icc_recommendation()}: a character vector holding the printed
+recommendation, one line per element.
+\item \code{print.icc_recommendation()}: the \code{icc_recommendation} object invisibly,
+having emitted that recommendation.
+}
 }
 \description{
 \code{choose_icc()} walks the decision tree of the \emph{Choosing an ICC} vignette and

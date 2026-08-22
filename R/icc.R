@@ -611,10 +611,26 @@
 #' value is a finite, well-calibrated interval on the near-zero-ICC boundary where the
 #' Monte-Carlo default aborts.
 #'
-#' @return An `icc` object: a list with the estimate table, variance components,
-#'   design, engine, interval settings, sample sizes, the fitted model, and the
-#'   call. Use [tidy()][generics::tidy], [glance()][generics::glance], and the
-#'   `print`/`summary` methods.
+#' @return `icc()` returns an `icc` object: a list with the estimate table,
+#'   variance components, design, engine, interval settings, sample sizes, the
+#'   fitted model, and the call.
+#'
+#'   The methods documented on this page return:
+#'   * `tidy.icc()`: a tibble with one row per estimated coefficient
+#'     and the columns `index`, `type`, `level`, `sf_index`, `estimate`,
+#'     `std.error`, `conf.low`, `conf.high`, `conf.level`, and `method`, plus an
+#'     `occasions` column when the design has within-cell replicates.
+#'   * `glance.icc()`: a one-row tibble of model-level summaries --
+#'     the sample sizes, the design flags, the effective rater counts, the
+#'     variance components, and the engine and interval settings.
+#'   * `format.icc()`: a character vector holding the printed report, one line per
+#'     element.
+#'   * `print.icc()`: the `icc` object invisibly, having emitted that report.
+#'   * `summary.icc()`: the `icc` object invisibly, having emitted the report
+#'     followed by the interpretive notes.
+#'   * `autoplot.icc()`: a `ggplot` object -- the coefficient forest plot, or the
+#'     variance-component decomposition when `what = "components"`.
+#'   * `plot.icc()`: the `icc` object invisibly, having drawn that same plot.
 #'
 #' @references
 #' Burch, B. D. (2011). Assessing the performance of normal-based and REML-based

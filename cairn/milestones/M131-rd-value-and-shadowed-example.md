@@ -76,7 +76,7 @@ prose → M129/M130/M132.
 
 - [x] T1: Parse `\alias` and `\usage` across `man/*.Rd`; record the selected
       page set and each page's alias set before writing any prose.
-- [ ] T2: Write per-topic `@return` prose in the roxygen behind each selected
+- [x] T2: Write per-topic `@return` prose in the roxygen behind each selected
       page (`R/icc.R`, `R/d-study.R`, `R/choose-icc.R`, `R/icc-methods.R`,
       `R/autoplot.R`), then re-document.
 - [ ] T3: Enumerate example-bound names against the exported data; rewrite
@@ -93,6 +93,7 @@ prose → M129/M130/M132.
 - 2026-08-21: plan gate chose documenting the existing return contract over changing any return shape to make it uniform, because GP2's one-way door closes at submission and a shape change is M48 T1's escalation, not a doc milestone's; falsified by a method whose return shape cannot be described honestly without changing it.
 - 2026-08-22: /milestone-implement opened on branch `m131-rd-value-and-shadowed-example`, cut from `origin/main` at 53f77a1; status set to in-progress.
 - 2026-08-22: T1 — `tools::parse_Rd()` over `man/*.Rd`, selecting pages with a `\usage` block and >1 `\alias`, selects exactly three, with these alias sets: `man/choose_icc.Rd` (3) `choose_icc`, `format.icc_recommendation`, `print.icc_recommendation`; `man/d_study.Rd` (7) `autoplot.icc_dstudy`, `plot.icc_dstudy`, `d_study`, `format.icc_dstudy`, `print.icc_dstudy`, `tidy.icc_dstudy`, `glance.icc_dstudy`; `man/icc.Rd` (8) `autoplot.icc`, `plot.icc`, `format.icc`, `print.icc`, `summary.icc`, `tidy.icc`, `glance.icc`, `icc`. Non-selected: `man/intraclass-package.Rd` (2 aliases, no `\usage`), `man/reexports.Rd` (3, no `\usage`), `man/ratings.Rd` and `man/ratings_incomplete.Rd` (1 alias each).
+- 2026-08-22: T2 — one `@return` list per page in the primary roxygen block (`R/icc.R`, `R/d-study.R`, `R/choose-icc.R`), the main function's return first and one bullet per method, each bullet naming the alias verbatim (`format.icc()`, `tidy.icc_dstudy()`, …); implement gate chose this over a `@return` tag on each method's own block, having measured that roxygen2 merges such tags in source-file collation order, which put a probe `@return` on `print.icc` above `icc()`'s own paragraph. Each bullet's text was written against an observed call: `format.*` character vectors of 14/12/17 lines, `print`/`summary`/`plot` returning their object invisibly, `tidy.icc()` a 10-column tibble, both `glance` methods one-row tibbles, both `autoplot` methods `ggplot` objects. Re-check over `man/*.Rd`: all 18 aliases across the three selected pages appear as `<alias>()` in their page's `\value`. `devtools::document()` stable on a second run; `air format .` clean; `NOT_CRAN=true CI=true devtools::test()` 0 failures / 8500 passing / 25 skipped.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

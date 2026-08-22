@@ -432,10 +432,28 @@ coverage is claimed for it). Only the HPDI needs the posterior draws, so
 interval methods already report a percentile interval.}
 }
 \value{
-An \code{icc} object: a list with the estimate table, variance components,
-design, engine, interval settings, sample sizes, the fitted model, and the
-call. Use \link[generics:tidy]{tidy()}, \link[generics:glance]{glance()}, and the
-\code{print}/\code{summary} methods.
+\code{icc()} returns an \code{icc} object: a list with the estimate table,
+variance components, design, engine, interval settings, sample sizes, the
+fitted model, and the call.
+
+The methods documented on this page return:
+\itemize{
+\item \code{tidy.icc()}: a tibble with one row per estimated coefficient
+and the columns \code{index}, \code{type}, \code{level}, \code{sf_index}, \code{estimate},
+\code{std.error}, \code{conf.low}, \code{conf.high}, \code{conf.level}, and \code{method}, plus an
+\code{occasions} column when the design has within-cell replicates.
+\item \code{glance.icc()}: a one-row tibble of model-level summaries --
+the sample sizes, the design flags, the effective rater counts, the
+variance components, and the engine and interval settings.
+\item \code{format.icc()}: a character vector holding the printed report, one line per
+element.
+\item \code{print.icc()}: the \code{icc} object invisibly, having emitted that report.
+\item \code{summary.icc()}: the \code{icc} object invisibly, having emitted the report
+followed by the interpretive notes.
+\item \code{autoplot.icc()}: a \code{ggplot} object -- the coefficient forest plot, or the
+variance-component decomposition when \code{what = "components"}.
+\item \code{plot.icc()}: the \code{icc} object invisibly, having drawn that same plot.
+}
 }
 \description{
 Estimates interrater-reliability intraclass correlation coefficients (ICCs)
