@@ -319,7 +319,7 @@ When the fit is Bayesian (`engine = "brms"`, see [*Estimation
 engines*](engines.html#a-bayesian-engine-brms)), the interval is neither a Monte-Carlo
 nor a bootstrap *confidence* interval but a **credible** interval read directly off the
 posterior draws of the ICC — a [different kind of
-statement](glossary.html#confidence-interval-vs.-credible-interval) about where the ICC
+statement](glossary.html#confidence-interval-vs--credible-interval) about where the ICC
 lies. `ci_method = "posterior"` is automatic — and required — for
 that engine.
 
