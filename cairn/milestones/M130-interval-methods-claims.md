@@ -2,7 +2,7 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M130: Back the interval-methods vignette's claims, and read it through
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate -->
 - **Depends on:** M129   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -103,7 +103,7 @@ and the checker-regress shape; the other six vignettes' prose → M48's check pa
       against the emitted HTML.
 - [x] T5: Glossary-term intersection, first-use linking, and the editorial
       prose read; reword the quantified lines T1 dispositioned as reword.
-- [ ] T6: Full gate-lite sweep.
+- [x] T6: Full gate-lite sweep.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
@@ -138,6 +138,9 @@ and the checker-regress shape; the other six vignettes' prose → M48's check pa
 - 2026-08-21: T6 SUPERSEDES the T3 and T5 ledger entries' disposition of line 210. Disposition (d) is unavailable to it — no page pointer can sit in that paragraph — and no existing test asserts the sentence (`git grep` finds "measuring with both the subject effects" only in this vignette). It therefore takes (e): reworded to "measuring with the subject effects and the errors alike drawn from the studied family", same meaning, quantifier gone, no figures added. The line consequently leaves the sweep.
 - 2026-08-21: T6 both failures were invisible to `devtools::test()`, which ran green throughout T2-T5. They fire only on the walk's `installed/` leg, which exists once the vignette is installed — i.e. under `R CMD check` and nowhere else. A local-suite-only gate would have shipped this.
 - 2026-08-21: T6 AC1 FINAL LEDGER, superseding the T5 entries after the line-210 reword. The sweep re-run on the final file returns 39 lines (line 210 left the domain; line identities are otherwise unchanged, the reword being net-zero on line count): (a) 27 lines — 19, 20, 61, 67, 69, 75, 91, 92, 94, 119, 120, 128, 130, 131, 146, 190, 195, 198, 199, 202, 206, 231, 257, 270, 271, 275, 276; (b) 9 lines — 83, 102, 105, 185, 188, 215, 217, 219, 225, each cited and inverted to red in the T5 entry; (f) 3 lines of the 6 permitted — 42, 222, 298. No line takes (c) or (d). 27 + 9 + 3 = 39.
+- 2026-08-21: T6 gate-lite, all clean. `NOT_CRAN=true CI=true devtools::test()`: 0 failures, 8383 passing, 25 skipped (8263 on main), the only 2 warnings pre-existing and outside this diff. `air format --check .` clean. `lintr::lint_package()` 0 lints. `pkgdown::check_pkgdown()` clean and `build_site()` exit 0. `urlchecker::url_check()` all 15 URLs correct. `cairn_validate` exit 0, all checks passed, no advisories.
+- 2026-08-21: T6 `R CMD check --as-cran` at `NOT_CRAN=false`: 0 ERRORs, 0 WARNINGs, 2 NOTEs, both environmental and neither introduced here (CRAN incoming feasibility — new submission at version 0.0.0.9000; HTML manual — no recent HTML Tidy and no V8). This is no worse than main by any reading.
+- 2026-08-21: T6 operational note, and a correction to what this session first concluded. The initial checks reported a `pdflatex is not available` ERROR plus a PDF-manual WARNING, and a same-shell `origin/main` worktree run reproduced them (main 1 ERROR / 1 WARNING / 4 NOTEs against the branch's 1 / 1 / 3), which looked like an environmental fault that also refuted this file's `Status: OK` stamp for the M129 pass. It did not: TinyTeX (TeX Live 2026) is installed at `~/Library/TinyTeX`, and only the non-interactive shell's PATH omits its bin dir. Re-running with `/Users/jmgirard/Library/TinyTeX/bin/universal-darwin` on PATH gives the 0/0/2 above. The ROADMAP stamp was accurate; run `R CMD check` with that dir on PATH or the PDF-manual leg fails for no reason.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
