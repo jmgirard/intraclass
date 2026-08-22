@@ -834,6 +834,11 @@ test_that("interval-methods.Rmd: exactly four opt-in methods, each fenced and cl
   # Article line 113: "Four opt-in methods serve exactly that terrain". The
   # enumerator is the validator's own accepted set, not a hand list: an
   # unrecognized value aborts with the allowed values spelled out, so ask it.
+  # This deliberately treats the abort's USER-FACING enumeration as the
+  # contract, because that enumeration is exactly what a reader of the article
+  # is told to expect (M130 return, F11). A reworded message that still names
+  # the same four values passes; one that drops or adds a value fails, which is
+  # the property under test.
   msg <- tryCatch(
     icc(ratings, score, subject, rater, ci_method = "not-a-method", seed = 1),
     error = conditionMessage
@@ -1101,25 +1106,36 @@ test_that("interval-methods.Rmd: `\"npbootstrap\"` alone takes a seed, and any c
   ))
 
   # "Any `conf_level` in (0, 1) is accepted", and the interval widens with it.
-  lo <- vapply(
-    c(0.5, 0.8, 0.95, 0.995),
-    function(cl) {
-      td <- tidy(icc(
-        ratings,
-        score,
-        subject,
-        rater,
-        model = "oneway",
-        ci_method = "npbootstrap",
-        conf_level = cl,
-        boot_samples = 199,
-        seed = 1
-      ))
-      td$conf.high[1] - td$conf.low[1]
-    },
-    numeric(1)
-  )
-  expect_true(all(diff(lo) > 0))
+  # Article line 130 makes the same promise for `"searle"` and `"burch"`, so
+  # all three closed-form-or-resampling opt-ins are swept, not just the one
+  # (M130 return, F15).
+  widths <- function(m, ...) {
+    vapply(
+      c(0.5, 0.8, 0.95, 0.995),
+      function(cl) {
+        args <- list(
+          ratings,
+          quote(score),
+          quote(subject),
+          quote(rater),
+          model = "oneway",
+          ci_method = m,
+          conf_level = cl,
+          unit = "single",
+          ...
+        )
+        td <- tidy(do.call(icc, args))
+        td$conf.high[1] - td$conf.low[1]
+      },
+      numeric(1)
+    )
+  }
+  expect_true(all(
+    diff(widths("npbootstrap", boot_samples = 199, seed = 1)) > 0
+  ))
+  for (m in c("searle", "burch")) {
+    expect_true(all(diff(widths(m)) > 0), info = m)
+  }
 })
 
 test_that("interval-methods.Rmd: the `ci-bootstrap` chunk's own comparison holds", {
@@ -1180,18 +1196,36 @@ test_that("interval-methods.Rmd: the default under-covers silently -- no abort, 
   td <- tidy(fit)
   expect_false(any(is.na(td$conf.low)))
   # Not widened: the reported interval is the ordinary Monte-Carlo one, no
-  # skew-driven inflation, so nothing in the output flags the shortfall.
+  # skew-driven inflation, so nothing in the output flags the shortfall. A bare
+  # upper bound on the width does not discriminate an inflation (M130 return,
+  # F6) -- the comparison is against a matched normal fit at the SAME geometry
+  # and the same subject-effect variance (chi-square(1) has variance 2), where
+  # any skew-triggered widening would show as the skewed interval running
+  # wider. Measured: 0.180 skewed against 0.208 normal, so it runs narrower.
   expect_true(all(td$method == "montecarlo"))
-  expect_lt(td$conf.high[1] - td$conf.low[1], 0.5)
+  set.seed(131)
+  matched <- data.frame(
+    subject = factor(rep(seq_len(n_s), times = n_r)),
+    rater = factor(rep(seq_len(n_r), each = n_s)),
+    score = rep(rnorm(n_s, sd = sqrt(2)), times = n_r) + rnorm(n_s * n_r)
+  )
+  td_n <- tidy(icc(matched, score, subject, rater, model = "oneway", seed = 1))
+  expect_lte(
+    td$conf.high[1] - td$conf.low[1],
+    td_n$conf.high[1] - td_n$conf.low[1]
+  )
 })
 
 test_that("interval-methods.Rmd: `\"searle\"` and `\"burch\"` project through the same Spearman-Brown image", {
   skip_if_not_installed("glmmTMB")
 
-  # Article line 140: both closed forms project ICC(k) -- and a numeric `unit` --
-  # through the same map `"npbootstrap"` uses. Check the map itself on the
-  # endpoints, which is what "the same image" means.
+  # Article line 131: both closed forms project ICC(k) -- AND a numeric `unit`
+  # -- through the same map `"npbootstrap"` uses. Check the map itself on the
+  # endpoints, which is what "the same image" means. The numeric-`unit` clause
+  # went untested until the M130 return (F14), so `m = 7` -- a projection past
+  # the four raters `ratings` carries -- is swept alongside `"average"`.
   sb <- function(p, k) k * p / (1 + (k - 1) * p)
+  m_proj <- 7
   for (m in c("searle", "burch", "npbootstrap")) {
     args <- list(
       ratings,
@@ -1200,18 +1234,37 @@ test_that("interval-methods.Rmd: `\"searle\"` and `\"burch\"` project through th
       quote(rater),
       model = "oneway",
       ci_method = m,
-      unit = c("single", "average")
+      unit = c("single", "average", m_proj)
     )
     if (m == "npbootstrap") {
       args <- c(args, list(boot_samples = 199, seed = 1))
     }
     td <- tidy(do.call(icc, args))
     single <- td[td$index == "ICC(1)", ]
-    average <- td[td$index == "ICC(k)", ]
     k <- 4 # `ratings` has four raters
-    expect_equal(average$estimate, sb(single$estimate, k), tolerance = 1e-8)
-    expect_equal(average$conf.low, sb(single$conf.low, k), tolerance = 1e-8)
-    expect_equal(average$conf.high, sb(single$conf.high, k), tolerance = 1e-8)
+    for (target in list(list("ICC(k)", k), list("ICC(7)", m_proj))) {
+      img <- td[td$index == target[[1]], ]
+      lab <- paste(m, target[[1]])
+      expect_identical(nrow(img), 1L, info = lab)
+      expect_equal(
+        img$estimate,
+        sb(single$estimate, target[[2]]),
+        tolerance = 1e-8,
+        info = lab
+      )
+      expect_equal(
+        img$conf.low,
+        sb(single$conf.low, target[[2]]),
+        tolerance = 1e-8,
+        info = lab
+      )
+      expect_equal(
+        img$conf.high,
+        sb(single$conf.high, target[[2]]),
+        tolerance = 1e-8,
+        info = lab
+      )
+    }
   }
 })
 
@@ -1224,10 +1277,15 @@ test_that("interval-methods.Rmd: at zero between-subject variance `\"burch\"` ab
     rater = factor(rep(1:4, times = 8)),
     score = rep(c(1, 2, 3, 4), times = 8) # identical profile for every subject
   )
-  # The abort is classed `intraclass_singular_fit` -- the kurtosis
-  # standardization divides by a between-subject variance of exactly zero.
+  # The abort is classed `intraclass_singular_fit` -- but so are
+  # `"montecarlo"`'s and `"npbootstrap"`'s on this same data, for entirely
+  # different reasons (non-finite draws; a `-Inf` log F), so the class alone
+  # does not say WHICH failure this is (M130 return, F8, the failure-identity
+  # rule). The message is pinned too: burch's abort names the kurtosis term
+  # dividing by `sqrt(MSA)`, which is the mechanism the article states.
   expect_error(
     icc(flat, score, subject, rater, model = "oneway", ci_method = "burch"),
+    regexp = "divides by sqrt\\(MSA\\)",
     class = "intraclass_singular_fit"
   )
   se <- tidy(icc(
@@ -1239,8 +1297,15 @@ test_that("interval-methods.Rmd: at zero between-subject variance `\"burch\"` ab
     ci_method = "searle",
     unit = "single"
   ))
+  # The discriminating control: `"searle"` does not merely avoid the abort, it
+  # returns the finite degenerate endpoints the exact-F form gives at MSA = 0
+  # -- both limits at -1/(k - 1) = -1/3 for these four raters. That is the
+  # asymmetry the article names, and it is what separates `"searle"` from the
+  # other three methods, all of which abort here.
   expect_false(is.na(se$conf.low))
   expect_false(is.na(se$conf.high))
+  expect_equal(se$conf.low, -1 / 3, tolerance = 1e-8)
+  expect_equal(se$conf.high, -1 / 3, tolerance = 1e-8)
 })
 
 test_that("interval-methods.Rmd: the `\"mpl\"` fences are the ones the article names", {
@@ -1277,12 +1342,45 @@ test_that("interval-methods.Rmd: the `\"mpl\"` fences are the ones the article n
   ))
   expect_false(any(is.na(ml$conf.low)))
 
-  # ICC(A,k) is the pole-safe Spearman-Brown image of ICC(A,1) (line 262).
+  # ICC(A,k) -- and ANY numeric-`unit` projection -- is the pole-safe
+  # Spearman-Brown image of ICC(A,1) (line 270). The numeric-`unit` half went
+  # untested until the M130 return (F14), so `m = 7` is swept with `"average"`.
   sb <- function(p, k) k * p / (1 + (k - 1) * p)
   a1 <- ml[ml$index == "ICC(A,1)", ]
   ak <- ml[ml$index == "ICC(A,k)", ]
   expect_equal(ak$conf.low, sb(a1$conf.low, n_r), tolerance = 1e-8)
   expect_equal(ak$conf.high, sb(a1$conf.high, n_r), tolerance = 1e-8)
+  m_proj <- 7
+  proj <- tidy(icc(
+    sim,
+    score,
+    subject,
+    rater,
+    type = "agreement",
+    ci_method = "mpl",
+    unit = c("single", m_proj)
+  ))
+  pj <- proj[proj$index == "ICC(A,7)", ]
+  expect_identical(nrow(pj), 1L)
+  expect_equal(pj$conf.low, sb(a1$conf.low, m_proj), tolerance = 1e-8)
+  expect_equal(pj$conf.high, sb(a1$conf.high, m_proj), tolerance = 1e-8)
+
+  # "a deterministic closed form -- no resampling, no `seed`" (line 274). The
+  # sibling test covers `"searle"` and `"burch"`; `"mpl"` is two-way, so it
+  # cannot ride that one-way sweep and went unchecked (M130 return, F15).
+  one <- function(sd) {
+    tidy(icc(
+      sim,
+      score,
+      subject,
+      rater,
+      type = "agreement",
+      ci_method = "mpl",
+      unit = "single",
+      seed = sd
+    ))$conf.low[1]
+  }
+  expect_identical(one(1), one(99))
 
   # Off the fence, each way the article names (line 263), classed each time.
   expect_error(
@@ -1390,7 +1488,6 @@ test_that("interval-methods.Rmd: two raters cover worse than five in every paire
   )
   # In this fixture `k` is the SUBJECT count and `n` the RATER count.
   mc <- f[f$source == "m113" & f$method == "mc", , drop = FALSE]
-  cell <- paste(mc$rho, mc$k, mc$dist, sep = "\r")
   two <- mc[mc$n == 2L, , drop = FALSE]
   five <- mc[mc$n == 5L, , drop = FALSE]
   shared <- intersect(
@@ -1406,8 +1503,18 @@ test_that("interval-methods.Rmd: two raters cover worse than five in every paire
     expect_lt(a, b, label = paste("2-rater coverage at", s))
   }
   # And the article's reason it is not a recommendation: the 2-rater cells
-  # abort far more often, so their failure is the visible kind.
-  expect_gt(mean(two$abort_rate), mean(five$abort_rate))
+  # abort far more often, so their failure is the visible kind. Restricted to
+  # the SHARED cells, never the unstratified marginal (M130 return, F7): every
+  # 2-rater cell sits at 10 subjects while the 5-rater cells span 10/30/50, and
+  # article line 188 itself calls that confound out. Measured on the shared
+  # cells: 0.269 against 0.177, so the claim survives the restriction.
+  in_shared <- function(d) {
+    paste(d$rho, d$k, d$dist, sep = "\r") %in% shared
+  }
+  expect_gt(
+    mean(two$abort_rate[in_shared(two)]),
+    mean(five$abort_rate[in_shared(five)])
+  )
 })
 
 test_that("interval-methods.Rmd: the smaller grid carries only the two lowest true-ICC values", {
@@ -1417,7 +1524,10 @@ test_that("interval-methods.Rmd: the smaller grid carries only the two lowest tr
   )
   small <- w[w$grid == "m76", , drop = FALSE]
   large <- w[w$grid == "m113", , drop = FALSE]
-  expect_identical(nrow(small), 16L) # the article's "16 cells"
+  # Article line 191 says "the smaller grid's 16 cells" in so many words, so
+  # this row count IS a claim under test, not an incidental fixture pin: a
+  # regenerated grid of a different size must red the article, not pass it.
+  expect_identical(nrow(small), 16L)
   levels_large <- sort(unique(large$rho))
   expect_setequal(unique(small$rho), utils::head(levels_large, 2L))
   expect_gt(length(levels_large), 2L) # the larger grid really does reach further
@@ -1445,36 +1555,121 @@ test_that("interval-methods.Rmd: the between-grid gap is mostly design points, w
   expect_gt(gap_restricted, 0)
 
   # "two separate simulations that mostly disagree at the design points they
-  # share, agreeing closely at only a couple of them": exactly two of the
-  # sixteen shared cells agree to within 1e-9 (they are the same underlying
-  # run); the other fourteen differ by between 1e-4 and 8.3e-3.
+  # share, agreeing closely at only a couple of them". Two things are claimed
+  # and two are asserted: a COUPLE of cells agree to machine precision, and the
+  # rest genuinely disagree rather than sitting at the edge of that threshold.
+  # The earlier form pinned the realization instead -- a 1e-4 floor with about
+  # 1.5e-5 of headroom, and an upper bound on the largest gap that the article
+  # never claims (M130 return, F9). The separation floor is now decades below
+  # the measured minimum, so it tests the qualitative split and not the run.
   d <- abs(
     small$ratio[match(shared, key(small))] -
       large$ratio[match(shared, key(large))]
   )
   expect_identical(sum(d < 1e-9), 2L)
-  expect_gt(min(d[d >= 1e-9]), 1e-4)
-  expect_lt(max(d), 0.01)
+  expect_gt(min(d[d >= 1e-9]), 1e-6)
 })
 
+# Every random-generator function called anywhere inside `expr`, namespace-
+# qualified calls included (`stats::rnorm` resolves to "rnorm"). Mirrors the
+# walker `data-raw/m116-classical-width-comparison.R` and
+# `test-m118-both-components-dgp.R` use; kept local so this file's assertion
+# does not depend on either of them loading.
+vc_rng_calls <- function(expr) {
+  out <- character(0)
+  walk <- function(e) {
+    if (is.call(e)) {
+      fn <- e[[1]]
+      nm <- if (is.name(fn)) {
+        as.character(fn)
+      } else if (is.call(fn) && identical(as.character(fn[[1]]), "::")) {
+        as.character(fn[[3]])
+      } else {
+        ""
+      }
+      # `rep`/`return` are not generators; the same two exclusions the M116
+      # walker carries.
+      if (grepl("^r[a-z]+$", nm) && !nm %in% c("rep", "return")) {
+        out <<- c(out, nm)
+      }
+      for (i in seq_along(e)) {
+        if (!is.null(e[[i]]) && !identical(e[[i]], quote(expr = ))) walk(e[[i]])
+      }
+    }
+  }
+  walk(expr)
+  out
+}
+
 test_that("interval-methods.Rmd: the two subject-effect grids draw their errors from a normal", {
-  # The article's line about what the grids vary is a claim about the
-  # generating scripts, which the M116 generator asserts against their source
-  # before it writes the comparison table's header.
-  tsv <- testthat::test_path(
-    "..",
-    "..",
-    "data-raw",
-    "m116-classical-width-comparison.tsv"
+  # Article lines 207-208. This is a claim about the two generating scripts,
+  # so it is asserted against their PARSED bodies -- the subject effect is the
+  # only component that branches on `dist`, and every random draw in the error
+  # term is `rnorm`. The earlier form grepped a `#` comment line in a TSV
+  # header, which asserts what a header says rather than what the generator
+  # does (M130 return, F2); a generator that changed its residual draw while
+  # leaving its header alone passed it.
+  scripts <- c("m76-coverage-sweep.R", "m111-fallback-sweep.R")
+  paths <- vapply(
+    scripts,
+    function(f) testthat::test_path("..", "..", "data-raw", f),
+    character(1)
   )
-  skip_if_not(file.exists(tsv), "data-raw/ absent from a built package")
-  head_lines <- utils::head(readLines(tsv, warn = FALSE), 40L)
-  dgp <- grep("^#", head_lines, value = TRUE)
-  expect_true(
-    any(grepl("SUBJECT EFFECT", dgp, fixed = TRUE)) &&
-      any(grepl("error always from", dgp, fixed = TRUE))
-  )
-  # The third grid is the one that does otherwise, and says so in its own header.
+  # `data-raw/` is `.Rbuildignore`d, so this leg cannot run inside a built
+  # package. That is structural for a claim ABOUT a generating script, and it
+  # is the same fence `test-m118-both-components-dgp.R` sits behind; the leg
+  # below, which reads a committed fixture, does ship.
+  skip_if_not(all(file.exists(paths)), "data-raw/ absent from a built package")
+
+  for (path in paths) {
+    gen <- NULL
+    for (e in parse(path)) {
+      if (
+        is.call(e) &&
+          as.character(e[[1]]) %in% c("<-", "=") &&
+          identical(as.character(e[[2]]), "gen_oneway")
+      ) {
+        gen <- e[[3]]
+      }
+    }
+    expect_false(is.null(gen), label = paste("gen_oneway() found in", path))
+
+    assigns <- Filter(
+      function(e) is.call(e) && as.character(e[[1]]) %in% c("<-", "="),
+      as.list(body(eval(gen)))
+    )
+    named <- function(nm) {
+      hit <- Filter(function(e) identical(as.character(e[[2]]), nm), assigns)
+      expect_identical(length(hit), 1L, label = paste(nm, "in", path))
+      hit[[1]][[3]]
+    }
+    subject_rhs <- named("a")
+    error_rhs <- named("vals")
+
+    # The subject effect is the component that branches on `dist` ...
+    expect_match(
+      paste(deparse(subject_rhs), collapse = " "),
+      "\\bdist\\b",
+      info = path
+    )
+    # ... and the error term draws, and draws from a normal and nothing else.
+    err_calls <- vc_rng_calls(error_rhs)
+    expect_gt(length(err_calls), 0L)
+    expect_setequal(unique(err_calls), "rnorm")
+    # Nothing outside those two right-hand sides smuggles in a third draw.
+    all_calls <- unlist(lapply(assigns, function(e) vc_rng_calls(e[[3]])))
+    expect_identical(
+      length(all_calls),
+      length(c(vc_rng_calls(subject_rhs), err_calls)),
+      label = paste("every draw accounted for in", path)
+    )
+  }
+})
+
+test_that("interval-methods.Rmd: the third grid draws both components from the family", {
+  # The other half of article lines 207-212: the third grid is the one that
+  # does otherwise, and it says so in its own committed header -- a fixture
+  # that ships, so unlike the leg above this one runs under `R CMD check`.
   res <- utils::head(
     readLines(
       testthat::test_path("fixtures", "width-reversal-by-cell.tsv"),
