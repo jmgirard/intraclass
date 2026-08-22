@@ -52,10 +52,16 @@ prose → M129/M130/M132.
       call, intersected with `data(package = "intraclass")$results[, "Item"]`
       (`"ratings"`, `"ratings_incomplete"`); `icc()`'s example uses the shipped
       `ratings` object directly.
-- [ ] AC3: `R CMD check --as-cran`'s raw `Status:` line is no worse than main's,
-      and the heading of its `\value`-section check is quoted verbatim in the
-      work log from an actual run (the heading's exact wording is
-      version-dependent and was not confirmable at plan time).
+- [ ] AC3: `R CMD check --as-cran` reports no ERROR, no WARNING, and no NOTE
+      heading on the branch that `origin/main`'s run does not also report. A
+      NOTE heading is the `* checking <...>` label of a check whose result line
+      ends in `NOTE`; NOTE bodies are not compared. Both runs use `R CMD build`
+      tarballs -- the branch tip and the branch's merge-base with `origin/main`
+      (53f77a1 as cut) -- invoked back-to-back as
+      `_R_CHECK_CRAN_INCOMING_REMOTE_=false R CMD check --as-cran --no-manual
+      <tarball>`, with no intervening toolchain change. One work-log line
+      summarizes that command, `R.version.string`, the two commit ids, both
+      `Status:` lines and both heading sets -- summarized, never pasted output.
 - [ ] AC4: `devtools::run_examples()` completes with no error, and each changed
       example's output is recorded in the work log.
 - [ ] AC5: `NOT_CRAN=true CI=true devtools::test()` 0 failures;
@@ -82,8 +88,10 @@ prose → M129/M130/M132.
 - [x] T3: Enumerate example-bound names against the exported data; rewrite
       `icc()`'s example to use the shipped `ratings`, checking the printed
       output is unchanged in value.
-- [ ] T4: `run_examples()`, the `--as-cran` check with its `Status:` line and
-      the `\value` check heading quoted, and the gate-lite sweep.
+- [ ] T4: `run_examples()`; `R CMD check --as-cran` on `R CMD build` tarballs of
+      the branch tip and of the merge-base with `origin/main`, recording both
+      `Status:` lines and their NOTE headings, and noting as a dated observation
+      whether any check heading mentions `\value`; the gate-lite sweep.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
@@ -95,6 +103,7 @@ prose → M129/M130/M132.
 - 2026-08-22: T1 — `tools::parse_Rd()` over `man/*.Rd`, selecting pages with a `\usage` block and >1 `\alias`, selects exactly three, with these alias sets: `man/choose_icc.Rd` (3) `choose_icc`, `format.icc_recommendation`, `print.icc_recommendation`; `man/d_study.Rd` (7) `autoplot.icc_dstudy`, `plot.icc_dstudy`, `d_study`, `format.icc_dstudy`, `print.icc_dstudy`, `tidy.icc_dstudy`, `glance.icc_dstudy`; `man/icc.Rd` (8) `autoplot.icc`, `plot.icc`, `format.icc`, `print.icc`, `summary.icc`, `tidy.icc`, `glance.icc`, `icc`. Non-selected: `man/intraclass-package.Rd` (2 aliases, no `\usage`), `man/reexports.Rd` (3, no `\usage`), `man/ratings.Rd` and `man/ratings_incomplete.Rd` (1 alias each).
 - 2026-08-22: T2 — one `@return` list per page in the primary roxygen block (`R/icc.R`, `R/d-study.R`, `R/choose-icc.R`), the main function's return first and one bullet per method, each bullet naming the alias verbatim (`format.icc()`, `tidy.icc_dstudy()`, …); implement gate chose this over a `@return` tag on each method's own block, having measured that roxygen2 merges such tags in source-file collation order, which put a probe `@return` on `print.icc` above `icc()`'s own paragraph. Each bullet's text was written against an observed call: `format.*` character vectors of 14/12/17 lines, `print`/`summary`/`plot` returning their object invisibly, `tidy.icc()` a 10-column tibble, both `glance` methods one-row tibbles, both `autoplot` methods `ggplot` objects. Re-check over `man/*.Rd`: all 18 aliases across the three selected pages appear as `<alias>()` in their page's `\value`. `devtools::document()` stable on a second run; `air format .` clean; `NOT_CRAN=true CI=true devtools::test()` 0 failures / 8500 passing / 25 skipped.
 - 2026-08-22: T3 — enumerating top-level `<-`/`=`/`assign()` bindings in every `man/*.Rd` `\examples` block against `data(package = "intraclass")$results[, "Item"]` (`ratings`, `ratings_incomplete`) found exactly one shadowing binding, `ratings` in `man/icc.Rd`; the hand-built frame was `identical()` to the shipped `ratings`. `icc()`'s example now calls the shipped object directly, with a two-line comment naming it as the Shrout & Fleiss (1979) worked example. Printed output before and after the rewrite `diff`s empty (both captured this session under `seed = 1`); the enumeration now returns 0 shadowing bindings. `man/d_study.Rd`'s `fit` binding is outside the domain (not exported data).
+- 2026-08-22: amendment (substantive, mini gate) — AC3 and T4 amended together, the Coverage row AC3 → T4 unchanged. Motivation: AC3 required quoting the heading of `R CMD check --as-cran`'s `\value`-section check, and no such heading exists — the run's Rd-related headings are `checking Rd files`, `Rd metadata`, `Rd line widths`, `Rd cross-references`, `for missing documentation entries`, `for code/documentation mismatches`, `Rd \usage sections`, `Rd contents`, all OK, and none mentions `\value` (observed 2026-08-22 on R 4.6.1). Amended AC3 narrows: it drops that unsatisfiable clause and replaces the `Status:`-line comparison with per-NOTE-heading set containment against the merge-base run, defining `NOTE heading` and pinning the invocation. No criterion was added and no existing promise extended. Two fresh-context [O] readers audited the wording in FULL mode before it was written: the first rejected an earlier draft as widening (an inert heading-census clause, `Rd-related` enumerated by no procedure, `no worse than main's` indeterminate, T4 left contradicting AC3); the second cleared the direction and caught one widening the draft still carried (an absolute no-WARNING bar where the original was relative to main), fixed before writing. Subagent use was user-approved at the gate, this session otherwise being told not to spawn agents unattended.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
