@@ -36,7 +36,7 @@ and the checker-regress shape; the other six vignettes' prose → M48's check pa
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: Every line that
+- [x] AC1: Every line that
       `grep -nE '\b(any|each|every|all|only|both|exactly|never|always|full)\b' vignettes/interval-methods.Rmd`
       returns (39 on 2026-08-21) states a claim that is (a) backed by a
       test in `tests/testthat/test-vignette-claims.R`; (b) backed by an
@@ -62,7 +62,7 @@ and the checker-regress shape; the other six vignettes' prose → M48's check pa
       names as reachable (`"npbootstrap"`, `"searle"`, `"burch"`, `"mpl"`), run
       on the article's own data. `grep -c 'interval-methods' tests/testthat/test-vignette-claims.R`
       returns 0 before this milestone.
-- [ ] AC3: For each test AC2 adds, a planted perturbation of each of these
+- [x] AC3: For each test AC2 adds, a planted perturbation of each of these
       forms reds it: a changed expected numeral, an inverted comparison
       direction, and a changed `ci_method` argument. Each run is logged.
 - [x] AC4: Every link target that
@@ -188,6 +188,7 @@ and the checker-regress shape; the other six vignettes' prose → M48's check pa
 - 2026-08-21: T14 `R CMD check --as-cran` at `NOT_CRAN=false`, TinyTeX on PATH: 0 ERRORs, 0 WARNINGs, raw `Status: 1 NOTE`. The NOTE is the `checking tests` leg comparing `spelling.Rout` against a `spelling.Rout.save` that a prior `spelling::spell_check_test()` run left in the check directory; it is NOT this branch's. Measured: `spelling::spell_check_package(vignettes = TRUE)` returns the same 28 words on this branch and on an `origin/main` tree extracted with `git archive` — identical sets, no word added by the NEWS bullet or the article rewords. The M117 width guard passes on the return's article change: the O3 reword adds no figure to a width neighbourhood. `origin/main` is being checked in this same shell for the raw-`Status` comparison AC6 asks for.
 - 2026-08-21: T14 `origin/main` checked in this SAME shell for the AC6 comparison — extracted with `git archive` into a scratch tree and run at `NOT_CRAN=false` with `--as-cran` and TinyTeX on PATH — raw `Status: 1 NOTE`, the identical result the branch returns, and its log carries the same `spelling.Rout`/`spelling.Rout.save` diff. So the branch is no worse than main, measured rather than reasoned, and the single NOTE is the environment's, not this work's. All tasks checked; status to review.
 
+- 2026-08-22: /milestone-review third pass executed all six criteria with fresh evidence (recorded in the Review section); all six PASS and are ticked against their evidence lines, the consistency gate passes including the NEWS entry the second pass failed on, and no finding qualifies for the return floor.
 ## Decisions
 <!-- owner: implement / review · append-only -->
 - 2026-08-21: /milestone-review opened draft PR #139 and executed all six criteria with fresh evidence (recorded in the Review section); all six PASS and are ticked against their evidence lines.
@@ -197,150 +198,140 @@ and the checker-regress shape; the other six vignettes' prose → M48's check pa
 - 2026-08-21: review return, further confirmed findings, none floor-qualifying on their own. Test `at zero between-subject variance` asserts `intraclass_singular_fit` for `"burch"` while its comment claims the kurtosis-standardization mechanism; measured on the same data, `"montecarlo"` and `"npbootstrap"` abort with that identical class, so the assertion does not identify which failure it is about (the failure-identity rule) — only `"searle"` returning `[-0.333, -0.333]` discriminates. The two-vs-five-rater test's abort-rate assertion compares 16 two-rater cells (all at 10 subjects) against 48 five-rater cells (10/30/50 subjects) — the unstratified marginal article line 188 itself calls confounded; restricted to the shared 10-subject cells the claim still holds, 0.269 against 0.177, so the repair is to restrict. The `no widening` assertion bounds width at 0.5 where the measured value is 0.180, a 2.8x margin that a real inflation would still pass. The errors-drawn-from-a-normal test greps a `#` comment rather than the DGP and sits behind a `skip_if_not(file.exists())` on `.Rbuildignore`d `data-raw/`, so it never runs in the built package and article line 206 is effectively unbacked.
 - 2026-08-21: review return, record defects the lens found in this milestone's own work log. The T2 entry says "T2 added nine tests" where the file carries 11 attributed to that task (16 total, 5 added at T3). The T5 AC5 entry's arithmetic does not close, and its linked list names "Burch interval", which the term intersection does not contain. AC5's "appears verbatim" was satisfied by a case-folded match — a literal `fixed = TRUE` match of the 32 headings returns 4, not 13 — and the log does not say the match was folded. These are superseded here, not edited (append-only).
 
+- 2026-08-22: review third pass — three fresh-context lenses per the user-facing tier. [S] blame-history and [S] prior-PR-comments each reported no findings (the PR-comments probe found no inline review comments in the repo, a third time). The [O] diff-bug lens returned 12; each is logged with its verdict in the Review section, with one added by the orchestrator (P13). Two are rejected under the out-of-scope taxonomy (P5, P10), one is resolved by this pass's own block (P12), and none demonstrates an acceptance criterion failing inside its domain, so none is a floor return.
 ## Review
 <!-- owner: review · exclusive -->
 
-**Second review pass, 2026-08-21 on `m130-interval-methods-claims` at PR #139**,
-after the first pass's defect return. Every result below was gathered fresh at
-this review by command; none is carried from implementation or from the first
-pass. This pass supersedes the first pass's evidence block, whose figures the
-return's own commits made stale.
+**Third review pass, 2026-08-22 on `m130-interval-methods-claims` at PR #139**,
+after two defect returns. Every result below was gathered fresh at this review by
+command; none is carried from implementation or from either earlier pass. This
+pass supersedes both earlier evidence blocks, whose figures the returns' own
+commits made stale.
 
-`origin/main` is unmoved at `5becdd8` — the commit this branch was cut from — so
-no merge was needed before gathering evidence.
+`origin/main` is unmoved at `5becdd8` — the commit this branch was cut from, and
+the merge base — so no merge was needed before gathering evidence. Tree clean,
+branch level with `origin`.
 
-- **AC1 — FAIL.** The domain and the recording form pass: the sweep re-run on
-  the final file returns 40 lines, the T9 ledger partitions them exactly
-  28 (a) / 9 (b) / 3 (f) with set equality against the sweep, no line
-  unledgered, none ledgered outside it, none double-dispositioned; incidental
-  use is 3 against the cap of 6, and only L300 sits inside a code chunk. What
-  fails is disposition (a) itself, on three lines:
-  (i) **L233** — "on data with *no* between-subject variance at all, `"burch"`
-  aborts ... while `"searle"` still returns its attained minimum" is FALSE on a
-  default call. Measured on the backing test's own `flat` fixture:
-  ICC(1) returns `[-0.3333333, -0.3333333]`, but ICC(k) returns `[-Inf, -Inf]`
-  with no warning — the Spearman-Brown pole at `p = -1/(k-1)`, not an attained
-  minimum. The test that carries this line's disposition (a) pins
-  `unit = "single"`, the one setting under which the degenerate row is never
-  produced.
-  (ii) **L70/L72** — "a multilevel lavaan fit needs balanced clusters and random
-  raters besides" is TRUE, but the test written on the return to back it never
-  exercises the balanced-clusters fence. Its third fenced cell, `ml[-(1:3), ]`,
-  drops three ratings rather than three subjects: measured, that leaves cluster
-  sizes 29/32 and cells-per-subject 3-4, so it trips `has_missing`, not
-  `unbalanced`. Dropping a whole subject instead gives cluster sizes 28/32 at
-  4 cells per subject and does abort `intraclass_unsupported` — the fence is
-  real and reachable, and simply untested. All three of that test's
-  `expect_error` calls also pin only `class = "intraclass_unsupported"`, and the
-  three messages are byte-identical, so none identifies which fence fired
-  (the failure-identity rule).
-  (iii) **L61** — "they do not all fall on the same side" is half-asserted:
-  `expect_false(all(bs$conf.high >= mc$conf.high))` establishes "not all
-  higher" and nothing establishes "not all lower". Measured `mc - bs` upper-bound
-  differences are `-0.00456, -0.00185, +0.02568, +0.00735`, genuinely two-sided
-  today, with nothing asserting the positive side.
+- **AC1 — PASS.** The sweep re-run on the final file returns 40 lines. Checked
+  mechanically rather than by eye: every one of the 40 swept lines appears
+  **verbatim** as a quoted key in the T14 final ledger, the ledger's 40 `(L…)`
+  provenance numbers are set-equal to the sweep's line numbers with no
+  duplicate, and the partition is 28 (a) / 9 (b) / 3 (f) = 40 — no line
+  unledgered, none ledgered outside the sweep, none double-dispositioned.
+  Incidental use is 3 against the cap of 6, and only L303 sits inside a code
+  chunk. The three disposition-(a) lines the second pass failed are now true as
+  written and backed: L233's zero-between-variance sentence states both unit
+  outcomes and its test drops the `unit = "single"` pin (measured
+  `ICC(1) = [-0.3333333, -0.3333333]`, `ICC(k) = [-Inf, -Inf]` on a default
+  call); L70/L72's balanced-clusters fence is exercised by a whole-subject drop
+  (cluster sizes 7/8, every remaining subject at all 4 raters) and each
+  byte-identical refusal is identified by a one-attribute contrast with a cell
+  asserted to succeed; L61 carries both `expect_false(all(>=))` and
+  `expect_false(all(<=))`.
 - **AC2 — PASS.** `git show origin/main:tests/testthat/test-vignette-claims.R |
-  grep -c 'interval-methods'` returns 0, so the stated precondition holds
-  against the merge base. The file now carries 18
-  `test_that("interval-methods.Rmd: ...")` blocks. AC2's three named topics are
-  each covered on the article's own data: the Monte-Carlo vs
-  parametric-bootstrap comparison at the chunk's own `boot_samples = 999,
-  seed = 1`; the under-coverage caveat by its behavioural half; and all four
-  opt-in methods, each reachable-case and each fence.
-- **AC3 — FAIL.** AC3 quantifies over "each test AC2 adds". That set grew on the
-  return: T7 replaced the single bootstrap-availability test with two, so the
-  file now carries 12 `icc()`-calling interval-methods tests where the first
-  pass fixed the domain at 11. The 33 logged runs cover the 11 as they stood,
-  one of which no longer exists. The two tests added on the return received
-  3 targeted plants between them in T8's batch of 15 — argument changes and one
-  changed expected value — not AC3's three required forms each. Six runs are
-  owed and none is logged.
+  grep -c 'interval-methods'` returns 0, so the stated precondition holds against
+  the merge base. The file now carries 18 `test_that("interval-methods.Rmd: …")`
+  blocks. AC2's three named topics are each covered on the article's own data:
+  the Monte-Carlo vs parametric-bootstrap comparison at the chunk's own
+  `boot_samples = 999, seed = 1`; the under-coverage caveat by its behavioural
+  half; and all four opt-in methods, each reachable-case and each fence.
+- **AC3 — PASS.** The domain was re-derived from the file rather than taken from
+  the log: parsing the 18 blocks gives 12 that call `icc()` on the article's own
+  data and 6 that read committed fixtures or parse `data-raw/` scripts, matching
+  the domain the first pass recorded and T13 swept (36 plants, 36 red). Verified
+  fresh by **replaying a 10-plant sample** spanning all three required forms and
+  10 of the 12 domain tests — changed expected numeral (searle-zero `-1/3`→`-1/4`;
+  under-covers `sqrt(2)`→`sqrt(0.2)`, the plant that once survived; every-coefficient
+  row count), inverted direction (ci-bootstrap `<`→`>`; mpl seed-identity; opt-in
+  count `4L`→`5L`; conf_level monotonicity `>`→`<`), changed `ci_method`
+  (npbootstrap→searle on unbalanced; lavaan bootstrap→montecarlo; design-matrix
+  bootstrap→montecarlo). **10 of 10 red**, and the unperturbed control of one of
+  them passes 7/7. Three of the ten red only under `NOT_CRAN=true` — they carry
+  `skip_on_cran()`; see finding P9.
 - **AC4 — PASS.** `docs/` was deleted and `pkgdown::build_site()` re-run from
-  scratch at this review, exit 0. The target grep returns 17 unique targets,
-  not the 14 the criterion records as its dated count — this milestone's own
-  AC5 linking added three; the promise quantifies over what the grep returns,
-  so the domain is the 17. All 17 resolve as emitted `id="..."` attributes:
-  2 in-page anchors, 1 cross-vignette page, 14 cross-vignette anchors,
-  including the corrected `confidence-interval-vs--credible-interval`. No
-  `man/` topics and no URLs among them.
+  scratch at this review, exit 0. The target grep returns 17 unique targets (the
+  criterion's dated count is 14; this milestone's own AC5 linking added three,
+  and the promise quantifies over what the grep returns). All 17 resolve as
+  emitted `id="…"` attributes in the freshly built HTML — 2 in-page anchors,
+  1 cross-vignette page, 14 cross-vignette anchors, including the corrected
+  `confidence-interval-vs--credible-interval` (the site emits the double-dash
+  form; main's `vs.-` link resolved to nothing). No `man/` topics, no URLs.
 - **AC5 — PASS.** `grep -n '^## ' vignettes/glossary.Rmd` returns 32 headings.
   Looped against the article, a literal case-sensitive match returns 4 — Engine,
   Monte-Carlo interval, REML, Variance component — and a case-folded match
-  returns 13. All 4 of the literal set are discharged, so the criterion holds
-  under the reading its own word "verbatim" states, and the case-folded superset
-  was linked or reasoned about besides. REML is linked at its first prose use;
-  Monte-Carlo interval's first prose use is L31-32, where the link markup splits
-  the phrase across the line break; Variance component's literal occurrences
-  (L345, L377) are both inside printed transcript blocks, its prose use at
-  L64-65 being the lower-cased plural, which is linked; Engine's first
-  occurrence is the `%\VignetteEngine{knitr::rmarkdown}` metadata directive and
-  in prose it is an ordinary noun, the reason the work log records.
-- **AC6 — PASS.** `NOT_CRAN=true CI=true devtools::test()`: 0 failures,
-  0 errors, 8461 passing, 25 skipped; its 2 warnings are pre-existing
+  returns 13. All 4 of the literal set are discharged under the reading the
+  criterion's own word "verbatim" states: REML linked at its first use (L154, the
+  only other occurrence L317); Variance component's first use is L64-65, linked,
+  the link markup splitting the phrase across the line break; Monte-Carlo
+  interval's first use is L31-32, linked the same way; Engine's first occurrence
+  is the `%\VignetteEngine{}` metadata directive and in prose it is an ordinary
+  noun, the reason the work log records. The case-folded superset of 13 was
+  linked or reasoned about besides.
+- **AC6 — PASS.** `NOT_CRAN=true CI=true devtools::test()`: 0 failures, 0 errors,
+  8497 passing, 25 skipped; its 2 warnings are the pre-existing pair
   (`test-icc-lavaan-multilevel.R:402`, `test-icc-type-vector.R:286`), both in
-  files outside this diff. `air format --check .` clean. `R CMD check --as-cran`
-  at `NOT_CRAN=false`, TinyTeX on PATH: raw `Status: 2 NOTEs`, 0 ERRORs,
-  0 WARNINGs. "No worse than main" was MEASURED rather than reasoned this pass:
-  `origin/main` was extracted with `git archive` and checked in the same shell,
-  and returns the same raw `Status: 2 NOTEs` with the same two NOTEs (CRAN
-  incoming feasibility; HTML manual). `pkgdown::check_pkgdown()` "No problems
-  found" and `build_site()` exit 0. `urlchecker::url_check()` 0 problems across
-  15 URLs. `cairn_validate` exit 0, 23 checks, no FAIL/WARN/ADVISORY line.
+  files outside this diff. `air format --check .` clean; `lintr::lint_package()`
+  0 lints. `R CMD check --as-cran` was run on **clean `git archive` tarballs of
+  both trees in the same shell**, TinyTeX on PATH: branch raw `Status: 2 NOTEs`,
+  `origin/main` raw `Status: 2 NOTEs`, the same two NOTEs on both sides (CRAN
+  incoming feasibility — new submission; HTML manual — no recent HTML Tidy). So
+  "no worse than main" is measured, not reasoned. (T14 reported `1 NOTE` from an
+  in-place check directory carrying a stale `spelling.Rout.save`; the clean-tarball
+  run above is the figure of record.) `pkgdown::check_pkgdown()` "No problems
+  found"; `build_site()` exit 0. `urlchecker::url_check()` all 15 URLs correct.
+  `cairn_validate` exit 0.
 
 ### Consistency gate
 
-Universal cairn-file checks: `cairn_validate` exit 0, all checks passed —
-`coverage complete` and `scaffold present` among them. No `DESIGN.md` principle
-changed, so `cairn_impact` is skipped.
+Universal cairn-file checks: `cairn_validate` exit 0, all 16 checks PASS —
+`coverage complete` and `scaffold present` among them — with one advisory
+(M130 at 14 tasks against the >10 split tripwire; those are the two returns'
+repair tasks, not new scope). No `DESIGN.md` principle changed, so
+`cairn_impact` is skipped.
 
 Toolchain checks, from the `r-package` profile's `consistency-gate` slot:
 `devtools::document()` produces no diff (`git status` clean after running it);
 `NAMESPACE`/`man/`/`data/` show no hand-edit drift; README.Rmd and README.md are
-in sync and untouched by this branch; `pkgdown::check_pkgdown()` passes.
-**FAILING: "NEWS.md has an entry for this milestone's user-visible changes."**
-`git diff origin/main...HEAD --stat -- NEWS.md` is empty. This milestone
-corrected two false claims in a shipped vignette and repaired a broken glossary
-anchor a reader would land on, which is user-visible by any reading, and the
-file carries direct precedent for exactly this shape (`NEWS.md:44-74` records
-article claim corrections; `:357` records the searle/burch asymmetry itself).
-Neither this milestone's gate entries nor the first pass's AC6 evidence
-mentions NEWS at all.
+in sync and untouched by this branch; `pkgdown::check_pkgdown()` passes;
+**NEWS.md now carries the entry** the second pass failed on — a *Documentation*
+bullet at `:415-427` plus the in-place correction of the `?icc` bullet at
+`:353-360`, and `git diff origin/main...HEAD --stat -- NEWS.md` is 18 insertions;
+no new top-level files, so no `.Rbuildignore` entry is owed; `R CMD check` clean
+as recorded under AC6. **Gate PASSES.**
 
-### Review findings (2026-08-21, three fresh-context lenses, second pass)
+### Review findings (2026-08-22, three fresh-context lenses, third pass)
 
-[S] blame-history: no disqualifying findings. It confirmed no `R/` source is
-touched by this diff, so no guard or fence was weakened; the one loosened
-numeric threshold and one removed assertion are the F9 repair itself, logged
-with its rationale, and the pre-change values were this branch's own first draft
-rather than a deliberate contract from an earlier milestone. The D-030
-`residual_template()` clause is untouched.
+[S] blame-history: no findings. It confirmed no `R/` source is touched, so no
+guard or fence was weakened, and read each change as the second return's own
+repair: the `sum(d < 1e-9) == 2L` loosening is finding O7's prescribed fix, the
+added matched-fit assertion is a net strengthening, and the D-030
+`residual_template()` clause is untouched. It independently re-derived the
+`confidence-interval-vs--credible-interval` anchor as correct.
 
 [S] prior-PR-comments: no regressions. Its probe
-(`gh api .../pulls/comments?per_page=1`) returned empty again, so
+(`gh api .../pulls/comments?per_page=1`) returned empty a third time, so
 `cairn/milestones/archive/` and `cairn/LESSONS.md` were the only surfaces with
-signal. It checked the M106/M115 reviews that name these files and the
-M76/M111/M112/M116-M119 width lineage, and found the diff following the
-established lessons rather than contradicting them — the T6 reword avoiding the
-M117 allowlist widening, and the F2 repair adopting M116's own AST-fence
-pattern, both cited as compliance rather than regression.
+signal. It read the M106/M115 reviews naming these files and the
+M76/M111/M112/M116-M119 width lineage and found the diff following those lessons;
+it also re-verified O1-O7's repairs against file contents rather than the log.
 
-[O] diff-bug: 16 findings, each logged below with the verdict this session
-reached by re-running it. Three are gate- or floor-qualifying and return the
-milestone; the rest are recorded for the return to action or reject.
+[O] diff-bug: 12 findings, each logged below with the verdict this session
+reached by re-running it, plus one the orchestrator added (P13). **None
+qualifies for the return floor**: no finding demonstrates an acceptance
+criterion failing inside its domain, and the lens independently re-derived
+AC1's domain, arithmetic, cap and ledger form as passing and confirmed all three
+corrected article claims true as now written.
 
-- **O1 CONFIRMED (gate).** No `NEWS.md` entry for this milestone's user-visible changes — the `consistency-gate` slot at `cairn/PROFILE.md:30`. Verified: the branch touches 4 files and none is `NEWS.md`.
-- **O2 CONFIRMED (floor).** `tests/testthat/test-vignette-claims.R:1038-1048` — the lavaan "balanced clusters" fence is never exercised; `ml[-(1:3), ]` is a missingness case. Measured cluster sizes 29/32 with cells-per-subject 3-4 against a true unbalanced case at 28/32 and 4. Aggravating: all three `expect_error`s pin only the class, and the three messages are identical.
-- **O3 CONFIRMED (floor).** `vignettes/interval-methods.Rmd:233-235` — `"searle"` returns `[-Inf, -Inf]` for ICC(k) at zero between-subject variance, silently, so "still returns its attained minimum" is false on a default call. The underlying behaviour is PRE-EXISTING and not introduced by this diff; the false claim about it, and the `unit = "single"` test that sidesteps it, are this milestone's.
-- **O4 CONFIRMED (floor).** `tests/testthat/test-vignette-claims.R:1166` — "they do not all fall on the same side" is half-asserted; nothing establishes "not all lower". Folded into AC1's failure above.
-- **O5 CONFIRMED.** `:903-984` — the design matrix omits the `design` and `level` axes its own comment claims to sweep. The lens ran both missing `design` values; each bootstraps fine, so the article claim survives and the test simply does not reach it.
-- **O6 CONFIRMED.** `:1669-1681` — the split-off third-grid test greps a `#` header line in a committed TSV, which is the form F2 condemned; the work log states this openly but the shape is unchanged.
-- **O7 CONFIRMED.** `:1569` — the F9 repair replaced the `1e-4` floor but kept `expect_identical(sum(d < 1e-9), 2L)`, which F9 also named.
-- **O8 CONFIRMED.** Milestone file — AC1 disposition (b)'s required citations live in the T5 entry keyed by pre-reword article line numbers; the reader must infer a uniform +2 offset to reach them from the T9 ledger. The ledger's own recording form passes; the cross-reference does not.
-- **O9 NO FINDING.** AC1's domain, arithmetic, cap and ledger recording form were independently re-derived and pass; the lens checked all 40 quoted keys against their stated lines.
-- **O10 CONFIRMED.** `:1385-1421` — the `"mpl"` one-way and fixed-rater cells raise byte-identical messages and neither is pinned, so they do not identify which fence they assert; the consistency cell correctly does pin its message.
-- **O11 CONFIRMED.** `:1658-1665` — the "nothing smuggles in a third draw" check scans only assignment expressions, so a draw inside `gen_oneway`'s trailing bare `data.frame(...)` return would be invisible to a check the comment calls exhaustive.
-- **O12 CONFIRMED.** AC3's domain grew from 11 to 12 on the return and was not re-swept in full. Folded into AC3's failure above.
-- **O13 REJECTED, with a records repair owed.** The lens reads AC5's "first use" as the first literal byte occurrence, making L261 an unlinked first use of "Monte-Carlo interval". Rejected: the article's first *use* of the term is L31-32, where the link markup splits the phrase across a line break, and that is the use a reader meets. The records half stands — the T9 entry claims L64-65 as "Variance component"'s first prose use when that occurrence is the lower-cased plural, and it names only L345 where the literal occurrences are L345 and L377. The evidence line above states it precisely.
-- **O14 CONFIRMED.** The first pass's Review figures ("16 blocks", "13 terms ... Nine are linked") are stale. Superseded by this pass's block, which replaces it.
-- **O15 REJECTED.** Ragged source line-wrapping in `vignettes/interval-methods.Rmd`. Cosmetic, invisible in the rendered HTML, and matching the out-of-scope taxonomy's style-nitpick member; the one long pre-existing line is on an unmodified line.
-- **O16 NOTED, no action.** The opt-in enumerator couples a test to a `cli` message's wording. Held deliberately at F11 with a comment stating the intent; the test survives a reworded message that keeps the four values, which is the right fence.
+- **P1 CONFIRMED (highest rank).** `R/icc.R:397-398` and `man/icc.Rd:288-289` still say `"searle"` "still returns its attained minimum" — the exact claim this milestone found false — while `NEWS.md:353-360`, edited on this branch, now describes `?icc` as documenting the two-unit split. Verified: `grep -rn "attained minimum" R/ man/ NEWS.md vignettes/` finds the uncorrected roxygen, and the diff touches no `R/` or `man/` file. The false `?icc` sentence is PRE-EXISTING; the NEWS sentence asserting a doc change that did not happen is this branch's.
+- **P2 CONFIRMED.** `NEWS.md:416-418` misdescribes the claim it corrected: it says the article claimed the two methods "agree on ICC(A,k) as a pair", where `git show origin/main:vignettes/interval-methods.Rmd | sed -n '57p'` reads "the upper bounds coincide" — unqualified over all four indices. The "as a pair" wording existed only in this branch's intermediate draft, so a reader is told a claim was fixed that never shipped, and the broader one that did ship goes unnamed.
+- **P3 CONFIRMED.** `tests/testthat/test-vignette-claims.R:1777` puts the whole third-grid test — including its committed-fixture cross-check at `:1810-1818` — behind `skip_if_not(file.exists(<data-raw path>))`, and `.Rbuildignore:4` excludes `^data-raw$`; so nothing in it runs in a built package, and `:1703-1706`'s comment "the leg below, which reads a committed fixture, does ship" is now false. Article lines 208-215's third-grid claim has no shipped assertion.
+- **P4 CONFIRMED.** `:1271` — the matched-fit assertion is the sole thing that reds the `sqrt(2)`→`sqrt(0.2)` plant (the width comparison at `:1272-1275` passes under it), and it runs at 0.0844 relative difference against `tolerance = 0.1`, ~18% headroom; its comment says "within 0.1" where testthat 3e's `tolerance` is relative, not absolute.
+- **P5 REJECTED.** `:1214`'s `abs(bs$conf.high - mc$conf.high) < 0.05` is called an instance of the F6 bare-bound shape. Rejected: F6 was about a bound too loose to discriminate an *inflation*, whereas here "sit close" IS the claim and a bound is its natural form. The sub-point that "markedly lower" is asserted only as `<` stands as a note.
+- **P6 CONFIRMED.** `:1032-1055` — the two single-level lavaan rater-mode cells and the two-level `td_ml` cell carry no `expect_gt(nrow(td), 0L)` anti-vacuity guard, which this file states and uses as an idiom elsewhere (`:754`, `:896`); on a zero-row `tidy()` the `all(... == "bootstrap")` and `!any(is.na(...))` assertions pass free.
+- **P7 CONFIRMED, minor.** `:1634`'s `expect_gt(gap_restricted, 0)` for "leaves a remainder" is satisfied by any floating-point difference (measured 0.005987); the substantive half at `:1632` carries the claim with 35% headroom.
+- **P8 CONFIRMED, minor.** `vc_rng_calls()`'s `^r[a-z]+$` filter cannot see `sample()` or `arima.sim()` and would miscount `rbind`/`rev`/`range`, so `expect_length(vc_rng_calls(...), 0L)` at `:1809` is not the absolute fence its comment calls it. It mirrors the M116 walker, so the shape is precedented; the comment overclaims.
+- **P9 CONFIRMED, no action proposed.** `skip_on_cran()` at `:905`, `:1006`, `:1192` means the sole backing for article lines 61, 67, 70 and 72 does not run on CRAN. AC1 does not require the tests to run in a built package, so this is not a criterion failure; with P3 it means the bootstrap-availability, lavaan-fence and comparison claims have no shipped coverage.
+- **P10 REJECTED.** `:1558`'s `coverage_nonabort >= 0.93` sits below the nominal 0.95 the article's "were fine" is about. Rejected as out-of-scope: 0.93 is the repo's existing convention in `test-doc-skew-caveat.R`, an unmodified pre-existing choice this diff did not introduce.
+- **P11 NOTED.** Article L77 ("the boundary is not the default's only weak spot") takes disposition (a), but no assertion is aimed at the two-weak-spots proposition itself; the nearest test demonstrates the second weak spot's behaviour. The weakest member of the (a) partition, not a demonstrated falsehood.
+- **P12 RESOLVED BY THIS PASS.** The second pass's Review figures (`Status: 2 NOTEs` against T14's `1 NOTE`, and its block counts) conflicted with the later work log; this block supersedes it and records the clean-tarball figure and its reason.
+- **P13 NOTED (orchestrator).** Article L70's "anywhere off those fences lavaan is Monte-Carlo only" has an unasserted half: the tests establish that the fenced cells refuse `bootstrap`, not that `montecarlo` succeeds there. Measured at this review — `icc(ratings_incomplete, …, engine = "lavaan", ci_method = "montecarlo")` returns `method == "montecarlo"` — so the claim is true; it is simply backed by measurement rather than by an expectation.
