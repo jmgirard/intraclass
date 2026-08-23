@@ -1,6 +1,6 @@
 # M134: Vignette prose pass — the reader path, and the house style standard
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -100,7 +100,7 @@ refused, D-021 stands.
 - [x] T6 Run the AC4 grep over added and removed diff lines; for each hunk it
       returns, compare the added claim's domain against the removed one and
       repair any widening in place.
-- [ ] T7 Run the AC5 verify block; re-knit nothing (no roxygen touched).
+- [x] T7 Run the AC5 verify block; re-knit nothing (no roxygen touched).
 
 ## Work log
 
@@ -119,6 +119,10 @@ refused, D-021 stands.
 - 2026-08-23: amendment gate — AC2 amended, the amended wording audited first by a fresh-context [O] reader in FULL mode (six questions; findings on satisfiability, GP8 count-pinning, an unenumerated singular over a template family, an unprobed exemption with no falsifier, and an instrument-bound promise — all five folded into the wording adopted; proportionality returned nothing). The gate chose the reviewed wording over a bare one-sentence exemption and over relaxing the test harness. Verdict recorded by the reader: WIDENING, since the amendment binds a property AC2 did not previously bind while relaxing the sentence target on one file.
 - 2026-08-23: T6 — AC4 grep run over added and removed lines of `git diff 72f9cc2 -- <the three files>` (42 matching lines across 18 hunks); every hunk's added claim domain compared against the removed text, all 18 EQUAL, no widening or narrowing.
 - 2026-08-23: T6 — the same diff also went to a fresh-context [O] reader that authored none of the prose, which found two R6 widenings the AC4 word list cannot catch, both from splitting a restrictive clause into a standalone sentence: `getting-started.Rmd` promoted "a textbook formula *that* misbehaves when a variance is near zero" into a general claim about textbook formulas, which the glossary's own `"mpl"` and `"npbootstrap"` entries contradict; `glossary.Rmd` promoted lavaan's "a rater is a single column with no random effect" into a claim about raters generally, false of the mixed-model engines. Both repaired in place, plus four lower-severity drifts (an entailment asserted by "meaning", a causal inversion at `choose_icc()`, a referent loosened to "That", and a directional "narrower margin"/"width advantage" where the original said only "margin"). Doc pins re-run clean.
+- 2026-08-23: T7 — verify block run. `devtools::document()` no diff; `devtools::test()` FAIL 0 | WARN 3 | SKIP 2 | PASS 8862; `python3 data-raw/check-record-claims.py --live` exit 0 (6 claims re-derived, 0 failures); `devtools::check(document = FALSE)` raw `Status: 1 NOTE`, 0 errors, 0 warnings, vignettes re-built OK in 31s. The NOTE is the `spelling.Rout` comparison and is pre-existing: `spelling::spell_check_package()` flags the same 31 words at `72f9cc2` and on this branch (proper names and en-GB spellings absent from `inst/WORDLIST`, none in text this milestone added).
+- 2026-08-23: NEWS.md gained a Documentation entry for the pass, worded to describe the act rather than assert a standing prose property no test enforces. Doc-claim pins re-run clean after it.
+- 2026-08-23: AC1's byte-identity holds — `data-raw/prose-profile.py` has one commit (`96b78b4`, T1) and `git diff 96b78b4 -- data-raw/prose-profile.py` is empty, so the baseline run and the final run used the same bytes.
+- 2026-08-23: all tasks checked; status → review.
 
 ## Decisions
 
