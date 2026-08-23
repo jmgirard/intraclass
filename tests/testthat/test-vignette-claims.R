@@ -2051,3 +2051,273 @@ test_that("interval-methods.Rmd: the third grid's shipped fixture states both co
   )
   expect_true(any(grepl("Both A_i and e_ij are drawn", res, fixed = TRUE)))
 })
+
+# --- The per-`ci_method` trustworthiness table (M133) --------------------
+# The article opens with a seven-row table -- one row per value of the
+# `ci_method` choice vector at `R/icc.R:692-703` -- stating for each method the
+# design family it computes an interval for, the family it refuses, and how
+# deeply that interval is independently verified. A table is only worth reading
+# if its cells are true of the shipped surface, so every row is backed here by
+# TWO live calls: one inside the family the row names as supported, asserted to
+# return an interval, and one outside it, asserted to raise the classed abort.
+#
+# Failure identity (tracking-rules): each refused call is pinned to the message
+# of the fence it is meant to fire, AND differs from a call asserted to succeed
+# in exactly the one attribute that fence names -- so a refusal arriving from
+# some other guard cannot be read as the fence under test. Where a fence's
+# message is generic (the lavaan bootstrap's), the one-attribute contrast is the
+# whole of the identification, which is why that row carries its own control
+# call rather than borrowing another row's.
+
+# The article's own `ci-mpl` data, rebuilt at its seed (`ratings` is too small
+# for the MPL calibration grid). Same construction as the `"mpl"` fences test
+# above; kept local to each test rather than shared, the file's convention.
+vc_mpl_sim <- function() {
+  set.seed(88)
+  n_s <- 20
+  n_r <- 4
+  subj_eff <- rnorm(n_s, sd = sqrt(0.6))
+  rater_eff <- rnorm(n_r, sd = sqrt(0.1))
+  noise <- matrix(rnorm(n_s * n_r, sd = sqrt(0.2)), n_s, n_r)
+  data.frame(
+    subject = factor(rep(seq_len(n_s), times = n_r)),
+    rater = factor(rep(seq_len(n_r), each = n_s)),
+    score = as.numeric(
+      outer(subj_eff, rep(1, n_r)) +
+        outer(rep(1, n_s), rater_eff) +
+        noise
+    )
+  )
+}
+
+test_that("interval-methods.Rmd: the table's supported cell returns an interval, every frequentist row", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lavaan")
+  skip_on_cran()
+
+  sim <- vc_mpl_sim()
+  # One supported call per row. The Bayesian row needs a Stan toolchain and so
+  # is asserted in its own test below.
+  supported <- list(
+    montecarlo = function() {
+      icc(ratings, score, subject, rater, seed = 1)
+    },
+    # Two calls: the mixed-model engine the row's cell names first, and the
+    # lavaan-on-complete-data control the refused cell below is contrasted
+    # against (that fence's message is generic, so the contrast carries it).
+    bootstrap = function() {
+      icc(
+        ratings,
+        score,
+        subject,
+        rater,
+        ci_method = "bootstrap",
+        boot_samples = 19,
+        seed = 1
+      )
+    },
+    `bootstrap (lavaan control)` = function() {
+      icc(
+        ratings,
+        score,
+        subject,
+        rater,
+        engine = "lavaan",
+        ci_method = "bootstrap",
+        boot_samples = 19,
+        seed = 1
+      )
+    },
+    npbootstrap = function() {
+      icc(
+        ratings,
+        score,
+        subject,
+        rater,
+        model = "oneway",
+        ci_method = "npbootstrap",
+        boot_samples = 99,
+        seed = 1
+      )
+    },
+    searle = function() {
+      icc(
+        ratings,
+        score,
+        subject,
+        rater,
+        model = "oneway",
+        ci_method = "searle"
+      )
+    },
+    burch = function() {
+      icc(ratings, score, subject, rater, model = "oneway", ci_method = "burch")
+    },
+    mpl = function() {
+      icc(sim, score, subject, rater, type = "agreement", ci_method = "mpl")
+    }
+  )
+  # Anti-vacuity: an empty list would pass every assertion below for free.
+  expect_identical(length(supported), 7L)
+
+  for (nm in names(supported)) {
+    td <- suppressWarnings(tidy(supported[[nm]]()))
+    expect_gt(nrow(td), 0L)
+    expect_false(any(is.na(td$conf.low)), info = nm)
+    expect_false(any(is.na(td$conf.high)), info = nm)
+    # An interval, not a degenerate point: the reported estimate lies inside it.
+    expect_true(all(td$conf.low <= td$estimate), info = nm)
+    expect_true(all(td$estimate <= td$conf.high), info = nm)
+    # The method the table's row names is the method that produced the interval
+    # -- a silent fallback to the Monte-Carlo default would make the row false.
+    if (nm %in% c("npbootstrap", "searle", "burch", "mpl")) {
+      expect_true(all(td$method == nm), info = nm)
+    }
+  }
+})
+
+test_that("interval-methods.Rmd: the table's Bayesian row returns a credible interval", {
+  # The one supported cell that needs a Stan compiler. Gated exactly as every
+  # other live brms fit in this package is (`test-icc-brms.R`): CI carries brms
+  # but no toolchain, so this runs locally and is skipped there.
+  skip_on_cran()
+  skip_on_ci()
+  skip_if_not_installed("brms")
+
+  # Tiny sampler -- the row's claim is that the Bayesian engine returns a
+  # credible interval on its supported family, never that the interval is
+  # well-sampled at this size. Sampling warnings on six subjects are expected.
+  fit <- suppressWarnings(icc(
+    ratings,
+    score,
+    subject,
+    rater,
+    type = "agreement",
+    engine = "brms",
+    seed = 1,
+    brm_args = list(chains = 2, iter = 1000, refresh = 0)
+  ))
+  expect_identical(fit$ci$method, "posterior")
+
+  td <- tidy(fit)
+  expect_setequal(td$index, c("ICC(A,1)", "ICC(A,k)"))
+  expect_false(any(is.na(td$conf.low)))
+  expect_true(all(td$conf.low <= td$estimate & td$estimate <= td$conf.high))
+})
+
+test_that("interval-methods.Rmd: the table's refused cell aborts classed, every row", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lavaan")
+  skip_on_cran()
+
+  sim <- vc_mpl_sim()
+  # `ratings` is balanced and `ratings_incomplete` is not -- the one attribute
+  # separating the `"searle"`/`"burch"` refusals from their supported calls,
+  # and the completeness attribute separating the lavaan bootstrap's. Asserted,
+  # never assumed, so a regenerated dataset cannot make those contrasts vacuous.
+  expect_identical(length(unique(table(ratings$subject))), 1L)
+  expect_gt(length(unique(table(ratings_incomplete$subject))), 1L)
+
+  # method -> (call, the fence message it must fire, the attribute it differs
+  # in from the supported call above).
+  refused <- list(
+    montecarlo = list(
+      call = function() {
+        icc(
+          ratings,
+          score,
+          subject,
+          rater,
+          engine = "brms",
+          ci_method = "montecarlo"
+        )
+      },
+      regexp = "requires `ci_method = \"posterior\"`",
+      differs = "engine"
+    ),
+    bootstrap = list(
+      call = function() {
+        icc(
+          ratings_incomplete,
+          score,
+          subject,
+          rater,
+          engine = "lavaan",
+          ci_method = "bootstrap",
+          boot_samples = 19,
+          seed = 1
+        )
+      },
+      regexp = "not yet available for this design/engine",
+      differs = "data completeness"
+    ),
+    posterior = list(
+      call = function() {
+        icc(ratings, score, subject, rater, ci_method = "posterior", seed = 1)
+      },
+      regexp = "requires `engine = \"brms\"`",
+      differs = "engine"
+    ),
+    npbootstrap = list(
+      call = function() {
+        icc(
+          ratings,
+          score,
+          subject,
+          rater,
+          ci_method = "npbootstrap",
+          boot_samples = 19,
+          seed = 1
+        )
+      },
+      regexp = "available only for the one-way random",
+      differs = "model"
+    ),
+    searle = list(
+      call = function() {
+        icc(
+          ratings_incomplete,
+          score,
+          subject,
+          rater,
+          model = "oneway",
+          ci_method = "searle"
+        )
+      },
+      regexp = "requires a balanced one-way design",
+      differs = "data balance"
+    ),
+    burch = list(
+      call = function() {
+        icc(
+          ratings_incomplete,
+          score,
+          subject,
+          rater,
+          model = "oneway",
+          ci_method = "burch"
+        )
+      },
+      regexp = "requires a balanced one-way design",
+      differs = "data balance"
+    ),
+    mpl = list(
+      call = function() {
+        icc(sim, score, subject, rater, type = "consistency", ci_method = "mpl")
+      },
+      regexp = "does not\\s+define a consistency",
+      differs = "type"
+    )
+  )
+  # Anti-vacuity, as above: one row per `ci_method` value, none skipped.
+  expect_identical(length(refused), 7L)
+
+  for (nm in names(refused)) {
+    expect_error(
+      suppressWarnings(refused[[nm]]$call()),
+      regexp = refused[[nm]]$regexp,
+      class = "intraclass_unsupported",
+      info = paste(nm, "-- differs in", refused[[nm]]$differs)
+    )
+  }
+})
