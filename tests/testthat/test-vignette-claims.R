@@ -310,8 +310,14 @@ test_that("d-studies-and-replicates.Rmd: the rater component dominates on `ratin
 test_that("d-studies-and-replicates.Rmd: a numeric `unit` adds the ICC(A,6) d_study row", {
   skip_if_not_installed("glmmTMB")
 
-  inline <- tidy(icc(ratings, score, subject, rater,
-    type = "agreement", unit = c("single", "average", 6), seed = 1
+  inline <- tidy(icc(
+    ratings,
+    score,
+    subject,
+    rater,
+    type = "agreement",
+    unit = c("single", "average", 6),
+    seed = 1
   ))
 
   # The article's own output: three rows, the third labeled ICC(A,6).
@@ -335,28 +341,52 @@ test_that("d-studies-and-replicates.Rmd: fixed-rater agreement refuses a numeric
   # The article's `error = TRUE` chunk. The refusal is classed, and it is raised
   # only when absolute agreement is the ONLY requested type.
   expect_error(
-    icc(ratings, score, subject, rater,
-      type = "agreement", raters = "fixed", unit = c("single", "average", 6),
+    icc(
+      ratings,
+      score,
+      subject,
+      rater,
+      type = "agreement",
+      raters = "fixed",
+      unit = c("single", "average", 6),
       seed = 1
     ),
     class = "intraclass_unidentified"
   )
 
   # Both remedies the message names do return a number ...
-  expect_no_error(suppressWarnings(icc(ratings, score, subject, rater,
-    type = "agreement", raters = "random", unit = c("single", "average", 6),
+  expect_no_error(suppressWarnings(icc(
+    ratings,
+    score,
+    subject,
+    rater,
+    type = "agreement",
+    raters = "random",
+    unit = c("single", "average", 6),
     seed = 1
   )))
-  expect_no_error(suppressWarnings(icc(ratings, score, subject, rater,
-    type = "consistency", raters = "fixed", unit = c("single", "average", 6),
+  expect_no_error(suppressWarnings(icc(
+    ratings,
+    score,
+    subject,
+    rater,
+    type = "consistency",
+    raters = "fixed",
+    unit = c("single", "average", 6),
     seed = 1
   )))
 
   # ... and the default (both types) drops the agreement projection with a
   # message rather than aborting, keeping the consistency one.
   expect_message(
-    both <- suppressWarnings(icc(ratings, score, subject, rater,
-      raters = "fixed", unit = c("single", "average", 6), seed = 1
+    both <- suppressWarnings(icc(
+      ratings,
+      score,
+      subject,
+      rater,
+      raters = "fixed",
+      unit = c("single", "average", 6),
+      seed = 1
     )),
     "Dropping the .*agreement.* D-study projection"
   )
