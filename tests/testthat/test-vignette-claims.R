@@ -2078,9 +2078,11 @@ test_that("interval-methods.Rmd: the third grid's shipped fixture states both co
 # contrast is what the `differs` field records. The field is documentation read
 # back in `info=` on failure -- the pinned message is what enforces identity --
 # except for the lavaan bootstrap, whose message is generic ("not yet available
-# for this design/engine combination") and shared by its three fences. There the
-# contrast IS the identification, which is why that method carries its own
-# control call rather than borrowing another's.
+# for this design/engine combination") and shared by every site that withholds a
+# `simulate_refit` -- the pinned call reaches the single-level `has_missing`
+# guard at `R/engine-lavaan.R:770`, not the multilevel triple at `:573-576`.
+# There the contrast IS the identification, which is why that method carries its
+# own control call rather than borrowing another's.
 
 test_that("icc(): the supported call returns an interval, every frequentist ci_method", {
   skip_if_not_installed("glmmTMB")
@@ -2217,7 +2219,8 @@ test_that("icc(): the supported call returns an interval, every frequentist ci_m
     expect_gt(nrow(td), 0L)
     expect_false(any(is.na(td$conf.low)), info = nm)
     expect_false(any(is.na(td$conf.high)), info = nm)
-    # An interval, not a degenerate point: the reported estimate lies inside it.
+    # The reported estimate lies within the reported bounds (which does not by
+    # itself exclude a zero-width interval).
     expect_true(all(td$conf.low <= td$estimate), info = nm)
     expect_true(all(td$estimate <= td$conf.high), info = nm)
     # The coefficient family this supported call produces. `expect_setequal()`
@@ -2452,22 +2455,9 @@ test_that("icc(): the second supported call runs, the ci_methods that admit one"
   expect_true(all(m7$method == "mpl"))
   expect_false(any(is.na(m7$conf.low)))
 
-  # `"montecarlo"`: the refusal on a `"brms"` fit is EXPLICIT-only -- an
-  # unset `ci_method` selects `"posterior"` there instead of refusing. The
-  # coupling is asserted in `test-icc-brms.R` ("engine = \"brms\" forces
-  # ci_method = \"posterior\" by default"), which observes it before any fit and
-  # so needs no Stan toolchain; not duplicated here. What this leg pins is the
-  # other half pinned here: that the refusal needs the explicit value.
-  expect_error(
-    icc(
-      ratings,
-      score,
-      subject,
-      rater,
-      engine = "brms",
-      ci_method = "montecarlo"
-    ),
-    regexp = "requires `ci_method = \"posterior\"`",
-    class = "intraclass_unsupported"
-  )
+  # `"montecarlo"` has no second supported call to add here. Its brms refusal is
+  # EXPLICIT-only -- an unset `ci_method` upgrades to `"posterior"` instead of
+  # refusing -- and both halves are already pinned elsewhere: the explicit
+  # refusal in the refused block above, the unset upgrade in `test-icc-brms.R`
+  # ("engine = \"brms\" forces ci_method = \"posterior\" by default").
 })

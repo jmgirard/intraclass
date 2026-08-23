@@ -44,7 +44,7 @@ heavy-tail grid → stay ROADMAP candidates on their own promotion conditions.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: For each value of the `ci_method` choice vector validated in
+- [x] AC1: For each value of the `ci_method` choice vector validated in
       `R/icc.R` (the `validate_choice()` call for `ci_method`),
       `tests/testthat/test-vignette-claims.R` runs one call the method computes
       an interval for and asserts an interval is returned, and one call it
@@ -52,10 +52,10 @@ heavy-tail grid → stay ROADMAP candidates on their own promotion conditions.
       call requires a Stan toolchain and is gated `skip_on_ci()`/
       `skip_on_cran()`; it is verified in a run without `CI=true`. No value has
       fewer than both.
-- [ ] AC2: For each value, a planted perturbation of each of these forms reds
+- [x] AC2: For each value, a planted perturbation of each of these forms reds
       AC1's tests: a changed `ci_method`; a changed design argument or input
       dataset; an inverted supported/refused direction.
-- [ ] AC3: `NOT_CRAN=true CI=true devtools::test()` 0 failures;
+- [x] AC3: `NOT_CRAN=true CI=true devtools::test()` 0 failures;
       `air format --check .` clean; `R CMD check`'s raw `Status:` line no worse
       than main's under the same command on the same machine;
       `pkgdown::check_pkgdown()` and `build_site()` clean; `cairn_validate`
@@ -121,6 +121,7 @@ heavy-tail grid → stay ROADMAP candidates on their own promotion conditions.
 - 2026-08-23: T7, discovered fix — `check-references` was RED on the pushed branch tip (`data-raw/enumerate-generalizing-claims.py --check`: 1 un-triaged candidate, 1 orphan ledger row). Cause: the M133 return fixes corrected the O-MPL `Decision` line at `cairn/references/ORACLES.md:1824` in place (the `conf_level = 0.95` claim superseded by M91/D-017) without refreshing the M74 triage ledger, whose rows are keyed by a hash of the claim text — so the old key `ORACLES:1d6bed4aa7` orphaned and the corrected text enumerated as un-triaged under `ORACLES:8465c34a03`. The triage CLASS is unchanged (`OUT-oracle-pin` — the repo's own MPL verdict, not an external source-table generalization), so the row was rekeyed in place rather than reclassified. Checker now 367 candidates / 367 rows / 0 un-triaged / 0 orphan. This was live on the branch since the return fixes and is inside Scope In, which carries the `ORACLES.md` correction.
 - 2026-08-23: T7 — plants re-run against the RETARGETED blocks (T4's runs were against the pre-descope text T6 rewrote). Harness ephemeral as before: the block plus its `vc_mpl_sim()` helper copied to a temp test file, one perturbation applied per run, file removed after. Unperturbed control GREEN in both modes; all 21 plants (3 forms x 7 `ci_method` values) RED. The six frequentist values ran at `NOT_CRAN=true CI=true`; `posterior`'s three ran at `NOT_CRAN=true` alone so its live brms fit executes, and that no-CI control passing is also AC1's evidence that the `skip_on_ci()` call is reached and green rather than merely skipped. Gate: suite 0 failures / 0 errors / 8600 passing / 26 skipped at `NOT_CRAN=true CI=true`; `air format --check .` exit 0; `devtools::document()` no diff; `pkgdown::check_pkgdown()` no problems and `build_site()` exit 0; `check-record-claims.py` 6 claims / 0 failures; `enumerate-generalizing-claims.py --check` 367/367, 0 un-triaged, 0 orphan; `cairn_validate` exit 0, all checks passed. `R CMD check --as-cran --no-manual` (with `_R_CHECK_CRAN_INCOMING_=false`) on `R CMD build` tarballs of the branch tip and of `git archive origin/main`, same command and machine: both raw `Status: OK`.
 - 2026-08-23: descope complete; status to `review`. AC1, AC2 and AC3 are the amended criteria and are left UNTICKED — the round-2 evidence they inherit predates T6's retarget, so review verifies them on fresh evidence under AC fencing. Defect-return count stays at 2.
+- 2026-08-23: review round 3 — AC1, AC2 and AC3 all PASS on fresh evidence (21 plants red, both controls green; suite 0 failures / 8600 passing / 26 skipped; both `R CMD check` tarballs raw `Status: OK`). Gate clean. Three-lens fan-out returned 8 findings: five fixed on the branch (the `ORACLES.md` "superseded" wording and its ledger rekey, a duplicated `montecarlo` assertion with a false comment, the block header's lavaan fence attribution, an overclaiming comment, and an M127 measurement the ROADMAP compression had dropped), one to follow-up, two rejected. No return; defect-return count stays at 2.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
@@ -309,3 +310,145 @@ Trigger (a) has not fired: this is the second defect return, not the third.
 Returned to `in-progress`. First defect return on this milestone; no thrash
 trigger. AC2, AC4 and AC5 stand on the evidence above and need only re-execution
 against the corrected table.
+
+### Round 3 (2026-08-23, post-descope, branch tip 1489ec5)
+
+`origin/main` 17bf072, unmoved since the branch was cut (`git fetch`; branch 0
+behind, 13 ahead). The criteria below are the AMENDED set the descope left —
+old AC1/AC3 (the shipped table and its depth prose) were removed by the gated
+amendment, so nothing here re-reviews them. All evidence is fresh: the round-2
+evidence these criteria inherit predates T6's retarget.
+
+#### Acceptance criteria
+
+- **AC1 — PASSED.** All seven values of the `ci_method` choice vector
+  (`R/icc.R:714-726`, the locator the block header carries, verified exact) have
+  both a supported and a refused call in `tests/testthat/test-vignette-claims.R`.
+  Supported: six frequentist values in one block asserting a non-`NA`
+  `conf.low`/`conf.high` bracketing the estimate, plus the coefficient family and
+  the `method` label; `posterior` in its own block behind a live brms fit. Refused:
+  all seven, each `expect_error(..., class = "intraclass_unsupported")` with the
+  fence's own message pinned. "No value has fewer than both" is enforced by an
+  enumerator, not a hand-list — both blocks scrape the accepted set out of
+  `validate_choice()`'s own abort message and `expect_setequal()` against it; run
+  directly, that scrape returns exactly `montecarlo bootstrap posterior
+  npbootstrap searle burch mpl`. The `posterior` supported call is gated
+  `skip_on_ci()`/`skip_on_cran()` and was verified in a run WITHOUT `CI=true`:
+  `filter = "vignette-claims"` 0 failures / 408 passing / **0 skipped**, with
+  `Compiling Stan program... Start sampling` in the log — the call executed, it
+  did not merely skip. Same file at `NOT_CRAN=true CI=true`: 0 failures / 404
+  passing / 1 skipped (that call).
+- **AC2 — PASSED.** All 21 plants (3 forms x 7 values) run against the
+  RETARGETED blocks red; both unperturbed controls green. Harness ephemeral: the
+  block plus its `vc_mpl_sim()` helper copied to a temp test file, one
+  perturbation applied per run, file removed (`git status` clean after). The six
+  frequentist values ran at `NOT_CRAN=true CI=true` (control 0 failed / 0 error /
+  1 skip); `posterior`'s three at `NOT_CRAN=true` alone so its live fit executes
+  (control 0 failed / 0 error / 0 skip). Changed-`ci_method` plants red on the
+  `method` assertion (bootstrap, npbootstrap, searle, burch, mpl) or on an
+  unexpected abort (montecarlo, posterior); changed-design/dataset plants red on
+  the index-family assertion (montecarlo, bootstrap, posterior) or on an
+  unexpected abort (npbootstrap, searle, burch, mpl); inverted-direction plants
+  red on both sides at once (supported call aborting AND refused call not
+  refusing) for every value. Re-spot-checked after the fix-now edits below —
+  control green in both modes, one plant per form still red.
+- **AC3 — PASSED.** Suite at `NOT_CRAN=true CI=true`: 0 failures / 0 errors /
+  8600 passing / 26 skipped. `air format --check .` exit 0. `cairn_validate` exit
+  0, all checks passed. `pkgdown::check_pkgdown()` no problems; `build_site()`
+  exit 0. `R CMD check --as-cran --no-manual` (with `_R_CHECK_CRAN_INCOMING_=false`)
+  on `R CMD build` tarballs of the branch tip and of `git archive origin/main`
+  (17bf072), same command and same machine: both raw `Status: OK` — the branch is
+  no worse than main's.
+
+#### Consistency gate
+
+Universal: `cairn_validate` exit 0, all checks passed (including `coverage
+complete` and `scaffold present`). No `DESIGN.md` principle changed, so
+`cairn_impact` was not run. Toolchain slot (`r-package`): `devtools::document()`
+no diff (`git status` clean after); no generated file hand-edited;
+README.Rmd/README.md untouched by the diff; `check_pkgdown()` clean; NEWS.md
+restored to `origin/main` byte-for-byte by the descope, so the milestone has no
+user-visible change to announce and needs no entry; no new top-level files.
+Repo-local checkers: `check-record-claims.py` 6 claims / 0 failures;
+`enumerate-generalizing-claims.py --check` 367 candidates / 367 rows / 0
+un-triaged / 0 orphan. PR #142 all 10 CI checks green. Revert verified:
+`git diff origin/main..HEAD -- vignettes/ NEWS.md` is empty.
+
+Defect-return count stays at 2 — no criterion or gate check failed this round.
+
+#### Independent review — three-lens fan-out
+
+Full fan-out (the declared tier is internal but the diff touches executable
+surface, so the docs-only single-lens route does not apply). [O] diff-bug,
+[S] blame-history, [S] prior-review-record, all fresh-context, each with its own
+evidence base. [S] blame-history reported **no findings**: `vc_mpl_sim()`
+reproduces the old inline construction draw-for-draw, the pins reference real
+fence messages and a real abort class, the descope matches D-021/D-029 as cited,
+the `ORACLES.md` correction is backed by D-017, and the triage rekey is the
+expected consequence of the line's content hash changing. [S] prior-review-record
+found the GitHub inline-comment probe empty (no real threads on this repo) and
+read the archived `## Review` sections; it reported one regression, which is
+[O]1 below reached independently.
+
+Findings and disposition (ranked as reported; every one logged):
+
+- **[O]1 / [S]1 — FIXED NOW.** "`ORACLES.md:1824` says M91/D-017 'superseded'
+  the old line; D-017's own Consequences say 'supersedes nothing.' Same line
+  describes 0.99 as 'conditional GO' — D-017's gate state, not the shipped
+  state, since BC7 resolved and 0.99 ships." Confirmed against
+  `cairn/DECISIONS.md:604` and `R/icc.R:1644-1649`. Both raised at round 2 as
+  [O]13 and logged rather than fixed, so this is a shipped-unfixed prior
+  finding. The line now reads "M91/D-017 extends D-014/D-015 to 0.90 and 0.99
+  ('supersedes nothing', its own Consequences) and all three levels ship, no
+  level deeper authorized". Correcting it rekeyed the claim ledger again
+  (`ORACLES:8465c34a03` -> `ORACLES:842df2e46f`), rekeyed in place, class
+  unchanged; checker back to 367/367, 0 un-triaged, 0 orphan.
+- **[O]2 — FIXED NOW.** "The third block's `montecarlo` leg is a verbatim
+  duplicate that does not pin what its comment claims." Confirmed: the
+  `expect_error` repeated the refused block's `montecarlo` entry call-for-call,
+  and its comment claimed to pin the explicit-only property, which nothing there
+  pins. The duplicate assertion is removed and the comment rewritten to say
+  plainly that `montecarlo` has no second supported call and where each half of
+  the coupling is actually pinned. No criterion depends on that block.
+- **[O]3 — FIXED NOW.** "The block header misattributes the lavaan bootstrap
+  fence": the header named the multilevel triple at `R/engine-lavaan.R:573-576`,
+  but the pinned refused call is single-level and reaches the `has_missing`
+  guard at `:770`. The pin itself fires correctly and `differs = "data
+  completeness"` is right for that site; only the explanation was wrong, and now
+  names `:770`.
+- **[O]4 — FIXED NOW.** "'An interval, not a degenerate point' overclaims its
+  assertion" — `conf.low <= estimate <= conf.high` admits a zero-width interval.
+  Comment reworded to state what the two assertions check.
+- **[O]5 — FIXED NOW.** "The ROADMAP byte budget was met by recompressing
+  unrelated candidate rows, and one lost evidence": the doc-claim-pin row dropped
+  an M127 *measurement* ("after measuring that a general widening would red the
+  unmutated control"), not a wording flourish. Restored in shortened form, with
+  the bytes freed from the two candidate rows M133 itself wrote. ROADMAP back to
+  23,991 bytes / 54 lines, under the 24,000-byte cap.
+- **[O]7 — FOLLOW-UP.** "The posterior half is invisible to both anti-vacuity
+  guards": the supported block hardcodes `setdiff(all_methods, "posterior")`, so
+  deleting the posterior test leaves the enumerator green, and `skip_on_ci()`
+  means CI would not notice either. Real, and not cheaply closable — a guard
+  would need cross-test knowledge. It joins the pin-coverage gaps the descope's
+  mini gate already routed to the table's candidate row (that row's "gaps logged
+  in that archive"); named in the archive summary rather than given a new row,
+  per the search-first candidate rule.
+- **[O]6 — REJECTED.** "Placement: the pins are not vignette claims any more."
+  True as stated, but the block shares `vc_mpl_sim()` with the vignette-derived
+  `"mpl"` fences test in the same file — a helper this milestone created
+  precisely to stop that construction being duplicated. Moving the pins out
+  re-creates the duplicate-construction hazard, so the file mismatch is the
+  cheaper of the two costs.
+- **[O]8 — REJECTED.** "The ~12-line message-scraping enumerator is duplicated
+  verbatim in both blocks." Style/DRY, and the reporter's own note applies: both
+  copies red together, so nothing is at risk. Out-of-scope taxonomy (pure nitpick).
+
+Return floor: no actioned finding demonstrates an acceptance criterion failing,
+and none is a load-bearing defect in what the package computes — the five fixed
+were an inaccurate records line, three inaccurate comments, and a tracking-file
+evidence restoration. No return.
+
+#### Outcome (round 3)
+
+All three amended criteria pass on fresh evidence; the consistency gate is
+clean; five findings fixed on the branch, one to follow-up, two rejected.
