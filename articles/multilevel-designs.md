@@ -147,14 +147,16 @@ The classroom example above has every rater rate every pupil in every
 classroom, so raters are **crossed** with clusters (ten Hove et al.’s
 Design 1). Two other layouts are common, and
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
-**infers which one you have** from the crossing pattern, so on complete
-data you need not declare it. (When missing cells leave the pattern
-genuinely ambiguous,
-[`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
-refuses to guess and you say which you mean with the `design` argument —
-see [*Incomplete (ragged) multilevel
-designs*](#incomplete-ragged-multilevel-designs) below.) The two layouts
-are:
+**infers which one you have** from the crossing pattern — which raters
+appear in which clusters, and which pupils each of them rates. The
+`design` argument overrides that inference, and there are two occasions
+to reach for it: when the rater *labels* do not mean what the pattern
+implies ([*Declaring the
+design*](#declaring-the-design-when-the-labels-are-ambiguous) below),
+and when missing cells leave the pattern genuinely ambiguous
+([*Incomplete (ragged) multilevel
+designs*](#incomplete-ragged-multilevel-designs)). The two nested
+layouts are:
 
 - **Raters nested in clusters** (Design 2): each classroom has its *own*
   panel of raters. There is then no between-cluster reliability to
@@ -210,6 +212,82 @@ longer applies — with each pupil’s raters unique, there is no rater main
 effect to keep in or drop from the error term. A layout that is neither
 cleanly crossed nor cleanly nested (some raters shared across clusters,
 some not) raises an informative error rather than guessing at a model.
+
+### Declaring the design when the labels are ambiguous
+
+Both relabellings above worked by rewriting the rater column, because
+inference reads that column and can only be as good as the labels in it.
+The `school` table as built numbers its raters 1–4 *inside every
+classroom*, and nothing in the data says whether “rater 1” in classroom
+3 is the same person as “rater 1” in classroom 7. Left to itself
+[`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) reads
+the reused labels as one panel rating everywhere — Design 1 — and says
+so rather than deciding quietly. If the numbering is instead
+classroom-relative, say so with `design`:
+
+``` r
+
+icc(school, score,
+  subject = pupil, rater = rater, cluster = classroom,
+  type = "agreement", design = "nested_in_clusters", seed = 1
+)
+#> ── Intraclass correlation: multilevel (raters nested in clusters) two-way random
+#> Subjects: 80 in 16 clusters | Raters: 4 (random) | Observations: 320 (complete)
+#> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
+#> 
+#>   level      index     estimate   95% CI
+#>   subject    ICC(A,1)     0.429   [0.310, 0.549]
+#>   subject    ICC(A,k)     0.751   [0.642, 0.830]
+#> 
+#> Variance components: cluster 0.966, subject 0.458, rater:cluster 0.128, residual 0.481
+```
+
+The header now reads *raters nested in clusters*, the cluster level is
+gone, and a single `rater:cluster` component replaces the two rater
+terms the crossed fit printed (`rater` and `cluster:rater`). If the
+numbering is *pupil*-relative — each pupil’s own four raters, numbered
+from one — the same table is Design 3:
+
+``` r
+
+icc(school, score,
+  subject = pupil, rater = rater, cluster = classroom,
+  type = "agreement", design = "nested_in_subjects", seed = 1
+)
+#> ── Intraclass correlation: multilevel (raters nested in subjects) absolute agree
+#> Subjects: 80 in 16 clusters | Raters: 4 (random) | Observations: 320 (complete)
+#> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
+#> 
+#>   level      index     estimate   95% CI
+#>   subject    ICC(1)       0.412   [0.290, 0.546]
+#>   subject    ICC(k)       0.737   [0.621, 0.828]
+#> 
+#> Variance components: cluster 0.998, subject 0.426, residual 0.609 (rater confounded)
+```
+
+Now there is no rater term at all: the components line reports the
+residual as `(rater confounded)`, and the coefficients are the
+agreement-only `ICC(1)` / `ICC(k)` of the multilevel one-way design.
+
+One table, three readings, and the data cannot tell you which is right —
+only you know what the labels mean. That is why
+[`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
+announces the crossed reading in a message rather than assuming it
+quietly; it prints once per session, so in this article it appeared back
+at the first classroom fit. What separates the three readings is mostly
+structure rather than the subject-level number: moving to Design 2
+barely moves the subject coefficients (`ICC(A,1)` 0.431 crossed against
+0.429 here) but takes the cluster level away, and moving to Design 3
+takes the rater term with it and renames the coefficients.
+
+Declaring a design is still bounded by the data: `design = "crossed"` on
+raters that do not bridge clusters is refused, for either error
+definition. What a declaration *can* do unchecked is choose among the
+readings the data does admit — the choice made twice above — so declare
+a design only when you know the labelling. Where the labels are already
+unique per rater, as in the two relabelled tables earlier, inference has
+everything it needs and passing the matching `design` explicitly returns
+the very same fit.
 
 ## Incomplete (ragged) multilevel designs
 
@@ -303,7 +381,7 @@ against the data), or the abort points you at the nested reading.
 ## Fixed raters in a multilevel design
 
 The multilevel examples so far treat raters as a [**random**
-sample](https://jmgirard.github.io/intraclass/articles/glossary.html#fixed-vs.-random-raters)
+sample](https://jmgirard.github.io/intraclass/articles/glossary.html#fixed-vs--random-raters)
 — the recommended default, which generalizes beyond the raters you
 happened to use. When the observed raters *are* the entire population of
 interest (a fixed panel of examiners, say), pass `raters = "fixed"`. As

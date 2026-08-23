@@ -57,9 +57,7 @@ Reliability climbs with more raters but with diminishing returns, and
 the projection is anchored to what you observed: at `m = 4` (the number
 of raters in `ratings`) `Φ(m)` is exactly the `ICC(A,k)` you would get
 from [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
-directly. For a one-off value you can also ask
-[`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) for it
-inline with a numeric `unit`, e.g. `unit = c("single", "average", 6)`.
+directly.
 
 The projection’s own interval settings — `conf_level`, `mc_samples` and
 `seed` — default to the fit’s own whenever the fit carries them, which a
@@ -143,12 +141,84 @@ curve just like the one above:
 plot(proj)
 ```
 
+### One projected value, without a projection object
+
+When you want a single projected rater count rather than a whole curve,
+[`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) will
+report it inline. `unit` takes the keywords `"single"` and `"average"` —
+the `ICC(*,1)` and `ICC(*,k)` you always get — and, alongside them, any
+number `m >= 1`:
+
+``` r
+
+icc(ratings, score, subject, rater,
+  type = "agreement", unit = c("single", "average", 6), seed = 1
+)
+#> ── Intraclass correlation: two-way random, absolute agreement ──────────────────
+#> Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)
+#> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
+#> 
+#>   index     estimate   95% CI
+#>   ICC(A,1)     0.290   [0.050, 0.706]
+#>   ICC(A,k)     0.620   [0.175, 0.906]
+#>   ICC(A,6)     0.710   [0.241, 0.935]
+#> 
+#> Variance components: subject 2.556, rater 5.244, residual 1.019
+#> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
+```
+
+The extra row is labeled `ICC(A,6)`, and it is the same quantity
+[`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)
+projects: the `m = 6` row of `proj` above carries the same estimate. The
+*interval* matches too, but only because both calls pass the same `seed`
+— the interval is Monte-Carlo, so two unseeded runs of the same
+projection agree on the estimate and differ in the last digits of the
+endpoints. Which one you reach for is a matter of shape, not of
+arithmetic: `unit` adds a row to a coefficient table,
+[`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)
+returns a projection object you can
+[`tidy()`](https://generics.r-lib.org/reference/tidy.html),
+[`glance()`](https://generics.r-lib.org/reference/glance.html) and plot.
+
+**Fixed raters cannot be projected to absolute agreement.** The rater
+term for [*fixed*
+raters](https://jmgirard.github.io/intraclass/articles/glossary.html#fixed-vs--random-raters)
+is the variance of exactly the raters you observed, so there is no wider
+pool for a hypothetical sixth rater to be drawn from, and
+[`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
+refuses rather than returning a number:
+
+``` r
+
+icc(ratings, score, subject, rater,
+  type = "agreement", raters = "fixed", unit = c("single", "average", 6),
+  seed = 1
+)
+#> Error in `icc()`:
+#> ! Projecting absolute agreement to a different number of raters is not
+#>   defined for "fixed" raters.
+#> ℹ With fixed raters the rater term is the finite-population variance of exactly
+#>   the raters you observed, so there is no 'average of m freshly sampled raters'
+#>   to project to.
+#> ℹ Use `raters = "random"` to project absolute agreement, or `type =
+#>   "consistency"` for a fixed-rater D-study.
+```
+
+Consistency has no such problem — the rater term drops out of it — which
+is why the two remedies the message names are to project with
+`raters = "random"`, or to ask for a fixed-rater `type = "consistency"`
+projection instead. The refusal is raised only when absolute agreement
+is *all* you asked for: a default
+[`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) call
+reports both error definitions, and there the consistency projection is
+kept and you are told the agreement one was dropped.
+
 **Projection is extrapolation.** The rater variance $`\sigma^2_r`$ is
 estimated from only as many raters as you observed, so projecting far
 beyond that design leans hard on that estimate. The Monte-Carlo interval
 widens honestly to reflect this rather than pretending to a precision it
 lacks — and projecting absolute agreement is refused for [*fixed*
-raters](https://jmgirard.github.io/intraclass/articles/glossary.html#fixed-vs.-random-raters),
+raters](https://jmgirard.github.io/intraclass/articles/glossary.html#fixed-vs--random-raters),
 where there is no wider rater universe to generalize to (use
 `raters = "random"`). The [D-study also works on a multilevel
 fit](https://jmgirard.github.io/intraclass/articles/multilevel-designs.html#how-many-raters-a-multilevel-d-study),

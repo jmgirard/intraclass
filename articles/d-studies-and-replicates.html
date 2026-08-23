@@ -120,9 +120,7 @@ refitting.</p>
 the projection is anchored to what you observed: at <code>m = 4</code>
 (the number of raters in <code>ratings</code>) <code>Φ(m)</code> is
 exactly the <code>ICC(A,k)</code> you would get from <code><a href="../reference/icc.html">icc()</a></code>
-directly. For a one-off value you can also ask <code><a href="../reference/icc.html">icc()</a></code> for it
-inline with a numeric <code>unit</code>,
-e.g. <code>unit = c("single", "average", 6)</code>.</p>
+directly.</p>
 <p>The projection’s own interval settings — <code>conf_level</code>,
 <code>mc_samples</code> and <code>seed</code> — default to the fit’s own
 whenever the fit carries them, which a default Monte-Carlo fit does;
@@ -182,16 +180,76 @@ it, since running it would render another reliability curve just like
 the one above:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">proj</span><span class="op">)</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="one-projected-value-without-a-projection-object">One projected value, without a projection object<a class="anchor" aria-label="anchor" href="#one-projected-value-without-a-projection-object"></a>
+</h3>
+<p>When you want a single projected rater count rather than a whole
+curve, <code><a href="../reference/icc.html">icc()</a></code> will report it inline. <code>unit</code> takes
+the keywords <code>"single"</code> and <code>"average"</code> — the
+<code>ICC(*,1)</code> and <code>ICC(*,k)</code> you always get — and,
+alongside them, any number <code>m &gt;= 1</code>:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>,</span>
+<span>  type <span class="op">=</span> <span class="st">"agreement"</span>, unit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"single"</span>, <span class="st">"average"</span>, <span class="fl">6</span><span class="op">)</span>, seed <span class="op">=</span> <span class="fl">1</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; ── <span style="font-weight: bold;">Intraclass correlation: two-way random, absolute agreement</span> ──────────────────</span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">  index     estimate   95% CI</span></span></span>
+<span><span class="co">#&gt;   ICC(A,1)  <span style="font-weight: bold;">   0.290</span>   <span style="font-weight: 100;">[0.050, 0.706]</span></span></span>
+<span><span class="co">#&gt;   ICC(A,k)  <span style="font-weight: bold;">   0.620</span>   <span style="font-weight: 100;">[0.175, 0.906]</span></span></span>
+<span><span class="co">#&gt;   ICC(A,6)  <span style="font-weight: bold;">   0.710</span>   <span style="font-weight: 100;">[0.241, 0.935]</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Variance components: subject 2.556, rater 5.244, residual 1.019</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)</span></span></span></code></pre></div>
+<p>The extra row is labeled <code>ICC(A,6)</code>, and it is the same
+quantity <code><a href="../reference/d_study.html">d_study()</a></code> projects: the <code>m = 6</code> row of
+<code>proj</code> above carries the same estimate. The <em>interval</em>
+matches too, but only because both calls pass the same <code>seed</code>
+— the interval is Monte-Carlo, so two unseeded runs of the same
+projection agree on the estimate and differ in the last digits of the
+endpoints. Which one you reach for is a matter of shape, not of
+arithmetic: <code>unit</code> adds a row to a coefficient table,
+<code><a href="../reference/d_study.html">d_study()</a></code> returns a projection object you can
+<code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code>, <code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code> and plot.</p>
+<p><strong>Fixed raters cannot be projected to absolute
+agreement.</strong> The rater term for <a href="glossary.html#fixed-vs--random-raters"><em>fixed</em> raters</a>
+is the variance of exactly the raters you observed, so there is no wider
+pool for a hypothetical sixth rater to be drawn from, and
+<code><a href="../reference/icc.html">icc()</a></code> refuses rather than returning a number:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>,</span>
+<span>  type <span class="op">=</span> <span class="st">"agreement"</span>, raters <span class="op">=</span> <span class="st">"fixed"</span>, unit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"single"</span>, <span class="st">"average"</span>, <span class="fl">6</span><span class="op">)</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">1</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `icc()`:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Projecting absolute agreement to a different number of raters is not</span></span>
+<span><span class="co">#&gt;   defined for <span style="color: #0000BB;">"fixed"</span> raters.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> With fixed raters the rater term is the finite-population variance of exactly</span></span>
+<span><span class="co">#&gt;   the raters you observed, so there is no 'average of m freshly sampled raters'</span></span>
+<span><span class="co">#&gt;   to project to.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Use `raters = "random"` to project absolute agreement, or `type =</span></span>
+<span><span class="co">#&gt;   "consistency"` for a fixed-rater D-study.</span></span></code></pre></div>
+<p>Consistency has no such problem — the rater term drops out of it —
+which is why the two remedies the message names are to project with
+<code>raters = "random"</code>, or to ask for a fixed-rater
+<code>type = "consistency"</code> projection instead. The refusal is
+raised only when absolute agreement is <em>all</em> you asked for: a
+default <code><a href="../reference/icc.html">icc()</a></code> call reports both error definitions, and
+there the consistency projection is kept and you are told the agreement
+one was dropped.</p>
 <p><strong>Projection is extrapolation.</strong> The rater variance
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>σ</mi><mi>r</mi><mn>2</mn></msubsup><annotation encoding="application/x-tex">\sigma^2_r</annotation></semantics></math>
 is estimated from only as many raters as you observed, so projecting far
 beyond that design leans hard on that estimate. The Monte-Carlo interval
 widens honestly to reflect this rather than pretending to a precision it
-lacks — and projecting absolute agreement is refused for <a href="glossary.html#fixed-vs.-random-raters"><em>fixed</em> raters</a>,
+lacks — and projecting absolute agreement is refused for <a href="glossary.html#fixed-vs--random-raters"><em>fixed</em> raters</a>,
 where there is no wider rater universe to generalize to (use
 <code>raters = "random"</code>). The <a href="multilevel-designs.html#how-many-raters-a-multilevel-d-study">D-study
 also works on a multilevel fit</a>, projecting the rater count at each
 level.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="within-cell-replicates-interaction-vs--pure-error">Within-cell replicates: interaction vs. pure error<a class="anchor" aria-label="anchor" href="#within-cell-replicates-interaction-vs--pure-error"></a>
@@ -205,7 +263,7 @@ subject high or low — a <em>stable</em> disagreement?) and <strong>pure
 error</strong> (how much a rater’s repeat ratings of the same subject
 wobble). <code><a href="../reference/icc.html">icc()</a></code> detects the replicates and fits the
 interaction model automatically:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2025</span><span class="op">)</span></span>
 <span><span class="va">ns</span> <span class="op">&lt;-</span> <span class="fl">20</span></span>
 <span><span class="va">nr</span> <span class="op">&lt;-</span> <span class="fl">4</span></span>
@@ -262,7 +320,7 @@ multilevel-by-ragged corners.</p>
 asking “how reliable would each rater’s mean of <code>n_o</code> ratings
 be?”. Supply exactly one axis per call (<code>m</code>
 <strong>or</strong> <code>n_o</code>).</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_rep</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">reps</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, type <span class="op">=</span> <span class="st">"agreement"</span>, occasions <span class="op">=</span> <span class="st">"average"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/d_study.html">d_study</a></span><span class="op">(</span><span class="va">fit_rep</span>, n_o <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # D-study projection: two-way random, absolute agreement</span></span>
@@ -305,7 +363,7 @@ can never disagree with the printed table. They need
 plot</strong> — each ICC index as a point estimate with its Monte-Carlo
 interval. Reusing the two-way <code>ratings</code> fit from the D-study
 section above:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span> <span class="co"># `fit &lt;- icc(ratings, score, subject, rater, type = "agreement", seed = 1)`</span></span></code></pre></div>
 <p><img src="d-studies-and-replicates_files/figure-html/plot-coef-1.png" class="r-plt" alt="Forest plot of ICC(A,1) and ICC(A,k) for the ratings data, each a point estimate with a horizontal Monte-Carlo interval, ICC(A,k) higher than ICC(A,1), and its interval slightly wider." width="700"></p>
@@ -315,7 +373,7 @@ from. It makes plain <em>why</em> absolute agreement is so much lower
 than the averaged coefficient on <code>ratings</code>: the
 <strong>rater</strong> component is large, and only absolute agreement
 counts between-rater differences as error:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">fit</span>, what <span class="op">=</span> <span class="st">"components"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="d-studies-and-replicates_files/figure-html/plot-comp-1.png" class="r-plt" alt="Bar chart of the estimated variance components for the ratings fit: subject, rater, and residual, with the rater component the largest." width="700"></p>
 <p>For a <strong>multilevel</strong> fit the forest plot facets by level

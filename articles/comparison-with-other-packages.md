@@ -201,7 +201,7 @@ excellent at what it was designed for.
 | Incomplete / unbalanced data | — | — | ✅ | ✅ |
 | Multilevel (subject **and** cluster) IRR | — | — | — | ✅ |
 | Boundary-aware interval | — | — | partial | ✅ |
-| [Fixed vs. random](https://jmgirard.github.io/intraclass/articles/glossary.html#fixed-vs.-random-raters) rater framing | partial | partial | — | ✅ |
+| [Fixed vs. random](https://jmgirard.github.io/intraclass/articles/glossary.html#fixed-vs--random-raters) rater framing | partial | partial | — | ✅ |
 | Guidance on *which* ICC to report | — | — | — | ✅ |
 
 Two rows deserve a word. Model-based extractors such as

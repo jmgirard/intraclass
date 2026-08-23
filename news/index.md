@@ -407,6 +407,29 @@
 
 ### Documentation
 
+- The *Multilevel designs* article now **runs** the `design` argument
+  instead of only naming it. The same simulated classroom table is
+  fitted three ways — the crossed reading
+  [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
+  infers from the reused rater labels, then
+  `design = "nested_in_clusters"` and `design = "nested_in_subjects"` —
+  so the three different answers, and the fact that only you know which
+  is right, are visible on the page. The article had said you reach for
+  `design` when missing cells make the crossing pattern ambiguous; it
+  also settles what repeated rater labels mean on complete data, which
+  is what
+  [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)’s
+  own message recommends it for, and the article now says so.
+
+- The *D-studies and within-cell replicates* article now runs the
+  numeric `unit` projection it previously mentioned only in passing,
+  showing the `ICC(A,6)` row it adds to a coefficient table and that the
+  row matches
+  [`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)
+  at `m = 6` in both estimate and interval. Beside it the article shows
+  the error raised when absolute agreement is projected for fixed
+  raters, and the two remedies that message names.
+
 - The [`?icc`](https://jmgirard.github.io/intraclass/reference/icc.md),
   [`?d_study`](https://jmgirard.github.io/intraclass/reference/d_study.md),
   and
