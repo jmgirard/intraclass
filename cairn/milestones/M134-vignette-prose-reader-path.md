@@ -1,11 +1,11 @@
 # M134: Vignette prose pass — the reader path, and the house style standard
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
-- **Branch/PR:** —
+- **Branch/PR:** `m134-vignette-prose-reader-path`
 
 ## Goal
 
@@ -33,10 +33,14 @@ stating rules R1–R6:
 - **R5 semicolons** — no semicolon joining clauses that could be two sentences (judgment, not gated).
 - **R6 meaning is fixed** — a rewrite never widens or narrows a claim's scope (M72/M128).
 
-Baseline over `vignettes/*.Rmd` at `72f9cc2`, measured 2026-08-23 by
-`python3 data-raw/prose-profile.py 'vignettes/*.Rmd'`: 594 sentences, 121 over
-35 words, 287 dash occurrences, 195 long parentheticals, 56 semicolons. The
-three in-scope files hold 313 of those sentences, 33 over 35 words, 99 dashes.
+Baseline over `vignettes/*.Rmd` at `72f9cc2`, measured 2026-08-23 by the
+committed ruler `python3 data-raw/prose-profile.py 'vignettes/*.Rmd'`: 744
+sentence-level fragments, 81 over 35 words, 226 dash-as-punctuation
+occurrences, 11 parentheticals over 15 words, 55 semicolons. The three
+in-scope files hold 358 of those fragments, 20 over 35 words, 66 dashes. The
+figures this milestone was planned with (594 / 121 / 287 / 195 / 56) came from
+a throwaway ruler that was never committed and cannot be re-run; the committed
+ruler's reading of the same commit supersedes them.
 
 **Out:** the five method articles → M135. Roxygen and `README.Rmd` → M136.
 `cli` abort and hint strings in `R/abort.R`/`R/boundary-hint.R` → stay a
@@ -75,13 +79,13 @@ refused, D-021 stands.
 
 ## Tasks
 
-- [ ] T1 Write `data-raw/prose-profile.py` (drops fenced chunks in `.Rmd`, reads
+- [x] T1 Write `data-raw/prose-profile.py` (drops fenced chunks in `.Rmd`, reads
       only `#'` lines outside `@examples` in `.R`, implements R1's exclusions),
       run it at `72f9cc2`, and record the baseline table in Scope.
 - [ ] T2 Write `cairn/doctrine/prose-style.md` with R1–R6.
 - [ ] T3 Rewrite `vignettes/getting-started.Rmd` against R1–R6.
 - [ ] T4 Rewrite `vignettes/choosing-an-icc.Rmd` against R1–R6.
-- [ ] T5 Rewrite `vignettes/glossary.Rmd` against R1–R6 (158 sentences, the
+- [ ] T5 Rewrite `vignettes/glossary.Rmd` against R1–R6 (167 fragments, the
       longest file; its one-sentence definitions are the R2 stress case).
 - [ ] T6 Run the AC4 grep over added and removed diff lines; for each hunk it
       returns, compare the added claim's domain against the removed one and
@@ -94,6 +98,9 @@ refused, D-021 stands.
 - 2026-08-23: plan-gate criteria audit ran in FULL mode ([O] fresh-context reader, all three milestones user-facing tier) and returned 13 findings, no criterion passing all six questions. Ten fixed here before writing: F1 (dash class unreachable at literal 0 — R1 exclusions defined), F2 (hand-listed R files → glob, M136), F3 (missing live MPL-checker AC, M136), F4 (`--self-test` is an instrument property → live mode), F5 (grep missed qualifier-deletion widening → added+removed lines, promise restated over hunks), F7 (AC3 unfalsifiable → R1–R6 enumerated in Scope; before/after examples moved to the PR body), F9 (AC1 was ruler-self-consistency → byte-identity of the ruler), F10 (`.R` mode scope undefined → `#'` outside `@examples`), F12 (M135 "re-triaged" undefined), F13 (M136 "in sync" → `git diff --exit-code`). Three posed at the gate: F8 (no target for parentheticals/semicolons), F11 (M136 AC2 requires a meaning change), audit note 2 (`cli` strings uncovered).
 - 2026-08-23: plan gate chose three milestones split by article family over one all-vignettes milestone because M135's files carry five separate prose guards that one review would have to fence at once; falsified by a review that finds the three-way split forced the same edit to be re-argued across milestones.
 - 2026-08-23: plan gate chose measured targets for R1/R2 only over numeric targets on all four trope classes because a zero target on parentheticals and semicolons has no non-arbitrary threshold and would fight readability; falsified by a post-pass read finding stacked parentheticals substantially unreduced.
+- 2026-08-23: T1 — `data-raw/prose-profile.py` committed and run at `72f9cc2`; the ruler is frozen from this commit (AC1's byte-identity clock starts here).
+- 2026-08-23: implement gate chose the committed ruler's baseline over the plan's recorded figures because the planned figures came from an uncommitted throwaway ruler that cannot be re-run; Scope amended to 744 fragments / 81 over 35 / 226 dashes / 11 long parentheticals / 55 semicolons over `vignettes/*.Rmd`, the three in-scope files holding 358 / 20 / 66. Falsified by the committed ruler needing a correction that changes these figures mid-pass.
+- 2026-08-23: implement gate chose counting headings and table cells as prose over body paragraphs only, so AC2's zero covers every surface a reader sees; T5's stale sentence figure corrected to the new ruler's 167 fragments.
 
 ## Decisions
 
