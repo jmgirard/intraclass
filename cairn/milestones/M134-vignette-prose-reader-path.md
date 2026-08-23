@@ -83,7 +83,7 @@ refused, D-021 stands.
       only `#'` lines outside `@examples` in `.R`, implements R1's exclusions),
       run it at `72f9cc2`, and record the baseline table in Scope.
 - [x] T2 Write `cairn/doctrine/prose-style.md` with R1–R6.
-- [ ] T3 Rewrite `vignettes/getting-started.Rmd` against R1–R6.
+- [x] T3 Rewrite `vignettes/getting-started.Rmd` against R1–R6.
 - [ ] T4 Rewrite `vignettes/choosing-an-icc.Rmd` against R1–R6.
 - [ ] T5 Rewrite `vignettes/glossary.Rmd` against R1–R6 (167 fragments, the
       longest file; its one-sentence definitions are the R2 stress case).
@@ -102,6 +102,7 @@ refused, D-021 stands.
 - 2026-08-23: implement gate chose the committed ruler's baseline over the plan's recorded figures because the planned figures came from an uncommitted throwaway ruler that cannot be re-run; Scope amended to 744 fragments / 81 over 35 / 226 dashes / 11 long parentheticals / 55 semicolons over `vignettes/*.Rmd`, the three in-scope files holding 358 / 20 / 66. Falsified by the committed ruler needing a correction that changes these figures mid-pass.
 - 2026-08-23: implement gate chose counting headings and table cells as prose over body paragraphs only, so AC2's zero covers every surface a reader sees; T5's stale sentence figure corrected to the new ruler's 167 fragments.
 - 2026-08-23: T2 — `cairn/doctrine/prose-style.md` written: R1–R6 verbatim from Scope, the ruler's prose boundary, the five-step pass procedure, and a stated budget of 120 lines / 8,000 bytes (at 97 / 5,162).
+- 2026-08-23: T3 — `getting-started.Rmd` rewritten; ruler now reports 0 dashes, 0 sentences over 35 (longest 32), against 18 dashes and 6 long sentences (longest 53) at baseline. Semicolons 1 → 0, long parentheticals 3 → 2.
 
 ## Decisions
 
