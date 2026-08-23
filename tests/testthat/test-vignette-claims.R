@@ -1593,19 +1593,19 @@ test_that("interval-methods.Rmd: at zero between-subject variance `\"burch\"` ab
   expect_identical(avg$conf.high, -Inf)
 })
 
-test_that("interval-methods.Rmd: the `\"mpl\"` fences are the ones the article names", {
-  skip_if_not_installed("glmmTMB")
-
-  # Article lines 257-275, run on the article's own simulated design (the
-  # `ci-mpl` chunk's data, rebuilt at its seed -- `ratings` is too small for
-  # the calibration grid).
+# The article's own `ci-mpl` chunk data, rebuilt at its seed (`ratings` is too
+# small for the MPL calibration grid). Shared by every test that needs it --
+# one construction, so a change to the article's simulation cannot leave a copy
+# stale in one test while another still passes. Callers that need the rater
+# count read it off the frame rather than restating the 4.
+vc_mpl_sim <- function() {
   set.seed(88)
   n_s <- 20
   n_r <- 4
   subj_eff <- rnorm(n_s, sd = sqrt(0.6))
   rater_eff <- rnorm(n_r, sd = sqrt(0.1))
   noise <- matrix(rnorm(n_s * n_r, sd = sqrt(0.2)), n_s, n_r)
-  sim <- data.frame(
+  data.frame(
     subject = factor(rep(seq_len(n_s), times = n_r)),
     rater = factor(rep(seq_len(n_r), each = n_s)),
     score = as.numeric(
@@ -1614,6 +1614,17 @@ test_that("interval-methods.Rmd: the `\"mpl\"` fences are the ones the article n
         noise
     )
   )
+}
+
+test_that("interval-methods.Rmd: the `\"mpl\"` fences are the ones the article names", {
+  skip_if_not_installed("glmmTMB")
+
+  # Article lines 257-275, run on the article's own simulated design (the
+  # `ci-mpl` chunk's data, rebuilt at its seed -- `ratings` is too small for
+  # the calibration grid). One shared builder, so this test and the
+  # trustworthiness-table tests below cannot drift apart (M133 review, B2).
+  sim <- vc_mpl_sim()
+  n_r <- nlevels(sim$rater)
 
   # On the fence: balanced, complete, two-way random absolute agreement.
   ml <- tidy(icc(
@@ -2062,33 +2073,15 @@ test_that("interval-methods.Rmd: the third grid's shipped fixture states both co
 # return an interval, and one outside it, asserted to raise the classed abort.
 #
 # Failure identity (tracking-rules): each refused call is pinned to the message
-# of the fence it is meant to fire, AND differs from a call asserted to succeed
-# in exactly the one attribute that fence names -- so a refusal arriving from
-# some other guard cannot be read as the fence under test. Where a fence's
-# message is generic (the lavaan bootstrap's), the one-attribute contrast is the
-# whole of the identification, which is why that row carries its own control
+# of the fence it is meant to fire, so a refusal arriving from some other guard
+# cannot be read as the fence under test. Each also differs from a call
+# asserted to succeed in exactly the one attribute that fence names; that
+# contrast is what the `differs` field records. The field is documentation read
+# back in `info=` on failure -- the pinned message is what enforces identity --
+# except for the lavaan bootstrap, whose message is generic ("not yet available
+# for this design/engine combination") and shared by its three fences. There the
+# contrast IS the identification, which is why that row carries its own control
 # call rather than borrowing another row's.
-
-# The article's own `ci-mpl` data, rebuilt at its seed (`ratings` is too small
-# for the MPL calibration grid). Same construction as the `"mpl"` fences test
-# above; kept local to each test rather than shared, the file's convention.
-vc_mpl_sim <- function() {
-  set.seed(88)
-  n_s <- 20
-  n_r <- 4
-  subj_eff <- rnorm(n_s, sd = sqrt(0.6))
-  rater_eff <- rnorm(n_r, sd = sqrt(0.1))
-  noise <- matrix(rnorm(n_s * n_r, sd = sqrt(0.2)), n_s, n_r)
-  data.frame(
-    subject = factor(rep(seq_len(n_s), times = n_r)),
-    rater = factor(rep(seq_len(n_r), each = n_s)),
-    score = as.numeric(
-      outer(subj_eff, rep(1, n_r)) +
-        outer(rep(1, n_s), rater_eff) +
-        noise
-    )
-  )
-}
 
 test_that("interval-methods.Rmd: the table's supported cell returns an interval, every frequentist row", {
   skip_if_not_installed("glmmTMB")
@@ -2199,8 +2192,26 @@ test_that("interval-methods.Rmd: the table's supported cell returns an interval,
       }
     )
   )
-  # Anti-vacuity: an empty list would pass every assertion below for free.
-  expect_identical(length(supported), 7L)
+  # Anti-vacuity by NAME, not by count: a bare length check passes on any seven
+  # entries, and this list's seven are six rows plus a control. Ask the
+  # validator for the accepted set -- the same enumerator the sibling test uses
+  # -- and require every value to have a supported call here, the Bayesian row
+  # excepted because its call is a live brms fit in its own test above.
+  msg <- tryCatch(
+    icc(ratings, score, subject, rater, ci_method = "not-a-method", seed = 1),
+    error = conditionMessage
+  )
+  all_methods <- gsub(
+    '"',
+    "",
+    regmatches(msg, gregexpr('"[^"]+"', msg))[[1]],
+    fixed = TRUE
+  )
+  expect_gt(length(all_methods), 0L)
+  expect_setequal(
+    setdiff(names(supported), "bootstrap (lavaan control)"),
+    setdiff(all_methods, "posterior")
+  )
 
   for (nm in names(supported)) {
     row <- supported[[nm]]
@@ -2211,8 +2222,13 @@ test_that("interval-methods.Rmd: the table's supported cell returns an interval,
     # An interval, not a degenerate point: the reported estimate lies inside it.
     expect_true(all(td$conf.low <= td$estimate), info = nm)
     expect_true(all(td$estimate <= td$conf.high), info = nm)
-    # The coefficient family the row's supported cell names.
-    expect_setequal(td$index, row$indices)
+    # The coefficient family the row's supported cell names. `expect_setequal()`
+    # takes no `info`, so this is the labelled form -- a failure has to name
+    # which row moved, and what it returned instead.
+    expect_true(
+      setequal(td$index, row$indices),
+      info = paste0(nm, " -- got: ", paste(td$index, collapse = ", "))
+    )
     # The method the table's row names is the method that produced the interval
     # -- a silent fallback to the Monte-Carlo default would make the row false.
     expect_true(all(td$method == row$method), info = nm)
@@ -2352,8 +2368,21 @@ test_that("interval-methods.Rmd: the table's refused cell aborts classed, every 
       differs = "type"
     )
   )
-  # Anti-vacuity, as above: one row per `ci_method` value, none skipped.
-  expect_identical(length(refused), 7L)
+  # Anti-vacuity by NAME, as in the supported test: every accepted `ci_method`
+  # value has a refused call here, none skipped. A bare count would pass on any
+  # seven entries.
+  msg <- tryCatch(
+    icc(ratings, score, subject, rater, ci_method = "not-a-method", seed = 1),
+    error = conditionMessage
+  )
+  all_methods <- gsub(
+    '"',
+    "",
+    regmatches(msg, gregexpr('"[^"]+"', msg))[[1]],
+    fixed = TRUE
+  )
+  expect_gt(length(all_methods), 0L)
+  expect_setequal(names(refused), all_methods)
 
   for (nm in names(refused)) {
     expect_error(
@@ -2363,4 +2392,84 @@ test_that("interval-methods.Rmd: the table's refused cell aborts classed, every 
       info = paste(nm, "-- differs in", refused[[nm]]$differs)
     )
   }
+})
+
+test_that("interval-methods.Rmd: the table's extra cell claims each run", {
+  skip_if_not_installed("glmmTMB")
+  skip_on_cran()
+
+  # Three rows name more than one thing in a cell, and the paired-call tests
+  # above run only one call per side. These are the remainders (M133 review,
+  # findings 3 and 9), each asserted on the surface rather than left as prose.
+  sim <- vc_mpl_sim()
+
+  # `"npbootstrap"` row: a numeric `unit` projection is supported on BALANCED
+  # one-way data and refused on unbalanced, which is the pair the cell names.
+  # `ratings` is balanced and `ratings_incomplete` is not (asserted in the
+  # refused test above), so the two calls differ in that attribute alone.
+  np2 <- tidy(icc(
+    ratings,
+    score,
+    subject,
+    rater,
+    model = "oneway",
+    ci_method = "npbootstrap",
+    unit = 2,
+    boot_samples = 99,
+    seed = 1
+  ))
+  expect_setequal(np2$index, "ICC(2)")
+  expect_true(all(np2$method == "npbootstrap"))
+  expect_false(any(is.na(np2$conf.low)))
+  expect_error(
+    icc(
+      ratings_incomplete,
+      score,
+      subject,
+      rater,
+      model = "oneway",
+      ci_method = "npbootstrap",
+      unit = 2,
+      boot_samples = 99,
+      seed = 1
+    ),
+    regexp = "supports .*unit = .single",
+    class = "intraclass_unsupported"
+  )
+
+  # `"mpl"` row: "and any numeric `unit` projection of them". The sibling
+  # `"mpl"` fences test checks this projection against its Spearman-Brown
+  # image; here the claim under test is only that the cell's supported list is
+  # reachable -- the projection returns an interval by the row's own method.
+  m7 <- tidy(icc(
+    sim,
+    score,
+    subject,
+    rater,
+    type = "agreement",
+    ci_method = "mpl",
+    unit = c("single", "average", 7)
+  ))
+  expect_setequal(m7$index, c("ICC(A,1)", "ICC(A,k)", "ICC(A,7)"))
+  expect_true(all(m7$method == "mpl"))
+  expect_false(any(is.na(m7$conf.low)))
+
+  # `"montecarlo"` row: the refusal on a `"brms"` fit is EXPLICIT-only -- an
+  # unset `ci_method` selects `"posterior"` there instead of refusing. The
+  # coupling is asserted in `test-icc-brms.R` ("engine = \"brms\" forces
+  # ci_method = \"posterior\" by default"), which observes it before any fit and
+  # so needs no Stan toolchain; not duplicated here. What this leg pins is the
+  # other half the cell asserts: that the refusal needs the explicit value.
+  expect_error(
+    icc(
+      ratings,
+      score,
+      subject,
+      rater,
+      engine = "brms",
+      ci_method = "montecarlo"
+    ),
+    regexp = "requires `ci_method = \"posterior\"`",
+    class = "intraclass_unsupported"
+  )
 })
