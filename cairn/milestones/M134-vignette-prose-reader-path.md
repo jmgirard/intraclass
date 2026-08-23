@@ -1,6 +1,6 @@
 # M134: Vignette prose pass — the reader path, and the house style standard
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -51,7 +51,7 @@ refused, D-021 stands.
 
 ## Acceptance criteria
 
-- [x] AC1 `data-raw/prose-profile.py` is committed, implements R1's counted
+- [ ] AC1 `data-raw/prose-profile.py` is committed, implements R1's counted
       class and R2's sentence rule as `cairn/doctrine/prose-style.md` defines
       them, counts `#'` lines outside `@examples` in `.R` mode, and is
       byte-identical between its baseline run at `72f9cc2` and its final run.
@@ -75,7 +75,7 @@ refused, D-021 stands.
       removed lines match `\b(any|each|every|all|only|both|exactly|never|always|full)\b`,
       the added text's claim domain is equal to or narrower than the text it
       replaced.
-- [ ] AC5 `devtools::test()` clean; `devtools::check()` raw `Status:` line 0
+- [x] AC5 `devtools::test()` clean; `devtools::check()` raw `Status:` line 0
       errors / 0 warnings (NOTEs justified); `devtools::document()` no diff;
       `python3 data-raw/check-record-claims.py` exits 0 in live mode.
 
@@ -137,6 +137,9 @@ refused, D-021 stands.
 
 - 2026-08-23: T10 — verify block re-run on the repaired branch. `devtools::document()` no diff (clean `git status` after); `devtools::test()` FAIL 0 | WARN 3 | SKIP 2 | PASS 8862; `devtools::check(document = FALSE)` raw `Status: 1 NOTE`, 0 errors / 0 warnings, vignettes re-built OK. The NOTE is the `spelling.Rout` comparison and is pre-existing: `spelling::spell_check_package()` flags 31 words on this branch, the same count recorded at `72f9cc2` and at T7, all proper names and en-GB spellings absent from `inst/WORDLIST`. `python3 data-raw/check-record-claims.py --live` exit 0 (6 claims, 0 failures) and `pkgdown::check_pkgdown()` clean, both re-run at T9. All tasks checked; status → review.
 
+- 2026-08-23: review second pass — `main` still unmoved (0 behind / 13 ahead), PR #143 refreshed. AC2, AC3, AC4, AC5 verified with fresh evidence at HEAD and ticked; the `72f9cc2` baseline reproduces exactly (744 / 81 / 226 / 11 / 55) under the corrected ruler; `cairn_validate` exit 0; `devtools::test()` FAIL 0 | PASS 8862; `devtools::check()` `Status: 1 NOTE` (pre-existing spelling, 31 words, unchanged from baseline). Full three-lens fan-out re-run: both `[S]` lenses clean, `[O]` returned ten findings.
+- 2026-08-23: amendment return: AC1 — "implements R1's counted class and R2's sentence rule as `cairn/doctrine/prose-style.md` defines them". The doctrine's R1 excludes "dashes joining capitalized proper nouns", which no procedure over the domain can decide; the ruler's decidable approximation (both flanking words capitalized) is a strictly larger exclusion, reproduced at review on a probe file where 2 of 4 genuine sentence-level breaks went uncounted. AC1 unticked. First amendment return on this milestone; the defect-return count stays at 1. Findings 3, 4, 5 and 6-10 recorded in the Review section for the maintainer at the step-6 gate.
+
 ## Decisions
 
 **2026-08-23 — the glossary keeps one over-35-word sentence rather than the test
@@ -152,6 +155,8 @@ the harness being relaxed for another reason — at which point AC2's target for
 `glossary.Rmd` returns to 0.
 
 ## Review
+
+### First pass — returned to `in-progress`
 
 Reviewed 2026-08-23 on `m134-vignette-prose-reader-path` at PR #143. Default
 branch `main` had not moved since the branch was cut (`origin/main` = `3652665`,
@@ -295,3 +300,232 @@ non-zero dashes in the three files, which would reopen T3–T5.
 
 Findings 2–9 carry no status change of their own and go to the maintainer for
 triage; they are listed above so none is silently dropped.
+
+### Second pass
+
+Reviewed 2026-08-23 on `m134-vignette-prose-reader-path` at PR #143, after the
+T8–T10 repairs. `git fetch` then `git rev-list --left-right --count
+origin/main...HEAD` reports 0 behind / 13 ahead, so `main` has still not moved
+since the branch was cut and no merge was needed before gathering evidence.
+
+#### Acceptance criteria
+
+- **AC1 — FAIL (second clause passes, first does not).** `data-raw/prose-profile.py` now has two commits (`96b78b4` T1,
+  `14e7dce` T8); `git diff 14e7dce -- data-raw/prose-profile.py` is 0 bytes, so
+  the file has not moved since the T8 re-baseline. The `72f9cc2` baseline was
+  re-run at review with those same bytes over the eight `vignettes/*.Rmd` blobs
+  extracted from that commit: 744 fragments / 81 over 35 / 226 dashes / 11 long
+  parentheticals / 55 semicolons, the three in-scope files holding 358 / 20 / 66
+  — reproducing the Scope table exactly, so the baseline run and the final run
+  use identical bytes. Read against `cairn/doctrine/prose-style.md`: `RE_DASH`
+  matches `---`/em dash/`--` longest-first; `count_dashes()` skips digit-flanked
+  dashes and skips a proper-noun join only when the word left of the dash **and**
+  the character right of it are both capitalized; `strip_rmd()` drops YAML front
+  matter and table rule rows; `SENTENCE_LIMIT` is 35, counted strictly greater;
+  `strip_roxygen()` keeps `#'` lines and suppresses each `@examples` block until
+  the next `#' @` tag. **What fails is the "implements R1's counted class … as
+  `cairn/doctrine/prose-style.md` defines them" clause.** The doctrine excludes
+  "dashes joining capitalized proper nouns"; the code excludes any dash whose
+  flanking words are both capitalized, which is a strictly larger class.
+  Reproduced at review on a five-sentence probe file: of four genuine
+  sentence-level breaks the ruler counted two — `Reliability—And nothing else…`
+  and the opening dash of `An ICC—Intraclass correlation—is the topic.` were
+  both silently excluded, because a sentence-initial capital and a capitalized
+  acronym are indistinguishable to the test from `Spearman--Brown`. The three
+  in-scope files are unaffected (their only capital-flanked dashes are
+  `Spearman--Brown`, `McGraw--Wong`, `Shrout--Fleiss`), so AC2's zeros stand.
+  See the Outcome below: this routes as an **amendment return**, not a defect
+  return.
+- **AC2 — pass.** Ruler re-run per file at review: `getting-started.Rmd` 0 dashes,
+  0 over 35 (longest 32); `choosing-an-icc.Rmd` 0 dashes, 0 over 35 (longest 35);
+  `glossary.Rmd` 0 dashes, 1 over 35 (64 words). The one long sentence is body
+  prose in the **Burch interval** entry. The 58-word clause `residual_template()`
+  returns is present in `glossary.Rmd` verbatim once wrapping is joined (matched
+  by exact substring at review, with the rendered `1.2963` / `100` cells in
+  place), and 64 − 58 = 6 ≤ 8.
+- **AC3 — pass.** `cairn/doctrine/prose-style.md` exists (97 lines, 5,162 bytes,
+  inside its own stated 120-line / 8,000-byte budget) and states R1–R6 with
+  wording matching the Scope list, R1's four exclusions and R2's 35-word limit
+  included.
+- **AC4 — pass.** `git diff 72f9cc2 -- <the three files>` is 33 hunks; the
+  qualifier grep over added **and** removed lines matches 46 lines across 14
+  hunks (up from 42 lines at the first pass — the T9 repairs added text carrying
+  the scope words). Each of the 14 was read added-against-removed: all EQUAL
+  domain, every match a dash, semicolon, or parenthesis converted to a sentence
+  break with the quantified claim carried over. The three claims the first pass
+  flagged were re-checked in particular and each now reads at or inside its
+  original domain: `getting-started.Rmd` says "the default interval does not rely
+  on a textbook formula that misbehaves when a variance is near zero" (the
+  default, with the restrictive clause intact); `choose_icc()` reads "does not fit
+  anything, and it takes no `data` argument" with no causal claim; the **Burch
+  interval** entry keeps "on the two grids this package has measured that vary
+  only the subject effect" attached to its narrowness claim.
+- **AC5 — pass.** `devtools::test()` FAIL 0 | WARN 3 | SKIP 2 | PASS 8862.
+  `devtools::check(document = FALSE)` raw `Status: 1 NOTE`, 0 errors / 0
+  warnings; zero `* checking …` lines report WARNING or ERROR, and vignettes
+  re-built OK in 22s. The NOTE is the `tests/spelling.Rout` comparison and is
+  pre-existing: `spelling::spell_check_package()` returns 31 words on this
+  branch, the same count recorded at `72f9cc2`, and every one is a proper name
+  (Chinn, Davison, Gulliford, Liu, Ohyama, Okabe, Searle, Ukoumunne, Xiao) or an
+  en-GB spelling absent from `inst/WORDLIST`; none is a word this milestone
+  introduced. `devtools::document()` produced no diff (only the milestone file
+  this review edits is modified). `python3 data-raw/check-record-claims.py
+  --live` exit 0, 6 claims re-derived, 0 failures.
+
+#### Consistency gate
+
+- `cairn_validate.py` exit 0 — 16 PASS, 7 advisory OK, no FAIL. `coverage
+  complete` and `binding criteria` both pass.
+- `cairn_impact.py` skipped: `Principles touched: —`, no DESIGN principle changed.
+- Toolchain checks (`r-package` profile's `consistency-gate` slot):
+  `devtools::document()` no diff; `NAMESPACE`, `man/`, `data/` untouched by the
+  branch diff; `README.Rmd`/`README.md` untouched; `pkgdown::check_pkgdown()`
+  reports "No problems found"; `NEWS.md` carries a Documentation entry for the
+  pass with no milestone number in it; no new top-level file (`data-raw/`
+  already carries `^data-raw$` in `.Rbuildignore`); `devtools::check()` as
+  recorded under AC5.
+
+#### Independent review
+
+Diff touches executable surface (`data-raw/prose-profile.py`) at a user-facing
+tier, so the full three-lens fan-out ran again on the repaired branch, each lens
+fresh-context and none having authored the work.
+
+**[S] blame-history — no defect findings.** Traced the branch's modified lines
+through `git log`/`git blame`. The scope-critical Burch passage in
+`glossary.Rmd` (the ICC 0.3 / ICC 0.6 / 5-rater / t(5) 1.2963 figures tied to
+M118 and D-030) is unchanged in substance between `main` and HEAD — punctuation
+and wrapping only. Confirmed M115's withdrawn-claim wording ("`"burch"`
+under-covers about as badly as the default") survives verbatim, the failure mode
+M115 itself was returned on. Ran `test-doc-skew-caveat.R` directly: 2344 pass, 0
+fail, 2 expected skips. One trivial note, no action: `prose-style.md` cites
+"M72/M128" for R6, and M128 is squarely on point (a prose polish there
+introduced a false "the interval widens accordingly" claim) while M72's link is
+looser.
+
+**[S] prior-review record — no findings.** The `gh api …/pulls/comments` probe
+returned `[]`, so no thread walk was paid for; archived `## Review` sections and
+`LESSONS.md` were the evidence base. Cleared M130's pkgdown-anchor lesson
+independently: the four re-punctuated glossary headings were rendered through
+`pandoc` before and after and all four anchor ids are byte-identical, and the
+one in-repo referrer (`glossary.html#effective-number-of-ratings-k_eff`, 2 uses)
+still resolves. Confirmed the first pass's directed repairs are present at HEAD.
+
+**[O] diff-bug — ten findings, ranked.** The lens re-derived the numbers rather
+than trusting the work log, and independently confirmed the baseline (744 / 81 /
+226 / 11 / 55; in-scope 358 / 20 / 66), AC2's 6 ≤ 8 arithmetic, the absence of
+any un-excluded dash form in the three files, and the line widths (0 / 1 / 5
+against 0 / 1 / 8).
+
+1. **The T8 repair is one class short: the ruler's exclusion is keyed on
+   capitalization, not on proper-noun-hood.** Verbatim: "Probed in the
+   scratchpad: `Reliability—And nothing else matters here.` scores 0, and
+   `An ICC—Intraclass correlation—is the topic.` scores 1 of its 2 breaks (the
+   `ICC—Intraclass` opener is excused, the closing `correlation—is` is caught) —
+   sentence-initial capitals and all-caps acronyms are exactly the tokens that
+   open sentences everywhere in this repo. It does not disturb this milestone's
+   numbers (at `72f9cc2` and at HEAD the only capital-flanked dashes in the three
+   files are `Spearman--Brown`, `McGraw--Wong`, `Shrout--Fleiss`), but AC1
+   promises the counted class the doctrine defines and this is the same failure
+   shape the first round returned on, one level down."
+   **Verified at review** on an independent probe file: 4 genuine breaks, 2
+   counted. **Disposition: the amendment return below.**
+2. **Two acceptance criteria are ticked `[x]` against evidence in `## Review`
+   that HEAD contradicts.** Verbatim: "AC1's recorded proof is 'exactly one
+   commit touching it (`96b78b4`, T1) … both blobs hash to `291d714e`' — false
+   since T8's `14e7dce` changed the bytes; AC4's proof quotes
+   `getting-started.Rmd` as keeping 'the textbook formulas *that misbehave when a
+   variance is near zero*', a string T9 replaced with 'the default interval does
+   not rely on a textbook formula that misbehaves…'. Neither criterion has fresh
+   evidence at HEAD, and AC5 is still unticked."
+   **Disposition: fixed by this pass.** The stale lines are now fenced under
+   `### First pass — returned to `in-progress``, where they are an accurate record
+   of what that pass measured, and every criterion carries fresh HEAD evidence
+   above.
+3. **`cairn/DESIGN.md`'s doctrine-module registry was not updated.** Verbatim:
+   "Lines 102–107 enumerate `doc-claim-pins.md`, `data-raw-checkers.md`, and
+   `source-ingestion.md` as the contents of `cairn/doctrine/`; D-033 makes that
+   list the registry and the branch adds a fourth page without touching it."
+   **Verified at review** — `cairn/DESIGN.md:102-107` lists three modules and
+   `prose-style.md` is not among them. **Disposition: maintainer's at re-review.**
+4. **R6 drift left in place, of the class T9 repaired elsewhere.** Verbatim:
+   "`vignettes/getting-started.Rmd`: 'the raters barely disagree --- the ratings
+   are highly reliable' became 'the raters barely disagree, **so** the ratings
+   are highly reliable', the same em-dash-to-causal-connective conversion T9
+   reverted at three other sites (glossary's estimand 'so'→'and',
+   choosing-an-icc's 'since', `choose_icc()`'s 'which is why'). The asserted
+   entailment is also false outside the sentence's frame — raters can agree
+   perfectly with the ICC at zero when subject variance vanishes, which the
+   glossary's own zero-variance-boundary entry describes."
+   **Verified at review** at `git diff 72f9cc2 -- vignettes/getting-started.Rmd`
+   lines 20–21. Outside AC4's domain (the line carries no word from AC4's list),
+   so it is not a criterion failure. **Disposition: maintainer's at re-review.**
+5. **R6 narrowing in `choosing-an-icc.Rmd`.** Verbatim: "'treats a systematic
+   difference between raters -- one judge scoring consistently higher than
+   another -- as error' became 'treats a systematic difference between raters as
+   error, **as when** one judge scores consistently higher than another': the
+   appositive was the definition of the difference, and 'as when' demotes it to
+   one illustrative case. R6 bars narrowing as well as widening."
+   **Verified at review** at that diff's lines 71–73. Outside AC4's domain.
+   **Disposition: maintainer's at re-review.**
+6. **The ruler mis-fragments a bullet list whose items carry no terminal
+   punctuation.** Verbatim: "Probed: an eight-item list collapses to a single
+   33-word fragment, so a long list reads as one overlong sentence (false R2
+   positive) and the fragment count under-reports. Nothing in `vignettes/` trips
+   it today, but `prose-style.md` specifies fragmentation for headings and table
+   cells and is silent on list items, so the behaviour is undocumented rather
+   than specified — and M135/M136 will run this instrument over list-bearing
+   files."
+7. **Two markdown constructs the R1 exclusion list does not reach produce false
+   dash hits.** Verbatim: "A pipe table whose separator row lacks a leading `|`
+   (valid pandoc, e.g. `-------- | --------`) scores 6 occurrences, and a `---`
+   thematic break scores 1. Neither exists in `vignettes/` now — every separator
+   row leads with `|` — but the ruler has no self-test, so this would surface as
+   an unexplained non-zero in a later pass."
+8. **R4's parenthetical counter matches only the innermost `\([^()]*\)`,**
+   verbatim: "so a long outer parenthetical wrapping a nested one is never
+   counted; the reported figure is a floor. R4 carries no target, so no criterion
+   is affected."
+9. **Doctrine/code order mismatch.** Verbatim: "`prose-style.md` states `.Rmd`
+   mode drops 'the YAML front matter, fenced code chunks, HTML comments' in that
+   order; `strip_rmd()` removes HTML comments before fences. Reachable only on a
+   chunk containing `<!--`, but AC1's promise is implementation-as-written."
+10. **`prose-style.md` was authored fresh rather than graduated from
+    `cairn/LESSONS.md`,** verbatim: "which is the route D-033 describes for a
+    `cairn/doctrine/` page, and no `D-0xx` entry records the new house standard —
+    the only decision written down is the local one in the milestone file about
+    the glossary's long sentence. A maintainer call, not a defect."
+
+Findings 6–10 disturb no criterion and are the maintainer's at re-review. The
+lens explicitly cleared four things so they are not re-raised: the `## In short`
+anchor move (accepted at the first gate, no in-repo referrer), the NEWS entry as
+now worded, `prose-profile.py`'s absence from the claim-pinned
+`data-raw-checker-inventory` globs, and `.R` mode's `@examples` suppression
+including the `y@slot` case.
+
+#### Outcome
+
+**Returned to `in-progress` as an amendment return on AC1.**
+
+Finding 1 demonstrates AC1's first clause failing, and it fails inside the
+domain of the procedure AC1 names. But the criterion, not the code, is what is
+wrong. AC1 (through the doctrine's R1) promises the ruler's counted class equals
+"every dash except those joining capitalized proper nouns", and *proper-noun-hood
+is not decidable by any procedure over that domain*: no test separates
+`Spearman--Brown` from `An ICC—Intraclass` without a hand-kept list of proper
+nouns, an enumeration whose membership is fixed by author recall. That is the
+widening test's trigger, so this routes as an amendment return rather than a
+second defect return, and it does not increment the defect-return count the
+thrash rule reads. The defect-return count stands at 1; this is amendment
+return 1 on AC1.
+
+The amendment to be gated at `/milestone-implement` step 6 restates R1's
+exclusion in terms the instrument can decide — the shape the ruler already
+implements, "dashes with no surrounding spaces joining two capitalized words" —
+in `cairn/doctrine/prose-style.md` **and** in the milestone's Scope, since AC3
+binds the two together. That is the amendment; whether findings 3, 4, 5 and
+6–10 are actioned in the same stint is the maintainer's call at that gate.
+
+Everything else passes: AC2, AC3, AC4 and AC5 all verified at HEAD, both
+`[S]` lenses clean, and the consistency gate green.
+
