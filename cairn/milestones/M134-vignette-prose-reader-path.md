@@ -85,7 +85,7 @@ refused, D-021 stands.
 - [x] T2 Write `cairn/doctrine/prose-style.md` with R1–R6.
 - [x] T3 Rewrite `vignettes/getting-started.Rmd` against R1–R6.
 - [x] T4 Rewrite `vignettes/choosing-an-icc.Rmd` against R1–R6.
-- [ ] T5 Rewrite `vignettes/glossary.Rmd` against R1–R6 (167 fragments, the
+- [x] T5 Rewrite `vignettes/glossary.Rmd` against R1–R6 (167 fragments, the
       longest file; its one-sentence definitions are the R2 stress case).
 - [ ] T6 Run the AC4 grep over added and removed diff lines; for each hunk it
       returns, compare the added claim's domain against the removed one and
@@ -104,6 +104,8 @@ refused, D-021 stands.
 - 2026-08-23: T2 — `cairn/doctrine/prose-style.md` written: R1–R6 verbatim from Scope, the ruler's prose boundary, the five-step pass procedure, and a stated budget of 120 lines / 8,000 bytes (at 97 / 5,162).
 - 2026-08-23: T3 — `getting-started.Rmd` rewritten; ruler now reports 0 dashes, 0 sentences over 35 (longest 32), against 18 dashes and 6 long sentences (longest 53) at baseline. Semicolons 1 → 0, long parentheticals 3 → 2.
 - 2026-08-23: T4 — `choosing-an-icc.Rmd` rewritten; ruler now reports 0 dashes, 0 sentences over 35 (longest 35), against 21 dashes and 3 long sentences (longest 49) at baseline. Semicolons 9 → 0, long parentheticals 2 → 0. The `## In one sentence` heading became `## In short`, since R2 forbids the one 49-word sentence it named; no cross-reference targets that anchor.
+- 2026-08-23: T5 — `glossary.Rmd` rewritten; ruler now reports 0 dashes (27 at baseline) and 1 sentence over 35 words (11 at baseline), semicolons 11 → 4, long parentheticals 0 → 0. The residue is irreducible: `tests/testthat/test-doc-skew-caveat.R`'s `residual_template()` requires a 58-word clause verbatim with no internal sentence-ending punctuation, so no split preserves it. AC2 amendment posed at a mini gate.
+- 2026-08-23: T5 — two first-pass splits broke the width pins (`test-doc-skew-caveat.R` failures at :1999 and :2359) by moving `burch` away from the width vocabulary in one sentence and capitalizing the residual clause's first word in the other; repaired by making the flat and parity clauses each their own hit sentence and restoring the lowercase clause after a colon. `devtools::test(filter = "doc-skew-caveat")` now clean, 2 pre-existing skips (vignettes not installed).
 
 ## Decisions
 
