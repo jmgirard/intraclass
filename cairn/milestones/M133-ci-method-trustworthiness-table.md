@@ -448,6 +448,19 @@ and none is a load-bearing defect in what the package computes — the five fixe
 were an inaccurate records line, three inaccurate comments, and a tracking-file
 evidence restoration. No return.
 
+#### Post-fix re-verification (branch tip f1a7a38)
+
+The five fix-now edits landed after the criteria evidence above was gathered, so
+the two mandated runs were repeated on the fixed tip. Suite at `NOT_CRAN=true
+CI=true`: 0 failures / 0 errors / **8599** passing / 26 skipped — one fewer than
+before, exactly the duplicated `montecarlo` assertion [O]2 removed. `R CMD check
+--as-cran --no-manual` on a fresh branch-tip tarball: raw `Status: OK`, matching
+main's under the same command on the same machine. `air format --check .` exit 0;
+`cairn_validate` exit 0; `check-record-claims.py` 6 claims / 0 failures;
+`enumerate-generalizing-claims.py --check` 367/367, 0 un-triaged, 0 orphan.
+Plants re-spot-checked against the post-fix file: control green in both modes,
+one plant per form still red.
+
 #### Outcome (round 3)
 
 All three amended criteria pass on fresh evidence; the consistency gate is
