@@ -2,7 +2,7 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M133: Tell users which interval method is trustworthy for their design
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate -->
 - **Depends on:** M130   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -88,7 +88,7 @@ ROADMAP candidates on their own promotion conditions.
 - [x] T3: Read each row's verification depth off `cairn/references/ORACLES.md`;
       draft the table and the caveat prose for every row below two oracles.
 - [x] T4: Planted-perturbation runs, three forms per row.
-- [ ] T5: Full gate-lite sweep.
+- [x] T5: Full gate-lite sweep.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
@@ -102,6 +102,7 @@ ROADMAP candidates on their own promotion conditions.
 - 2026-08-22: T2 — three test blocks appended to `tests/testthat/test-vignette-claims.R`: the six frequentist rows' supported cells (plus a lavaan-complete control for the bootstrap row, whose fence message is generic), the Bayesian row's supported cell behind a live brms fit (`skip_on_ci`/`skip_on_cran`), and all seven refused cells. Each refused call is pinned to its own fence message and differs from a passing call in exactly the one attribute the fence names; balance and completeness of `ratings` vs `ratings_incomplete` are asserted rather than assumed. `test_local(filter = "vignette-claims")` 389 passing, 0 failures, 0 skipped locally. `air format` clean.
 - 2026-08-22: T3 — the seven-row table plus its caveat paragraphs ship in `vignettes/interval-methods.Rmd` as a new `## Which method serves which design` section directly after the intro. Depth read off `cairn/references/ORACLES.md`: `montecarlo` (O1/O2/O3 plus the cross-engine O-LME and O-SEM legs), `bootstrap` (O-SEM M21 Slice 1, O-SEM-ML-BOOT, O-Boot-DS, the replicate oracles' both-`ci_method` legs), `posterior` (O-Bayes, ten Hove 2020 §4.2 findings plus the committed coverage fixtures), `npbootstrap` (O-NPBoot: ukoumunne2003 Table I and ohyama2025), `searle`/`burch` (O-Classical-OW: two independent published worked examples each) all clear two or more independent checks; `mpl` (O-MPL) rests on xiao2013 alone, its kappa_m constants script-derived below rho = 0.6. Caveats stated in the reader's terms: the measured skew under-coverage for `montecarlo`/`searle`/`burch` (D-027) and `npbootstrap` (D-031, stated without figures), the unmeasured skew behaviour of `bootstrap` and `mpl`, `posterior`'s two-rater bias, and `npbootstrap`'s unbalanced-SE and ICC(k) inheritance. NEWS.md Documentation entry added. Vignette renders (`rmarkdown::render` exit 0); `air format --check .` clean.
 - 2026-08-22: T4 — 21 planted perturbations (three forms x seven rows) plus an unperturbed control, each run as its own copy of the M133 test blocks at `NOT_CRAN=true`: control green, all 21 red, each for the reason its form targets. Changed-`ci_method` plants red on the `method` assertion (bootstrap, npbootstrap, searle, burch, mpl), on an unexpected abort (montecarlo -> `"mpl"`), or on a refusal that stopped refusing (posterior). Changed-design plants red on the index-set assertion (montecarlo, bootstrap, posterior) or on an unexpected abort (npbootstrap `"twoway"`, searle/burch on `ratings_incomplete`, mpl `model = "oneway"`). Inverted-direction plants red on the supported call aborting (montecarlo, posterior) or the refused call no longer throwing `intraclass_unsupported` (bootstrap, npbootstrap, searle, burch, mpl). Two assertions were added to the supported test to make design and method changes detectable at all — the row's coefficient family and its `method` label, previously checked only for the four opt-in rows. Harness ephemeral, as T1's probes; nothing committed under `data-raw/` (scope excludes a committed checker).
+- 2026-08-22: T5 — gate-lite sweep clean on the branch tip. Suite at `NOT_CRAN=true CI=true`: 0 failures, 0 errors, 8590 passing, 26 skipped (one more skip than main's 25 — the Bayesian row's live brms fit). `air format --check .` clean; `devtools::document()` no diff; `pkgdown::check_pkgdown()` no problems, `build_site()` exit 0; `data-raw/check-record-claims.py` 6 claims, 0 failures; `cairn_validate` exit 0, all checks passed. `R CMD check --as-cran --no-manual` (with `_R_CHECK_CRAN_INCOMING_=false`) on `R CMD build` tarballs of the branch tip and of `git archive origin/main` (17bf072), same command and machine: both raw `Status: OK`. That command differs from M132's by `--no-manual`, which sidesteps this machine's missing `pdflatex`; under it neither tree has any condition to compare, so the branch is no worse than main's.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
