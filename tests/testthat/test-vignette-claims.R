@@ -2096,83 +2096,126 @@ test_that("interval-methods.Rmd: the table's supported cell returns an interval,
   skip_on_cran()
 
   sim <- vc_mpl_sim()
-  # One supported call per row. The Bayesian row needs a Stan toolchain and so
-  # is asserted in its own test below.
+  # One supported call per row, each with the coefficient family the row's
+  # supported cell names and the interval method the row is about. Both are
+  # asserted: a design argument changed under a call moves the family, and a
+  # `ci_method` changed under it moves the method, so neither can drift away
+  # from the table's cell unnoticed.
+  two_way <- c("ICC(A,1)", "ICC(A,k)", "ICC(C,1)", "ICC(C,k)")
+  one_way <- c("ICC(1)", "ICC(k)")
+  agreement <- c("ICC(A,1)", "ICC(A,k)")
+  # The Bayesian row needs a Stan toolchain and is asserted in its own test below.
   supported <- list(
-    montecarlo = function() {
-      icc(ratings, score, subject, rater, seed = 1)
-    },
+    montecarlo = list(
+      indices = two_way,
+      method = "montecarlo",
+      call = function() {
+        icc(ratings, score, subject, rater, seed = 1)
+      }
+    ),
     # Two calls: the mixed-model engine the row's cell names first, and the
     # lavaan-on-complete-data control the refused cell below is contrasted
     # against (that fence's message is generic, so the contrast carries it).
-    bootstrap = function() {
-      icc(
-        ratings,
-        score,
-        subject,
-        rater,
-        ci_method = "bootstrap",
-        boot_samples = 19,
-        seed = 1
-      )
-    },
-    `bootstrap (lavaan control)` = function() {
-      icc(
-        ratings,
-        score,
-        subject,
-        rater,
-        engine = "lavaan",
-        ci_method = "bootstrap",
-        boot_samples = 19,
-        seed = 1
-      )
-    },
-    npbootstrap = function() {
-      icc(
-        ratings,
-        score,
-        subject,
-        rater,
-        model = "oneway",
-        ci_method = "npbootstrap",
-        boot_samples = 99,
-        seed = 1
-      )
-    },
-    searle = function() {
-      icc(
-        ratings,
-        score,
-        subject,
-        rater,
-        model = "oneway",
-        ci_method = "searle"
-      )
-    },
-    burch = function() {
-      icc(ratings, score, subject, rater, model = "oneway", ci_method = "burch")
-    },
-    mpl = function() {
-      icc(sim, score, subject, rater, type = "agreement", ci_method = "mpl")
-    }
+    bootstrap = list(
+      indices = two_way,
+      method = "bootstrap",
+      call = function() {
+        icc(
+          ratings,
+          score,
+          subject,
+          rater,
+          ci_method = "bootstrap",
+          boot_samples = 19,
+          seed = 1
+        )
+      }
+    ),
+    `bootstrap (lavaan control)` = list(
+      indices = two_way,
+      method = "bootstrap",
+      call = function() {
+        icc(
+          ratings,
+          score,
+          subject,
+          rater,
+          engine = "lavaan",
+          ci_method = "bootstrap",
+          boot_samples = 19,
+          seed = 1
+        )
+      }
+    ),
+    npbootstrap = list(
+      indices = one_way,
+      method = "npbootstrap",
+      call = function() {
+        icc(
+          ratings,
+          score,
+          subject,
+          rater,
+          model = "oneway",
+          ci_method = "npbootstrap",
+          boot_samples = 99,
+          seed = 1
+        )
+      }
+    ),
+    searle = list(
+      indices = one_way,
+      method = "searle",
+      call = function() {
+        icc(
+          ratings,
+          score,
+          subject,
+          rater,
+          model = "oneway",
+          ci_method = "searle"
+        )
+      }
+    ),
+    burch = list(
+      indices = one_way,
+      method = "burch",
+      call = function() {
+        icc(
+          ratings,
+          score,
+          subject,
+          rater,
+          model = "oneway",
+          ci_method = "burch"
+        )
+      }
+    ),
+    mpl = list(
+      indices = agreement,
+      method = "mpl",
+      call = function() {
+        icc(sim, score, subject, rater, type = "agreement", ci_method = "mpl")
+      }
+    )
   )
   # Anti-vacuity: an empty list would pass every assertion below for free.
   expect_identical(length(supported), 7L)
 
   for (nm in names(supported)) {
-    td <- suppressWarnings(tidy(supported[[nm]]()))
+    row <- supported[[nm]]
+    td <- suppressWarnings(tidy(row$call()))
     expect_gt(nrow(td), 0L)
     expect_false(any(is.na(td$conf.low)), info = nm)
     expect_false(any(is.na(td$conf.high)), info = nm)
     # An interval, not a degenerate point: the reported estimate lies inside it.
     expect_true(all(td$conf.low <= td$estimate), info = nm)
     expect_true(all(td$estimate <= td$conf.high), info = nm)
+    # The coefficient family the row's supported cell names.
+    expect_setequal(td$index, row$indices)
     # The method the table's row names is the method that produced the interval
     # -- a silent fallback to the Monte-Carlo default would make the row false.
-    if (nm %in% c("npbootstrap", "searle", "burch", "mpl")) {
-      expect_true(all(td$method == nm), info = nm)
-    }
+    expect_true(all(td$method == row$method), info = nm)
   }
 })
 
