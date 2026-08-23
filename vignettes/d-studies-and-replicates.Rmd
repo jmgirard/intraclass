@@ -106,13 +106,16 @@ icc(ratings, score, subject, rater,
 ```
 
 The extra row is labeled `ICC(A,6)`, and it is the same quantity `d_study()`
-projects: the `m = 6` row of a projection off this fit carries the same estimate
-and the same interval. Which one you reach for is a matter of shape, not of
-arithmetic — `unit` adds a row to a coefficient table, `d_study()` returns a
-projection object you can `tidy()`, `glance()` and plot.
+projects: the `m = 6` row of `proj` above carries the same estimate. The
+*interval* matches too, but only because both calls pass the same `seed` — the
+interval is Monte-Carlo, so two unseeded runs of the same projection agree on
+the estimate and differ in the last digits of the endpoints. Which one you reach
+for is a matter of shape, not of arithmetic: `unit` adds a row to a coefficient
+table, `d_study()` returns a projection object you can `tidy()`, `glance()` and
+plot.
 
 **Fixed raters cannot be projected to absolute agreement.** The rater term for
-[*fixed* raters](glossary.html#fixed-vs.-random-raters) is the variance of
+[*fixed* raters](glossary.html#fixed-vs--random-raters) is the variance of
 exactly the raters you observed, so there is no wider pool for a hypothetical
 sixth rater to be drawn from, and `icc()` refuses rather than returning a
 number:

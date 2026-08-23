@@ -354,8 +354,10 @@ test_that("d-studies-and-replicates.Rmd: fixed-rater agreement refuses a numeric
     class = "intraclass_unidentified"
   )
 
-  # Both remedies the message names do return a number ...
-  expect_no_error(suppressWarnings(icc(
+  # Both remedies the message names do return the projected row itself, not
+  # merely a fit: `raters = "random"` keeps the agreement projection, and
+  # `type = "consistency"` under fixed raters gives the consistency one.
+  random_agr <- suppressWarnings(icc(
     ratings,
     score,
     subject,
@@ -364,8 +366,9 @@ test_that("d-studies-and-replicates.Rmd: fixed-rater agreement refuses a numeric
     raters = "random",
     unit = c("single", "average", 6),
     seed = 1
-  )))
-  expect_no_error(suppressWarnings(icc(
+  ))
+  expect_true("ICC(A,6)" %in% tidy(random_agr)$index)
+  fixed_con <- suppressWarnings(icc(
     ratings,
     score,
     subject,
@@ -374,7 +377,8 @@ test_that("d-studies-and-replicates.Rmd: fixed-rater agreement refuses a numeric
     raters = "fixed",
     unit = c("single", "average", 6),
     seed = 1
-  )))
+  ))
+  expect_true("ICC(C,6)" %in% tidy(fixed_con)$index)
 
   # ... and the default (both types) drops the agreement projection with a
   # message rather than aborting, keeping the consistency one.
@@ -762,8 +766,13 @@ test_that("multilevel-designs.Rmd: a declared `design` overrides the labels' own
   }
 
   # Inference: the reused labels read as one panel rating everywhere (Design 1),
-  # so both levels come back.
-  inferred <- suppressMessages(fit_as())
+  # so both levels come back -- and icc() announces that reading rather than
+  # taking it silently, which is what the article tells the reader to rely on.
+  rlang::reset_message_verbosity("intraclass_crossed_ml_labels")
+  expect_message(
+    inferred <- fit_as(),
+    "Treating raters with the same label in different clusters"
+  )
   expect_identical(inferred$design$ml_design, "crossed")
   expect_setequal(unique(inferred$estimates$level), c("subject", "cluster"))
 
@@ -772,8 +781,13 @@ test_that("multilevel-designs.Rmd: a declared `design` overrides the labels' own
   d2 <- fit_as("nested_in_clusters")
   expect_identical(d2$design$ml_design, "nested_in_clusters")
   expect_setequal(unique(d2$estimates$level), "subject")
-  # A rater component exists (the print labels it `rater:cluster`) ...
-  expect_true("rater" %in% names(d2$components))
+  # The article's claim is about the PRINTED label: one `rater:cluster` term in
+  # place of the crossed fit's separate `rater` and `cluster:rater` terms.
+  comp_line <- function(x) grep("Variance components", format(x), value = TRUE)
+  expect_match(comp_line(d2), "rater:cluster")
+  expect_no_match(comp_line(d2), "cluster:rater")
+  expect_match(comp_line(inferred), "rater 0")
+  expect_match(comp_line(inferred), "cluster:rater")
   # The numeral the article prints for this call.
   expect_equal(round(tidy(d2)$estimate[tidy(d2)$index == "ICC(A,1)"], 3), 0.429)
 
@@ -781,8 +795,9 @@ test_that("multilevel-designs.Rmd: a declared `design` overrides the labels' own
   d3 <- fit_as("nested_in_subjects")
   expect_identical(d3$design$ml_design, "nested_in_subjects")
   expect_setequal(d3$estimates$index, c("ICC(1)", "ICC(k)"))
-  # ... and under Design 3 there is none at all (print: `rater confounded`).
+  # ... and under Design 3 there is no rater term at all.
   expect_false("rater" %in% names(d3$components))
+  expect_match(comp_line(d3), "residual .* \\(rater confounded\\)")
   # The numeral the article prints for this call.
   expect_equal(round(tidy(d3)$estimate[tidy(d3)$index == "ICC(1)"], 3), 0.412)
 
@@ -795,15 +810,23 @@ test_that("multilevel-designs.Rmd: a declared `design` overrides the labels' own
   )))
 
   # "Where the labels are already unique per rater ... passing the matching
-  # `design` explicitly returns the very same fit."
+  # `design` explicitly returns the very same fit." Both relabelled tables.
   school_d3 <- school
   school_d3$rater <- factor(paste(school_d3$pupil, school_d3$rater, sep = "_"))
-  unique_args <- args
-  unique_args[[1]] <- school_d3
-  expect_equal(
-    tidy(do.call(icc, c(unique_args, list(design = "nested_in_subjects")))),
-    tidy(do.call(icc, unique_args))
+  school_d2_lab <- school
+  school_d2_lab$rater <- factor(
+    paste(school_d2_lab$classroom, school_d2_lab$rater, sep = "_")
   )
+  no_op <- function(data, design) {
+    a <- args
+    a[[1]] <- data
+    expect_equal(
+      tidy(do.call(icc, c(a, list(design = design)))),
+      tidy(do.call(icc, a))
+    )
+  }
+  no_op(school_d3, "nested_in_subjects")
+  no_op(school_d2_lab, "nested_in_clusters")
 })
 
 # Vignette claims (comparison-with-other-packages.Rmd) --------------------
