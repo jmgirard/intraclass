@@ -2,12 +2,12 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M133: Tell users which interval method is trustworthy for their design
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate -->
 - **Depends on:** M130   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP1, GP5   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m133-ci-method-trustworthiness-table`   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create -->
@@ -79,7 +79,7 @@ ROADMAP candidates on their own promotion conditions.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: For each of the seven `ci_method` values, run one supported call and
+- [x] T1: For each of the seven `ci_method` values, run one supported call and
       one refused call and record the outcome (interval, or abort class) — the
       run is ephemeral evidence in the work log, not a committed fixture.
       Cross-check each fence against its D-entry (D-010 npbootstrap, D-013
@@ -97,6 +97,8 @@ ROADMAP candidates on their own promotion conditions.
 - 2026-08-21: criteria audit ran in FULL mode (user-facing tier), two rounds, fresh-context [O] reader, and this milestone was RE-CUT between them. Round 1 found the whole drafted scope barred by D-021/D-029 — its deliverable was a `cairn/references/` page plus a committed enumerating script, the apparatus class exactly, with no trigger in what the package computes — and found AC1's enumerator broken (`formals(icc)$ci_method` returns the single string `"montecarlo"`; the seven-value vector lives in the `validate_choice` call at `R/icc.R:692-703`), AC5's two named checkers disclaiming claim-truth by their own docstrings, and AC2/AC3 binding properties of a records page rather than of the deliverable. The re-cut moved the deliverable into the shipped vignette. Round 2 found the re-cut still failing: "committed per-combination fixtures" re-imported the apparatus D-029 warns about at `:1300`, and the declared factorial was 224 cells at its floor and unbounded on `unit` (`normalize_unit`, `R/icc.R:2691-2717`, accepts any number ≥ 1), with a large share aborting in argument validation rather than in any interval method. Re-cut again to seven rows and fourteen calls, no new fixtures, no new checker. Both re-cuts are the reason this milestone's criteria differ most from their first draft.
 - 2026-08-21: plan gate chose a seven-row per-`ci_method` table over a full (ci_method × design × type × raters × unit) factorial, because the factorial is intractable at any reading and would mostly document `validate_type`/`validate_choice` rather than interval-method trustworthiness; falsified by a user meeting a refusal the seven-row fence does not predict.
 - 2026-08-21: plan gate chose shipping the guidance in the vignette over building a standing test that the table matches the surface, because a guard over the repo's own records needs D-021's trigger and none exists; falsified by the table going stale against a `ci_method` fence change.
+- 2026-08-22: T1 — all fourteen fence probes run on the branch (`devtools::load_all`). Supported side returns an interval for: `montecarlo` (two-way `ratings`), `bootstrap` (two-way `ratings`, 19 resamples), `posterior` (live brms fit on `ratings`, 2 chains x 1000 iter, `ICC(A,1)` [0.0380, 0.6602]), `npbootstrap` (one-way `ratings`, and unbalanced `ratings_incomplete`), `searle` and `burch` (balanced one-way `ratings`), `mpl` (the article's seeded 20x4 two-way agreement sim). Refused side aborts `intraclass_unsupported` for all seven: brms with explicit `montecarlo`; lavaan bootstrap on `ratings_incomplete`; `posterior` off brms; `npbootstrap` on two-way; `searle`/`burch` on unbalanced one-way; `mpl` on explicit consistency. Fences cross-checked against D-010 (npbootstrap), D-013 (searle/burch), D-015 (mpl) and the brms coupling at `R/icc.R:735-756` (ADR-033); no disagreement with the source fences at `R/icc.R:1598-1683`.
+- 2026-08-22: implement question gate — live brms fit gated `skip_on_ci()`/`skip_on_cran()` for the posterior row's supported call (the repo's existing idiom for every live Bayesian test; CI has brms but no Stan toolchain, so that one call reports as skipped); table placed directly after the article's intro rather than as a closing summary; depth column carries a short plain-language label with the per-row anchors and caveats in prose below it. Fable escalation was offered on the depth judgments and declined.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
