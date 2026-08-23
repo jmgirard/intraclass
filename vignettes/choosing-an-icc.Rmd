@@ -75,8 +75,8 @@ question first.
 ## 1. Agreement vs. consistency (`type`)
 
 **Does the actual value need to match, or only the rank order?** *Absolute
-agreement* treats a systematic difference between raters as error, as when one
-judge scores consistently higher than another. *Consistency* forgives a constant
+agreement* treats a systematic difference between raters, one judge scoring
+consistently higher than another, as error. *Consistency* forgives a constant
 per-rater offset and asks only whether raters rank subjects the same way.
 
 ```{r type}

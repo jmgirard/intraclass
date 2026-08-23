@@ -19,8 +19,14 @@ rendered-message tests, and stays a ROADMAP candidate row.
 
 - **R1 dash-as-punctuation** — no em dash, `---`, or standalone `--` used as a
   sentence-level break. Not counted: YAML front-matter delimiters, markdown
-  table rules, dashes flanked by digits (page and numeric ranges), dashes
-  joining capitalized proper nouns (`Spearman--Brown`).
+  table separator rows, dashes flanked by digits (page and numeric ranges), and
+  unspaced dashes joining two capitalized words (`Spearman--Brown`). That last
+  exclusion is a shape, not a part of speech: the ruler does not separate
+  `Spearman--Brown` from `An ICC—Intraclass`, and separating them would need a
+  hand-kept list of proper nouns. A capital that follows a capitalized word is
+  indistinguishable from a proper-noun join, so a sentence-initial capital or an
+  acronym in that position goes uncounted with the proper nouns. A dash with a
+  space on either side is counted whatever flanks it.
 - **R2 sentence length** — no prose sentence over 35 words.
 - **R3 one idea per sentence** — at most one subordinate clause before the main
   verb.
@@ -50,8 +56,8 @@ the repo's own records is records apparatus, which D-021 bars, and D-029's
 carve-out covers correcting what the package tells its users, not building
 machinery over it.
 
-In `.Rmd` mode it drops, in order: the YAML front matter, fenced code chunks,
-HTML comments, markdown table *rules* (the `|---|---|` separator row), and
+In `.Rmd` mode it drops, in order: the YAML front matter, HTML comments, fenced
+code chunks, markdown table *rules* (the `|---|---|` separator row), and
 list-marker and blockquote prefixes. Headings and table *cells* stay in — they
 are prose the reader reads, so a dash or an overlong clause in one counts. A
 heading becomes one fragment; a table row becomes one fragment per cell. Link
@@ -62,6 +68,18 @@ In `.R` mode it reads only roxygen comment lines (`#'`), and only those outside
 an `@examples` block: an `@examples` tag suppresses lines until the next `#' @`
 tag. The `#'` prefix and any leading `@tag` token are stripped, and what is left
 runs through the same pipeline.
+
+What the ruler does **not** see is as much part of the standard as what it
+does, since a rule the instrument cannot reach is judgment, not a target. Four
+boundaries, none of them reached by any vignette in this repo today: a table
+separator row is recognized only when it starts with `|`, so a pandoc-legal
+`---- | ----` row scores as dashes; a `---` alone on a line below the front
+matter is counted, since nothing distinguishes it from a spaced break; a run of
+list items is joined into one fragment rather than one fragment per item, so a
+long unpunctuated list under-reports both its fragment count and its sentence
+lengths; and HTML comments are stripped before fences, so a chunk containing the
+string `<!--` swallows the prose up to the next real comment. Widening any of
+these is a ruler change, which the frozen-ruler rule below prices.
 
 A **word** is a whitespace-separated token carrying at least one alphanumeric
 character. A **sentence** is a span ending in `.`, `!`, or `?` followed by

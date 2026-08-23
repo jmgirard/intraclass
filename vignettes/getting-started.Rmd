@@ -27,7 +27,7 @@ that answers it.
 An ICC runs from 0 to 1 and reports **the share of the variation in scores that
 reflects real differences between the things being rated**, rather than
 disagreement or noise between raters. Near 1, almost all the spread in scores is
-genuine subject-to-subject difference and the raters barely disagree, so the
+genuine subject-to-subject difference and the raters barely disagree, and the
 ratings are highly reliable. Near 0, the raters are effectively adding noise, and a
 score tells you more about who happened to rate it than about the subject.
 

@@ -25,8 +25,14 @@ stating rules R1–R6:
 
 - **R1 dash-as-punctuation** — no em dash, `---`, or standalone `--` used as a
   sentence-level break. Not counted: YAML front-matter delimiters, markdown
-  table rules, dashes flanked by digits (page and numeric ranges), dashes
-  joining capitalized proper nouns (`Spearman--Brown`).
+  table separator rows, dashes flanked by digits (page and numeric ranges), and
+  unspaced dashes joining two capitalized words (`Spearman--Brown`). That last
+  exclusion is a shape, not a part of speech: the ruler does not separate
+  `Spearman--Brown` from `An ICC—Intraclass`, and separating them would need a
+  hand-kept list of proper nouns. A capital that follows a capitalized word is
+  indistinguishable from a proper-noun join, so a sentence-initial capital or an
+  acronym in that position goes uncounted with the proper nouns. A dash with a
+  space on either side is counted whatever flanks it.
 - **R2 sentence length** — no prose sentence over 35 words.
 - **R3 one idea per sentence** — at most one subordinate clause before the main verb.
 - **R4 parentheticals** — at most one per sentence, none over 15 words (judgment, not gated).
@@ -106,6 +112,12 @@ refused, D-021 stands.
       corrected bytes.
 - [x] T9 Action the review findings the gate directs.
 - [x] T10 Re-run the AC5 verify block.
+- [x] T11 Amendment: restate R1's exclusion in the terms the ruler can decide,
+      identically in `cairn/doctrine/prose-style.md` and Scope, and write the
+      ruler's four documented blind spots into the doctrine's prose boundary.
+- [x] T12 Action the amendment gate's other dispositions: the two R6 drifts the
+      second review found, and `cairn/DESIGN.md`'s doctrine-module registry.
+- [ ] T13 Re-run the AC5 verify block.
 
 ## Work log
 
@@ -139,6 +151,12 @@ refused, D-021 stands.
 
 - 2026-08-23: review second pass — `main` still unmoved (0 behind / 13 ahead), PR #143 refreshed. AC2, AC3, AC4, AC5 verified with fresh evidence at HEAD and ticked; the `72f9cc2` baseline reproduces exactly (744 / 81 / 226 / 11 / 55) under the corrected ruler; `cairn_validate` exit 0; `devtools::test()` FAIL 0 | PASS 8862; `devtools::check()` `Status: 1 NOTE` (pre-existing spelling, 31 words, unchanged from baseline). Full three-lens fan-out re-run: both `[S]` lenses clean, `[O]` returned ten findings.
 - 2026-08-23: amendment return: AC1 — "implements R1's counted class and R2's sentence rule as `cairn/doctrine/prose-style.md` defines them". The doctrine's R1 excludes "dashes joining capitalized proper nouns", which no procedure over the domain can decide; the ruler's decidable approximation (both flanking words capitalized) is a strictly larger exclusion, reproduced at review on a probe file where 2 of 4 genuine sentence-level breaks went uncounted. AC1 unticked. First amendment return on this milestone; the defect-return count stays at 1. Findings 3, 4, 5 and 6-10 recorded in the Review section for the maintainer at the step-6 gate.
+
+- 2026-08-23: amendment-gate criteria audit ran in FULL mode ([O] fresh-context reader that authored none of the wording, user-facing tier), reading AC1 and AC3 as they read with the amended R1. Eight findings. Two fixed before the gate: the draft over-described the code (it read as though any capital after an unspaced dash is excused, where the left word must be capitalized too) and it asserted that no procedure could separate the two shapes, which nothing falsifies — now a claim about this ruler. Six posed or recorded at the gate: the ruler's four boundary gaps (pipe-less separator rows, `---` thematic breaks, joined list items, comment-before-fence stripping), AC1 binding an instrument rather than the prose, and AC3 binding two records to each other. Verdict recorded by the reader: NARROWS — the exclusion grows from an undecidable subset to a decidable superset, so the counted class shrinks.
+- 2026-08-23: amendment return: AC1 — "Not counted: YAML front-matter delimiters, markdown table separator rows, dashes flanked by digits (page and numeric ranges), and unspaced dashes joining two capitalized words (`Spearman--Brown`)." This line executes the review's amendment return on AC1 rather than opening a new one, so the amendment-return count on AC1 stays at 1. AC1's own wording is unchanged; its meaning moves through R1, which the amendment restates identically in `cairn/doctrine/prose-style.md` and in Scope. The gate chose the reviewed wording over dropping its explanation and over a hand-kept proper-noun list, which is the author-recall enumeration the widening test bars. Narrowing repair: the exclusion widens, so R1's counted class shrinks. No ruler bytes change, so the frozen baseline and the `72f9cc2` figures stand.
+- 2026-08-23: amendment gate chose documenting the ruler's four blind spots over repairing it, because the list-fragmentation repair moves the baseline figures for all eight vignettes mid-return; a ROADMAP candidate row carries the hardening and the two criteria-shape findings forward. Falsified by M135 or M136 hitting one of the four shapes in a file it must measure.
+- 2026-08-23: T11 — R1 restated in `cairn/doctrine/prose-style.md` and Scope (byte-identical text); the doctrine's `.Rmd` strip order corrected to comments-before-fences to match `strip_rmd()`, and a paragraph added naming the four boundaries. Page at 115 lines / 6,486 bytes, inside its stated 120-line / 8,000-byte budget.
+- 2026-08-23: T12 — `getting-started.Rmd`'s "the raters barely disagree, so the ratings are highly reliable" restored to the original's conjoined "and"; `choosing-an-icc.Rmd`'s "as error, as when one judge scores consistently higher" restored to the appositive definition "a systematic difference between raters, one judge scoring consistently higher than another, as error". `cairn/DESIGN.md`'s doctrine-module registry gained `prose-style.md`. Ruler re-run after the edits: 0 dashes on all three files, 0 over-35 in `getting-started.Rmd` (longest 32) and `choosing-an-icc.Rmd` (longest 35), 1 in `glossary.Rmd` (64 words) — AC2 unchanged.
 
 ## Decisions
 
