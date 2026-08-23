@@ -1491,3 +1491,22 @@ as of 2026-07-12 and is not falsified by later graduations.
 **Consequences.** Future maturation exits may graduate a family into
 `cairn/doctrine/`; the DESIGN.md § Design Principles preamble names both
 lineages.
+
+### D-034 (2026-08-23): `cairn/doctrine/` also admits a standard authored directly
+
+**Context.** D-033 defined `cairn/doctrine/` as the home for transferable craft
+*graduated whole from `cairn/LESSONS.md`*. M134 authored `prose-style.md`
+fresh — no LESSONS family graduated into it; the closest lineage (the M72/M128
+prose-widening family, covering R6 alone) is still live in `LESSONS.md`. Adding
+`prose-style.md` to `DESIGN.md`'s registry under D-033's graduation clause
+therefore asserted a lineage that does not exist (M134 third-pass finding 4).
+
+**Decision.** A doctrine module may enter `cairn/doctrine/` either by
+graduation from `cairn/LESSONS.md` or by being authored directly as a standard
+the repo will hold work to. The rest of D-033 stands: doctrine modules are
+transferable craft, distinct from `references/`, claiming no other file's
+ownership, each page naming its own scope and corrected in place.
+
+**Consequences.** `DESIGN.md`'s registry line names the directory without
+asserting graduation. A directly-authored module carries no `LESSONS.md`
+lineage to retire, so no maturation exit is owed for it.

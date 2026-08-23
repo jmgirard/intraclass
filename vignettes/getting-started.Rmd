@@ -31,15 +31,15 @@ genuine subject-to-subject difference and the raters barely disagree, and the
 ratings are highly reliable. Near 0, the raters are effectively adding noise, and a
 score tells you more about who happened to rate it than about the subject.
 
-`intraclass` estimates that number by fitting a **mixed model**, rather than from
-the classical ANOVA mean-squares formulas older tools use. The model separates
-subject variation from rater variation as [variance
-components](glossary.html#variance-component). The two approaches agree on clean,
-balanced data, but the model-based one also handles missing ratings, multiple
-designs, and honest confidence intervals. See [*Engines*](engines.html) for the
-machinery. This article walks the whole pipeline
-on a small example: **fit → estimate → interpret**. (New to any of the terms as they
-come up? The [*Glossary*](glossary.html) defines each one in a sentence.)
+`intraclass` estimates that number by fitting a **mixed model**, rather than
+from the classical ANOVA mean-squares formulas older tools use. The model
+separates subject variation from rater variation as [variance
+components](glossary.html#variance-component). The two approaches agree on
+clean, balanced data, but the model-based one also handles missing ratings,
+multiple designs, and honest confidence intervals. See [*Engines*](engines.html)
+for the machinery. This article walks the whole pipeline on a small example:
+**fit → estimate → interpret**. (New to any of the terms as they come up? The
+[*Glossary*](glossary.html) defines each one in a sentence.)
 
 ## The data
 

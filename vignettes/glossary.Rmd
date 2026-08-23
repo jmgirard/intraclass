@@ -76,13 +76,13 @@ methods*](interval-methods.html).
 
 ## Conflated ICC
 
-The single-level ICC you would get by **ignoring** a clustering structure (pupils in
-classrooms, patients in clinics). This quantity is ten Hove et al.'s (2022)
-Equation 14. It folds the between-cluster and within-cluster variation into one
-"true score" and is
-biased for both the subject-level and cluster-level questions. `icc()` can report it
-(`level = "conflated"`) purely as a **diagnostic contrast**, to show the cost of
-ignoring the structure. It is never a number to report. See [*Multilevel
+The single-level ICC you would get by **ignoring** a clustering structure
+(pupils in classrooms, patients in clinics). This quantity is ten Hove et al.'s
+(2022) Equation 14. It folds the between-cluster and within-cluster variation
+into one "true score" and is biased for both the subject-level and cluster-level
+questions. `icc()` can report it (`level = "conflated"`) purely as a
+**diagnostic contrast**, to show the cost of ignoring the structure. It is never
+a number to report. See [*Multilevel
 designs*](multilevel-designs.html#how-much-does-ignoring-the-nesting-cost-the-conflated-icc).
 
 ## Connectedness (identification)
@@ -192,8 +192,8 @@ agreement**. In lavaan's formulation a rater is a single column with no random
 effect, so its variance is read from the spread of the estimated column
 (indicator) means (Jorgensen 2021). It is a genuinely different estimator than
 the mixed model's random effect, though asymptotically equivalent to it, and can
-differ modestly on small designs. See
-[*Estimation engines*](engines.html#a-structural-equation-engine-lavaan).
+differ modestly on small designs. See [*Estimation
+engines*](engines.html#a-structural-equation-engine-lavaan).
 
 ## Modified profile likelihood
 
@@ -283,12 +283,11 @@ effects. See
 
 ## Variance component
 
-A share of the total variation in the scores traced to one source. It says how much
-comes from real differences between **subjects**, from some **raters** scoring
-higher than others, from the **subject-by-rater** interaction, and from residual
-**error**. Every
-ICC is a ratio built from these components: signal variance over signal-plus-error
-variance.
+A share of the total variation in the scores traced to one source. It says how
+much comes from real differences between **subjects**, from some **raters**
+scoring higher than others, from the **subject-by-rater** interaction, and from
+residual **error**. Every ICC is a ratio built from these components: signal
+variance over signal-plus-error variance.
 
 ## Zero-variance boundary
 
