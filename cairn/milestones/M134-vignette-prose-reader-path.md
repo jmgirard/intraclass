@@ -178,6 +178,7 @@ refused, D-021 stands.
 - 2026-08-23: hygiene note for the maintainer, restated — `cairn/ROADMAP.md` is at 23,999 bytes against its 24,000-byte budget. The candidate row's edit was sized to fit; the next row cannot be added without retiring one.
 - 2026-08-23: T16 — verify block re-run on the repaired branch. `devtools::document()` no diff (clean `git status` after); `devtools::test()` FAIL 0 | WARN 3 | SKIP 2 | PASS 8862, the same figures as T7, T10 and T13; `devtools::check(document = FALSE, args = "--no-manual")` raw `Status: 1 NOTE`, 0 errors / 0 warnings, no `* checking …` line reporting WARNING or ERROR, vignettes re-built OK in 23s, duration 14m 16s. The NOTE is the `tests/spelling.Rout` comparison and is pre-existing: `spelling::spell_check_package()` returns 31 words on this branch, the count recorded at `72f9cc2`, T7, T10 and T13, none introduced here. `python3 data-raw/check-record-claims.py --live` exit 0 (6 claims, 0 failures); `pkgdown::check_pkgdown()` "No problems found"; `cairn_validate` exit 0, all checks pass, one advisory (16 tasks against the 10-task split tripwire). All tasks checked; status → review.
 - 2026-08-23: review fourth pass, checkpoint (mid-phase) — `main` still unmoved (0 behind / 20 ahead), PR #143 refreshed. AC1-AC4 verified with fresh evidence at HEAD and ticked; the `72f9cc2` baseline reproduces exactly (744 / 81 / 226 / 11 / 55; in-scope 358 / 20 / 66) under the T14 ruler, and a six-shape probe confirms R1's counted class. `cairn_validate` exit 0, all checks pass, one advisory (16 tasks against the 10-task tripwire). `pkgdown::check_pkgdown()` clean; `check-record-claims.py --live` exit 0; `devtools::document()` no diff. AC5's `devtools::test()` and `devtools::check()` still running. Three lenses spawned; the prior-review lens returned no findings.
+- 2026-08-23: review fourth pass — AC1-AC5 all verified with fresh evidence at HEAD; `devtools::test()` FAIL 0 | PASS 8862, `devtools::check()` `Status: 1 NOTE` (pre-existing spelling, 31 words, unchanged from baseline), `cairn_validate` exit 0. Both `[S]` lenses clean; `[O]` returned seven findings. amendment return: AC1 - "implements R1's counted class and R2's sentence rule as `cairn/doctrine/prose-style.md` defines them". R1 excludes "markdown table separator rows" unqualified while the doctrine's ruler section defines the row as carrying at least one `|`; a pandoc simple-table or grid-table separator row scores dashes, reproduced at review (30 occurrences on a probe, nil reachable in this repo). This is amendment return 2 naming AC1, so the second-occurrence stop fires: no further round convened, disposition to the maintainer at the gate. Defect-return count stays at 2; thrash trigger (b) still standing.
 
 ## Decisions
 
@@ -836,3 +837,171 @@ merge was needed before gathering evidence. Branch re-pushed; PR #143 refreshed.
   default interval does not rely on a textbook formula that misbehaves when a
   variance is near zero", "reports every defined formulation", and
   `choosing-an-icc.Rmd`'s restored appositive.
+- **AC5 — pass.** `devtools::test()` FAIL 0 | WARN 3 | SKIP 2 | PASS 8862, the
+  same figures as T7, T10, T13 and T16. `devtools::check(document = FALSE,
+  args = "--no-manual")` raw `Status: 1 NOTE`, 0 errors / 0 warnings, duration
+  21m 51s; zero `* checking …` lines report WARNING or ERROR, and vignettes
+  re-built OK in 32s. The NOTE is the `tests/spelling.Rout` comparison and is
+  pre-existing: `spelling::spell_check_package()` returns 31 words on this
+  branch, the count recorded at `72f9cc2`, T7, T10, T13 and T16, every one a
+  proper name (Chinn, Davison, Gulliford, Liu, Ohyama, Okabe, Searle,
+  Ukoumunne, Xiao), an en-GB spelling, or a technical term absent from
+  `inst/WORDLIST`; none is a word this milestone introduced.
+  `devtools::document()` produced no diff (`git status` clean after it).
+  `python3 data-raw/check-record-claims.py --live` exit 0, 6 claims re-derived,
+  0 failures.
+
+#### Consistency gate
+
+- `cairn_validate.py` exit 0 — 16 PASS, 6 advisory OK, 1 advisory WARN (M134's
+  16 tasks against the 10-task split tripwire). `coverage complete`,
+  `binding criteria` and `scaffold present` all pass.
+- `cairn_impact.py` skipped: `Principles touched: —`, no DESIGN principle changed.
+- Toolchain checks (`r-package` profile's `consistency-gate` slot):
+  `devtools::document()` no diff; `NAMESPACE`, `man/` and `data/` untouched by
+  the branch diff; `README.Rmd`/`README.md` untouched (only `data-raw/README.md`
+  changed); `pkgdown::check_pkgdown()` "No problems found"; `NEWS.md` carries a
+  Documentation entry for the pass with no milestone number in it; no new
+  top-level file (`data-raw/` and `cairn/` both carry `.Rbuildignore` entries);
+  `devtools::check()` as recorded under AC5.
+
+#### Independent review
+
+Diff touches executable surface (`data-raw/prose-profile.py`) at a user-facing
+tier, so the full three-lens fan-out ran again, each lens fresh-context and none
+having authored the work.
+
+**[S] blame-history — no findings.** Traced the branch's 24 commits and the
+modified lines through `git log`/`git blame`. The Burch-interval paragraph's
+figures (0.3, 0.6, t(5), 100 subjects, 1.2963, 5 raters) are byte-identical to
+`main`; the M72/M128 widening family's own failure mode occurred mid-branch and
+was repaired at T6 before HEAD. Re-derived pandoc anchor ids for the four
+re-punctuated glossary headings before and after: byte-identical, and the
+referrers in the two untouched vignettes still resolve. Ran
+`test-doc-skew-caveat.R` (2344 pass / 0 fail) and `test-vignette-claims.R`
+(246 pass / 0 fail) directly, plus `check-record-claims.py` and
+`check-mpl-doc-claims.py`, all clean. Confirmed D-034's account of the D-033 gap
+is accurate against `LESSONS.md:14`, and that no R source, test, `DESCRIPTION`
+or `NAMESPACE` file is touched.
+
+**[S] prior-review record — no findings.** The
+`gh api repos/jmgirard/intraclass/pulls/comments?per_page=1` probe returned `[]`,
+so no thread walk was paid for; the three prior `## Review` passes in this file
+and `cairn/milestones/archive/` were the evidence base. Every finding the three
+prior passes directed into a return stint was checked at HEAD and found fixed:
+third-pass findings 1, 2, 3, 6, 7, second-pass finding 6, first-pass finding 9.
+Third-pass findings 4 and 5 are resolved by D-034 and the doctrine's
+pinned-clause exemption. Nothing reintroduced or contradicted.
+
+**[O] diff-bug — seven findings, ranked.** The lens re-derived every number
+rather than trusting the work log, independently reproducing the `72f9cc2`
+baseline (744 / 81 / 226 / 11 / 55; in-scope 358 / 20 / 66), AC2's 6 ≤ 8
+arithmetic, the byte-identity, the amended R1's behaviour on an eight-site probe,
+`.R` mode's `@examples` suppression, the pkgdown anchor ids, and T15's
+whitespace-only claim.
+
+1. **The T14 separator-row repair is one class short: a pandoc simple-table or
+   grid-table separator row still scores as dash-as-punctuation.** Verbatim:
+   "`RE_TABLE_RULE = re.compile(r\"^(?=[^|]*\\|)(?=[^-]*-)[\\s:|-]+$\")` — the
+   `(?=[^|]*\\|)` lookahead requires at least one `|`. R1
+   (`cairn/doctrine/prose-style.md:22`, byte-identical in Scope) excludes
+   'markdown table separator rows' without qualification, and pandoc's
+   `simple_tables`/`multiline_tables` separator carries no pipe at all while
+   `grid_tables` uses `+---+---+`."
+   **Reproduced at review** on an independent probe: a pandoc simple table, a
+   grid table and a setext underline together score 30 dash occurrences; all
+   four pipe-table shapes (leading-only, trailing-only, both, aligned) score 0,
+   so the T14 fix does hold for the shape it was cut for.
+   Reachability nil today: `grep -rnE '^\s*\+[-=+]+\+\s*$'` over `vignettes/`,
+   `R/` and `README.Rmd` returns nothing, and the only bare dash-run lines in
+   `vignettes/` are the eight files' YAML closing delimiters, which `RE_YAML`
+   strips. **AC2's zeros are undisturbed.**
+   The counter-reading the gate should weigh, in the lens's own words: "the
+   doctrine's *ruler-behaviour* section (`prose-style.md:61-64`) does describe
+   the rule as 'carrying at least one of each of `|` and `-`', so the page is
+   internally self-consistent if R1's bare phrase is read as scoped to pipe
+   tables — but AC1 names R1's counted class, and R1 says only 'markdown table
+   separator rows'." **Disposition: the amendment-return stop below.**
+2. **The doctrine's blind-spot paragraph asserts "Four boundaries" and
+   enumerates four; at least two more exist.** Verbatim: missing are "(a) the
+   simple/grid separator rows of finding 1; (b) a **setext heading underline**."
+   **Reproduced at review** — `Setext heading` over `--------------` scores 5
+   dash occurrences, and because `RE_HEADING` is ATX-only the heading is not
+   fragmented as a heading, so heading and rule merge into one fragment.
+   `cairn/ROADMAP.md`'s candidate row repeats the same four-item list and
+   inherits the understatement. **Disposition: maintainer's at the gate.**
+3. **A 108-character unwrapped line in `cairn/doctrine/prose-style.md:45`,** in
+   a file whose every other line wraps at ~79. Verbatim: "zero on either has no
+   non-arbitrary threshold and would fight readability. R3 and R6 are not
+   counted at all." **Reproduced at review** — `awk 'length>88'` returns this
+   line and no other. **Disposition: maintainer's at the gate.**
+4. **The T9 insert falsified a sentence one paragraph above it in
+   `data-raw/README.md:44-46`.** Verbatim: "the rest of this README documents
+   the **brms/Stan offline verification strategy**, which does" — `## The prose
+   ruler` was inserted immediately after that sentence, so "the rest of this
+   README" is no longer only the brms strategy. **Reproduced at review** by
+   reading `data-raw/README.md:40-62`. **Disposition: maintainer's at the gate.**
+5. **R6 note, `vignettes/glossary.Rmd:45` and `:47` — "margin" became "width
+   margin" at both sites.** The lens reads the domain as EQUAL ("the current
+   wording is non-directional and the paragraph is explicitly about width"), and
+   reports it only because a prior pass already repaired this sentence once.
+   Independently read at review against the removed text: EQUAL.
+   **Disposition: reject at triage, no defect.**
+6. **R6 note, `vignettes/getting-started.Rmd:150` — subject narrowed from "the
+   interval `icc()` reports" to "the default interval".** The lens flags it for
+   completeness and identifies it as the deliberate T9 repair of first-pass
+   finding 7. **Disposition: reject at triage, the repair the gate directed.**
+7. **`RE_DASH` counts occurrences inside a dash run, where R1 speaks of "a
+   standalone `--`".** Verbatim: a bare `----` scores 2. "Only reachable outside
+   stripped regions, and it is what makes findings 1 and 2 produce inflated
+   counts rather than 1 each. No criterion affected."
+   **Disposition: maintainer's at the gate.**
+
+The lens explicitly cleared, so none is re-raised: AC1's byte-identity, the
+`72f9cc2` baseline, AC2 at HEAD and the 58-word pinned clause, R1's amended
+proper-noun clause against an eight-site probe, R2's sentence rule, `.R` mode,
+the ruler docstring / doctrine / Scope agreement, the doctrine's budget, the
+pkgdown anchors, T15's whitespace-only claim, the full AC4 word-diff sweep,
+line widths, `data-raw/README.md`'s claim pins, the doc pins, D-034 and
+`DESIGN.md`'s registry line, the NEWS entry as now worded, and the absence of
+any conflict with D-021, D-029, D-032, D-033 or a DESIGN principle.
+
+#### Outcome
+
+**Amendment return 2 on AC1 — and the second-occurrence stop fires, so no
+further round is convened and the disposition goes to the user.**
+
+Finding 1 demonstrates AC1's first clause failing inside the domain of the
+procedure AC1 names. AC1 promises the ruler "implements R1's counted class …
+as `cairn/doctrine/prose-style.md` defines them", and `prose-style.md` defines
+that class two incompatible ways: R1 (line 22, byte-identical in Scope) excludes
+"markdown table separator rows" unqualified, while the ruler-behaviour section
+(lines 61–64) defines the recognized row as one "carrying at least one of each
+of `|` and `-`". The code implements the second exactly. Since the criterion
+cannot be satisfied against both readings, the promise is what is wrong, not the
+implementation — and under the never-reinterpret rule the passing reading is not
+available to review.
+
+It routes as an **amendment** return, not a defect return, under the widening
+test. No shape-based procedure separates a pandoc simple-table rule from a
+setext heading underline or a `---` thematic break, both of which the doctrine
+deliberately *counts*; the repair available is either to restate R1's table
+clause in the terms the instrument can decide — T11's move, one clause down —
+or to widen the doctrine's blind-spot enumeration, whose membership (which
+markdown and pandoc table syntaxes exist) is fixed by author recall rather than
+decided by a procedure over the domain. Third-pass finding 3 routed the other
+way precisely because a clean procedure repair *did* exist there; here it does
+not.
+
+This is amendment return **2** naming AC1 on this milestone. Per the
+amendment-return second-occurrence rule, review stops: no further amendment
+round is convened, AC1 is left as it stands, and the disposition is the
+maintainer's. The defect-return count stays at **2** (threshold (a) is 3 and is
+not reached); thrash trigger (b) remains standing from the third pass — AC1 has
+now diverged from the ruler at four consecutive reviews, each by a new clause of
+R1's exclusion list.
+
+Everything else passes: AC2, AC3, AC4 and AC5 all verified at HEAD with fresh
+evidence, both `[S]` lenses clean, and the consistency gate green. No finding at
+this pass disturbs AC2's zeros or any number the vignettes state; the ruler's
+uncovered shapes are unreachable in every file in this repo today.
