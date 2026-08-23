@@ -42,9 +42,9 @@ An opt-in closed-form confidence interval for the balanced one-way design
 **exact-F interval** leans on normality instead. Tracking tail weight is not the same as widening: on the two
 grids this package has measured that vary only the subject effect it came out
 the narrower of the two in nearly every cell. How much narrower is conditional, and not in the direction one might guess.
-`"burch"`'s narrower margin holds much the same up to a true ICC of 0.3 rather than shrinking as the true ICC rises
+`"burch"`'s width margin holds much the same up to a true ICC of 0.3 rather than shrinking as the true ICC rises
 (on the larger grid; the smaller grid's margin does shrink across its levels).
-The `"burch"` width advantage then collapses to near parity at a true ICC of 0.6, on the one grid reaching that value,
+The `"burch"` width margin then collapses to near parity at a true ICC of 0.6, on the one grid reaching that value,
 where every cell favouring the exact-F interval sits. It shrinks steadily as the subject count grows, measured at 5 raters.
 Burch reports the reverse for symmetric heavy-tailed data with non-normal errors,
 and a third grid now measures that case.
@@ -75,7 +75,8 @@ methods*](interval-methods.html).
 ## Conflated ICC
 
 The single-level ICC you would get by **ignoring** a clustering structure (pupils in
-classrooms, patients in clinics). That is ten Hove et al.'s (2022) Equation 14. It
+classrooms, patients in clinics). This quantity is ten Hove et al.'s (2022)
+Equation 14. It
 folds the between-cluster and within-cluster variation into one "true score" and is
 biased for both the subject-level and cluster-level questions. `icc()` can report it
 (`level = "conflated"`) purely as a **diagnostic contrast**, to show the cost of
@@ -145,8 +146,8 @@ picking the coefficient is really picking which one answers your question. See
 An opt-in closed-form confidence interval for the balanced one-way design
 (`ci_method = "searle"`): it inverts the exact-F pivot of the one-way ANOVA
 (Searle 1971, Ch. 9 Table 9.14; the McGraw & Wong 1996 Table 7 limits). Exact
-under normality, meaning best-calibrated when the data are approximately normal, and
-deterministic. Exact is not the same as shortest: see the **Burch interval**
+under normality. It is best-calibrated when the data are approximately normal,
+and it is deterministic. Exact is not the same as shortest: see the **Burch interval**
 above for what this package measured about their relative widths. See
 [*Confidence-interval methods*](interval-methods.html#the-opt-in-boundary-robust-methods).
 
@@ -183,10 +184,11 @@ captures.
 ## Indicator-mean estimator
 
 How the **lavaan** (SEM) engine recovers the rater variance for **absolute
-agreement**. A rater is a single column with no random effect, so its variance is
-read from the spread of the estimated column (indicator) means (Jorgensen 2021). It
-is a genuinely different estimator than the mixed model's random effect, though
-asymptotically equivalent, and can differ modestly on small designs. See
+agreement**. In lavaan's formulation a rater is a single column with no random
+effect, so its variance is read from the spread of the estimated column
+(indicator) means (Jorgensen 2021). It is asymptotically equivalent to the mixed
+model's random effect but a genuinely different estimator, and can differ
+modestly on small designs. See
 [*Estimation engines*](engines.html#a-structural-equation-engine-lavaan).
 
 ## Modified profile likelihood

@@ -97,7 +97,7 @@ refused, D-021 stands.
 - [x] T4 Rewrite `vignettes/choosing-an-icc.Rmd` against R1–R6.
 - [x] T5 Rewrite `vignettes/glossary.Rmd` against R1–R6 (167 fragments, the
       longest file; its one-sentence definitions are the R2 stress case).
-- [ ] T6 Run the AC4 grep over added and removed diff lines; for each hunk it
+- [x] T6 Run the AC4 grep over added and removed diff lines; for each hunk it
       returns, compare the added claim's domain against the removed one and
       repair any widening in place.
 - [ ] T7 Run the AC5 verify block; re-knit nothing (no roxygen touched).
@@ -117,6 +117,8 @@ refused, D-021 stands.
 - 2026-08-23: T5 — `glossary.Rmd` rewritten; ruler now reports 0 dashes (27 at baseline) and 1 sentence over 35 words (11 at baseline), semicolons 11 → 4, long parentheticals 0 → 0. The residue is irreducible: `tests/testthat/test-doc-skew-caveat.R`'s `residual_template()` requires a 58-word clause verbatim with no internal sentence-ending punctuation, so no split preserves it. AC2 amendment posed at a mini gate.
 - 2026-08-23: T5 — two first-pass splits broke the width pins (`test-doc-skew-caveat.R` failures at :1999 and :2359) by moving `burch` away from the width vocabulary in one sentence and capitalizing the residual clause's first word in the other; repaired by making the flat and parity clauses each their own hit sentence and restoring the lowercase clause after a colon. `devtools::test(filter = "doc-skew-caveat")` now clean, 2 pre-existing skips (vignettes not installed).
 - 2026-08-23: amendment gate — AC2 amended, the amended wording audited first by a fresh-context [O] reader in FULL mode (six questions; findings on satisfiability, GP8 count-pinning, an unenumerated singular over a template family, an unprobed exemption with no falsifier, and an instrument-bound promise — all five folded into the wording adopted; proportionality returned nothing). The gate chose the reviewed wording over a bare one-sentence exemption and over relaxing the test harness. Verdict recorded by the reader: WIDENING, since the amendment binds a property AC2 did not previously bind while relaxing the sentence target on one file.
+- 2026-08-23: T6 — AC4 grep run over added and removed lines of `git diff 72f9cc2 -- <the three files>` (42 matching lines across 18 hunks); every hunk's added claim domain compared against the removed text, all 18 EQUAL, no widening or narrowing.
+- 2026-08-23: T6 — the same diff also went to a fresh-context [O] reader that authored none of the prose, which found two R6 widenings the AC4 word list cannot catch, both from splitting a restrictive clause into a standalone sentence: `getting-started.Rmd` promoted "a textbook formula *that* misbehaves when a variance is near zero" into a general claim about textbook formulas, which the glossary's own `"mpl"` and `"npbootstrap"` entries contradict; `glossary.Rmd` promoted lavaan's "a rater is a single column with no random effect" into a claim about raters generally, false of the mixed-model engines. Both repaired in place, plus four lower-severity drifts (an entailment asserted by "meaning", a causal inversion at `choose_icc()`, a referent loosened to "That", and a directional "narrower margin"/"width advantage" where the original said only "margin"). Doc pins re-run clean.
 
 ## Decisions
 

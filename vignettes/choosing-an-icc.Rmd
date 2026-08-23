@@ -53,9 +53,9 @@ str(ratings)
 **Is every subject rated by the *same* set of raters, or by a different set each
 time?** If the same raters judge everyone (a *crossed*, two-way design, like
 `ratings`), keep the default `model = "twoway"` and the four choices below apply.
-Instead each subject may be rated by whichever raters happened to be available,
-so that "rater 1" for one subject has nothing to do with "rater 1" for another.
-Then the raters are *interchangeable* and the design is **one-way**
+If instead each subject is rated by whichever raters happened to be available,
+then "rater 1" for one subject has nothing to do with "rater 1" for another.
+Those raters are *interchangeable* and the design is **one-way**
 (`model = "oneway"`).
 
 ```{r oneway}
@@ -254,8 +254,8 @@ well-defined estimands that `icc()` computes.
 If you would rather answer the questions than remember which argument each maps
 to, `choose_icc()` walks the same tree and hands back the coefficient to report
 together with the exact `icc()` call that computes it. It does **not** fit
-anything, since there is no `data` argument. So it is a quick way to settle the
-choice before you run the model.
+anything, which is why it takes no `data` argument. So it is a quick way to
+settle the choice before you run the model.
 
 ```{r choose}
 choose_icc(type = "agreement", unit = "single", raters = "random")
