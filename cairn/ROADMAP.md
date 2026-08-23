@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-22 (M131 done pass: `cairn_validate` exit 0, all checks passed; `NOT_CRAN=true CI=true` suite 0 failures / 8500 passing / 25 skipped; `air format --check .` clean; `devtools::document()` no diff; `pkgdown::check_pkgdown()` clean; `devtools::run_examples()` exit 0; `R CMD check --as-cran` on `R CMD build` tarballs of the branch tip and merge-base 53f77a1, the same command back-to-back under R 4.6.1, both raw `Status: 1 NOTE` with the sole heading `checking CRAN incoming feasibility` and no WARNING on either; the four python `data-raw/` checkers exit 0; PR #140 all 8 CI checks green. Terminal rows rotated M126 out, M131 in, with the `[claim:roadmap-terminal-rows]` expectation in this same commit. LESSONS: one M131 line added (`run_examples()`'s stray `Rplots.pdf`; roxygen2's collation-order `@return` merge) and the M72 `cairn_validate` references-status line pruned as the stalest, no retirement exit being available — 46 lines, 19,891 bytes.)_
+_Last hygiene check: 2026-08-22 (M132 done pass: `cairn_validate` exit 0, all checks passed; suite 0 failures / 8530 passing / 25 skipped at `NOT_CRAN=true CI=true`; `air format --check .` clean; `document()` no diff; `check_pkgdown()` clean, `build_site()` exit 0; `check-record-claims.py` 6 claims, 0 failures; PR #141 all 10 CI checks green. `R CMD check --as-cran` on `R CMD build` tarballs of the branch tip and of `git archive origin/main` (e086166), same command and machine, both raw `Status: 1 ERROR, 1 WARNING, 3 NOTEs` with identical headings — the ERROR and WARNING are this machine's missing `pdflatex`, so the branch is no worse than main's (M131's single-NOTE figure was measured where `pdflatex` was available). Terminal rows rotated M127 out, M132 in, with the `[claim:roadmap-terminal-rows]` expectation in this same commit. LESSONS: no line added — M132's findings were recurrences, so the M130 and M131 lines were widened in place; nothing retired (no enforcement, ownership, or maturation exit). Both files went over budget with the day's additions and were compressed back under: 53 lines here, 46 in LESSONS at 19,999 bytes.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,15 +9,14 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M132 | Make the two prose-only `icc()` argument values reachable from the docs | review | — | normal | milestones/M132-prose-only-icc-arguments.md |
 | M133 | Tell users which interval method is trustworthy for their design | planned | M130 | high | milestones/M133-ci-method-trustworthiness-table.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68, M129, M130, M131, M132, M133 | high | milestones/M48-release-v010.md |
-| M127 | Correct the lme4 merDeriv requirement message | done | — | normal | milestones/archive/M127-merderiv-requirement-message.md |
 | M128 | Show the plotting surface in the README, and polish the front page | done | — | normal | milestones/archive/M128-readme-figures-polish.md |
 | M129 | Back the hand-pasted engine transcripts in the vignettes | done | — | high | milestones/archive/M129-vignette-brms-transcripts.md |
 | M130 | Back the interval-methods vignette's claims, and read it through | done | M129 | high | milestones/archive/M130-interval-methods-claims.md |
 | M131 | Say what each documented method returns, and stop shadowing the shipped dataset | done | — | high | milestones/archive/M131-rd-value-and-shadowed-example.md |
-<!-- terminal-row retention: M131 done (2026-08-22) → M126 rotated out (oldest terminal by merge order; its archive file still resolves there). Kept: M127, M128, M129, M130, M131 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
+| M132 | Make the two prose-only `icc()` argument values reachable from the docs | done | — | normal | milestones/archive/M132-prose-only-icc-arguments.md |
+<!-- terminal-row retention: M132 done (2026-08-22) → M127 rotated out (oldest terminal by merge order; its archive file still resolves there). Kept: M128, M129, M130, M131, M132 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
