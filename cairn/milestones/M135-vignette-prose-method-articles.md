@@ -1,11 +1,11 @@
 # M135: Vignette prose pass — the method articles
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** M134
 - **Driving RR:** —
 - **Principles touched:** —
-- **Branch/PR:** —
+- **Branch/PR:** `m135-vignette-prose-method-articles`
 
 ## Goal
 
@@ -21,9 +21,10 @@ Surface tier: **user-facing** — published articles; D-029 carve-out, as M134.
 `vignettes/interval-methods.Rmd`, rewritten against rules R1–R6 of
 `cairn/doctrine/prose-style.md` (M134).
 
-Baseline at `72f9cc2`: these five hold 281 sentences, 88 over 35 words, 188 dash
-occurrences. `interval-methods.Rmd` is the worst file in the package (86
-sentences, 28 over 35 words, 54 dashes) and the only one fenced by four guards:
+Baseline at `9eae24d`, measured with the `data-raw/prose-profile.py` that M134
+shipped: these five hold 386 sentences, 61 over 35 words, 160 dash occurrences.
+`interval-methods.Rmd` is the worst file in the package (119 sentences, 22 over
+35 words, 45 dashes) and the only one fenced by four guards:
 `tests/testthat/test-vignette-claims.R`, `test-vignette-transcripts.R` (M129
 engine transcripts), `test-doc-skew-caveat.R`, `data-raw/check-mpl-doc-claims.py`
 (`VIGNETTE = "vignettes/interval-methods.Rmd"`, `check-mpl-doc-claims.py:46`) and
@@ -82,6 +83,8 @@ found wrong goes to `/hotfix` or its own milestone, never into a style edit.
 
 - 2026-08-23: created by /milestone-plan.
 - 2026-08-23: plan-gate criteria audit ran in FULL mode; the record and its 13 findings are in M134's work log — this file's AC2/AC3 carry the F5 and F12 repairs, and its AC5 the F4 live-mode repair.
+- 2026-08-23: amendment (Substantive, Scope, user-selected at the implement question gate): the Scope baseline is re-measured at `9eae24d` with the shipped ruler — 386 / 61 / 160 for the five, 119 / 22 / 45 for `interval-methods.Rmd`; the plan's 281 / 88 / 188 came from a draft ruler M134's review then changed.
+- 2026-08-23: implement question gate chose to carry `interval-methods.Rmd` in this milestone rather than pre-split it; the plan's split trigger stands.
 - 2026-08-23: plan gate chose to fold `interval-methods.Rmd` into this milestone over giving it its own because its four guards are re-run once for the whole file family rather than twice; falsified by T5 plus T7 overrunning a working session, which is the split's trigger.
 
 ## Decisions
