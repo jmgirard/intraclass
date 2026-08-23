@@ -75,10 +75,10 @@ alternative home → not attempted; these two values are the whole scope.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Build (or reuse) a Design-3 fixture the vignette can show, and run
+- [x] T1: Build (or reuse) a Design-3 fixture the vignette can show, and run
       `icc(..., design = "nested_in_subjects")` against it; compare the result
       to what auto-inference returns on the same data.
-- [ ] T2: Write the AC1 and AC3 chunks into `multilevel-designs.Rmd`; reconcile
+- [x] T2: Write the AC1 and AC3 chunks into `multilevel-designs.Rmd`; reconcile
       the `:120-123` bullet against the evaluated output.
 - [ ] T3: Write the numeric-`unit` chunk into `d-studies-and-replicates.Rmd`
       and document the fixed-agreement projection fence beside it.
@@ -92,6 +92,9 @@ alternative home → not attempted; these two values are the whole scope.
 - 2026-08-21: created by /milestone-plan (pre-M48 CRAN-readiness slate; user selected this item at the plan gate). Promotes the "Two `icc()` argument values reachable only by inference or prose" candidate row, whose promotion condition is "on a user reporting either as unclear, or fold into the next multilevel or D-study vignette pass" — the plan gate promoted it as pre-CRAN doc-completeness work instead, on the maintainer's stated goal, and records that here rather than claiming the row's own condition fired.
 - 2026-08-21: criteria audit ran in FULL mode (user-facing tier), two rounds, fresh-context [O] reader. Round 1 found AC1 citing `vignettes/multilevel-designs.Rmd:117`, which is inside the *nested-in-clusters* bullet, not the nested-in-subjects one (that opens `:120`); AC3's premise false twice — the printed message is at `README.md:152` not `:130`, and "only inside a printed message" is falsified by `man/icc.Rd:134` and `:519`; AC2's `abort_fixed_agr_projection()` line off by one (`:2724`, not `:2723`); AC4 varying probe location but not form. Round 2 returned no further findings on this milestone; all four fixes verified against the files.
 - 2026-08-21: plan gate chose demonstrating both values in the existing vignettes over adding Rd examples for them, because the candidate row frames both as vignette-reachability gaps and `man/icc.Rd` already names `nested_in_clusters` twice without making it runnable; falsified by a Design-3 demonstration proving too costly to evaluate at knit time.
+- 2026-08-22: question gate — user chose the live `error = TRUE` chunk for the fixed-rater projection refusal (the idiom `choosing-an-icc.Rmd:197` already uses) and chose to widen the "`design` is for missing-cell ambiguity" framing to name the label-convention case too; the demonstration-data question was returned as "decide for me" and settled on the recommendation (the shipped `school` table).
+- 2026-08-22: T1 — reused the vignette's existing `school_d3` relabelling rather than building a Design-3 fixture. Measured on the branch tip: `icc(school_d3, ..., design = "nested_in_subjects", seed = 1)` returns a `tidy()` identical to the same call without `design`, so a chunk there would show syntax only. The demonstration therefore runs on the shipped `school` table, whose rater labels 1-4 repeat in every classroom: inference reports Design 1, `design = "nested_in_clusters"` reports Design 2 (`ICC(A,1)` 0.429), `design = "nested_in_subjects"` reports Design 3 (`ICC(1)` 0.412).
+- 2026-08-22: T2 — `multilevel-designs.Rmd` gains a "Declaring the design when the labels are ambiguous" subsection carrying the two explicit-`design` chunks (AC1 + AC3), and the framing paragraph above the Design 2/3 bullets now names both occasions for `design` instead of missing-cell ambiguity alone. Every prose claim in the new subsection was checked against a `knitr::knit()` of the edited vignette. The `:120-123` Design 3 bullet was checked against that output and needed no correction: the fit reports `ICC(1)` / `ICC(k)`, an agreement-only header, and `residual 0.609 (rater confounded)`.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

@@ -108,10 +108,13 @@ raters that bridge the clusters, and works on complete or incomplete data.)
 The classroom example above has every rater rate every pupil in every classroom,
 so raters are **crossed** with clusters (ten Hove et al.'s Design 1). Two other
 layouts are common, and `icc()` **infers which one you have** from the crossing
-pattern, so on complete data you need not declare it. (When missing cells leave
-the pattern genuinely ambiguous, `icc()` refuses to guess and you say which you
-mean with the `design` argument — see [*Incomplete (ragged) multilevel
-designs*](#incomplete-ragged-multilevel-designs) below.) The two layouts are:
+pattern — which raters appear in which clusters, and which pupils each of them
+rates. The `design` argument overrides that inference, and there are two
+occasions to reach for it: when the rater *labels* do not mean what the pattern
+implies ([*Declaring the design*](#declaring-the-design-when-the-labels-are-ambiguous)
+below), and when missing cells leave the pattern genuinely ambiguous
+([*Incomplete (ragged) multilevel
+designs*](#incomplete-ragged-multilevel-designs)). The two nested layouts are:
 
 - **Raters nested in clusters** (Design 2): each classroom has its *own* panel of
   raters. There is then no between-cluster reliability to report — a cluster-level
@@ -145,6 +148,47 @@ applies — with each pupil's raters unique, there is no rater main effect to ke
 in or drop from the error term. A layout that is neither cleanly crossed nor
 cleanly nested (some raters shared across clusters, some not) raises an
 informative error rather than guessing at a model.
+
+### Declaring the design when the labels are ambiguous
+
+Both relabellings above worked by rewriting the rater column, because inference
+reads that column and can only be as good as the labels in it. The `school`
+table as built numbers its raters 1--4 *inside every classroom*, and nothing in
+the data says whether "rater 1" in classroom 3 is the same person as "rater 1"
+in classroom 7. Left to itself `icc()` reads the reused labels as one panel
+rating everywhere — Design 1 — and says so rather than deciding quietly. If the
+numbering is instead classroom-relative, say so with `design`:
+
+```{r ml-declared-clusters, eval = requireNamespace("glmmTMB", quietly = TRUE)}
+icc(school, score,
+  subject = pupil, rater = rater, cluster = classroom,
+  type = "agreement", design = "nested_in_clusters", seed = 1
+)
+```
+
+The header now reads *raters nested in clusters*, the cluster level is gone, and
+a `rater:cluster` component appears in place of the crossed fit's rater term.
+If the numbering is *pupil*-relative — each pupil's own four raters, numbered
+from one — the same table is Design 3:
+
+```{r ml-declared-subjects, eval = requireNamespace("glmmTMB", quietly = TRUE)}
+icc(school, score,
+  subject = pupil, rater = rater, cluster = classroom,
+  type = "agreement", design = "nested_in_subjects", seed = 1
+)
+```
+
+Now there is no rater term at all: the components line reports the residual as
+`(rater confounded)`, and the coefficients are the agreement-only `ICC(1)` /
+`ICC(k)` of the multilevel one-way design.
+
+One table, three answers, and the data cannot tell you which is right — only you
+know what the labels mean. That is why `icc()` announces the crossed reading
+instead of assuming it. `design` declares how the rater column should be read;
+it is not a claim the data can check for you, so declare it only when you know
+the labelling. Where the labels *are* already unique per rater — the two
+relabelled tables above — inference has everything it needs, and passing the
+matching `design` explicitly returns the very same fit.
 
 ## Incomplete (ragged) multilevel designs
 
