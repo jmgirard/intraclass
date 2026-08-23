@@ -2,12 +2,12 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M133: Tell users which interval method is trustworthy for their design
 
-- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate -->
 - **Depends on:** M130   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP1, GP5   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** `m133-ci-method-trustworthiness-table`   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m133-ci-method-trustworthiness-table` / https://github.com/jmgirard/intraclass/pull/142   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create -->
@@ -50,7 +50,7 @@ ROADMAP candidates on their own promotion conditions.
       default `"montecarlo"` — stating for each: the design/estimand family it
       computes an interval for, the family it refuses, and its verification
       depth.
-- [ ] AC2: For every row, `tests/testthat/test-vignette-claims.R` runs one call
+- [x] AC2: For every row, `tests/testthat/test-vignette-claims.R` runs one call
       inside the family that row names as supported and asserts an interval is
       returned, and one call outside it and asserts the abort class that row
       names. No row ships without both.
@@ -59,10 +59,10 @@ ROADMAP candidates on their own promotion conditions.
       one; or carrying a stated coverage caveat. Every row that is not the
       first says so in the vignette's shipped prose, in the reader's terms —
       not only in the work log.
-- [ ] AC4: For each row, a planted perturbation of each of these forms reds
+- [x] AC4: For each row, a planted perturbation of each of these forms reds
       AC2's tests: a changed `ci_method`, a changed design argument, and an
       inverted supported/refused direction. Each planted run is logged.
-- [ ] AC5: `NOT_CRAN=true CI=true devtools::test()` 0 failures;
+- [x] AC5: `NOT_CRAN=true CI=true devtools::test()` 0 failures;
       `air format --check .` clean; `R CMD check`'s raw `Status:` line no worse
       than main's; `pkgdown::check_pkgdown()` and `build_site()` clean;
       `cairn_validate` exit 0.
@@ -103,9 +103,109 @@ ROADMAP candidates on their own promotion conditions.
 - 2026-08-22: T3 — the seven-row table plus its caveat paragraphs ship in `vignettes/interval-methods.Rmd` as a new `## Which method serves which design` section directly after the intro. Depth read off `cairn/references/ORACLES.md`: `montecarlo` (O1/O2/O3 plus the cross-engine O-LME and O-SEM legs), `bootstrap` (O-SEM M21 Slice 1, O-SEM-ML-BOOT, O-Boot-DS, the replicate oracles' both-`ci_method` legs), `posterior` (O-Bayes, ten Hove 2020 §4.2 findings plus the committed coverage fixtures), `npbootstrap` (O-NPBoot: ukoumunne2003 Table I and ohyama2025), `searle`/`burch` (O-Classical-OW: two independent published worked examples each) all clear two or more independent checks; `mpl` (O-MPL) rests on xiao2013 alone, its kappa_m constants script-derived below rho = 0.6. Caveats stated in the reader's terms: the measured skew under-coverage for `montecarlo`/`searle`/`burch` (D-027) and `npbootstrap` (D-031, stated without figures), the unmeasured skew behaviour of `bootstrap` and `mpl`, `posterior`'s two-rater bias, and `npbootstrap`'s unbalanced-SE and ICC(k) inheritance. NEWS.md Documentation entry added. Vignette renders (`rmarkdown::render` exit 0); `air format --check .` clean.
 - 2026-08-22: T4 — 21 planted perturbations (three forms x seven rows) plus an unperturbed control, each run as its own copy of the M133 test blocks at `NOT_CRAN=true`: control green, all 21 red, each for the reason its form targets. Changed-`ci_method` plants red on the `method` assertion (bootstrap, npbootstrap, searle, burch, mpl), on an unexpected abort (montecarlo -> `"mpl"`), or on a refusal that stopped refusing (posterior). Changed-design plants red on the index-set assertion (montecarlo, bootstrap, posterior) or on an unexpected abort (npbootstrap `"twoway"`, searle/burch on `ratings_incomplete`, mpl `model = "oneway"`). Inverted-direction plants red on the supported call aborting (montecarlo, posterior) or the refused call no longer throwing `intraclass_unsupported` (bootstrap, npbootstrap, searle, burch, mpl). Two assertions were added to the supported test to make design and method changes detectable at all — the row's coefficient family and its `method` label, previously checked only for the four opt-in rows. Harness ephemeral, as T1's probes; nothing committed under `data-raw/` (scope excludes a committed checker).
 - 2026-08-22: T5 — gate-lite sweep clean on the branch tip. Suite at `NOT_CRAN=true CI=true`: 0 failures, 0 errors, 8590 passing, 26 skipped (one more skip than main's 25 — the Bayesian row's live brms fit). `air format --check .` clean; `devtools::document()` no diff; `pkgdown::check_pkgdown()` no problems, `build_site()` exit 0; `data-raw/check-record-claims.py` 6 claims, 0 failures; `cairn_validate` exit 0, all checks passed. `R CMD check --as-cran --no-manual` (with `_R_CHECK_CRAN_INCOMING_=false`) on `R CMD build` tarballs of the branch tip and of `git archive origin/main` (17bf072), same command and machine: both raw `Status: OK`. That command differs from M132's by `--no-manual`, which sidesteps this machine's missing `pdflatex`; under it neither tree has any condition to compare, so the branch is no worse than main's.
+- 2026-08-22: review returned M133 to in-progress (defect return 1). AC1 fails: five of the seven rows misdescribe the shipped surface — the lavaan multilevel bootstrap fenced to the cluster level rather than to the fit, npbootstrap's numeric-`unit` fence omitted, montecarlo overreaching on the lavaan engine and naming a brms refusal that fires only on an explicit value, mpl's numeric-`unit` projection omitted, and burch's zero-variance clause naming an `intraclass_singular_fit` in a column otherwise about design refusals. AC3 fails: the caveat prose omits `posterior` from the methods never run on the skew study, and reports `posterior`'s two-rater point bias without its measured two-rater interval under-coverage. AC2, AC4, AC5 passed on fresh evidence. Nine further findings logged for the return, plus one pre-existing stale line in `ORACLES.md`'s O-MPL entry.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
 
 ## Review
 <!-- owner: review · exclusive -->
+
+**PR:** https://github.com/jmgirard/intraclass/pull/142 (draft) · reviewed 2026-08-22 at branch tip 2217c27, `origin/main` 17bf072 (branch not behind).
+
+### Acceptance criteria
+
+- **AC1 — FAILED.** The row set is right and the three columns are present: the
+  table at `vignettes/interval-methods.Rmd:37-45` carries `montecarlo`,
+  `bootstrap`, `posterior`, `npbootstrap`, `searle`, `burch`, `mpl` — the seven
+  values of the `ci_method` choice vector, in source order, matching it exactly.
+  (Locator drift, not a defect: that vector sat at `R/icc.R:692-703` at plan
+  time and sits at `R/icc.R:714-726` today, moved by M130 and M131 roxygen
+  above it; verified with `git show 6ce0088:R/icc.R`.) What fails is what the
+  rows *state*. Five rows misdescribe the surface, each confirmed by running the
+  call: the `bootstrap` row fences the lavaan multilevel bootstrap to the
+  cluster level when the fence is on the fit (a subject-level multilevel lavaan
+  bootstrap returns an interval — the passing M130 assertion at
+  `test-vignette-claims.R:1265`); the `npbootstrap` row's "balanced or
+  unbalanced" omits the numeric-`unit` fence (`unit = 2` on unbalanced one-way
+  aborts `intraclass_unsupported`, `R/icc.R:1626-1637`, while balanced returns
+  `ICC(2)`); the `montecarlo` row claims every design on the lavaan engine
+  (one-way lavaan aborts `intraclass_unsupported`) and names a brms fit as
+  refused when only an *explicit* `"montecarlo"` is (unset upgrades to
+  `"posterior"`, `R/icc.R:735-737`); the `mpl` row omits the numeric-`unit`
+  projection it admits (`unit = c("single", 7)` returns `ICC(A,7)`); the `burch`
+  row's zero-between-variance clause is an `intraclass_singular_fit`, a data
+  degeneracy, not the design refusal the column is otherwise about.
+- **AC2 — PASSED.** All fourteen cells run and assert. Fresh run at
+  `NOT_CRAN=true CI=true`: supported-cell block 50 passing / 0 failed;
+  refused-cell block 10 passing / 0 failed; Bayesian-row block skipped (its live
+  brms fit is gated `skip_on_ci`, the repo's idiom — it passes locally, and
+  T2/T4 record its interval).
+- **AC3 — FAILED.** Every row carries a depth label and every row below the top
+  tier says so in shipped prose, so the criterion's form is met; two of the
+  statements are false. The caveat prose names `bootstrap` and `mpl` as the
+  methods never run on the skew study, but `posterior` was never on it either
+  (D-027 and D-031 cover `mc`, `searle`, `burch`, `npbootstrap` only). And the
+  `posterior` row reports only the two-rater point-estimate bias, omitting the
+  measured two-rater interval under-coverage — the load-bearing figure for a
+  table about intervals — which `ORACLES.md` records at k = 2 against k = 5.
+- **AC4 — PASSED.** Re-read the T4 record and re-ran the harness's control: 21
+  planted perturbations (three forms x seven rows) plus an unperturbed control,
+  each as its own copy of the M133 blocks at `NOT_CRAN=true`; control green, all
+  21 red, each on the assertion its form targets.
+- **AC5 — PASSED.** Fresh: suite 0 failures / 0 errors / 8590 passing / 26
+  skipped at `NOT_CRAN=true CI=true`; `air format --check .` exit 0;
+  `devtools::document()` no diff; `pkgdown::check_pkgdown()` no problems;
+  `build_site()` exit 0 (T5). `R CMD check --as-cran --no-manual` on built
+  tarballs of the branch tip and of `git archive origin/main` (17bf072), same
+  command and machine: both raw `Status: OK`, so no worse than main's.
+
+### Consistency gate
+
+`cairn_validate` exit 0, all checks passed. `data-raw/check-record-claims.py` 6
+claims / 0 failures. No principle changed, so `cairn_impact` was not run.
+Toolchain slot: `document()` no diff; no generated file hand-edited; README.Rmd
+untouched; `check_pkgdown()` clean; NEWS.md carries a Documentation entry; no new
+top-level files.
+
+### Independent review — three-lens fan-out
+
+[O] diff-bug, [S] blame-history, [S] prior-PR-comments, all fresh-context. The
+prior-review lens reported no prior-review evidence reintroduced (the GitHub
+inline-comment probe returned empty, so it read the archived `## Review`
+sections for M106, M115, M130, M132 and the LESSONS lines, and cleared the diff
+against every regression class they name). Findings and disposition:
+
+- **Return-causing (AC1):** the five misdescribing rows above — [O]2 lavaan
+  multilevel bootstrap fenced to the wrong axis; [O]3 npbootstrap numeric-`unit`
+  fence omitted; [O]7 montecarlo overreaches on lavaan; [O]8 montecarlo's brms
+  refusal is explicit-only; [O]9 mpl's numeric-`unit` projection omitted; [O]4
+  burch's zero-variance clause is a different abort class and ships untested.
+- **Return-causing (AC3):** [O]5 `posterior` omitted from the never-measured
+  group; [O]6 `posterior`'s two-rater interval under-coverage omitted; [S]B4
+  independently reached [O]6's conclusion from the other direction.
+- **Fix on return, not criterion-failing:** [O]1 / [S]B1 NEWS says "Five of the
+  seven" where the table says six; [O]13 NEWS's "Every cell ... backed by a pair
+  of live calls" is untrue of the depth column and unconditional about the
+  CI-skipped Bayesian row; [O]10 the `bootstrap` depth label is asserted across
+  every glmmTMB/lme4 design but measured on one cell (no registry entry exists
+  for that bootstrap; its legs are O-SEM Slice 1's known-population coverage and
+  the cross-engine lavaan-glmmTMB agreement); [O]11 the anti-vacuity guards
+  count 7 by coincidence (six rows plus a control) and check no names; [O]12 the
+  `differs` field is documentation, not enforcement, and the header comment
+  overstates it; [O]14 one assertion in the supported loop lacks `info = nm`;
+  [S]B2 `vc_mpl_sim()` re-pastes the seeded construction already inline at
+  `test-vignette-claims.R:1602-1615` instead of being shared with it.
+- **Adjacent, pre-existing:** [O]15 `ORACLES.md`'s O-MPL Decision line still says
+  `conf_level = 0.95` only, superseded by M91/D-017 ({0.90, 0.95, 0.99}); the
+  vignette follows the code and is right, the registry entry is stale. Current
+  knowledge, so correctable in place with the correction marked.
+- **Noted, no action:** [S]B3 the milestone file cites `R/icc.R:692-703`, correct
+  at plan time and moved since — plan-owned text, recorded above rather than
+  edited at review.
+
+### Outcome
+
+Returned to `in-progress`. First defect return on this milestone; no thrash
+trigger. AC2, AC4 and AC5 stand on the evidence above and need only re-execution
+against the corrected table.
