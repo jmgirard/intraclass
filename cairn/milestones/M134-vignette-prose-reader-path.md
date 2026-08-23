@@ -84,7 +84,7 @@ refused, D-021 stands.
       run it at `72f9cc2`, and record the baseline table in Scope.
 - [x] T2 Write `cairn/doctrine/prose-style.md` with R1–R6.
 - [x] T3 Rewrite `vignettes/getting-started.Rmd` against R1–R6.
-- [ ] T4 Rewrite `vignettes/choosing-an-icc.Rmd` against R1–R6.
+- [x] T4 Rewrite `vignettes/choosing-an-icc.Rmd` against R1–R6.
 - [ ] T5 Rewrite `vignettes/glossary.Rmd` against R1–R6 (167 fragments, the
       longest file; its one-sentence definitions are the R2 stress case).
 - [ ] T6 Run the AC4 grep over added and removed diff lines; for each hunk it
@@ -103,6 +103,7 @@ refused, D-021 stands.
 - 2026-08-23: implement gate chose counting headings and table cells as prose over body paragraphs only, so AC2's zero covers every surface a reader sees; T5's stale sentence figure corrected to the new ruler's 167 fragments.
 - 2026-08-23: T2 — `cairn/doctrine/prose-style.md` written: R1–R6 verbatim from Scope, the ruler's prose boundary, the five-step pass procedure, and a stated budget of 120 lines / 8,000 bytes (at 97 / 5,162).
 - 2026-08-23: T3 — `getting-started.Rmd` rewritten; ruler now reports 0 dashes, 0 sentences over 35 (longest 32), against 18 dashes and 6 long sentences (longest 53) at baseline. Semicolons 1 → 0, long parentheticals 3 → 2.
+- 2026-08-23: T4 — `choosing-an-icc.Rmd` rewritten; ruler now reports 0 dashes, 0 sentences over 35 (longest 35), against 21 dashes and 3 long sentences (longest 49) at baseline. Semicolons 9 → 0, long parentheticals 2 → 0. The `## In one sentence` heading became `## In short`, since R2 forbids the one 49-word sentence it named; no cross-reference targets that anchor.
 
 ## Decisions
 
