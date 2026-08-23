@@ -27,66 +27,6 @@ default struggles on — the transformed bootstrap-*t* (`"npbootstrap"`), the ex
 that comes with the brms engine. (Terms are defined in the
 [*Glossary*](glossary.html).)
 
-## Which method serves which design
-
-Each `ci_method` value is fenced to the designs it is defined for, and refuses
-the rest with an error rather than returning a number it cannot stand behind.
-The table maps the whole set; the sections below explain the methods one at a
-time.
-
-| `ci_method` | Computes an interval for | Refuses | How well checked |
-|---|---|---|---|
-| `"montecarlo"` (default) | every design the package fits, whichever of the `"glmmTMB"`, `"lme4"` and `"lavaan"` engines fits it | an explicit `"montecarlo"` on a `"brms"` fit, which reports a credible interval instead — leaving `ci_method` unset there selects `"posterior"` rather than refusing | two or more independent checks; under-covers on skewed subject effects |
-| `"bootstrap"` | every design the `"glmmTMB"` and `"lme4"` engines fit; a `"lavaan"` fit on complete data, and a multilevel `"lavaan"` fit on balanced clusters with random raters besides | a `"lavaan"` fit off those fences; a `"brms"` fit | two or more independent checks, though on a limited set of designs; never measured on skewed or heavy-tailed data |
-| `"posterior"` | any design the `"brms"` engine fits — automatic, and required, there | every other engine | two or more independent checks; at two raters the interval covers below its nominal level and the point estimate is biased low |
-| `"npbootstrap"` | the one-way random design, balanced or unbalanced; a numeric `unit` projection on balanced data | two-way, cluster and multilevel designs; a numeric `unit` on unbalanced data | two independent published sources; under-covers on skewed subject effects, less deeply than the default |
-| `"searle"` | the balanced one-way random design | unbalanced one-way data; every two-way, cluster and multilevel design | two independent published sources; under-covers on skewed subject effects |
-| `"burch"` | the balanced one-way random design | the same as `"searle"` | two independent published sources; under-covers on skewed subject effects |
-| `"mpl"` | the balanced, complete two-way random absolute-agreement ICC(A,1) and ICC(A,k) — and any numeric `unit` projection of them — at a `conf_level` of 0.90, 0.95 or 0.99 | one-way, multilevel, fixed-rater and within-cell-replicate designs; consistency; unbalanced or incomplete data | one published source; its correction constants rest on simulation below a true ICC of 0.6 |
-
-**What the last column means.** It is about the evidence *this package* holds
-that the interval does what it claims, not about the method's standing in the
-literature. "Two or more independent checks" means at least two things that
-could have disagreed were compared — a published worked example, a second
-engine fitting the same model, or the coverage of a seeded simulation whose
-true value is known. Every row clears that bar except `"mpl"`, and each row's
-remaining gap is worth reading before you rely on it:
-
-- **The three methods measured under skew all under-cover.** The Monte-Carlo
-  default, `"searle"` and `"burch"` were run on a simulation study of skewed
-  and heavy-tailed subject effects and all three cover less often than their
-  nominal level there. That is a measured limit rather than an unknown, and
-  [When the default under-covers](#when-the-default-under-covers) gives the
-  numbers.
-- **`"npbootstrap"` was run on that same study and does not repair it.** It
-  under-covers in a minority of the study's cells, less deeply than the default
-  does, and it never aborts — so on skewed data it fails quietly rather than
-  loudly. Two further pieces of it rest on inheritance rather than on an
-  independent source: on unbalanced data its standard error follows a
-  derivation with no published coverage table behind it, and the ICC(k)
-  interval is the exact monotone image of the ICC(1) one rather than a
-  separately anchored interval.
-- **`"bootstrap"`, `"posterior"` and `"mpl"` have never been run on that
-  study.** The parametric bootstrap because a full grid means a model refit per
-  resample per replicate, `"posterior"` because it needs the Bayesian engine and
-  a Stan fit per replicate, `"mpl"` because its two-way fence refuses every cell
-  of a one-way grid. Their behaviour on strongly skewed data is unmeasured here,
-  so treat it as unknown rather than as safe. The parametric bootstrap carries a
-  second gap of its own: the checks behind its depth label were run on the
-  two-way random single-level design, while the label is claimed for every
-  design the mixed-model engines fit.
-- **`"posterior"` carries its source's caveat about two raters.** It reproduces
-  the findings of the published simulation study it was checked against,
-  including this one: at two raters the credible interval covers below its
-  nominal level and the point estimate is biased low, while at more than two
-  raters coverage runs close to nominal and the bias is small. Two raters is the
-  Bayesian engine's known weak cell, and the shortfall is in the interval, not
-  only in the number beside it.
-- **`"mpl"` is the one method resting on a single published source.** Its
-  interval machinery reproduces that paper's worked example, but the correction
-  constant it looks up per design was calibrated here by simulation for true
-  ICCs below 0.6, where the paper publishes no value.
-
 ## Monte-Carlo and the parametric bootstrap
 
 Every interval elsewhere in these articles has been the default [**Monte-Carlo**

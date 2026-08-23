@@ -12,83 +12,84 @@
 ## Goal
 <!-- owner: plan · create -->
 
-Let a reader see, per `ci_method`, which designs it computes an interval for,
-which it refuses, and how deeply that interval is independently verified.
+Pin, in the test suite, at least one call each `ci_method` computes an interval
+for and at least one call it refuses.
 
 ## Scope
 <!-- owner: plan · create/amend-via-gate -->
 
-**Surface tier: user-facing** — the deliverable is a table and caveats shipped
-in `vignettes/interval-methods.Rmd`. Nothing here is a records artifact.
+**Surface tier: internal** — the deliverable is test coverage in
+`tests/testthat/test-vignette-claims.R`. Nothing user-facing ships.
 
-**In:** one table row per value of the `ci_method` choice vector at
-`R/icc.R:692-703` (`montecarlo`, `bootstrap`, `posterior`, `npbootstrap`,
-`searle`, `burch`, `mpl`) — supported family, refused family, verification
-depth — each row's supported/refused claim established by running a call on
-each side of the fence, and each row's verification depth read off
-`cairn/references/ORACLES.md`. Any row not backed by two independent oracles
-says so in the reader's terms.
+**In:** one supported call and one refused call per value of the `ci_method`
+choice vector — the `validate_choice()` call for `ci_method` in `R/icc.R`, at
+`:714-726` when last read — and their tests; plus the O-MPL `Decision` line in
+`cairn/references/ORACLES.md`, corrected in place (D-021's own correct-in-place
+clause).
 
-**Out:** a `cairn/references/` page or committed checker enumerating the
-surface → **not built**: that is records apparatus, barred by D-021 and expressly
-retained by D-029, whose closing warning at `cairn/DECISIONS.md:1300` names this
-exact framing. A standing test asserting the table matches the surface →
-ROADMAP candidate row, promoted on a user reaching a cell the table
-misdescribes. A full factorial over `type`/`raters`/`unit` with committed
+**Out:** the seven-row trustworthiness table and its depth prose in
+`vignettes/interval-methods.Rmd` → **reverted from the branch**, with its own
+ROADMAP candidate row. D-021 does not bar the table: D-029 holds that user-facing
+documentation plans normally. What two review rounds showed is that its cells
+need deriving from the fences rather than composing from a reading; the
+standing-guard route to that is the *existing* candidate row, which does need
+D-021 superseded first. A `cairn/references/` page or committed checker
+enumerating the surface → **not built**, the apparatus class D-021 bars and D-029
+expressly retains. A full factorial over `type`/`raters`/`unit` with committed
 per-combination fixtures → **not attempted**: 224 cells at the floor and
-unbounded on `unit` (which `normalize_unit` accepts as any number ≥ 1), 32 of
-them forced-brms MCMC fits, against a 5 MB CRAN package budget. Extending the
-M113 skew battery to `"bootstrap"`, and the two-way heavy-tail grid → stay
-ROADMAP candidates on their own promotion conditions.
+unbounded on `unit`, 32 of them forced-brms MCMC fits, against a 5 MB CRAN
+package budget. Extending the M113 skew battery to `"bootstrap"`, and the two-way
+heavy-tail grid → stay ROADMAP candidates on their own promotion conditions.
 
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: `vignettes/interval-methods.Rmd` ships a table with one row per value
-      of the `ci_method` choice vector at `R/icc.R:692-703` — read from that
-      source, never from `formals(icc)$ci_method`, which returns only the
-      default `"montecarlo"` — stating for each: the design/estimand family it
-      computes an interval for, the family it refuses, and its verification
-      depth.
-- [x] AC2: For every row, `tests/testthat/test-vignette-claims.R` runs one call
-      inside the family that row names as supported and asserts an interval is
-      returned, and one call outside it and asserts the abort class that row
-      names. No row ships without both.
-- [ ] AC3: Every row's verification depth is one of: backed by two or more
-      independent oracles named in `cairn/references/ORACLES.md`; backed by
-      one; or carrying a stated coverage caveat. Every row that is not the
-      first says so in the vignette's shipped prose, in the reader's terms —
-      not only in the work log.
-- [x] AC4: For each row, a planted perturbation of each of these forms reds
-      AC2's tests: a changed `ci_method`, a changed design argument, and an
-      inverted supported/refused direction. Each planted run is logged.
-- [x] AC5: `NOT_CRAN=true CI=true devtools::test()` 0 failures;
+- [ ] AC1: For each value of the `ci_method` choice vector validated in
+      `R/icc.R` (the `validate_choice()` call for `ci_method`),
+      `tests/testthat/test-vignette-claims.R` runs one call the method computes
+      an interval for and asserts an interval is returned, and one call it
+      refuses and asserts the abort class. The `posterior` value's supported
+      call requires a Stan toolchain and is gated `skip_on_ci()`/
+      `skip_on_cran()`; it is verified in a run without `CI=true`. No value has
+      fewer than both.
+- [ ] AC2: For each value, a planted perturbation of each of these forms reds
+      AC1's tests: a changed `ci_method`; a changed design argument or input
+      dataset; an inverted supported/refused direction.
+- [ ] AC3: `NOT_CRAN=true CI=true devtools::test()` 0 failures;
       `air format --check .` clean; `R CMD check`'s raw `Status:` line no worse
-      than main's; `pkgdown::check_pkgdown()` and `build_site()` clean;
-      `cairn_validate` exit 0.
+      than main's under the same command on the same machine;
+      `pkgdown::check_pkgdown()` and `build_site()` clean; `cairn_validate`
+      exit 0.
 
 ## Coverage
 <!-- owner: plan · create/amend-via-gate -->
 
-- AC1 → T1, T3
-- AC2 → T2
-- AC3 → T3
-- AC4 → T4
-- AC5 → T5
+- AC1 → T1, T2, T6, T7
+- AC2 → T4, T6, T7
+- AC3 → T5, T7
 
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [x] T1: For each of the seven `ci_method` values, run one supported call and
-      one refused call and record the outcome (interval, or abort class) — the
-      run is ephemeral evidence in the work log, not a committed fixture.
-      Cross-check each fence against its D-entry (D-010 npbootstrap, D-013
-      searle/burch, D-015 mpl, ADR-033 posterior/brms coupling).
-- [x] T2: Write the per-row supported/refused tests, RED-first.
-- [x] T3: Read each row's verification depth off `cairn/references/ORACLES.md`;
-      draft the table and the caveat prose for every row below two oracles.
-- [x] T4: Planted-perturbation runs, three forms per row.
+- [x] T1: For each `ci_method` value, run one supported call and one refused
+      call and record the outcome (interval, or abort class) — ephemeral
+      evidence in the work log, not a committed fixture. Cross-check each fence
+      against its D-entry (D-010 npbootstrap, D-013 searle/burch, D-015 mpl,
+      ADR-033 posterior/brms coupling).
+- [x] T2: Write the per-value supported/refused tests, RED-first.
+- [x] T3: *(superseded by T6 — this task shipped the table the descope reverts.)*
+- [x] T4: Planted-perturbation runs, three forms per value.
 - [x] T5: Full gate-lite sweep.
+- [x] T6: Revert the vignette's `Which method serves which design` section and
+      its NEWS entry. Retarget the suite's table-facing prose onto the fences
+      **by procedure, not by hand-list**: grep `tests/testthat/` for
+      table-referring terms (`table`, `row`, `cell`, `trustworthiness`) and
+      retarget every hit, the block header's stale `R/icc.R:692-703` locator
+      included. Add a ROADMAP candidate row for the table itself, leaving the
+      existing standing-guard row intact.
+- [ ] T7: Re-run AC2's three plant forms against the retargeted blocks, then
+      re-run the gate — including one suite run without `CI=true` so the
+      `posterior` supported call executes. Log each planted run.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
@@ -112,6 +113,11 @@ ROADMAP candidates on their own promotion conditions.
 - 2026-08-22: review round 2 returned M133 to in-progress (defect return 2). AC1 fails again on three new cells of the same shape: the `mpl` row omits the calibration-geometry fence (12 raters, 8 subjects and 150 subjects all abort inside what the Computes cell describes), the `burch` Refuses cell rewritten to "the same as `searle`" is now false against D-022's zero-between-variance asymmetry, and the `npbootstrap` numeric-`unit` promise is unqualified where the Spearman-Brown pole refuses it. AC3 fails again on three prose inaccuracies: "three methods measured under skew" against four, the `bootstrap` evidence understated against O-SEM-ML-BOOT and O-Boot-DS, and the `posterior` two-rater coverage attributed to the published source rather than to this package's reproduction. AC2, AC4, AC5 passed on fresh evidence. Thrash trigger (b) fires — the disposition goes to the user with the plan gate's recorded alternatives.
 - 2026-08-22: parked as `blocked` at the user's decision after defect return 2. **Blocker:** the seven-row table's cells are composed from a reading of the fences, and two review rounds have each found new cells that misdescribe the surface (round 1: five; round 2: the `mpl` calibration grid, the `burch` refusal equality, the `npbootstrap` numeric-`unit` promise). Unblocking needs a decision the milestone cannot take for itself — whether to derive the cells from the code by a standing guard, which the plan gate declined under D-021 with D-029 retaining the bar and whose ROADMAP candidate row requires superseding D-021 first, or to narrow what the criteria promise to what a run has confirmed. The branch `m133-ci-method-trustworthiness-table` and draft PR #142 stand as they are; AC2, AC4 and AC5 hold on round-2 evidence, AC1 and AC3 do not.
 - 2026-08-22: unparked at the user's decision for a descope. `/milestone-review` reached its session start with the milestone `blocked`; the recorded blocker's decision was put to the user, who chose narrowing the milestone to its already-verified criteria over deriving the cells by a standing guard (which needs D-021 superseded first), over an override re-review, and over dropping. Status back to `in-progress` for the gated criterion-amendment protocol (`/milestone-implement` step 6) and that amendment alone; re-review follows the narrowed set. No defect-return increment — this is the disposition of return 2, not a third.
+- 2026-08-23: DESCOPE amendment (gated, `/milestone-implement` step 6) executing the user's disposition of defect return 2. Criteria narrowed and renumbered: old AC1 (the shipped table) and old AC3 (the depth prose) REMOVED, their promise exiting to a ROADMAP candidate row; old AC2 → AC1, old AC4 → AC2, old AC5 → AC3. Surface tier drops user-facing → internal; the deliverable is now the fence tests alone. Not an amendment return and not a defect return — the defect-return count stays at 2.
+- 2026-08-23: amendment criteria audit ran in FULL mode by a fresh-context [O] reader, twice (the tier is now internal, which earns only the reduced audit; full was run anyway rather than lighten rigor inside a descope). Round 1 returned 15 findings, round 2 — the once-round on wording the mini gate changed — returned 12. Fixed at the gate: the Goal's "so a later fence change reds rather than passing silently" universal dropped (the exemplar-vs-universal overreach both returns died on); `R/icc.R:692-703` corrected to the `validate_choice()` call, the range a hint only, after the reader measured the drift to `:714-726` inside this milestone's own life; the hand-pinned count "seven" dropped per GP8; "each planted run is logged" moved from criterion to task as a recording act; `posterior`'s `skip_on_ci()` carve-out stated, with a run without `CI=true` added to T7 and mapped, since AC3's mandated run skips it; AC2's plant-form wording matched to what T4 ran (dataset, not only design argument) and its coverage extended to T6/T7, whose retarget rewrites the very blocks T4 planted against; T3 marked superseded; T6's hand-list of table-facing prose restated as a grep procedure after the reader found four sites it missed; a candidate row for the table added, distinct from the standing-guard row; the `ORACLES.md` correction brought inside Scope In; AC3 given "under the same command on the same machine". Held deliberately: AC2 stays at three plant forms (D-118 — widening a twice-returned milestone's probe matrix is the direction the rule recommends against), and `pkgdown` stays in AC3 because T6 edits a vignette.
+- 2026-08-23: Scope Out cited the wrong door and was corrected. The draft made re-shipping the table conditional on superseding D-021; D-029 (`cairn/DECISIONS.md:1271-1303`) holds D-021 governs records apparatus and expressly not user-facing documentation, which "plans normally". Only the standing-guard candidate row carries the D-021 bar.
+- 2026-08-23: mini gate — the revert is bound as T6 rather than as a new AC4 (D-118: adding a criterion widens a twice-returned milestone), and AC1 holds at class-only rather than regaining the fence-message clause the descope draft had added. Recorded gap: `intraclass_unsupported` is one class across 46 abort sites and the lavaan bootstrap message is shared by three fences, so AC1 is satisfiable by a test that drops the `regexp` pins the shipped tests currently carry; the promise is what narrowed, not the checks. That gap, and AC2's unprobed axes (`unit`, the anti-vacuity enumerator), go to the table's candidate row.
+- 2026-08-23: T6 — `vignettes/interval-methods.Rmd` and `NEWS.md` restored to `origin/main` byte-for-byte (`git diff origin/main --` empty for both). Test prose retargeted by the grep procedure: the sweep over `tests/testthat/` for `table|row|cell|trustworthiness` returned 40 hits, all but the M133 additions being unrelated senses (the kappa_m lookup table, grid cells, data rows), so the domain was narrowed to the branch's own added lines — 24 hits, two of them the R `table()` function. 18 edits: the block header rewritten from "the per-`ci_method` trustworthiness table" to "the per-`ci_method` fence pins", all four `test_that()` names re-anchored from "interval-methods.Rmd: the table's ..." to "icc(): ...", the loop variable `row` renamed `entry`, and every remaining "the row's cell"/"the table's row" reworded to name the method. The stale `R/icc.R:692-703` in the header corrected to the `validate_choice()` call at `:714-726`; the older `"mpl"` fences block's cross-reference at `:1625` retargeted too — a site T6's first hand-list had missed, which is why the task was restated as a procedure. ROADMAP: the standing-guard candidate row rewritten (its premise "M133 ships a seven-row table" is now false) and a second row added for the table itself, with D-029's distinction recorded — the table is not barred, only the guard is. Both files under budget: ROADMAP 54 lines / 23,996 bytes (the 24,000-byte budget was met by compressing the two new rows and the three widest pre-existing ones, main having sat 11 bytes under the ceiling). `air format --check .` clean; `cairn_validate` exit 0, all checks passed; `vignette-claims`/`doc-skew-caveat`/`ci-mpl` 0 failures at `NOT_CRAN=true CI=true`.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

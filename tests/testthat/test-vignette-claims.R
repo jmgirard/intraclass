@@ -1622,7 +1622,7 @@ test_that("interval-methods.Rmd: the `\"mpl\"` fences are the ones the article n
   # Article lines 257-275, run on the article's own simulated design (the
   # `ci-mpl` chunk's data, rebuilt at its seed -- `ratings` is too small for
   # the calibration grid). One shared builder, so this test and the
-  # trustworthiness-table tests below cannot drift apart (M133 review, B2).
+  # per-`ci_method` fence pins below cannot drift apart (M133 review, B2).
   sim <- vc_mpl_sim()
   n_r <- nlevels(sim$rater)
 
@@ -2063,14 +2063,13 @@ test_that("interval-methods.Rmd: the third grid's shipped fixture states both co
   expect_true(any(grepl("Both A_i and e_ij are drawn", res, fixed = TRUE)))
 })
 
-# --- The per-`ci_method` trustworthiness table (M133) --------------------
-# The article opens with a seven-row table -- one row per value of the
-# `ci_method` choice vector at `R/icc.R:692-703` -- stating for each method the
-# design family it computes an interval for, the family it refuses, and how
-# deeply that interval is independently verified. A table is only worth reading
-# if its cells are true of the shipped surface, so every row is backed here by
-# TWO live calls: one inside the family the row names as supported, asserted to
-# return an interval, and one outside it, asserted to raise the classed abort.
+# --- The per-`ci_method` fence pins (M133) --------------------------------
+# One pair of live calls per value of the `ci_method` choice vector -- the
+# `validate_choice()` call for `ci_method` in `R/icc.R`, at `:714-726` when last
+# read -- pinning where each method's fence sits: one call the method computes
+# an interval for, asserted to return one, and one call it refuses, asserted to
+# raise the classed abort. The pins are the deliverable; a fence moved without
+# these reds is the thing they exist to catch.
 #
 # Failure identity (tracking-rules): each refused call is pinned to the message
 # of the fence it is meant to fire, so a refusal arriving from some other guard
@@ -2080,24 +2079,23 @@ test_that("interval-methods.Rmd: the third grid's shipped fixture states both co
 # back in `info=` on failure -- the pinned message is what enforces identity --
 # except for the lavaan bootstrap, whose message is generic ("not yet available
 # for this design/engine combination") and shared by its three fences. There the
-# contrast IS the identification, which is why that row carries its own control
-# call rather than borrowing another row's.
+# contrast IS the identification, which is why that method carries its own
+# control call rather than borrowing another's.
 
-test_that("interval-methods.Rmd: the table's supported cell returns an interval, every frequentist row", {
+test_that("icc(): the supported call returns an interval, every frequentist ci_method", {
   skip_if_not_installed("glmmTMB")
   skip_if_not_installed("lavaan")
   skip_on_cran()
 
   sim <- vc_mpl_sim()
-  # One supported call per row, each with the coefficient family the row's
-  # supported cell names and the interval method the row is about. Both are
-  # asserted: a design argument changed under a call moves the family, and a
-  # `ci_method` changed under it moves the method, so neither can drift away
-  # from the table's cell unnoticed.
+  # One supported call per method, each with the coefficient family that call
+  # produces and the interval method it is about. Both are asserted: a design
+  # argument changed under a call moves the family, and a `ci_method` changed
+  # under it moves the method, so neither can drift unnoticed.
   two_way <- c("ICC(A,1)", "ICC(A,k)", "ICC(C,1)", "ICC(C,k)")
   one_way <- c("ICC(1)", "ICC(k)")
   agreement <- c("ICC(A,1)", "ICC(A,k)")
-  # The Bayesian row needs a Stan toolchain and is asserted in its own test below.
+  # `"posterior"` needs a Stan toolchain and is asserted in its own test below.
   supported <- list(
     montecarlo = list(
       indices = two_way,
@@ -2106,8 +2104,8 @@ test_that("interval-methods.Rmd: the table's supported cell returns an interval,
         icc(ratings, score, subject, rater, seed = 1)
       }
     ),
-    # Two calls: the mixed-model engine the row's cell names first, and the
-    # lavaan-on-complete-data control the refused cell below is contrasted
+    # Two calls: the mixed-model engine first, and the
+    # lavaan-on-complete-data control the refused call below is contrasted
     # against (that fence's message is generic, so the contrast carries it).
     bootstrap = list(
       indices = two_way,
@@ -2193,9 +2191,9 @@ test_that("interval-methods.Rmd: the table's supported cell returns an interval,
     )
   )
   # Anti-vacuity by NAME, not by count: a bare length check passes on any seven
-  # entries, and this list's seven are six rows plus a control. Ask the
+  # entries, and this list's seven are six methods plus a control. Ask the
   # validator for the accepted set -- the same enumerator the sibling test uses
-  # -- and require every value to have a supported call here, the Bayesian row
+  # -- and require every value to have a supported call here, `"posterior"`
   # excepted because its call is a live brms fit in its own test above.
   msg <- tryCatch(
     icc(ratings, score, subject, rater, ci_method = "not-a-method", seed = 1),
@@ -2214,36 +2212,36 @@ test_that("interval-methods.Rmd: the table's supported cell returns an interval,
   )
 
   for (nm in names(supported)) {
-    row <- supported[[nm]]
-    td <- suppressWarnings(tidy(row$call()))
+    entry <- supported[[nm]]
+    td <- suppressWarnings(tidy(entry$call()))
     expect_gt(nrow(td), 0L)
     expect_false(any(is.na(td$conf.low)), info = nm)
     expect_false(any(is.na(td$conf.high)), info = nm)
     # An interval, not a degenerate point: the reported estimate lies inside it.
     expect_true(all(td$conf.low <= td$estimate), info = nm)
     expect_true(all(td$estimate <= td$conf.high), info = nm)
-    # The coefficient family the row's supported cell names. `expect_setequal()`
+    # The coefficient family this supported call produces. `expect_setequal()`
     # takes no `info`, so this is the labelled form -- a failure has to name
-    # which row moved, and what it returned instead.
+    # which method moved, and what it returned instead.
     expect_true(
-      setequal(td$index, row$indices),
+      setequal(td$index, entry$indices),
       info = paste0(nm, " -- got: ", paste(td$index, collapse = ", "))
     )
-    # The method the table's row names is the method that produced the interval
-    # -- a silent fallback to the Monte-Carlo default would make the row false.
-    expect_true(all(td$method == row$method), info = nm)
+    # The method asked for is the method that produced the interval -- a silent
+    # fallback to the Monte-Carlo default would make the pin vacuous.
+    expect_true(all(td$method == entry$method), info = nm)
   }
 })
 
-test_that("interval-methods.Rmd: the table's Bayesian row returns a credible interval", {
-  # The one supported cell that needs a Stan compiler. Gated exactly as every
+test_that("icc(): the supported call returns a credible interval, ci_method = \"posterior\"", {
+  # The one supported call that needs a Stan compiler. Gated exactly as every
   # other live brms fit in this package is (`test-icc-brms.R`): CI carries brms
   # but no toolchain, so this runs locally and is skipped there.
   skip_on_cran()
   skip_on_ci()
   skip_if_not_installed("brms")
 
-  # Tiny sampler -- the row's claim is that the Bayesian engine returns a
+  # Tiny sampler -- the claim is that the Bayesian engine returns a
   # credible interval on its supported family, never that the interval is
   # well-sampled at this size. Sampling warnings on six subjects are expected.
   fit <- suppressWarnings(icc(
@@ -2264,7 +2262,7 @@ test_that("interval-methods.Rmd: the table's Bayesian row returns a credible int
   expect_true(all(td$conf.low <= td$estimate & td$estimate <= td$conf.high))
 })
 
-test_that("interval-methods.Rmd: the table's refused cell aborts classed, every row", {
+test_that("icc(): the refused call aborts classed, every ci_method", {
   skip_if_not_installed("glmmTMB")
   skip_if_not_installed("lavaan")
   skip_on_cran()
@@ -2394,17 +2392,17 @@ test_that("interval-methods.Rmd: the table's refused cell aborts classed, every 
   }
 })
 
-test_that("interval-methods.Rmd: the table's extra cell claims each run", {
+test_that("icc(): the second supported call runs, the ci_methods that admit one", {
   skip_if_not_installed("glmmTMB")
   skip_on_cran()
 
-  # Three rows name more than one thing in a cell, and the paired-call tests
+  # Three methods admit a second supported call, and the paired-call tests
   # above run only one call per side. These are the remainders (M133 review,
   # findings 3 and 9), each asserted on the surface rather than left as prose.
   sim <- vc_mpl_sim()
 
-  # `"npbootstrap"` row: a numeric `unit` projection is supported on BALANCED
-  # one-way data and refused on unbalanced, which is the pair the cell names.
+  # `"npbootstrap"`: a numeric `unit` projection is supported on BALANCED
+  # one-way data and refused on unbalanced, which is the pair pinned here.
   # `ratings` is balanced and `ratings_incomplete` is not (asserted in the
   # refused test above), so the two calls differ in that attribute alone.
   np2 <- tidy(icc(
@@ -2437,10 +2435,10 @@ test_that("interval-methods.Rmd: the table's extra cell claims each run", {
     class = "intraclass_unsupported"
   )
 
-  # `"mpl"` row: "and any numeric `unit` projection of them". The sibling
+  # `"mpl"`: a numeric `unit` projection of the agreement pair. The sibling
   # `"mpl"` fences test checks this projection against its Spearman-Brown
-  # image; here the claim under test is only that the cell's supported list is
-  # reachable -- the projection returns an interval by the row's own method.
+  # image; here the claim under test is only that the projection is reachable
+  # -- it returns an interval by the method asked for.
   m7 <- tidy(icc(
     sim,
     score,
@@ -2454,12 +2452,12 @@ test_that("interval-methods.Rmd: the table's extra cell claims each run", {
   expect_true(all(m7$method == "mpl"))
   expect_false(any(is.na(m7$conf.low)))
 
-  # `"montecarlo"` row: the refusal on a `"brms"` fit is EXPLICIT-only -- an
+  # `"montecarlo"`: the refusal on a `"brms"` fit is EXPLICIT-only -- an
   # unset `ci_method` selects `"posterior"` there instead of refusing. The
   # coupling is asserted in `test-icc-brms.R` ("engine = \"brms\" forces
   # ci_method = \"posterior\" by default"), which observes it before any fit and
   # so needs no Stan toolchain; not duplicated here. What this leg pins is the
-  # other half the cell asserts: that the refusal needs the explicit value.
+  # other half pinned here: that the refusal needs the explicit value.
   expect_error(
     icc(
       ratings,
