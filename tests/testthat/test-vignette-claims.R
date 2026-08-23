@@ -300,6 +300,104 @@ test_that("d-studies-and-replicates.Rmd: the rater component dominates on `ratin
   expect_gt(comp$rater, comp$residual)
 })
 
+# The "One projected value, without a projection object" section runs a numeric
+# `unit` inline and states three things about it: the extra row is labeled
+# `ICC(A,6)`; it is the same quantity `d_study()` projects, estimate AND interval;
+# and asking for it under FIXED raters with `type = "agreement"` alone is refused
+# rather than answered. Back all three on the shipped `ratings` data, naming the
+# condition class the refusal signals (#1, #5).
+
+test_that("d-studies-and-replicates.Rmd: a numeric `unit` adds the ICC(A,6) d_study row", {
+  skip_if_not_installed("glmmTMB")
+
+  inline <- tidy(icc(
+    ratings,
+    score,
+    subject,
+    rater,
+    type = "agreement",
+    unit = c("single", "average", 6),
+    seed = 1
+  ))
+
+  # The article's own output: three rows, the third labeled ICC(A,6).
+  expect_identical(inline$index, c("ICC(A,1)", "ICC(A,k)", "ICC(A,6)"))
+  at_6 <- inline[inline$index == "ICC(A,6)", ]
+  # The numeral the article prints for the ICC(A,6) row.
+  expect_equal(round(at_6$estimate, 3), 0.710)
+
+  # "the same quantity d_study() projects": same estimate and same interval, which
+  # holds because both reducers run the fit's own seed.
+  fit <- icc(ratings, score, subject, rater, type = "agreement", seed = 1)
+  proj <- tidy(d_study(fit, m = 6, seed = 1))
+  expect_equal(at_6$estimate, proj$estimate, tolerance = 1e-8)
+  expect_equal(at_6$conf.low, proj$conf.low, tolerance = 1e-8)
+  expect_equal(at_6$conf.high, proj$conf.high, tolerance = 1e-8)
+})
+
+test_that("d-studies-and-replicates.Rmd: fixed-rater agreement refuses a numeric `unit`", {
+  skip_if_not_installed("glmmTMB")
+
+  # The article's `error = TRUE` chunk. The refusal is classed, and it is raised
+  # only when absolute agreement is the ONLY requested type.
+  expect_error(
+    icc(
+      ratings,
+      score,
+      subject,
+      rater,
+      type = "agreement",
+      raters = "fixed",
+      unit = c("single", "average", 6),
+      seed = 1
+    ),
+    class = "intraclass_unidentified"
+  )
+
+  # Both remedies the message names do return the projected row itself, not
+  # merely a fit: `raters = "random"` keeps the agreement projection, and
+  # `type = "consistency"` under fixed raters gives the consistency one.
+  random_agr <- suppressWarnings(icc(
+    ratings,
+    score,
+    subject,
+    rater,
+    type = "agreement",
+    raters = "random",
+    unit = c("single", "average", 6),
+    seed = 1
+  ))
+  expect_true("ICC(A,6)" %in% tidy(random_agr)$index)
+  fixed_con <- suppressWarnings(icc(
+    ratings,
+    score,
+    subject,
+    rater,
+    type = "consistency",
+    raters = "fixed",
+    unit = c("single", "average", 6),
+    seed = 1
+  ))
+  expect_true("ICC(C,6)" %in% tidy(fixed_con)$index)
+
+  # ... and the default (both types) drops the agreement projection with a
+  # message rather than aborting, keeping the consistency one.
+  expect_message(
+    both <- suppressWarnings(icc(
+      ratings,
+      score,
+      subject,
+      rater,
+      raters = "fixed",
+      unit = c("single", "average", 6),
+      seed = 1
+    )),
+    "Dropping the .*agreement.* D-study projection"
+  )
+  expect_true("ICC(C,6)" %in% tidy(both)$index)
+  expect_false("ICC(A,6)" %in% tidy(both)$index)
+})
+
 # Multilevel claims (multilevel-designs.Rmd) ------------------------------
 # The multilevel-designs article's example asserts that on the simulated
 # `school` design the cluster-level ICC is the larger of the two levels. Rebuild
@@ -616,6 +714,119 @@ test_that("multilevel-designs.Rmd: nested relabels of `school` infer Designs 2 a
   )
   expect_identical(x3$design$ml_design, "nested_in_subjects")
   expect_setequal(x3$estimates$index, c("ICC(1)", "ICC(k)"))
+})
+
+# The "Declaring the design when the labels are ambiguous" section runs the SAME
+# `school` table three ways and claims the answers differ: inference reads the
+# reused rater labels as crossed (Design 1, both levels), `design =
+# "nested_in_clusters"` reads them as Design 2 (subject level only, a
+# rater-within-cluster component), and `design = "nested_in_subjects"` reads them
+# as Design 3 (agreement-only ICC(1)/ICC(k), rater confounded into the residual).
+# It also claims a declaration matching what the labels already say changes
+# nothing. Back all four (#1).
+
+test_that("multilevel-designs.Rmd: a declared `design` overrides the labels' own reading", {
+  skip_if_not_installed("glmmTMB")
+
+  set.seed(2025)
+  n_class <- 16
+  n_pupil <- 5
+  n_rater <- 4
+  grid <- expand.grid(
+    pupil = seq_len(n_pupil),
+    classroom = seq_len(n_class),
+    rater = seq_len(n_rater)
+  )
+  class_effect <- rnorm(n_class, sd = 1.3)[grid$classroom]
+  pupil_effect <- rnorm(n_class * n_pupil, sd = 0.6)[
+    (grid$classroom - 1) * n_pupil + grid$pupil
+  ]
+  rater_effect <- rnorm(n_rater, sd = 0.4)[grid$rater]
+  school <- data.frame(
+    classroom = factor(grid$classroom),
+    pupil = factor(paste(grid$classroom, grid$pupil, sep = "_")),
+    rater = factor(grid$rater),
+    score = 10 +
+      class_effect +
+      pupil_effect +
+      rater_effect +
+      rnorm(nrow(grid), sd = 0.7)
+  )
+  args <- list(
+    school,
+    quote(score),
+    subject = quote(pupil),
+    rater = quote(rater),
+    cluster = quote(classroom),
+    type = "agreement",
+    seed = 1
+  )
+  fit_as <- function(design = NULL) {
+    do.call(icc, c(args, list(design = design)))
+  }
+
+  # Inference: the reused labels read as one panel rating everywhere (Design 1),
+  # so both levels come back -- and icc() announces that reading rather than
+  # taking it silently, which is what the article tells the reader to rely on.
+  rlang::reset_message_verbosity("intraclass_crossed_ml_labels")
+  expect_message(
+    inferred <- fit_as(),
+    "Treating raters with the same label in different clusters"
+  )
+  expect_identical(inferred$design$ml_design, "crossed")
+  expect_setequal(unique(inferred$estimates$level), c("subject", "cluster"))
+
+  # Declared Design 2: subject level only, and the rater term becomes a
+  # rater-within-cluster component.
+  d2 <- fit_as("nested_in_clusters")
+  expect_identical(d2$design$ml_design, "nested_in_clusters")
+  expect_setequal(unique(d2$estimates$level), "subject")
+  # The article's claim is about the PRINTED label: one `rater:cluster` term in
+  # place of the crossed fit's separate `rater` and `cluster:rater` terms.
+  comp_line <- function(x) grep("Variance components", format(x), value = TRUE)
+  expect_match(comp_line(d2), "rater:cluster")
+  expect_no_match(comp_line(d2), "cluster:rater")
+  expect_match(comp_line(inferred), "rater 0")
+  expect_match(comp_line(inferred), "cluster:rater")
+  # The numeral the article prints for this call.
+  expect_equal(round(tidy(d2)$estimate[tidy(d2)$index == "ICC(A,1)"], 3), 0.429)
+
+  # Declared Design 3: no rater term at all, agreement-only ICC(1)/ICC(k).
+  d3 <- fit_as("nested_in_subjects")
+  expect_identical(d3$design$ml_design, "nested_in_subjects")
+  expect_setequal(d3$estimates$index, c("ICC(1)", "ICC(k)"))
+  # ... and under Design 3 there is no rater term at all.
+  expect_false("rater" %in% names(d3$components))
+  expect_match(comp_line(d3), "residual .* \\(rater confounded\\)")
+  # The numeral the article prints for this call.
+  expect_equal(round(tidy(d3)$estimate[tidy(d3)$index == "ICC(1)"], 3), 0.412)
+
+  # The three readings really are three different answers.
+  a1 <- function(x) tidy(x)$estimate[1]
+  expect_false(isTRUE(all.equal(a1(d2), a1(d3))))
+  expect_false(isTRUE(all.equal(
+    a1(d2),
+    tidy(inferred)$estimate[tidy(inferred)$level == "subject"][1]
+  )))
+
+  # "Where the labels are already unique per rater ... passing the matching
+  # `design` explicitly returns the very same fit." Both relabelled tables.
+  school_d3 <- school
+  school_d3$rater <- factor(paste(school_d3$pupil, school_d3$rater, sep = "_"))
+  school_d2_lab <- school
+  school_d2_lab$rater <- factor(
+    paste(school_d2_lab$classroom, school_d2_lab$rater, sep = "_")
+  )
+  no_op <- function(data, design) {
+    a <- args
+    a[[1]] <- data
+    expect_equal(
+      tidy(do.call(icc, c(a, list(design = design)))),
+      tidy(do.call(icc, a))
+    )
+  }
+  no_op(school_d3, "nested_in_subjects")
+  no_op(school_d2_lab, "nested_in_clusters")
 })
 
 # Vignette claims (comparison-with-other-packages.Rmd) --------------------

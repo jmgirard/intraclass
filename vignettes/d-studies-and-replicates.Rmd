@@ -45,8 +45,6 @@ proj
 Reliability climbs with more raters but with diminishing returns, and the
 projection is anchored to what you observed: at `m = 4` (the number of raters in
 `ratings`) `Φ(m)` is exactly the `ICC(A,k)` you would get from `icc()` directly.
-For a one-off value you can also ask `icc()` for it inline with a numeric `unit`,
-e.g. `unit = c("single", "average", 6)`.
 
 The projection's own interval settings --- `conf_level`, `mc_samples` and `seed`
 --- default to the fit's own whenever the fit carries them, which a default
@@ -94,11 +92,53 @@ just like the one above:
 plot(proj)
 ```
 
+### One projected value, without a projection object
+
+When you want a single projected rater count rather than a whole curve, `icc()`
+will report it inline. `unit` takes the keywords `"single"` and `"average"` —
+the `ICC(*,1)` and `ICC(*,k)` you always get — and, alongside them, any number
+`m >= 1`:
+
+```{r dstudy-unit, eval = requireNamespace("glmmTMB", quietly = TRUE)}
+icc(ratings, score, subject, rater,
+  type = "agreement", unit = c("single", "average", 6), seed = 1
+)
+```
+
+The extra row is labeled `ICC(A,6)`, and it is the same quantity `d_study()`
+projects: the `m = 6` row of `proj` above carries the same estimate. The
+*interval* matches too, but only because both calls pass the same `seed` — the
+interval is Monte-Carlo, so two unseeded runs of the same projection agree on
+the estimate and differ in the last digits of the endpoints. Which one you reach
+for is a matter of shape, not of arithmetic: `unit` adds a row to a coefficient
+table, `d_study()` returns a projection object you can `tidy()`, `glance()` and
+plot.
+
+**Fixed raters cannot be projected to absolute agreement.** The rater term for
+[*fixed* raters](glossary.html#fixed-vs--random-raters) is the variance of
+exactly the raters you observed, so there is no wider pool for a hypothetical
+sixth rater to be drawn from, and `icc()` refuses rather than returning a
+number:
+
+```{r dstudy-unit-fixed, error = TRUE, eval = requireNamespace("glmmTMB", quietly = TRUE)}
+icc(ratings, score, subject, rater,
+  type = "agreement", raters = "fixed", unit = c("single", "average", 6),
+  seed = 1
+)
+```
+
+Consistency has no such problem — the rater term drops out of it — which is why
+the two remedies the message names are to project with `raters = "random"`, or
+to ask for a fixed-rater `type = "consistency"` projection instead. The refusal
+is raised only when absolute agreement is *all* you asked for: a default
+`icc()` call reports both error definitions, and there the consistency
+projection is kept and you are told the agreement one was dropped.
+
 **Projection is extrapolation.** The rater variance $\sigma^2_r$ is estimated from
 only as many raters as you observed, so projecting far beyond that design leans
 hard on that estimate. The Monte-Carlo interval widens honestly to reflect this
 rather than pretending to a precision it lacks — and projecting absolute agreement
-is refused for [*fixed* raters](glossary.html#fixed-vs.-random-raters), where there is
+is refused for [*fixed* raters](glossary.html#fixed-vs--random-raters), where there is
 no wider rater universe to
 generalize to (use `raters = "random"`). The [D-study also works on a multilevel
 fit](multilevel-designs.html#how-many-raters-a-multilevel-d-study), projecting the
