@@ -80,7 +80,7 @@ alternative home → not attempted; these two values are the whole scope.
       to what auto-inference returns on the same data.
 - [x] T2: Write the AC1 and AC3 chunks into `multilevel-designs.Rmd`; reconcile
       the `:120-123` bullet against the evaluated output.
-- [ ] T3: Write the numeric-`unit` chunk into `d-studies-and-replicates.Rmd`
+- [x] T3: Write the numeric-`unit` chunk into `d-studies-and-replicates.Rmd`
       and document the fixed-agreement projection fence beside it.
 - [ ] T4: Add the backing tests to `tests/testthat/test-vignette-claims.R`,
       RED-first; run the three planted-perturbation forms per call.
@@ -95,6 +95,7 @@ alternative home → not attempted; these two values are the whole scope.
 - 2026-08-22: question gate — user chose the live `error = TRUE` chunk for the fixed-rater projection refusal (the idiom `choosing-an-icc.Rmd:197` already uses) and chose to widen the "`design` is for missing-cell ambiguity" framing to name the label-convention case too; the demonstration-data question was returned as "decide for me" and settled on the recommendation (the shipped `school` table).
 - 2026-08-22: T1 — reused the vignette's existing `school_d3` relabelling rather than building a Design-3 fixture. Measured on the branch tip: `icc(school_d3, ..., design = "nested_in_subjects", seed = 1)` returns a `tidy()` identical to the same call without `design`, so a chunk there would show syntax only. The demonstration therefore runs on the shipped `school` table, whose rater labels 1-4 repeat in every classroom: inference reports Design 1, `design = "nested_in_clusters"` reports Design 2 (`ICC(A,1)` 0.429), `design = "nested_in_subjects"` reports Design 3 (`ICC(1)` 0.412).
 - 2026-08-22: T2 — `multilevel-designs.Rmd` gains a "Declaring the design when the labels are ambiguous" subsection carrying the two explicit-`design` chunks (AC1 + AC3), and the framing paragraph above the Design 2/3 bullets now names both occasions for `design` instead of missing-cell ambiguity alone. Every prose claim in the new subsection was checked against a `knitr::knit()` of the edited vignette. The `:120-123` Design 3 bullet was checked against that output and needed no correction: the fit reports `ICC(1)` / `ICC(k)`, an agreement-only header, and `residual 0.609 (rater confounded)`.
+- 2026-08-22: T3 — `d-studies-and-replicates.Rmd` gains a "One projected value, without a projection object" subsection: an evaluated `unit = c("single", "average", 6)` call on `ratings` (adds the `ICC(A,6)` row, 0.710 [0.245, 0.937]) and an `error = TRUE` chunk showing the fixed-rater agreement refusal live. The backticked-only mention at the old `:49` is removed, the subsection replacing it. Claims checked against a `knitr::knit()` of the edited vignette; the `d_study(fit, m = 6, seed = 1)` equality of estimate and interval was measured separately and is pinned by the T4 test rather than asserted in the article.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
