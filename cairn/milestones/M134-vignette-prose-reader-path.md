@@ -1,6 +1,6 @@
 # M134: Vignette prose pass — the reader path, and the house style standard
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -117,7 +117,7 @@ refused, D-021 stands.
       ruler's four documented blind spots into the doctrine's prose boundary.
 - [x] T12 Action the amendment gate's other dispositions: the two R6 drifts the
       second review found, and `cairn/DESIGN.md`'s doctrine-module registry.
-- [ ] T13 Re-run the AC5 verify block.
+- [x] T13 Re-run the AC5 verify block.
 
 ## Work log
 
@@ -157,6 +157,8 @@ refused, D-021 stands.
 - 2026-08-23: amendment gate chose documenting the ruler's four blind spots over repairing it, because the list-fragmentation repair moves the baseline figures for all eight vignettes mid-return; a ROADMAP candidate row carries the hardening and the two criteria-shape findings forward. Falsified by M135 or M136 hitting one of the four shapes in a file it must measure.
 - 2026-08-23: T11 — R1 restated in `cairn/doctrine/prose-style.md` and Scope (byte-identical text); the doctrine's `.Rmd` strip order corrected to comments-before-fences to match `strip_rmd()`, and a paragraph added naming the four boundaries. Page at 115 lines / 6,486 bytes, inside its stated 120-line / 8,000-byte budget.
 - 2026-08-23: T12 — `getting-started.Rmd`'s "the raters barely disagree, so the ratings are highly reliable" restored to the original's conjoined "and"; `choosing-an-icc.Rmd`'s "as error, as when one judge scores consistently higher" restored to the appositive definition "a systematic difference between raters, one judge scoring consistently higher than another, as error". `cairn/DESIGN.md`'s doctrine-module registry gained `prose-style.md`. Ruler re-run after the edits: 0 dashes on all three files, 0 over-35 in `getting-started.Rmd` (longest 32) and `choosing-an-icc.Rmd` (longest 35), 1 in `glossary.Rmd` (64 words) — AC2 unchanged.
+- 2026-08-23: T13 — verify block re-run on the amended branch. `devtools::document()` no diff (clean `git status` after); `devtools::test()` no Failed section, exit 0, 3 warnings and 2 skips, the same set as T7 and T10; `devtools::check(document = FALSE, args = "--no-manual")` raw `Status: 1 NOTE`, 0 errors / 0 warnings, vignettes re-built OK in 22s, duration 13m 24s. The NOTE is the `tests/spelling.Rout` comparison and is pre-existing: `spelling::spell_check_package()` returns 31 words on this branch, the count recorded at `72f9cc2`, T7 and T10, none introduced here. `python3 data-raw/check-record-claims.py --live` exit 0 (6 claims, 0 failures); `pkgdown::check_pkgdown()` "No problems found"; `cairn_validate` exit 0, all checks pass, one advisory (sizing tripwires). All tasks checked; status → review.
+- 2026-08-23: hygiene note for the maintainer — `cairn/ROADMAP.md` is at 23,996 bytes against its 24,000-byte budget after this milestone's candidate row. The next row cannot be added without retiring one.
 
 ## Decisions
 
