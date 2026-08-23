@@ -2,7 +2,7 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M132: Make the two prose-only `icc()` argument values reachable from the docs
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -84,7 +84,7 @@ alternative home → not attempted; these two values are the whole scope.
       and document the fixed-agreement projection fence beside it.
 - [x] T4: Add the backing tests to `tests/testthat/test-vignette-claims.R`,
       RED-first; run the three planted-perturbation forms per call.
-- [ ] T5: Full gate-lite sweep.
+- [x] T5: Full gate-lite sweep.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
@@ -99,6 +99,7 @@ alternative home → not attempted; these two values are the whole scope.
 - 2026-08-22: T4 — two tests added to `tests/testthat/test-vignette-claims.R`: one pinning the declared-`design` section (inference reads the reused labels as crossed with both levels; `nested_in_clusters` gives subject-only with a rater component and `ICC(A,1)` 0.429; `nested_in_subjects` gives `ICC(1)`/`ICC(k)` 0.412 with no rater component; the three readings differ; and a matching declaration on the pupil-unique relabelling returns a `tidy()` equal to inference's), one pinning the numeric-`unit` section (`ICC(A,6)` row 0.710, estimate and both endpoints equal to `d_study(fit, m = 6, seed = 1)`) and one pinning the refusal (classed `intraclass_unidentified`, both named remedies return a number, and the default two-type call drops the agreement projection with a message while keeping `ICC(C,6)`). Suite for the file: 0 failures, 240 passing, 3 skipped.
 - 2026-08-22: AC4 — 12 perturbations planted one at a time and reverted, each run through `testthat::test_file()`; every one red. Three forms per call for the three value-returning calls: changed numeral / changed `design` or `unit` argument / removed argument (`nested_in_clusters` 1/4/4 failures, `nested_in_subjects` 1/5/4, numeric `unit` 1/5/5). The `error = TRUE` refusal call returns no number, so the numeral form is inapplicable there and the changed-expectation form was planted as a changed expected condition class instead (`intraclass_unidentified` -> `intraclass_unsupported`, 1 failure), alongside changed `raters` (1) and removed `unit` (1).
 - 2026-08-22: T5 — `air format` rewrote the new test calls to one-argument-per-line, so all 12 perturbations were planted and run again against the formatted text that ships; every one red, with the same failure counts as the first pass except P10 (234 passing vs 235, the formatted file's own count). NEWS.md gains two Documentation bullets, one per article.
+- 2026-08-22: T5 sweep — `NOT_CRAN=true CI=true devtools::test()` 0 failures / 8524 passing / 25 skipped (2 warnings, both in files this branch does not touch: `test-icc-lavaan-multilevel.R:402` lavaan negative lv variances, `test-icc-type-vector.R:286`); `air format --check .` exit 0; `devtools::document()` no diff; `pkgdown::check_pkgdown()` "No problems found" and `build_site()` exit 0, with the new section's anchor resolving in `docs/articles/multilevel-designs.html`; `cairn_validate` exit 0, all checks passed. `R CMD check --as-cran` on `R CMD build` tarballs of the branch tip and of `git archive origin/main` (e086166), same command, same machine: both `Status: 1 ERROR, 1 WARNING, 3 NOTEs` with identical headings — the ERROR and WARNING are this machine's missing `pdflatex` (`checking PDF version of manual`), present on both sides, so the branch is no worse than main's. A first branch check reported a fourth NOTE (`Non-standard file/directory found at top level: 'figure'`) from a gitignored `figure/` directory my own vignette knits had left in the working tree; it was deleted and the check re-run.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
