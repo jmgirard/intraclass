@@ -57,7 +57,7 @@ refused, D-021 stands.
 
 ## Acceptance criteria
 
-- [ ] AC1 `data-raw/prose-profile.py` is committed, implements R1's counted
+- [x] AC1 `data-raw/prose-profile.py` is committed, implements R1's counted
       class and R2's sentence rule as `cairn/doctrine/prose-style.md` defines
       them, counts `#'` lines outside `@examples` in `.R` mode, and is
       byte-identical between its baseline run at `72f9cc2` and its final run.
@@ -177,6 +177,7 @@ refused, D-021 stands.
 - 2026-08-23: T15 — **D-034** appended: a doctrine module may enter `cairn/doctrine/` either by graduation from `cairn/LESSONS.md` or by being authored directly as a standard the repo will hold work to, the rest of D-033 standing. `cairn/DESIGN.md`'s registry line now reads "**Doctrine modules** (`cairn/doctrine/`, transferable craft standards — D-033, D-034):", which no longer asserts a graduation `prose-style.md` does not have (third-pass finding 4). The doctrine's pinned-clause exemption (finding 5) landed with the T14 doctrine edit: R1/R2's "reports zero" now carries "The one exemption is a clause a test pins verbatim and that admits no sentence break: a pass carrying such a clause records it where it records the pass, with the clause's word count and the sentence's." Five orphan wraps reflowed (finding 6, plus the `[S]` lens's `glossary.Rmd:82`) at `choosing-an-icc.Rmd`, `getting-started.Rmd`, and three sites in `glossary.Rmd`; whitespace only, verified by the three files' whitespace-collapsed token streams diffing empty against the previous commit, and the ruler unchanged at 0 / 0 / 0 dashes and 0 / 0 / 1 over 35. Long-line counts hold at 0 / 1 / 5. The ROADMAP candidate row's blind-spot list re-pointed at the current four.
 - 2026-08-23: hygiene note for the maintainer, restated — `cairn/ROADMAP.md` is at 23,999 bytes against its 24,000-byte budget. The candidate row's edit was sized to fit; the next row cannot be added without retiring one.
 - 2026-08-23: T16 — verify block re-run on the repaired branch. `devtools::document()` no diff (clean `git status` after); `devtools::test()` FAIL 0 | WARN 3 | SKIP 2 | PASS 8862, the same figures as T7, T10 and T13; `devtools::check(document = FALSE, args = "--no-manual")` raw `Status: 1 NOTE`, 0 errors / 0 warnings, no `* checking …` line reporting WARNING or ERROR, vignettes re-built OK in 23s, duration 14m 16s. The NOTE is the `tests/spelling.Rout` comparison and is pre-existing: `spelling::spell_check_package()` returns 31 words on this branch, the count recorded at `72f9cc2`, T7, T10 and T13, none introduced here. `python3 data-raw/check-record-claims.py --live` exit 0 (6 claims, 0 failures); `pkgdown::check_pkgdown()` "No problems found"; `cairn_validate` exit 0, all checks pass, one advisory (16 tasks against the 10-task split tripwire). All tasks checked; status → review.
+- 2026-08-23: review fourth pass, checkpoint (mid-phase) — `main` still unmoved (0 behind / 20 ahead), PR #143 refreshed. AC1-AC4 verified with fresh evidence at HEAD and ticked; the `72f9cc2` baseline reproduces exactly (744 / 81 / 226 / 11 / 55; in-scope 358 / 20 / 66) under the T14 ruler, and a six-shape probe confirms R1's counted class. `cairn_validate` exit 0, all checks pass, one advisory (16 tasks against the 10-task tripwire). `pkgdown::check_pkgdown()` clean; `check-record-claims.py --live` exit 0; `devtools::document()` no diff. AC5's `devtools::test()` and `devtools::check()` still running. Three lenses spawned; the prior-review lens returned no findings.
 
 ## Decisions
 
@@ -781,3 +782,57 @@ than the prose".
 Findings 1, 2, 6 and 7 carry no status change and are directed into the return
 stint; findings 4 and 5 are the maintainer's at re-review. AC2, AC3, AC4 and AC5
 all verified at HEAD, both `[S]` lenses clean, the consistency gate green.
+
+### Fourth pass
+
+Reviewed 2026-08-23 on `m134-vignette-prose-reader-path` at PR #143, after the
+T14–T16 repairs. `git fetch` then `git rev-list --left-right --count
+origin/main...HEAD` reports 0 behind / 20 ahead, and local `main` is level with
+`origin/main`, so `main` has still not moved since the branch was cut and no
+merge was needed before gathering evidence. Branch re-pushed; PR #143 refreshed.
+
+#### Acceptance criteria
+
+- **AC1 — pass.** `data-raw/prose-profile.py` has three commits (`96b78b4` T1,
+  `14e7dce` T8, `b092c3a` T14); the blob at HEAD and the worktree file both hash
+  to `8a2a4cee`, so the T14 re-baseline run and the final run used the same
+  bytes. The `72f9cc2` baseline was re-derived at review with those bytes over
+  the eight `vignettes/*.Rmd` blobs extracted from that commit: 744 fragments /
+  81 over 35 / 226 dashes / 11 long parentheticals / 55 semicolons, the three
+  in-scope files holding 358 / 20 / 66 — reproducing the Scope table exactly.
+  Read against `cairn/doctrine/prose-style.md` and probed rather than read:
+  a probe file carrying `sentence---And`, `An ICC—Intraclass correlation—is`,
+  `Spearman--Brown`, `McGraw--Wong`, `10--20`, a spaced ` --- ` break twice, and
+  four separator-row shapes (`|--- |---`, `|---|`, `--- | ---`, `| :---: | ---: |`)
+  scored 4 dashes — exactly the class R1 defines: the lowercase-left unspaced
+  break, the closing `correlation—is`, and both spaced breaks, with every
+  proper-noun join, the numeric range, and all four separator rows excluded. The
+  T14 repair closes the leading- and trailing-pipe-optional gap the third pass
+  returned on. `SENTENCE_LIMIT` is 35, counted strictly greater. `.R` mode probed
+  independently: a file with roxygen prose in the title, `@param` and `@return`
+  and a dash inside `@examples` plus two plain `#` comments scored 3 dashes —
+  `#'` lines outside `@examples` only.
+- **AC2 — pass.** Ruler re-run per file at review: `getting-started.Rmd` 0
+  dashes, 0 over 35 (longest 32); `choosing-an-icc.Rmd` 0 dashes, 0 over 35
+  (longest 35); `glossary.Rmd` 0 dashes, 1 over 35 (64 words). The one long
+  sentence is body prose in the **Burch interval** entry. The clause
+  `residual_template()` returns was reconstructed from
+  `tests/testthat/test-doc-skew-caveat.R:2265-2283` with the rendered `1.2963`
+  and `100` cells, counts 58 words by the ruler's own `words()`, and is present
+  verbatim both in the reported sentence and in `glossary.Rmd`'s
+  whitespace-joined text; 64 − 58 = 6 ≤ 8. `residual_expected_runs` requires the
+  clause in `glossary.Rmd` and `test-doc-skew-caveat.R` passes, so the pin holds.
+- **AC3 — pass.** `cairn/doctrine/prose-style.md` exists (118 lines, 6,752
+  bytes, inside its own stated 120-line / 8,000-byte budget). Its R1–R6 block
+  was compared against Scope's after whitespace-collapsing both: byte-identical.
+- **AC4 — pass.** `git diff 72f9cc2 -- <the three files>` is 32 hunks; the
+  qualifier grep over added **and** removed lines matches 52 lines across 16
+  hunks (up from 46 / 14 at the third pass — T15's reflows moved hunk
+  boundaries). Each of the 16 was read added-against-removed at review: all
+  EQUAL domain, every match a dash, semicolon, or parenthesis converted to a
+  sentence break with the quantified claim carried over. The scope-critical
+  strings survive verbatim: `glossary.Rmd`'s "on the two grids this package has
+  measured that vary only the subject effect", `getting-started.Rmd`'s "the
+  default interval does not rely on a textbook formula that misbehaves when a
+  variance is near zero", "reports every defined formulation", and
+  `choosing-an-icc.Rmd`'s restored appositive.
