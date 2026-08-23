@@ -101,6 +101,11 @@ refused, D-021 stands.
       returns, compare the added claim's domain against the removed one and
       repair any widening in place.
 - [x] T7 Run the AC5 verify block; re-knit nothing (no roxygen touched).
+- [x] T8 Repair the ruler's proper-noun exclusion so it requires capitalization
+      on both sides of the dash, and re-run the `72f9cc2` baseline with the
+      corrected bytes.
+- [ ] T9 Action the review findings the gate directs.
+- [ ] T10 Re-run the AC5 verify block.
 
 ## Work log
 
@@ -125,6 +130,8 @@ refused, D-021 stands.
 - 2026-08-23: all tasks checked; status → review.
 - 2026-08-23: review checkpoint (mid-phase) — PR #143 opened as draft; `main` unmoved since the branch was cut. AC1–AC4 verified with fresh evidence and ticked. AC5 pending: `devtools::document()` no diff and `pkgdown::check_pkgdown()` clean and `check-record-claims.py --live` exit 0 already recorded, `devtools::test()` and `devtools::check()` still running. `cairn_validate` exit 0, all checks pass. Three review lenses spawned; the prior-review lens returned no findings.
 - 2026-08-23: review returned M134 to `in-progress`. Failed: **AC1** — `data-raw/prose-profile.py`'s proper-noun exclusion (`before.isalnum() and after.isalnum() and after.isupper()`) is broader than the class `cairn/doctrine/prose-style.md` defines, so the ruler does not count an unspaced dash before a capitalized word. Reproduced on a five-site probe file: three genuine sentence-level breaks, one counted. Fixing it breaks AC1's byte-identity clause, so the `72f9cc2` baseline is re-run with the corrected ruler and the Scope figures restated, per the doctrine's own frozen-ruler rule; T3-T5 reopen if the corrected ruler reports non-zero on the three files. AC2/AC3/AC4 verified and ticked before the return; AC5 incomplete. Eight further [O] findings recorded in the Review section for triage, no status change of their own. First defect return on this milestone.
+
+- 2026-08-23: T8 — `count_dashes()` repaired: the proper-noun exclusion now requires the word left of the dash to be capitalized as well as the character right of it, so `sentence---And` and `spaces—Raters` are counted while `Spearman--Brown` and `10--20` stay excluded. Verified on a five-site probe file: 1 counted before the fix, 3 after, the two excluded sites unchanged. Re-ran the `72f9cc2` baseline with the corrected bytes over the eight `vignettes/*.Rmd` blobs: 744 fragments / 81 over 35 / 226 dashes / 11 long parentheticals / 55 semicolons, the three in-scope files holding 358 / 20 / 66 — identical to the figures Scope already records, so no Scope amendment is owed. The three in-scope files still report 0 dashes under the corrected ruler, so T3–T5 do not reopen. AC1's byte-identity clause now reads against the corrected bytes: the baseline re-run and the final run use the same file.
 
 ## Decisions
 

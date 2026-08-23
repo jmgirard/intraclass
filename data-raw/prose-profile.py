@@ -217,6 +217,14 @@ def sentences(paragraph: str) -> list[str]:
     return [s for s in out if words(s)]
 
 
+def left_word(text: str, end: int) -> str:
+    """The unbroken alphanumeric run ending at `end` (exclusive), or ``""``."""
+    start = end
+    while start > 0 and text[start - 1].isalnum():
+        start -= 1
+    return text[start:end]
+
+
 def count_dashes(text: str) -> int:
     """R1's counted class: dashes standing in for sentence-level punctuation."""
     total = 0
@@ -225,11 +233,11 @@ def count_dashes(text: str) -> int:
         after = text[match.end()] if match.end() < len(text) else ""
         if before.isdigit() and after.isdigit():
             continue  # numeric or page range
-        if (
-            before.isalnum()
-            and after.isalnum()
-            and after.isupper()
-        ):
+        # A proper-noun join is capitalized on BOTH sides (Spearman--Brown).
+        # Testing only the right side would excuse `sentence---And`, which is
+        # the ordinary unspaced form of the break R1 bans.
+        left = left_word(text, match.start())
+        if left[:1].isupper() and after.isalnum() and after.isupper():
             continue  # proper-noun join (Spearman--Brown)
         total += 1
     return total
