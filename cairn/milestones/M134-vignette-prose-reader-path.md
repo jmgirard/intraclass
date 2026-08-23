@@ -5,7 +5,7 @@
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
-- **Branch/PR:** `m134-vignette-prose-reader-path`
+- **Branch/PR:** `m134-vignette-prose-reader-path` / https://github.com/jmgirard/intraclass/pull/143
 
 ## Goal
 
@@ -51,11 +51,11 @@ refused, D-021 stands.
 
 ## Acceptance criteria
 
-- [ ] AC1 `data-raw/prose-profile.py` is committed, implements R1's counted
+- [x] AC1 `data-raw/prose-profile.py` is committed, implements R1's counted
       class and R2's sentence rule as `cairn/doctrine/prose-style.md` defines
       them, counts `#'` lines outside `@examples` in `.R` mode, and is
       byte-identical between its baseline run at `72f9cc2` and its final run.
-- [ ] AC2 `python3 data-raw/prose-profile.py 'vignettes/getting-started.Rmd'`
+- [x] AC2 `python3 data-raw/prose-profile.py 'vignettes/getting-started.Rmd'`
       and the same command for `choosing-an-icc.Rmd` and `glossary.Rmd` each
       report 0 dash-as-punctuation occurrences. `getting-started.Rmd` and
       `choosing-an-icc.Rmd` each report 0 sentences over 35 words. Every
@@ -68,9 +68,9 @@ refused, D-021 stands.
       sentence break inside it leaves a `.` the template does not carry. If it
       ever admits a split, or the test stops matching verbatim, the target for
       `glossary.Rmd` returns to 0.
-- [ ] AC3 `cairn/doctrine/prose-style.md` exists and states rules R1–R6 as
+- [x] AC3 `cairn/doctrine/prose-style.md` exists and states rules R1–R6 as
       listed in Scope.
-- [ ] AC4 For every hunk of `git diff 72f9cc2 -- vignettes/getting-started.Rmd
+- [x] AC4 For every hunk of `git diff 72f9cc2 -- vignettes/getting-started.Rmd
       vignettes/choosing-an-icc.Rmd vignettes/glossary.Rmd` whose added **or**
       removed lines match `\b(any|each|every|all|only|both|exactly|never|always|full)\b`,
       the added text's claim domain is equal to or narrower than the text it
@@ -123,6 +123,7 @@ refused, D-021 stands.
 - 2026-08-23: NEWS.md gained a Documentation entry for the pass, worded to describe the act rather than assert a standing prose property no test enforces. Doc-claim pins re-run clean after it.
 - 2026-08-23: AC1's byte-identity holds — `data-raw/prose-profile.py` has one commit (`96b78b4`, T1) and `git diff 96b78b4 -- data-raw/prose-profile.py` is empty, so the baseline run and the final run used the same bytes.
 - 2026-08-23: all tasks checked; status → review.
+- 2026-08-23: review checkpoint (mid-phase) — PR #143 opened as draft; `main` unmoved since the branch was cut. AC1–AC4 verified with fresh evidence and ticked. AC5 pending: `devtools::document()` no diff and `pkgdown::check_pkgdown()` clean and `check-record-claims.py --live` exit 0 already recorded, `devtools::test()` and `devtools::check()` still running. `cairn_validate` exit 0, all checks pass. Three review lenses spawned; the prior-review lens returned no findings.
 
 ## Decisions
 
@@ -139,3 +140,40 @@ the harness being relaxed for another reason — at which point AC2's target for
 `glossary.Rmd` returns to 0.
 
 ## Review
+
+Reviewed 2026-08-23 on `m134-vignette-prose-reader-path` at PR #143. Default
+branch `main` had not moved since the branch was cut (`origin/main` = `3652665`,
+branch 0 behind / 8 ahead), so no merge was needed before gathering evidence.
+
+### Acceptance criteria
+
+- **AC1 — pass.** `data-raw/prose-profile.py` is committed with exactly one
+  commit touching it (`96b78b4`, T1); `git diff 96b78b4 -- data-raw/prose-profile.py`
+  is empty and both blobs hash to `291d714e`, so the baseline run and the final
+  run used identical bytes. Read against `cairn/doctrine/prose-style.md`: `RE_DASH`
+  matches `---`/em dash/`--` longest-first, `count_dashes()` skips digit-flanked
+  dashes and capitalized proper-noun joins, `strip_rmd()` removes the YAML front
+  matter and the markdown table rule row, and `SENTENCE_LIMIT` is 35 counted
+  strictly greater. `strip_roxygen()` keeps `#'` lines and suppresses each
+  `@examples` block until the next `#' @` tag.
+- **AC2 — pass.** Ruler re-run on each file: `getting-started.Rmd` 0 dashes,
+  0 sentences over 35 (longest 32); `choosing-an-icc.Rmd` 0 dashes, 0 over 35
+  (longest 35); `glossary.Rmd` 0 dashes, 1 over 35 (64 words). The one long
+  sentence is body prose in the **Burch interval** entry. Its 58-word residual
+  clause from `residual_template()` is present verbatim in `glossary.Rmd` once
+  line wrapping is joined, and 64 − 58 = 6 ≤ 8.
+- **AC3 — pass.** `cairn/doctrine/prose-style.md` exists (97 lines) and states
+  R1–R6 with wording matching the Scope list; R1's four exclusions and R2's
+  35-word limit are stated as Scope has them.
+- **AC4 — pass.** `git diff 72f9cc2 -- <the three files>` is 33 hunks; the
+  qualifier grep over added **and** removed lines matches 42 lines across 14
+  hunks. (T6 recorded 18 hunks; the later R6 repairs merged hunk boundaries,
+  and the matching-line count is unchanged.) All 14 read as EQUAL domain: every
+  match is a dash, semicolon, or parenthesis converted to a sentence break with
+  the quantified claim carried over verbatim. The two claims most at risk were
+  checked in particular — `getting-started.Rmd` keeps the restrictive clause in
+  "the textbook formulas *that misbehave when a variance is near zero*", so it
+  is not a claim about textbook formulas generally, and the **Burch interval**
+  entry keeps "on the two grids this package has measured that vary only the
+  subject effect" attached to its narrowness claim.
+
