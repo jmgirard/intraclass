@@ -138,7 +138,7 @@ projection is kept and you are told the agreement one was dropped.
 only as many raters as you observed, so projecting far beyond that design leans
 hard on that estimate. The Monte-Carlo interval widens honestly to reflect this
 rather than pretending to a precision it lacks — and projecting absolute agreement
-is refused for [*fixed* raters](glossary.html#fixed-vs.-random-raters), where there is
+is refused for [*fixed* raters](glossary.html#fixed-vs--random-raters), where there is
 no wider rater universe to
 generalize to (use `raters = "random"`). The [D-study also works on a multilevel
 fit](multilevel-designs.html#how-many-raters-a-multilevel-d-study), projecting the

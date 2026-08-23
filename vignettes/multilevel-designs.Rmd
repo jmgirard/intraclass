@@ -257,7 +257,7 @@ nested — `icc()` does not guess; you resolve it by declaring `design = "crosse
 ## Fixed raters in a multilevel design
 
 The multilevel examples so far treat raters as a [**random**
-sample](glossary.html#fixed-vs.-random-raters) — the recommended
+sample](glossary.html#fixed-vs--random-raters) — the recommended
 default, which generalizes beyond the raters you happened to use. When the observed
 raters *are* the entire population of interest (a fixed panel of examiners, say), pass
 `raters = "fixed"`. As in the single-level case, the rater main effect is then the

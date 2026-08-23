@@ -101,6 +101,7 @@ alternative home → not attempted; these two values are the whole scope.
 - 2026-08-22: T5 — `air format` rewrote the new test calls to one-argument-per-line, so all 12 perturbations were planted and run again against the formatted text that ships; every one red, with the same failure counts as the first pass except P10 (234 passing vs 235, the formatted file's own count). NEWS.md gains two Documentation bullets, one per article.
 - 2026-08-22: T5 sweep — `NOT_CRAN=true CI=true devtools::test()` 0 failures / 8524 passing / 25 skipped (2 warnings, both in files this branch does not touch: `test-icc-lavaan-multilevel.R:402` lavaan negative lv variances, `test-icc-type-vector.R:286`); `air format --check .` exit 0; `devtools::document()` no diff; `pkgdown::check_pkgdown()` "No problems found" and `build_site()` exit 0, with the new section's anchor resolving in `docs/articles/multilevel-designs.html`; `cairn_validate` exit 0, all checks passed. `R CMD check --as-cran` on `R CMD build` tarballs of the branch tip and of `git archive origin/main` (e086166), same command, same machine: both `Status: 1 ERROR, 1 WARNING, 3 NOTEs` with identical headings — the ERROR and WARNING are this machine's missing `pdflatex` (`checking PDF version of manual`), present on both sides, so the branch is no worse than main's. A first branch check reported a fourth NOTE (`Non-standard file/directory found at top level: 'figure'`) from a gitignored `figure/` directory my own vignette knits had left in the working tree; it was deleted and the check re-run.
 - 2026-08-22: review — three fresh-context reviewers ([O] diff-bug, [S] blame-history, [S] prior-PR-comments) returned 12 findings; 9 fixed on the branch, 2 sent to candidate rows, 1 rejected as presentation, plus a gate finding fixing a stale registered record claim that was reddening `check-references` on the default branch. Every acceptance criterion passed as written on fresh evidence; no return.
+- 2026-08-22: gate — maintainer chose to fix the three pre-existing broken glossary anchors on this branch as well, and to record both follow-up findings as candidate ROADMAP rows.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
@@ -234,7 +235,10 @@ design test complements rather than duplicates the existing inference test.
    link and the target id now match. Three further instances of the same wrong
    form are pre-existing on the default branch
    (`d-studies-and-replicates.Rmd:141`, `multilevel-designs.Rmd:251`,
-   `comparison-with-other-packages.Rmd:183`) — carried to the gate.
+   `comparison-with-other-packages.Rmd:183`) — carried to the gate, where the
+   maintainer chose to fix them here too; all three corrected, and a sweep of
+   every `glossary.html#` link in the built site now finds no unresolved
+   anchor.
    The GitHub inline-comment probe returned empty, so no PR-thread walk was run.
 
 **Gate finding outside the fan-out.** `check-references` was red on PR #141 and
