@@ -1,6 +1,6 @@
 # M134: Vignette prose pass — the reader path, and the house style standard
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -126,7 +126,7 @@ refused, D-021 stands.
 - [x] T15 Action the gate's other dispositions: the `cairn/doctrine/`
       admission decision and `cairn/DESIGN.md`'s registry line, the doctrine's
       pinned-clause exemption, and the orphan line wraps.
-- [ ] T16 Re-run the AC5 verify block.
+- [x] T16 Re-run the AC5 verify block.
 
 ## Work log
 
@@ -176,6 +176,7 @@ refused, D-021 stands.
 - 2026-08-23: Coverage amended (third-pass finding 7): AC1 → T1, T8, T11, T14; AC2 gains T14; AC3 gains T11 and T15; AC5 gains T10, T13, T16.
 - 2026-08-23: T15 — **D-034** appended: a doctrine module may enter `cairn/doctrine/` either by graduation from `cairn/LESSONS.md` or by being authored directly as a standard the repo will hold work to, the rest of D-033 standing. `cairn/DESIGN.md`'s registry line now reads "**Doctrine modules** (`cairn/doctrine/`, transferable craft standards — D-033, D-034):", which no longer asserts a graduation `prose-style.md` does not have (third-pass finding 4). The doctrine's pinned-clause exemption (finding 5) landed with the T14 doctrine edit: R1/R2's "reports zero" now carries "The one exemption is a clause a test pins verbatim and that admits no sentence break: a pass carrying such a clause records it where it records the pass, with the clause's word count and the sentence's." Five orphan wraps reflowed (finding 6, plus the `[S]` lens's `glossary.Rmd:82`) at `choosing-an-icc.Rmd`, `getting-started.Rmd`, and three sites in `glossary.Rmd`; whitespace only, verified by the three files' whitespace-collapsed token streams diffing empty against the previous commit, and the ruler unchanged at 0 / 0 / 0 dashes and 0 / 0 / 1 over 35. Long-line counts hold at 0 / 1 / 5. The ROADMAP candidate row's blind-spot list re-pointed at the current four.
 - 2026-08-23: hygiene note for the maintainer, restated — `cairn/ROADMAP.md` is at 23,999 bytes against its 24,000-byte budget. The candidate row's edit was sized to fit; the next row cannot be added without retiring one.
+- 2026-08-23: T16 — verify block re-run on the repaired branch. `devtools::document()` no diff (clean `git status` after); `devtools::test()` FAIL 0 | WARN 3 | SKIP 2 | PASS 8862, the same figures as T7, T10 and T13; `devtools::check(document = FALSE, args = "--no-manual")` raw `Status: 1 NOTE`, 0 errors / 0 warnings, no `* checking …` line reporting WARNING or ERROR, vignettes re-built OK in 23s, duration 14m 16s. The NOTE is the `tests/spelling.Rout` comparison and is pre-existing: `spelling::spell_check_package()` returns 31 words on this branch, the count recorded at `72f9cc2`, T7, T10 and T13, none introduced here. `python3 data-raw/check-record-claims.py --live` exit 0 (6 claims, 0 failures); `pkgdown::check_pkgdown()` "No problems found"; `cairn_validate` exit 0, all checks pass, one advisory (16 tasks against the 10-task split tripwire). All tasks checked; status → review.
 
 ## Decisions
 
