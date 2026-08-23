@@ -527,11 +527,38 @@ icc(
 
 ## Value
 
-An `icc` object: a list with the estimate table, variance components,
-design, engine, interval settings, sample sizes, the fitted model, and
-the call. Use [tidy()](https://generics.r-lib.org/reference/tidy.html),
-[glance()](https://generics.r-lib.org/reference/glance.html), and the
-`print`/`summary` methods.
+`icc()` returns an `icc` object: a list with the estimate table,
+variance components, design, engine, interval settings, sample sizes,
+the fitted model, and the call.
+
+The methods documented on this page return:
+
+- `tidy.icc()`: a tibble with one row per estimated coefficient carrying
+  the columns `index`, `type`, `level`, `sf_index`, `estimate`,
+  `std.error`, `conf.low`, `conf.high`, `conf.level`, and `method`, plus
+  an `occasions` column – inserted after `index`, so the list above is
+  not a column order – when the design has within-cell replicates.
+
+- `glance.icc()`: a one-row tibble of model-level summaries – the sample
+  sizes, the design flags, the effective rater counts, the variance
+  components, and the engine and interval settings.
+
+- `format.icc()`: a character vector holding the printed report, one
+  line per element.
+
+- `print.icc()`: the `icc` object invisibly, having emitted that report.
+
+- `summary.icc()`: the `icc` object invisibly, having emitted the report
+  followed by the interpretive notes.
+
+- `autoplot.icc()`: a `ggplot` object – the coefficient forest plot, or
+  the variance-component decomposition when `what = "components"`.
+
+- `plot.icc()`: the `icc` object invisibly, having drawn that same plot.
+
+`tidy.icc()` and `glance.icc()` implement the
+[tidy()](https://generics.r-lib.org/reference/tidy.html) and
+[glance()](https://generics.r-lib.org/reference/glance.html) generics.
 
 ## Which ICC is this, and when should you use it?
 
@@ -850,12 +877,18 @@ ggplot2::autoplot(fit) # coefficient forest plot (the default)
 
 ggplot2::autoplot(fit, what = "components") # variance-component decomposition
 
-ratings <- data.frame(
-  subject = factor(rep(1:6, 4)),
-  rater = factor(rep(1:4, each = 6)),
-  score = c(9, 6, 8, 7, 10, 6, 2, 1, 4, 1, 5, 2,
-            5, 3, 6, 2, 6, 4, 8, 2, 8, 6, 9, 7)
-)
+# `ratings` is the shipped Shrout & Fleiss (1979) worked example: six
+# subjects rated by all four raters, in the long layout `icc()` expects --
+# one rating per row, with the subject, the rater, and the score in columns.
+head(ratings)
+#>   subject rater score
+#> 1       1     1     9
+#> 2       2     1     6
+#> 3       3     1     8
+#> 4       4     1     7
+#> 5       5     1    10
+#> 6       6     1     6
+
 icc(ratings, score, subject, rater, seed = 1)
 #> ── Intraclass correlation: two-way random, absolute agreement & consistency ────
 #> Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)

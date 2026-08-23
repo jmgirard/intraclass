@@ -125,11 +125,15 @@ generalization). Required for a two-way design.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>An <code>icc_recommendation</code> object (a list) with a <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> method. It
+    <p><code>choose_icc()</code> returns an <code>icc_recommendation</code> object (a list). It
 carries the recommended coefficient rows (<code>$rows</code>), the exact <code><a href="icc.html">icc()</a></code> call as
 a string (<code>$call</code>), the per-decision rationale (<code>$rationale</code>), and any notes
 (<code>$notes</code>).</p>
-    </div>
+<p>The methods documented on this page return:</p><ul><li><p><code>format.icc_recommendation()</code>: a character vector holding the printed
+recommendation, one line per element.</p></li>
+<li><p><code>print.icc_recommendation()</code>: the <code>icc_recommendation</code> object invisibly,
+having emitted that recommendation.</p></li>
+</ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Supply the decisions as arguments to get advice programmatically; call

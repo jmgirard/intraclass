@@ -73,12 +73,19 @@ print(x, ...)
 
 ## Value
 
-An `icc_recommendation` object (a list) with a
-[`print()`](https://rdrr.io/r/base/print.html) method. It carries the
-recommended coefficient rows (`$rows`), the exact
+`choose_icc()` returns an `icc_recommendation` object (a list). It
+carries the recommended coefficient rows (`$rows`), the exact
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) call
 as a string (`$call`), the per-decision rationale (`$rationale`), and
 any notes (`$notes`).
+
+The methods documented on this page return:
+
+- `format.icc_recommendation()`: a character vector holding the printed
+  recommendation, one line per element.
+
+- `print.icc_recommendation()`: the `icc_recommendation` object
+  invisibly, having emitted that recommendation.
 
 ## Details
 

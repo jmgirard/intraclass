@@ -407,6 +407,32 @@
 
 ### Documentation
 
+- The [`?icc`](https://jmgirard.github.io/intraclass/reference/icc.md),
+  [`?d_study`](https://jmgirard.github.io/intraclass/reference/d_study.md),
+  and
+  [`?choose_icc`](https://jmgirard.github.io/intraclass/reference/choose_icc.md)
+  help pages now say what each documented method returns. Every one of
+  those pages documents a function together with its
+  [`format()`](https://rdrr.io/r/base/format.html),
+  [`print()`](https://rdrr.io/r/base/print.html), and (as applicable)
+  [`summary()`](https://rdrr.io/r/base/summary.html),
+  [`tidy()`](https://generics.r-lib.org/reference/tidy.html),
+  [`glance()`](https://generics.r-lib.org/reference/glance.html),
+  [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html),
+  and [`plot()`](https://rdrr.io/r/graphics/plot.default.html) methods,
+  but their *Value* sections described only the object the main function
+  returns; each now lists the main function and every method sharing the
+  page, naming the method in full. What these functions return is
+  unchanged.
+
+- [`?icc`](https://jmgirard.github.io/intraclass/reference/icc.md)’s
+  example now calls the shipped `ratings` dataset directly, and shows
+  its first rows so the long, one-rating-per-row layout
+  [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
+  expects is visible on the page. The example previously rebuilt an
+  identical data frame by hand under the same name, shadowing the
+  shipped object for the rest of the page.
+
 - The *Estimation engines* and *Confidence-interval methods* articles
   show the `brms` engine’s output in pre-computed blocks, because
   knitting them would need a Stan toolchain. Those blocks are now
@@ -417,6 +443,7 @@
   actually emits, and the engines article now says that a design this
   small may also report sampler divergences, which the shown output
   omits.
+
 - The README now shows what the plots look like: the
   [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
   forest plot of a default
@@ -426,6 +453,7 @@
   reliability curve projecting that fit to other rater counts. Both
   figures carry alt text. The front page also gains a *Learn more* index
   of the articles and a *Related work* comparison table.
+
 - The [`?icc`](https://jmgirard.github.io/intraclass/reference/icc.md)
   documentation of the classical closed forms no longer claims that
   `"searle"` and `"burch"` give a finite interval on every dataset: on
@@ -436,12 +464,14 @@
   interval is the attained minimum; the averaged projection carries that
   minimum through the Spearman-Brown pole and reports `-Inf`, which a
   default call prints beside it.
+
 - The [`?icc`](https://jmgirard.github.io/intraclass/reference/icc.md)
   reference entry for Burch (2011) now cites the correct article —
   “Assessing the performance of normal-based and REML-based confidence
   intervals for the intraclass correlation coefficient”, *Computational
   Statistics and Data Analysis*, 55, 1018–1028 — matching the glossary’s
   already-corrected entry.
+
 - The *Confidence-interval methods* vignette now covers the four opt-in
   `ci_method` values — `"npbootstrap"`, `"searle"`, `"burch"`, and
   `"mpl"` — with each method’s design fence, determinism, `conf_level`
@@ -451,11 +481,13 @@
   swept by the same mechanical claim-checker that already guards the
   [`?icc`](https://jmgirard.github.io/intraclass/reference/icc.md) MPL
   documentation.
+
 - The package comparison and “related work” documentation no longer
   presents `gtheory` as an alternative package to reach for: it was
   archived from CRAN in March 2025 and is not a dependency. The
   historical numerical agreement between the `lavaan` (SEM) engine and
   `gtheory` is retained as a cited reference.
+
 - `ci_method = "bootstrap"` now documents what its interval and its
   point estimate do at the zero-between-subject-variance boundary:
   because the point comes from the model fit and the endpoints from
@@ -463,6 +495,7 @@
   the reported point. Both numbers are zero to any reading where that
   happens, and **no reported value changed** — a committed sweep records
   the measurement the documentation cites.
+
 - The README no longer describes the Bayesian engine as forthcoming:
   `engine = "brms"` ships, with `ci_method = "posterior"`,
   `posterior_summary`, and `prior`/`brm_args` arguments, and it now
@@ -471,6 +504,7 @@
   also two packages short, and described what an installation retrieves
   rather than what the package declares; it now names every non-base
   entry of the `Imports:` field (`lifecycle` and `tibble` were missing).
+
 - The README’s *Installation* section and the *Estimation engines*
   article now name the dependency the declared `Imports:` field does not
   reveal: `glmmTMB` lists `lme4` in its own `Imports:`, so the `lme4`
@@ -480,6 +514,7 @@
   entry whatever interval method is asked for, and `merDeriv` stays in
   `Suggests:`. `glmmTMB` is the only engine a plain install leaves ready
   to use.
+
 - The *Multilevel designs* vignette no longer says the multilevel design
   is never declared by the user.
   [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
@@ -487,12 +522,14 @@
   cells leave that pattern ambiguous the `design` argument is how you
   resolve it — as the same vignette’s section on incomplete data already
   explained.
+
 - The *Getting started* vignette now shows
   [`summary()`](https://rdrr.io/r/base/summary.html) on a fitted `icc`.
   It reprints the report and appends interpretive notes — for the
   default two-way fit shown there, one per error definition reported
   plus one on what a single rating per cell cannot separate — output no
   vignette displayed before.
+
 - The *D-studies and within-cell replicates* vignette now shows a
   projection as data:
   [`tidy()`](https://generics.r-lib.org/reference/tidy.html) on a
@@ -509,6 +546,7 @@
   call. It also describes the
   [`plot()`](https://rdrr.io/r/graphics/plot.default.html) wrapper for
   [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html).
+
 - [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
   on a
   [`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)
@@ -517,6 +555,7 @@
   matching the one
   [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
   on an `icc` fit already had.
+
 - The *Confidence-interval methods* article’s quantified claims are now
   backed by tests, and reading it through found three of them wrong. It
   said the Monte-Carlo and parametric-bootstrap upper bounds in its

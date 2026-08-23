@@ -83,19 +83,49 @@ glance(x, ...)
 
 ## Value
 
-An `icc_dstudy` object: a tibble with one row per projected point and
-columns `m`, `index` (e.g. `"ICC(A,3)"`), `type`, `estimate`,
-`std.error`, `conf.low`, and `conf.high`, carrying the design and
-interval settings as attributes. If the fitted `icc` reports both error
-definitions (the default), `d_study()` projects **one reliability curve
-per definition** and
+`d_study()` returns an `icc_dstudy` object: a tibble with one row per
+projected point and columns `m`, `index` (e.g. `"ICC(A,3)"`), `type`,
+`estimate`, `std.error`, `conf.low`, and `conf.high`, carrying the
+design and interval settings as attributes. If the fitted `icc` reports
+both error definitions (the default), `d_study()` projects **one
+reliability curve per definition** and
 [`tidy()`](https://generics.r-lib.org/reference/tidy.html) surfaces a
 `type` column to distinguish them; a single-type fit projects a single
 curve. A multilevel projection adds a `level` column (one curve per
-level). Use [tidy()](https://generics.r-lib.org/reference/tidy.html),
-[glance()](https://generics.r-lib.org/reference/glance.html), and
-[`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
-(the reliability curve).
+level), and a replicate projection an `occasions` column.
+
+The methods documented on this page return:
+
+- `tidy.icc_dstudy()`: a tibble with one row per projected point
+  carrying the columns `m`, `index`, `estimate`, `std.error`,
+  `conf.low`, `conf.high`, `conf.level`, and `method`, plus a `type`
+  column when both error definitions are projected, a `level` column for
+  a multilevel projection, and an `occasions` column for a replicate
+  projection. The conditional columns are inserted after `index`
+  (`type`) and after `m` (`level`, `occasions`), so the list above is
+  not a column order.
+
+- `glance.icc_dstudy()`: a one-row tibble of projection-level summaries
+  – the distinct projected rater counts `m` and their range (held at the
+  observed rater count when the sweep is over occasions, so this is not
+  a row count), the error definition(s), the rater treatment, the
+  observed rater count, and the interval settings.
+
+- `format.icc_dstudy()`: a character vector holding the printed
+  projection table, one line per element.
+
+- `print.icc_dstudy()`: the `icc_dstudy` object invisibly, having
+  emitted that table.
+
+- `autoplot.icc_dstudy()`: a `ggplot` object – the reliability curve,
+  faceted by level for a multilevel projection.
+
+- `plot.icc_dstudy()`: the `icc_dstudy` object invisibly, having drawn
+  that curve.
+
+`tidy.icc_dstudy()` and `glance.icc_dstudy()` implement the
+[tidy()](https://generics.r-lib.org/reference/tidy.html) and
+[glance()](https://generics.r-lib.org/reference/glance.html) generics.
 
 ## Projection is extrapolation
 

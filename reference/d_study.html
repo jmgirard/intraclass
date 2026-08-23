@@ -143,15 +143,37 @@ the seed.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>An <code>icc_dstudy</code> object: a tibble with one row per projected point and
-columns <code>m</code>, <code>index</code> (e.g. <code>"ICC(A,3)"</code>), <code>type</code>, <code>estimate</code>, <code>std.error</code>,
-<code>conf.low</code>, and <code>conf.high</code>, carrying the design and interval settings as
-attributes. If the fitted <code>icc</code> reports both error definitions (the default),
-<code>d_study()</code> projects <strong>one reliability curve per definition</strong> and <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code>
-surfaces a <code>type</code> column to distinguish them; a single-type fit projects a
-single curve. A multilevel projection adds a <code>level</code> column (one curve per
-level). Use <a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a>, <a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a>, and
-<code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> (the reliability curve).</p>
+    <p><code>d_study()</code> returns an <code>icc_dstudy</code> object: a tibble with one row per
+projected point and columns <code>m</code>, <code>index</code> (e.g. <code>"ICC(A,3)"</code>), <code>type</code>,
+<code>estimate</code>, <code>std.error</code>, <code>conf.low</code>, and <code>conf.high</code>, carrying the design and
+interval settings as attributes. If the fitted <code>icc</code> reports both error
+definitions (the default), <code>d_study()</code> projects <strong>one reliability curve per
+definition</strong> and <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code> surfaces a <code>type</code> column to distinguish them; a
+single-type fit projects a single curve. A multilevel projection adds a
+<code>level</code> column (one curve per level), and a replicate projection an
+<code>occasions</code> column.</p>
+<p>The methods documented on this page return:</p><ul><li><p><code>tidy.icc_dstudy()</code>: a tibble with one row per projected point carrying
+the columns <code>m</code>, <code>index</code>, <code>estimate</code>, <code>std.error</code>, <code>conf.low</code>,
+<code>conf.high</code>, <code>conf.level</code>, and <code>method</code>, plus a <code>type</code> column when both
+error definitions are projected, a <code>level</code> column for a multilevel
+projection, and an <code>occasions</code> column for a replicate projection. The
+conditional columns are inserted after <code>index</code> (<code>type</code>) and after <code>m</code>
+(<code>level</code>, <code>occasions</code>), so the list above is not a column order.</p></li>
+<li><p><code>glance.icc_dstudy()</code>: a one-row tibble of projection-level summaries –
+the distinct projected rater counts <code>m</code> and their range (held at the
+observed rater count when the sweep is over occasions, so this is not a
+row count), the error definition(s), the rater treatment, the observed
+rater count, and the interval settings.</p></li>
+<li><p><code>format.icc_dstudy()</code>: a character vector holding the printed projection
+table, one line per element.</p></li>
+<li><p><code>print.icc_dstudy()</code>: the <code>icc_dstudy</code> object invisibly, having emitted
+that table.</p></li>
+<li><p><code>autoplot.icc_dstudy()</code>: a <code>ggplot</code> object – the reliability curve,
+faceted by level for a multilevel projection.</p></li>
+<li><p><code>plot.icc_dstudy()</code>: the <code>icc_dstudy</code> object invisibly, having drawn that
+curve.</p></li>
+</ul><p><code>tidy.icc_dstudy()</code> and <code>glance.icc_dstudy()</code> implement the
+<a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a> and <a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a> generics.</p>
     </div>
     <div class="section level2">
     <h2 id="projection-is-extrapolation">Projection is extrapolation<a class="anchor" aria-label="anchor" href="#projection-is-extrapolation"></a></h2>
