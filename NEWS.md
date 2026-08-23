@@ -339,6 +339,16 @@
 
 ## Documentation
 
+* The *Confidence-interval methods* article now opens with a table covering
+  every `ci_method` value: the designs each one computes an interval for, the
+  designs it refuses, and how well the package has checked it. Five of the
+  seven methods rest on two or more independent checks and one rests on a
+  single published source; the paragraphs under the table say which, and name
+  what is still unmeasured for each — including the two methods that have never
+  been run on the skewed-data study the rest were measured on. Every cell of
+  the table is backed by a pair of live calls in the test suite, one inside the
+  family the row names and one outside it.
+
 * The *Multilevel designs* article now **runs** the `design` argument instead of
   only naming it. The same simulated classroom table is fitted three ways — the
   crossed reading `icc()` infers from the reused rater labels, then
