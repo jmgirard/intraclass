@@ -46,6 +46,20 @@ same seeded-provenance pattern and need no special handling; the rest of
 this README documents the **brms/Stan offline verification strategy**, which
 does (M52; `cairn/DESIGN.md § Known issues`).
 
+## The prose ruler
+
+`prose-profile.py` is not a record-claim checker and is wired into no CI job. It
+is a one-shot ruler for the documentation prose passes, run by hand over a glob
+of `.Rmd` or `.R` files: it reports, per file, the sentence count, how many
+sentences run past 35 words, how many dashes stand in for sentence-level
+punctuation, how many parentheticals run past 15 words, and how many semicolons
+appear. What it counts as prose, and the writing rules it measures, are defined
+in `cairn/doctrine/prose-style.md`.
+
+```
+python3 data-raw/prose-profile.py 'vignettes/*.Rmd' --verbose
+```
+
 ## Why the brms engine is verified offline
 
 Three constraints are inherent, not fixable:

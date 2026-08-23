@@ -69,7 +69,7 @@ it the **most conservative** coefficient: on this data `ICC(1)` is
 `r sprintf("%.2f", tidy(oneway)$estimate[1])`, below the two-way `ICC(A,1)` and
 `ICC(C,1)` you will see next, precisely because those separate the rater effect
 that one-way absorbs. The agreement/consistency and fixed/random choices below do
-not apply to one-way, since there is no rater term to reason about. Answer this
+not apply to one-way, where there is no rater term to reason about. Answer this
 question first.
 
 ## 1. Agreement vs. consistency (`type`)
@@ -254,16 +254,17 @@ well-defined estimands that `icc()` computes.
 If you would rather answer the questions than remember which argument each maps
 to, `choose_icc()` walks the same tree and hands back the coefficient to report
 together with the exact `icc()` call that computes it. It does **not** fit
-anything, which is why it takes no `data` argument. So it is a quick way to
-settle the choice before you run the model.
+anything, and it takes no `data` argument. So it is a quick way to settle the
+choice before you run the model.
 
 ```{r choose}
 choose_icc(type = "agreement", unit = "single", raters = "random")
 ```
 
 Pass the decisions as arguments, as above. Or, in an interactive session, call
-`choose_icc()` with them omitted to be asked each outstanding question in turn. Answering a choice that does not apply to your design (for example `type`
-under a one-way model) is a clear error rather than a silent guess.
+`choose_icc()` with them omitted to be asked each outstanding question in turn.
+Answering a choice that does not apply to your design (for example `type` under a
+one-way model) is a clear error rather than a silent guess.
 
 ## In short
 

@@ -147,12 +147,13 @@ labels a result for you: the honest summary is the whole interval.
 The interval `icc()` reports is a [**Monte-Carlo**
 interval](glossary.html#monte-carlo-interval), and it is
 [**boundary-aware**](glossary.html#zero-variance-boundary). In plain terms:
-`icc()` avoids the textbook formulas that misbehave when a variance is near
-zero, a common situation, since raters who barely differ push the rater variance
-to its zero boundary. It simulates many plausible parameter sets from the fitted
-model instead, and reads the interval off the resulting spread of ICCs. This keeps the interval well-behaved right at that boundary. The [*Interval methods*](interval-methods.html) article covers how it
-works and the alternatives (a parametric bootstrap, and Bayesian credible
-intervals).
+the default interval does not rely on a textbook formula that misbehaves when a
+variance is near zero. That is a common situation: raters who barely differ push
+the rater variance to its zero boundary. Instead `icc()` simulates many plausible
+parameter sets from the fitted model, and reads the interval off the resulting
+spread of ICCs. This keeps the interval well-behaved right at that boundary. The
+[*Interval methods*](interval-methods.html) article covers how it works and the
+alternatives (a parametric bootstrap, and Bayesian credible intervals).
 
 ## Consistency instead of agreement
 

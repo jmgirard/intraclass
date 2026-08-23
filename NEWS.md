@@ -343,7 +343,7 @@
   rewritten for readability: long sentences split, and dashes standing in for a
   colon or a full stop replaced. Nothing about what the package computes or
   reports changed, and every claim the pass touched was checked against the text
-  it replaced, so no statement is broader or narrower than it was.
+  it replaced.
 
 * The *Multilevel designs* article now **runs** the `design` argument instead of
   only naming it. The same simulated classroom table is fitted three ways — the

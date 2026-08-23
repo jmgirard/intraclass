@@ -13,10 +13,9 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 
 A plain-language reference for the terms that recur across these articles. Each
 entry defines the idea once, and the other articles link here rather than
-re-explaining it. Terms are listed alphabetically. Nothing here is new: it is the
-vocabulary the
-[*Getting started*](getting-started.html) and [*Choosing an ICC*](choosing-an-icc.html)
-guides use, gathered in one place.
+re-explaining it. Terms are listed alphabetically. Nothing here is new: it is
+the vocabulary the [*Getting started*](getting-started.html) and
+[*Choosing an ICC*](choosing-an-icc.html) guides use, gathered in one place.
 
 ## Absolute agreement
 
@@ -39,13 +38,16 @@ See **single-unit ICC** for its counterpart.
 An opt-in closed-form confidence interval for the balanced one-way design
 (`ci_method = "burch"`). It gives REML-based limits with a kurtosis adjustment
 (Burch 2011), so its width tracks the tail weight of the data, where the
-**exact-F interval** leans on normality instead. Tracking tail weight is not the same as widening: on the two
-grids this package has measured that vary only the subject effect it came out
-the narrower of the two in nearly every cell. How much narrower is conditional, and not in the direction one might guess.
-`"burch"`'s width margin holds much the same up to a true ICC of 0.3 rather than shrinking as the true ICC rises
-(on the larger grid; the smaller grid's margin does shrink across its levels).
-The `"burch"` width margin then collapses to near parity at a true ICC of 0.6, on the one grid reaching that value,
-where every cell favouring the exact-F interval sits. It shrinks steadily as the subject count grows, measured at 5 raters.
+**exact-F interval** leans on normality instead. Tracking tail weight is not the
+same as widening: on the two grids this package has measured that vary only the
+subject effect it came out the narrower of the two in nearly every cell. How much
+narrower is conditional, and not in the direction one might guess. `"burch"`'s
+width margin holds much the same up to a true ICC of 0.3 rather than shrinking as
+the true ICC rises (on the larger grid; the smaller grid's margin does shrink
+across its levels). The `"burch"` width margin then collapses to near parity at a
+true ICC of 0.6, on the one grid reaching that value, where every cell favouring
+the exact-F interval sits. It shrinks steadily as the subject count grows,
+measured at 5 raters.
 Burch reports the reverse for symmetric heavy-tailed data with non-normal errors,
 and a third grid now measures that case.
 What `"burch"` does against `"searle"` depends on what the residual is
@@ -76,8 +78,8 @@ methods*](interval-methods.html).
 
 The single-level ICC you would get by **ignoring** a clustering structure (pupils in
 classrooms, patients in clinics). This quantity is ten Hove et al.'s (2022)
-Equation 14. It
-folds the between-cluster and within-cluster variation into one "true score" and is
+Equation 14. It folds the between-cluster and within-cluster variation into one
+"true score" and is
 biased for both the subject-level and cluster-level questions. `icc()` can report it
 (`level = "conflated"`) purely as a **diagnostic contrast**, to show the cost of
 ignoring the structure. It is never a number to report. See [*Multilevel
@@ -137,7 +139,7 @@ estimator. See [*Estimation engines*](engines.html).
 
 The true quantity you are trying to estimate: the target the ICC is aiming at.
 The word matters because "the ICC" is not one number. Agreement and consistency,
-single and average, subject level and cluster level are *different estimands*, so
+single and average, subject level and cluster level are *different estimands*, and
 picking the coefficient is really picking which one answers your question. See
 [*Choosing an ICC*](choosing-an-icc.html).
 
@@ -155,7 +157,8 @@ above for what this package measured about their relative widths. See
 
 **Full-information maximum likelihood**: the technique the **lavaan** (SEM) engine
 uses to fit **incomplete** data. Rather than dropping cases with missing cells, it
-uses every observed value to estimate the model. See [*Estimation engines*](engines.html#a-structural-equation-engine-lavaan).
+uses every observed value to estimate the model. See
+[*Estimation engines*](engines.html#a-structural-equation-engine-lavaan).
 
 ## Finite-population rater variance: `θ²_r`
 
@@ -163,7 +166,8 @@ Raters may be treated as **fixed**, meaning the observed raters *are* the whole
 population of interest. Then the "rater variance" is the spread of just those
 raters, computed as a bias-corrected finite-population quantity (McGraw & Wong's
 Case 3A) rather than an estimate of a wider rater universe. On balanced data it
-equals the random-rater variance. Under imbalance it differs. See **fixed vs. random raters**.
+equals the random-rater variance. Under imbalance it differs. See **fixed vs.
+random raters**.
 
 ## Fixed vs. random raters
 
@@ -186,9 +190,9 @@ captures.
 How the **lavaan** (SEM) engine recovers the rater variance for **absolute
 agreement**. In lavaan's formulation a rater is a single column with no random
 effect, so its variance is read from the spread of the estimated column
-(indicator) means (Jorgensen 2021). It is asymptotically equivalent to the mixed
-model's random effect but a genuinely different estimator, and can differ
-modestly on small designs. See
+(indicator) means (Jorgensen 2021). It is a genuinely different estimator than
+the mixed model's random effect, though asymptotically equivalent to it, and can
+differ modestly on small designs. See
 [*Estimation engines*](engines.html#a-structural-equation-engine-lavaan).
 
 ## Modified profile likelihood
@@ -242,8 +246,8 @@ engines*](engines.html#a-bayesian-engine-brms).
 In the Bayesian **brms** engine, the distribution placed on each variance component
 *before* seeing the data. Here that is a weakly-informative half-*t*(4, 0, 1) on
 every standard deviation (ten Hove et al. 2020), the sourced prior every coverage
-result depends on. Overriding it (`prior =`) voids those guarantees, so `icc()` warns. See
-[*Estimation engines*](engines.html#the-prior-and-overriding-it).
+result depends on. Overriding it (`prior =`) voids those guarantees, so `icc()`
+warns. See [*Estimation engines*](engines.html#the-prior-and-overriding-it).
 
 ## REML
 
@@ -264,8 +268,8 @@ as high.
 In a **multilevel** design (subjects nested in clusters, such as pupils in
 classrooms), two reliabilities are defined. The **subject level** asks how reliably
 raters distinguish subjects *within* a cluster. The **cluster level** asks how
-reliably they distinguish *cluster means*. `icc()` reports both from one fit. See [*Multilevel
-designs*](multilevel-designs.html#subject-level-vs.-cluster-level).
+reliably they distinguish *cluster means*. `icc()` reports both from one fit.
+See [*Multilevel designs*](multilevel-designs.html#subject-level-vs.-cluster-level).
 
 ## Transformed bootstrap-*t*
 
@@ -289,10 +293,11 @@ variance.
 ## Zero-variance boundary
 
 A variance component cannot be negative, so its estimate can land *exactly* at
-zero, the edge of the allowed range. Ordinary interval formulas misbehave there (they can
-run below zero or collapse). The Monte-Carlo default is **boundary-aware**: it works
-on a scale where zero is reachable without breaking, which is one reason glmmTMB is
-the recommended engine. See [*Confidence-interval methods*](interval-methods.html).
+zero, the edge of the allowed range. Ordinary interval formulas misbehave there
+(they can run below zero or collapse). The Monte-Carlo default is
+**boundary-aware**: it works on a scale where zero is reachable without breaking,
+which is one reason glmmTMB is the recommended engine. See
+[*Confidence-interval methods*](interval-methods.html).
 
 ## References
 
