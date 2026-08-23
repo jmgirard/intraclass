@@ -42,9 +42,9 @@ figure.
 Every committed reference value in the test suite traces to a seeded script
 here (PRINCIPLES.md #4/#12) and an entry in the oracle registry
 (`cairn/references/ORACLES.md`). Frequentist oracle scripts follow the
-same seeded-provenance pattern and need no special handling; the rest of
-this README documents the **brms/Stan offline verification strategy**, which
-does (M52; `cairn/DESIGN.md § Known issues`).
+same seeded-provenance pattern and need no special handling; the
+**brms/Stan offline verification strategy** below does (M52;
+`cairn/DESIGN.md § Known issues`).
 
 ## The prose ruler
 

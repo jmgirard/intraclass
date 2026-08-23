@@ -6,8 +6,7 @@
 
 This page owns the writing standard for every surface a user reads: the
 vignettes, the roxygen blocks that become `man/`, and `README.Rmd`. It states
-six rules, R1–R6. Two of them are measured by a committed ruler; the other four
-are judgment the writer applies at a read-through.
+six rules, R1–R6: two measured by a committed ruler, four judgment at a read-through.
 
 It does not own status, task lists, or the record of which pass applied it —
 those live in `cairn/ROADMAP.md` and the milestone files. It does not reach
@@ -42,7 +41,8 @@ claims to have applied them reports zero. The one exemption is a clause a test
 pins verbatim and that admits no sentence break: a pass carrying such a clause
 records it where it records the pass, with the clause's word count and the
 sentence's. R4 and R5 are counted by the same ruler but carry no target — a
-zero on either has no non-arbitrary threshold and would fight readability. R3 and R6 are not counted at all.
+zero on either has no non-arbitrary threshold and would fight readability.
+R3 and R6 are not counted at all.
 
 R6 is the one that can silently break something. A dash spliced into two
 sentences, a clause hoisted out of a parenthesis, an "and" turned into a full
@@ -74,24 +74,25 @@ tag. The `#'` prefix and any leading `@tag` token are stripped, and what is left
 runs through the same pipeline.
 
 What the ruler does **not** see is as much part of the standard as what it
-does, since a rule the instrument cannot reach is judgment, not a target. Four
+does, since a rule the instrument cannot reach is judgment, not a target. Six
 boundaries, none reached by any vignette in this repo today: a `---` alone on a
-line below the front matter is counted, nothing distinguishing it from a spaced
-break; a run of list items joins into one fragment rather than one per item,
-under-reporting both its fragment count and its sentence lengths; HTML comments
-are stripped before fences, so a chunk containing `<!--` swallows the prose to
-the next real comment; and a table row splits into cells only when it starts
-with `|`, so a leading-pipe-less table's cells measure as one fragment. Widening
-any of these is a ruler change, priced by the frozen-ruler rule below.
+line below the front matter is counted, as is a setext heading underline, which
+also merges with its heading into one fragment because the heading test is
+ATX-only; a pandoc simple-table or grid-table separator row is counted, since
+the row test above requires a `|` and neither shape carries one; a run of list
+items joins into one fragment rather than one per item, under-reporting both its
+fragment count and its sentence lengths; HTML comments are stripped before
+fences, so a chunk containing `<!--` swallows the prose to the next real
+comment; and a table row splits into cells only when it starts with `|`, so a
+leading-pipe-less table's cells measure as one fragment. Widening any of these
+is a ruler change, priced by the frozen-ruler rule below.
 
 A **word** is a whitespace-separated token carrying at least one alphanumeric
 character. A **sentence** is a span ending in `.`, `!`, or `?` followed by
-whitespace, with a held-back list of abbreviations (`e.g.`, `i.e.`, `cf.`,
-`al.`, `p.`, and the rest in the script) and single-letter initials that never
-end one.
+whitespace, with a held-back list of abbreviations (`e.g.`, `i.e.`, `cf.`, `al.`,
+`p.`, and the rest in the script) and single-letter initials that never end one.
 
-Run it over a glob, and add `--verbose` to have every over-35-word sentence
-printed with its count:
+Run it over a glob; `--verbose` prints every over-35-word sentence with its count:
 
     python3 data-raw/prose-profile.py 'vignettes/*.Rmd' --verbose
     python3 data-raw/prose-profile.py 'R/*.R'

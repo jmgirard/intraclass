@@ -179,6 +179,7 @@ refused, D-021 stands.
 - 2026-08-23: T16 — verify block re-run on the repaired branch. `devtools::document()` no diff (clean `git status` after); `devtools::test()` FAIL 0 | WARN 3 | SKIP 2 | PASS 8862, the same figures as T7, T10 and T13; `devtools::check(document = FALSE, args = "--no-manual")` raw `Status: 1 NOTE`, 0 errors / 0 warnings, no `* checking …` line reporting WARNING or ERROR, vignettes re-built OK in 23s, duration 14m 16s. The NOTE is the `tests/spelling.Rout` comparison and is pre-existing: `spelling::spell_check_package()` returns 31 words on this branch, the count recorded at `72f9cc2`, T7, T10 and T13, none introduced here. `python3 data-raw/check-record-claims.py --live` exit 0 (6 claims, 0 failures); `pkgdown::check_pkgdown()` "No problems found"; `cairn_validate` exit 0, all checks pass, one advisory (16 tasks against the 10-task split tripwire). All tasks checked; status → review.
 - 2026-08-23: review fourth pass, checkpoint (mid-phase) — `main` still unmoved (0 behind / 20 ahead), PR #143 refreshed. AC1-AC4 verified with fresh evidence at HEAD and ticked; the `72f9cc2` baseline reproduces exactly (744 / 81 / 226 / 11 / 55; in-scope 358 / 20 / 66) under the T14 ruler, and a six-shape probe confirms R1's counted class. `cairn_validate` exit 0, all checks pass, one advisory (16 tasks against the 10-task tripwire). `pkgdown::check_pkgdown()` clean; `check-record-claims.py --live` exit 0; `devtools::document()` no diff. AC5's `devtools::test()` and `devtools::check()` still running. Three lenses spawned; the prior-review lens returned no findings.
 - 2026-08-23: review fourth pass — AC1-AC5 all verified with fresh evidence at HEAD; `devtools::test()` FAIL 0 | PASS 8862, `devtools::check()` `Status: 1 NOTE` (pre-existing spelling, 31 words, unchanged from baseline), `cairn_validate` exit 0. Both `[S]` lenses clean; `[O]` returned seven findings. amendment return: AC1 - "implements R1's counted class and R2's sentence rule as `cairn/doctrine/prose-style.md` defines them". R1 excludes "markdown table separator rows" unqualified while the doctrine's ruler section defines the row as carrying at least one `|`; a pandoc simple-table or grid-table separator row scores dashes, reproduced at review (30 occurrences on a probe, nil reachable in this repo). This is amendment return 2 naming AC1, so the second-occurrence stop fires: no further round convened, disposition to the maintainer at the gate. Defect-return count stays at 2; thrash trigger (b) still standing.
+- 2026-08-23: gate triage — merge approved; findings 2, 3 and 4 fixed on the branch (doctrine blind-spot list to six boundaries, the 108-char line rewrapped, `data-raw/README.md`'s falsified sentence reworded), findings 5 and 6 rejected, finding 7 and AC1's shape carried on the ROADMAP candidate row. Finding 1 accepted and recorded; the `/milestone-brief` escalation and a fifth amendment round both declined. Doctrine compressed back to 119 lines / 6,900 bytes; AC3 re-checked byte-identical; ruler, claim pins and doc pins re-run clean.
 
 ## Decisions
 
@@ -1005,3 +1006,38 @@ Everything else passes: AC2, AC3, AC4 and AC5 all verified at HEAD with fresh
 evidence, both `[S]` lenses clean, and the consistency gate green. No finding at
 this pass disturbs AC2's zeros or any number the vignettes state; the ruler's
 uncovered shapes are unreachable in every file in this repo today.
+
+#### Gate triage
+
+Presented at the gate 2026-08-23 with every finding verbatim. The maintainer
+took the merge, and directed findings 2, 3 and 4 fixed on the branch first.
+
+- **Finding 1 — accepted, recorded.** The merge proceeds with AC1's gap on
+  record: the divergence is between R1's one-line shorthand and the doctrine's
+  own precise ruler definition, which the code implements exactly, and no file
+  in this repo reaches the uncovered shapes. The offered `/milestone-brief`
+  escalation and a fifth amendment round were both declined.
+- **Finding 2 — fixed.** The doctrine's blind-spot paragraph now names **six**
+  boundaries, adding the setext heading underline and the pandoc simple- or
+  grid-table separator row.
+- **Finding 3 — fixed.** `prose-style.md:45` rewrapped; `awk 'length>88'`
+  returns nothing over the file.
+- **Finding 4 — fixed.** `data-raw/README.md` now reads "the **brms/Stan
+  offline verification strategy** below does", so the sentence no longer claims
+  the rest of the file.
+- **Findings 5 and 6 — rejected.** Both are R6 notes the lens itself read as
+  EQUAL domain or as the repair a prior gate directed; re-read at review against
+  the removed text and confirmed.
+- **Finding 7 — follow-up.** `RE_DASH` counting each occurrence inside a dash
+  run goes to the existing ROADMAP candidate row with the ruler hardening.
+
+Re-verified after the fixes: `cairn/doctrine/prose-style.md` is 119 lines /
+6,900 bytes, back inside its stated 120-line / 8,000-byte budget after
+compressing four paragraphs outside the R1–R6 block; AC3's byte-identity with
+Scope re-checked and holds; the ruler still reports 0 / 0 / 0 dashes and
+0 / 0 / 1 sentences over 35 on the three files; `check-record-claims.py --live`
+exit 0; `test-doc-skew-caveat.R` + `test-vignette-claims.R` FAIL 0 | PASS 2752.
+The fixes touch markdown only — no R source, no vignette — so AC5's `test()` and
+`check()` results stand. `cairn_validate` exit 0; `cairn/ROADMAP.md` back to
+23,931 bytes after the candidate row was rewritten and the hygiene stamp
+replaced.
