@@ -21,8 +21,9 @@ the caller does not need the shell to match them).
 
 What counts as prose
 --------------------
-`.Rmd` mode strips, in order: the YAML front matter, fenced code chunks,
-HTML comments, markdown table *rules* (the `|---|---|` separator row), and
+`.Rmd` mode strips, in order: the YAML front matter, HTML comments, fenced
+code chunks, markdown table *rules* (a separator row of dashes, colons,
+pipes and spaces, carrying at least one `|` and at least one `-`), and
 list-marker/blockquote prefixes.  Headings and table *cells* stay in: they
 are prose the reader reads, so a dash or an overlong clause there counts.
 A heading becomes one fragment; a table row becomes one fragment per cell.
@@ -39,9 +40,11 @@ The counted classes
 R1 dash-as-punctuation -- an occurrence of `---`, an em dash, or a
 standalone `--`, EXCEPT: dashes flanked with no space by digits on both
 sides (numeric and page ranges), and dashes flanked with no space by word
-characters whose right-hand side begins with a capital (proper-noun joins
-such as `Spearman--Brown`).  YAML delimiters and table rules never reach the
-scanner, having been stripped above.
+characters that are capitalized on BOTH sides (proper-noun joins such as
+`Spearman--Brown`).  A capital on the right alone does not excuse a dash:
+`break---And` is the ordinary unspaced form of the break R1 bans.  YAML
+delimiters and table rules never reach the scanner, having been stripped
+above.
 
 R2 sentence length -- a prose sentence of more than 35 words.  Sentences are
 split on `.`/`!`/`?` followed by whitespace, holding back a list of
@@ -90,7 +93,10 @@ RE_HTML_COMMENT = re.compile(r"<!--.*?-->", re.DOTALL)
 RE_FENCE = re.compile(r"^\s*(```|~~~)")
 RE_HEADING = re.compile(r"^\s*#{1,6}\s+")
 RE_TABLE_ROW = re.compile(r"^\s*\|")
-RE_TABLE_RULE = re.compile(r"^\s*\|[\s:|-]*\|\s*$")
+# A separator row is dashes, colons, pipes and spaces carrying at least one
+# `|` and at least one `-`.  Pandoc makes the leading and the trailing pipe
+# optional, so requiring either one under-recognizes the row.
+RE_TABLE_RULE = re.compile(r"^(?=[^|]*\|)(?=[^-]*-)[\s:|-]+$")
 RE_LIST_MARKER = re.compile(r"^\s*(?:[-*+]\s+|\d+[.)]\s+)")
 RE_BLOCKQUOTE = re.compile(r"^\s*>+\s?")
 RE_LINK = re.compile(r"\[([^\]]*)\]\([^)]*\)")

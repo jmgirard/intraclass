@@ -87,11 +87,11 @@ refused, D-021 stands.
 
 ## Coverage
 
-- AC1 → T1
-- AC2 → T1, T3, T4, T5
-- AC3 → T2
+- AC1 → T1, T8, T11, T14
+- AC2 → T1, T3, T4, T5, T14
+- AC3 → T2, T11, T15
 - AC4 → T6
-- AC5 → T7
+- AC5 → T7, T10, T13, T16
 
 ## Tasks
 
@@ -118,6 +118,15 @@ refused, D-021 stands.
 - [x] T12 Action the amendment gate's other dispositions: the two R6 drifts the
       second review found, and `cairn/DESIGN.md`'s doctrine-module registry.
 - [x] T13 Re-run the AC5 verify block.
+- [x] T14 Repair `RE_TABLE_RULE` to recognize a pandoc separator row with the
+      leading and trailing pipes optional, correct the two stale docstring
+      passages in the same edit (so the ruler's bytes are final before the
+      baseline run), then re-run the `72f9cc2` baseline and re-measure the
+      three in-scope files.
+- [ ] T15 Action the gate's other dispositions: the `cairn/doctrine/`
+      admission decision and `cairn/DESIGN.md`'s registry line, the doctrine's
+      pinned-clause exemption, and the orphan line wraps.
+- [ ] T16 Re-run the AC5 verify block.
 
 ## Work log
 
@@ -161,6 +170,10 @@ refused, D-021 stands.
 - 2026-08-23: hygiene note for the maintainer — `cairn/ROADMAP.md` is at 23,996 bytes against its 24,000-byte budget after this milestone's candidate row. The next row cannot be added without retiring one.
 
 - 2026-08-23: review third pass returned M134 to `in-progress`. Failed: **AC1** — R1 excludes "markdown table separator rows", and `RE_TABLE_RULE` (`data-raw/prose-profile.py:93`) recognizes one only when it carries a leading **and** a trailing `|`; a legal pandoc row `|--- |---` scores 2 dash occurrences, reproduced at review on a probe file. No `vignettes/` file trips it, so AC2's zeros stand. Defect return 2 (the amendment-return count on AC1 stays at 1); the repair is a regex change, which restarts the frozen baseline. Thrash trigger (b) fires — AC1 has failed at three consecutive reviews, each by a new clause of R1's exclusion list; a `/milestone-brief` escalation is offered. AC2-AC5 verified with fresh evidence at HEAD and left ticked. Six further [O] findings recorded in the Review section: the ruler docstring's stale exclusion rule and stale strip order, DESIGN.md's D-033 graduation claim, the doctrine's unqualified "reports zero", orphan line wraps, and a stale Coverage block.
+
+- 2026-08-23: return gate — three questions posed, all three recommendations taken. (1) AC1: repair the ruler over the offered `/milestone-brief` escalation (thrash trigger (b)) and over narrowing AC1 to drop its counted-class clause; the repair recognizes a separator row by shape, closing the no-leading-pipe gap in the same pass rather than leaving the next clause of that shape for review 4. Falsified by a fourth review finding a further R1 clause the ruler decides differently from the doctrine. (2) Finding 4: a new D-entry widening `cairn/doctrine/`'s admission plus a reworded DESIGN.md registry line, over rewording DESIGN.md alone and over delisting `prose-style.md`. (3) Finding 5: the doctrine gains a pinned-clause exemption, over leaving the absolute for M135/M136 to inherit.
+- 2026-08-23: T14 — `RE_TABLE_RULE` repaired to `^(?=[^|]*\|)(?=[^-]*-)[\s:|-]+$`: a separator row is dashes, colons, pipes and spaces carrying at least one of each of `|` and `-`, with both pipes optional as pandoc allows. The two stale docstring passages (the pre-T8 proper-noun rule at the counted-classes head, and the `.Rmd` strip order) were corrected in the same edit, so the ruler's bytes were final before the baseline run and AC1's byte-identity clause reads against them. Probe file carrying `|--- |---`, `---- | ----`, `|---|---|`, `sentence---And`, `Spearman--Brown` and `10--20`: 5 dashes counted before the repair, 1 after — the one genuine sentence-level break, both proper-noun and numeric joins still excluded, all three separator rows now excluded. Re-ran the `72f9cc2` baseline with the final bytes over the eight `vignettes/*.Rmd` blobs: 744 fragments / 81 over 35 / 226 dashes / 11 long parentheticals / 55 semicolons, the three in-scope files holding 358 / 20 / 66 — identical to the figures Scope already records, so no Scope amendment is owed. The three files at HEAD still report 0 dashes each and 0 / 0 / 1 sentences over 35 (longest 32 / 35 / 64), so AC2 is undisturbed and T3–T5 do not reopen. `cairn/doctrine/prose-style.md`'s strip description and boundary paragraph restated against the repaired ruler: the separator-row gap is closed, and the fourth boundary is now the narrower one that remains, a table row splitting into cells only when it starts with `|`. Page at 118 lines / 6,752 bytes, inside its 120-line / 8,000-byte budget.
+- 2026-08-23: Coverage amended (third-pass finding 7): AC1 → T1, T8, T11, T14; AC2 gains T14; AC3 gains T11 and T15; AC5 gains T10, T13, T16.
 
 ## Decisions
 

@@ -38,9 +38,11 @@ rendered-message tests, and stays a ROADMAP candidate row.
   (M72/M128).
 
 R1 and R2 are gated: `data-raw/prose-profile.py` counts them, and a pass that
-claims to have applied them reports zero. R4 and R5 are counted by the same
-ruler but carry no target — a zero on either has no non-arbitrary threshold and
-would fight readability. R3 and R6 are not counted at all.
+claims to have applied them reports zero. The one exemption is a clause a test
+pins verbatim and that admits no sentence break: a pass carrying such a clause
+records it where it records the pass, with the clause's word count and the
+sentence's. R4 and R5 are counted by the same ruler but carry no target — a
+zero on either has no non-arbitrary threshold and would fight readability. R3 and R6 are not counted at all.
 
 R6 is the one that can silently break something. A dash spliced into two
 sentences, a clause hoisted out of a parenthesis, an "and" turned into a full
@@ -57,12 +59,14 @@ carve-out covers correcting what the package tells its users, not building
 machinery over it.
 
 In `.Rmd` mode it drops, in order: the YAML front matter, HTML comments, fenced
-code chunks, markdown table *rules* (the `|---|---|` separator row), and
-list-marker and blockquote prefixes. Headings and table *cells* stay in — they
-are prose the reader reads, so a dash or an overlong clause in one counts. A
-heading becomes one fragment; a table row becomes one fragment per cell. Link
-targets are dropped (`[text](url)` becomes `text`), emphasis markers are
-dropped, and each inline code span collapses to a single word.
+code chunks, markdown table *rules* (a separator row of dashes, colons, pipes
+and spaces carrying at least one of each of `|` and `-`, with the leading and
+trailing pipes optional as pandoc allows), and list-marker and blockquote
+prefixes. Headings and table *cells* stay in — they are prose the reader reads,
+so a dash or an overlong clause in one counts. A heading becomes one fragment; a
+table row becomes one fragment per cell. Link targets are dropped
+(`[text](url)` becomes `text`), emphasis markers are dropped, and each inline
+code span collapses to a single word.
 
 In `.R` mode it reads only roxygen comment lines (`#'`), and only those outside
 an `@examples` block: an `@examples` tag suppresses lines until the next `#' @`
@@ -71,15 +75,14 @@ runs through the same pipeline.
 
 What the ruler does **not** see is as much part of the standard as what it
 does, since a rule the instrument cannot reach is judgment, not a target. Four
-boundaries, none of them reached by any vignette in this repo today: a table
-separator row is recognized only when it starts with `|`, so a pandoc-legal
-`---- | ----` row scores as dashes; a `---` alone on a line below the front
-matter is counted, since nothing distinguishes it from a spaced break; a run of
-list items is joined into one fragment rather than one fragment per item, so a
-long unpunctuated list under-reports both its fragment count and its sentence
-lengths; and HTML comments are stripped before fences, so a chunk containing the
-string `<!--` swallows the prose up to the next real comment. Widening any of
-these is a ruler change, which the frozen-ruler rule below prices.
+boundaries, none reached by any vignette in this repo today: a `---` alone on a
+line below the front matter is counted, nothing distinguishing it from a spaced
+break; a run of list items joins into one fragment rather than one per item,
+under-reporting both its fragment count and its sentence lengths; HTML comments
+are stripped before fences, so a chunk containing `<!--` swallows the prose to
+the next real comment; and a table row splits into cells only when it starts
+with `|`, so a leading-pipe-less table's cells measure as one fragment. Widening
+any of these is a ruler change, priced by the frozen-ruler rule below.
 
 A **word** is a whitespace-separated token carrying at least one alphanumeric
 character. A **sentence** is a span ending in `.`, `!`, or `?` followed by
