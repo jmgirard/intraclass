@@ -79,15 +79,15 @@
     
     
 <p>A plain-language reference for the terms that recur across these
-articles. Each entry defines the idea once; the other articles link here
-rather than re-explaining it. Terms are listed alphabetically. Nothing
-here is new — it is the vocabulary the <a href="getting-started.html"><em>Getting started</em></a> and <a href="choosing-an-icc.html"><em>Choosing an ICC</em></a> guides use,
+articles. Each entry defines the idea once, and the other articles link
+here rather than re-explaining it. Terms are listed alphabetically.
+Nothing here is new: it is the vocabulary the <a href="getting-started.html"><em>Getting started</em></a> and <a href="choosing-an-icc.html"><em>Choosing an ICC</em></a> guides use,
 gathered in one place.</p>
 <div class="section level2">
 <h2 id="absolute-agreement">Absolute agreement<a class="anchor" aria-label="anchor" href="#absolute-agreement"></a>
 </h2>
 <p>One of the two <code>type</code>s of ICC. Absolute agreement asks
-whether raters give the <em>same</em> score — two raters who rank
+whether raters give the <em>same</em> score. Two raters who rank
 subjects identically but sit a full point apart do <strong>not</strong>
 agree in this sense. It counts systematic rater differences (the rater
 variance) as error. Contrast <strong>consistency</strong>. In
@@ -95,13 +95,13 @@ generalizability theory the absolute-agreement ICC is the
 <strong>dependability coefficient</strong>.</p>
 </div>
 <div class="section level2">
-<h2 id="average-unit-icc-icck">Average-unit ICC — <code>ICC(*,k)</code><a class="anchor" aria-label="anchor" href="#average-unit-icc-icck"></a>
+<h2 id="average-unit-icc-icck">Average-unit ICC: <code>ICC(*,k)</code><a class="anchor" aria-label="anchor" href="#average-unit-icc-icck"></a>
 </h2>
 <p>The reliability of the <strong>mean</strong> of <code>k</code>
 raters, rather than of one rater. Averaging cancels part of the error,
 so <code>ICC(*,k)</code> is always at least as high as the single-rater
 <code>ICC(*,1)</code>. The <code>k</code> is the number of raters whose
-average you will actually use; on incomplete data it becomes the
+average you will actually use. On incomplete data it becomes the
 <strong>effective number of ratings</strong>. See <strong>single-unit
 ICC</strong> for its counterpart.</p>
 </div>
@@ -109,31 +109,32 @@ ICC</strong> for its counterpart.</p>
 <h2 id="burch-interval">Burch interval<a class="anchor" aria-label="anchor" href="#burch-interval"></a>
 </h2>
 <p>An opt-in closed-form confidence interval for the balanced one-way
-design (<code>ci_method = "burch"</code>): REML-based limits with a
-kurtosis adjustment (Burch 2011), so its width tracks the tail weight of
-the data, where the <strong>exact-F interval</strong> leans on normality
-instead. Tracking tail weight is not the same as widening: on the two
-grids this package has measured that vary only the subject effect it
-came out the narrower of the two in nearly every cell. How much narrower
-is conditional, and not in the direction one might guess:
-<code>"burch"</code>’s margin holds much the same up to a true ICC of
-0.3 rather than shrinking as the true ICC rises (on the larger grid; the
-smaller grid’s margin does shrink across its levels), then collapses to
-near parity at a true ICC of 0.6, on the one grid reaching that value,
-where every cell favouring the exact-F interval sits. It shrinks
-steadily as the subject count grows, measured at 5 raters. Burch reports
-the reverse for symmetric heavy-tailed data with non-normal errors, and
-a third grid now measures that case. What <code>"burch"</code> does
-against <code>"searle"</code> depends on what the residual is drawn
-from, and the three grids now measure that: the two grids that vary only
-the subject effect put it narrower nearly everywhere, while the third,
-which draws the residual from the same family as the subject effect,
-puts it wider at every symmetric heavy-tailed family measured (a median
-width ratio of 1.2963 at t(5) with 100 subjects) and narrower at every
-lighter-tailed one, the normal included. So neither interval is reliably
-the tighter one. That adjustment is not a remedy for heavy tails: on
-strongly skewed subject effects <code>"burch"</code> under-covers about
-as badly as the default — see <a href="interval-methods.html#when-the-default-under-covers"><em>When the
+design (<code>ci_method = "burch"</code>). It gives REML-based limits
+with a kurtosis adjustment (Burch 2011), so its width tracks the tail
+weight of the data, where the <strong>exact-F interval</strong> leans on
+normality instead. Tracking tail weight is not the same as widening: on
+the two grids this package has measured that vary only the subject
+effect it came out the narrower of the two in nearly every cell. How
+much narrower is conditional, and not in the direction one might guess.
+<code>"burch"</code>’s width margin holds much the same up to a true ICC
+of 0.3 rather than shrinking as the true ICC rises (on the larger grid;
+the smaller grid’s margin does shrink across its levels). The
+<code>"burch"</code> width margin then collapses to near parity at a
+true ICC of 0.6, on the one grid reaching that value, where every cell
+favouring the exact-F interval sits. It shrinks steadily as the subject
+count grows, measured at 5 raters. Burch reports the reverse for
+symmetric heavy-tailed data with non-normal errors, and a third grid now
+measures that case. What <code>"burch"</code> does against
+<code>"searle"</code> depends on what the residual is drawn from. The
+three grids now measure that: the two grids that vary only the subject
+effect put it narrower nearly everywhere, while the third, which draws
+the residual from the same family as the subject effect, puts it wider
+at every symmetric heavy-tailed family measured (a median width ratio of
+1.2963 at t(5) with 100 subjects) and narrower at every lighter-tailed
+one, the normal included. So neither interval is reliably the tighter
+one. That adjustment is not a remedy for heavy tails: on strongly skewed
+subject effects <code>"burch"</code> under-covers about as badly as the
+default. See <a href="interval-methods.html#when-the-default-under-covers"><em>When the
 default under-covers</em></a>. Deterministic: no resamples, no seed. See
 <a href="interval-methods.html#the-opt-in-boundary-robust-methods"><em>Confidence-interval
 methods</em></a>.</p>
@@ -145,23 +146,22 @@ methods</em></a>.</p>
 output) is a range built so that, across many hypothetical repetitions
 of the study, 95% of such ranges would contain the true ICC. A
 <strong>credible interval</strong> (the Bayesian <code>brms</code>
-engine’s output) is a range that holds 95% of the posterior probability
-— you can say directly “there is a 95% chance the ICC lies in here,
-given the data and the prior.” They answer subtly different questions;
-see <a href="interval-methods.html"><em>Confidence-interval
+engine’s output) is a range that holds 95% of the posterior probability.
+You can say directly “there is a 95% chance the ICC lies in here, given
+the data and the prior.” They answer subtly different questions. See <a href="interval-methods.html"><em>Confidence-interval
 methods</em></a>.</p>
 </div>
 <div class="section level2">
 <h2 id="conflated-icc">Conflated ICC<a class="anchor" aria-label="anchor" href="#conflated-icc"></a>
 </h2>
 <p>The single-level ICC you would get by <strong>ignoring</strong> a
-clustering structure (pupils in classrooms, patients in clinics) — ten
-Hove et al.’s (2022) Equation 14. It folds the between-cluster and
-within-cluster variation into one “true score” and is biased for both
-the subject-level and cluster-level questions. <code><a href="../reference/icc.html">icc()</a></code> can
-report it (<code>level = "conflated"</code>) purely as a
-<strong>diagnostic contrast</strong> to show the cost of ignoring the
-structure; it is never a number to report. See <a href="multilevel-designs.html#how-much-does-ignoring-the-nesting-cost-the-conflated-icc"><em>Multilevel
+clustering structure (pupils in classrooms, patients in clinics). This
+quantity is ten Hove et al.’s (2022) Equation 14. It folds the
+between-cluster and within-cluster variation into one “true score” and
+is biased for both the subject-level and cluster-level questions.
+<code><a href="../reference/icc.html">icc()</a></code> can report it (<code>level = "conflated"</code>)
+purely as a <strong>diagnostic contrast</strong>, to show the cost of
+ignoring the structure. It is never a number to report. See <a href="multilevel-designs.html#how-much-does-ignoring-the-nesting-cost-the-conflated-icc"><em>Multilevel
 designs</em></a>.</p>
 </div>
 <div class="section level2">
@@ -171,7 +171,7 @@ designs</em></a>.</p>
 are linked tightly enough that the model can separate a subject effect
 from a rater effect. With enough missing cells a design can split into
 disconnected islands, and then the variance components are not
-<strong>identified</strong> — no method can estimate them.
+<strong>identified</strong>, and no method can estimate them.
 <code><a href="../reference/icc.html">icc()</a></code> checks this and aborts loudly rather than return a
 number that isn’t estimable.</p>
 </div>
@@ -180,10 +180,9 @@ number that isn’t estimable.</p>
 </h2>
 <p>The other <code>type</code> of ICC. Consistency asks whether raters
 <em>rank</em> subjects the same way, forgiving a constant offset between
-raters — two raters who agree on the ordering but differ by a fixed
-point still count as perfectly consistent. It leaves the rater main
-effect out of the error term. Contrast <strong>absolute
-agreement</strong>.</p>
+raters. Two raters who agree on the ordering but differ by a fixed point
+still count as perfectly consistent. It leaves the rater main effect out
+of the error term. Contrast <strong>absolute agreement</strong>.</p>
 </div>
 <div class="section level2">
 <h2 id="credible-interval">Credible interval<a class="anchor" aria-label="anchor" href="#credible-interval"></a>
@@ -204,12 +203,12 @@ replicates</em></a>.</p>
 </h2>
 <p>A forward-looking projection: given the variance components you
 already estimated, <em>how reliable would the mean of some other number
-of raters (or occasions) be?</em> It reuses the existing fit — no
-refitting — and answers “how many raters do I need?”. See <a href="d-studies-and-replicates.html"><em>D-studies and within-cell
+of raters (or occasions) be?</em> It reuses the existing fit, with no
+refitting, and answers “how many raters do I need?”. See <a href="d-studies-and-replicates.html"><em>D-studies and within-cell
 replicates</em></a>.</p>
 </div>
 <div class="section level2">
-<h2 id="effective-number-of-ratings-k_eff">Effective number of ratings — <code>k_eff</code><a class="anchor" aria-label="anchor" href="#effective-number-of-ratings-k_eff"></a>
+<h2 id="effective-number-of-ratings-k_eff">Effective number of ratings: <code>k_eff</code><a class="anchor" aria-label="anchor" href="#effective-number-of-ratings-k_eff"></a>
 </h2>
 <p>On <strong>incomplete</strong> data, subjects are rated different
 numbers of times, so there is no single “<code>k</code>” to average
@@ -228,15 +227,15 @@ variance components, chosen with the <code>engine</code> argument:
 <strong>lme4</strong> (an alternate mixed-model solver),
 <strong>lavaan</strong> (a structural-equation formulation), or
 <strong>brms</strong> (a Bayesian fit). Some engines are just a
-different solver for the same estimator; others compute a genuinely
+different solver for the same estimator. Others compute a genuinely
 different, though asymptotically equivalent, estimator. See <a href="engines.html"><em>Estimation engines</em></a>.</p>
 </div>
 <div class="section level2">
 <h2 id="estimand">Estimand<a class="anchor" aria-label="anchor" href="#estimand"></a>
 </h2>
-<p>The true quantity you are trying to estimate — the target the ICC is
-aiming at. The word matters because “the ICC” is not one number:
-agreement and consistency, single and average, subject level and cluster
+<p>The true quantity you are trying to estimate: the target the ICC is
+aiming at. The word matters because “the ICC” is not one number.
+Agreement and consistency, single and average, subject level and cluster
 level are <em>different estimands</em>, and picking the coefficient is
 really picking which one answers your question. See <a href="choosing-an-icc.html"><em>Choosing an ICC</em></a>.</p>
 </div>
@@ -246,32 +245,32 @@ really picking which one answers your question. See <a href="choosing-an-icc.htm
 <p>An opt-in closed-form confidence interval for the balanced one-way
 design (<code>ci_method = "searle"</code>): it inverts the exact-F pivot
 of the one-way ANOVA (Searle 1971, Ch. 9 Table 9.14; the McGraw &amp;
-Wong 1996 Table 7 limits). Exact under normality — best-calibrated when
-the data are approximately normal — and deterministic. Exact is not the
-same as shortest: see the <strong>Burch interval</strong> above for what
-this package measured about their relative widths. See <a href="interval-methods.html#the-opt-in-boundary-robust-methods"><em>Confidence-interval
+Wong 1996 Table 7 limits). Exact under normality. It is best-calibrated
+when the data are approximately normal, and it is deterministic. Exact
+is not the same as shortest: see the <strong>Burch interval</strong>
+above for what this package measured about their relative widths. See <a href="interval-methods.html#the-opt-in-boundary-robust-methods"><em>Confidence-interval
 methods</em></a>.</p>
 </div>
 <div class="section level2">
 <h2 id="fiml">FIML<a class="anchor" aria-label="anchor" href="#fiml"></a>
 </h2>
-<p><strong>Full-information maximum likelihood</strong> — the technique
+<p><strong>Full-information maximum likelihood</strong>: the technique
 the <strong>lavaan</strong> (SEM) engine uses to fit
-<strong>incomplete</strong> data: rather than dropping cases with
+<strong>incomplete</strong> data. Rather than dropping cases with
 missing cells, it uses every observed value to estimate the model. See
 <a href="engines.html#a-structural-equation-engine-lavaan"><em>Estimation
 engines</em></a>.</p>
 </div>
 <div class="section level2">
-<h2 id="finite-population-rater-variance-θ²_r">Finite-population rater variance — <code>θ²_r</code><a class="anchor" aria-label="anchor" href="#finite-population-rater-variance-%CE%B8%C2%B2_r"></a>
+<h2 id="finite-population-rater-variance-θ²_r">Finite-population rater variance: <code>θ²_r</code><a class="anchor" aria-label="anchor" href="#finite-population-rater-variance-%CE%B8%C2%B2_r"></a>
 </h2>
-<p>When raters are treated as <strong>fixed</strong> (the observed
-raters <em>are</em> the whole population of interest), the “rater
+<p>Raters may be treated as <strong>fixed</strong>, meaning the observed
+raters <em>are</em> the whole population of interest. Then the “rater
 variance” is the spread of just those raters, computed as a
 bias-corrected finite-population quantity (McGraw &amp; Wong’s Case 3A)
 rather than an estimate of a wider rater universe. On balanced data it
-equals the random-rater variance; under imbalance it differs. See
-<strong>fixed vs. random raters</strong>.</p>
+equals the random-rater variance. Under imbalance it differs. See
+<strong>fixed vs. random raters</strong>.</p>
 </div>
 <div class="section level2">
 <h2 id="fixed-vs--random-raters">Fixed vs. random raters<a class="anchor" aria-label="anchor" href="#fixed-vs--random-raters"></a>
@@ -298,12 +297,12 @@ captures.</p>
 <h2 id="indicator-mean-estimator">Indicator-mean estimator<a class="anchor" aria-label="anchor" href="#indicator-mean-estimator"></a>
 </h2>
 <p>How the <strong>lavaan</strong> (SEM) engine recovers the rater
-variance for <strong>absolute agreement</strong>: since a rater is a
-single column with no random effect, its variance is read from the
-spread of the estimated column (indicator) means (Jorgensen 2021). It is
-a genuinely different — though asymptotically equivalent — estimator
-than the mixed model’s random effect, and can differ modestly on small
-designs. See <a href="engines.html#a-structural-equation-engine-lavaan"><em>Estimation
+variance for <strong>absolute agreement</strong>. In lavaan’s
+formulation a rater is a single column with no random effect, so its
+variance is read from the spread of the estimated column (indicator)
+means (Jorgensen 2021). It is a genuinely different estimator than the
+mixed model’s random effect, though asymptotically equivalent to it, and
+can differ modestly on small designs. See <a href="engines.html#a-structural-equation-engine-lavaan"><em>Estimation
 engines</em></a>.</p>
 </div>
 <div class="section level2">
@@ -311,8 +310,8 @@ engines</em></a>.</p>
 </h2>
 <p>An opt-in deterministic confidence interval for the balanced,
 complete two-way random absolute-agreement design
-(<code>ci_method = "mpl"</code>; Xiao &amp; Liu 2013): it profiles the
-likelihood in the ICC with a calibrated small-sample correction and
+(<code>ci_method = "mpl"</code>; Xiao &amp; Liu 2013). It profiles the
+likelihood in the ICC with a calibrated small-sample correction, and
 returns an interval at the near-zero boundary where the Monte-Carlo
 default aborts. Available at <code>conf_level</code> 0.90, 0.95, and
 0.99, and deliberately conservative. See <a href="interval-methods.html#the-opt-in-boundary-robust-methods"><em>Confidence-interval
@@ -328,7 +327,7 @@ the zero-variance boundary, recomputes the ICC for each draw, and takes
 the 2.5% and 97.5% quantiles. Fast and boundary-aware. It does assume
 the fitted parameters are approximately normally distributed around the
 truth, and it under-covers when the subject effects are strongly skewed
-or heavy-tailed — see <a href="interval-methods.html#when-the-default-under-covers"><em>When the
+or heavy-tailed. See <a href="interval-methods.html#when-the-default-under-covers"><em>When the
 default under-covers</em></a>. See also <a href="interval-methods.html"><em>Confidence-interval
 methods</em></a>.</p>
 </div>
@@ -358,7 +357,7 @@ methods</em></a>.</p>
 <h2 id="posterior-mode-map">Posterior mode (MAP)<a class="anchor" aria-label="anchor" href="#posterior-mode-map"></a>
 </h2>
 <p>The point estimate the Bayesian <strong>brms</strong> engine reports:
-the peak (mode) of the posterior distribution of the ICC — the
+the peak (mode) of the posterior distribution of the ICC, the
 <em>maximum a posteriori</em> value. On a small, right-skewed posterior
 it can sit below the mixed-model REML estimate. Its interval is a
 <strong>credible</strong> interval. See <a href="engines.html#a-bayesian-engine-brms"><em>Estimation
@@ -368,24 +367,24 @@ engines</em></a>.</p>
 <h2 id="prior">Prior<a class="anchor" aria-label="anchor" href="#prior"></a>
 </h2>
 <p>In the Bayesian <strong>brms</strong> engine, the distribution placed
-on each variance component <em>before</em> seeing the data — here a
-weakly-informative half-<em>t</em>(4, 0, 1) on every standard deviation
-(ten Hove et al. 2020), the sourced prior every coverage result depends
-on. Overriding it (<code>prior =</code>) voids those guarantees, so
-<code><a href="../reference/icc.html">icc()</a></code> warns. See <a href="engines.html#the-prior-and-overriding-it"><em>Estimation
+on each variance component <em>before</em> seeing the data. Here that is
+a weakly-informative half-<em>t</em>(4, 0, 1) on every standard
+deviation (ten Hove et al. 2020), the sourced prior every coverage
+result depends on. Overriding it (<code>prior =</code>) voids those
+guarantees, so <code><a href="../reference/icc.html">icc()</a></code> warns. See <a href="engines.html#the-prior-and-overriding-it"><em>Estimation
 engines</em></a>.</p>
 </div>
 <div class="section level2">
 <h2 id="reml">REML<a class="anchor" aria-label="anchor" href="#reml"></a>
 </h2>
-<p><strong>Restricted maximum likelihood</strong> — the standard method
+<p><strong>Restricted maximum likelihood</strong>: the standard method
 the mixed-model engines (glmmTMB, lme4) use to estimate variance
 components. It corrects the downward bias that ordinary maximum
 likelihood has when estimating variances, which matters for the small
 samples common in reliability studies.</p>
 </div>
 <div class="section level2">
-<h2 id="single-unit-icc-icc1">Single-unit ICC — <code>ICC(*,1)</code><a class="anchor" aria-label="anchor" href="#single-unit-icc-icc1"></a>
+<h2 id="single-unit-icc-icc1">Single-unit ICC: <code>ICC(*,1)</code><a class="anchor" aria-label="anchor" href="#single-unit-icc-icc1"></a>
 </h2>
 <p>The reliability of a <strong>single</strong> rater’s score. Its
 counterpart, the <strong>average-unit ICC</strong>
@@ -395,10 +394,10 @@ raters and is always at least as high.</p>
 <div class="section level2">
 <h2 id="subject-level-vs--cluster-level">Subject level vs. cluster level<a class="anchor" aria-label="anchor" href="#subject-level-vs--cluster-level"></a>
 </h2>
-<p>In a <strong>multilevel</strong> design (subjects nested in clusters
-— pupils in classrooms), two reliabilities are defined. The
+<p>In a <strong>multilevel</strong> design (subjects nested in clusters,
+such as pupils in classrooms), two reliabilities are defined. The
 <strong>subject level</strong> asks how reliably raters distinguish
-subjects <em>within</em> a cluster; the <strong>cluster level</strong>
+subjects <em>within</em> a cluster. The <strong>cluster level</strong>
 asks how reliably they distinguish <em>cluster means</em>.
 <code><a href="../reference/icc.html">icc()</a></code> reports both from one fit. See <a href="multilevel-designs.html#subject-level-vs.-cluster-level"><em>Multilevel
 designs</em></a>.</p>
@@ -408,9 +407,9 @@ designs</em></a>.</p>
 </h2>
 <p>An opt-in confidence-interval method for the one-way design, balanced
 or unbalanced (<code>ci_method = "npbootstrap"</code>; Ukoumunne et
-al. 2003): it resamples whole subjects with replacement, stabilizes the
+al. 2003). It resamples whole subjects with replacement, stabilizes the
 variance with a log-F transform, studentizes, and back-transforms the
-endpoints — so it takes a <code>seed</code> and
+endpoints, so it takes a <code>seed</code> and
 <code>boot_samples</code>. Robust at the zero-variance boundary and to
 non-normal subject effects. See <a href="interval-methods.html#the-opt-in-boundary-robust-methods"><em>Confidence-interval
 methods</em></a>.</p>
@@ -418,18 +417,19 @@ methods</em></a>.</p>
 <div class="section level2">
 <h2 id="variance-component">Variance component<a class="anchor" aria-label="anchor" href="#variance-component"></a>
 </h2>
-<p>A share of the total variation in the scores traced to one source —
-how much comes from real differences between <strong>subjects</strong>,
-from some <strong>raters</strong> scoring higher than others, from the
-<strong>subject-by-rater</strong> interaction, and from residual
-<strong>error</strong>. Every ICC is a ratio built from these
-components: signal variance over signal-plus-error variance.</p>
+<p>A share of the total variation in the scores traced to one source. It
+says how much comes from real differences between
+<strong>subjects</strong>, from some <strong>raters</strong> scoring
+higher than others, from the <strong>subject-by-rater</strong>
+interaction, and from residual <strong>error</strong>. Every ICC is a
+ratio built from these components: signal variance over
+signal-plus-error variance.</p>
 </div>
 <div class="section level2">
 <h2 id="zero-variance-boundary">Zero-variance boundary<a class="anchor" aria-label="anchor" href="#zero-variance-boundary"></a>
 </h2>
 <p>A variance component cannot be negative, so its estimate can land
-<em>exactly</em> at zero — the edge of the allowed range. Ordinary
+<em>exactly</em> at zero, the edge of the allowed range. Ordinary
 interval formulas misbehave there (they can run below zero or collapse).
 The Monte-Carlo default is <strong>boundary-aware</strong>: it works on
 a scale where zero is reachable without breaking, which is one reason

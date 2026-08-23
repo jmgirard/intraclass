@@ -3,22 +3,22 @@
 “Which ICC should I report?” is the question this package is built to
 answer. There is no single intraclass correlation: the name hides a
 whole family of coefficients, and they do not all measure the same
-thing. (In the jargon, they target different
-[*estimands*](https://jmgirard.github.io/intraclass/articles/glossary.html#estimand)
-— different true quantities you could be trying to pin down; the
+thing. In the jargon, they target different
+[*estimands*](https://jmgirard.github.io/intraclass/articles/glossary.html#estimand):
+different true quantities you could be trying to pin down. The
 [*Glossary*](https://jmgirard.github.io/intraclass/articles/glossary.md)
-defines this and the other terms as they arise.) Report the wrong one
-and you can overstate reliability by a wide margin, or penalize a rating
+defines this and the other terms as they arise. Report the wrong one and
+you can overstate reliability by a wide margin, or penalize a rating
 procedure for differences that do not actually matter to you.
 
 The good news: you do not need the formulas. You need to answer a few
-plain questions about *your* study — does the exact value matter or only
-the ranking? will you use one rater or an average of several? — and each
+plain questions about *your* study. Does the exact value matter, or only
+the ranking? Will you use one rater or an average of several? Each
 answer sets one argument of
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md). Four
 such choices pin down the coefficient, and each is a genuine decision
 about your measurement, not a technicality. Work through them top to
-bottom on the single dataset below (so the numbers stay comparable); by
+bottom on the single dataset below, so the numbers stay comparable. By
 the end you will know both which coefficient to report and the exact
 call that computes it.
 
@@ -33,7 +33,7 @@ argument.](choosing-icc-tree.svg)
 (1979), in the long, one-row-per-rating format
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
 expects. Every subject is rated by every rater, so it is a complete,
-balanced two-way design – the clean case in which the choices below are
+balanced two-way design: the clean case in which the choices below are
 easiest to see.
 
 ``` r
@@ -51,8 +51,8 @@ str(ratings)
 set each time?** If the same raters judge everyone (a *crossed*, two-way
 design, like `ratings`), keep the default `model = "twoway"` and the
 four choices below apply. If instead each subject is rated by whichever
-raters happened to be available – so “rater 1” for one subject has
-nothing to do with “rater 1” for another – the raters are
+raters happened to be available, then “rater 1” for one subject has
+nothing to do with “rater 1” for another. Those raters are
 *interchangeable* and the design is **one-way** (`model = "oneway"`).
 
 ``` r
@@ -81,14 +81,14 @@ so it folds them into the residual and reports a single `ICC(1)` /
 data `ICC(1)` is 0.17, below the two-way `ICC(A,1)` and `ICC(C,1)` you
 will see next, precisely because those separate the rater effect that
 one-way absorbs. The agreement/consistency and fixed/random choices
-below do not apply to one-way (there is no rater term to reason about) –
-so answer this question first.
+below do not apply to one-way, where there is no rater term to reason
+about. Answer this question first.
 
 ## 1. Agreement vs. consistency (`type`)
 
 **Does the actual value need to match, or only the rank order?**
-*Absolute agreement* treats a systematic difference between raters – one
-judge scoring consistently higher than another – as error. *Consistency*
+*Absolute agreement* treats a systematic difference between raters, one
+judge scoring consistently higher than another, as error. *Consistency*
 forgives a constant per-rater offset and asks only whether raters rank
 subjects the same way.
 
@@ -120,8 +120,8 @@ consistency
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 ```
 
-Here `ICC(A,1)` is 0.29 but `ICC(C,1)` is 0.71. The gap is not noise –
-it is a direct read-out of how much the raters differ in average level.
+Here `ICC(A,1)` is 0.29 but `ICC(C,1)` is 0.71. The gap is not noise. It
+is a direct read-out of how much the raters differ in average level.
 Consistency is never smaller than agreement, because it drops a source
 of error. Choose **agreement** when the number itself must be trusted (a
 clinical score, a physical measurement) and **consistency** when only
@@ -138,7 +138,7 @@ the larger number (the Spearman–Brown relationship).
 
 For absolute agreement above, the single-rater 0.29 rises to 0.62 for
 the four-rater mean. Report `ICC(*,k)` only if the averaged score is
-what you will actually act on; if downstream users see one rater’s
+what you will actually act on. If downstream users see one rater’s
 judgment, `ICC(*,1)` is the honest figure. Request one or both with
 `unit = "single"`, `unit = "average"`, or the default
 `c("single", "average")`.
@@ -146,10 +146,10 @@ judgment, `ICC(*,1)` is the honest figure. Request one or both with
 ## 3. Random vs. fixed raters (`raters`)
 
 **Are your raters a sample you want to generalize beyond, or the entire
-population of interest?** *Random* raters (the default) are a sample;
-the coefficient generalizes to the rater universe they were drawn from.
-*Fixed* raters are the only judges you care about, and the coefficient
-does not generalize past them.
+population of interest?** *Random* raters (the default) are a sample,
+and the coefficient generalizes to the rater universe they were drawn
+from. *Fixed* raters are the only judges you care about, and the
+coefficient does not generalize past them.
 
 ``` r
 
@@ -167,8 +167,8 @@ on `raters = "fixed"` because random is the recommended default for
 interrater reliability: fixing the raters answers a narrower question.
 On this **balanced** design the fixed and random *point estimates*
 coincide, but they are fit by different models and their intervals
-differ – and on **incomplete** data even the point estimates diverge
-(see below). Prefer **random** unless you truly never intend to
+differ. On **incomplete** data even the point estimates diverge, as
+shown below. Prefer **random** unless you truly never intend to
 generalize beyond these exact raters.
 
 ## 4. Complete vs. incomplete designs
@@ -176,18 +176,18 @@ generalize beyond these exact raters.
 **Is every subject rated by every rater?** When cells are missing, the
 classical ANOVA identities break down, but the mixed model
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) fits
-does not – it uses whatever ratings are present. Two things change
+does not: it uses whatever ratings are present. Two things change
 automatically:
 
-- The design must stay **connected** (the raters and subjects must form
-  a single linked web); a disconnected design cannot separate subject
-  from rater variance, and
+- The design must stay **connected**, meaning the raters and subjects
+  must form a single linked web. A disconnected design cannot separate
+  subject from rater variance, and
   [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
   fails loudly rather than returning a plausible-looking number.
 - The averaging divisor for `ICC(*,k)` becomes the *effective* number of
-  ratings, `k_eff` — the harmonic mean of the per-subject counts (an
-  average that leans toward the smaller counts, so a few well-rated
-  subjects cannot disguise the many that were rated by fewer raters). It
+  ratings, `k_eff`. That is the harmonic mean of the per-subject counts,
+  an average that leans toward the smaller counts, so a few well-rated
+  subjects cannot disguise the many that were rated by fewer raters. It
   honestly reflects the ragged averages you actually computed.
 
 ### A worked incomplete design
@@ -217,7 +217,7 @@ inc
 ```
 
 The header now reads `20 of 24 cells (incomplete)`, and `ICC(*,k)`
-averages over an *effective* 3.27 raters rather than 4 – the harmonic
+averages over an *effective* 3.27 raters rather than 4, the harmonic
 mean of the per-subject counts (four subjects were seen by three raters,
 two by all four). The estimate sits a little below the complete-data
 value, as fewer ratings warrant.
@@ -290,11 +290,11 @@ the ill-posed case the package refuses to guess at.
 
 ## A fifth choice: subject- vs. cluster-level
 
-Everything above takes the subject as the object of measurement. When
-subjects are themselves nested in higher-level units – pupils within
-classrooms, patients within clinics – you may instead want the
-reliability of the *cluster* mean, a multilevel ICC (ten Hove, Jorgensen
-& van der Ark, 2022). Pass a `cluster` column to
+Everything above takes the subject as the object of measurement.
+Subjects may themselves be nested in higher-level units, such as pupils
+within classrooms or patients within clinics. Then you may instead want
+the reliability of the *cluster* mean, a multilevel ICC (ten Hove,
+Jorgensen & van der Ark, 2022). Pass a `cluster` column to
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) and it
 reports the **subject-level** (within-cluster) and **cluster-level**
 (between-cluster) coefficients side by side. The [*Multilevel
@@ -303,10 +303,10 @@ article works a full example.
 
 ## Once you have a number
 
-Picking the right coefficient is half the job; reading it is the other
+Picking the right coefficient is half the job. Reading it is the other
 half. Two habits keep you honest, whichever coefficient you chose.
 Interpret it against its **confidence interval**, not the point estimate
-alone — a small study can leave the reliability genuinely uncertain
+alone. A small study can leave the reliability genuinely uncertain
 across a wide range. And treat published “poor / good / excellent”
 cutoffs as rough conventions, not verdicts: the bar that matters depends
 on the stakes of your decision and on which coefficient you are reading.
@@ -344,8 +344,8 @@ each maps to,
 walks the same tree and hands back the coefficient to report together
 with the exact
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) call
-that computes it. It does **not** fit anything – there is no `data`
-argument – so it is a quick way to settle the choice before you run the
+that computes it. It does **not** fit anything, and it takes no `data`
+argument. So it is a quick way to settle the choice before you run the
 model.
 
 ``` r
@@ -370,20 +370,20 @@ choose_icc(type = "agreement", unit = "single", raters = "random")
 #>   - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.
 ```
 
-Pass the decisions as arguments, as above, or – in an interactive
-session – call
+Pass the decisions as arguments, as above. Or, in an interactive
+session, call
 [`choose_icc()`](https://jmgirard.github.io/intraclass/reference/choose_icc.md)
 with them omitted to be asked each outstanding question in turn.
 Answering a choice that does not apply to your design (for example
 `type` under a one-way model) is a clear error rather than a silent
 guess.
 
-## In one sentence
+## In short
 
 Pick **agreement vs. consistency** by whether the value or only the rank
-must match; **single vs. average** by how many raters you will actually
-use; **random vs. fixed** by whether you generalize beyond these raters;
-and let
+must match. Pick **single vs. average** by how many raters you will
+actually use. Pick **random vs. fixed** by whether you generalize beyond
+these raters. Let
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) handle
 **complete vs. incomplete** for you, provided the design stays
 connected.

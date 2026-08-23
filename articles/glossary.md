@@ -1,9 +1,9 @@
 # Glossary
 
 A plain-language reference for the terms that recur across these
-articles. Each entry defines the idea once; the other articles link here
-rather than re-explaining it. Terms are listed alphabetically. Nothing
-here is new — it is the vocabulary the [*Getting
+articles. Each entry defines the idea once, and the other articles link
+here rather than re-explaining it. Terms are listed alphabetically.
+Nothing here is new: it is the vocabulary the [*Getting
 started*](https://jmgirard.github.io/intraclass/articles/getting-started.md)
 and [*Choosing an
 ICC*](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.md)
@@ -12,49 +12,49 @@ guides use, gathered in one place.
 ## Absolute agreement
 
 One of the two `type`s of ICC. Absolute agreement asks whether raters
-give the *same* score — two raters who rank subjects identically but sit
+give the *same* score. Two raters who rank subjects identically but sit
 a full point apart do **not** agree in this sense. It counts systematic
 rater differences (the rater variance) as error. Contrast
 **consistency**. In generalizability theory the absolute-agreement ICC
 is the **dependability coefficient**.
 
-## Average-unit ICC — `ICC(*,k)`
+## Average-unit ICC: `ICC(*,k)`
 
 The reliability of the **mean** of `k` raters, rather than of one rater.
 Averaging cancels part of the error, so `ICC(*,k)` is always at least as
 high as the single-rater `ICC(*,1)`. The `k` is the number of raters
-whose average you will actually use; on incomplete data it becomes the
+whose average you will actually use. On incomplete data it becomes the
 **effective number of ratings**. See **single-unit ICC** for its
 counterpart.
 
 ## Burch interval
 
 An opt-in closed-form confidence interval for the balanced one-way
-design (`ci_method = "burch"`): REML-based limits with a kurtosis
-adjustment (Burch 2011), so its width tracks the tail weight of the
-data, where the **exact-F interval** leans on normality instead.
+design (`ci_method = "burch"`). It gives REML-based limits with a
+kurtosis adjustment (Burch 2011), so its width tracks the tail weight of
+the data, where the **exact-F interval** leans on normality instead.
 Tracking tail weight is not the same as widening: on the two grids this
 package has measured that vary only the subject effect it came out the
 narrower of the two in nearly every cell. How much narrower is
-conditional, and not in the direction one might guess: `"burch"`’s
+conditional, and not in the direction one might guess. `"burch"`’s width
 margin holds much the same up to a true ICC of 0.3 rather than shrinking
 as the true ICC rises (on the larger grid; the smaller grid’s margin
-does shrink across its levels), then collapses to near parity at a true
-ICC of 0.6, on the one grid reaching that value, where every cell
-favouring the exact-F interval sits. It shrinks steadily as the subject
-count grows, measured at 5 raters. Burch reports the reverse for
-symmetric heavy-tailed data with non-normal errors, and a third grid now
-measures that case. What `"burch"` does against `"searle"` depends on
-what the residual is drawn from, and the three grids now measure that:
-the two grids that vary only the subject effect put it narrower nearly
-everywhere, while the third, which draws the residual from the same
-family as the subject effect, puts it wider at every symmetric
-heavy-tailed family measured (a median width ratio of 1.2963 at t(5)
-with 100 subjects) and narrower at every lighter-tailed one, the normal
-included. So neither interval is reliably the tighter one. That
-adjustment is not a remedy for heavy tails: on strongly skewed subject
-effects `"burch"` under-covers about as badly as the default — see
-[*When the default
+does shrink across its levels). The `"burch"` width margin then
+collapses to near parity at a true ICC of 0.6, on the one grid reaching
+that value, where every cell favouring the exact-F interval sits. It
+shrinks steadily as the subject count grows, measured at 5 raters. Burch
+reports the reverse for symmetric heavy-tailed data with non-normal
+errors, and a third grid now measures that case. What `"burch"` does
+against `"searle"` depends on what the residual is drawn from. The three
+grids now measure that: the two grids that vary only the subject effect
+put it narrower nearly everywhere, while the third, which draws the
+residual from the same family as the subject effect, puts it wider at
+every symmetric heavy-tailed family measured (a median width ratio of
+1.2963 at t(5) with 100 subjects) and narrower at every lighter-tailed
+one, the normal included. So neither interval is reliably the tighter
+one. That adjustment is not a remedy for heavy tails: on strongly skewed
+subject effects `"burch"` under-covers about as badly as the default.
+See [*When the default
 under-covers*](https://jmgirard.github.io/intraclass/articles/interval-methods.html#when-the-default-under-covers).
 Deterministic: no resamples, no seed. See [*Confidence-interval
 methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.html#the-opt-in-boundary-robust-methods).
@@ -65,22 +65,22 @@ A **confidence interval** (the frequentist engines’ output) is a range
 built so that, across many hypothetical repetitions of the study, 95% of
 such ranges would contain the true ICC. A **credible interval** (the
 Bayesian `brms` engine’s output) is a range that holds 95% of the
-posterior probability — you can say directly “there is a 95% chance the
+posterior probability. You can say directly “there is a 95% chance the
 ICC lies in here, given the data and the prior.” They answer subtly
-different questions; see [*Confidence-interval
+different questions. See [*Confidence-interval
 methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.md).
 
 ## Conflated ICC
 
 The single-level ICC you would get by **ignoring** a clustering
-structure (pupils in classrooms, patients in clinics) — ten Hove et
-al.’s (2022) Equation 14. It folds the between-cluster and
+structure (pupils in classrooms, patients in clinics). This quantity is
+ten Hove et al.’s (2022) Equation 14. It folds the between-cluster and
 within-cluster variation into one “true score” and is biased for both
 the subject-level and cluster-level questions.
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) can
-report it (`level = "conflated"`) purely as a **diagnostic contrast** to
-show the cost of ignoring the structure; it is never a number to report.
-See [*Multilevel
+report it (`level = "conflated"`) purely as a **diagnostic contrast**,
+to show the cost of ignoring the structure. It is never a number to
+report. See [*Multilevel
 designs*](https://jmgirard.github.io/intraclass/articles/multilevel-designs.html#how-much-does-ignoring-the-nesting-cost-the-conflated-icc).
 
 ## Connectedness (identification)
@@ -88,7 +88,7 @@ designs*](https://jmgirard.github.io/intraclass/articles/multilevel-designs.html
 A design is **connected** when the raters and subjects are linked
 tightly enough that the model can separate a subject effect from a rater
 effect. With enough missing cells a design can split into disconnected
-islands, and then the variance components are not **identified** — no
+islands, and then the variance components are not **identified**, and no
 method can estimate them.
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) checks
 this and aborts loudly rather than return a number that isn’t estimable.
@@ -96,8 +96,8 @@ this and aborts loudly rather than return a number that isn’t estimable.
 ## Consistency
 
 The other `type` of ICC. Consistency asks whether raters *rank* subjects
-the same way, forgiving a constant offset between raters — two raters
-who agree on the ordering but differ by a fixed point still count as
+the same way, forgiving a constant offset between raters. Two raters who
+agree on the ordering but differ by a fixed point still count as
 perfectly consistent. It leaves the rater main effect out of the error
 term. Contrast **absolute agreement**.
 
@@ -116,11 +116,11 @@ replicates*](https://jmgirard.github.io/intraclass/articles/d-studies-and-replic
 
 A forward-looking projection: given the variance components you already
 estimated, *how reliable would the mean of some other number of raters
-(or occasions) be?* It reuses the existing fit — no refitting — and
+(or occasions) be?* It reuses the existing fit, with no refitting, and
 answers “how many raters do I need?”. See [*D-studies and within-cell
 replicates*](https://jmgirard.github.io/intraclass/articles/d-studies-and-replicates.md).
 
-## Effective number of ratings — `k_eff`
+## Effective number of ratings: `k_eff`
 
 On **incomplete** data, subjects are rated different numbers of times,
 so there is no single “`k`” to average over. `k_eff` is the **harmonic
@@ -137,15 +137,15 @@ to estimate the variance components, chosen with the `engine` argument:
 **glmmTMB** (the default mixed model), **lme4** (an alternate
 mixed-model solver), **lavaan** (a structural-equation formulation), or
 **brms** (a Bayesian fit). Some engines are just a different solver for
-the same estimator; others compute a genuinely different, though
+the same estimator. Others compute a genuinely different, though
 asymptotically equivalent, estimator. See [*Estimation
 engines*](https://jmgirard.github.io/intraclass/articles/engines.md).
 
 ## Estimand
 
-The true quantity you are trying to estimate — the target the ICC is
-aiming at. The word matters because “the ICC” is not one number:
-agreement and consistency, single and average, subject level and cluster
+The true quantity you are trying to estimate: the target the ICC is
+aiming at. The word matters because “the ICC” is not one number.
+Agreement and consistency, single and average, subject level and cluster
 level are *different estimands*, and picking the coefficient is really
 picking which one answers your question. See [*Choosing an
 ICC*](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.md).
@@ -155,28 +155,29 @@ ICC*](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.md).
 An opt-in closed-form confidence interval for the balanced one-way
 design (`ci_method = "searle"`): it inverts the exact-F pivot of the
 one-way ANOVA (Searle 1971, Ch. 9 Table 9.14; the McGraw & Wong 1996
-Table 7 limits). Exact under normality — best-calibrated when the data
-are approximately normal — and deterministic. Exact is not the same as
-shortest: see the **Burch interval** above for what this package
+Table 7 limits). Exact under normality. It is best-calibrated when the
+data are approximately normal, and it is deterministic. Exact is not the
+same as shortest: see the **Burch interval** above for what this package
 measured about their relative widths. See [*Confidence-interval
 methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.html#the-opt-in-boundary-robust-methods).
 
 ## FIML
 
-**Full-information maximum likelihood** — the technique the **lavaan**
-(SEM) engine uses to fit **incomplete** data: rather than dropping cases
+**Full-information maximum likelihood**: the technique the **lavaan**
+(SEM) engine uses to fit **incomplete** data. Rather than dropping cases
 with missing cells, it uses every observed value to estimate the model.
 See [*Estimation
 engines*](https://jmgirard.github.io/intraclass/articles/engines.html#a-structural-equation-engine-lavaan).
 
-## Finite-population rater variance — `θ²_r`
+## Finite-population rater variance: `θ²_r`
 
-When raters are treated as **fixed** (the observed raters *are* the
-whole population of interest), the “rater variance” is the spread of
-just those raters, computed as a bias-corrected finite-population
-quantity (McGraw & Wong’s Case 3A) rather than an estimate of a wider
-rater universe. On balanced data it equals the random-rater variance;
-under imbalance it differs. See **fixed vs. random raters**.
+Raters may be treated as **fixed**, meaning the observed raters *are*
+the whole population of interest. Then the “rater variance” is the
+spread of just those raters, computed as a bias-corrected
+finite-population quantity (McGraw & Wong’s Case 3A) rather than an
+estimate of a wider rater universe. On balanced data it equals the
+random-rater variance. Under imbalance it differs. See **fixed vs.
+random raters**.
 
 ## Fixed vs. random raters
 
@@ -198,19 +199,20 @@ information per subject, which the harmonic mean captures.
 ## Indicator-mean estimator
 
 How the **lavaan** (SEM) engine recovers the rater variance for
-**absolute agreement**: since a rater is a single column with no random
-effect, its variance is read from the spread of the estimated column
-(indicator) means (Jorgensen 2021). It is a genuinely different — though
-asymptotically equivalent — estimator than the mixed model’s random
-effect, and can differ modestly on small designs. See [*Estimation
+**absolute agreement**. In lavaan’s formulation a rater is a single
+column with no random effect, so its variance is read from the spread of
+the estimated column (indicator) means (Jorgensen 2021). It is a
+genuinely different estimator than the mixed model’s random effect,
+though asymptotically equivalent to it, and can differ modestly on small
+designs. See [*Estimation
 engines*](https://jmgirard.github.io/intraclass/articles/engines.html#a-structural-equation-engine-lavaan).
 
 ## Modified profile likelihood
 
 An opt-in deterministic confidence interval for the balanced, complete
 two-way random absolute-agreement design (`ci_method = "mpl"`; Xiao &
-Liu 2013): it profiles the likelihood in the ICC with a calibrated
-small-sample correction and returns an interval at the near-zero
+Liu 2013). It profiles the likelihood in the ICC with a calibrated
+small-sample correction, and returns an interval at the near-zero
 boundary where the Monte-Carlo default aborts. Available at `conf_level`
 0.90, 0.95, and 0.99, and deliberately conservative. See
 [*Confidence-interval
@@ -225,7 +227,7 @@ recomputes the ICC for each draw, and takes the 2.5% and 97.5%
 quantiles. Fast and boundary-aware. It does assume the fitted parameters
 are approximately normally distributed around the truth, and it
 under-covers when the subject effects are strongly skewed or
-heavy-tailed — see [*When the default
+heavy-tailed. See [*When the default
 under-covers*](https://jmgirard.github.io/intraclass/articles/interval-methods.html#when-the-default-under-covers).
 See also [*Confidence-interval
 methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.md).
@@ -251,7 +253,7 @@ methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.md).
 ## Posterior mode (MAP)
 
 The point estimate the Bayesian **brms** engine reports: the peak (mode)
-of the posterior distribution of the ICC — the *maximum a posteriori*
+of the posterior distribution of the ICC, the *maximum a posteriori*
 value. On a small, right-skewed posterior it can sit below the
 mixed-model REML estimate. Its interval is a **credible** interval. See
 [*Estimation
@@ -260,23 +262,23 @@ engines*](https://jmgirard.github.io/intraclass/articles/engines.html#a-bayesian
 ## Prior
 
 In the Bayesian **brms** engine, the distribution placed on each
-variance component *before* seeing the data — here a weakly-informative
-half-*t*(4, 0, 1) on every standard deviation (ten Hove et al. 2020),
-the sourced prior every coverage result depends on. Overriding it
-(`prior =`) voids those guarantees, so
+variance component *before* seeing the data. Here that is a
+weakly-informative half-*t*(4, 0, 1) on every standard deviation (ten
+Hove et al. 2020), the sourced prior every coverage result depends on.
+Overriding it (`prior =`) voids those guarantees, so
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) warns.
 See [*Estimation
 engines*](https://jmgirard.github.io/intraclass/articles/engines.html#the-prior-and-overriding-it).
 
 ## REML
 
-**Restricted maximum likelihood** — the standard method the mixed-model
+**Restricted maximum likelihood**: the standard method the mixed-model
 engines (glmmTMB, lme4) use to estimate variance components. It corrects
 the downward bias that ordinary maximum likelihood has when estimating
 variances, which matters for the small samples common in reliability
 studies.
 
-## Single-unit ICC — `ICC(*,1)`
+## Single-unit ICC: `ICC(*,1)`
 
 The reliability of a **single** rater’s score. Its counterpart, the
 **average-unit ICC** `ICC(*,k)`, is the reliability of the mean of `k`
@@ -284,9 +286,9 @@ raters and is always at least as high.
 
 ## Subject level vs. cluster level
 
-In a **multilevel** design (subjects nested in clusters — pupils in
-classrooms), two reliabilities are defined. The **subject level** asks
-how reliably raters distinguish subjects *within* a cluster; the
+In a **multilevel** design (subjects nested in clusters, such as pupils
+in classrooms), two reliabilities are defined. The **subject level**
+asks how reliably raters distinguish subjects *within* a cluster. The
 **cluster level** asks how reliably they distinguish *cluster means*.
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
 reports both from one fit. See [*Multilevel
@@ -295,25 +297,26 @@ designs*](https://jmgirard.github.io/intraclass/articles/multilevel-designs.html
 ## Transformed bootstrap-*t*
 
 An opt-in confidence-interval method for the one-way design, balanced or
-unbalanced (`ci_method = "npbootstrap"`; Ukoumunne et al. 2003): it
+unbalanced (`ci_method = "npbootstrap"`; Ukoumunne et al. 2003). It
 resamples whole subjects with replacement, stabilizes the variance with
-a log-F transform, studentizes, and back-transforms the endpoints — so
-it takes a `seed` and `boot_samples`. Robust at the zero-variance
-boundary and to non-normal subject effects. See [*Confidence-interval
+a log-F transform, studentizes, and back-transforms the endpoints, so it
+takes a `seed` and `boot_samples`. Robust at the zero-variance boundary
+and to non-normal subject effects. See [*Confidence-interval
 methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.html#the-opt-in-boundary-robust-methods).
 
 ## Variance component
 
-A share of the total variation in the scores traced to one source — how
-much comes from real differences between **subjects**, from some
-**raters** scoring higher than others, from the **subject-by-rater**
-interaction, and from residual **error**. Every ICC is a ratio built
-from these components: signal variance over signal-plus-error variance.
+A share of the total variation in the scores traced to one source. It
+says how much comes from real differences between **subjects**, from
+some **raters** scoring higher than others, from the
+**subject-by-rater** interaction, and from residual **error**. Every ICC
+is a ratio built from these components: signal variance over
+signal-plus-error variance.
 
 ## Zero-variance boundary
 
 A variance component cannot be negative, so its estimate can land
-*exactly* at zero — the edge of the allowed range. Ordinary interval
+*exactly* at zero, the edge of the allowed range. Ordinary interval
 formulas misbehave there (they can run below zero or collapse). The
 Monte-Carlo default is **boundary-aware**: it works on a scale where
 zero is reachable without breaking, which is one reason glmmTMB is the

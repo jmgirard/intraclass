@@ -7,8 +7,8 @@ library(intraclass)
 
 ## What an ICC tells you
 
-Suppose several raters each score the same set of things — essays,
-patients, video clips — and you want to know whether the scores can be
+Suppose several raters each score the same set of things: essays,
+patients, video clips. You want to know whether the scores can be
 *trusted*. If two raters watch the same clip, will they land on the same
 number? If you swapped in a different rater, would the result hold up?
 That is a question about **interrater reliability**, and an **intraclass
@@ -18,17 +18,17 @@ An ICC runs from 0 to 1 and reports **the share of the variation in
 scores that reflects real differences between the things being rated**,
 rather than disagreement or noise between raters. Near 1, almost all the
 spread in scores is genuine subject-to-subject difference and the raters
-barely disagree — the ratings are highly reliable. Near 0, the raters
+barely disagree, and the ratings are highly reliable. Near 0, the raters
 are effectively adding noise, and a score tells you more about who
 happened to rate it than about the subject.
 
-`intraclass` estimates that number by fitting a **mixed model** (it
-separates subject variation from rater variation as [variance
-components](https://jmgirard.github.io/intraclass/articles/glossary.html#variance-component)),
-rather than from the classical ANOVA mean-squares formulas older tools
-use. The two agree on clean, balanced data but the model-based approach
-also handles missing ratings, multiple designs, and honest confidence
-intervals — see
+`intraclass` estimates that number by fitting a **mixed model**, rather
+than from the classical ANOVA mean-squares formulas older tools use. The
+model separates subject variation from rater variation as [variance
+components](https://jmgirard.github.io/intraclass/articles/glossary.html#variance-component).
+The two approaches agree on clean, balanced data, but the model-based
+one also handles missing ratings, multiple designs, and honest
+confidence intervals. See
 [*Engines*](https://jmgirard.github.io/intraclass/articles/engines.md)
 for the machinery. This article walks the whole pipeline on a small
 example: **fit → estimate → interpret**. (New to any of the terms as
@@ -40,8 +40,8 @@ defines each one in a sentence.)
 
 We use the classic Shrout & Fleiss (1979) example, shipped with the
 package as `ratings`: 6 subjects each rated by the same 4 raters, one
-rating per cell. `intraclass` wants **long** format — one rating per
-row, with columns for the subject, the rater, and the score.
+rating per cell. `intraclass` wants **long** format: one rating per row,
+with columns for the subject, the rater, and the score.
 
 ``` r
 
@@ -58,13 +58,13 @@ head(ratings)
 ## Fit
 
 Call [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
-with the data and the three columns (unquoted). With the defaults a
-single **two-way random** fit reports every defined formulation —
+with the data and the three columns (unquoted). With the defaults, a
+single **two-way random** fit reports every defined formulation:
 absolute agreement and consistency, each for a single rater and for the
-average of your raters: `ICC(A,1)`, `ICC(A,k)`, `ICC(C,1)`, `ICC(C,k)`
-(the next sections unpack these labels). They are grouped by error
-definition in the printout. We set a `seed` so the confidence interval
-is reproducible.
+average of your raters. Those four are `ICC(A,1)`, `ICC(A,k)`,
+`ICC(C,1)`, and `ICC(C,k)`. The next sections unpack the labels. They
+are grouped by error definition in the printout. We set a `seed` so the
+confidence interval is reproducible.
 
 ``` r
 
@@ -93,9 +93,9 @@ fit
 ## Read the result with the tidy verbs
 
 [`tidy()`](https://generics.r-lib.org/reference/tidy.html) returns one
-row per coefficient, with the estimate and confidence interval;
+row per coefficient, with the estimate and confidence interval.
 [`glance()`](https://generics.r-lib.org/reference/glance.html) returns a
-one-row model summary including the variance components.
+one-row model summary, including the variance components.
 
 ``` r
 
@@ -120,9 +120,9 @@ glance(fit)
 ```
 
 [`summary()`](https://rdrr.io/r/base/summary.html) is the other reading
-of the same fit: it reprints the report above and then appends a short
+of the same fit. It reprints the report above, then appends a short
 **interpretive note for each error definition present**, plus one about
-what a single rating per cell cannot separate. Nothing is recomputed —
+what a single rating per cell cannot separate. Nothing is recomputed:
 the notes are read off the design, so they track whatever you fitted:
 
 ``` r
@@ -152,7 +152,7 @@ summary(fit)
 ## Interpret
 
 **Single vs. the average of several raters.** `ICC(A,1)` = 0.29 is the
-reliability of a *single* rater — how much you can trust one person’s
+reliability of a *single* rater: how much you can trust one person’s
 score. `ICC(A,k)` = 0.62 is the reliability of the *mean* of all 4
 raters. Averaging cancels out independent rater noise, so the mean is
 always more reliable than one rater alone (this is the
@@ -164,10 +164,10 @@ rater’s judgment.
 **Absolute agreement vs. rank order.** These are **absolute-agreement**
 coefficients: if one rater scores consistently higher than another, that
 systematic gap counts as error. Here the raters differ sharply in
-average level, which is why the agreement ICC is low — a signal that the
-rating procedure has a level problem worth fixing. (If you only care
-that raters *rank* subjects the same way, ask for *consistency* instead
-— see below.)
+average level, which is why the agreement ICC is low. That is a signal
+that the rating procedure has a level problem worth fixing. (If you only
+care that raters *rank* subjects the same way, ask for *consistency*
+instead, described below.)
 
 ### Is this a good ICC?
 
@@ -183,17 +183,17 @@ rough vocabulary. **Koo & Li (2016)** propose:
 
 An older scheme, **Cicchetti (1994)**, draws its lines a little
 differently (\< 0.40 poor, 0.40–0.59 fair, 0.60–0.74 good, 0.75–1.00
-excellent). Treat these as conventions, not laws: the bar that matters
+excellent). Treat these as conventions, not laws. The bar that matters
 depends on the stakes of your decision, and on *which* ICC you are
-reading (an agreement and a consistency coefficient on the same data are
-not comparable to the same cutoff).
+reading. An agreement coefficient and a consistency coefficient on the
+same data are not comparable to the same cutoff.
 
-Most important — and this is Koo & Li’s own recommendation — **judge the
+Most important, and this is Koo & Li’s own recommendation: **judge the
 confidence interval, not just the point estimate.** Here the four-rater
 mean `ICC(A,k)` = 0.62 reads as “moderate,” but its 95% interval runs
-from 0.17 to 0.91 — from “poor” all the way to “excellent.” With only
-six subjects, the data simply cannot pin the reliability down to one
-band. That is why
+from 0.17 to 0.91, from “poor” all the way to “excellent.” With only six
+subjects, the data simply cannot pin the reliability down to one band.
+That is why
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) never
 returns a point estimate without an interval, and never labels a result
 for you: the honest summary is the whole interval.
@@ -206,11 +206,12 @@ reports is a [**Monte-Carlo**
 interval](https://jmgirard.github.io/intraclass/articles/glossary.html#monte-carlo-interval),
 and it is
 [**boundary-aware**](https://jmgirard.github.io/intraclass/articles/glossary.html#zero-variance-boundary).
-In plain terms: instead of relying on a textbook formula that misbehaves
-when a variance is near zero (a common situation — raters who barely
-differ push the rater variance to its zero boundary),
+In plain terms: the default interval does not rely on a textbook formula
+that misbehaves when a variance is near zero. That is a common
+situation: raters who barely differ push the rater variance to its zero
+boundary. Instead
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
-simulates many plausible parameter sets from the fitted model and reads
+simulates many plausible parameter sets from the fitted model, and reads
 the interval off the resulting spread of ICCs. This keeps the interval
 well-behaved right at that boundary. The [*Interval
 methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.md)
@@ -219,11 +220,11 @@ bootstrap, and Bayesian credible intervals).
 
 ## Consistency instead of agreement
 
-If a constant per-rater offset is acceptable — you care only that raters
-*rank* subjects the same way, not that they land on the same number —
-ask for **consistency** with `type = "consistency"`. It drops the rater
-main effect from the error, so it is never smaller than the agreement
-coefficient:
+Suppose a constant per-rater offset is acceptable: you care only that
+raters *rank* subjects the same way, not that they land on the same
+number. Then ask for **consistency** with `type = "consistency"`. It
+drops the rater main effect from the error, so it is never smaller than
+the agreement coefficient:
 
 ``` r
 
@@ -243,21 +244,21 @@ The gap between the two (here `ICC(C,1)` = 0.71 vs. `ICC(A,1)` = 0.29)
 is a direct read-out of how much systematic rater-level difference is
 present.
 
-By default raters are treated as **random** — a sample you want to
+By default raters are treated as **random**: a sample you want to
 generalize beyond, so that your reliability claim covers raters you did
 not use. If your raters are the entire population of interest you can
-pass `raters = "fixed"` (the classic `ICC(3,1)`), but
+pass `raters = "fixed"`, the classic `ICC(3,1)`. But
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) will
 warn: random is the recommended default for interrater reliability, and
 on balanced data the number is identical anyway.
 
 ## Which ICC do I want?
 
-Whether the raters are crossed (the same set judges everyone) or
-interchangeable (`model = "oneway"`), absolute agreement
-vs. consistency, single vs. average, fixed vs. random raters, complete
-vs. incomplete designs — these choices define *which* ICC is correct for
-your study. The [*Choosing an
+Several choices define *which* ICC is correct for your study. Are the
+raters crossed, so that the same set judges everyone, or interchangeable
+(`model = "oneway"`)? Absolute agreement or consistency? A single rater
+or the average? Fixed or random raters? A complete or an incomplete
+design? The [*Choosing an
 ICC*](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.md)
 article
 ([`vignette("choosing-an-icc")`](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.md))
