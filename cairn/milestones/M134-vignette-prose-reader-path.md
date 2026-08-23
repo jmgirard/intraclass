@@ -1,6 +1,6 @@
 # M134: Vignette prose pass — the reader path, and the house style standard
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -105,7 +105,7 @@ refused, D-021 stands.
       on both sides of the dash, and re-run the `72f9cc2` baseline with the
       corrected bytes.
 - [x] T9 Action the review findings the gate directs.
-- [ ] T10 Re-run the AC5 verify block.
+- [x] T10 Re-run the AC5 verify block.
 
 ## Work log
 
@@ -134,6 +134,8 @@ refused, D-021 stands.
 - 2026-08-23: T8 — `count_dashes()` repaired: the proper-noun exclusion now requires the word left of the dash to be capitalized as well as the character right of it, so `sentence---And` and `spaces—Raters` are counted while `Spearman--Brown` and `10--20` stay excluded. Verified on a five-site probe file: 1 counted before the fix, 3 after, the two excluded sites unchanged. Re-ran the `72f9cc2` baseline with the corrected bytes over the eight `vignettes/*.Rmd` blobs: 744 fragments / 81 over 35 / 226 dashes / 11 long parentheticals / 55 semicolons, the three in-scope files holding 358 / 20 / 66 — identical to the figures Scope already records, so no Scope amendment is owed. The three in-scope files still report 0 dashes under the corrected ruler, so T3–T5 do not reopen. AC1's byte-identity clause now reads against the corrected bytes: the baseline re-run and the final run use the same file.
 
 - 2026-08-23: T9 — review findings actioned per the gate. Fixed: the NEWS entry's second clause ("so no statement is broader or narrower than it was") dropped, leaving the act it can back; four R6 drifts restored to the original's neutral wording (`glossary.Rmd`'s estimand "so" back to "and"; the indicator-mean entry back to leading with "a genuinely different estimator … though asymptotically equivalent", matching `engines.Rmd`; `choosing-an-icc.Rmd`'s "since there is no rater term" to "where"; `choose_icc()`'s "which is why it takes no `data` argument" to a neutral "and it takes no `data` argument"); `getting-started.Rmd`'s "avoids the textbook formulas" restored to the original's indefinite, default-scoped "the default interval does not rely on a textbook formula that misbehaves…"; long source lines rewrapped, taking >88-character lines to 0 / 1 / 5 against 0 / 1 / 8 at `72f9cc2`. Accepted at the gate: the `## In short` heading keeps the new anchor (no in-repo referrer). Added: a `## The prose ruler` section to `data-raw/README.md`, kept out of the claim-pinned checker inventory since the ruler is not a checker and is wired into no CI job. Ruler re-run after the edits: still 0 dashes on all three files and 1 over-35 sentence in `glossary.Rmd`. `check-record-claims.py --live` exit 0; doc pins FAIL 0 | PASS 2752.
+
+- 2026-08-23: T10 — verify block re-run on the repaired branch. `devtools::document()` no diff (clean `git status` after); `devtools::test()` FAIL 0 | WARN 3 | SKIP 2 | PASS 8862; `devtools::check(document = FALSE)` raw `Status: 1 NOTE`, 0 errors / 0 warnings, vignettes re-built OK. The NOTE is the `spelling.Rout` comparison and is pre-existing: `spelling::spell_check_package()` flags 31 words on this branch, the same count recorded at `72f9cc2` and at T7, all proper names and en-GB spellings absent from `inst/WORDLIST`. `python3 data-raw/check-record-claims.py --live` exit 0 (6 claims, 0 failures) and `pkgdown::check_pkgdown()` clean, both re-run at T9. All tasks checked; status → review.
 
 ## Decisions
 
