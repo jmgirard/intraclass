@@ -9,7 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M133 | Tell users which interval method is trustworthy for their design | in-progress | M130 | high | milestones/M133-ci-method-trustworthiness-table.md |
+| M133 | Tell users which interval method is trustworthy for their design | blocked | M130 | high | milestones/M133-ci-method-trustworthiness-table.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68, M129, M130, M131, M132, M133 | high | milestones/M48-release-v010.md |
 | M128 | Show the plotting surface in the README, and polish the front page | done | — | normal | milestones/archive/M128-readme-figures-polish.md |
 | M129 | Back the hand-pasted engine transcripts in the vignettes | done | — | high | milestones/archive/M129-vignette-brms-transcripts.md |
