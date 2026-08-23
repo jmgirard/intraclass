@@ -60,7 +60,7 @@ nothing to do with “rater 1” for another – the raters are
 oneway <- icc(ratings, score, subject, rater, model = "oneway", seed = 2024)
 #> Warning in check_dep_version(dep_pkg = "TMB"): package version mismatch: 
 #> glmmTMB was built with TMB package version 1.9.21
-#> Current TMB package version is 1.9.23
+#> Current TMB package version is 1.9.25
 #> Please re-install glmmTMB from source or restore original 'TMB' package (see '?reinstalling' for more information)
 oneway
 #> ── Intraclass correlation: one-way random ──────────────────────────────────────
@@ -101,8 +101,8 @@ agreement
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   index     estimate   95% CI
-#>   ICC(A,1)     0.290   [0.050, 0.711]
-#>   ICC(A,k)     0.620   [0.173, 0.908]
+#>   ICC(A,1)     0.290   [0.050, 0.713]
+#>   ICC(A,k)     0.620   [0.173, 0.909]
 #> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
@@ -114,8 +114,8 @@ consistency
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   index     estimate   95% CI
-#>   ICC(C,1)     0.715   [0.340, 0.926]
-#>   ICC(C,k)     0.909   [0.673, 0.980]
+#>   ICC(C,1)     0.715   [0.343, 0.924]
+#>   ICC(C,k)     0.909   [0.676, 0.980]
 #> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 ```
