@@ -39,7 +39,12 @@ red when the fact changes (M91).
   to a `references/` page that adds a range/superlative/"never"/"exactly
   one"/decimal-range claim needs a triage row keyed by the enumerator's
   `citekey:hash`; a repo-internal claim (derived result, committed fixture)
-  triages `OUT-oracle-pin` (M85, M76).
+  triages `OUT-oracle-pin` (M85, M76). Correcting an EXISTING claim in place
+  stales it the same way — the hash is over the claim text, so the old row
+  orphans and the corrected text enumerates as un-triaged. Rekey the row in
+  place, keeping its class when the claim's nature has not changed, and re-run
+  after every such edit: M133 paid this twice on one `ORACLES.md` line, once on
+  an already-pushed branch tip.
 - **MPL doc claims** (`data-raw/mpl-doc-claims.tsv`): rewording the pinned
   `@param conf_level`/`ci_method` roxygen blocks or NEWS MPL-scope sentences
   needs the row re-triaged (quote + claim key); a **new** universal/negative
