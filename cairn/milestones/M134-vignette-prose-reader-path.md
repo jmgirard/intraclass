@@ -1,6 +1,6 @@
 # M134: Vignette prose pass — the reader path, and the house style standard
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -124,6 +124,7 @@ refused, D-021 stands.
 - 2026-08-23: AC1's byte-identity holds — `data-raw/prose-profile.py` has one commit (`96b78b4`, T1) and `git diff 96b78b4 -- data-raw/prose-profile.py` is empty, so the baseline run and the final run used the same bytes.
 - 2026-08-23: all tasks checked; status → review.
 - 2026-08-23: review checkpoint (mid-phase) — PR #143 opened as draft; `main` unmoved since the branch was cut. AC1–AC4 verified with fresh evidence and ticked. AC5 pending: `devtools::document()` no diff and `pkgdown::check_pkgdown()` clean and `check-record-claims.py --live` exit 0 already recorded, `devtools::test()` and `devtools::check()` still running. `cairn_validate` exit 0, all checks pass. Three review lenses spawned; the prior-review lens returned no findings.
+- 2026-08-23: review returned M134 to `in-progress`. Failed: **AC1** — `data-raw/prose-profile.py`'s proper-noun exclusion (`before.isalnum() and after.isalnum() and after.isupper()`) is broader than the class `cairn/doctrine/prose-style.md` defines, so the ruler does not count an unspaced dash before a capitalized word. Reproduced on a five-site probe file: three genuine sentence-level breaks, one counted. Fixing it breaks AC1's byte-identity clause, so the `72f9cc2` baseline is re-run with the corrected ruler and the Scope figures restated, per the doctrine's own frozen-ruler rule; T3-T5 reopen if the corrected ruler reports non-zero on the three files. AC2/AC3/AC4 verified and ticked before the return; AC5 incomplete. Eight further [O] findings recorded in the Review section for triage, no status change of their own. First defect return on this milestone.
 
 ## Decisions
 
@@ -177,3 +178,109 @@ branch 0 behind / 8 ahead), so no merge was needed before gathering evidence.
   entry keeps "on the two grids this package has measured that vary only the
   subject effect" attached to its narrowness claim.
 
+- **AC5 — not established.** `devtools::document()` produced no diff (only the
+  milestone file this review edits was modified). `pkgdown::check_pkgdown()`
+  clean and `python3 data-raw/check-record-claims.py --live` exit 0 (6 claims
+  re-derived, 0 failures). `devtools::test()` and `devtools::check()` were still
+  running when the review returned on AC1; their results are not recorded here
+  and AC5 stays unticked.
+
+### Consistency gate
+
+- `python3 cairn_validate.py` exit 0 — 16 PASS, 7 advisory OK, no FAIL.
+- `cairn_impact.py` skipped: `Principles touched: —`, no DESIGN principle changed.
+- Toolchain checks (`r-package` profile's `consistency-gate` slot):
+  `devtools::document()` no diff; `NAMESPACE`/`man/`/`data/` untouched by the
+  diff; `README.Rmd`/`README.md` untouched by the branch; `pkgdown::check_pkgdown()`
+  clean; `NEWS.md` carries a Documentation entry for the pass; no new top-level
+  file (`data-raw/` already carries `^data-raw$` in `.Rbuildignore`);
+  `devtools::check()` incomplete at return.
+
+### Independent review
+
+Diff touches executable surface (`data-raw/prose-profile.py`) at a user-facing
+tier, so the full three-lens fan-out ran, each lens fresh-context and none
+having authored the work.
+
+**[S] blame-history — no findings.** Traced every changed line in the three
+vignettes to the commit that introduced it. The Burch/searle width paragraph
+built up by M115–M118 survives verbatim (all figures, the "narrower nearly
+everywhere" contrast, and the "the two grids that vary only the subject effect"
+scope clause); only punctuation changed. Ran `test-doc-skew-caveat.R` (2344 pass,
+0 fail) and `test-vignette-claims.R` (246 pass, 0 fail) directly as independent
+confirmation. Noted that two R6 widenings appeared mid-branch and were repaired
+before HEAD, so the merged diff carries neither.
+
+**[S] prior-review record — no findings.** The GitHub inline-comment probe
+returned empty, so no thread walk was paid for; archived `## Review` sections and
+`LESSONS.md` were the evidence base. Cleared M130's pkgdown-anchor lesson by
+rendering the four changed glossary headings through `pandoc` before and after —
+all four anchor ids are stable — and confirmed no `glossary.html#…` reference in
+the other six vignettes targets a changed heading.
+
+**[O] diff-bug — nine findings, ranked.** Full text in the work log's return
+line and below; dispositions are the maintainer's at the gate.
+
+1. **The ruler's proper-noun exclusion is over-broad, so R1's counted class is
+   narrower than the doctrine defines it.** `data-raw/prose-profile.py:227-233`
+   skips a dash whenever `before.isalnum() and after.isalnum() and
+   after.isupper()`. The doctrine excludes "dashes joining capitalized proper
+   nouns"; the code requires nothing of the left side. **Reproduced at review**
+   on a probe file with five dash sites: of three genuine sentence-level breaks,
+   the ruler counted one — `…no spaces—Raters differ…` and `…one---And this
+   too…` were both silently excluded, and only the spaced ` --- ` was counted.
+   An unspaced em dash before a capitalized word is the ordinary typographic
+   form of the trope R1 bans.
+2. **The NEWS entry asserts a universal meaning-preservation guarantee nothing
+   enforces.** `NEWS.md`: "every claim the pass touched was checked against the
+   text it replaced, so no statement is broader or narrower than it was." The
+   first clause describes the act; the second asserts a standing property of the
+   prose, which no test enforces and which findings 4, 5, and 7 are candidate
+   counterexamples to.
+3. **Source line-wrapping regressed.** `getting-started.Rmd:153` (202 chars),
+   `choosing-an-icc.Rmd:36` (252) and `:265` (153) are unwrapped joins;
+   `glossary.Rmd` goes from 8 to 16 lines over 88 characters. Confirmed
+   independently at a 90-character threshold: glossary 4 → 9, getting-started
+   0 → 1, choosing-an-icc 1 → 2.
+4. **`choose_icc()` gained a causal claim the original did not make.**
+   "It does **not** fit anything, which is why it takes no `data` argument"
+   replaces a neutral apposition, and asserts the direction backwards.
+5. **Two added causal connectives.** `glossary.Rmd` turns "and picking the
+   coefficient is really picking…" into "so picking…"; `choosing-an-icc.Rmd`
+   turns an appositive into "since there is no rater term to reason about".
+   Each converts a conjoined fact into an asserted entailment.
+6. **`## In one sentence` → `## In short` moves a published anchor.** No
+   in-repo referrer (confirmed by the lens and by the work log), so the break is
+   external bookmarks only. The four glossary heading swaps are safe.
+7. **"`icc()` avoids the textbook formulas…" is a package-level claim where the
+   original described only the default.** `ci_method = "searle"`/`"burch"`/
+   `"mpl"` are closed-form intervals `icc()` will use; the restrictive clause
+   probably rescues it, but it is the widening shape R6 warns about.
+8. **Indicator-mean entry: the concessive is flipped.** "asymptotically
+   equivalent … **but** a genuinely different estimator" reverses the original's
+   emphasis, and `engines.Rmd:99` still leads with the other half.
+9. **`data-raw/README.md` gained no row for the new script.** No claim-pinned
+   count is disturbed, but `data-raw/`'s inventory has no pointer to it.
+
+The lens found nothing factually wrong about what the package does beyond
+finding 7's overreach, and nothing contradicting D-021, D-029, D-032, D-033 or a
+DESIGN principle.
+
+### Outcome
+
+**Returned to `in-progress` under the return floor.** Finding 1 demonstrates AC1
+failing inside its own domain: AC1 promises the ruler "implements R1's counted
+class … as `cairn/doctrine/prose-style.md` defines them", and it does not. This
+is a defect return, not an amendment return — the criterion is right and the
+implementation is wrong, and the repair is a correction to a procedure, not the
+widening of an author-recalled enumeration.
+
+The repair interacts with AC1's second clause. Fixing the exclusion breaks
+byte-identity with the `72f9cc2` baseline run, so the baseline must be re-run
+with the corrected ruler and the Scope figures restated — which is what
+`prose-style.md`'s own closing rule already prescribes ("a correction to the
+ruler restarts the pass's baseline"). The corrected ruler may also report
+non-zero dashes in the three files, which would reopen T3–T5.
+
+Findings 2–9 carry no status change of their own and go to the maintainer for
+triage; they are listed above so none is silently dropped.
