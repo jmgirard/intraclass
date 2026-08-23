@@ -2,14 +2,23 @@
 
 ## Record-claim checkers
 
-Five checkers live here — `check-mpl-doc-claims.py`, `check-oracle-registry.py`,
-`check-record-claims.py`, `check-reference-observations.py` and
-`enumerate-generalizing-claims.py` [claim:data-raw-checker-inventory] — all
-stdlib-only `python3` so the R-free `check-references` CI job can run them. Four
-of the five are wired into that job, which invokes a `data-raw` checker eight
+Six checkers live here — `check-mpl-doc-claims.py`, `check-oracle-registry.py`,
+`check-record-claims.py`, `check-reference-observations.py`,
+`check-vignette-render-warnings.py` and `enumerate-generalizing-claims.py`
+[claim:data-raw-checker-inventory] — all stdlib-only `python3` so the R-free
+`check-references` CI job can run them. Four
+of the six are wired into that job, which invokes a `data-raw` checker eight
 times [claim:lint-checker-invocations]: each wired checker twice, once for the
 check and once for its vacuity self-test. `check-oracle-registry.py` is run
-locally only.
+locally only. `check-vignette-render-warnings.py` runs in the `pkgdown` job
+instead, because what it checks is the built site rather than the sources: it
+reads `docs/` after `build_site_github_pages()` and before the deploy step, and
+reds if a built page shows a load-time dependency version-skew warning. That
+warning is what a binary `glmmTMB` built against an older `TMB` prints from
+`.onLoad`; because `intraclass` imports `glmmTMB` it renders into every vignette
+that loads the package. The workflow prevents it by rebuilding `glmmTMB` from
+source against the installed `TMB` when the two are skewed; this checker is the
+guard that the prevention held.
 
 Two more checkers here are R rather than `python3`, so neither is matched by
 that `ls` and neither runs in the R-free job. `check-checkpoint-sites.R` parses
@@ -19,7 +28,7 @@ three separate reversions of a site's guard call walked straight past.
 `check-abort-remedy-verdicts.R` is the second, and is run locally.
 
 Whether a checker probes itself is a committed claim rather than an impression
-[claim:checker-self-test-status]. Five of the six carry a `--self-test` that
+[claim:checker-self-test-status]. Six of the seven carry a `--self-test` that
 plants mutations and requires each to red the check, printing one PASS line per
 planted mutation so its coverage is counted rather than asserted.
 `check-abort-remedy-verdicts.R` is the one that does not: it parses no arguments
