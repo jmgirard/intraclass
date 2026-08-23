@@ -432,10 +432,32 @@ coverage is claimed for it). Only the HPDI needs the posterior draws, so
 interval methods already report a percentile interval.}
 }
 \value{
-An \code{icc} object: a list with the estimate table, variance components,
-design, engine, interval settings, sample sizes, the fitted model, and the
-call. Use \link[generics:tidy]{tidy()}, \link[generics:glance]{glance()}, and the
-\code{print}/\code{summary} methods.
+\code{icc()} returns an \code{icc} object: a list with the estimate table,
+variance components, design, engine, interval settings, sample sizes, the
+fitted model, and the call.
+
+The methods documented on this page return:
+\itemize{
+\item \code{tidy.icc()}: a tibble with one row per estimated coefficient carrying
+the columns \code{index}, \code{type}, \code{level}, \code{sf_index}, \code{estimate},
+\code{std.error}, \code{conf.low}, \code{conf.high}, \code{conf.level}, and \code{method}, plus an
+\code{occasions} column -- inserted after \code{index}, so the list above is not a
+column order -- when the design has within-cell replicates.
+\item \code{glance.icc()}: a one-row tibble of model-level summaries --
+the sample sizes, the design flags, the effective rater counts, the
+variance components, and the engine and interval settings.
+\item \code{format.icc()}: a character vector holding the printed report, one line per
+element.
+\item \code{print.icc()}: the \code{icc} object invisibly, having emitted that report.
+\item \code{summary.icc()}: the \code{icc} object invisibly, having emitted the report
+followed by the interpretive notes.
+\item \code{autoplot.icc()}: a \code{ggplot} object -- the coefficient forest plot, or the
+variance-component decomposition when \code{what = "components"}.
+\item \code{plot.icc()}: the \code{icc} object invisibly, having drawn that same plot.
+}
+
+\code{tidy.icc()} and \code{glance.icc()} implement the \link[generics:tidy]{tidy()} and
+\link[generics:glance]{glance()} generics.
 }
 \description{
 Estimates interrater-reliability intraclass correlation coefficients (ICCs)
@@ -711,12 +733,11 @@ fit <- icc(ratings, score, subject, rater, unit = c("single", "average"), seed =
 ggplot2::autoplot(fit) # coefficient forest plot (the default)
 ggplot2::autoplot(fit, what = "components") # variance-component decomposition
 \dontshow{\}) # examplesIf}
-ratings <- data.frame(
-  subject = factor(rep(1:6, 4)),
-  rater = factor(rep(1:4, each = 6)),
-  score = c(9, 6, 8, 7, 10, 6, 2, 1, 4, 1, 5, 2,
-            5, 3, 6, 2, 6, 4, 8, 2, 8, 6, 9, 7)
-)
+# `ratings` is the shipped Shrout & Fleiss (1979) worked example: six
+# subjects rated by all four raters, in the long layout `icc()` expects --
+# one rating per row, with the subject, the rater, and the score in columns.
+head(ratings)
+
 icc(ratings, score, subject, rater, seed = 1)
 
 }

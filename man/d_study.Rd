@@ -53,15 +53,42 @@ override to change the confidence level, the number of Monte-Carlo draws, or
 the seed.}
 }
 \value{
-An \code{icc_dstudy} object: a tibble with one row per projected point and
-columns \code{m}, \code{index} (e.g. \code{"ICC(A,3)"}), \code{type}, \code{estimate}, \code{std.error},
-\code{conf.low}, and \code{conf.high}, carrying the design and interval settings as
-attributes. If the fitted \code{icc} reports both error definitions (the default),
-\code{d_study()} projects \strong{one reliability curve per definition} and \code{tidy()}
-surfaces a \code{type} column to distinguish them; a single-type fit projects a
-single curve. A multilevel projection adds a \code{level} column (one curve per
-level). Use \link[generics:tidy]{tidy()}, \link[generics:glance]{glance()}, and
-\code{autoplot()} (the reliability curve).
+\code{d_study()} returns an \code{icc_dstudy} object: a tibble with one row per
+projected point and columns \code{m}, \code{index} (e.g. \code{"ICC(A,3)"}), \code{type},
+\code{estimate}, \code{std.error}, \code{conf.low}, and \code{conf.high}, carrying the design and
+interval settings as attributes. If the fitted \code{icc} reports both error
+definitions (the default), \code{d_study()} projects \strong{one reliability curve per
+definition} and \code{tidy()} surfaces a \code{type} column to distinguish them; a
+single-type fit projects a single curve. A multilevel projection adds a
+\code{level} column (one curve per level), and a replicate projection an
+\code{occasions} column.
+
+The methods documented on this page return:
+\itemize{
+\item \code{tidy.icc_dstudy()}: a tibble with one row per projected point carrying
+the columns \code{m}, \code{index}, \code{estimate}, \code{std.error}, \code{conf.low},
+\code{conf.high}, \code{conf.level}, and \code{method}, plus a \code{type} column when both
+error definitions are projected, a \code{level} column for a multilevel
+projection, and an \code{occasions} column for a replicate projection. The
+conditional columns are inserted after \code{index} (\code{type}) and after \code{m}
+(\code{level}, \code{occasions}), so the list above is not a column order.
+\item \code{glance.icc_dstudy()}: a one-row tibble of projection-level summaries --
+the distinct projected rater counts \code{m} and their range (held at the
+observed rater count when the sweep is over occasions, so this is not a
+row count), the error definition(s), the rater treatment, the observed
+rater count, and the interval settings.
+\item \code{format.icc_dstudy()}: a character vector holding the printed projection
+table, one line per element.
+\item \code{print.icc_dstudy()}: the \code{icc_dstudy} object invisibly, having emitted
+that table.
+\item \code{autoplot.icc_dstudy()}: a \code{ggplot} object -- the reliability curve,
+faceted by level for a multilevel projection.
+\item \code{plot.icc_dstudy()}: the \code{icc_dstudy} object invisibly, having drawn that
+curve.
+}
+
+\code{tidy.icc_dstudy()} and \code{glance.icc_dstudy()} implement the
+\link[generics:tidy]{tidy()} and \link[generics:glance]{glance()} generics.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}

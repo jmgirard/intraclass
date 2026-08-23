@@ -339,6 +339,20 @@
 
 ## Documentation
 
+* The `?icc`, `?d_study`, and `?choose_icc` help pages now say what each
+  documented method returns. Every one of those pages documents a function
+  together with its `format()`, `print()`, and (as applicable) `summary()`,
+  `tidy()`, `glance()`, `autoplot()`, and `plot()` methods, but their *Value*
+  sections described only the object the main function returns; each now lists
+  the main function and every method sharing the page, naming the method in
+  full. What these functions return is unchanged.
+
+* `?icc`'s example now calls the shipped `ratings` dataset directly, and shows
+  its first rows so the long, one-rating-per-row layout `icc()` expects is
+  visible on the page. The example previously rebuilt an identical data frame by
+  hand under the same name, shadowing the shipped object for the rest of the
+  page.
+
 * The *Estimation engines* and *Confidence-interval methods* articles show the
   `brms` engine's output in pre-computed blocks, because knitting them would need
   a Stan toolchain. Those blocks are now generated from a committed fit and

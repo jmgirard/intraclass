@@ -16,3 +16,4 @@
 ^.*\.DS_Store$
 ^tests/testthat/_problems$
 testthat-problems[.]rds$
+^Rplots\.pdf$

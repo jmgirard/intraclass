@@ -52,10 +52,16 @@
 #'   `"cluster"` (between-cluster reliability), or `"both"`. Required when
 #'   `multilevel = TRUE`.
 #'
-#' @return An `icc_recommendation` object (a list) with a [print()] method. It
+#' @return `choose_icc()` returns an `icc_recommendation` object (a list). It
 #'   carries the recommended coefficient rows (`$rows`), the exact `icc()` call as
 #'   a string (`$call`), the per-decision rationale (`$rationale`), and any notes
 #'   (`$notes`).
+#'
+#'   The methods documented on this page return:
+#'   * `format.icc_recommendation()`: a character vector holding the printed
+#'     recommendation, one line per element.
+#'   * `print.icc_recommendation()`: the `icc_recommendation` object invisibly,
+#'     having emitted that recommendation.
 #'
 #' @seealso [icc()], and `vignette("choosing-an-icc")` for the full decision tree.
 #'
