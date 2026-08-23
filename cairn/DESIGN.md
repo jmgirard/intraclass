@@ -99,13 +99,16 @@ vignettes, `cairn/estimand-specs/`). (Design interview, 2026-07-12.)
 - **Format with `air`** (`air format .`); CI enforces `air format --check`;
   `lintr` owns semantic linters only.
 - Tracking travels with code (cairn: same commit as the work).
-- **Doctrine modules** (`cairn/doctrine/`, graduated lesson families — D-033):
+- **Doctrine modules** (`cairn/doctrine/`, transferable craft standards — D-033,
+  D-034):
   [`doc-claim-pins.md`](doctrine/doc-claim-pins.md) (pinning documentation
   claims), [`data-raw-checkers.md`](doctrine/data-raw-checkers.md) (what the
   `check-references` CI job runs, what stales each ledger, the
-  run-all-four-before-push rule), and
+  run-all-four-before-push rule),
   [`source-ingestion.md`](doctrine/source-ingestion.md) (verifying PDF
-  extractions).
+  extractions), and [`prose-style.md`](doctrine/prose-style.md) (the house
+  writing standard R1–R6 for the vignettes, roxygen, and `README.Rmd`, and what
+  the `data-raw/prose-profile.py` ruler counts).
 
 ## Design Principles
 
