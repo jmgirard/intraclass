@@ -69,7 +69,7 @@ found wrong goes to `/hotfix` or its own milestone, never into a style edit.
 
 - [x] T1 Rewrite `vignettes/engines.Rmd` against R1–R6.
 - [x] T2 Rewrite `vignettes/comparison-with-other-packages.Rmd` against R1–R6.
-- [ ] T3 Rewrite `vignettes/d-studies-and-replicates.Rmd` against R1–R6.
+- [x] T3 Rewrite `vignettes/d-studies-and-replicates.Rmd` against R1–R6.
 - [ ] T4 Rewrite `vignettes/multilevel-designs.Rmd` against R1–R6.
 - [ ] T5 Rewrite `vignettes/interval-methods.Rmd` against R1–R6, holding every
       sentence the four guards quote byte-stable unless T7 re-keys it.
@@ -82,6 +82,7 @@ found wrong goes to `/hotfix` or its own milestone, never into a style edit.
 ## Work log
 
 - 2026-08-23: created by /milestone-plan.
+- 2026-08-23: T3 `d-studies-and-replicates.Rmd` rewritten — ruler 13 over-35 and 28 dashes down to 0/0 (92 sentences, max 33 words). Scope-word grep shows no widening. `devtools::test()`: FAIL 0, PASS 8862.
 - 2026-08-23: T2 `comparison-with-other-packages.Rmd` rewritten — ruler 3 over-35 and 30 dashes down to 0/0 (71 sentences, max 33 words); the capability matrix's `—` "not provided" cells became `❌`, which the ruler does not count and which reads against the table's own `✅`. Scope-word grep (case-insensitive, wider than AC2's literal regex) shows no widening. `devtools::test()`: FAIL 0, PASS 8862.
 - 2026-08-23: T1 `engines.Rmd` rewritten — ruler 12 over-35 and 24 dashes down to 0/0 (68 sentences, max 31 words); scope-word grep over the added and removed lines shows every `every`/`only`/`full`/`exactly`/`any`/`both` preserved one-for-one. `devtools::test()`: FAIL 0, PASS 8862.
 - 2026-08-23: plan-gate criteria audit ran in FULL mode; the record and its 13 findings are in M134's work log — this file's AC2/AC3 carry the F5 and F12 repairs, and its AC5 the F4 live-mode repair.
