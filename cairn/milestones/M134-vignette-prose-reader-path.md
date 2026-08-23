@@ -57,7 +57,17 @@ refused, D-021 stands.
       byte-identical between its baseline run at `72f9cc2` and its final run.
 - [ ] AC2 `python3 data-raw/prose-profile.py 'vignettes/getting-started.Rmd'`
       and the same command for `choosing-an-icc.Rmd` and `glossary.Rmd` each
-      report 0 dash-as-punctuation occurrences and 0 sentences over 35 words.
+      report 0 dash-as-punctuation occurrences. `getting-started.Rmd` and
+      `choosing-an-icc.Rmd` each report 0 sentences over 35 words. Every
+      sentence the ruler reports over 35 words in `glossary.Rmd` is prose the
+      reader reads, contains verbatim a clause `residual_template()` in
+      `tests/testthat/test-doc-skew-caveat.R` returns, and exceeds that
+      clause's own word count by at most eight (one such sentence at this
+      commit: 64 words against a 58-word clause). The clause admits no split:
+      the test matches it `fixed = TRUE` across a run's joined sentences, so a
+      sentence break inside it leaves a `.` the template does not carry. If it
+      ever admits a split, or the test stops matching verbatim, the target for
+      `glossary.Rmd` returns to 0.
 - [ ] AC3 `cairn/doctrine/prose-style.md` exists and states rules R1–R6 as
       listed in Scope.
 - [ ] AC4 For every hunk of `git diff 72f9cc2 -- vignettes/getting-started.Rmd
@@ -106,7 +116,20 @@ refused, D-021 stands.
 - 2026-08-23: T4 — `choosing-an-icc.Rmd` rewritten; ruler now reports 0 dashes, 0 sentences over 35 (longest 35), against 21 dashes and 3 long sentences (longest 49) at baseline. Semicolons 9 → 0, long parentheticals 2 → 0. The `## In one sentence` heading became `## In short`, since R2 forbids the one 49-word sentence it named; no cross-reference targets that anchor.
 - 2026-08-23: T5 — `glossary.Rmd` rewritten; ruler now reports 0 dashes (27 at baseline) and 1 sentence over 35 words (11 at baseline), semicolons 11 → 4, long parentheticals 0 → 0. The residue is irreducible: `tests/testthat/test-doc-skew-caveat.R`'s `residual_template()` requires a 58-word clause verbatim with no internal sentence-ending punctuation, so no split preserves it. AC2 amendment posed at a mini gate.
 - 2026-08-23: T5 — two first-pass splits broke the width pins (`test-doc-skew-caveat.R` failures at :1999 and :2359) by moving `burch` away from the width vocabulary in one sentence and capitalizing the residual clause's first word in the other; repaired by making the flat and parity clauses each their own hit sentence and restoring the lowercase clause after a colon. `devtools::test(filter = "doc-skew-caveat")` now clean, 2 pre-existing skips (vignettes not installed).
+- 2026-08-23: amendment gate — AC2 amended, the amended wording audited first by a fresh-context [O] reader in FULL mode (six questions; findings on satisfiability, GP8 count-pinning, an unenumerated singular over a template family, an unprobed exemption with no falsifier, and an instrument-bound promise — all five folded into the wording adopted; proportionality returned nothing). The gate chose the reviewed wording over a bare one-sentence exemption and over relaxing the test harness. Verdict recorded by the reader: WIDENING, since the amendment binds a property AC2 did not previously bind while relaxing the sentence target on one file.
 
 ## Decisions
+
+**2026-08-23 — the glossary keeps one over-35-word sentence rather than the test
+harness being relaxed.** The residual-width clause `residual_template()` requires
+is matched `fixed = TRUE` against a run's joined sentences, so a sentence break
+inside the clause leaves a `.` the template does not carry and the match fails.
+Two ways out: bend the prose (accept one long sentence) or relax the harness
+(match punctuation-normalized text, so the clause may be split). This milestone
+took the first; the second changes a guard over a measured claim, which is
+apparatus work needing its own plan gate, and this milestone's scope is prose
+only. Falsified by a reader reporting the grids sentence as unreadable, or by
+the harness being relaxed for another reason — at which point AC2's target for
+`glossary.Rmd` returns to 0.
 
 ## Review
