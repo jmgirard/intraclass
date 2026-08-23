@@ -2,7 +2,7 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M133: Tell users which interval method is trustworthy for their design
 
-- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate -->
 - **Depends on:** M130   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -109,6 +109,7 @@ ROADMAP candidates on their own promotion conditions.
 - 2026-08-22: return fixes, smaller findings — NEWS corrected from "Five of the seven" to six, and its two overclaims narrowed (the depth column has no call behind it; the Bayesian row's call is skipped without a Stan toolchain). Both anti-vacuity guards now compare list NAMES against the validator's own accepted set rather than counting to 7. The header comment no longer claims the `differs` field enforces anything; it records the contrast and the pinned message enforces identity. The index-family assertion is labelled (`expect_setequal()` takes no `info`, so it is the `expect_true(setequal(...))` form). `vc_mpl_sim()` is now shared with the older `\"mpl\"` fences test, which read the same seeded construction inline; that test derives its rater count from the frame. A new block runs the three extra cell claims. Pre-existing: `ORACLES.md`'s O-MPL Decision line said `conf_level = 0.95` only, superseded by M91/D-017 — corrected in place and marked.
 - 2026-08-22: the M130 width-claim guard (`test-doc-skew-caveat.R`) reddened on the first draft of these fixes: writing "on a narrow set of designs" into the bootstrap depth cell put the word "narrow" beside "burch" in the same block, so the whole table read as a width statement and its `conf_level` numerals and "two raters" came back as unchecked figures. Reworded to "on a limited set of designs"; guard green (2347 passing). The guard caught a real hazard — the table sits in a file whose width claims are pinned — and nothing about the claim itself was wrong.
 - 2026-08-22: gate re-run after the fixes — suite 0 failures / 0 errors / 8600 passing / 26 skipped at `NOT_CRAN=true CI=true`; `air format --check .` exit 0; `devtools::document()` no diff; `pkgdown::check_pkgdown()` no problems and `build_site()` exit 0; `check-record-claims.py` 6 claims / 0 failures; `cairn_validate` exit 0. `R CMD check --as-cran --no-manual` on a fresh branch-tip tarball: raw `Status: OK`, matching main measured under the same command earlier this session.
+- 2026-08-22: review round 2 returned M133 to in-progress (defect return 2). AC1 fails again on three new cells of the same shape: the `mpl` row omits the calibration-geometry fence (12 raters, 8 subjects and 150 subjects all abort inside what the Computes cell describes), the `burch` Refuses cell rewritten to "the same as `searle`" is now false against D-022's zero-between-variance asymmetry, and the `npbootstrap` numeric-`unit` promise is unqualified where the Spearman-Brown pole refuses it. AC3 fails again on three prose inaccuracies: "three methods measured under skew" against four, the `bootstrap` evidence understated against O-SEM-ML-BOOT and O-Boot-DS, and the `posterior` two-rater coverage attributed to the published source rather than to this package's reproduction. AC2, AC4, AC5 passed on fresh evidence. Thrash trigger (b) fires — the disposition goes to the user with the plan gate's recorded alternatives.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
@@ -209,7 +210,90 @@ against every regression class they name). Findings and disposition:
   at plan time and moved since — plan-owned text, recorded above rather than
   edited at review.
 
-### Outcome
+### Round 2 (2026-08-22, branch tip b6146f7)
+
+Re-reviewed after the return fixes. Full three-lens fan-out again.
+
+- **AC1 — FAILED again**, three new cells, same shape as round 1: cells composed
+  from a reading of the fences rather than derived from them. (a) The `"mpl"`
+  row omits the calibration-geometry fence entirely — a balanced, complete,
+  two-way random absolute-agreement design at 12 raters aborts
+  `intraclass_unsupported` ("calibrated for 2-10 raters"), as do 8 subjects and
+  150 subjects ("calibrated for 10-100 subjects"), all squarely inside what the
+  row's Computes cell describes; the article's own `"mpl"` section 300 lines
+  below states this grid, so the summary contradicts the prose it summarises.
+  (b) The `"burch"` Refuses cell, rewritten to "the same as `\"searle\"`" on the
+  round-1 return, is now false the other way: D-022 decided precisely that Burch
+  at zero between-subject variance aborts `intraclass_singular_fit` while Searle
+  returns an interval, and `test-vignette-claims.R:1560` pins that asymmetry.
+  Their *design* fences are identical (verified: both refuse unbalanced and
+  two-way); the cell does not say "design". (c) The `"npbootstrap"` Computes cell
+  promises "a numeric `unit` projection on balanced data" unqualified, but
+  `npb_guard_sb_pole()` refuses it where the Spearman-Brown map crosses the pole
+  — on a balanced 15x3 low-ICC design `unit = 2` returns an interval while
+  `unit = 50` and `unit = 500` abort.
+- **AC2 — PASSED.** Fresh at the tip: the M133 blocks run 89 passing, 0 failed,
+  1 skipped (the Bayesian row on CI).
+- **AC3 — FAILED again**, three inaccuracies in the caveat prose. The first
+  bullet says "The three methods measured under skew" while the next bullet and
+  NEWS both say four (D-031 put `npbootstrap` on the same grid). The
+  `"bootstrap"` bullet says its checks "were run on the two-way random
+  single-level design", which understates `ORACLES.md` — O-SEM-ML-BOOT is the
+  two-level lavaan bootstrap and O-Boot-DS covers multilevel and
+  incomplete-subject bands. The `"posterior"` bullet attributes the two-rater
+  interval under-coverage to the published source; O-Bayes records the published
+  finding as near-nominal above two raters and the two-rater coverage as this
+  package's own seeded reproduction.
+- **AC4 — PASSED.** T4's harness re-read; the assertions it plants against are
+  unchanged in kind, and the supported/refused blocks it targets still carry
+  them.
+- **AC5 — PASSED.** Fresh at the tip: suite 0 failures / 0 errors / 8600 passing
+  / 26 skipped at `NOT_CRAN=true CI=true`; `air format --check .` exit 0;
+  `devtools::document()` no diff; `pkgdown::check_pkgdown()` no problems;
+  `R CMD check --as-cran --no-manual` on a tarball built at the tip, raw
+  `Status: OK`, matching main under the same command.
+
+**Consistency gate.** `cairn_validate` exit 0, all checks passed;
+`check-record-claims.py` 6 claims / 0 failures; no principle changed;
+README untouched; NEWS entry present; no new top-level files.
+
+**Other lenses.** Blame-history: no blocking findings — it confirmed the
+`vc_mpl_sim()` refactor byte-identical and behaviour-preserving, and the
+`ORACLES.md` correction accurate against D-017 and in the repo's established
+in-place-correction convention. Prior-review: clean, reached independently
+against M106, M115, M130 and M132's archived findings.
+
+**Further findings, logged, not criterion-failing.** [O]7 the pre-existing
+sentence at `vignettes/interval-methods.Rmd:167-168` ("The remaining methods
+were never run on that study") became false at D-031 (2026-08-15) and shipped
+in M130 on 2026-08-22; this branch now contradicts it in the same file. [O]8 the
+`"montecarlo"` depth cell states its skew under-coverage unqualified while
+D-027's grid is one-way, which the article's own section is careful to say. [O]9
+the `montecarlo` leg of the extra-cell-claims test re-runs the refused-cell
+block's assertion verbatim and its comment overstates what it pins. [O]11 NEWS
+says the Bayesian call is "skipped where none is present", but the gate is
+`skip_on_ci()` and skips regardless of toolchain. [O]12 NEWS points readers at
+the oracle registry, which is `.Rbuildignore`d and absent from the installed
+package and the site. [O]13 the `ORACLES.md` correction says M91/D-017
+"superseded" the old line, while D-017's own Consequences read "supersedes
+nothing". [O]14 the ROADMAP candidate row at `cairn/ROADMAP.md:28` carries the
+same stale `R/icc.R:692-703` locator. [O]10 rejected: the `"searle"`/`"burch"`
+cells promise no numeric `unit`, so their pole refusal is not a cell the row
+misdescribes. [O]16 noted: AC1 and AC3 stay unticked, which is this outcome.
+
+**Thrash rule (b) fires.** AC1 and AC3 have each now failed twice, each time by
+new instances of one shape — cell and caveat text composed from a reading of the
+surface rather than derived from it. The remedy the rule names is to reconsider
+the alternative the plan gate recorded against; the 2026-08-21 work log records
+two, and the second ("a standing test that the table matches the surface",
+declined under D-021 with D-029 retaining the bar) is the one this failure mode
+points at. Its ROADMAP candidate row states the promotion condition as a user
+reaching a cell the table misdescribes, and requires superseding D-021 first.
+Trigger (a) has not fired: this is the second defect return, not the third.
+
+**Outcome.** Returned to `in-progress`. Defect return 2.
+
+### Outcome (round 1)
 
 Returned to `in-progress`. First defect return on this milestone; no thrash
 trigger. AC2, AC4 and AC5 stand on the evidence above and need only re-execution
