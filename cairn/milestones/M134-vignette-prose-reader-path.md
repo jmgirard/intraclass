@@ -1,6 +1,6 @@
 # M134: Vignette prose pass — the reader path, and the house style standard
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -159,6 +159,8 @@ refused, D-021 stands.
 - 2026-08-23: T12 — `getting-started.Rmd`'s "the raters barely disagree, so the ratings are highly reliable" restored to the original's conjoined "and"; `choosing-an-icc.Rmd`'s "as error, as when one judge scores consistently higher" restored to the appositive definition "a systematic difference between raters, one judge scoring consistently higher than another, as error". `cairn/DESIGN.md`'s doctrine-module registry gained `prose-style.md`. Ruler re-run after the edits: 0 dashes on all three files, 0 over-35 in `getting-started.Rmd` (longest 32) and `choosing-an-icc.Rmd` (longest 35), 1 in `glossary.Rmd` (64 words) — AC2 unchanged.
 - 2026-08-23: T13 — verify block re-run on the amended branch. `devtools::document()` no diff (clean `git status` after); `devtools::test()` no Failed section, exit 0, 3 warnings and 2 skips, the same set as T7 and T10; `devtools::check(document = FALSE, args = "--no-manual")` raw `Status: 1 NOTE`, 0 errors / 0 warnings, vignettes re-built OK in 22s, duration 13m 24s. The NOTE is the `tests/spelling.Rout` comparison and is pre-existing: `spelling::spell_check_package()` returns 31 words on this branch, the count recorded at `72f9cc2`, T7 and T10, none introduced here. `python3 data-raw/check-record-claims.py --live` exit 0 (6 claims, 0 failures); `pkgdown::check_pkgdown()` "No problems found"; `cairn_validate` exit 0, all checks pass, one advisory (sizing tripwires). All tasks checked; status → review.
 - 2026-08-23: hygiene note for the maintainer — `cairn/ROADMAP.md` is at 23,996 bytes against its 24,000-byte budget after this milestone's candidate row. The next row cannot be added without retiring one.
+
+- 2026-08-23: review third pass returned M134 to `in-progress`. Failed: **AC1** — R1 excludes "markdown table separator rows", and `RE_TABLE_RULE` (`data-raw/prose-profile.py:93`) recognizes one only when it carries a leading **and** a trailing `|`; a legal pandoc row `|--- |---` scores 2 dash occurrences, reproduced at review on a probe file. No `vignettes/` file trips it, so AC2's zeros stand. Defect return 2 (the amendment-return count on AC1 stays at 1); the repair is a regex change, which restarts the frozen baseline. Thrash trigger (b) fires — AC1 has failed at three consecutive reviews, each by a new clause of R1's exclusion list; a `/milestone-brief` escalation is offered. AC2-AC5 verified with fresh evidence at HEAD and left ticked. Six further [O] findings recorded in the Review section: the ruler docstring's stale exclusion rule and stale strip order, DESIGN.md's D-033 graduation claim, the doctrine's unqualified "reports zero", orphan line wraps, and a stale Coverage block.
 
 ## Decisions
 
@@ -549,3 +551,217 @@ binds the two together. That is the amendment; whether findings 3, 4, 5 and
 Everything else passes: AC2, AC3, AC4 and AC5 all verified at HEAD, both
 `[S]` lenses clean, and the consistency gate green.
 
+
+### Third pass — returned to `in-progress`
+
+Reviewed 2026-08-23 on `m134-vignette-prose-reader-path` at PR #143, after the
+T11–T13 amendment. `git fetch` then `git rev-list --left-right --count
+origin/main...HEAD` reports 0 behind / 16 ahead, and local `main` is level with
+`origin/main`, so `main` has still not moved since the branch was cut and no
+merge was needed before gathering evidence. Branch re-pushed; PR #143 refreshed.
+
+#### Acceptance criteria
+
+- **AC1 — FAIL (byte-identity, `.R` mode and R2 pass; the counted-class clause
+  does not).** `data-raw/prose-profile.py` has two commits (`96b78b4` T1,
+  `14e7dce` T8); `git diff 14e7dce -- data-raw/prose-profile.py` is 0 bytes and
+  the blob hashes at `14e7dce`, at HEAD and in the worktree are all
+  `751b7c07`, so the re-baseline run and the final run used the same bytes. The
+  `72f9cc2` baseline was re-derived at review over the eight `vignettes/*.Rmd`
+  blobs extracted from that commit: 744 fragments / 81 over 35 / 226 dashes / 11
+  long parentheticals / 55 semicolons, the three in-scope files holding
+  358 / 20 / 66 — reproducing the Scope table exactly. `SENTENCE_LIMIT` is 35,
+  counted strictly greater. `strip_roxygen()` keeps `#'` lines and suppresses
+  each `@examples` block until the next `#' @` tag. R1's amended proper-noun
+  clause now holds: a six-site probe scored 4 of 6 dashes, excluding exactly
+  `Spearman--Brown` and `10--20` while counting `sentence---And`, the closing
+  `correlation—is`, and both halves of a spaced break — which is what the
+  amended R1 and its explanatory sentences say. **What fails is R1's
+  table-separator-row exclusion.** R1 excludes "markdown table separator rows";
+  `RE_TABLE_RULE` (`data-raw/prose-profile.py:93`, `^\s*\|[\s:|-]*\|\s*$`)
+  recognizes a row only when it carries a **leading and a trailing** `|`.
+  Reproduced at review: a table whose separator row is `|--- |---` — a leading
+  pipe, no trailing pipe, legal pandoc — scores 2 dash occurrences. The
+  doctrine's own blind-spot paragraph does not cover this shape: it says the row
+  "is recognized only when it starts with `|`", which the `|--- |---` row does.
+  No file in `vignettes/` trips it (every separator row there carries both
+  pipes), so AC2's zeros are undisturbed. See the Outcome below.
+- **AC2 — pass.** Ruler re-run per file at review: `getting-started.Rmd` 0
+  dashes, 0 over 35 (longest 32); `choosing-an-icc.Rmd` 0 dashes, 0 over 35
+  (longest 35); `glossary.Rmd` 0 dashes, 1 over 35 (64 words). The one long
+  sentence is body prose in the **Burch interval** entry. The clause
+  `residual_template()` returns is 58 words counted by the ruler's own `words()`,
+  is present verbatim in `glossary.Rmd` once wrapping is joined (matched by exact
+  substring at review with the rendered `1.2963` / `100` cells in place), and
+  64 − 58 = 6 ≤ 8.
+- **AC3 — pass.** `cairn/doctrine/prose-style.md` exists (115 lines, 6,486 bytes,
+  inside its own stated 120-line / 8,000-byte budget). Its R1–R6 block was
+  compared byte-for-byte against Scope's after rewrapping: identical, R1's
+  amended exclusion text included.
+- **AC4 — pass.** `git diff 72f9cc2 -- <the three files>` is 33 hunks; the
+  qualifier grep over added **and** removed lines matches 46 lines across 14
+  hunks. Each of the 14 was read added-against-removed at review: all EQUAL
+  domain, every match a dash, semicolon, or parenthesis converted to a sentence
+  break with the quantified claim carried over. The T12 repairs are present and
+  read at their original domain — `getting-started.Rmd`'s conjoined "barely
+  disagree, and the ratings are highly reliable", and `choosing-an-icc.Rmd`'s
+  restored appositive "a systematic difference between raters, one judge scoring
+  consistently higher than another, as error".
+- **AC5 — pass.** `devtools::test()` FAIL 0 | WARN 3 | SKIP 2 | PASS 8862.
+  `devtools::check(document = FALSE, args = "--no-manual")` raw `Status: 1 NOTE`,
+  0 errors / 0 warnings, duration 15m 50s; no `* checking …` line reports
+  WARNING or ERROR, and vignettes re-built OK in 23s. The NOTE is the
+  `tests/spelling.Rout` comparison and is pre-existing:
+  `spelling::spell_check_package()` returns 31 words on this branch, the count
+  recorded at `72f9cc2`, T7, T10 and T13. `devtools::document()` produced no diff
+  (`git status` clean after it). `python3 data-raw/check-record-claims.py --live`
+  exit 0, 6 claims re-derived, 0 failures.
+
+#### Consistency gate
+
+- `cairn_validate.py` exit 0 — 16 PASS, 7 advisory OK, 1 advisory WARN (M134's
+  13 tasks against the 10-task split tripwire). `coverage complete` and
+  `binding criteria` both pass.
+- `cairn_impact.py` skipped: `Principles touched: —`, no DESIGN principle changed.
+- Toolchain checks (`r-package` profile's `consistency-gate` slot):
+  `devtools::document()` no diff; `NAMESPACE`, `man/` and `data/` untouched by
+  the branch diff; `README.Rmd`/`README.md` untouched;
+  `pkgdown::check_pkgdown()` "No problems found"; `NEWS.md` carries a
+  Documentation entry for the pass with no milestone number in it; no new
+  top-level file (`data-raw/` already carries `^data-raw$` in `.Rbuildignore`);
+  `devtools::check()` as recorded under AC5.
+
+#### Independent review
+
+Diff touches executable surface (`data-raw/prose-profile.py`) at a user-facing
+tier, so the full three-lens fan-out ran again, each lens fresh-context and none
+having authored the work.
+
+**[S] blame-history — no findings.** Traced the branch's modified lines through
+`git log`/`git blame`. The Burch/`"searle"` width claims built up over M115–M118
+survive verbatim in `glossary.Rmd` — every figure (0.3, 0.6, t(5), 100 subjects,
+1.2963, 5 raters) and the scope clause "on the two grids this package has
+measured that vary only the subject effect" — punctuation and wrapping only.
+`choosing-an-icc.Rmd`'s `k_eff` = 3.27 harmonic-mean figure untouched. Ran
+`test-doc-skew-caveat.R` (2344 pass / 0 fail) and `test-vignette-claims.R`
+(246 pass / 0 fail) directly. Confirmed no recorded decision addresses dash or
+punctuation style, so R1 contradicts nothing on record. One cosmetic note, no
+action: an orphaned line break at `glossary.Rmd:82`.
+
+**[S] prior-review record — no findings.** The
+`gh api repos/jmgirard/intraclass/pulls/comments?per_page=1` probe returned `[]`,
+so no thread walk was paid for; archived `## Review` sections (M115, M118, M124,
+M126, M128, M129, M130, M132, M133) and `LESSONS.md` were the evidence base.
+Cleared M130's pkgdown-anchor lesson (no period-bearing heading introduced),
+M72/M128's universal-word lesson (AC4 is that lesson mechanized), M124's
+`getting-started.Rmd` overclaiming pattern, M115's withdrawn `"burch"` claim, and
+D-033's registry, whose second-pass gap T12 closed.
+
+**[O] diff-bug — seven findings, ranked.** The lens re-derived the numbers rather
+than trusting the work log, independently reproducing the baseline
+(744 / 81 / 226 / 11 / 55; in-scope 358 / 20 / 66), AC2's 6 ≤ 8 arithmetic, the
+byte-identity, the amended R1's behaviour on a ten-site probe, and `.R` mode's
+`@examples` suppression.
+
+1. **The ruler's own module docstring still specifies the pre-T8 exclusion
+   rule.** Verbatim: "`data-raw/prose-profile.py:41-43`: 'dashes flanked with no
+   space by word characters whose right-hand side begins with a capital
+   (proper-noun joins such as `Spearman--Brown`).' The code at line 240 requires
+   the **left** word capitalized too, and T11 restated R1 in `prose-style.md` to
+   match. The docstring was never touched. Under the docstring's rule,
+   `break---And` is excluded; the code counts it."
+   **Verified at review** by reading both records. AC1 binds the ruler's
+   behaviour, which is correct, so this is not a criterion failure.
+   **Disposition: fix in the return stint.**
+2. **The docstring also states the wrong `.Rmd` strip order.** Verbatim:
+   "`data-raw/prose-profile.py:24-26`: '`.Rmd` mode strips, in order: the YAML
+   front matter, fenced code chunks, HTML comments, …'. `strip_rmd()` applies
+   `RE_HTML_COMMENT` at line 113, before the fence loop at 116-121. Second-pass
+   finding 9 flagged this order mismatch; T11 corrected `prose-style.md` to
+   comments-before-fences but left the script's docstring, so the two records now
+   disagree in the opposite direction."
+   **Verified at review** by reading. **Disposition: fix in the return stint.**
+3. **The doctrine's separator-row blind spot understates the ruler's actual
+   gap.** Verbatim: "`cairn/doctrine/prose-style.md:75`: 'a table separator row
+   is recognized only when it starts with `|`, so a pandoc-legal `---- | ----`
+   row scores as dashes.' `RE_TABLE_RULE` also requires a **trailing** `|`. A
+   table whose separator row is `|---|---` (leading pipe, no trailing pipe —
+   legal pandoc) scores 2 dash occurrences."
+   **Verified at review** on an independent probe (`|--- |---`, 2 dashes
+   counted), and every separator row in `vignettes/` confirmed to carry both
+   pipes. **Disposition: the defect return below.**
+4. **`cairn/DESIGN.md:102` now asserts something false about `prose-style.md`.**
+   Verbatim: "The registry line reads '**Doctrine modules** (`cairn/doctrine/`,
+   graduated lesson families — D-033):' and T12 added `prose-style.md` to it.
+   D-033 defines `cairn/doctrine/` as the home for 'transferable craft
+   **graduated whole from `cairn/LESSONS.md`**'; `prose-style.md` was authored
+   fresh at T2, and `cairn/LESSONS.md:14` (the M72/M128 prose-widening family,
+   the closest lineage, covering R6 only) is still live in LESSONS.md rather than
+   graduated out. The T12 edit converts second-pass finding 10 from an omission
+   into an inaccurate statement in DESIGN.md."
+   **Verified at review** against `DECISIONS.md:1483-1487` and `LESSONS.md:14`.
+   **Disposition: maintainer's at re-review.**
+5. **The doctrine states an absolute that the milestone introducing it does not
+   meet.** Verbatim: "`cairn/doctrine/prose-style.md:40-41`: 'R1 and R2 are
+   gated: `data-raw/prose-profile.py` counts them, and a pass that claims to have
+   applied them reports zero.' M134 applied the pass and `glossary.Rmd` reports 1
+   sentence over 35 words. The page carries no exemption for a clause pinned
+   verbatim by a test that admits no split — the case AC2 was amended for and
+   that the milestone's `## Decisions` section records. M135/M136 will inherit
+   the unqualified wording."
+   **Verified at review** — the ruler reports 1 over-35 in `glossary.Rmd` at
+   HEAD. **Disposition: maintainer's at re-review.**
+6. **Re-wrapping left orphan fragments (cosmetic, no rendered effect).**
+   Verbatim: "`vignettes/choosing-an-icc.Rmd:217` ('a `cluster` column' alone on
+   a line), `vignettes/getting-started.Rmd:41`, `vignettes/glossary.Rmd:195` and
+   `:290`. Long-line counts are fine (0 / 1 / 5 against 0 / 1 / 8 at baseline),
+   but several splits left two- and three-word lines mid-paragraph."
+   The `[S]` blame lens independently flagged `glossary.Rmd:82`.
+   **Disposition: fix in the return stint.**
+7. **Coverage block is one revision behind the task list.** Verbatim: "Coverage
+   maps AC1 → T1 only, though T8 (ruler repair + re-baseline) and T11 (R1
+   restatement) both discharge AC1, and T11 also discharges AC3. Tracking-only."
+   **Verified at review.** `cairn_validate`'s mechanical `coverage complete`
+   check still passes (each AC maps to ≥1 existing task).
+   **Disposition: Coverage amendment in the return stint.**
+
+The lens re-confirmed that second-pass findings 6, 7, 8, 9 and 10 are unchanged
+at HEAD; 6, 7 and 9 are carried by the ROADMAP candidate row, 8 and 10 are not.
+It explicitly cleared the R6 repairs of T9 and T12 at HEAD, the Burch passage,
+the `## In short` anchor, the four glossary heading swaps, and the NEWS entry as
+now worded.
+
+#### Outcome
+
+**Returned to `in-progress` under the return floor — defect return 2.**
+
+Finding 3 demonstrates AC1's first clause failing inside the domain of the
+procedure AC1 names: R1 excludes "markdown table separator rows" and the ruler
+counts the dashes in one whose trailing `|` is absent. This is a **defect**
+return, not an amendment return. The widening test does not fire: the repair
+available is a procedure change — `RE_TABLE_RULE` recognizing a separator row
+without requiring the trailing pipe — not the widening of an author-recalled
+enumeration. Adding `|--- |---` to the doctrine's four-item blind-spot list
+*would* be that widening, which is why it is not the repair. Fixing the regex
+changes the ruler's bytes and so restarts the frozen baseline under
+`prose-style.md`'s own closing rule, exactly as T8 did; the corrected ruler may
+also move the eight-file `72f9cc2` figures, and the three in-scope files must be
+re-measured after it.
+
+The amendment-return count on AC1 stays at 1. The defect-return count is now 2;
+the thrash rule's threshold (a) is 3 and has not been reached.
+
+**Thrash trigger (b) fires.** AC1 has now failed at three consecutive reviews,
+each by a new mechanism of the same shape — a clause of R1's exclusion list where
+the ruler's decision and the doctrine's text diverge (round 1: the proper-noun
+join too broad; round 2: the proper-noun clause undecidable; round 3: the
+table-separator clause too narrow). Re-cutting around the same predicate buys the
+next clause, not a fix. The plan gate recorded no alternative for AC1's shape, so
+the remedy under (b) is an offered `/milestone-brief` escalation — offered per
+instance, never automatic. The ROADMAP candidate row already names the
+diagnosis in the maintainer's own terms: "M134's AC1 binding the ruler rather
+than the prose".
+
+Findings 1, 2, 6 and 7 carry no status change and are directed into the return
+stint; findings 4 and 5 are the maintainer's at re-review. AC2, AC3, AC4 and AC5
+all verified at HEAD, both `[S]` lenses clean, the consistency gate green.
