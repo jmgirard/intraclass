@@ -110,9 +110,9 @@
 #' exactly as for the frequentist fits.
 #' **Fixed raters**
 #' (`raters = "fixed"`) are supported for the crossed design at the **subject**
-#' level on both balanced and **incomplete** data. The rater main effect becomes
-#' the finite-population variance of the observed raters (McGraw & Wong Case 3A).
-#' So on balanced data consistency is identical to the random-rater case, and
+#' level on both balanced and **incomplete** data. For that design and level, the
+#' rater main effect becomes the finite-population variance of the observed raters
+#' (McGraw & Wong Case 3A). So on balanced data consistency is identical to the random-rater case, and
 #' absolute agreement differs only by that term. On incomplete data both types
 #' differ from random, and the finite-population variance is read from the ragged
 #' rater-contrast fit.
@@ -243,9 +243,10 @@
 #'   across a range of `m`. Projecting absolute agreement is not defined for fixed
 #'   raters (see [d_study()]).
 #' @param occasions For data with **within-cell replicates** (more than one rating
-#'   per subject-by-rater cell), whether to average over them. `"single"` is the
-#'   default, the reliability of one rating. `"average"` is the mean of the
-#'   `n_o` replicates, which reduces pure error. `"average"` requires replicated
+#'   per subject-by-rater cell), whether to average over them. Ask for `"single"`,
+#'   the reliability of one rating, and/or `"average"`, the mean of the `n_o`
+#'   replicates, which reduces pure error. `"single"` is the default and
+#'   `"average"` requires replicated
 #'   data. See the *Within-cell replicates* section. Ignored with one rating per
 #'   cell.
 #' @param level For multilevel designs (a `cluster` column), which reliability to
@@ -273,8 +274,8 @@
 #'   equivalent structural-equation (common-factor) generalizability model and
 #'   recovers the rater main effect from the mean structure (Jorgensen 2021).
 #'   **Consistency** ICCs from `"lavaan"` equal the mixed-model estimates exactly
-#'   on balanced data. **Absolute-agreement** ICCs use the SEM indicator-mean
-#'   estimator of the rater variance. That estimator is asymptotically equivalent
+#'   on balanced data. **Absolute-agreement** ICCs from `"lavaan"` use the SEM
+#'   indicator-mean estimator of the rater variance. That estimator is asymptotically equivalent
 #'   to the mixed-model one and matches conventional generalizability-theory
 #'   software on real data (Vispoel et al. 2022). But it differs by a
 #'   small-sample term on tiny designs, e.g. 0.284 vs 0.290 on the 6-subject
@@ -287,9 +288,9 @@
 #'   covers the two-way design with random or fixed raters, on both complete and
 #'   **incomplete** data. For fixed raters the agreement rater term is the McGraw
 #'   & Wong Case-3A bias-corrected finite-population variance, which equals the
-#'   mixed-model estimate on balanced data. For that design, missing cells are
-#'   estimated by full-information maximum likelihood, and the parametric
-#'   bootstrap is unavailable for incomplete SEM. It also covers the crossed (Design 1)
+#'   mixed-model estimate on balanced data. In the two-way SEM, with either rater
+#'   type, missing cells are estimated by full-information maximum likelihood, and
+#'   the parametric bootstrap is unavailable for incomplete SEM. It also covers the crossed (Design 1)
 #'   **multilevel** design at both levels, plus the conflated diagnostic, via a
 #'   two-level SEM. With **random**
 #'   raters the multilevel fit covers complete/balanced data. It also covers
@@ -547,8 +548,8 @@
 #'   `prior` argument. Supplying them, or a non-empty `brm_args` with any other
 #'   engine, is an error.
 #' @param prior Optional custom prior for `engine = "brms"`, as a \pkg{brms} prior
-#'   object (from [brms::set_prior()] or [brms::prior()], combined with `c()`).
-#'   The default `NULL` uses the **sourced** half-*t*(4, 0, 1) prior on every
+#'   object (from [brms::set_prior()] or [brms::prior()]). Several priors can be
+#'   combined with `c()`. The default `NULL` uses the **sourced** half-*t*(4, 0, 1) prior on every
 #'   random-effect SD (ten Hove, Jorgensen & van der Ark 2020), the prior every
 #'   coverage result in this package depends on. Supplying a custom prior is a
 #'   deliberate deviation, intended for prior-sensitivity, method-comparison, or

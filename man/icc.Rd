@@ -116,9 +116,10 @@ across a range of \code{m}. Projecting absolute agreement is not defined for fix
 raters (see \code{\link[=d_study]{d_study()}}).}
 
 \item{occasions}{For data with \strong{within-cell replicates} (more than one rating
-per subject-by-rater cell), whether to average over them. \code{"single"} is the
-default, the reliability of one rating. \code{"average"} is the mean of the
-\code{n_o} replicates, which reduces pure error. \code{"average"} requires replicated
+per subject-by-rater cell), whether to average over them. Ask for \code{"single"},
+the reliability of one rating, and/or \code{"average"}, the mean of the \code{n_o}
+replicates, which reduces pure error. \code{"single"} is the default and
+\code{"average"} requires replicated
 data. See the \emph{Within-cell replicates} section. Ignored with one rating per
 cell.}
 
@@ -149,8 +150,8 @@ data. \code{"lavaan"} fits the
 equivalent structural-equation (common-factor) generalizability model and
 recovers the rater main effect from the mean structure (Jorgensen 2021).
 \strong{Consistency} ICCs from \code{"lavaan"} equal the mixed-model estimates exactly
-on balanced data. \strong{Absolute-agreement} ICCs use the SEM indicator-mean
-estimator of the rater variance. That estimator is asymptotically equivalent
+on balanced data. \strong{Absolute-agreement} ICCs from \code{"lavaan"} use the SEM
+indicator-mean estimator of the rater variance. That estimator is asymptotically equivalent
 to the mixed-model one and matches conventional generalizability-theory
 software on real data (Vispoel et al. 2022). But it differs by a
 small-sample term on tiny designs, e.g. 0.284 vs 0.290 on the 6-subject
@@ -163,9 +164,9 @@ log-SD parameterization) with a clear message. \code{"lavaan"}
 covers the two-way design with random or fixed raters, on both complete and
 \strong{incomplete} data. For fixed raters the agreement rater term is the McGraw
 & Wong Case-3A bias-corrected finite-population variance, which equals the
-mixed-model estimate on balanced data. For that design, missing cells are
-estimated by full-information maximum likelihood, and the parametric
-bootstrap is unavailable for incomplete SEM. It also covers the crossed (Design 1)
+mixed-model estimate on balanced data. In the two-way SEM, with either rater
+type, missing cells are estimated by full-information maximum likelihood, and
+the parametric bootstrap is unavailable for incomplete SEM. It also covers the crossed (Design 1)
 \strong{multilevel} design at both levels, plus the conflated diagnostic, via a
 two-level SEM. With \strong{random}
 raters the multilevel fit covers complete/balanced data. It also covers
@@ -430,8 +431,8 @@ are owned by \code{intraclass} and may not be set here. The prior has its own
 engine, is an error.}
 
 \item{prior}{Optional custom prior for \code{engine = "brms"}, as a \pkg{brms} prior
-object (from \code{\link[brms:set_prior]{brms::set_prior()}} or \code{\link[brms:prior]{brms::prior()}}, combined with \code{c()}).
-The default \code{NULL} uses the \strong{sourced} half-\emph{t}(4, 0, 1) prior on every
+object (from \code{\link[brms:set_prior]{brms::set_prior()}} or \code{\link[brms:prior]{brms::prior()}}). Several priors can be
+combined with \code{c()}. The default \code{NULL} uses the \strong{sourced} half-\emph{t}(4, 0, 1) prior on every
 random-effect SD (ten Hove, Jorgensen & van der Ark 2020), the prior every
 coverage result in this package depends on. Supplying a custom prior is a
 deliberate deviation, intended for prior-sensitivity, method-comparison, or
@@ -599,9 +600,9 @@ incomplete data ships for every random-rater engine: \code{glmmTMB}, \code{lme4}
 exactly as for the frequentist fits.
 \strong{Fixed raters}
 (\code{raters = "fixed"}) are supported for the crossed design at the \strong{subject}
-level on both balanced and \strong{incomplete} data. The rater main effect becomes
-the finite-population variance of the observed raters (McGraw & Wong Case 3A).
-So on balanced data consistency is identical to the random-rater case, and
+level on both balanced and \strong{incomplete} data. For that design and level, the
+rater main effect becomes the finite-population variance of the observed raters
+(McGraw & Wong Case 3A). So on balanced data consistency is identical to the random-rater case, and
 absolute agreement differs only by that term. On incomplete data both types
 differ from random, and the finite-population variance is read from the ragged
 rater-contrast fit.

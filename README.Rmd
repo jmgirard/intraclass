@@ -149,6 +149,6 @@ autoplot(d_study(fit, m = 1:10))
 |---|---|---|
 | Classical ANOVA / mean squares | `psych`, `irr`, `irrNA`, `irrICC`, `ICCDesign` | ANOVA / mean-squares based, mostly assuming balanced data |
 | Model-based variance partition | `performance::icc`, `misty` | A variance-partition coefficient, but not the full interrater-reliability ICC family, the error-variance framing, or a selection framework |
-| **intraclass** | `intraclass` | Mixed-model estimation, Monte-Carlo confidence intervals, and decision guidance |
+| **intraclass** | no alternatives | Mixed-model estimation, Monte-Carlo confidence intervals, and decision guidance |
 
 **intraclass** fills that gap, following ten Hove, Jorgensen & van der Ark.
