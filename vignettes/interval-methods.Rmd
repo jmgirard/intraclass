@@ -287,8 +287,8 @@ interval there. It is deliberately conservative: it over-covers, is wider
 than the Monte-Carlo interval at interior cells, and so it is an opt-in
 and not the default. Two reporting caveats come from `?icc`. The two-sided interval
 is not equal-tailed, so a limit must not be read as a one-sided bound at half
-the complementary level, and at `conf_level = 0.99` with two raters the interval
-can be near-vacuous.
+the complementary level, and separately, at `conf_level = 0.99` with two raters
+the interval can be near-vacuous.
 
 The shipped `ratings` data are too small for the calibration grid (six
 subjects), so the demonstration simulates a balanced two-way design inside it:
