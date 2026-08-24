@@ -1,6 +1,6 @@
 # M136: Roxygen and README prose pass
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** M134
 - **Driving RR:** —
@@ -122,6 +122,8 @@ condition text with their own guard
       from a fresh-context reader. Repair every widening it finds.
 
 ## Work log
+
+- 2026-08-24: T6 re-run after the return-2 and T7 repairs. `devtools::test()` FAIL 0 / WARN 3 / SKIP 2 / PASS 8827; `devtools::check()` raw `Status: 1 NOTE` (19m 21s), the `spelling.Rout` diff that fires only under `NOT_CRAN` (M127/M128), and `spelling::spell_check_package()` flags the same 31 words the review round measured on `origin/main`. `devtools::document()` and `build_readme()` leave no diff; `check-mpl-doc-claims.py` 61 candidates / 12 settled / 0 failures and `check-record-claims.py` 6 claims both exit 0; ruler `R/*.R` TOTAL 588 sentences / 0 dashes / 2 over-35 (both the `residual_template()` carriers, 64 words each), `README.Rmd` 65 / 0 / 0. No stray `Rplots.pdf`. Status back to review.
 
 - 2026-08-24: checkpoint. T7's repairs are committed and `document()`/`build_readme()`/`check-mpl-doc-claims.py`/`check-record-claims.py` and both rulers are clean over them; the AC6 `devtools::test()` and `devtools::check()` runs are still pending, so T6's re-run is not yet recorded.
 
