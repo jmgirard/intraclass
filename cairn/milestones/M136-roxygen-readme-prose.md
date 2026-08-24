@@ -169,13 +169,54 @@ the edit. Running the checker against each branch commit extracted with `git arc
 rewrite under a commit message naming only the criteria amendment, and the ledger
 re-key lands one commit later in `900b2d5`.
 
-**AC3 — pending.** Census reproduced over
+**AC3 — FAIL.** Census reproduced over
 `git diff -U0 $(git merge-base main HEAD)...HEAD -- R/ README.Rmd`: 130 hunks, 52
-selected, 0 pure additions among the selected. Per file selected: `R/icc.R` 38,
-`R/d-study.R` 8, `README.Rmd` 4, `R/data.R` 1, `R/choose-icc.R` 1, `R/abort.R` 0
-(so the at-least-one-in-each requirement holds). The T5 work-log line records
-`R/d-study.R` 9, which does not sum to its own reported 52; 8 does. The
-claim-domain judgment over the 52 units is with a fresh-context [O] reader.
+selected under the literal `^[+-][^+-]` content-line rule, 0 pure additions among
+them. Per file selected: `R/icc.R` 38, `R/d-study.R` 8, `README.Rmd` 4, `R/data.R` 1,
+`R/choose-icc.R` 1, `R/abort.R` 0 — so the at-least-one-in-`R/icc.R` and
+at-least-one-in-`README.Rmd` requirements hold. The T5 work-log line records
+`R/d-study.R` 9, which does not sum to its own reported 52; 8 does. With no pure
+additions, the added-only branch and the `residual_template()` exemption never fire,
+and every selected unit is judged on the removed-vs-added domain rule alone.
+
+The claim-domain judgment went to a fresh-context [O] reader that authored none of
+the prose. It re-ran the census independently (130 hunks; 52 under the literal rule,
+53 if markdown bullet lines whose diff prefix is `+-`/`--` are also counted; it
+audited all 53), confirmed 0 selected lines lie outside a roxygen block or a markdown
+paragraph so the hand-adjudication set is empty, and confirmed the `@param design`
+unit is not selected by the regex, so AC4's exemption removes nothing from the audit.
+It confirmed both widenings the T5 pass repaired are repaired at HEAD.
+
+It then found a further widening, which I verified directly against the diff.
+`README.Rmd:41-42`, inside the release NOTE block on the GitHub landing page:
+
+    removed: multilevel designs (subject vs. cluster level, with raters crossed
+             with or nested in clusters/subjects)
+    added:   multilevel designs, at the subject level and the cluster level, with
+             raters crossed with or nested in clusters or subjects
+
+`subject vs. cluster level` is a contrast; `at the subject level and the cluster
+level` is a conjunction, and it now distributes across both the crossed and the
+nested rater layouts. `R/icc.R:88-90` states that a nested design defines the
+subject level only, and restricts `level` to `"subject"` there. So the added text
+states a claim whose domain is wider than the removed text, which is exactly what
+AC3 forbids — and it is the same alternation-to-conjunction defect as the
+`clusters/subjects` repair made two words later in the same sentence.
+
+Six further candidates the reader ranked below it, reported here and left to triage:
+(2) `R/icc.R:357-359`, a reproducibility guarantee de-parenthesized from `(your
+retry reproduces it exactly)` to a coordinate clause, loosening its binding to the
+seeded case — the next sentence still limits it; (3) `R/icc.R:313-315` lavaan
+`incomplete ... or unbalanced` -> `incomplete ... and unbalanced`; (4)
+`R/icc.R:308-310`, a lavaan parenthetical scoped to the two-way design promoted to
+a free-standing sentence covering all of lavaan; (5) `R/icc.R:443`, `That margin`
+-> `` `"burch"`'s width margin ``, dropping the named two-grid antecedent;
+(6) `R/icc.R:645-647`, a shared-convention list item promoted to a sentence whose
+subject no longer names the two methods; (7) three juxtapositions turned into
+asserted causation (`R/data.R:38`, `R/choose-icc.R:41-42`, `R/icc.R:143-144`), which
+the reader judged substantively correct. The reader also flagged, out of AC3 scope,
+that `R/icc.R:285-287`'s unchanged `"lme4"` line already asserts the same
+crossed-and-nested-at-both-levels cross-product that finding 1 introduces.
 
 **AC4 — pass.** `man/icc.Rd`'s `\item{design}` entry reads "There are two occasions
 to override that inference. The first is when the rater \emph{labels} do not mean
