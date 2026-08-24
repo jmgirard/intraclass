@@ -1,6 +1,6 @@
 # M135: Vignette prose pass — the method articles
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** M134
 - **Driving RR:** —
@@ -101,6 +101,9 @@ found wrong goes to `/hotfix` or its own milestone, never into a style edit.
 
 ## Work log
 
+- 2026-08-24: return 1 complete, status back to `review`. T8 verify block re-run whole: `devtools::test()` FAIL 0 / WARN 3 (expected) / SKIP 2 / PASS 8861; `devtools::check()` `Status: 1 NOTE`, 0 errors, 0 warnings, 16m 37s, the NOTE being the testthat suite's 28m elapsed against a 16m threshold (D-011), with vignette re-building OK; `devtools::document()` no diff; `air format .` no diff; `python3 data-raw/check-record-claims.py` 6 claims re-derived, 0 failures; `cairn_validate.py` all 16 checks PASS, 7 advisories OK.
+- 2026-08-24: the `tests/spelling.Rout.save` mismatch from the first pass still reproduces and is still pre-existing — 31 flagged words, every one a proper noun, a British spelling or package jargon out of `icc.Rd`, `NEWS.md`, `glossary.Rmd` and `interval-methods.Rmd`, none introduced by this return's edits. No error, warning or NOTE comes of it.
+- 2026-08-24: AC1, AC3, AC4 and AC5 stay ticked from the first review pass, but the branch has moved since that evidence was taken — re-review takes fresh evidence for all five, AC2 being the amended one and unticked.
 - 2026-08-24: T6 re-run under the amended AC2 — the census over `git diff -U0 9eae24d...HEAD -- vignettes/` selects 56 of 138 hunks and none of them is a pure insertion; every selected hunk read in context, no widening inside the census's own domain.
 - 2026-08-24: T6 read-through leg (the criteria audit's seventh finding) — all 52 hunks of the normal-context `vignettes/` diff read in context by a fresh [O] reader that authored none of the prose. Four widenings the ten words cannot see, repaired: the resampling-noise clause at `interval-methods.Rmd:65` re-bracketed to the multilevel designs alone; the level-median claim at `:184` given back its "On the larger grid" restriction, which is the grid `argmax_cut` computes its medians on; the engines 0.284/0.290 explanation re-scoped to "here" with the carries-noise hedge kept; the Design 2 bullet's conclusion tied back to its premise. Three reported findings rejected: the "ten Hove" citation sits where the base text put it, "does not abort at the near-zero-ICC boundary" is scoped by that boundary, and the capability-matrix cells are the maintainer call already taken above.
 - 2026-08-24: amendment return: AC2 — "In the scope-word census over `git diff -U0 9eae24d...HEAD -- vignettes/` — case-insensitive whole-word matching of `any`, `each`, `every`, `all`, `only`, `both`, `exactly`, `never`, `always` and `full` (`grep -iE '\b(any|each|every|all|only|both|exactly|never|always|full)\b'`) over the diff's added and removed content lines, a hunk being selected when the census matches at least one of its added or removed lines — the census selects at least one hunk, and in every hunk it selects, the added text states a claim whose domain is equal to or narrower than the removed text it replaced; a selected hunk with no removed lines has no replaced text, and the criterion certifies nothing about it. The census decides nothing about a claim-domain change carrying none of those ten words; such a change is outside what this criterion certifies." — user-selected at the mini gate; the promise narrows to what the census settles, a wider word list being inadmissible.
