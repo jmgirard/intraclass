@@ -1,11 +1,11 @@
 # M136: Roxygen and README prose pass
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** M134
 - **Driving RR:** —
 - **Principles touched:** —
-- **Branch/PR:** —
+- **Branch/PR:** `m136-roxygen-readme-prose`
 
 ## Goal
 
