@@ -176,11 +176,11 @@ of intent, not a scorecard: each tool is excellent at what it was designed for.
 | Capability | `psych` | `irr` | `irrICC` | `intraclass` |
 |---|:--:|:--:|:--:|:--:|
 | Balanced ANOVA ICC family | ✅ | ✅ | ✅ | ✅ |
-| Incomplete / unbalanced data | ❌ | ❌ | ✅ | ✅ |
-| Multilevel (subject **and** cluster) IRR | ❌ | ❌ | ❌ | ✅ |
-| Boundary-aware interval | ❌ | ❌ | partial | ✅ |
-| [Fixed vs. random](glossary.html#fixed-vs--random-raters) rater framing | partial | partial | ❌ | ✅ |
-| Guidance on *which* ICC to report | ❌ | ❌ | ❌ | ✅ |
+| Incomplete / unbalanced data | no | no | ✅ | ✅ |
+| Multilevel (subject **and** cluster) IRR | no | no | no | ✅ |
+| Boundary-aware interval | no | no | partial | ✅ |
+| [Fixed vs. random](glossary.html#fixed-vs--random-raters) rater framing | partial | partial | no | ✅ |
+| Guidance on *which* ICC to report | no | no | no | ✅ |
 
 Two rows deserve a word. Model-based extractors such as `performance::icc`
 return **variance components** or a variance-partition coefficient. That is the

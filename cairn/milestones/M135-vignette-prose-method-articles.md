@@ -46,10 +46,18 @@ found wrong goes to `/hotfix` or its own milestone, never into a style edit.
       sentence break because the test matches it with `fixed = TRUE` and the
       clause begins lower-case with no internal sentence end. For the other four
       it reports 0 sentences over 35 words.
-- [x] AC2 For every hunk of `git diff <base> -- vignettes/` in this milestone
-      whose added **or** removed lines match
-      `\b(any|each|every|all|only|both|exactly|never|always|full)\b`, the added
-      text's claim domain is equal to or narrower than the text it replaced.
+- [ ] AC2 In the scope-word census over `git diff -U0 9eae24d...HEAD --
+      vignettes/` — case-insensitive whole-word matching of `any`, `each`,
+      `every`, `all`, `only`, `both`, `exactly`, `never`, `always` and `full`
+      (`grep -iE '\b(any|each|every|all|only|both|exactly|never|always|full)\b'`)
+      over the diff's added and removed content lines, a hunk being selected
+      when the census matches at least one of its added or removed lines — the
+      census selects at least one hunk, and in every hunk it selects, the added
+      text states a claim whose domain is equal to or narrower than the removed
+      text it replaced; a selected hunk with no removed lines has no replaced
+      text, and the criterion certifies nothing about it. The census decides
+      nothing about a claim-domain change carrying none of those ten words;
+      such a change is outside what this criterion certifies.
 - [x] AC3 `python3 data-raw/check-mpl-doc-claims.py` exits 0 in live mode
       against the edited `interval-methods.Rmd`, and every
       `data-raw/mpl-doc-claims.tsv` row whose key changes carries the edited
@@ -81,7 +89,11 @@ found wrong goes to `/hotfix` or its own milestone, never into a style edit.
       sentence the four guards quote byte-stable unless T7 re-keys it. Record
       each exempted sentence's word count and its pinned clause's in the work
       log, per the R1/R2 exemption in `cairn/doctrine/prose-style.md`.
-- [x] T6 Run the AC2 grep over added and removed diff lines; repair any widening.
+- [x] T6 Run the AC2 census over the `vignettes/` diff and repair any widening
+      it selects. Then read every prose hunk in that diff in context for
+      claim-domain widening the census cannot see — scope carried by words
+      outside the ten (`no`, `some`), or a dropped qualifier — and record what
+      was read and repaired in the work log.
 - [x] T7 Re-key `data-raw/mpl-doc-claims.tsv` for every quote T5 edited, keeping
       `assertion` and `disposition` unchanged; run both `interval-methods`
       guards live before the commit that carries the prose edit.
@@ -89,6 +101,12 @@ found wrong goes to `/hotfix` or its own milestone, never into a style edit.
 
 ## Work log
 
+- 2026-08-24: T6 re-run under the amended AC2 — the census over `git diff -U0 9eae24d...HEAD -- vignettes/` selects 56 of 138 hunks and none of them is a pure insertion; every selected hunk read in context, no widening inside the census's own domain.
+- 2026-08-24: T6 read-through leg (the criteria audit's seventh finding) — all 52 hunks of the normal-context `vignettes/` diff read in context by a fresh [O] reader that authored none of the prose. Four widenings the ten words cannot see, repaired: the resampling-noise clause at `interval-methods.Rmd:65` re-bracketed to the multilevel designs alone; the level-median claim at `:184` given back its "On the larger grid" restriction, which is the grid `argmax_cut` computes its medians on; the engines 0.284/0.290 explanation re-scoped to "here" with the carries-noise hedge kept; the Design 2 bullet's conclusion tied back to its premise. Three reported findings rejected: the "ten Hove" citation sits where the base text put it, "does not abort at the near-zero-ICC boundary" is scoped by that boundary, and the capability-matrix cells are the maintainer call already taken above.
+- 2026-08-24: amendment return: AC2 — "In the scope-word census over `git diff -U0 9eae24d...HEAD -- vignettes/` — case-insensitive whole-word matching of `any`, `each`, `every`, `all`, `only`, `both`, `exactly`, `never`, `always` and `full` (`grep -iE '\b(any|each|every|all|only|both|exactly|never|always|full)\b'`) over the diff's added and removed content lines, a hunk being selected when the census matches at least one of its added or removed lines — the census selects at least one hunk, and in every hunk it selects, the added text states a claim whose domain is equal to or narrower than the removed text it replaced; a selected hunk with no removed lines has no replaced text, and the criterion certifies nothing about it. The census decides nothing about a claim-domain change carrying none of those ten words; such a change is outside what this criterion certifies." — user-selected at the mini gate; the promise narrows to what the census settles, a wider word list being inadmissible.
+- 2026-08-24: criteria audit of the amended AC2 ran in FULL mode (user-facing tier) via a fresh-context [O] reader that authored none of it. Seven findings with one clear right answer each, all applied: substring matching admitted 105 added lines against whole-word matching's 76 (`small-sample`, `Reach`, `parallel`), so the regex is spelled out; a unified diff pairs hunks not lines and this prose rewraps, so the universal moved onto hunks; the anti-vacuity floor counted lines the universal did not range over, so it moved onto hunks too; the removed-line leg was inert until the hunk repair made it live; pure-insertion hunks had an undefined predicate, now given a stated verdict; `-U0` pinned because hunk boundaries depend on the context setting; `<base>` replaced by the literal `9eae24d`. The seventh finding — the widening class the ten words cannot see has no home — went to T6 rather than into the promise. Reachability, probe, instrument and proportionality questions returned nothing.
+- 2026-08-24: T6 amended (minor) to carry the audit's seventh finding: the census run, then an in-context read of every prose hunk in the `vignettes/` diff for widening the ten words cannot see.
+- 2026-08-24: review finding 7 (maintainer call, user-selected at the mini gate): the capability matrix's 11 `❌` cells, across its five rows, become the word `no`, matching the table's existing `partial` word-cells and keeping the emphasis off three named third-party packages. The `✅` marks and the zero dash count stand.
 - 2026-08-24: return 1, consistency gate closed — `NEWS.md` gained a *Documentation* bullet naming the five rewritten articles, beside M134's bullet for its three.
 - 2026-08-24: return 1, findings 1 and 9 — `cairn/ROADMAP.md:20`'s retention comment now names the M134 rotation and the terminal set M134/M130/M131/M132/M133, the correction marked in place; `data-raw/record-claims.tsv`'s `roadmap-terminal-rows` reason now dates the rotation 2026-08-23, the date the table rotated. `check-record-claims.py`: 6 claims re-derived, 0 failures.
 - 2026-08-24: return 1, finding 2 — the MPL subsection's boundary-return, conservatism and near-vacuity claims are back inside `check-mpl-doc-claims.py`'s candidate net: the conservatism and opt-in clauses rejoined into one candidate sentence, the two reporting caveats rejoined into one, and the boundary-return clause rephrased so its sentence carries a trigger token. Ledger: two re-keys (`9613de486205`->`76fbf751b3cd`, `93240bdb40e9`->`d78ce12088ef`, quotes and `assertion`/`disposition` unchanged) and one added row (`0e83d1125bf2`, disposition `out`, settled by `test-ci-mpl.R`'s boundary test rather than the M92 cells). Checker 48 candidates (was 47), 12 settled, 0 failures; `--self-test` reds every mutation.

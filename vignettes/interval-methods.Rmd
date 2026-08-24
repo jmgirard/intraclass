@@ -62,8 +62,8 @@ upper bounds round alike above. But they are not identical, and they do not all
 fall on the same side. The two methods can diverge more where the asymptotics are
 strained: near the [zero-variance boundary](glossary.html#zero-variance-boundary), and
 for the multilevel designs, which carry more [variance
-components](glossary.html#variance-component) and often few clusters. There the
-bootstrap's cluster-level interval in
+components](glossary.html#variance-component) and often few clusters. In the
+multilevel case the bootstrap's cluster-level interval in
 particular carries more resampling noise. The bootstrap is available for every design
 the `"glmmTMB"` and `"lme4"` engines fit. The `"lavaan"` engine bootstraps complete
 data, and a multilevel lavaan fit needs balanced clusters and random raters besides.
@@ -181,8 +181,8 @@ Two things to read off. The first is the pattern along the true ICC.
 `"burch"`'s width advantage holds much
 the same up to a true ICC of 0.3 rather than shrinking as the true ICC rises
 (on the larger grid; the smaller grid's margin does shrink across its levels).
-Measured by level medians the largest margin is at a true ICC of 0.1, not at the
-bottom of the range. Cell by cell, though, `"burch"`'s width margin is the larger
+On the larger grid, measured by level medians the largest margin is at a true ICC
+of 0.1, not at the bottom of the range. Cell by cell, though, `"burch"`'s width margin is the larger
 one at the bottom level in 11 of 16 paired cells. The advantage then
 collapses to near parity at a true ICC of 0.6, on the one grid reaching that
 value, where every cell favouring `"searle"` sits. The second is the pattern along

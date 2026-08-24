@@ -118,9 +118,9 @@ multilevel designs*](#incomplete-ragged-multilevel-designs)). The two nested lay
 are:
 
 - **Raters nested in clusters** (Design 2): each classroom has its *own* panel of
-  raters. A cluster-level ICC needs the *same* raters spanning clusters, so there is
-  no between-cluster reliability to report and `icc()` returns the subject level
-  only.
+  raters. Under Design 2 there is then no between-cluster reliability to report: a
+  cluster-level ICC needs the *same* raters spanning clusters, so `icc()` returns
+  the subject level only.
 - **Raters nested in subjects** (Design 3): each pupil is rated by their *own*
   raters. Now systematic rater differences cannot be separated from residual error
   at all, so this is a multilevel *one-way* design: it reports agreement-only
