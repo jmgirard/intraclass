@@ -5,7 +5,7 @@
 - **Depends on:** M134
 - **Driving RR:** —
 - **Principles touched:** —
-- **Branch/PR:** `m135-vignette-prose-method-articles`
+- **Branch/PR:** `m135-vignette-prose-method-articles` / https://github.com/jmgirard/intraclass/pull/144
 
 ## Goal
 
@@ -37,7 +37,7 @@ found wrong goes to `/hotfix` or its own milestone, never into a style edit.
 
 ## Acceptance criteria
 
-- [ ] AC1 `python3 data-raw/prose-profile.py '<file>' --verbose` run against each
+- [x] AC1 `python3 data-raw/prose-profile.py '<file>' --verbose` run against each
       of the five files named in Scope reports a nonzero sentence count and 0
       dash-as-punctuation occurrences. For `interval-methods.Rmd` it reports at
       most one sentence over 35 words; if one is reported, `--verbose` shows it
@@ -46,16 +46,16 @@ found wrong goes to `/hotfix` or its own milestone, never into a style edit.
       sentence break because the test matches it with `fixed = TRUE` and the
       clause begins lower-case with no internal sentence end. For the other four
       it reports 0 sentences over 35 words.
-- [ ] AC2 For every hunk of `git diff <base> -- vignettes/` in this milestone
+- [x] AC2 For every hunk of `git diff <base> -- vignettes/` in this milestone
       whose added **or** removed lines match
       `\b(any|each|every|all|only|both|exactly|never|always|full)\b`, the added
       text's claim domain is equal to or narrower than the text it replaced.
-- [ ] AC3 `python3 data-raw/check-mpl-doc-claims.py` exits 0 in live mode
+- [x] AC3 `python3 data-raw/check-mpl-doc-claims.py` exits 0 in live mode
       against the edited `interval-methods.Rmd`, and every
       `data-raw/mpl-doc-claims.tsv` row whose key changes carries the edited
       quote verbatim with its `assertion` and `disposition` columns unchanged,
       in the same commit as the prose edit.
-- [ ] AC4 `Rscript data-raw/m117-width-pin-mutations.R` exits 0 against the
+- [x] AC4 `Rscript data-raw/m117-width-pin-mutations.R` exits 0 against the
       edited `interval-methods.Rmd`.
 - [ ] AC5 `devtools::test()` clean (including `test-vignette-claims.R`,
       `test-vignette-transcripts.R`, `test-doc-skew-caveat.R`);
@@ -89,6 +89,7 @@ found wrong goes to `/hotfix` or its own milestone, never into a style edit.
 
 ## Work log
 
+- 2026-08-24: review in progress (checkpoint) — PR #144 draft opened; AC1-AC4 verified with fresh evidence and ticked; `cairn_validate` exit 0; AC5 test/check run and the three review lenses still in flight. Consistency-gate check pending disposition: the profile's NEWS.md slot has no entry for this pass's five rewritten articles, where M134 wrote one for its three.
 - 2026-08-24: T8 verify block — `devtools::test()` FAIL 0 / WARN 3 (expected) / SKIP 2 / PASS 8861; `devtools::check()` `Status: 1 NOTE`, the NOTE being the testthat suite's 23m elapsed time, which is what this suite costs (D-011); `devtools::document()` no diff; `python3 data-raw/check-record-claims.py` 6 claims re-derived, 0 failures.
 - 2026-08-24: T8 discovered repair, outside this milestone's Scope and flagged for review: `check-record-claims.py` was already red on `main` before this branch was cut. Its `roadmap-terminal-rows` row still expected `M129\nM130\nM131\nM132\nM133` while the table reads `M134\nM130\nM131\nM132\nM133`, because M134's archive pass rotated the table without rotating the row; the row's prose was staler still, naming M128 and a 2026-08-22 rotation. Corrected in place with the correction marked, per the rule for a record proven false. It is a records edit with no runtime surface, and it sits on this branch rather than the default branch so the merge gate sees it.
 - 2026-08-24: T8 open concern for review, not repaired: `R CMD check` reports a `tests/spelling.Rout.save` mismatch — the saved output expects "All Done!" and the run lists ~30 words. Every word listed comes from `icc.Rd`, `NEWS.md`, `glossary.Rmd` or wording this pass did not introduce, so the mismatch predates this branch; it produces no ERROR, WARNING or NOTE, and `Status:` is 1 NOTE.
@@ -114,3 +115,48 @@ found wrong goes to `/hotfix` or its own milestone, never into a style edit.
 ## Decisions
 
 ## Review
+
+PR: https://github.com/jmgirard/intraclass/pull/144 (draft). Base `main` at
+`9eae24d`, unmoved since the branch was cut, so no merge-forward was needed.
+Diffstat: 10 files, +391 / -356.
+
+### Acceptance-criteria evidence
+
+- AC1 (2026-08-24) `python3 data-raw/prose-profile.py '<file>' --verbose` run
+  fresh on each of the five. `engines.Rmd` 68 sentences / 0 over 35 / 0 dashes
+  (max 31); `comparison-with-other-packages.Rmd` 71 / 0 / 0 (max 33);
+  `d-studies-and-replicates.Rmd` 92 / 0 / 0 (max 33); `multilevel-designs.Rmd`
+  127 / 0 / 0 (max 34); `interval-methods.Rmd` 165 / 1 / 0 (max 78). Every count
+  is nonzero and every dash count is 0. The one over-35 sentence in
+  `interval-methods.Rmd` is the 78-word sentence `--verbose` names, at
+  `vignettes/interval-methods.Rmd:217-224`; it carries verbatim the clause
+  `residual_template()` builds at `tests/testthat/test-doc-skew-caveat.R:2265`,
+  matched with `fixed = TRUE` at line 2360 of the same file. The clause begins
+  lower-case ("the two grids that vary only ...") and holds no sentence-ending
+  period, so no break inside it is available.
+- AC2 (2026-08-24) Scope-word census run fresh over
+  `git diff 9eae24d...HEAD -- vignettes/`, case-insensitively (wider than the
+  criterion's lower-case regex). Per-file whole-file counts of the ten scope
+  words are identical between base and head for four files; the one delta is
+  `each` in `d-studies-and-replicates.Rmd`, 7 to 8. Read in context, that
+  substitution replaces a plural list predicate ("`conf_level`, `mc_samples` and
+  `seed` --- default to the fit's own") with a distributive one ("Each defaults
+  to the fit's own") over the same three settings, so the domain is unchanged.
+  Every remaining scope-word hunk in all five files was read in context; the
+  four that restructure around a scope word (the Design 2 "subject level only"
+  bullet, the Design 3 pupil-relative clause, the interval-methods "both project
+  ICC(k)" sentence which keeps "and a numeric `unit` with it", and the
+  multilevel consistency sentence) each preserve their domain. No widening; no
+  repair needed.
+- AC3 (2026-08-24) `python3 data-raw/check-mpl-doc-claims.py` exits 0 in live
+  mode: 47 claim candidates, 12 settled against `data-raw/m92-interp-sweep.rds`,
+  0 failures. Three `mpl-doc-claims.tsv` rows changed key
+  (`e6451ef204bb`->`3fe46e9bfb3f`, `41e4c69d7afd`->`9613de486205`,
+  `b6b220daac63`->`93240bdb40e9`); the tsv diff shows `disposition` (`out`) and
+  `assertion` (empty) byte-identical on all three, only `reason` extended with
+  the re-key note. All four vignette quotes bind verbatim in the checker's own
+  normalized scope, checked by calling `vignette_scope()`/`normalize()` directly.
+  The tsv edit and the prose edit ride the same commit, `8a6b18c`.
+- AC4 (2026-08-24) `Rscript data-raw/m117-width-pin-mutations.R` exits 0 against
+  the edited vignette: every prose mutation refused, control clean.
+
