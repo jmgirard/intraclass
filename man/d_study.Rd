@@ -50,8 +50,8 @@ projects the rater count \code{m} instead.}
 
 \item{conf_level, mc_samples, seed}{Interval settings. Each defaults to the
 value stored on \code{x}, so a seeded fit yields a reproducible projection.
-Override any of them to change the confidence level, the number of
-Monte-Carlo draws, or the seed.}
+Override to change the confidence level, the number of Monte-Carlo draws,
+or the seed.}
 }
 \value{
 \code{d_study()} returns an \code{icc_dstudy} object: a tibble with one row per

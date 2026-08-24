@@ -107,8 +107,8 @@
 #'   projects the rater count `m` instead.
 #' @param conf_level,mc_samples,seed Interval settings. Each defaults to the
 #'   value stored on `x`, so a seeded fit yields a reproducible projection.
-#'   Override any of them to change the confidence level, the number of
-#'   Monte-Carlo draws, or the seed.
+#'   Override to change the confidence level, the number of Monte-Carlo draws,
+#'   or the seed.
 #'
 #' @return `d_study()` returns an `icc_dstudy` object: a tibble with one row per
 #'   projected point and columns `m`, `index` (e.g. `"ICC(A,3)"`), `type`,

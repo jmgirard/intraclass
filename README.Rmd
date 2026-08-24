@@ -39,7 +39,7 @@ functions.
 > consistency, single vs. average, random vs. fixed raters) and one-way designs.
 > It covers imbalanced and incomplete (missing-cell) data. It also covers
 > multilevel designs, at the subject level and the cluster level, with raters
-> crossed with or nested in clusters and subjects. Each comes with
+> crossed with or nested in clusters or subjects. Each comes with
 > boundary-aware Monte-Carlo intervals. Fits run on `glmmTMB` (the default) or
 > `lme4`. Bayesian fits run on `brms`, and SEM fits on `lavaan`. The
 > [engines article](https://jmgirard.github.io/intraclass/articles/engines.html)
