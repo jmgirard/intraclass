@@ -81,7 +81,7 @@ condition text with their own guard
       of the surface; `@examples` untouched).
 - [ ] T2 Rewrite the `#'` blocks in the remaining `R/*.R` files against R1–R6,
       and rewrite `@param design` to name both Scope occasions.
-- [ ] T3 Rewrite `README.Rmd` against R1–R6.
+- [x] T3 Rewrite `README.Rmd` against R1–R6.
 - [ ] T4 Re-key `data-raw/mpl-doc-claims.tsv` for every quote T1 edited, keeping
       `assertion` and `disposition` unchanged; run the checker live before the
       commit carrying the roxygen edit.
@@ -95,6 +95,7 @@ condition text with their own guard
 - 2026-08-23: created by /milestone-plan.
 - 2026-08-23: plan-gate criteria audit ran in FULL mode; the record and its 13 findings are in M134's work log — this file carries the F2 (glob over hand-list), F3 (live MPL checker AC), F11 (design occasions listed, hunk exempted) and F13 (`git diff --exit-code`) repairs.
 - 2026-08-23: plan gate chose to absorb the M132-review `@param design` candidate over leaving it on the ROADMAP because that row's own promotion trigger is "the next pass over `?icc`'s multilevel prose", which this is; falsified by the alignment edit widening a claim AC3 would otherwise have caught.
+- 2026-08-24: T3 README.Rmd rewritten; ruler 65 sentences, 0 over-35, 0 dashes (was 40/4/22). `build_readme()` re-knitted README.md.
 - 2026-08-23: plan gate chose to leave the `cli` abort and hint strings out over folding them in because they are condition text with pinned renderings (M93, M127) and a separate guard, not documentation prose; falsified by a user reporting an abort remedy as unreadable in the same way the docs were.
 
 ## Decisions
