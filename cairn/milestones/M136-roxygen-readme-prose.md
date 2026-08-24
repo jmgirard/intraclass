@@ -5,7 +5,7 @@
 - **Depends on:** M134
 - **Driving RR:** —
 - **Principles touched:** —
-- **Branch/PR:** `m136-roxygen-readme-prose`
+- **Branch/PR:** `m136-roxygen-readme-prose` / https://github.com/jmgirard/intraclass/pull/145
 
 ## Goal
 
@@ -49,7 +49,7 @@ condition text with their own guard
 
 ## Acceptance criteria
 
-- [ ] AC1 `python3 data-raw/prose-profile.py 'R/*.R'` reports 0
+- [x] AC1 `python3 data-raw/prose-profile.py 'R/*.R'` reports 0
       dash-as-punctuation occurrences in its TOTAL row, a nonzero sentence
       count in its `R/icc.R` row, and 0 sentences over 35 words in every other
       row. The same command over `README.Rmd` reports 0 dashes, a nonzero
@@ -80,7 +80,7 @@ condition text with their own guard
       clause `residual_template()` or `width_templates()` returns. The census
       decides nothing about a claim-domain change carrying none of those ten
       words.
-- [ ] AC4 The rendered `man/icc.Rd` `design` argument entry names both
+- [x] AC4 The rendered `man/icc.Rd` `design` argument entry names both
       occasions listed in Scope, in the article's terms.
 - [ ] AC5 `Rscript -e 'devtools::build_readme()'` followed by
       `git diff --exit-code README.md` is clean.
@@ -119,6 +119,8 @@ condition text with their own guard
 
 ## Work log
 
+- 2026-08-24: review opened; draft PR #145. AC1 and AC4 verified against fresh evidence; AC2 fails its same-commit clause.
+
 - 2026-08-23: created by /milestone-plan.
 - 2026-08-23: plan-gate criteria audit ran in FULL mode; the record and its 13 findings are in M134's work log — this file carries the F2 (glob over hand-list), F3 (live MPL checker AC), F11 (design occasions listed, hunk exempted) and F13 (`git diff --exit-code`) repairs.
 - 2026-08-23: plan gate chose to absorb the M132-review `@param design` candidate over leaving it on the ROADMAP because that row's own promotion trigger is "the next pass over `?icc`'s multilevel prose", which this is; falsified by the alignment edit widening a claim AC3 would otherwise have caught.
@@ -142,3 +144,56 @@ condition text with their own guard
 ## Decisions
 
 ## Review
+
+Fresh evidence, 2026-08-24, at `be1e38c` on `m136-roxygen-readme-prose` (PR #145).
+
+**AC1 — pass.** `python3 data-raw/prose-profile.py 'R/*.R'`: TOTAL 588 sentences,
+0 dash-as-punctuation, 2 over-35, max 64. `R/icc.R` 395 sentences (nonzero); every
+other row 0 over-35. Over `README.Rmd`: 65 sentences, 0 dashes, 0 over-35, max 35.
+The exemption clause: the 58-word text `residual_template()` returns occurs exactly
+twice in `R/icc.R`'s `#'` lines outside `@examples` (counted after stripping `#'`
+and collapsing whitespace). Both occurrences sit in distinct sentences — a single
+sentence carrying both would run to at least 116 words, and the ruler's max for the
+file is 64 — so the over-35 count 2 equals the clause-carrying-sentence count 2.
+
+**AC2 — FAIL on the same-commit clause.** The other two clauses hold:
+`python3 data-raw/check-mpl-doc-claims.py` exits 0 live (61 candidates, 12 settled,
+0 failures), all 41 re-keyed rows carry their quote verbatim under the checker's own
+`normalize()` and scope extraction, and no `(file, disposition, assertion)` triple
+present at the merge base is absent from the edited ledger (the only new triples are
+11 added `R/icc.R`/`out`/empty-assertion rows). But the re-key did not travel with
+the edit. Running the checker against each branch commit extracted with `git archive`:
+`dba21ad`, `139a285`, `0d33928` OK (48 candidates); `e849606` **FAIL, 32 failures**
+(6 stale keys, 15 out-rows whose quote no longer exists, 11 uncovered claims);
+`900b2d5` OK (61); `be1e38c` OK (61). `e849606` carries a 456-line `R/icc.R` roxygen
+rewrite under a commit message naming only the criteria amendment, and the ledger
+re-key lands one commit later in `900b2d5`.
+
+**AC3 — pending.** Census reproduced over
+`git diff -U0 $(git merge-base main HEAD)...HEAD -- R/ README.Rmd`: 130 hunks, 52
+selected, 0 pure additions among the selected. Per file selected: `R/icc.R` 38,
+`R/d-study.R` 8, `README.Rmd` 4, `R/data.R` 1, `R/choose-icc.R` 1, `R/abort.R` 0
+(so the at-least-one-in-each requirement holds). The T5 work-log line records
+`R/d-study.R` 9, which does not sum to its own reported 52; 8 does. The
+claim-domain judgment over the 52 units is with a fresh-context [O] reader.
+
+**AC4 — pass.** `man/icc.Rd`'s `\item{design}` entry reads "There are two occasions
+to override that inference. The first is when the rater \emph{labels} do not mean
+what the crossing pattern implies, as in a complete table whose rater labels repeat
+across clusters. The second is when missing cells leave the pattern genuinely
+ambiguous between a crossed and a nested design." — both Scope occasions, in the
+terms `vignettes/multilevel-designs.Rmd:110-117` uses.
+
+**AC5 — pending.**
+
+**AC6 — partial.** `devtools::document()` produces no diff (`git status --porcelain`
+after the run names only this milestone file). `python3 data-raw/check-record-claims.py`
+exits 0 (6 registered claims re-derived, 0 failures). `devtools::test()` and
+`devtools::check()` still running.
+
+**Consistency gate.** `cairn_validate.py` exit 0 — 16 PASS, 7 advisories all OK; the
+`release window` advisory did not fire. No `DESIGN.md` principle changed, so
+`cairn_impact.py` is skipped. Profile `r-package` toolchain slot: `document()` no
+diff (recorded above); NEWS.md carries two Documentation entries for this pass, with
+no milestone numbers in the user-facing text; `build_readme()`, `check_pkgdown()` and
+`devtools::check()` pending.
