@@ -1,6 +1,6 @@
 # M135: Vignette prose pass — the method articles
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** M134
 - **Driving RR:** —
