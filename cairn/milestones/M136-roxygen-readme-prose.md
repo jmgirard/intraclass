@@ -1,6 +1,6 @@
 # M136: Roxygen and README prose pass
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** M134
 - **Driving RR:** —
@@ -59,7 +59,7 @@ condition text with their own guard
       returns. Such a clause admits no sentence break:
       `tests/testthat/test-doc-skew-caveat.R` matches it with `fixed = TRUE`,
       and it begins lower-case with no internal sentence end.
-- [ ] AC2 `python3 data-raw/check-mpl-doc-claims.py` exits 0 in live mode
+- [x] AC2 `python3 data-raw/check-mpl-doc-claims.py` exits 0 in live mode
       against the edited `R/icc.R`, and every `data-raw/mpl-doc-claims.tsv` row
       whose key changes carries the edited quote verbatim with its `assertion`
       and `disposition` columns unchanged, in the same commit as the edit.
@@ -119,6 +119,8 @@ condition text with their own guard
 
 ## Work log
 
+- 2026-08-24: review returned to in-progress (defect return 2). AC3 fails its claim-domain rule at two further sites, both a sentence split dropping a scope marker: `R/icc.R:275-276`, where the semicolon that made `from `"lavaan"`` govern both halves became a full stop, leaving "**Absolute-agreement** ICCs use the SEM indicator-mean estimator" unscoped and false of `"glmmTMB"`/`"lme4"`; and `R/icc.R:113-114`, where a colon scoping the Case-3A mechanism to the crossed fixed-rater subject level became a full stop. AC1, AC2, AC4, AC5, AC6 and the whole consistency gate pass — AC2, the first return's other failure, is cleared by the rebuilt history (all 12 commits exit 0 under `check-mpl-doc-claims.py`). Thrash trigger (b) fires: AC3 twice, new mechanism each time, same shape. The three-lens fan-out was run anyway; its seven [O] findings are in the Review section, two of them user-facing docs defects (`@param occasions` lost `and/or`; `R/icc.R:290` "For that design" lost its antecedent, so the incomplete-SEM bootstrap fence reads as fixed-rater-only while `R/engine-lavaan.R:770` applies it to random raters too). The rebuilt branch is still unpushed: the harness refused the force-push again, so PR #145 carries the pre-rewrite history.
+
 - 2026-08-24: defect-return repairs complete; status back to review. `devtools::test()` FAIL 0 / WARN 3 / SKIP 2 / PASS 8827; `devtools::check()` raw `Status: 1 NOTE` (the NOT_CRAN `spelling.Rout` diff, M127/M128); `devtools::document()` and `build_readme()` leave no diff; `cairn_validate.py` all checks passed. The force-push of the rebuilt branch to PR #145 is not yet done — this session's harness refused it, so the remote still carries the pre-rewrite history.
 
 - 2026-08-24: defect-return repair, AC2 same-commit clause. Branch history rebuilt from `0d33928`: the amendment tracking edit and the `R/icc.R` roxygen rewrite that `e849606` carried together are now separate commits, and the `mpl-doc-claims.tsv` re-key that landed in `900b2d5` travels in the same commit as the rewrite it re-keys. Verified by extracting each of the branch's 10 commits with `git archive` and running `check-mpl-doc-claims.py` in the extracted tree: all 10 exit 0 (48 candidates before the rewrite, 61 from it on), where the old history had `e849606` red with 32 failures. `git diff --stat backup/m136-pre-rewrite HEAD` is empty, so the rewrite changed no file content. Force-pushed to PR #145 at the user's gate; the pre-rewrite tip is kept locally at `backup/m136-pre-rewrite`.
@@ -157,127 +159,199 @@ condition text with their own guard
 
 ## Review
 
-Fresh evidence, 2026-08-24, at `be1e38c` on `m136-roxygen-readme-prose` (PR #145).
+Fresh evidence, 2026-08-24, at `6d0ee5c` on `m136-roxygen-readme-prose` (PR #145).
+Second review round, after the AC2 history rebuild and the AC3 repairs.
+
+**Default branch.** `git fetch` then compare: `origin/main` is `fe58134`, which is
+also `git merge-base main HEAD`, so the default branch has not moved under the
+branch and no sync merge was needed. The branch is 12 commits ahead.
+
+**Remote is stale.** The rebuilt history is local only: `origin/m136-roxygen-readme-prose`
+is still `855ed4e`, the pre-rewrite tip, so PR #145 shows the old commits. The
+force-push was refused by this session's harness again, as at the end of the
+implement phase. All AC2 evidence below is over the local commits.
 
 **AC1 — pass.** `python3 data-raw/prose-profile.py 'R/*.R'`: TOTAL 588 sentences,
 0 dash-as-punctuation, 2 over-35, max 64. `R/icc.R` 395 sentences (nonzero); every
 other row 0 over-35. Over `README.Rmd`: 65 sentences, 0 dashes, 0 over-35, max 35.
-The exemption clause: the 58-word text `residual_template()` returns occurs exactly
-twice in `R/icc.R`'s `#'` lines outside `@examples` (counted after stripping `#'`
-and collapsing whitespace). Both occurrences sit in distinct sentences — a single
-sentence carrying both would run to at least 116 words, and the ruler's max for the
-file is 64 — so the over-35 count 2 equals the clause-carrying-sentence count 2.
+The exemption clause: the text `residual_template()` returns
+(`tests/testthat/test-doc-skew-caveat.R:2265`) occurs exactly twice in `R/icc.R`'s
+`#'` lines outside `@examples`, at `R/icc.R:451` and `R/icc.R:635`, counted after
+stripping `#'` and collapsing whitespace. Both sit in distinct sentences: one
+sentence carrying both would run past 116 words and the ruler's max for the file is
+64. So the over-35 count 2 equals the clause-carrying-sentence count 2.
 
-**AC2 — FAIL on the same-commit clause.** The other two clauses hold:
-`python3 data-raw/check-mpl-doc-claims.py` exits 0 live (61 candidates, 12 settled,
-0 failures), all 41 re-keyed rows carry their quote verbatim under the checker's own
-`normalize()` and scope extraction, and no `(file, disposition, assertion)` triple
-present at the merge base is absent from the edited ledger (the only new triples are
-11 added `R/icc.R`/`out`/empty-assertion rows). But the re-key did not travel with
-the edit. Running the checker against each branch commit extracted with `git archive`:
-`dba21ad`, `139a285`, `0d33928` OK (48 candidates); `e849606` **FAIL, 32 failures**
-(6 stale keys, 15 out-rows whose quote no longer exists, 11 uncovered claims);
-`900b2d5` OK (61); `be1e38c` OK (61). `e849606` carries a 456-line `R/icc.R` roxygen
-rewrite under a commit message naming only the criteria amendment, and the ledger
-re-key lands one commit later in `900b2d5`.
+**AC2 — pass.** This was the first return's first failure; the rebuilt history
+clears it. `python3 data-raw/check-mpl-doc-claims.py` exits 0 live: 61 candidates,
+12 settled, 0 failures. Every one of the branch's 12 commits, extracted with
+`git archive` into a scratch tree and checked there, exits 0: 48 candidates through
+`934fb13`, 61 from `40727dd` on. `data-raw/mpl-doc-claims.tsv` changed in exactly
+one commit, `40727dd`, which is the commit carrying the `R/icc.R` roxygen rewrite it
+re-keys, so the re-key travels with its edit. Comparing the `(file, disposition,
+assertion)` multiset at the merge base against HEAD: no triple loses an instance;
+the only gain is 11 added `R/icc.R` / `out` / empty-assertion rows (55 rows to 66).
+The verbatim-quote half is what the live checker's 0 failures establishes.
 
 **AC3 — FAIL.** Census reproduced over
 `git diff -U0 $(git merge-base main HEAD)...HEAD -- R/ README.Rmd`: 130 hunks, 52
 selected under the literal `^[+-][^+-]` content-line rule, 0 pure additions among
 them. Per file selected: `R/icc.R` 38, `R/d-study.R` 8, `README.Rmd` 4, `R/data.R` 1,
-`R/choose-icc.R` 1, `R/abort.R` 0 — so the at-least-one-in-`R/icc.R` and
-at-least-one-in-`README.Rmd` requirements hold. The T5 work-log line records
-`R/d-study.R` 9, which does not sum to its own reported 52; 8 does. With no pure
+`R/choose-icc.R` 1 — so the at-least-one-in-`R/icc.R` and at-least-one-in-`README.Rmd`
+requirements hold, and these figures match the post-repair work-log line. Every
+selected content line in an `.R` file is a `#'` line and every selected `README.Rmd`
+line sits in a markdown paragraph, so the hand-adjudication set is empty. The
+`@param design` hunk carries no trigger word on any content line, so the census does
+not select it and AC4's exemption removes nothing from the audit. With no pure
 additions, the added-only branch and the `residual_template()` exemption never fire,
 and every selected unit is judged on the removed-vs-added domain rule alone.
 
 The claim-domain judgment went to a fresh-context [O] reader that authored none of
-the prose. It re-ran the census independently (130 hunks; 52 under the literal rule,
-53 if markdown bullet lines whose diff prefix is `+-`/`--` are also counted; it
-audited all 53), confirmed 0 selected lines lie outside a roxygen block or a markdown
-paragraph so the hand-adjudication set is empty, and confirmed the `@param design`
-unit is not selected by the regex, so AC4's exemption removes nothing from the audit.
-It confirmed both widenings the T5 pass repaired are repaired at HEAD.
+the prose. It reproduced all of the counts above independently and confirmed the five
+repairs the first return directed are present at HEAD. It then found two further
+widenings, both of which I verified directly against the diff.
 
-It then found a further widening, which I verified directly against the diff.
-`README.Rmd:41-42`, inside the release NOTE block on the GitHub landing page:
+1. `R/icc.R:275-276`, in `@param engine`. Removed: `**Consistency** ICCs from
+   `"lavaan"` equal the mixed-model estimates exactly on balanced data;
+   **absolute-agreement** ICCs use the SEM indicator-mean estimator of the rater
+   variance, which is asymptotically equivalent to ...`. Added: `... exactly on
+   balanced data. **Absolute-agreement** ICCs use the SEM indicator-mean estimator
+   of the rater variance. That estimator is asymptotically equivalent to ...`. The
+   semicolon made `from `"lavaan"`` govern both halves; the full stop leaves the
+   second half with no scope marker, so it states a claim about absolute-agreement
+   ICCs generally. Two sentences earlier the same paragraph says `"glmmTMB"` and
+   `"lme4"` fit the variance components by REML, and the next sentence contrasts
+   this estimator with "the mixed-model one", so the widened reading is false inside
+   its own paragraph. The hunk is selected on `exactly`, `every` and `both`.
+2. `R/icc.R:113-114`, in the multilevel section. Removed: `... at the **subject**
+   level on both balanced and **incomplete** data: the rater main effect becomes the
+   finite-population variance of the observed raters (McGraw & Wong Case 3A), so on
+   balanced data ...`. Added: `... on both balanced and **incomplete** data. The
+   rater main effect becomes the finite-population variance of the observed raters
+   (McGraw & Wong Case 3A). So on balanced data ...`. The colon bound the mechanism
+   to the crossed fixed-rater subject level; free-standing it states the rule for
+   fixed raters generally, and eleven lines later the same block says nested
+   Design 2 forms that variance **per cluster**. Milder than 1 — the preceding
+   sentence still supplies the subject — but the same loss of an explicit scope
+   marker.
 
-    removed: multilevel designs (subject vs. cluster level, with raters crossed
-             with or nested in clusters/subjects)
-    added:   multilevel designs, at the subject level and the cluster level, with
-             raters crossed with or nested in clusters or subjects
+Both are the shape the first return already failed AC3 on: splitting a sentence at a
+scope-carrying punctuation mark drops the scope. Neither repair widens an
+enumeration, so the M139 widening test does not apply and these are defect findings,
+not amendment evidence.
 
-`subject vs. cluster level` is a contrast; `at the subject level and the cluster
-level` is a conjunction, and it now distributes across both the crossed and the
-nested rater layouts. `R/icc.R:88-90` states that a nested design defines the
-subject level only, and restricts `level` to `"subject"` there. So the added text
-states a claim whose domain is wider than the removed text, which is exactly what
-AC3 forbids — and it is the same alternation-to-conjunction defect as the
-`clusters/subjects` repair made two words later in the same sentence.
-
-Six further candidates the reader ranked below it, reported here and left to triage:
-(2) `R/icc.R:357-359`, a reproducibility guarantee de-parenthesized from `(your
-retry reproduces it exactly)` to a coordinate clause, loosening its binding to the
-seeded case — the next sentence still limits it; (3) `R/icc.R:313-315` lavaan
-`incomplete ... or unbalanced` -> `incomplete ... and unbalanced`; (4)
-`R/icc.R:308-310`, a lavaan parenthetical scoped to the two-way design promoted to
-a free-standing sentence covering all of lavaan; (5) `R/icc.R:443`, `That margin`
--> `` `"burch"`'s width margin ``, dropping the named two-grid antecedent;
-(6) `R/icc.R:645-647`, a shared-convention list item promoted to a sentence whose
-subject no longer names the two methods; (7) three juxtapositions turned into
-asserted causation (`R/data.R:38`, `R/choose-icc.R:41-42`, `R/icc.R:143-144`), which
-the reader judged substantively correct. The reader also flagged, out of AC3 scope,
-that `R/icc.R:285-287`'s unchanged `"lme4"` line already asserts the same
-crossed-and-nested-at-both-levels cross-product that finding 1 introduces.
+The reader also cleared, with reasons I checked: the three rejections the first
+return's triage recorded (the lavaan `incomplete ... and unbalanced` conjunction
+against `R/engine-lavaan.R:341`; the three juxtaposition-to-causation edits; and the
+`That margin` change, required because `tests/testthat/test-doc-skew-caveat.R:886`
+seeds a width run only from a sentence matching `burch`), and five further candidates
+it judged not widenings (`R/icc.R:469-471`, `R/icc.R:78-81`, `README.Rmd:42`,
+`R/icc.R:109-110`, and `R/icc.R:290` as a narrowing rather than a widening).
 
 **AC4 — pass.** `man/icc.Rd`'s `\item{design}` entry reads "There are two occasions
 to override that inference. The first is when the rater \emph{labels} do not mean
 what the crossing pattern implies, as in a complete table whose rater labels repeat
 across clusters. The second is when missing cells leave the pattern genuinely
-ambiguous between a crossed and a nested design." — both Scope occasions, in the
-terms `vignettes/multilevel-designs.Rmd:110-117` uses.
+ambiguous between a crossed and a nested design." Both Scope occasions, in the terms
+`vignettes/multilevel-designs.Rmd:110-117` uses.
 
 **AC5 — pass.** `Rscript -e 'devtools::build_readme()'` then
-`git diff --exit-code README.md` exits 0: README.md is in sync with README.Rmd.
+`git diff --exit-code README.md` exits 0.
 
-**AC6 — pass.** `devtools::test()` `[ FAIL 0 | WARN 3 | SKIP 2 | PASS 8827 ]`; the
-three warnings are lavaan's "some estimated lv variances are negative" surfaced
-through `cli_warn()` at `R/engine-lavaan.R:415`, engine behaviour the suite exercises
-deliberately, not new. `devtools::check()` raw `Status: 1 NOTE`, so 0 errors and 0
-warnings. The NOTE is the `spelling.Rout` diff that fires only under `NOT_CRAN`
-(M127/M128): `spelling::spell_check_package()` flags 31 words on this branch and 31
-on `origin/main`, and the two sorted word lists are identical, so the branch adds
-none. `devtools::document()` produces no diff (`git status --porcelain` after the run
-names only this milestone file). `python3 data-raw/check-record-claims.py` exits 0
-(6 registered claims re-derived, 0 failures).
+**AC6 — pass.** `devtools::test()` `[ FAIL 0 | WARN 3 | SKIP 2 | PASS 8827 ]`.
+`devtools::check()` raw `Status: 1 NOTE` (duration 15m 16s), so 0 errors and
+0 warnings; the NOTE is the `spelling.Rout` diff that fires only under `NOT_CRAN`
+(M127/M128), and `spelling::spell_check_package()` flags 31 words on this branch,
+the same count the first round measured on `origin/main` with an identical list, so
+the branch adds none. `devtools::document()` leaves the tree clean
+(`git status --porcelain` empty after the run). `python3 data-raw/check-record-claims.py`
+exits 0, 6 registered claims re-derived.
 
-**Consistency gate.** `cairn_validate.py` exit 0 — 16 PASS, 7 advisories all OK; the
-`release window` advisory did not fire. No `DESIGN.md` principle changed, so
-`cairn_impact.py` is skipped. Profile `r-package` toolchain slot: `document()` no
-diff (recorded above); generated `NAMESPACE`/`man/` therefore not hand-edited;
-README.md in sync (AC5); `pkgdown::check_pkgdown()` reports "No problems found";
-NEWS.md carries two Documentation entries for this pass, with no milestone numbers in
-the user-facing text; no new top-level files, and `devtools::check()` raises no
-`.Rbuildignore` NOTE. The gate's toolchain half passes; the milestone is returned on
-AC2 and AC3, not on the gate.
+**Consistency gate — pass.** `cairn_validate.py` exit 0: 16 PASS, 7 advisories all
+OK, and the `release window` advisory did not fire. No `DESIGN.md` principle changed,
+so `cairn_impact.py` is skipped. Profile `r-package` toolchain slot: `document()` no
+diff, so generated `NAMESPACE`/`man/` are not hand-edited; README.md in sync (AC5);
+`pkgdown::check_pkgdown()` reports "No problems found"; `NEWS.md` carries two
+Documentation entries for this pass with no milestone numbers in the user-facing
+text; no new top-level files, and `check()` raises no `.Rbuildignore` NOTE. The
+milestone is returned on AC3, not on the gate.
 
-**Outcome: returned to `in-progress`.** Two criteria fail against fresh evidence —
-AC2's same-commit clause and AC3's claim-domain rule. Both are defect returns
-(neither repair widens an enumeration, so the M139 widening test does not apply).
-This is the first defect return on this milestone; the 2026-08-24 amendment return
-runs on its own track. The step-5 review fan-out was not spawned: the branch has to
-change to clear AC2, so a diff review now would be reviewing a diff that will be
-recommitted.
+**Review fan-out.** Run despite the AC3 failure, so the repair round has the whole
+list rather than discovering the rest on a third pass. Declared tier is user-facing,
+so all three lenses were spawned, each fresh-context and none having authored the
+prose.
+
+[S] blame-history: no findings. It re-derived the per-commit AC2 evidence
+independently, confirmed both first-return repairs hold at HEAD, and grepped for two
+claims past milestones falsified and pinned as never-to-reappear (M92's "nothing
+isolates the rater", M105/D-022's "finite interval on every dataset") — neither is
+present. Its one observation, `R/icc.R:280-287`'s unchanged `"lme4"` sentence, is an
+unmodified line and pre-existing.
+
+[S] prior-review record: no findings. The `gh api repos/jmgirard/intraclass/pulls/comments?per_page=1`
+probe returned `[]`, so no per-PR thread walk was paid for (M91's measurement holds).
+Over the archived `## Review` sections for M115-M119, M123, M124, M126, M128, M131
+and M132 it found the width and coverage figures (0.6725, 0.825/0.84, 0.9430/0.9614,
+1.2963) preserved verbatim and the M123/M126 install-disclosure claims unchanged.
+
+[O] diff-bug: seven findings, ranked, none an AC3 failure. Recorded here in the
+reader's order; the first two I verified directly.
+
+1. `R/icc.R:245-250`, `@param occasions` dropped `and/or`. The removed text read
+   ``"single"` (the default -- the reliability of one rating) and/or `"average"``;
+   the added text is two flat sentences that never say both may be asked for.
+   `validate_occasions()` (`R/icc.R:2661-2674`) accepts "one or both of" and
+   de-duplicates, and the sibling `@param level` two lines below still reads
+   "and/or ... Defaults to both". A `?icc` reader with replicated data no longer
+   learns that `occasions = c("single", "average")` is legal. Carries none of AC3's
+   ten trigger words, so the census decides nothing about it.
+2. `R/icc.R:290`, "For that design" lost its antecedent. The first return's own
+   repair (d) put a fixed-rater sentence immediately before it, so "For that design,
+   missing cells are estimated by full-information maximum likelihood, and the
+   parametric bootstrap is unavailable for incomplete SEM" now reads as
+   fixed-rater-only. `R/engine-lavaan.R:770` sets `simulate_refit = NULL` on
+   `has_missing` regardless of `raters`, so the fence covers random-rater fits too,
+   and a random-rater lavaan user with missing cells can read the bootstrap as open
+   to them and hit the abort. A narrowing, which AC3 permits.
+3. `data-raw/mpl-doc-claims.tsv`, four `reason` columns cite keys the re-key removed:
+   `da3faf98d0c8` cites `a6f8e9dbe094`, `e50b57c2c557` cites `e428d688f11e`,
+   `76fbf751b3cd` cites `d445b858554b`, `c3bbfdcb4994` cites `f80587033837`. The
+   checker does not validate reason cross-references, so this is silent.
+4. `data-raw/mpl-doc-claims.tsv:36`, row `33685fc5f591`'s quote was re-pointed to
+   "tabulated, not continuous" while its `reason` still explains the node grid and
+   linear rule, which the split moved into the following sentence.
+5. `README.Rmd:152`, the Related-work table's `| **intraclass** | -- |` placeholder
+   became `| **intraclass** | `intraclass` |`, a self-reference where the em dash had
+   meant "no alternative packages".
+6. `data-raw/mpl-doc-claims.tsv`, 21 re-keyed rows run the note into the previous
+   sentence with no punctuation ("... is the validated property Re-keyed at M136
+   (prose pass).").
+7. `R/icc.R:550`, `@param prior` turned "combine several with `c()`" into "combined
+   with `c()`", reading as a form requirement rather than a capability.
+
+**Outcome: returned to `in-progress`.** AC3 fails against fresh evidence for the
+second time. AC1, AC2, AC4, AC5, AC6 and the whole consistency gate pass; AC2, the
+first return's other failure, is cleared.
+
+**Thrash rule, trigger (b).** This is defect return 2, so trigger (a) has not fired.
+Trigger (b) has: AC3 has now failed twice, each time by a new mechanism of the same
+shape — a sentence split at a scope-carrying punctuation mark that drops the scope
+(return 1: a contrast turned into a conjunction at `README.Rmd:41-42`; return 2: a
+semicolon and a colon turned into full stops at `R/icc.R:275` and `R/icc.R:113`).
+Each round has audited the 52-hunk selection by hand and repaired what that round's
+reader caught, and each round a new instance has surfaced. The alternative the plan
+gate recorded against for this predicate is M135's added-vs-removed-only census
+shape, which is weaker than the one in force and would not have caught either
+instance, so reconsidering it is not the remedy here. The 2026-08-24 amendment return
+runs on its own track and is not counted.
 
 **What has to happen before re-review:**
 
-1. Make the ledger re-key travel with the roxygen edit it re-keys, so no commit on
-   the branch leaves `check-mpl-doc-claims.py` red. Today only `e849606` is red.
-   `e849606` also carries the T1 `R/icc.R` rewrite under a message naming only the
-   criteria amendment, so separating the amendment from the rewrite and folding the
-   ledger re-key into the rewrite commit fixes both the criterion and the message.
-2. Repair the `README.Rmd:41-42` widening — restore the contrast the removed text
-   drew between the subject and cluster levels, rather than conjoining them across
-   both rater layouts.
-3. Triage the six lower-ranked AC3 candidates above, repairing or rejecting each
-   with a reason.
+1. Restore the scope markers at `R/icc.R:275-276` and `R/icc.R:113-114`.
+2. Repair or reject with a reason each of the seven [O] diff-bug findings above.
+   Findings 1 and 2 are user-facing docs defects and are worth fixing on their own
+   merits, whatever AC3 says about them.
+3. Push the rebuilt branch to PR #145. The remote still carries the pre-rewrite
+   history, so nothing on GitHub reflects what was reviewed here.
+4. Before the third round, decide whether hand-auditing the selection is going to
+   converge, or whether the remaining risk is better handled another way. Two rounds
+   of hand audit have each left an instance behind.
