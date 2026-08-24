@@ -116,12 +116,17 @@ condition text with their own guard
       confirm the census selects that hunk.
 - [x] T6 `devtools::document()`, `devtools::build_readme()`, then the AC6 verify
       block; drop the stray `Rplots.pdf` if an example run leaves one (M131).
-- [ ] T7 Exhaustive scope-punctuation sweep, the shape both AC3 returns failed on:
+- [x] T7 Exhaustive scope-punctuation sweep, the shape both AC3 returns failed on:
       enumerate every hunk of the AC3 diff whose removed text carries a semicolon
       or a mid-sentence colon the added text does not, and take a verdict on each
       from a fresh-context reader. Repair every widening it finds.
 
 ## Work log
+
+- 2026-08-24: checkpoint. T7's repairs are committed and `document()`/`build_readme()`/`check-mpl-doc-claims.py`/`check-record-claims.py` and both rulers are clean over them; the AC6 `devtools::test()` and `devtools::check()` runs are still pending, so T6's re-run is not yet recorded.
+
+- 2026-08-24: T7 sweep. 76 of the 130 hunks lose a semicolon or a mid-sentence colon; a fresh-context [O] reader that authored none of the prose gave a verdict on every one. Two widenings, both verified against the code and repaired. `R/icc.R:298-304`: the semicolon run under "With **random** raters the multilevel fit covers..." had left "Incomplete or unbalanced data is Monte-Carlo only" free-standing, which `R/icc.R:386` and the eight `glmmtmb_simulate_refit()` attach sites contradict; the three clauses now read "For that random-rater two-level fit ...", "Its parametric bootstrap ...", "For that fit, incomplete or unbalanced data ...". `R/d-study.R:60-62`: "The **cluster** level is dropped with a note" now reads "On that same data the **cluster** level is dropped with a note", the condition `R/d-study.R:240` actually gates on (`!isTRUE(x$design$balanced)`). The other 74 cleared, four of them the sites earlier rounds repaired.
+- 2026-08-24: AC3 census re-run after the T7 repairs: 130 hunks, 53 selected (was 52; the repaired `R/icc.R` engine region now carries a trigger word), 0 pure additions. Per file `R/icc.R` 39, `R/d-study.R` 8, `README.Rmd` 4, `R/data.R` 1, `R/choose-icc.R` 1.
 
 - 2026-08-24: rebuilt branch force-pushed to PR #145 (`855ed4e` -> `b715492`), so the remote now carries the history the second review round read. The two earlier sessions' refusals did not recur.
 - 2026-08-24: return-2 AC3 repairs. `R/icc.R:113` regains the scope the colon carried ("For that design and level, the rater main effect becomes..."); `R/icc.R:275` regains the one the semicolon carried ("**Absolute-agreement** ICCs from `"lavaan"` use the SEM indicator-mean estimator...").

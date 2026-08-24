@@ -137,8 +137,8 @@ does \strong{not} average over subjects, so there is no "subjects per cluster"
 projection. That is a sample-size question, not a reliability one. Nested
 designs project the subject level only. The conflated diagnostic
 (\code{level = "conflated"}) is not projected. On \strong{incomplete} data the
-\strong{subject} level projects, because projection moves only the divisor. The
-\strong{cluster} level is dropped with a note: projecting \code{m} raters is the
+\strong{subject} level projects, because projection moves only the divisor. On that
+same data the \strong{cluster} level is dropped with a note: projecting \code{m} raters is the
 averaged \code{ICC(c,k)} case, whose ragged divisor is an open modeling question
 (M9).
 }

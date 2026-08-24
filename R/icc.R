@@ -295,13 +295,13 @@
 #'   two-level SEM. With **random**
 #'   raters the multilevel fit covers complete/balanced data. It also covers
 #'   **incomplete** data (missing cells estimated by two-level full-information
-#'   ML) and **unbalanced** data (unequal cluster sizes). The interval is the
-#'   Monte-Carlo interval (the default). The parametric bootstrap, which
-#'   simulates two-level datasets from the fitted moments and refits per
-#'   resample, is available on balanced/complete data only. Incomplete or
-#'   unbalanced data is Monte-Carlo only, because resamples cannot reproduce a
-#'   missingness pattern and the bootstrap coverage is validated only on balanced
-#'   data. With **fixed** raters the
+#'   ML) and **unbalanced** data (unequal cluster sizes). For that random-rater
+#'   two-level fit the interval is the Monte-Carlo interval (the default). Its
+#'   parametric bootstrap, which simulates two-level datasets from the fitted
+#'   moments and refits per resample, is available on balanced/complete data
+#'   only. For that fit, incomplete or unbalanced data is Monte-Carlo only,
+#'   because resamples cannot reproduce a missingness pattern and the bootstrap
+#'   coverage is validated only on balanced data. With **fixed** raters the
 #'   between-level rater intercepts give the Case-3A finite-population
 #'   \eqn{\theta^2_r} at both levels, on complete, balanced data with equal
 #'   cluster sizes only. That path is Monte-Carlo only, because the fixed-rater

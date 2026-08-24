@@ -58,8 +58,8 @@
 #' projection. That is a sample-size question, not a reliability one. Nested
 #' designs project the subject level only. The conflated diagnostic
 #' (`level = "conflated"`) is not projected. On **incomplete** data the
-#' **subject** level projects, because projection moves only the divisor. The
-#' **cluster** level is dropped with a note: projecting `m` raters is the
+#' **subject** level projects, because projection moves only the divisor. On that
+#' same data the **cluster** level is dropped with a note: projecting `m` raters is the
 #' averaged `ICC(c,k)` case, whose ragged divisor is an open modeling question
 #' (M9).
 #'
