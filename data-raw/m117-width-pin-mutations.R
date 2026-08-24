@@ -480,7 +480,7 @@ prose_mutations <- list(
   r3_spelled_qualifier = function(l) {
     insert_after(
       l,
-      "of the larger grid, but how much narrower depends",
+      "of the larger grid. How much narrower depends",
       "That margin holds across four further subject levels."
     )
   },
@@ -593,7 +593,7 @@ prose_mutations <- list(
     # prose_scan.
     insert_after(
       l,
-      "of the larger grid, but how much narrower depends",
+      "of the larger grid. How much narrower depends",
       "It is narrower with 2 raters than with 5."
     )
   }

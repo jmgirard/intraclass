@@ -15,16 +15,16 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 library(intraclass)
 ```
 
-A point estimate on its own can mislead — with a handful of subjects the same ICC
+A point estimate on its own can mislead: with a handful of subjects the same ICC
 could be "poor" or "excellent" and you would not know it. So every `icc()` coefficient
 comes with an interval, never a bare number, and the `ci_method` argument selects how
 that interval is built. This article covers the Monte-Carlo default and the
-parametric bootstrap; the [four opt-in
+parametric bootstrap. It then covers the [four opt-in
 methods](#the-opt-in-boundary-robust-methods) for the near-boundary terrain the
-default struggles on — the transformed bootstrap-*t* (`"npbootstrap"`), the exact-F
+default struggles on: the transformed bootstrap-*t* (`"npbootstrap"`), the exact-F
 (`"searle"`) and Burch (`"burch"`) closed forms, and the modified profile likelihood
-(`"mpl"`); and the Bayesian [**credible**](glossary.html#credible-interval) interval
-that comes with the brms engine. (Terms are defined in the
+(`"mpl"`). Last is the Bayesian [**credible**](glossary.html#credible-interval)
+interval that comes with the brms engine. (Terms are defined in the
 [*Glossary*](glossary.html).)
 
 ## Monte-Carlo and the parametric bootstrap
@@ -37,9 +37,9 @@ A second method, a [**parametric
 bootstrap**](glossary.html#parametric-bootstrap) (`ci_method = "bootstrap"`), instead
 simulates response vectors from the
 fitted model, refits, and takes percentile quantiles of the resampled coefficients. It
-does not lean on the asymptotic-normal covariance approximation (the assumption that the
-estimates are normally distributed around the truth, which frays in small samples) — at
-the cost of a full refit per resample, so it is far slower.
+does not lean on the asymptotic-normal covariance approximation, the assumption that
+the estimates are normally distributed around the truth, which frays in small samples.
+That costs a full refit per resample, so it is far slower.
 
 ```{r ci-bootstrap, eval = requireNamespace("glmmTMB", quietly = TRUE)}
 mc <- tidy(icc(ratings, score, subject, rater, seed = 1))
@@ -57,17 +57,17 @@ data.frame(
 The point estimates are identical (same fit). The bootstrap's lower bounds run
 markedly lower, because this is a very small design (six subjects) and the
 bootstrap's lower tail is noisier than the covariance-based Monte-Carlo draw. Its
-upper bounds sit close to the Monte-Carlo ones — close enough that ICC(A,k)'s two
-upper bounds round alike above — but they are not identical, and they do not all
-fall on the same side. The two methods can diverge more where the asymptotics are strained
-— near the [zero-variance boundary](glossary.html#zero-variance-boundary), and
-for the multilevel designs (more [variance
-components](glossary.html#variance-component), often few clusters), where the
-bootstrap's cluster-level interval in
+upper bounds sit close to the Monte-Carlo ones, close enough that ICC(A,k)'s two
+upper bounds round alike above. But they are not identical, and they do not all
+fall on the same side. The two methods can diverge more where the asymptotics are
+strained: near the [zero-variance boundary](glossary.html#zero-variance-boundary), and
+for the multilevel designs, which carry more [variance
+components](glossary.html#variance-component) and often few clusters. In the
+multilevel case the bootstrap's cluster-level interval in
 particular carries more resampling noise. The bootstrap is available for every design
 the `"glmmTMB"` and `"lme4"` engines fit. The `"lavaan"` engine bootstraps complete
-data, and a multilevel lavaan fit needs balanced clusters and random raters besides;
-anywhere off those fences lavaan is Monte-Carlo only — resamples cannot reproduce a
+data, and a multilevel lavaan fit needs balanced clusters and random raters besides.
+Anywhere off those fences lavaan is Monte-Carlo only. Resamples cannot reproduce a
 missingness pattern, the two-level factory reads the raw rater component and is
 random-only, and the two-level bootstrap was validated on balanced clusters. Raise
 `boot_samples` (default `999`) for a smoother interval at proportionally more cost.
@@ -77,21 +77,21 @@ random-only, and the two-level bootstrap was validated on balanced clusters. Rai
 The boundary is not the default's only weak spot, and the other one is easier to
 miss because nothing about the output looks wrong. The Monte-Carlo draw assumes the
 fitted parameters are approximately normally distributed around the truth. That
-assumption is about the *estimates*, not the ratings — but it degrades when the
+assumption is about the *estimates*, not the ratings. But it degrades when the
 **subject effects** are strongly skewed or heavy-tailed, and then a nominal 95%
 interval covers considerably less often than 95% of the time.
 
 A one-way simulation study measured this across four subject-effect distributions.
-Where the default produced an interval at all, coverage fell to 0.6725 at its worst
-— chi-square(1) subject effects, a true ICC of 0.6, 50 subjects and 5 raters. Those
+Where the default produced an interval at all, coverage fell to 0.6725 at its worst:
+chi-square(1) subject effects, a true ICC of 0.6, 50 subjects and 5 raters. Those
 runs did not abort, warn, or widen, so the shortfall is invisible in the interval
 itself.
 
 Two patterns in that study are worth carrying away, and one tempting reading of it
 is wrong. At 5 raters per subject, coverage falls as the subject count rises, once
-the true ICC is moderate or high — the largest designs are the exposed ones, not the
+the true ICC is moderate or high. The largest designs are the exposed ones, not the
 smallest. And near-normal or uniform subject effects under-covered only in cells
-where many runs aborted; wherever the default almost always returned an interval,
+where many runs aborted. Wherever the default almost always returned an interval,
 those distributions were fine. The wrong reading is that fewer raters is safer: in
 every cell where both were measured, 2 raters covered worse than 5. What changes is
 that a larger share of the 2-rater runs abort outright, and an abort is a visible
@@ -101,25 +101,25 @@ The held-out battery agrees where the geometry matches: lognormal and Laplace
 subject effects covered 0.825 and 0.84 at that same 50-subject, 5-rater geometry,
 while their 20-subject, 3-rater cells came out near nominal.
 
-The natural reaction — switch to a closed form — does not help. In every cell where
+The natural reaction, switching to a closed form, does not help. In every cell where
 the default under-covered without also aborting often, `"searle"` and `"burch"`
 under-covered as well, usually by more: `"burch"`, the one this article used to
 recommend for heavy tails, bottoms out at 0.6655. The remaining methods were never
 run on that study, so this article recommends none of them in its place.
 
 What to do instead is ordinary statistical hygiene rather than a package setting.
-Look at the distribution of the subject means before trusting a narrow interval;
-report the variance components alongside the coefficient; and treat an interval on
+Look at the distribution of the subject means before trusting a narrow interval.
+Report the variance components alongside the coefficient. And treat an interval on
 visibly skewed data as optimistic about its own precision.
 
 ## The opt-in boundary-robust methods
 
 Near the [zero-variance boundary](glossary.html#zero-variance-boundary) the
-Monte-Carlo default can fail to produce an interval; when it aborts, its message
-names an alternative method — chosen by running the candidates on your own data,
-not by consulting a table — so in practice you rarely need to pick one from
+Monte-Carlo default can fail to produce an interval. When it aborts, its message
+names an alternative method, chosen by running the candidates on your own data
+rather than by consulting a table. So in practice you rarely need to pick one from
 scratch. This section is for when you do. Four opt-in methods serve exactly that
-terrain; each is fenced to a specific design and aborts with a classed error
+terrain. Each is fenced to a specific design and aborts with a classed error
 anywhere else.
 
 ### The transformed bootstrap-*t* (`ci_method = "npbootstrap"`)
@@ -127,26 +127,26 @@ anywhere else.
 The non-parametric [**transformed
 bootstrap-*t***](glossary.html#transformed-bootstrap-t) of Ukoumunne et al. (2003)
 serves the **one-way random design** (`model = "oneway"`), on balanced and
-unbalanced data alike — of the four opt-in methods it is the only one that
+unbalanced data alike. Of the four opt-in methods it is the only one that
 serves unbalanced one-way data. It resamples whole subjects with replacement rather than
 simulating from the fitted model, so it is the only opt-in method that takes a
-`seed` (and `boot_samples`); pin both for a reproducible interval. Any
-`conf_level` in `(0, 1)` is accepted. `unit = "average"` — the ICC(k) — is the
+`seed` (and `boot_samples`). Pin both for a reproducible interval. Any
+`conf_level` in `(0, 1)` is accepted. `unit = "average"`, the ICC(k), is the
 exact monotone Spearman-Brown image of the ICC(1) endpoints, so its coverage is
-inherited by construction, balanced or not; a numeric `unit` (a D-study
-projection) is restricted to balanced data. Reach for it for boundary robustness
-— an interval that exists where the Monte-Carlo default aborts — and for
+inherited by construction, balanced or not. A numeric `unit` (a D-study
+projection) is restricted to balanced data. Reach for it for boundary robustness,
+an interval that exists where the Monte-Carlo default aborts, and for
 robustness to non-normal subject effects. Its endpoints are deliberately left
 untruncated on the estimator's own support (Ukoumunne et al. 2003, §5.2), so a
-near-boundary lower limit can be negative — honest disclosure, not an error.
+near-boundary lower limit can be negative. That is honest disclosure, not an error.
 
 ### The classical closed forms (`ci_method = "searle"` and `"burch"`)
 
 Two deterministic classical intervals for the **balanced one-way random design**:
 closed forms with no resampling, so `mc_samples`, `boot_samples`, and `seed` do
 not apply and no `std.error` is reported. Any `conf_level` in `(0, 1)` is
-accepted, and both project ICC(k) — and a numeric `unit` — through the same
-Spearman-Brown image as `"npbootstrap"`. The [**exact-F
+accepted. Both project ICC(k) through the same Spearman-Brown image as
+`"npbootstrap"`, and a numeric `unit` with it. The [**exact-F
 interval**](glossary.html#exact-f-interval) (`"searle"`; Searle 1971, the McGraw &
 Wong 1996 Table 7 limits) is exact under normality and best-calibrated when the
 data are approximately normal. The [**Burch
@@ -157,10 +157,10 @@ some robustness to mild non-normality. It is not, however, a remedy for heavy
 tails: on strongly skewed subject effects it under-covers about as badly as the
 default (see [When the default under-covers](#when-the-default-under-covers)).
 
-**Which is the tighter interval?** Neither, reliably — and the margin between
+**Which is the tighter interval?** Neither, reliably, and the margin between
 them is not a fixed one. Over the larger grid's 64 cells, spanning four
 distribution families, `"burch"` is the *narrower* of the two in 59 of 64 cells
-of the larger grid, but how much narrower depends on where in the design you
+of the larger grid. How much narrower depends on where in the design you
 look. Below, the median width ratio is `"burch"`'s width over `"searle"`'s, so a
 value under 1 means `"burch"` is narrower and 1 means they are the same width.
 
@@ -177,41 +177,43 @@ value under 1 means `"burch"` is narrower and 1 means they are the same width.
 | 30 | 0.9646 | 15 of 16 |
 | 50 | 0.9769 | 13 of 16 |
 
-Two things to read off. In the true ICC, `"burch"`'s width advantage holds much
+Two things to read off. The first is the pattern along the true ICC.
+`"burch"`'s width advantage holds much
 the same up to a true ICC of 0.3 rather than shrinking as the true ICC rises
-(on the larger grid; the smaller grid's margin does shrink across its levels) —
-by level medians the largest margin is at a true ICC of 0.1, not at the bottom
-of the range, though cell by cell the bottom level carries the larger margin
-in 11 of 16 paired cells — and
-then collapses to near parity at a true ICC of 0.6, on the one grid reaching that
-value, where every cell favouring `"searle"` sits. In the subject count it
+(on the larger grid; the smaller grid's margin does shrink across its levels).
+On the larger grid, measured by level medians the largest margin is at a true ICC
+of 0.1, not at the bottom of the range. Cell by cell, though, `"burch"`'s width margin is the larger
+one at the bottom level in 11 of 16 paired cells. The advantage then
+collapses to near parity at a true ICC of 0.6, on the one grid reaching that
+value, where every cell favouring `"searle"` sits. The second is the pattern along
+the subject count. There `"burch"`'s width margin
 shrinks steadily as the subject count grows, measured at 5 raters, which is the
 cut the second table takes. That cut is at 5 raters because 10 subjects is the
 only subject count in either grid where the rater count varies, so an
 unstratified row there would be confounded with it. The smaller grid's 16 cells
 carry only the two lowest true-ICC values, so that sweep cannot show the first
-pattern; it shows the second in the same direction, `"burch"` running narrower by
+pattern. It shows the second in the same direction, `"burch"` running narrower by
 a median width ratio of 0.9017 at 10 subjects, 0.9611 at 30 subjects and 0.9775
 at 50 subjects.
 
 A pooled figure over both grids that vary only the subject effect would hide all of this, and it would invite a
 second misreading. The smaller grid's design points are a subset of the larger
-one's, so much of the gap between their pooled medians is which true-ICC values
-each grid covers rather than a disagreement between two bodies of evidence — but
+one's. So much of the gap between their pooled medians is which true-ICC values
+each grid covers, rather than a disagreement between two bodies of evidence. But
 only much of it. Restricting the larger grid to the smaller one's design points
-closes most of that gap and leaves a remainder, and the two are separate
+closes most of that gap and leaves a remainder. The two are separate
 simulations that mostly disagree at the design points they share, agreeing
 closely at only a couple of them. A pooled between-grid comparison is not a clean
 contrast in either direction, which is why nothing above is one.
 
 Both of the grids above draw the **subject effects** alone from the non-normal
 family and always draw the errors from a normal, and that is not an incidental
-detail. Burch's own expected-length comparison — which is
-against this very exact-F interval — is kurtosis-conditional: he finds his
+detail. Burch's own expected-length comparison is
+against this very exact-F interval, and it is kurtosis-conditional. He finds his
 interval shorter for light-tailed data but *wider* for symmetric heavy-tailed
 data, measuring with the subject effects and the errors alike drawn from the
 studied family. A third
-grid now measures that case here.
+grid now measures that residual case here.
 What `"burch"` does against `"searle"` depends on what the residual is
 drawn from, and the three grids now measure that:
 the two grids that vary only the subject effect put it narrower
@@ -220,13 +222,13 @@ the same family as the subject effect, puts it wider at every
 symmetric heavy-tailed family measured (a median width ratio of
 1.2963 at t(5) with 100 subjects) and narrower at every lighter-tailed one,
 the normal included. So the
-honest summary is that the ordering depends on the data — on what the residual is
-drawn from most of all — and you should not pick between
+honest summary is that the ordering depends on the data, on what the residual is
+drawn from most of all. You should not pick between
 them on width.
 
 Prefer `"searle"`: across every distribution family in that skew study it landed
 closer to nominal coverage in most cells, heavy-tailed ones included. What
-`"burch"` buys is dipping below the nominal level in fewer cells overall — a more
+`"burch"` buys is dipping below the nominal level in fewer cells overall, a more
 limited kind of steadiness than its kurtosis adjustment suggests. Their value over
 the default is a finite, well-calibrated interval at the near-zero-ICC boundary
 where the Monte-Carlo default aborts. One asymmetry
@@ -258,12 +260,12 @@ data.frame(
 )
 ```
 
-All four columns share the same point estimate — `ci_method` selects the
-interval, never the estimator. The visible difference is at the lower end: the
+All four columns share the same point estimate: `ci_method` selects the
+interval, never the estimator. The visible difference is at the lower end. The
 three opt-in methods' lower limits dip below zero, because their endpoints are
 left untruncated on the estimator's own support, while the Monte-Carlo interval
 stays inside the range. And the Burch adjustment is empirical, not a one-way
-widening — here it comes out *narrower* than the exact-F interval, because its
+widening. Here it comes out *narrower* than the exact-F interval, because its
 width tracks the tail weight these particular data actually show, which is the
 same direction the grids above measure.
 
@@ -271,22 +273,22 @@ same direction the grids above measure.
 
 The [**modified profile-likelihood
 interval**](glossary.html#modified-profile-likelihood) of Xiao & Liu (2013) is
-the two-way counterpart: it serves the **balanced, complete two-way random
+the two-way counterpart. It serves the **balanced, complete two-way random
 absolute-agreement** ICC(A,1), with ICC(A,k) and any numeric-`unit` projection
-its pole-safe Spearman-Brown image, and aborts on any other design, on
+its pole-safe Spearman-Brown image. It aborts on any other design, on
 [consistency](glossary.html#consistency) or fixed raters, and on unbalanced or
 incomplete data. It is a
-deterministic closed form — no resampling, no `seed`. Its calibration fixes two
+deterministic closed form: no resampling, no `seed`. Its calibration fixes two
 fences: `conf_level` must be 0.90, 0.95, or 0.99 (each level carries its own
 calibrated correction constant, never interpolated between levels), and the
-calibration grid spans 2–10 raters and 10–100 subjects. Like `"npbootstrap"`, it
-returns an interval at the near-zero-ICC boundary where the two-way Monte-Carlo
-default aborts; it is deliberately conservative — it over-covers, and is wider
-than the Monte-Carlo interval at interior cells — which is why it is an opt-in
-and not the default. Two reporting caveats from `?icc`: the two-sided interval
+calibration grid spans 2–10 raters and 10–100 subjects. Unlike the two-way Monte-Carlo default, it does
+not abort at the near-zero-ICC boundary: like `"npbootstrap"`, it returns an
+interval there. It is deliberately conservative: it over-covers, is wider
+than the Monte-Carlo interval at interior cells, and so it is an opt-in
+and not the default. Two reporting caveats come from `?icc`. The two-sided interval
 is not equal-tailed, so a limit must not be read as a one-sided bound at half
-the complementary level; and at `conf_level = 0.99` with two raters the interval
-can be near-vacuous.
+the complementary level, and separately, at `conf_level = 0.99` with two raters
+the interval can be near-vacuous.
 
 The shipped `ratings` data are too small for the calibration grid (six
 subjects), so the demonstration simulates a balanced two-way design inside it:
@@ -314,23 +316,23 @@ data.frame(
 )
 ```
 
-The two point estimates agree (same REML fit); the `"mpl"` interval is the wider
-of the pair at this comfortably interior cell — the conservatism described
+The two point estimates agree, from the same REML fit. The `"mpl"` interval is the
+wider of the pair at this comfortably interior cell, the conservatism described
 above, visible on ordinary data.
 
 ## Bayesian credible intervals (`ci_method = "posterior"`)
 
 When the fit is Bayesian (`engine = "brms"`, see [*Estimation
 engines*](engines.html#a-bayesian-engine-brms)), the interval is neither a Monte-Carlo
-nor a bootstrap *confidence* interval but a **credible** interval read directly off the
-posterior draws of the ICC — a [different kind of
+nor a bootstrap *confidence* interval. It is a **credible** interval read directly off
+the posterior draws of the ICC, a [different kind of
 statement](glossary.html#confidence-interval-vs--credible-interval) about where the ICC
-lies. `ci_method = "posterior"` is automatic — and required — for
+lies. `ci_method = "posterior"` is automatic, and required, for
 that engine.
 
-As in the engines article, the brms chunks below are shown with pre-computed output
-(fitting a Stan model needs a toolchain not available when this site is built), so they
-are not evaluated at knit time.
+As in the engines article, the brms chunks below are shown with pre-computed output, so
+they are not evaluated at knit time. Fitting a Stan model needs a toolchain not
+available when this site is built.
 
 ```{r posterior, eval = FALSE}
 icc(ratings, score, subject, rater, engine = "brms", type = "agreement", seed = 1)
@@ -349,18 +351,18 @@ icc(ratings, score, subject, rater, engine = "brms", type = "agreement", seed = 
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
 ```
 
-The point estimate is the [posterior mode (MAP)](glossary.html#posterior-mode-map) and
+The point estimate is the [posterior mode (MAP)](glossary.html#posterior-mode-map), and
 the default interval is a
-**percentile** credible interval — the lower `2.5%` and upper `97.5%` quantiles of the
+**percentile** credible interval: the lower `2.5%` and upper `97.5%` quantiles of the
 ICC draws.
-Percentile is the default because it is invariant to how the ICC is parameterized and
-degrades gracefully as a variance component approaches zero (ten Hove et al. 2020, §4.2,
-find it nominal at more than two raters).
+Percentile is the default because it is invariant to how the ICC is parameterized, and
+because it degrades gracefully as a variance component approaches zero
+(ten Hove et al. 2020, §4.2). They find it nominal at more than two raters.
 
 ### Highest-posterior-density intervals
 
-For comparison you can ask for a **highest-posterior-density interval** (HPDI) — the
-*narrowest* interval containing 95% of the posterior mass — with
+For comparison you can ask for a **highest-posterior-density interval** (HPDI), the
+*narrowest* interval containing 95% of the posterior mass. Request it with
 `posterior_summary = "hpdi"`:
 
 ```{r posterior-hpdi, eval = FALSE}
@@ -382,7 +384,7 @@ icc(ratings, score, subject, rater, engine = "brms",
 ```
 
 The header now flags `(HPDI)`, and on the same draws the interval is no wider than the
-percentile one — that is what "narrowest" means. Here `ICC(A,1)` is `[0.04, 0.60]`
-against the percentile `[0.07, 0.65]`; the point estimate (the MAP) is unchanged.
+percentile one. That is what "narrowest" means. Here `ICC(A,1)` is `[0.04, 0.60]`
+against the percentile `[0.07, 0.65]`, and the point estimate (the MAP) is unchanged.
 Percentile stays the default, because HPDI is not transform-invariant and can behave
-less well at the variance boundary — it is offered for comparison, not as an upgrade.
+less well at the variance boundary. It is offered for comparison, not as an upgrade.
