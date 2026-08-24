@@ -1,6 +1,6 @@
 # M136: Roxygen and README prose pass
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** M134
 - **Driving RR:** —
@@ -82,9 +82,9 @@ condition text with their own guard
       words.
 - [x] AC4 The rendered `man/icc.Rd` `design` argument entry names both
       occasions listed in Scope, in the article's terms.
-- [ ] AC5 `Rscript -e 'devtools::build_readme()'` followed by
+- [x] AC5 `Rscript -e 'devtools::build_readme()'` followed by
       `git diff --exit-code README.md` is clean.
-- [ ] AC6 `devtools::test()` clean; `devtools::check()` raw `Status:` line 0
+- [x] AC6 `devtools::test()` clean; `devtools::check()` raw `Status:` line 0
       errors / 0 warnings (NOTEs justified); `devtools::document()` no diff;
       `python3 data-raw/check-record-claims.py` exits 0 in live mode.
 
@@ -118,6 +118,8 @@ condition text with their own guard
       block; drop the stray `Rplots.pdf` if an example run leaves one (M131).
 
 ## Work log
+
+- 2026-08-24: review returned to in-progress (defect return 1). AC2 fails its "in the same commit as the edit" clause: `e849606` carries the `R/icc.R` roxygen rewrite and `check-mpl-doc-claims.py` fails there with 32 failures, the ledger re-key landing only in `900b2d5`. AC3 fails its claim-domain rule at `README.Rmd:41-42`: "subject vs. cluster level" became "at the subject level and the cluster level", widening the claim across both rater layouts where a nested design defines the subject level only. AC1, AC4, AC5, AC6 and the whole consistency gate pass.
 
 - 2026-08-24: review opened; draft PR #145. AC1 and AC4 verified against fresh evidence; AC2 fails its same-commit clause.
 
@@ -225,16 +227,47 @@ across clusters. The second is when missing cells leave the pattern genuinely
 ambiguous between a crossed and a nested design." — both Scope occasions, in the
 terms `vignettes/multilevel-designs.Rmd:110-117` uses.
 
-**AC5 — pending.**
+**AC5 — pass.** `Rscript -e 'devtools::build_readme()'` then
+`git diff --exit-code README.md` exits 0: README.md is in sync with README.Rmd.
 
-**AC6 — partial.** `devtools::document()` produces no diff (`git status --porcelain`
-after the run names only this milestone file). `python3 data-raw/check-record-claims.py`
-exits 0 (6 registered claims re-derived, 0 failures). `devtools::test()` and
-`devtools::check()` still running.
+**AC6 — pass.** `devtools::test()` `[ FAIL 0 | WARN 3 | SKIP 2 | PASS 8827 ]`; the
+three warnings are lavaan's "some estimated lv variances are negative" surfaced
+through `cli_warn()` at `R/engine-lavaan.R:415`, engine behaviour the suite exercises
+deliberately, not new. `devtools::check()` raw `Status: 1 NOTE`, so 0 errors and 0
+warnings. The NOTE is the `spelling.Rout` diff that fires only under `NOT_CRAN`
+(M127/M128): `spelling::spell_check_package()` flags 31 words on this branch and 31
+on `origin/main`, and the two sorted word lists are identical, so the branch adds
+none. `devtools::document()` produces no diff (`git status --porcelain` after the run
+names only this milestone file). `python3 data-raw/check-record-claims.py` exits 0
+(6 registered claims re-derived, 0 failures).
 
 **Consistency gate.** `cairn_validate.py` exit 0 — 16 PASS, 7 advisories all OK; the
 `release window` advisory did not fire. No `DESIGN.md` principle changed, so
 `cairn_impact.py` is skipped. Profile `r-package` toolchain slot: `document()` no
-diff (recorded above); NEWS.md carries two Documentation entries for this pass, with
-no milestone numbers in the user-facing text; `build_readme()`, `check_pkgdown()` and
-`devtools::check()` pending.
+diff (recorded above); generated `NAMESPACE`/`man/` therefore not hand-edited;
+README.md in sync (AC5); `pkgdown::check_pkgdown()` reports "No problems found";
+NEWS.md carries two Documentation entries for this pass, with no milestone numbers in
+the user-facing text; no new top-level files, and `devtools::check()` raises no
+`.Rbuildignore` NOTE. The gate's toolchain half passes; the milestone is returned on
+AC2 and AC3, not on the gate.
+
+**Outcome: returned to `in-progress`.** Two criteria fail against fresh evidence —
+AC2's same-commit clause and AC3's claim-domain rule. Both are defect returns
+(neither repair widens an enumeration, so the M139 widening test does not apply).
+This is the first defect return on this milestone; the 2026-08-24 amendment return
+runs on its own track. The step-5 review fan-out was not spawned: the branch has to
+change to clear AC2, so a diff review now would be reviewing a diff that will be
+recommitted.
+
+**What has to happen before re-review:**
+
+1. Make the ledger re-key travel with the roxygen edit it re-keys, so no commit on
+   the branch leaves `check-mpl-doc-claims.py` red. Today only `e849606` is red.
+   `e849606` also carries the T1 `R/icc.R` rewrite under a message naming only the
+   criteria amendment, so separating the amendment from the rewrite and folding the
+   ledger re-key into the rewrite commit fixes both the criterion and the message.
+2. Repair the `README.Rmd:41-42` widening — restore the contrast the removed text
+   drew between the subject and cluster levels, rather than conjoining them across
+   both rater layouts.
+3. Triage the six lower-ranked AC3 candidates above, repairing or rejecting each
+   with a reason.
