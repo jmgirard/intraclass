@@ -43,14 +43,15 @@ Defaults to \code{1:(2 * n_raters)}, a curve from a single rater to twice the
 observed count. Mutually exclusive with \code{n_o}.}
 
 \item{n_o}{Numeric vector of occasion (within-cell replicate) counts to project to
-(each \eqn{\ge 1}), holding raters at the observed count -- a D-study on the
-\strong{occasion} facet of a within-cell replicate fit. Mutually exclusive with \code{m};
-supplying both aborts. \code{NULL} (the default) projects the rater count \code{m} instead.}
+(each \eqn{\ge 1}), holding raters at the observed count. This is a D-study
+on the \strong{occasion} facet of a within-cell replicate fit. Mutually
+exclusive with \code{m}, and supplying both aborts. \code{NULL} (the default)
+projects the rater count \code{m} instead.}
 
 \item{conf_level, mc_samples, seed}{Interval settings. Each defaults to the
-value stored on \code{x} (so a seeded fit yields a reproducible projection);
-override to change the confidence level, the number of Monte-Carlo draws, or
-the seed.}
+value stored on \code{x}, so a seeded fit yields a reproducible projection.
+Override any of them to change the confidence level, the number of
+Monte-Carlo draws, or the seed.}
 }
 \value{
 \code{d_study()} returns an \code{icc_dstudy} object: a tibble with one row per
@@ -58,30 +59,30 @@ projected point and columns \code{m}, \code{index} (e.g. \code{"ICC(A,3)"}), \co
 \code{estimate}, \code{std.error}, \code{conf.low}, and \code{conf.high}, carrying the design and
 interval settings as attributes. If the fitted \code{icc} reports both error
 definitions (the default), \code{d_study()} projects \strong{one reliability curve per
-definition} and \code{tidy()} surfaces a \code{type} column to distinguish them; a
+definition} and \code{tidy()} surfaces a \code{type} column to distinguish them. A
 single-type fit projects a single curve. A multilevel projection adds a
 \code{level} column (one curve per level), and a replicate projection an
 \code{occasions} column.
 
 The methods documented on this page return:
 \itemize{
-\item \code{tidy.icc_dstudy()}: a tibble with one row per projected point carrying
-the columns \code{m}, \code{index}, \code{estimate}, \code{std.error}, \code{conf.low},
-\code{conf.high}, \code{conf.level}, and \code{method}, plus a \code{type} column when both
-error definitions are projected, a \code{level} column for a multilevel
+\item \code{tidy.icc_dstudy()}: a tibble with one row per projected point. Its
+columns are \code{m}, \code{index}, \code{estimate}, \code{std.error}, \code{conf.low},
+\code{conf.high}, \code{conf.level}, and \code{method}. It gains a \code{type} column when
+both error definitions are projected, a \code{level} column for a multilevel
 projection, and an \code{occasions} column for a replicate projection. The
 conditional columns are inserted after \code{index} (\code{type}) and after \code{m}
 (\code{level}, \code{occasions}), so the list above is not a column order.
-\item \code{glance.icc_dstudy()}: a one-row tibble of projection-level summaries --
-the distinct projected rater counts \code{m} and their range (held at the
-observed rater count when the sweep is over occasions, so this is not a
-row count), the error definition(s), the rater treatment, the observed
-rater count, and the interval settings.
+\item \code{glance.icc_dstudy()}: a one-row tibble of projection-level summaries. It
+carries the distinct projected rater counts \code{m} and their range, the
+error definition(s), the rater treatment, the observed rater count, and
+the interval settings. The count and range are held at the observed rater
+count when the sweep is over occasions, so they are not a row count.
 \item \code{format.icc_dstudy()}: a character vector holding the printed projection
 table, one line per element.
 \item \code{print.icc_dstudy()}: the \code{icc_dstudy} object invisibly, having emitted
 that table.
-\item \code{autoplot.icc_dstudy()}: a \code{ggplot} object -- the reliability curve,
+\item \code{autoplot.icc_dstudy()}: a \code{ggplot} object holding the reliability curve,
 faceted by level for a multilevel projection.
 \item \code{plot.icc_dstudy()}: the \code{icc_dstudy} object invisibly, having drawn that
 curve.
@@ -94,48 +95,52 @@ curve.
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 
 Projects the reliability of a fitted \code{\link[=icc]{icc()}} to the mean of an arbitrary
-number of raters \code{m} -- a generalizability-theory \strong{decision (D-) study},
-answering "how reliable would the mean of \code{m} raters be?" and, read as a
-curve, "how many raters do I need?". The point estimate and its boundary-aware
-interval reuse the fit stored on \code{x}; no model is refit. The band follows the
-fit's \code{ci_method}: a Monte-Carlo fit reprojects one draw from the parameter
-covariance across every \code{m}, while a \strong{bootstrap} fit reprojects its stored
-resamples (so at \code{m} = the observed rater count the band matches the fitted
-\verb{ICC(*,k)} interval exactly).
+number of raters \code{m}. This is a generalizability-theory \strong{decision (D-)
+study}, answering "how reliable would the mean of \code{m} raters be?" and, read
+as a curve, "how many raters do I need?". The point estimate and its
+boundary-aware interval reuse the fit stored on \code{x}, and no model is refit.
+The
+band follows the fit's \code{ci_method}. A Monte-Carlo fit reprojects one draw
+from the parameter covariance across every \code{m}. A \strong{bootstrap} fit
+reprojects its stored resamples, so at \code{m} = the observed rater count the
+band matches the fitted \verb{ICC(*,k)} interval exactly.
 }
 \section{Projection is extrapolation}{
 
-Projecting to an \code{m} you did not run is an \strong{extrapolation}, and its
-trustworthiness depends on how well the variance components -- especially the
-rater variance \eqn{\sigma^2_r}, estimated from only as many raters as you
-observed -- are pinned down. With few raters that estimate is noisy, so the
-projected interval is honestly wide; the Monte-Carlo interval widens
-automatically (it recomputes \eqn{\Phi(m)} on every draw) rather than
+Projecting to an \code{m} you did not run is an \strong{extrapolation}. Its
+trustworthiness depends on how well the variance components are pinned down,
+especially the rater variance \eqn{\sigma^2_r}, which is estimated from only
+as many raters as you observed. With few raters that estimate is noisy, so
+the projected interval is honestly wide. The Monte-Carlo interval widens
+automatically, recomputing \eqn{\Phi(m)} on every draw rather than
 pretending a single plugged-in value. \code{m} is the number of raters and is
 normally an integer, though non-integer values are permitted.
 
 Projection is defined for random raters (both agreement and consistency), for
 fixed-rater \strong{consistency}, and for the \strong{one-way} model (a Spearman-Brown
 projection of \code{ICC(1)}). It is \strong{not} defined for fixed-rater absolute
-agreement: there the rater term is the finite-population variance of exactly the
-raters you observed, so there is no "average of \code{m} freshly sampled raters" to
-project to, and \code{d_study()} aborts (use \code{raters = "random"}).
+agreement. There the rater term is the finite-population variance of exactly
+the raters you observed, so there is no "average of \code{m} freshly sampled
+raters" to project to. \code{d_study()} aborts in that case (use
+\code{raters = "random"}).
 }
 
 \section{Multilevel projections}{
 
-For a multilevel fit (a \code{cluster} column), \code{d_study()} projects the rater count
-\code{m} for each correctly-partitioned level on the object — the \strong{subject} and/or
-\strong{cluster} level — returning one reliability curve per level (the result gains
-a \code{level} column, and \code{autoplot()} facets by it). This is the paper-sanctioned
-rater projection (ten Hove et al. 2022): \code{m} is the number of raters per cluster,
-and the cluster-level coefficient does \strong{not} average over subjects, so there is
-no "subjects per cluster" projection — that is a sample-size question, not a
-reliability one. Nested designs project the subject level only. The conflated
-diagnostic (\code{level = "conflated"}) is not projected. On \strong{incomplete} data the
-\strong{subject} level projects (projection moves only the divisor); the \strong{cluster}
-level is dropped with a note, because projecting \code{m} raters is the averaged
-\code{ICC(c,k)} case whose ragged divisor is an open modeling question (M9).
+For a multilevel fit (a \code{cluster} column), \code{d_study()} projects the rater
+count \code{m} for each correctly-partitioned level on the object, meaning the
+\strong{subject} and/or \strong{cluster} level. It returns one reliability curve per
+level, and the result gains a \code{level} column that \code{autoplot()} facets by.
+This is the paper-sanctioned rater projection (ten Hove et al. 2022). Here
+\code{m} is the number of raters per cluster, and the cluster-level coefficient
+does \strong{not} average over subjects, so there is no "subjects per cluster"
+projection. That is a sample-size question, not a reliability one. Nested
+designs project the subject level only. The conflated diagnostic
+(\code{level = "conflated"}) is not projected. On \strong{incomplete} data the
+\strong{subject} level projects, because projection moves only the divisor. The
+\strong{cluster} level is dropped with a note: projecting \code{m} raters is the
+averaged \code{ICC(c,k)} case, whose ragged divisor is an open modeling question
+(M9).
 }
 
 \section{Within-cell replicate fits}{
@@ -151,26 +156,27 @@ occasion setting on the fit (\code{"single"} and/or \code{"average"}), so at \co
 observed rater count each curve matches the fitted \verb{ICC(*,k)}.
 \item the \strong{occasion count \code{n_o}} (supply the \code{n_o} argument), holding raters at the
 observed count: pure error divides by \code{m * n_o} while the rater and interaction
-terms are unchanged. Because occasion averaging rescales \strong{only pure error}, this
-curve is well-posed for random \strong{and} fixed raters -- including fixed absolute
-agreement, which the rater projection refuses (occasions are a random facet
-however the raters are treated). At \code{n_o} = the fitted occasion count it matches
-the fitted \verb{ICC(*,k)}.
+terms are unchanged. Because occasion averaging rescales \strong{only pure
+error}, this curve is well-posed for random \strong{and} fixed raters. That
+includes fixed absolute agreement, which the rater projection refuses,
+since occasions are a random facet however the raters are treated. At
+\code{n_o} = the fitted occasion count it matches the fitted \verb{ICC(*,k)}.
 }
 
 \strong{The occasion curve has a finite ceiling.} As \code{n_o} grows it approaches
-\verb{sigma^2_s / (sigma^2_s + (sigma^2_r + sigma^2_sr) / m)}, \strong{not} 1 -- averaging
-more occasions washes out only pure measurement error, never the rater or
-subject-by-rater variance. Read it as "how much does re-rating help?", which
+\verb{sigma^2_s / (sigma^2_s + (sigma^2_r + sigma^2_sr) / m)}, \strong{not} 1.
+Averaging more occasions washes out only pure measurement error, never the
+rater or subject-by-rater variance. Read it as "how much does re-rating help?", which
 plateaus, unlike adding raters.
 
-For a multilevel replicate fit (crossed Design 1 or nested Design 2), a \strong{rater}
-projection moves the subject level across occasion settings and the cluster level
-single-occasion, while an \strong{occasion} projection moves the subject level across
-\code{n_o} and returns the cluster level as a \strong{flat} curve: the cluster-level error set
-(\verb{\{rater, cluster:rater\}}) has no pure-error term, so averaging occasions cannot
-change it (\code{d_study()} notes this). \strong{Ragged} replicate fits are refused for either
-axis (the occasion-averaged ragged divisor is an open modeling question).
+For a multilevel replicate fit (crossed Design 1 or nested Design 2), a
+\strong{rater} projection moves the subject level across occasion settings and the
+cluster level single-occasion. An \strong{occasion} projection moves the subject
+level across \code{n_o} and returns the cluster level as a \strong{flat} curve. The
+cluster-level error set (\verb{\{rater, cluster:rater\}}) has no pure-error term, so
+averaging occasions cannot change it, and \code{d_study()} notes this. \strong{Ragged}
+replicate fits are refused for either axis (the occasion-averaged ragged
+divisor is an open modeling question).
 }
 
 \examples{

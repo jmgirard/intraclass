@@ -25,14 +25,14 @@ choose_icc(
 \code{"twoway"}. Under \code{"oneway"} the \code{type} and \code{raters} choices do not exist
 (there is no rater term), and supplying them is an error.}
 
-\item{type}{\code{"agreement"} (the value itself must match; systematic rater
-offsets count as error) or \code{"consistency"} (only rank order matters; a
+\item{type}{\code{"agreement"} (the value itself must match, so systematic rater
+offsets count as error) or \code{"consistency"} (only rank order matters, so a
 constant per-rater offset is forgiven). Required for a two-way design.}
 
 \item{unit}{\code{"single"} (you will act on one rater's score), \code{"average"} (the
 mean of your raters), or \code{"both"}. Required.}
 
-\item{raters}{\code{"random"} (a sample you generalize beyond -- the recommended
+\item{raters}{\code{"random"} (a sample you generalize beyond, and the recommended
 default for interrater reliability) or \code{"fixed"} (exactly these judges, no
 generalization). Required for a two-way design.}
 
@@ -68,17 +68,17 @@ exact \code{\link[=icc]{icc()}} call that computes them. It does \strong{not} fi
 \code{data} argument. Copy the emitted call and run it on your data.
 }
 \details{
-Supply the decisions as arguments to get advice programmatically; call
-\code{choose_icc()} with the relevant answers omitted in an interactive session to
+Supply the decisions as arguments to get advice programmatically. In an
+interactive session, call \code{choose_icc()} with the relevant answers omitted to
 be asked the outstanding questions one at a time.
 
-The two structural facts about your design -- whether the raters are crossed
-(\code{model}) and whether subjects are nested in clusters (\code{multilevel}) -- default
-to the common case (a crossed, non-multilevel two-way design), matching
-\code{\link[=icc]{icc()}}. The choices that actually select the coefficient (\code{type}, \code{unit},
-\code{raters}, and \code{level} when multilevel) have no silent default: in a
+Two structural facts about your design default to the common case, a crossed,
+non-multilevel two-way design, matching \code{\link[=icc]{icc()}}. They are whether the raters
+are crossed (\code{model}) and whether subjects are nested in clusters
+(\code{multilevel}). The choices that actually select the coefficient have no
+silent default: \code{type}, \code{unit}, \code{raters}, and \code{level} when multilevel. In a
 non-interactive session, leaving one unanswered is an error naming the
-unanswered decision (rather than quietly picking one for you).
+unanswered decision, rather than quietly picking one for you.
 }
 \examples{
 # Two-way absolute agreement, single rater, random raters (Shrout & Fleiss
