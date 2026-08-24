@@ -18,15 +18,15 @@ The comparison packages are `psych` (Revelle’s
 used ANOVA ICC in R), `irr`
 ([`irr::icc`](https://rdrr.io/pkg/irr/man/icc.html), a classical
 inter-rater-reliability toolkit), and `irrICC` (Gwet’s model-based
-ICCs). All three are optional — the code chunks below only run when the
+ICCs). All three are optional: the code chunks below only run when the
 package is installed.
 
 ## Does it agree? (validation)
 
-On a **balanced** design — every subject rated by every rater — the
-whole ICC family is defined for all of these tools, so we can line them
-up coefficient by coefficient. The `ratings` dataset is six subjects
-each scored by the same four raters.
+On a **balanced** design, one where every subject is rated by every
+rater, the whole ICC family is defined for all of these tools. So we can
+line them up coefficient by coefficient. The `ratings` dataset is six
+subjects each scored by the same four raters.
 
 `intraclass` estimates the coefficients from [variance
 components](https://jmgirard.github.io/intraclass/articles/glossary.html#variance-component)
@@ -87,16 +87,17 @@ max_gap <- max(abs(comparison$intraclass - comparison$psych),
                abs(comparison$intraclass - comparison$irr))
 ```
 
-Every coefficient matches to five decimal places — the largest
+Every coefficient matches to five decimal places. The largest
 disagreement anywhere in the table is 7.2e-06. That residual is not
-error in either tool; it is the small-sample gap between a REML fit and
+error in either tool. It is the small-sample gap between a REML fit and
 ANOVA mean squares, which vanishes as the sample grows. **On the designs
-classical tools handle, you lose nothing by using `intraclass`** — the
-`psych` agreement is in fact checked on every test run of this package.
+classical tools handle, you lose nothing by using `intraclass`**, and
+the `psych` agreement is in fact checked on every test run of this
+package.
 
 A model-based tool from a different lineage agrees too. `irrICC`
 implements Gwet’s ICCs, estimated by a moment method rather than either
-REML or ANOVA; its two-way random agreement coefficient (`icc2r`)
+REML or ANOVA. Its two-way random agreement coefficient (`icc2r`)
 reproduces `intraclass`’s `ICC(A,1)`:
 
 ``` r
@@ -128,7 +129,7 @@ rating data are rarely so tidy, and that is where the packages diverge.
 ### Incomplete and unbalanced data
 
 The `ratings_incomplete` dataset is the same study with four ratings
-missing — in particular the second rater scored only two of the six
+missing. In particular, the second rater scored only two of the six
 subjects:
 
 ``` r
@@ -184,66 +185,66 @@ c(estimate = fit_inc$estimates$estimate[1],
 #>     0.5205561     6.0000000    20.0000000     3.2727273
 ```
 
-All six subjects and all twenty observed ratings contribute; nothing is
-thrown away. (`irrICC` can also fit incomplete data with its own model —
-see the capability matrix below — but the mean-squares tools cannot.)
+All six subjects and all twenty observed ratings contribute, and nothing
+is thrown away. `irrICC` can also fit incomplete data with its own
+model, as the capability matrix below shows, but the mean-squares tools
+cannot.
 
 ### The bigger picture
 
 Agreement on balanced data and graceful handling of missing data are two
 entries in a wider gap. The table below summarizes what each package
-computes; it is a map of intent, not a scorecard — each tool is
-excellent at what it was designed for.
+computes. It is a map of intent, not a scorecard: each tool is excellent
+at what it was designed for.
 
 | Capability | `psych` | `irr` | `irrICC` | `intraclass` |
 |----|:--:|:--:|:--:|:--:|
 | Balanced ANOVA ICC family | ✅ | ✅ | ✅ | ✅ |
-| Incomplete / unbalanced data | — | — | ✅ | ✅ |
-| Multilevel (subject **and** cluster) IRR | — | — | — | ✅ |
-| Boundary-aware interval | — | — | partial | ✅ |
-| [Fixed vs. random](https://jmgirard.github.io/intraclass/articles/glossary.html#fixed-vs--random-raters) rater framing | partial | partial | — | ✅ |
-| Guidance on *which* ICC to report | — | — | — | ✅ |
+| Incomplete / unbalanced data | no | no | ✅ | ✅ |
+| Multilevel (subject **and** cluster) IRR | no | no | no | ✅ |
+| Boundary-aware interval | no | no | partial | ✅ |
+| [Fixed vs. random](https://jmgirard.github.io/intraclass/articles/glossary.html#fixed-vs--random-raters) rater framing | partial | partial | no | ✅ |
+| Guidance on *which* ICC to report | no | no | no | ✅ |
 
 Two rows deserve a word. Model-based extractors such as
 `performance::icc` return **variance components** or a
-variance-partition coefficient, which is the raw material of an ICC but
+variance-partition coefficient. That is the raw material of an ICC, but
 not the inter-rater-reliability coefficient family itself, nor the
 error-variance framing that distinguishes agreement from consistency.
-(`intraclass`’s own generalizability coefficients were validated against
-`gtheory` — a generalizability-theory package archived from CRAN in
-March 2025, and not a dependency here — agreeing to within 0.001; those
-committed reference values live in the package’s reference notes.) And
-an **interval** that is
+`intraclass`’s own generalizability coefficients were validated against
+`gtheory`, agreeing to within 0.001. `gtheory` is a
+generalizability-theory package archived from CRAN in March 2025, and is
+not a dependency here. Those committed reference values live in the
+package’s reference notes. And an **interval** that is
 [boundary-aware](https://jmgirard.github.io/intraclass/articles/glossary.html#monte-carlo-interval)
-— that behaves correctly when a variance component is estimated at its
-[zero
+is something none of the classical tools provide. Such an interval
+behaves correctly when a variance component is estimated at its [zero
 boundary](https://jmgirard.github.io/intraclass/articles/glossary.html#zero-variance-boundary),
-where a normal-approximation interval silently misbehaves — is something
-none of the classical tools provide.
+where a normal-approximation interval silently misbehaves.
 
 `intraclass` earns its extra machinery on exactly these cases. For the
 details of each, see the companion articles:
 
 - [*Choosing an
-  ICC*](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.md)
-  — the selection framework the last matrix row points to.
+  ICC*](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.md):
+  the selection framework the last matrix row points to.
 - [*Multilevel
-  designs*](https://jmgirard.github.io/intraclass/articles/multilevel-designs.md)
-  — subject- and cluster-level reliability when raters are nested.
+  designs*](https://jmgirard.github.io/intraclass/articles/multilevel-designs.md):
+  subject- and cluster-level reliability when raters are nested.
 - [*Interval
-  methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.md)
-  — the boundary-aware Monte-Carlo and bootstrap intervals.
+  methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.md):
+  the boundary-aware Monte-Carlo and bootstrap intervals.
 - [*Estimation
-  engines*](https://jmgirard.github.io/intraclass/articles/engines.md) —
+  engines*](https://jmgirard.github.io/intraclass/articles/engines.md):
   the mixed-model, SEM, and Bayesian backends behind these numbers.
 
 ## When to use which
 
 If your design is **balanced and complete** and you only need the
 classic McGraw–Wong coefficients, `psych` and `irr` are mature,
-familiar, and — as the table above shows — numerically identical to
+familiar, and, as the table above shows, numerically identical to
 `intraclass`. Reach for `intraclass` when your data are **incomplete or
-unbalanced**, when raters are **nested in clusters**, when you need an
-**interval you can trust near the boundary**, or when you want the
-package to help you **choose and justify** the coefficient in the first
-place.
+unbalanced**, or when raters are **nested in clusters**. Reach for it
+too when you need an **interval you can trust near the boundary**, or
+when you want the package to help you **choose and justify** the
+coefficient in the first place.

@@ -13,15 +13,15 @@ reason to switch. An
 is the computational backend
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) uses
 to estimate the [variance
-components](https://jmgirard.github.io/intraclass/articles/glossary.html#variance-component)
-— chosen with the `engine` argument. Some engine choices are purely
-computational — the same estimator, a different solver — while others
-compute a genuinely different (though asymptotically equivalent:
-converging to the same answer as the sample grows) estimator, or move to
-a fully Bayesian fit. This article covers the mixed-model engines
-(glmmTMB, lme4), the structural-equation engine (lavaan), and the
-Bayesian engine (brms), and when the distinction matters. Any unfamiliar
-term is defined in the
+components](https://jmgirard.github.io/intraclass/articles/glossary.html#variance-component),
+chosen with the `engine` argument. Some engine choices are purely
+computational: the same estimator, a different solver. Others compute a
+genuinely different estimator, one that is asymptotically equivalent (it
+converges to the same answer as the sample grows), or move to a fully
+Bayesian fit. This article covers the mixed-model engines (glmmTMB,
+lme4), the structural-equation engine (lavaan), and the Bayesian engine
+(brms), and when the distinction matters. Any unfamiliar term is defined
+in the
 [*Glossary*](https://jmgirard.github.io/intraclass/articles/glossary.md).
 
 ## The mixed-model engines: glmmTMB and lme4
@@ -30,18 +30,18 @@ By default
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) fits
 the variance components with **glmmTMB**. You can instead request
 **lme4** with `engine = "lme4"` for the random two-way design. The lme4
-package itself arrives with the installation — glmmTMB names lme4 in its
-own `Imports:` — but the engine needs one piece more: **merDeriv**,
-which supplies the parameter covariance the default Monte-Carlo interval
-is built from, and which every lme4 fit checks for on entry whatever
-interval method you ask for. merDeriv sits in `Suggests:` and is fetched
-only on request, so a plain install leaves you with the lme4 package but
-not the lme4 engine. Both engines are
+package itself arrives with the installation, because glmmTMB names lme4
+in its own `Imports:`. But the engine needs one piece more:
+**merDeriv**. It supplies the parameter covariance the default
+Monte-Carlo interval is built from, and every lme4 fit checks for it on
+entry whatever interval method you ask for. merDeriv sits in `Suggests:`
+and is fetched only on request, so a plain install leaves you with the
+lme4 package but not the lme4 engine. Both engines are
 [REML](https://jmgirard.github.io/intraclass/articles/glossary.html#reml)
-mixed-model fits of the same model (REML — restricted maximum likelihood
-— is the standard way to estimate variance components), so on a given
-dataset they return the same coefficients to numerical tolerance — the
-choice is about the fitting backend, not the estimand.
+mixed-model fits of the same model. (REML, restricted maximum
+likelihood, is the standard way to estimate variance components.) On a
+given dataset they therefore return the same coefficients to numerical
+tolerance: the choice is about the fitting backend, not the estimand.
 
 ``` r
 
@@ -64,24 +64,24 @@ data.frame(
 ```
 
 The two point estimates agree to well within rounding, and their
-Monte-Carlo intervals coincide to about `0.01`: the lme4 interval is
+Monte-Carlo intervals coincide to about `0.01`. The lme4 interval is
 built from the parameter covariance supplied by the **merDeriv**
 package, transformed onto the same boundary-aware log-scale glmmTMB
-uses. glmmTMB remains the recommended default — it is the engine this
+uses. glmmTMB remains the recommended default. It is the engine this
 package declares in `Imports:`, and it is robust when a variance
 component sits exactly at the [zero
-boundary](https://jmgirard.github.io/intraclass/articles/glossary.html#zero-variance-boundary),
-where the lme4 route cannot form an interval and directs you back to
-glmmTMB. lme4 otherwise has full design parity with glmmTMB — the
-fixed-rater and every multilevel design, on balanced **and**
-incomplete/ragged data — degrading to glmmTMB only at that variance
-boundary.
+boundary](https://jmgirard.github.io/intraclass/articles/glossary.html#zero-variance-boundary).
+At that boundary the lme4 route cannot form an interval, and directs you
+back to glmmTMB. lme4 otherwise has full design parity with glmmTMB,
+covering the fixed-rater and every multilevel design, on balanced
+**and** incomplete/ragged data. It degrades to glmmTMB only at that
+variance boundary.
 
 ## A structural-equation engine (`lavaan`)
 
 `engine = "lavaan"` fits the same design as a **structural equation
-model** — a common-factor generalizability model in the sense of
-Jorgensen (2021) — for the random two-way design. Unlike lme4, this is
+model**, a common-factor generalizability model in the sense of
+Jorgensen (2021), for the random two-way design. Unlike lme4, this is
 not just a different backend for the *same* estimator: it matters which
 coefficient you ask for.
 
@@ -114,52 +114,52 @@ compare[!duplicated(compare$index), ]
 **Consistency** coefficients are a ratio of the subject and residual
 variances, so the SEM returns them identically to the mixed model.
 **Absolute agreement** is different. The SEM has no random rater effect
-to estimate — a rater is a single column, so its effect lives in the
+to estimate: a rater is a single column, so its effect lives in the
 column *means*. Following Jorgensen (2021), the rater variance is
 recovered from the mean structure as the variance of the estimated
 indicator intercepts. This [**indicator-mean
 estimator**](https://jmgirard.github.io/intraclass/articles/glossary.html#indicator-mean-estimator)
 is a genuinely different estimator of the rater variance than the mixed
-model’s random effect: the two are asymptotically equivalent and match
+model’s random effect. The two are asymptotically equivalent and match
 conventional generalizability-theory software (GENOVA, and formerly the
-`gtheory` package) closely on real data \[Vispoel et al. 2022\], but on
-a small design they differ by a modest amount — here `ICC(A,1)` is about
-`0.284` from lavaan versus `0.290` from the mixed model, because the raw
-variance of only four estimated rater means carries small-sample noise
-the mixed model shrinks away.
+`gtheory` package) closely on real data \[Vispoel et al. 2022\]. But on
+a small design they differ by a modest amount: here `ICC(A,1)` is about
+`0.284` from lavaan versus `0.290` from the mixed model. The gap here
+comes from the raw variance of only four estimated rater means, which
+carries small-sample noise the mixed model shrinks away.
 
-Which is “right”? Neither is wrong — they are two defensible estimators
+Which is “right”? Neither is wrong: they are two defensible estimators
 of the same population quantity. Use `"glmmTMB"` (the default) if you
 want the mixed-model random-rater estimate and its wider,
-generalize-to-new-raters interval; reach for `"lavaan"` if you are
+generalize-to-new-raters interval. Reach for `"lavaan"` if you are
 working inside an SEM generalizability-theory workflow and want results
 comparable to that literature. The SEM engine covers the random **and
 fixed-rater** two-way design, on complete **and incomplete**
 ([FIML](https://jmgirard.github.io/intraclass/articles/glossary.html#fiml))
-data — the parametric bootstrap is available on complete data,
-Monte-Carlo throughout — and the crossed (Design 1) **multilevel**
-design as a two-level SEM (random raters on complete, balanced data with
-equal cluster sizes; Monte-Carlo interval), reporting the subject- and
-cluster-level ICCs off one five-component fit. Two-level SEM estimation
-is full-information ML with no REML analog, so with few clusters its
-cluster-level components sit slightly below the REML estimates and its
-agreement rater term slightly above — both documented differences that
-shrink as the cluster count grows, while consistency ICCs agree
-essentially exactly. One-way designs are still directed to the
-mixed-model engines.
+data, with the parametric bootstrap available on complete data and
+Monte-Carlo throughout. It also covers the crossed (Design 1)
+**multilevel** design as a two-level SEM, reporting the subject- and
+cluster-level ICCs off one five-component fit. That route takes random
+raters on complete, balanced data with equal cluster sizes, and gives a
+Monte-Carlo interval. Two-level SEM estimation is full-information ML
+with no REML analog. So with few clusters its cluster-level components
+sit slightly below the REML estimates, and its agreement rater term
+slightly above. Both are documented differences that shrink as the
+cluster count grows, while consistency ICCs agree essentially exactly.
+One-way designs are still directed to the mixed-model engines.
 
 ## A Bayesian engine (`brms`)
 
 `engine = "brms"` fits the variance components in a fully **Bayesian**
-framework (Stan, via the **brms** package) — the approach ten Hove,
-Jorgensen & van der Ark (2020) developed for interrater reliability.
-Instead of a single REML point with a Monte-Carlo interval, it samples
-the posterior of every variance component and reads the ICC off the
-draws: the point estimate is the [posterior **mode**
+framework (Stan, via the **brms** package). This is the approach ten
+Hove, Jorgensen & van der Ark (2020) developed for interrater
+reliability. Instead of a single REML point with a Monte-Carlo interval,
+it samples the posterior of every variance component and reads the ICC
+off the draws. The point estimate is the [posterior **mode**
 (MAP)](https://jmgirard.github.io/intraclass/articles/glossary.html#posterior-mode-map)
-and the interval is a **credible** interval (covered in
+and the interval is a **credible** interval, covered in
 [*Confidence-interval
-methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.html#bayesian-credible-intervals-ci_method-posterior)).
+methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.html#bayesian-credible-intervals-ci_method-posterior).
 Because it samples a Stan model, this engine is slower than the others
 and needs the `brms` package (an optional `Suggests` dependency).
 
@@ -167,7 +167,7 @@ The examples below are shown with pre-computed output: fitting a Stan
 model needs a toolchain not available when this site is built, so these
 chunks are not evaluated at knit time. What they show is
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)’s own
-printed output; on a design this small the sampler may additionally
+printed output. On a design this small the sampler may additionally
 report divergent transitions, and whether it does depends on the seed
 and the platform, so those warnings are not reproduced here.
 
@@ -190,22 +190,22 @@ bayes
 
 The header names a **brms (MCMC)** engine and a **posterior credible**
 interval, and `ci_method = "posterior"` is automatic. On this tiny
-six-subject design the MAP `ICC(A,1)` (about `0.24`) sits a little below
-the glmmTMB REML value (`0.29`): the MAP is the mode of a wide,
+six-subject design the MAP `ICC(A,1)` is about `0.24`, a little below
+the glmmTMB REML value of `0.29`. The MAP is the mode of a wide,
 right-skewed posterior, which the small sample pulls down (ten Hove et
-al. 2020 note this at small rater counts). Sampler settings — chains,
-iterations, backend, parallel `cores` — pass through `brm_args`, e.g.
+al. 2020 note this at small rater counts). Sampler settings pass through
+`brm_args`: chains, iterations, backend, and parallel `cores`, as in
 `brm_args = list(chains = 4, cores = 4)`.
 
 ### The prior, and overriding it
 
 By default the engine places a weakly-informative **half-*t*(4, 0, 1)**
 [prior](https://jmgirard.github.io/intraclass/articles/glossary.html#prior)
-on every random-effect standard deviation — the *sourced* prior (ten
-Hove et al. 2020, §3.3/§4.1) that every coverage result in this package
-depends on. You can supply your own prior for prior-sensitivity or
-method-comparison work with the `prior` argument (any brms prior
-object), but
+on every random-effect standard deviation. That is the *sourced* prior
+(ten Hove et al. 2020, §3.3/§4.1) that every coverage result in this
+package depends on. You can supply your own prior for prior-sensitivity
+or method-comparison work with the `prior` argument, which takes any
+brms prior object. But
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) warns
 loudly, because leaving the sourced prior **voids the coverage
 guarantees** and a poorly chosen SD prior can *worsen* the small-sample
@@ -227,9 +227,9 @@ icc(ratings, score, subject, rater, engine = "brms",
 ```
 
 Here the deliberately over-tight `normal(0, 0.1)` prior squeezes every
-standard deviation toward zero, collapsing the ICC to nearly nothing — a
-vivid reminder that the prior is load-bearing, not a casual knob. Leave
-`prior` unset unless you specifically intend to depart from the sourced
-default. The brms engine covers the same design family as the
+standard deviation toward zero, collapsing the ICC to nearly nothing. It
+is a vivid reminder that the prior is load-bearing, not a casual knob.
+Leave `prior` unset unless you specifically intend to depart from the
+sourced default. The brms engine covers the same design family as the
 mixed-model engines (two-way random and fixed, one-way, and the
 multilevel designs), on balanced and incomplete data.

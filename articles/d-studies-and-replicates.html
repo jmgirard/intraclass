@@ -80,13 +80,14 @@
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jmgirard/intraclass" class="external-link">intraclass</a></span><span class="op">)</span></span></code></pre></div>
-<p>Two things you can do once you have a fitted <code><a href="../reference/icc.html">icc()</a></code>:
-project its reliability to a different number of raters (a <a href="glossary.html#d-study-decision-study"><strong>decision
-study</strong></a>), and — when each cell holds more than one rating —
-separate the subject-by-rater interaction from pure error
-(<strong>within-cell replicates</strong>). This article also shows the
-<code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> methods that visualize a fit. (Unfamiliar terms
-are defined in the <a href="glossary.html"><em>Glossary</em></a>.)</p>
+<p>Two things you can do once you have a fitted <code><a href="../reference/icc.html">icc()</a></code>. The
+first is to project its reliability to a different number of raters, a
+<a href="glossary.html#d-study-decision-study"><strong>decision
+study</strong></a>. The second, available when each cell holds more than
+one rating, is to separate the subject-by-rater interaction from pure
+error (<strong>within-cell replicates</strong>). This article also shows
+the <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> methods that visualize a fit. (Unfamiliar
+terms are defined in the <a href="glossary.html"><em>Glossary</em></a>.)</p>
 <div class="section level2">
 <h2 id="how-many-raters-do-i-need-a-d-study">How many raters do I need? A D-study<a class="anchor" aria-label="anchor" href="#how-many-raters-do-i-need-a-d-study"></a>
 </h2>
@@ -99,7 +100,7 @@ generalizability theory the absolute-agreement ICC is the <a href="glossary.html
 coefficient</a>, and projecting it to <code>m</code> raters is just a
 change of the averaging divisor,</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Φ</mi><mo stretchy="false" form="prefix">(</mo><mi>m</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><msubsup><mi>σ</mi><mi>s</mi><mn>2</mn></msubsup><mrow><msubsup><mi>σ</mi><mi>s</mi><mn>2</mn></msubsup><mo>+</mo><mo stretchy="false" form="prefix">(</mo><msubsup><mi>σ</mi><mi>r</mi><mn>2</mn></msubsup><mo>+</mo><msubsup><mi>σ</mi><mrow><mi>r</mi><mi>e</mi><mi>s</mi></mrow><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo><mi>/</mi><mi>m</mi></mrow></mfrac><mo>,</mo></mrow><annotation encoding="application/x-tex">\Phi(m) = \frac{\sigma^2_s}{\sigma^2_s + (\sigma^2_r + \sigma^2_{res}) / m},</annotation></semantics></math></p>
-<p>so <code><a href="../reference/d_study.html">d_study()</a></code> reuses the fit you already have — no
+<p>so <code><a href="../reference/d_study.html">d_study()</a></code> reuses the fit you already have, with no
 refitting.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, type <span class="op">=</span> <span class="st">"agreement"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
@@ -116,19 +117,19 @@ refitting.</p>
 <span><span class="co">#&gt;   6     0.710  [0.239, 0.937]</span></span>
 <span><span class="co">#&gt;   7     0.741  [0.268, 0.945]</span></span>
 <span><span class="co">#&gt;   8     0.765  [0.295, 0.952]</span></span></code></pre></div>
-<p>Reliability climbs with more raters but with diminishing returns, and
-the projection is anchored to what you observed: at <code>m = 4</code>
-(the number of raters in <code>ratings</code>) <code>Φ(m)</code> is
+<p>Reliability climbs with more raters, but with diminishing returns.
+The projection is anchored to what you observed: at <code>m = 4</code>,
+the number of raters in <code>ratings</code>, <code>Φ(m)</code> is
 exactly the <code>ICC(A,k)</code> you would get from <code><a href="../reference/icc.html">icc()</a></code>
 directly.</p>
-<p>The projection’s own interval settings — <code>conf_level</code>,
-<code>mc_samples</code> and <code>seed</code> — default to the fit’s own
-whenever the fit carries them, which a default Monte-Carlo fit does;
-pass any of them to <code><a href="../reference/d_study.html">d_study()</a></code> to override it for this call
-alone. The <code>seed = 1</code> above is the fit’s own seed passed
-explicitly, which is why the <code>m = 4</code> row reproduces the fit’s
-<code>ICC(A,k)</code> <em>interval</em> exactly, and not merely its
-estimate.</p>
+<p>The projection has its own interval settings:
+<code>conf_level</code>, <code>mc_samples</code> and <code>seed</code>.
+Each defaults to the fit’s own whenever the fit carries them, which a
+default Monte-Carlo fit does. Pass any of them to <code><a href="../reference/d_study.html">d_study()</a></code>
+to override it for this call alone. The <code>seed = 1</code> above is
+the fit’s own seed passed explicitly. That is why the <code>m = 4</code>
+row reproduces the fit’s <code>ICC(A,k)</code> <em>interval</em>
+exactly, and not merely its estimate.</p>
 <p><code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code> turns the projection into one row per projected
 point, and <code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code> summarizes the projection as a
 whole:</p>
@@ -153,27 +154,27 @@ whole:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     8     1     8 agreement random          4       0.95 montecarlo      <span style="text-decoration: underline;">10</span>000</span></span></code></pre></div>
 <p>The one column here that <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code> on the <em>fit</em> does
 not also give you is <strong><code>m</code></strong>, the rater-count
-column — which is the whole point of a D-study: the same coefficient,
-indexed by the rater count it is projected to. <code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code>
-describes the projection rather than the model, reporting the swept
-range (<code>n_m</code>, <code>m_min</code>, <code>m_max</code>)
-alongside the design and the interval settings.</p>
+column. That column is the whole point of a D-study: the same
+coefficient, indexed by the rater count it is projected to.
+<code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code> describes the projection rather than the model,
+reporting the swept range (<code>n_m</code>, <code>m_min</code>,
+<code>m_max</code>) alongside the design and the interval settings.</p>
 <p>We fit with <code>type = "agreement"</code> here because the
 dependability coefficient above <em>is</em> the absolute-agreement
 projection. A default <code><a href="../reference/icc.html">icc()</a></code> reports both agreement and
 consistency, and <code><a href="../reference/d_study.html">d_study()</a></code> then projects <strong>one curve
-per error definition</strong> (adding a <code>type</code> column) —
-handy when you want both, but for this walkthrough one curve keeps the
-picture clear.</p>
-<p>Read as a curve, this is the classic “how many raters?” picture —
-plot it with <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> (which needs
-<strong>ggplot2</strong>):</p>
+per error definition</strong>, adding a <code>type</code> column. That
+is handy when you want both, but for this walkthrough one curve keeps
+the picture clear.</p>
+<p>Read as a curve, this is the classic “how many raters?” picture. Plot
+it with <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code>, which needs
+<strong>ggplot2</strong>:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="fu"><a href="../reference/d_study.html">d_study</a></span><span class="op">(</span><span class="va">fit</span>, m <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">12</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="d-studies-and-replicates_files/figure-html/dstudy-plot-1.png" class="r-plt" alt="Projected reliability rising with the number of raters, with a Monte-Carlo interval band." width="700"></p>
 <p>There is also a <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> method, for the console habit of
-drawing a picture as a side effect: <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> on a projection
+drawing a picture as a side effect. <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> on a projection
 prints the very same ggplot that <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> builds from it,
 then returns the projection invisibly. We show the call rather than run
 it, since running it would render another reliability curve just like
@@ -185,9 +186,9 @@ the one above:</p>
 </h3>
 <p>When you want a single projected rater count rather than a whole
 curve, <code><a href="../reference/icc.html">icc()</a></code> will report it inline. <code>unit</code> takes
-the keywords <code>"single"</code> and <code>"average"</code> — the
-<code>ICC(*,1)</code> and <code>ICC(*,k)</code> you always get — and,
-alongside them, any number <code>m &gt;= 1</code>:</p>
+the keywords <code>"single"</code> and <code>"average"</code>, which
+give the <code>ICC(*,1)</code> and <code>ICC(*,k)</code> you always get.
+Alongside them it also takes any number <code>m &gt;= 1</code>:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>,</span>
 <span>  type <span class="op">=</span> <span class="st">"agreement"</span>, unit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"single"</span>, <span class="st">"average"</span>, <span class="fl">6</span><span class="op">)</span>, seed <span class="op">=</span> <span class="fl">1</span></span>
@@ -206,17 +207,17 @@ alongside them, any number <code>m &gt;= 1</code>:</p>
 <p>The extra row is labeled <code>ICC(A,6)</code>, and it is the same
 quantity <code><a href="../reference/d_study.html">d_study()</a></code> projects: the <code>m = 6</code> row of
 <code>proj</code> above carries the same estimate. The <em>interval</em>
-matches too, but only because both calls pass the same <code>seed</code>
-— the interval is Monte-Carlo, so two unseeded runs of the same
-projection agree on the estimate and differ in the last digits of the
-endpoints. Which one you reach for is a matter of shape, not of
-arithmetic: <code>unit</code> adds a row to a coefficient table,
+matches too, but only because both calls pass the same
+<code>seed</code>. The interval is Monte-Carlo, so two unseeded runs of
+the same projection agree on the estimate and differ in the last digits
+of the endpoints. Which one you reach for is a matter of shape, not of
+arithmetic: <code>unit</code> adds a row to a coefficient table, while
 <code><a href="../reference/d_study.html">d_study()</a></code> returns a projection object you can
 <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code>, <code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code> and plot.</p>
 <p><strong>Fixed raters cannot be projected to absolute
 agreement.</strong> The rater term for <a href="glossary.html#fixed-vs--random-raters"><em>fixed</em> raters</a>
-is the variance of exactly the raters you observed, so there is no wider
-pool for a hypothetical sixth rater to be drawn from, and
+is the variance of exactly the raters you observed. There is no wider
+pool for a hypothetical sixth rater to be drawn from, so
 <code><a href="../reference/icc.html">icc()</a></code> refuses rather than returning a number:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>,</span>
@@ -231,11 +232,11 @@ pool for a hypothetical sixth rater to be drawn from, and
 <span><span class="co">#&gt;   to project to.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Use `raters = "random"` to project absolute agreement, or `type =</span></span>
 <span><span class="co">#&gt;   "consistency"` for a fixed-rater D-study.</span></span></code></pre></div>
-<p>Consistency has no such problem — the rater term drops out of it —
-which is why the two remedies the message names are to project with
+<p>Consistency has no such problem, because the rater term drops out of
+it. That is why the two remedies the message names are to project with
 <code>raters = "random"</code>, or to ask for a fixed-rater
 <code>type = "consistency"</code> projection instead. The refusal is
-raised only when absolute agreement is <em>all</em> you asked for: a
+raised only when absolute agreement is <em>all</em> you asked for. A
 default <code><a href="../reference/icc.html">icc()</a></code> call reports both error definitions, and
 there the consistency projection is kept and you are told the agreement
 one was dropped.</p>
@@ -243,8 +244,8 @@ one was dropped.</p>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>σ</mi><mi>r</mi><mn>2</mn></msubsup><annotation encoding="application/x-tex">\sigma^2_r</annotation></semantics></math>
 is estimated from only as many raters as you observed, so projecting far
 beyond that design leans hard on that estimate. The Monte-Carlo interval
-widens honestly to reflect this rather than pretending to a precision it
-lacks — and projecting absolute agreement is refused for <a href="glossary.html#fixed-vs--random-raters"><em>fixed</em> raters</a>,
+widens honestly to reflect this, rather than pretending to a precision
+it lacks. And projecting absolute agreement is refused for <a href="glossary.html#fixed-vs--random-raters"><em>fixed</em> raters</a>,
 where there is no wider rater universe to generalize to (use
 <code>raters = "random"</code>). The <a href="multilevel-designs.html#how-many-raters-a-multilevel-d-study">D-study
 also works on a multilevel fit</a>, projecting the rater count at each
@@ -255,14 +256,14 @@ level.</p>
 <h2 id="within-cell-replicates-interaction-vs--pure-error">Within-cell replicates: interaction vs. pure error<a class="anchor" aria-label="anchor" href="#within-cell-replicates-interaction-vs--pure-error"></a>
 </h2>
 <p>So far every subject-by-rater cell holds a single rating. When each
-rater rates each subject <strong>more than once</strong> —
-<em>within-cell replicates</em> — you can separate two things that a
-single rating confounds: the <strong>subject-by-rater
-interaction</strong> (does a rater systematically score a particular
-subject high or low — a <em>stable</em> disagreement?) and <strong>pure
-error</strong> (how much a rater’s repeat ratings of the same subject
-wobble). <code><a href="../reference/icc.html">icc()</a></code> detects the replicates and fits the
-interaction model automatically:</p>
+rater rates each subject <strong>more than once</strong>, a design with
+<em>within-cell replicates</em>, you can separate two things that a
+single rating confounds. The first is the <strong>subject-by-rater
+interaction</strong>: does a rater systematically score a particular
+subject high or low, a <em>stable</em> disagreement? The second is
+<strong>pure error</strong>, meaning how much a rater’s repeat ratings
+of the same subject wobble. <code><a href="../reference/icc.html">icc()</a></code> detects the replicates
+and fits the interaction model automatically:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2025</span><span class="op">)</span></span>
 <span><span class="va">ns</span> <span class="op">&lt;-</span> <span class="fl">20</span></span>
@@ -294,30 +295,30 @@ interaction model automatically:</p>
 <p>The variance-components line now shows <code>subject:rater</code>
 (the interaction) and <code>residual</code> (pure error) as separate
 terms. The <strong>single-occasion</strong> rows
-(<code>occasions = 1</code>) are the ordinary ICCs — a single rating’s
-error still includes the interaction — but they are now fit correctly
-rather than folding the interaction into the residual. The
+(<code>occasions = 1</code>) are the ordinary ICCs, since a single
+rating’s error still includes the interaction. But they are now fit
+correctly, rather than folding the interaction into the residual. The
 <strong>occasion-averaged</strong> rows (<code>occasions = 3</code>
-here) give the reliability of a rater’s <em>mean of three ratings</em>:
-averaging cuts pure error (but not the interaction), so those
-coefficients are higher.</p>
+here) give the reliability of a rater’s <em>mean of three ratings</em>.
+Averaging cuts pure error but not the interaction, so those coefficients
+are higher.</p>
 <p>Within-cell replicates extend beyond this balanced two-way random
 example: <strong>fixed</strong> raters (balanced),
 <strong>multilevel</strong> designs (crossed Design 1 and nested Design
 2, balanced), and <strong>ragged</strong> replicates at a single
 occasion are all supported. What remains open is the
-occasion-<em>averaged</em> coefficient on ragged replicates — with
-unequal per-cell counts there is no single effective-occasion divisor
-with a validated oracle — along with the compound fixed-by-ragged and
-multilevel-by-ragged corners.</p>
+occasion-<em>averaged</em> coefficient on ragged replicates, where
+unequal per-cell counts leave no single effective-occasion divisor with
+a validated oracle. The compound fixed-by-ragged and
+multilevel-by-ragged corners are open too.</p>
 </div>
 <div class="section level2">
 <h2 id="how-many-occasions-do-i-need-a-d-study-on-the-occasion-facet">How many occasions do I need? A D-study on the occasion facet<a class="anchor" aria-label="anchor" href="#how-many-occasions-do-i-need-a-d-study-on-the-occasion-facet"></a>
 </h2>
 <p>Just as <code>d_study(m = ...)</code> projects the number of
 <em>raters</em>, <code>d_study(n_o = ...)</code> projects the number of
-<em>occasions</em> off a replicate fit — holding the raters fixed and
-asking “how reliable would each rater’s mean of <code>n_o</code> ratings
+<em>occasions</em> off a replicate fit. It holds the raters fixed and
+asks “how reliable would each rater’s mean of <code>n_o</code> ratings
 be?”. Supply exactly one axis per call (<code>m</code>
 <strong>or</strong> <code>n_o</code>).</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
@@ -333,22 +334,23 @@ be?”. Supply exactly one axis per call (<code>m</code>
 <span><span class="co">#&gt;     5  4     0.641  [0.292, 0.844]</span></span>
 <span><span class="co">#&gt;     6  4     0.643  [0.293, 0.846]</span></span></code></pre></div>
 <p>Notice the curve <strong>flattens</strong>. Averaging more occasions
-only cancels <em>pure error</em> (<code>residual</code>); it never
+only cancels <em>pure error</em> (<code>residual</code>). It never
 touches the rater or <code>subject:rater</code> variance. So the
-occasion curve climbs to a <strong>ceiling below 1</strong> — the
+occasion curve climbs to a <strong>ceiling below 1</strong>, rather than
+approaching 1 the way a rater projection does. That ceiling is the
 reliability you would reach with perfectly repeatable ratings but the
-same raters — rather than approaching 1 the way a rater projection does.
-Read it as “how much does re-rating help?”, which saturates.</p>
+same raters. Read it as “how much does re-rating help?”, which
+saturates.</p>
 <p>Because occasions are a <strong>random</strong> facet however the
 raters are treated, the occasion projection is defined even where a
 rater projection is not: <strong>fixed-rater absolute agreement projects
-on the occasion axis</strong> (it is only the <em>rater</em> axis that
+on the occasion axis</strong>. It is only the <em>rater</em> axis that
 is undefined for fixed absolute agreement, having no “freshly sampled
-rater” to add). On a <strong>multilevel</strong> replicate fit the
+rater” to add. On a <strong>multilevel</strong> replicate fit the
 subject-level curve rises with <code>n_o</code> while the cluster-level
-curve is <strong>flat</strong> — the cluster-level error set has no
-pure-error term, so occasions cannot change it (<code><a href="../reference/d_study.html">d_study()</a></code>
-says so with a note).</p>
+curve is <strong>flat</strong>. The cluster-level error set has no
+pure-error term, so occasions cannot change it, and
+<code><a href="../reference/d_study.html">d_study()</a></code> says so with a note.</p>
 </div>
 <div class="section level2">
 <h2 id="visualizing-a-fit">Visualizing a fit<a class="anchor" aria-label="anchor" href="#visualizing-a-fit"></a>
@@ -360,24 +362,24 @@ plot by hand. Both read straight off the fitted object, so the picture
 can never disagree with the printed table. They need
 <strong>ggplot2</strong>, an optional dependency.</p>
 <p>The default, <code>what = "coefficients"</code>, is a <strong>forest
-plot</strong> — each ICC index as a point estimate with its Monte-Carlo
+plot</strong>: each ICC index as a point estimate with its Monte-Carlo
 interval. Reusing the two-way <code>ratings</code> fit from the D-study
 section above:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span> <span class="co"># `fit &lt;- icc(ratings, score, subject, rater, type = "agreement", seed = 1)`</span></span></code></pre></div>
 <p><img src="d-studies-and-replicates_files/figure-html/plot-coef-1.png" class="r-plt" alt="Forest plot of ICC(A,1) and ICC(A,k) for the ratings data, each a point estimate with a horizontal Monte-Carlo interval, ICC(A,k) higher than ICC(A,1), and its interval slightly wider." width="700"></p>
-<p><code>what = "components"</code> shows the other half of the story —
+<p><code>what = "components"</code> shows the other half of the story:
 the estimated <strong>variance components</strong> the ratio is built
 from. It makes plain <em>why</em> absolute agreement is so much lower
-than the averaged coefficient on <code>ratings</code>: the
+than the averaged coefficient on <code>ratings</code>. The
 <strong>rater</strong> component is large, and only absolute agreement
 counts between-rater differences as error:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">fit</span>, what <span class="op">=</span> <span class="st">"components"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="d-studies-and-replicates_files/figure-html/plot-comp-1.png" class="r-plt" alt="Bar chart of the estimated variance components for the ratings fit: subject, rater, and residual, with the rater component the largest." width="700"></p>
-<p>For a <strong>multilevel</strong> fit the forest plot facets by level
-— see <a href="multilevel-designs.html#visualizing-the-levels"><em>Multilevel
+<p>For a <strong>multilevel</strong> fit the forest plot facets by
+level. See <a href="multilevel-designs.html#visualizing-the-levels"><em>Multilevel
 designs</em></a> for that example.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

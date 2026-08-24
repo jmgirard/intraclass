@@ -83,8 +83,8 @@
 <p>The <a href="getting-started.html"><em>Getting started</em></a> and
 <a href="choosing-an-icc.html"><em>Choosing an ICC</em></a> articles
 treat the <strong>subject</strong> as the object of measurement. But
-subjects are often nested in higher-level <strong>clusters</strong> —
-pupils in classrooms, patients in clinics — and then “reliability”
+subjects are often nested in higher-level <strong>clusters</strong>,
+such as pupils in classrooms or patients in clinics. Then “reliability”
 splits in two: how well raters tell <em>subjects</em> apart, and how
 well they tell <em>clusters</em> apart. Those are different questions
 with different answers, and reporting one when you needed the other can
@@ -156,9 +156,9 @@ signal but modest within-classroom differences:</p>
 <p>Both levels come back in one call. Here the
 <strong>cluster-level</strong> ICC is the higher of the two: raters
 agree more about which <em>classrooms</em> score high than about which
-<em>pupils within a classroom</em> do — exactly the pattern you would
-expect when most of the true variation lives between classrooms. Which
-number you report depends on the decision you will make: a
+<em>pupils within a classroom</em> do. That is exactly the pattern you
+would expect when most of the true variation lives between classrooms.
+Which number you report depends on the decision you will make: a
 classroom-level intervention cares about the cluster-level reliability,
 a pupil-level one about the subject level. Request just one with
 <code>level = "subject"</code> or <code>level = "cluster"</code>.</p>
@@ -167,12 +167,12 @@ a pupil-level one about the subject level. Request just one with
 <h2 id="how-much-does-ignoring-the-nesting-cost-the-conflated-icc">How much does ignoring the nesting cost? The conflated ICC<a class="anchor" aria-label="anchor" href="#how-much-does-ignoring-the-nesting-cost-the-conflated-icc"></a>
 </h2>
 <p>What would you have reported if you had <em>ignored</em> the
-classrooms and run an ordinary single-level ICC? That number — ten Hove
-et al.’s Equation 14 — folds the between-classroom and within-classroom
-variation together into one “true score” and is biased for
-<strong>both</strong> questions above. <code><a href="../reference/icc.html">icc()</a></code> can compute
-this <a href="glossary.html#conflated-icc">conflated ICC</a> as a
-<strong>diagnostic contrast</strong> with
+classrooms and run an ordinary single-level ICC? That number is ten Hove
+et al.’s Equation 14. It folds the between-classroom and
+within-classroom variation together into one “true score”, and is biased
+for <strong>both</strong> questions above. <code><a href="../reference/icc.html">icc()</a></code> can
+compute this <a href="glossary.html#conflated-icc">conflated ICC</a> as
+a <strong>diagnostic contrast</strong> with
 <code>level = "conflated"</code>, so you can see the distortion directly
 rather than take it on faith:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -199,12 +199,12 @@ rather than take it on faith:</p>
 <p>The conflated value lands between the two correct levels and matches
 neither: it over- or under-states the reliability of any real decision.
 It is printed with a warning label and is <strong>never</strong> a
-coefficient to report — it exists only to quantify the cost of ignoring
-the structure. (It is the flat two-way ICC read off the fit, so it comes
-in both an absolute-agreement and a consistency form; a default
+coefficient to report. It exists only to quantify the cost of ignoring
+the structure. It is the flat two-way ICC read off the fit, so it comes
+in both an absolute-agreement and a consistency form, and a default
 <code>level = "conflated"</code> call reports both. It needs a crossed,
 random-rater design with raters that bridge the clusters, and works on
-complete or incomplete data.)</p>
+complete or incomplete data.</p>
 </div>
 <div class="section level2">
 <h2 id="when-raters-are-nested">When raters are nested<a class="anchor" aria-label="anchor" href="#when-raters-are-nested"></a>
@@ -213,20 +213,21 @@ complete or incomplete data.)</p>
 classroom, so raters are <strong>crossed</strong> with clusters (ten
 Hove et al.’s Design 1). Two other layouts are common, and
 <code><a href="../reference/icc.html">icc()</a></code> <strong>infers which one you have</strong> from the
-crossing pattern — which raters appear in which clusters, and which
+crossing pattern: which raters appear in which clusters, and which
 pupils each of them rates. The <code>design</code> argument overrides
-that inference, and there are two occasions to reach for it: when the
-rater <em>labels</em> do not mean what the pattern implies (<a href="#declaring-the-design-when-the-labels-are-ambiguous"><em>Declaring
-the design</em></a> below), and when missing cells leave the pattern
-genuinely ambiguous (<a href="#incomplete-ragged-multilevel-designs"><em>Incomplete (ragged)
+that inference, and there are two occasions to reach for it. The first
+is when the rater <em>labels</em> do not mean what the pattern implies
+(<a href="#declaring-the-design-when-the-labels-are-ambiguous"><em>Declaring
+the design</em></a> below). The second is when missing cells leave the
+pattern genuinely ambiguous (<a href="#incomplete-ragged-multilevel-designs"><em>Incomplete (ragged)
 multilevel designs</em></a>). The two nested layouts are:</p>
 <ul>
 <li>
 <strong>Raters nested in clusters</strong> (Design 2): each
-classroom has its <em>own</em> panel of raters. There is then no
-between-cluster reliability to report — a cluster-level ICC needs the
-<em>same</em> raters spanning clusters — so <code><a href="../reference/icc.html">icc()</a></code> returns
-the subject level only.</li>
+classroom has its <em>own</em> panel of raters. Under Design 2 there is
+then no between-cluster reliability to report: a cluster-level ICC needs
+the <em>same</em> raters spanning clusters, so <code><a href="../reference/icc.html">icc()</a></code>
+returns the subject level only.</li>
 <li>
 <strong>Raters nested in subjects</strong> (Design 3): each pupil is
 rated by their <em>own</em> raters. Now systematic rater differences
@@ -267,7 +268,7 @@ raters, the design is a multilevel one-way (Design 3):</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Variance components: cluster 0.998, subject 0.426, residual 0.609 (rater confounded)</span></span></span></code></pre></div>
 <p>Here the coefficients are labeled <code>ICC(1)</code> /
-<code>ICC(k)</code> and <code>type</code> no longer applies — with each
+<code>ICC(k)</code> and <code>type</code> no longer applies. With each
 pupil’s raters unique, there is no rater main effect to keep in or drop
 from the error term. A layout that is neither cleanly crossed nor
 cleanly nested (some raters shared across clusters, some not) raises an
@@ -281,8 +282,8 @@ The <code>school</code> table as built numbers its raters 1–4 <em>inside
 every classroom</em>, and nothing in the data says whether “rater 1” in
 classroom 3 is the same person as “rater 1” in classroom 7. Left to
 itself <code><a href="../reference/icc.html">icc()</a></code> reads the reused labels as one panel rating
-everywhere — Design 1 — and says so rather than deciding quietly. If the
-numbering is instead classroom-relative, say so with
+everywhere, which is Design 1, and says so rather than deciding quietly.
+If the numbering is instead classroom-relative, say so with
 <code>design</code>:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">school</span>, <span class="va">score</span>,</span>
@@ -302,8 +303,8 @@ numbering is instead classroom-relative, say so with
 level is gone, and a single <code>rater:cluster</code> component
 replaces the two rater terms the crossed fit printed (<code>rater</code>
 and <code>cluster:rater</code>). If the numbering is
-<em>pupil</em>-relative — each pupil’s own four raters, numbered from
-one — the same table is Design 3:</p>
+<em>pupil</em>-relative, meaning each pupil’s own four raters numbered
+from one, the same table is Design 3:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">school</span>, <span class="va">score</span>,</span>
 <span>  subject <span class="op">=</span> <span class="va">pupil</span>, rater <span class="op">=</span> <span class="va">rater</span>, cluster <span class="op">=</span> <span class="va">classroom</span>,</span>
@@ -323,20 +324,20 @@ residual as <code>(rater confounded)</code>, and the coefficients are
 the agreement-only <code>ICC(1)</code> / <code>ICC(k)</code> of the
 multilevel one-way design.</p>
 <p>One table, three readings, and the data cannot tell you which is
-right — only you know what the labels mean. That is why
+right: only you know what the labels mean. That is why
 <code><a href="../reference/icc.html">icc()</a></code> announces the crossed reading in a message rather
-than assuming it quietly; it prints once per session, so in this article
-it appeared back at the first classroom fit. What separates the three
-readings is mostly structure rather than the subject-level number:
-moving to Design 2 barely moves the subject coefficients
-(<code>ICC(A,1)</code> 0.431 crossed against 0.429 here) but takes the
-cluster level away, and moving to Design 3 takes the rater term with it
-and renames the coefficients.</p>
+than assuming it quietly. The message prints once per session, so in
+this article it appeared back at the first classroom fit. What separates
+the three readings is mostly structure rather than the subject-level
+number. Moving to Design 2 barely moves the subject coefficients
+(<code>ICC(A,1)</code> 0.431 crossed against 0.429 here), but takes the
+cluster level away. Moving to Design 3 takes the rater term with it and
+renames the coefficients.</p>
 <p>Declaring a design is still bounded by the data:
 <code>design = "crossed"</code> on raters that do not bridge clusters is
 refused, for either error definition. What a declaration <em>can</em> do
-unchecked is choose among the readings the data does admit — the choice
-made twice above — so declare a design only when you know the labelling.
+unchecked is choose among the readings the data does admit, the choice
+made twice above. So declare a design only when you know the labelling.
 Where the labels are already unique per rater, as in the two relabelled
 tables earlier, inference has everything it needs and passing the
 matching <code>design</code> explicitly returns the very same fit.</p>
@@ -356,7 +357,7 @@ design is handled directly. Drop a fifth of the ratings from the
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">11</span><span class="op">)</span></span>
 <span><span class="va">school_ragged</span> <span class="op">&lt;-</span> <span class="va">school</span><span class="op">[</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">school</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fl">0.2</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">school</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, <span class="op">]</span></span></code></pre></div>
 <p>At the <strong>subject</strong> level both agreement and consistency
-come back, and — exactly as in the single-level incomplete case —
+come back. Exactly as in the single-level incomplete case,
 <code>ICC(*,k)</code> averages over the <a href="glossary.html#effective-number-of-ratings-k_eff"><em>effective</em>
 number of ratings</a> per pupil (<code>k_eff</code>, the harmonic mean),
 which is below the full panel size of 4:</p>
@@ -378,10 +379,10 @@ effective <code>k</code> so the divisor is never a black box.</p>
 <p>At the <strong>cluster</strong> level, both the single-rater
 <code>ICC(c,1)</code> and the <strong>averaged</strong>
 <code>ICC(c,k)</code> come back on ragged data. The averaged coefficient
-divides the cluster error by its own effective rater count — the raters
-behind each classroom’s observed mean — reported as <code>k_c_eff</code>
-(the inverse-Simpson harmonic mean), which is <em>not</em> the same as
-the per-pupil <code>k_eff</code>:</p>
+divides the cluster error by its own effective rater count, the raters
+behind each classroom’s observed mean. That count is reported as
+<code>k_c_eff</code> (the inverse-Simpson harmonic mean), and it is
+<em>not</em> the same as the per-pupil <code>k_eff</code>:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">school_ragged</span>, <span class="va">score</span>, subject <span class="op">=</span> <span class="va">pupil</span>, rater <span class="op">=</span> <span class="va">rater</span>, cluster <span class="op">=</span> <span class="va">classroom</span>,</span>
 <span>  level <span class="op">=</span> <span class="st">"cluster"</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"agreement"</span>, <span class="st">"consistency"</span><span class="op">)</span>,</span>
@@ -405,27 +406,27 @@ differences no longer cancel perfectly from a <em>comparison</em> of
 observed cluster means (they cancel only when every cluster has the same
 rater weighting). If you are ranking clusters by their observed means,
 prefer the <strong>agreement</strong> <code>ICC(c,k)</code>, whose error
-term accounts for that; <code>ICC(c,k)</code> consistency measures
+term accounts for that. The consistency <code>ICC(c,k)</code> measures
 cluster×rater disagreement only. This averaged cluster coefficient on
-ragged data ships for every random-rater engine — <code>glmmTMB</code>,
-<code>lme4</code>, and the Bayesian <code>brms</code> engine (which
+ragged data ships for every random-rater engine: <code>glmmTMB</code>,
+<code>lme4</code>, and the Bayesian <code>brms</code> engine, which
 applies the same <code>k_c_eff</code> divisor to its posterior
-draws).</p>
+draws.</p>
 <p>One thing is still deliberately fenced off, with a clear error rather
-than a silently wrong number: when missing cells make the crossing
-pattern <strong>ambiguous</strong> — some raters happen to appear in
-only one classroom, so the design could be read as crossed <em>or</em>
-nested — <code><a href="../reference/icc.html">icc()</a></code> does not guess; you resolve it by declaring
-<code>design = "crossed"</code> (validated against the data), or the
-abort points you at the nested reading.</p>
+than a silently wrong number. Missing cells can make the crossing
+pattern <strong>ambiguous</strong>: some raters happen to appear in only
+one classroom, so the design could be read as crossed <em>or</em>
+nested. There <code><a href="../reference/icc.html">icc()</a></code> does not guess. You resolve it by
+declaring <code>design = "crossed"</code>, which is validated against
+the data, or the abort points you at the nested reading.</p>
 </div>
 <div class="section level2">
 <h2 id="fixed-raters-in-a-multilevel-design">Fixed raters in a multilevel design<a class="anchor" aria-label="anchor" href="#fixed-raters-in-a-multilevel-design"></a>
 </h2>
 <p>The multilevel examples so far treat raters as a <a href="glossary.html#fixed-vs--random-raters"><strong>random</strong>
-sample</a> — the recommended default, which generalizes beyond the
-raters you happened to use. When the observed raters <em>are</em> the
-entire population of interest (a fixed panel of examiners, say), pass
+sample</a>, the recommended default, which generalizes beyond the raters
+you happened to use. When the observed raters <em>are</em> the entire
+population of interest (a fixed panel of examiners, say), pass
 <code>raters = "fixed"</code>. As in the single-level case, the rater
 main effect is then the <a href="glossary.html#finite-population-rater-variance-%CE%B8%C2%B2_r">finite-population
 variance</a> of <em>these</em> raters (McGraw &amp; Wong’s Case 3A)
@@ -452,37 +453,37 @@ levels come back:</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Variance components: cluster 0.998, subject 0.461, rater 0.136, cluster:rater 0.000, residual 0.473</span></span></span></code></pre></div>
 <p>On this balanced design the fixed-rater coefficients match the
-random-rater ones <strong>at both levels</strong>:
-<strong>consistency</strong> never uses the rater term, so it is
-identical either way, and <strong>absolute agreement</strong> coincides
+random-rater ones <strong>at both levels</strong>.
+<strong>Consistency</strong> never uses the rater term, so it is
+identical either way. <strong>Absolute agreement</strong> coincides
 because the finite-population rater variance equals the random-sample
 estimate when the design is balanced. At the cluster level the
 between-rater disagreement in cluster means is that same
 finite-population term plus the cluster-by-rater interaction. The
 subject level genuinely diverges from random on
 <strong>incomplete</strong> data, where the rater variance is estimated
-from unequal cell counts — and the crossed (Design 1) fixed-rater
+from unequal cell counts. And the crossed (Design 1) fixed-rater
 multilevel design is supported on ragged data too, at the subject level,
 exactly as the single-level incomplete case above.</p>
 <p>Multilevel support now covers <strong>random</strong> raters on the
 crossed design (Design 1), complete or <strong>incomplete</strong>, at
-the subject level and the cluster level — both the single-rater
-<code>ICC(c,1)</code> and the averaged <code>ICC(c,k)</code>, across all
-three engines (<code>glmmTMB</code>, <code>lme4</code>,
-<code>brms</code>); and the nested designs (Designs 2 and 3, subject
-level), complete <strong>or incomplete</strong>. The structural-equation
-<code>lavaan</code> engine joins them on the crossed design for
-<strong>complete, balanced</strong> data with equal cluster sizes: a
-two-level SEM estimates the same five-component decomposition and
-reports both levels (see the <a href="engines.html">engines vignette</a>
-for how its estimator differs from the mixed-model one at small cluster
-counts). <strong>Fixed</strong> raters are supported at the subject
-level on the crossed design (complete <strong>and</strong> incomplete),
-at the <strong>cluster</strong> level on the crossed design (complete
-data), and, on complete data, the nested Design 2. What remains open:
+the subject level and the cluster level. That covers both the
+single-rater <code>ICC(c,1)</code> and the averaged
+<code>ICC(c,k)</code>, across all three engines (<code>glmmTMB</code>,
+<code>lme4</code>, <code>brms</code>). It also covers the nested designs
+(Designs 2 and 3, subject level), complete <strong>or
+incomplete</strong>. The structural-equation <code>lavaan</code> engine
+joins them on the crossed design for <strong>complete, balanced</strong>
+data with equal cluster sizes. A two-level SEM estimates the same
+five-component decomposition and reports both levels. See the <a href="engines.html">engines vignette</a> for how its estimator differs
+from the mixed-model one at small cluster counts. <strong>Fixed</strong>
+raters are supported at the subject level on the crossed design
+(complete <strong>and</strong> incomplete), at the
+<strong>cluster</strong> level on the crossed design (complete data),
+and, on complete data, the nested Design 2. What remains open is
 incomplete <em>fixed-rater cluster-level</em> estimation. Design 3
-reports no fixed-rater or cluster-level coefficient by construction —
-with raters nested in subjects there is no separable rater effect to
+reports no fixed-rater or cluster-level coefficient by construction.
+With raters nested in subjects there is no separable rater effect to
 fix, and no crossed-cluster structure to support a cluster mean.</p>
 </div>
 <div class="section level2">
@@ -512,19 +513,19 @@ column), and <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.htm
 <span><span class="co">#&gt;   cluster  8     0.983  [0.000, 0.996]</span></span></code></pre></div>
 <p>Only the <strong>rater</strong> count is projected. The cluster-level
 coefficient does not average over subjects (ten Hove et al. 2022, Eq.
-13), so “how many subjects per cluster?” is a <em>sample-size</em>
-question — how precisely you estimate the variance components — not a
-reliability projection.</p>
+13). So “how many subjects per cluster?” is a <em>sample-size</em>
+question, about how precisely you estimate the variance components, and
+not a reliability projection.</p>
 </div>
 <div class="section level2">
 <h2 id="visualizing-the-levels">Visualizing the levels<a class="anchor" aria-label="anchor" href="#visualizing-the-levels"></a>
 </h2>
-<p>The <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> forest plot (see <a href="d-studies-and-replicates.html#visualizing-a-fit"><em>D-studies and
-within-cell replicates</em></a> for the single-level version) facets a
+<p>The <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> forest plot facets a
 <strong>multilevel</strong> fit by level, so the subject- and
-cluster-level coefficients line up for comparison — the same
-<code>school</code> fit from above, whose cluster level was the higher
-of the two:</p>
+cluster-level coefficients line up for comparison. See <a href="d-studies-and-replicates.html#visualizing-a-fit"><em>D-studies and
+within-cell replicates</em></a> for the single-level version. Below is
+the same <code>school</code> fit from above, whose cluster level was the
+higher of the two:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">school</span>, <span class="va">score</span>, subject <span class="op">=</span> <span class="va">pupil</span>, rater <span class="op">=</span> <span class="va">rater</span>, cluster <span class="op">=</span> <span class="va">classroom</span>,</span>
@@ -534,10 +535,11 @@ of the two:</p>
 <div class="section level2">
 <h2 id="or-let-the-package-choose-the-level">Or let the package choose the level<a class="anchor" aria-label="anchor" href="#or-let-the-package-choose-the-level"></a>
 </h2>
-<p>The multilevel <em>fifth choice</em> — subject vs. cluster level — is
-part of the <code><a href="../reference/choose_icc.html">choose_icc()</a></code> decision helper too; the <a href="choosing-an-icc.html"><em>Choosing an ICC</em></a> guide walks the
-other four axes. Pass the design and it hands back the coefficient to
-report and the exact <code><a href="../reference/icc.html">icc()</a></code> call, without fitting
+<p>The multilevel <em>fifth choice</em>, subject level against cluster
+level, is part of the <code><a href="../reference/choose_icc.html">choose_icc()</a></code> decision helper too. The
+<a href="choosing-an-icc.html"><em>Choosing an ICC</em></a> guide walks
+the other four axes. Pass the design and it hands back the coefficient
+to report and the exact <code><a href="../reference/icc.html">icc()</a></code> call, without fitting
 anything:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/choose_icc.html">choose_icc</a></span><span class="op">(</span>model <span class="op">=</span> <span class="st">"twoway"</span>, multilevel <span class="op">=</span> <span class="cn">TRUE</span>, level <span class="op">=</span> <span class="st">"cluster"</span>,</span>

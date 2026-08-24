@@ -91,15 +91,16 @@ in the <a href="glossary.html"><em>Glossary</em></a>.</p>
 <code><a href="https://rdrr.io/pkg/psych/man/ICC.html" class="external-link">psych::ICC</a></code>, the most widely used ANOVA ICC in R),
 <code>irr</code> (<code><a href="https://rdrr.io/pkg/irr/man/icc.html" class="external-link">irr::icc</a></code>, a classical
 inter-rater-reliability toolkit), and <code>irrICC</code> (Gwet’s
-model-based ICCs). All three are optional — the code chunks below only
+model-based ICCs). All three are optional: the code chunks below only
 run when the package is installed.</p>
 <div class="section level2">
 <h2 id="does-it-agree-validation">Does it agree? (validation)<a class="anchor" aria-label="anchor" href="#does-it-agree-validation"></a>
 </h2>
-<p>On a <strong>balanced</strong> design — every subject rated by every
-rater — the whole ICC family is defined for all of these tools, so we
-can line them up coefficient by coefficient. The <code>ratings</code>
-dataset is six subjects each scored by the same four raters.</p>
+<p>On a <strong>balanced</strong> design, one where every subject is
+rated by every rater, the whole ICC family is defined for all of these
+tools. So we can line them up coefficient by coefficient. The
+<code>ratings</code> dataset is six subjects each scored by the same
+four raters.</p>
 <p><code>intraclass</code> estimates the coefficients from <a href="glossary.html#variance-component">variance components</a> fitted
 by <a href="glossary.html#reml">REML</a> (a mixed model), whereas
 <code>psych</code> and <code>irr</code> derive them from classical
@@ -187,16 +188,16 @@ to each other. The table shows how close they land here:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">max_gap</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">$</span><span class="va">intraclass</span> <span class="op">-</span> <span class="va">comparison</span><span class="op">$</span><span class="va">psych</span><span class="op">)</span>,</span>
 <span>               <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">$</span><span class="va">intraclass</span> <span class="op">-</span> <span class="va">comparison</span><span class="op">$</span><span class="va">irr</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>Every coefficient matches to five decimal places — the largest
+<p>Every coefficient matches to five decimal places. The largest
 disagreement anywhere in the table is 7.2e-06. That residual is not
-error in either tool; it is the small-sample gap between a REML fit and
+error in either tool. It is the small-sample gap between a REML fit and
 ANOVA mean squares, which vanishes as the sample grows. <strong>On the
 designs classical tools handle, you lose nothing by using
-<code>intraclass</code></strong> — the <code>psych</code> agreement is
-in fact checked on every test run of this package.</p>
+<code>intraclass</code></strong>, and the <code>psych</code> agreement
+is in fact checked on every test run of this package.</p>
 <p>A model-based tool from a different lineage agrees too.
 <code>irrICC</code> implements Gwet’s ICCs, estimated by a moment method
-rather than either REML or ANOVA; its two-way random agreement
+rather than either REML or ANOVA. Its two-way random agreement
 coefficient (<code>icc2r</code>) reproduces <code>intraclass</code>’s
 <code>ICC(A,1)</code>:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -228,7 +229,7 @@ diverge.</p>
 <h3 id="incomplete-and-unbalanced-data">Incomplete and unbalanced data<a class="anchor" aria-label="anchor" href="#incomplete-and-unbalanced-data"></a>
 </h3>
 <p>The <code>ratings_incomplete</code> dataset is the same study with
-four ratings missing — in particular the second rater scored only two of
+four ratings missing. In particular, the second rater scored only two of
 the six subjects:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">wide_incomplete</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/reshape.html" class="external-link">reshape</a></span><span class="op">(</span><span class="va">ratings_incomplete</span>, idvar <span class="op">=</span> <span class="st">"subject"</span>,</span>
@@ -316,18 +317,18 @@ of ratings</a> (<code>k_eff</code>) that accounts for the imbalance:</p>
 <span>  k_eff <span class="op">=</span> <span class="va">fit_inc</span><span class="op">$</span><span class="va">k_eff</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      estimate subjects_used  ratings_used         k_eff </span></span>
 <span><span class="co">#&gt;     0.5205561     6.0000000    20.0000000     3.2727273</span></span></code></pre></div>
-<p>All six subjects and all twenty observed ratings contribute; nothing
-is thrown away. (<code>irrICC</code> can also fit incomplete data with
-its own model — see the capability matrix below — but the mean-squares
-tools cannot.)</p>
+<p>All six subjects and all twenty observed ratings contribute, and
+nothing is thrown away. <code>irrICC</code> can also fit incomplete data
+with its own model, as the capability matrix below shows, but the
+mean-squares tools cannot.</p>
 </div>
 <div class="section level3">
 <h3 id="the-bigger-picture">The bigger picture<a class="anchor" aria-label="anchor" href="#the-bigger-picture"></a>
 </h3>
 <p>Agreement on balanced data and graceful handling of missing data are
 two entries in a wider gap. The table below summarizes what each package
-computes; it is a map of intent, not a scorecard — each tool is
-excellent at what it was designed for.</p>
+computes. It is a map of intent, not a scorecard: each tool is excellent
+at what it was designed for.</p>
 <table class="table">
 <colgroup>
 <col width="15%">
@@ -353,22 +354,22 @@ excellent at what it was designed for.</p>
 </tr>
 <tr class="even">
 <td>Incomplete / unbalanced data</td>
-<td align="center">—</td>
-<td align="center">—</td>
+<td align="center">no</td>
+<td align="center">no</td>
 <td align="center">✅</td>
 <td align="center">✅</td>
 </tr>
 <tr class="odd">
 <td>Multilevel (subject <strong>and</strong> cluster) IRR</td>
-<td align="center">—</td>
-<td align="center">—</td>
-<td align="center">—</td>
+<td align="center">no</td>
+<td align="center">no</td>
+<td align="center">no</td>
 <td align="center">✅</td>
 </tr>
 <tr class="even">
 <td>Boundary-aware interval</td>
-<td align="center">—</td>
-<td align="center">—</td>
+<td align="center">no</td>
+<td align="center">no</td>
 <td align="center">partial</td>
 <td align="center">✅</td>
 </tr>
@@ -378,46 +379,46 @@ excellent at what it was designed for.</p>
 rater framing</td>
 <td align="center">partial</td>
 <td align="center">partial</td>
-<td align="center">—</td>
+<td align="center">no</td>
 <td align="center">✅</td>
 </tr>
 <tr class="even">
 <td>Guidance on <em>which</em> ICC to report</td>
-<td align="center">—</td>
-<td align="center">—</td>
-<td align="center">—</td>
+<td align="center">no</td>
+<td align="center">no</td>
+<td align="center">no</td>
 <td align="center">✅</td>
 </tr>
 </tbody>
 </table>
 <p>Two rows deserve a word. Model-based extractors such as
 <code>performance::icc</code> return <strong>variance
-components</strong> or a variance-partition coefficient, which is the
-raw material of an ICC but not the inter-rater-reliability coefficient
+components</strong> or a variance-partition coefficient. That is the raw
+material of an ICC, but not the inter-rater-reliability coefficient
 family itself, nor the error-variance framing that distinguishes
-agreement from consistency. (<code>intraclass</code>’s own
+agreement from consistency. <code>intraclass</code>’s own
 generalizability coefficients were validated against
-<code>gtheory</code> — a generalizability-theory package archived from
-CRAN in March 2025, and not a dependency here — agreeing to within
-0.001; those committed reference values live in the package’s reference
-notes.) And an <strong>interval</strong> that is <a href="glossary.html#monte-carlo-interval">boundary-aware</a> — that
-behaves correctly when a variance component is estimated at its <a href="glossary.html#zero-variance-boundary">zero boundary</a>, where a
-normal-approximation interval silently misbehaves — is something none of
-the classical tools provide.</p>
+<code>gtheory</code>, agreeing to within 0.001. <code>gtheory</code> is
+a generalizability-theory package archived from CRAN in March 2025, and
+is not a dependency here. Those committed reference values live in the
+package’s reference notes. And an <strong>interval</strong> that is <a href="glossary.html#monte-carlo-interval">boundary-aware</a> is
+something none of the classical tools provide. Such an interval behaves
+correctly when a variance component is estimated at its <a href="glossary.html#zero-variance-boundary">zero boundary</a>, where a
+normal-approximation interval silently misbehaves.</p>
 <p><code>intraclass</code> earns its extra machinery on exactly these
 cases. For the details of each, see the companion articles:</p>
 <ul>
 <li>
-<a href="choosing-an-icc.html"><em>Choosing an ICC</em></a> — the
+<a href="choosing-an-icc.html"><em>Choosing an ICC</em></a>: the
 selection framework the last matrix row points to.</li>
 <li>
-<a href="multilevel-designs.html"><em>Multilevel designs</em></a> —
+<a href="multilevel-designs.html"><em>Multilevel designs</em></a>:
 subject- and cluster-level reliability when raters are nested.</li>
 <li>
-<a href="interval-methods.html"><em>Interval methods</em></a> — the
+<a href="interval-methods.html"><em>Interval methods</em></a>: the
 boundary-aware Monte-Carlo and bootstrap intervals.</li>
 <li>
-<a href="engines.html"><em>Estimation engines</em></a> — the
+<a href="engines.html"><em>Estimation engines</em></a>: the
 mixed-model, SEM, and Bayesian backends behind these numbers.</li>
 </ul>
 </div>
@@ -427,14 +428,14 @@ mixed-model, SEM, and Bayesian backends behind these numbers.</li>
 </h2>
 <p>If your design is <strong>balanced and complete</strong> and you only
 need the classic McGraw–Wong coefficients, <code>psych</code> and
-<code>irr</code> are mature, familiar, and — as the table above shows —
+<code>irr</code> are mature, familiar, and, as the table above shows,
 numerically identical to <code>intraclass</code>. Reach for
 <code>intraclass</code> when your data are <strong>incomplete or
-unbalanced</strong>, when raters are <strong>nested in
-clusters</strong>, when you need an <strong>interval you can trust near
-the boundary</strong>, or when you want the package to help you
-<strong>choose and justify</strong> the coefficient in the first
-place.</p>
+unbalanced</strong>, or when raters are <strong>nested in
+clusters</strong>. Reach for it too when you need an <strong>interval
+you can trust near the boundary</strong>, or when you want the package
+to help you <strong>choose and justify</strong> the coefficient in the
+first place.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

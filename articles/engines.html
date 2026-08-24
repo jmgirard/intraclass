@@ -84,33 +84,33 @@
 works, and every example in the other articles uses it. This article is
 for when you want to know what that default is doing, or you have a
 reason to switch. An <a href="glossary.html#engine"><strong>engine</strong></a> is the
-computational backend <code><a href="../reference/icc.html">icc()</a></code> uses to estimate the <a href="glossary.html#variance-component">variance components</a> — chosen
+computational backend <code><a href="../reference/icc.html">icc()</a></code> uses to estimate the <a href="glossary.html#variance-component">variance components</a>, chosen
 with the <code>engine</code> argument. Some engine choices are purely
-computational — the same estimator, a different solver — while others
-compute a genuinely different (though asymptotically equivalent:
-converging to the same answer as the sample grows) estimator, or move to
-a fully Bayesian fit. This article covers the mixed-model engines
-(glmmTMB, lme4), the structural-equation engine (lavaan), and the
-Bayesian engine (brms), and when the distinction matters. Any unfamiliar
-term is defined in the <a href="glossary.html"><em>Glossary</em></a>.</p>
+computational: the same estimator, a different solver. Others compute a
+genuinely different estimator, one that is asymptotically equivalent (it
+converges to the same answer as the sample grows), or move to a fully
+Bayesian fit. This article covers the mixed-model engines (glmmTMB,
+lme4), the structural-equation engine (lavaan), and the Bayesian engine
+(brms), and when the distinction matters. Any unfamiliar term is defined
+in the <a href="glossary.html"><em>Glossary</em></a>.</p>
 <div class="section level2">
 <h2 id="the-mixed-model-engines-glmmtmb-and-lme4">The mixed-model engines: glmmTMB and lme4<a class="anchor" aria-label="anchor" href="#the-mixed-model-engines-glmmtmb-and-lme4"></a>
 </h2>
 <p>By default <code><a href="../reference/icc.html">icc()</a></code> fits the variance components with
 <strong>glmmTMB</strong>. You can instead request <strong>lme4</strong>
 with <code>engine = "lme4"</code> for the random two-way design. The
-lme4 package itself arrives with the installation — glmmTMB names lme4
-in its own <code>Imports:</code> — but the engine needs one piece more:
-<strong>merDeriv</strong>, which supplies the parameter covariance the
-default Monte-Carlo interval is built from, and which every lme4 fit
-checks for on entry whatever interval method you ask for. merDeriv sits
-in <code>Suggests:</code> and is fetched only on request, so a plain
-install leaves you with the lme4 package but not the lme4 engine. Both
-engines are <a href="glossary.html#reml">REML</a> mixed-model fits of
-the same model (REML — restricted maximum likelihood — is the standard
-way to estimate variance components), so on a given dataset they return
-the same coefficients to numerical tolerance — the choice is about the
-fitting backend, not the estimand.</p>
+lme4 package itself arrives with the installation, because glmmTMB names
+lme4 in its own <code>Imports:</code>. But the engine needs one piece
+more: <strong>merDeriv</strong>. It supplies the parameter covariance
+the default Monte-Carlo interval is built from, and every lme4 fit
+checks for it on entry whatever interval method you ask for. merDeriv
+sits in <code>Suggests:</code> and is fetched only on request, so a
+plain install leaves you with the lme4 package but not the lme4 engine.
+Both engines are <a href="glossary.html#reml">REML</a> mixed-model fits
+of the same model. (REML, restricted maximum likelihood, is the standard
+way to estimate variance components.) On a given dataset they therefore
+return the same coefficients to numerical tolerance: the choice is about
+the fitting backend, not the estimand.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">glmmtmb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, engine <span class="op">=</span> <span class="st">"glmmTMB"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning in check_dep_version(dep_pkg = "TMB"): package version mismatch: </span></span>
@@ -129,25 +129,25 @@ fitting backend, not the estimand.</p>
 <span><span class="co">#&gt; 3 ICC(C,1)  0.7148 0.7148</span></span>
 <span><span class="co">#&gt; 4 ICC(C,k)  0.9093 0.9093</span></span></code></pre></div>
 <p>The two point estimates agree to well within rounding, and their
-Monte-Carlo intervals coincide to about <code>0.01</code>: the lme4
+Monte-Carlo intervals coincide to about <code>0.01</code>. The lme4
 interval is built from the parameter covariance supplied by the
 <strong>merDeriv</strong> package, transformed onto the same
 boundary-aware log-scale glmmTMB uses. glmmTMB remains the recommended
-default — it is the engine this package declares in
+default. It is the engine this package declares in
 <code>Imports:</code>, and it is robust when a variance component sits
 exactly at the <a href="glossary.html#zero-variance-boundary">zero
-boundary</a>, where the lme4 route cannot form an interval and directs
-you back to glmmTMB. lme4 otherwise has full design parity with glmmTMB
-— the fixed-rater and every multilevel design, on balanced
-<strong>and</strong> incomplete/ragged data — degrading to glmmTMB only
-at that variance boundary.</p>
+boundary</a>. At that boundary the lme4 route cannot form an interval,
+and directs you back to glmmTMB. lme4 otherwise has full design parity
+with glmmTMB, covering the fixed-rater and every multilevel design, on
+balanced <strong>and</strong> incomplete/ragged data. It degrades to
+glmmTMB only at that variance boundary.</p>
 </div>
 <div class="section level2">
 <h2 id="a-structural-equation-engine-lavaan">A structural-equation engine (<code>lavaan</code>)<a class="anchor" aria-label="anchor" href="#a-structural-equation-engine-lavaan"></a>
 </h2>
 <p><code>engine = "lavaan"</code> fits the same design as a
-<strong>structural equation model</strong> — a common-factor
-generalizability model in the sense of Jorgensen (2021) — for the random
+<strong>structural equation model</strong>, a common-factor
+generalizability model in the sense of Jorgensen (2021), for the random
 two-way design. Unlike lme4, this is not just a different backend for
 the <em>same</em> estimator: it matters which coefficient you ask
 for.</p>
@@ -177,37 +177,38 @@ for.</p>
 <p><strong>Consistency</strong> coefficients are a ratio of the subject
 and residual variances, so the SEM returns them identically to the mixed
 model. <strong>Absolute agreement</strong> is different. The SEM has no
-random rater effect to estimate — a rater is a single column, so its
+random rater effect to estimate: a rater is a single column, so its
 effect lives in the column <em>means</em>. Following Jorgensen (2021),
 the rater variance is recovered from the mean structure as the variance
 of the estimated indicator intercepts. This <a href="glossary.html#indicator-mean-estimator"><strong>indicator-mean
 estimator</strong></a> is a genuinely different estimator of the rater
-variance than the mixed model’s random effect: the two are
+variance than the mixed model’s random effect. The two are
 asymptotically equivalent and match conventional generalizability-theory
 software (GENOVA, and formerly the <code>gtheory</code> package) closely
-on real data [Vispoel et al. 2022], but on a small design they differ by
-a modest amount — here <code>ICC(A,1)</code> is about <code>0.284</code>
-from lavaan versus <code>0.290</code> from the mixed model, because the
-raw variance of only four estimated rater means carries small-sample
-noise the mixed model shrinks away.</p>
-<p>Which is “right”? Neither is wrong — they are two defensible
+on real data [Vispoel et al. 2022]. But on a small design they differ by
+a modest amount: here <code>ICC(A,1)</code> is about <code>0.284</code>
+from lavaan versus <code>0.290</code> from the mixed model. The gap here
+comes from the raw variance of only four estimated rater means, which
+carries small-sample noise the mixed model shrinks away.</p>
+<p>Which is “right”? Neither is wrong: they are two defensible
 estimators of the same population quantity. Use <code>"glmmTMB"</code>
 (the default) if you want the mixed-model random-rater estimate and its
-wider, generalize-to-new-raters interval; reach for
+wider, generalize-to-new-raters interval. Reach for
 <code>"lavaan"</code> if you are working inside an SEM
 generalizability-theory workflow and want results comparable to that
 literature. The SEM engine covers the random <strong>and
 fixed-rater</strong> two-way design, on complete <strong>and
-incomplete</strong> (<a href="glossary.html#fiml">FIML</a>) data — the
-parametric bootstrap is available on complete data, Monte-Carlo
-throughout — and the crossed (Design 1) <strong>multilevel</strong>
-design as a two-level SEM (random raters on complete, balanced data with
-equal cluster sizes; Monte-Carlo interval), reporting the subject- and
-cluster-level ICCs off one five-component fit. Two-level SEM estimation
-is full-information ML with no REML analog, so with few clusters its
-cluster-level components sit slightly below the REML estimates and its
-agreement rater term slightly above — both documented differences that
-shrink as the cluster count grows, while consistency ICCs agree
+incomplete</strong> (<a href="glossary.html#fiml">FIML</a>) data, with
+the parametric bootstrap available on complete data and Monte-Carlo
+throughout. It also covers the crossed (Design 1)
+<strong>multilevel</strong> design as a two-level SEM, reporting the
+subject- and cluster-level ICCs off one five-component fit. That route
+takes random raters on complete, balanced data with equal cluster sizes,
+and gives a Monte-Carlo interval. Two-level SEM estimation is
+full-information ML with no REML analog. So with few clusters its
+cluster-level components sit slightly below the REML estimates, and its
+agreement rater term slightly above. Both are documented differences
+that shrink as the cluster count grows, while consistency ICCs agree
 essentially exactly. One-way designs are still directed to the
 mixed-model engines.</p>
 </div>
@@ -216,19 +217,20 @@ mixed-model engines.</p>
 </h2>
 <p><code>engine = "brms"</code> fits the variance components in a fully
 <strong>Bayesian</strong> framework (Stan, via the <strong>brms</strong>
-package) — the approach ten Hove, Jorgensen &amp; van der Ark (2020)
-developed for interrater reliability. Instead of a single REML point
-with a Monte-Carlo interval, it samples the posterior of every variance
-component and reads the ICC off the draws: the point estimate is the <a href="glossary.html#posterior-mode-map">posterior <strong>mode</strong>
-(MAP)</a> and the interval is a <strong>credible</strong> interval
-(covered in <a href="interval-methods.html#bayesian-credible-intervals-ci_method-posterior"><em>Confidence-interval
-methods</em></a>). Because it samples a Stan model, this engine is
-slower than the others and needs the <code>brms</code> package (an
-optional <code>Suggests</code> dependency).</p>
+package). This is the approach ten Hove, Jorgensen &amp; van der Ark
+(2020) developed for interrater reliability. Instead of a single REML
+point with a Monte-Carlo interval, it samples the posterior of every
+variance component and reads the ICC off the draws. The point estimate
+is the <a href="glossary.html#posterior-mode-map">posterior
+<strong>mode</strong> (MAP)</a> and the interval is a
+<strong>credible</strong> interval, covered in <a href="interval-methods.html#bayesian-credible-intervals-ci_method-posterior"><em>Confidence-interval
+methods</em></a>. Because it samples a Stan model, this engine is slower
+than the others and needs the <code>brms</code> package (an optional
+<code>Suggests</code> dependency).</p>
 <p>The examples below are shown with pre-computed output: fitting a Stan
 model needs a toolchain not available when this site is built, so these
 chunks are not evaluated at knit time. What they show is
-<code><a href="../reference/icc.html">icc()</a></code>’s own printed output; on a design this small the
+<code><a href="../reference/icc.html">icc()</a></code>’s own printed output. On a design this small the
 sampler may additionally report divergent transitions, and whether it
 does depends on the seed and the platform, so those warnings are not
 reproduced here.</p>
@@ -248,26 +250,26 @@ reproduced here.</p>
 <p>The header names a <strong>brms (MCMC)</strong> engine and a
 <strong>posterior credible</strong> interval, and
 <code>ci_method = "posterior"</code> is automatic. On this tiny
-six-subject design the MAP <code>ICC(A,1)</code> (about
-<code>0.24</code>) sits a little below the glmmTMB REML value
-(<code>0.29</code>): the MAP is the mode of a wide, right-skewed
+six-subject design the MAP <code>ICC(A,1)</code> is about
+<code>0.24</code>, a little below the glmmTMB REML value of
+<code>0.29</code>. The MAP is the mode of a wide, right-skewed
 posterior, which the small sample pulls down (ten Hove et al. 2020 note
-this at small rater counts). Sampler settings — chains, iterations,
-backend, parallel <code>cores</code> — pass through
-<code>brm_args</code>, e.g.
+this at small rater counts). Sampler settings pass through
+<code>brm_args</code>: chains, iterations, backend, and parallel
+<code>cores</code>, as in
 <code>brm_args = list(chains = 4, cores = 4)</code>.</p>
 <div class="section level3">
 <h3 id="the-prior-and-overriding-it">The prior, and overriding it<a class="anchor" aria-label="anchor" href="#the-prior-and-overriding-it"></a>
 </h3>
 <p>By default the engine places a weakly-informative
 <strong>half-<em>t</em>(4, 0, 1)</strong> <a href="glossary.html#prior">prior</a> on every random-effect standard
-deviation — the <em>sourced</em> prior (ten Hove et al. 2020, §3.3/§4.1)
-that every coverage result in this package depends on. You can supply
-your own prior for prior-sensitivity or method-comparison work with the
-<code>prior</code> argument (any brms prior object), but
-<code><a href="../reference/icc.html">icc()</a></code> warns loudly, because leaving the sourced prior
-<strong>voids the coverage guarantees</strong> and a poorly chosen SD
-prior can <em>worsen</em> the small-sample boundary behavior:</p>
+deviation. That is the <em>sourced</em> prior (ten Hove et al. 2020,
+§3.3/§4.1) that every coverage result in this package depends on. You
+can supply your own prior for prior-sensitivity or method-comparison
+work with the <code>prior</code> argument, which takes any brms prior
+object. But <code><a href="../reference/icc.html">icc()</a></code> warns loudly, because leaving the sourced
+prior <strong>voids the coverage guarantees</strong> and a poorly chosen
+SD prior can <em>worsen</em> the small-sample boundary behavior:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/paul-buerkner/brms" class="external-link">brms</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, engine <span class="op">=</span> <span class="st">"brms"</span>,</span>
@@ -282,12 +284,12 @@ prior can <em>worsen</em> the small-sample boundary behavior:</p>
 <span><span class="co">#&gt;   prior-sensitivity or method-comparison work.</span></span></code></pre></div>
 <p>Here the deliberately over-tight <code>normal(0, 0.1)</code> prior
 squeezes every standard deviation toward zero, collapsing the ICC to
-nearly nothing — a vivid reminder that the prior is load-bearing, not a
-casual knob. Leave <code>prior</code> unset unless you specifically
-intend to depart from the sourced default. The brms engine covers the
-same design family as the mixed-model engines (two-way random and fixed,
-one-way, and the multilevel designs), on balanced and incomplete
-data.</p>
+nearly nothing. It is a vivid reminder that the prior is load-bearing,
+not a casual knob. Leave <code>prior</code> unset unless you
+specifically intend to depart from the sourced default. The brms engine
+covers the same design family as the mixed-model engines (two-way random
+and fixed, one-way, and the multilevel designs), on balanced and
+incomplete data.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
