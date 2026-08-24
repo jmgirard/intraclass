@@ -177,16 +177,16 @@ value under 1 means `"burch"` is narrower and 1 means they are the same width.
 | 30 | 0.9646 | 15 of 16 |
 | 50 | 0.9769 | 13 of 16 |
 
-Two things to read off. The first is the true ICC. `"burch"`'s width
-advantage holds much
+Two things to read off. The first is the pattern along the true ICC.
+`"burch"`'s width advantage holds much
 the same up to a true ICC of 0.3 rather than shrinking as the true ICC rises
 (on the larger grid; the smaller grid's margin does shrink across its levels).
 Measured by level medians the largest margin is at a true ICC of 0.1, not at the
 bottom of the range. Cell by cell, though, `"burch"`'s width margin is the larger
 one at the bottom level in 11 of 16 paired cells. The advantage then
 collapses to near parity at a true ICC of 0.6, on the one grid reaching that
-value, where every cell favouring `"searle"` sits. In the subject count `"burch"`'s
-width margin
+value, where every cell favouring `"searle"` sits. The second is the pattern along
+the subject count. There `"burch"`'s width margin
 shrinks steadily as the subject count grows, measured at 5 raters, which is the
 cut the second table takes. That cut is at 5 raters because 10 subjects is the
 only subject count in either grid where the rater count varies, so an
@@ -281,13 +281,13 @@ incomplete data. It is a
 deterministic closed form: no resampling, no `seed`. Its calibration fixes two
 fences: `conf_level` must be 0.90, 0.95, or 0.99 (each level carries its own
 calibrated correction constant, never interpolated between levels), and the
-calibration grid spans 2–10 raters and 10–100 subjects. Like `"npbootstrap"`, it
-returns an interval at the near-zero-ICC boundary where the two-way Monte-Carlo
-default aborts. It is deliberately conservative: it over-covers, and is wider
-than the Monte-Carlo interval at interior cells. That is why it is an opt-in
+calibration grid spans 2–10 raters and 10–100 subjects. Unlike the two-way Monte-Carlo default, it does
+not abort at the near-zero-ICC boundary: like `"npbootstrap"`, it returns an
+interval there. It is deliberately conservative: it over-covers, is wider
+than the Monte-Carlo interval at interior cells, and so it is an opt-in
 and not the default. Two reporting caveats come from `?icc`. The two-sided interval
 is not equal-tailed, so a limit must not be read as a one-sided bound at half
-the complementary level. And at `conf_level = 0.99` with two raters the interval
+the complementary level, and at `conf_level = 0.99` with two raters the interval
 can be near-vacuous.
 
 The shipped `ratings` data are too small for the calibration grid (six
@@ -356,8 +356,8 @@ the default interval is a
 **percentile** credible interval: the lower `2.5%` and upper `97.5%` quantiles of the
 ICC draws.
 Percentile is the default because it is invariant to how the ICC is parameterized, and
-because it degrades gracefully as a variance component approaches zero. Ten Hove et al.
-(2020, §4.2) find it nominal at more than two raters.
+because it degrades gracefully as a variance component approaches zero
+(ten Hove et al. 2020, §4.2). They find it nominal at more than two raters.
 
 ### Highest-posterior-density intervals
 

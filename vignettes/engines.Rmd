@@ -102,9 +102,9 @@ estimator of the rater variance than the mixed model's random effect. The two ar
 asymptotically equivalent and match conventional generalizability-theory software
 (GENOVA, and formerly the `gtheory` package) closely on real data
 [Vispoel et al. 2022]. But on a small design they differ by a modest amount: here
-`ICC(A,1)` is about `0.284` from lavaan versus `0.290` from the mixed model. The gap
-is small-sample noise in the raw variance of only four estimated rater means, noise
-the mixed model shrinks away.
+`ICC(A,1)` is about `0.284` from lavaan versus `0.290` from the mixed model. They
+differ because the raw variance of only four estimated rater means carries
+small-sample noise the mixed model shrinks away.
 
 Which is "right"? Neither is wrong: they are two defensible estimators of the same
 population quantity. Use `"glmmTMB"` (the default) if you want the mixed-model

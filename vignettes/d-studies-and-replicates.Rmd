@@ -183,9 +183,10 @@ but not the interaction, so those coefficients are higher.
 Within-cell replicates extend beyond this balanced two-way random example: **fixed**
 raters (balanced), **multilevel** designs (crossed Design 1 and nested Design 2,
 balanced), and **ragged** replicates at a single occasion are all supported. What
-remains open is the occasion-*averaged* coefficient on ragged replicates, along with
-the compound fixed-by-ragged and multilevel-by-ragged corners. With unequal per-cell
-counts there is no single effective-occasion divisor with a validated oracle.
+remains open is the occasion-*averaged* coefficient on ragged replicates, where
+unequal per-cell counts leave no single effective-occasion divisor with a
+validated oracle. The compound fixed-by-ragged and multilevel-by-ragged corners
+are open too.
 
 ## How many occasions do I need? A D-study on the occasion facet
 

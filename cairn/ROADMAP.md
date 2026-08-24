@@ -17,7 +17,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | M131 | Say what each documented method returns, and stop shadowing the shipped dataset | done | — | high | milestones/archive/M131-rd-value-and-shadowed-example.md |
 | M132 | Make the two prose-only `icc()` argument values reachable from the docs | done | — | normal | milestones/archive/M132-prose-only-icc-arguments.md |
 | M133 | Tell users which interval method is trustworthy for their design | done | M130 | high | milestones/archive/M133-ci-method-trustworthiness-table.md |
-<!-- terminal-row retention: M133 done (2026-08-23) → M128 rotated out (oldest terminal by merge order; its archive file still resolves there). Kept: M129, M130, M131, M132, M133 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
+<!-- terminal-row retention: M134 done (2026-08-23) → M129 rotated out (oldest terminal by merge order; its archive file still resolves there). Kept: M134, M130, M131, M132, M133 (5 most recent terminal) [claim:roadmap-terminal-rows]. (corrected M135: the comment still described the earlier M133 rotation, which M134's archive pass superseded.) -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
