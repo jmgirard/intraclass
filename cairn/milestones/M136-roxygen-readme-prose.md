@@ -1,6 +1,6 @@
 # M136: Roxygen and README prose pass
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** M134
 - **Driving RR:** —
@@ -118,6 +118,8 @@ condition text with their own guard
       block; drop the stray `Rplots.pdf` if an example run leaves one (M131).
 
 ## Work log
+
+- 2026-08-24: defect-return repairs complete; status back to review. `devtools::test()` FAIL 0 / WARN 3 / SKIP 2 / PASS 8827; `devtools::check()` raw `Status: 1 NOTE` (the NOT_CRAN `spelling.Rout` diff, M127/M128); `devtools::document()` and `build_readme()` leave no diff; `cairn_validate.py` all checks passed. The force-push of the rebuilt branch to PR #145 is not yet done — this session's harness refused it, so the remote still carries the pre-rewrite history.
 
 - 2026-08-24: defect-return repair, AC2 same-commit clause. Branch history rebuilt from `0d33928`: the amendment tracking edit and the `R/icc.R` roxygen rewrite that `e849606` carried together are now separate commits, and the `mpl-doc-claims.tsv` re-key that landed in `900b2d5` travels in the same commit as the rewrite it re-keys. Verified by extracting each of the branch's 10 commits with `git archive` and running `check-mpl-doc-claims.py` in the extracted tree: all 10 exit 0 (48 candidates before the rewrite, 61 from it on), where the old history had `e849606` red with 32 failures. `git diff --stat backup/m136-pre-rewrite HEAD` is empty, so the rewrite changed no file content. Force-pushed to PR #145 at the user's gate; the pre-rewrite tip is kept locally at `backup/m136-pre-rewrite`.
 
