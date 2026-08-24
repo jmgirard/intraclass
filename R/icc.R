@@ -287,9 +287,9 @@
 #'   covers the two-way design with random or fixed raters, on both complete and
 #'   **incomplete** data. For fixed raters the agreement rater term is the McGraw
 #'   & Wong Case-3A bias-corrected finite-population variance, which equals the
-#'   mixed-model estimate on balanced data. Missing cells are estimated by
-#'   full-information maximum likelihood, and the parametric bootstrap is
-#'   unavailable for incomplete SEM. It also covers the crossed (Design 1)
+#'   mixed-model estimate on balanced data. For that design, missing cells are
+#'   estimated by full-information maximum likelihood, and the parametric
+#'   bootstrap is unavailable for incomplete SEM. It also covers the crossed (Design 1)
 #'   **multilevel** design at both levels, plus the conflated diagnostic, via a
 #'   two-level SEM. With **random**
 #'   raters the multilevel fit covers complete/balanced data. It also covers
@@ -355,8 +355,8 @@
 #'   separately, so one can be named where the other is not. On unbalanced one-way
 #'   data it can name `"npbootstrap"`. Because that method resamples, its trial
 #'   run is evidence about one run rather than about the data. So the trial uses
-#'   your call's own `boot_samples` and your own `seed` when you set one, and
-#'   your retry reproduces it exactly. With no seed set it uses a
+#'   your call's own `boot_samples` and your own `seed` when you set one, in
+#'   which case your retry reproduces it exactly. With no seed set it uses a
 #'   fixed seed the message then names, and an unseeded retry draws fresh resamples
 #'   and can fail where the verified run succeeded, especially on small designs.
 #'   The trial run leaves the session's random-number stream untouched.
@@ -640,10 +640,10 @@
 #' the normal included.
 #' Its robustness has a measured limit: on strongly skewed subject effects
 #' `"burch"` under-covers about as badly as the default (see the coverage caveat
-#' under Confidence intervals). Both share the conventions above. The
+#' under Confidence intervals). Both share the conventions above. For both, the
 #' `unit = "average"` (ICC(k))
 #' interval is the same exact monotone **Spearman-Brown** image of the ICC(1)
-#' endpoints, so its coverage is identical by construction. Endpoints are left
+#' endpoints, so its coverage is identical by construction. Their endpoints are left
 #' **untruncated** on the estimator's own support, and the reported **point** is the
 #' engine (REML) point. Being closed forms they take no `mc_samples`, `boot_samples`,
 #' or `seed`, and report no `std.error` (there is no sampling distribution). Their

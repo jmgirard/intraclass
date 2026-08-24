@@ -163,9 +163,9 @@ log-SD parameterization) with a clear message. \code{"lavaan"}
 covers the two-way design with random or fixed raters, on both complete and
 \strong{incomplete} data. For fixed raters the agreement rater term is the McGraw
 & Wong Case-3A bias-corrected finite-population variance, which equals the
-mixed-model estimate on balanced data. Missing cells are estimated by
-full-information maximum likelihood, and the parametric bootstrap is
-unavailable for incomplete SEM. It also covers the crossed (Design 1)
+mixed-model estimate on balanced data. For that design, missing cells are
+estimated by full-information maximum likelihood, and the parametric
+bootstrap is unavailable for incomplete SEM. It also covers the crossed (Design 1)
 \strong{multilevel} design at both levels, plus the conflated diagnostic, via a
 two-level SEM. With \strong{random}
 raters the multilevel fit covers complete/balanced data. It also covers
@@ -233,8 +233,8 @@ method's Spearman-Brown map breaks down. The two closed forms are asked
 separately, so one can be named where the other is not. On unbalanced one-way
 data it can name \code{"npbootstrap"}. Because that method resamples, its trial
 run is evidence about one run rather than about the data. So the trial uses
-your call's own \code{boot_samples} and your own \code{seed} when you set one, and
-your retry reproduces it exactly. With no seed set it uses a
+your call's own \code{boot_samples} and your own \code{seed} when you set one, in
+which case your retry reproduces it exactly. With no seed set it uses a
 fixed seed the message then names, and an unseeded retry draws fresh resamples
 and can fail where the verified run succeeded, especially on small designs.
 The trial run leaves the session's random-number stream untouched.
@@ -755,10 +755,10 @@ symmetric heavy-tailed family measured (a median width ratio of
 the normal included.
 Its robustness has a measured limit: on strongly skewed subject effects
 \code{"burch"} under-covers about as badly as the default (see the coverage caveat
-under Confidence intervals). Both share the conventions above. The
+under Confidence intervals). Both share the conventions above. For both, the
 \code{unit = "average"} (ICC(k))
 interval is the same exact monotone \strong{Spearman-Brown} image of the ICC(1)
-endpoints, so its coverage is identical by construction. Endpoints are left
+endpoints, so its coverage is identical by construction. Their endpoints are left
 \strong{untruncated} on the estimator's own support, and the reported \strong{point} is the
 engine (REML) point. Being closed forms they take no \code{mc_samples}, \code{boot_samples},
 or \code{seed}, and report no \code{std.error} (there is no sampling distribution). Their

@@ -38,8 +38,8 @@ functions.
 > ICC family is implemented. That covers two-way designs (absolute agreement vs.
 > consistency, single vs. average, random vs. fixed raters) and one-way designs.
 > It covers imbalanced and incomplete (missing-cell) data. It also covers
-> multilevel designs, at the subject level and the cluster level, with raters
-> crossed with or nested in clusters or subjects. Each comes with
+> multilevel designs, at the subject or cluster level, with raters crossed with
+> or nested in clusters or subjects. Each comes with
 > boundary-aware Monte-Carlo intervals. Fits run on `glmmTMB` (the default) or
 > `lme4`. Bayesian fits run on `brms`, and SEM fits on `lavaan`. The
 > [engines article](https://jmgirard.github.io/intraclass/articles/engines.html)
