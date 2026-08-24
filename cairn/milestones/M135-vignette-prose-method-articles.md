@@ -1,6 +1,6 @@
 # M135: Vignette prose pass — the method articles
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** M134
 - **Driving RR:** —
@@ -57,7 +57,7 @@ found wrong goes to `/hotfix` or its own milestone, never into a style edit.
       in the same commit as the prose edit.
 - [x] AC4 `Rscript data-raw/m117-width-pin-mutations.R` exits 0 against the
       edited `interval-methods.Rmd`.
-- [ ] AC5 `devtools::test()` clean (including `test-vignette-claims.R`,
+- [x] AC5 `devtools::test()` clean (including `test-vignette-claims.R`,
       `test-vignette-transcripts.R`, `test-doc-skew-caveat.R`);
       `devtools::check()` raw `Status:` line 0 errors / 0 warnings (NOTEs
       justified); `devtools::document()` no diff;
@@ -89,6 +89,7 @@ found wrong goes to `/hotfix` or its own milestone, never into a style edit.
 
 ## Work log
 
+- 2026-08-24: review returned to in-progress (defect return 1). Consistency gate FAILED on the `r-package` profile's `NEWS.md` slot: five published articles rewritten, no NEWS entry, where M134 wrote one for its three. AC1-AC5 all verified green with fresh evidence. Six fix-now findings from the review fan-out (stale `cairn/ROADMAP.md:20` retention comment; three MPL claims dropped out of `check-mpl-doc-claims.py`'s candidate net; a widened reason clause in `d-studies-and-replicates.Rmd`; "Ten Hove" miscapitalized at `interval-methods.Rmd:359`; a softened hedge in `engines.Rmd`; the rotation date in the `roadmap-terminal-rows` row), one maintainer call (the capability matrix's `—`→`❌` cells), and an AC2 amendment owed. Detail in the Review section.
 - 2026-08-24: review in progress (checkpoint) — PR #144 draft opened; AC1-AC4 verified with fresh evidence and ticked; `cairn_validate` exit 0; AC5 test/check run and the three review lenses still in flight. Consistency-gate check pending disposition: the profile's NEWS.md slot has no entry for this pass's five rewritten articles, where M134 wrote one for its three.
 - 2026-08-24: T8 verify block — `devtools::test()` FAIL 0 / WARN 3 (expected) / SKIP 2 / PASS 8861; `devtools::check()` `Status: 1 NOTE`, the NOTE being the testthat suite's 23m elapsed time, which is what this suite costs (D-011); `devtools::document()` no diff; `python3 data-raw/check-record-claims.py` 6 claims re-derived, 0 failures.
 - 2026-08-24: T8 discovered repair, outside this milestone's Scope and flagged for review: `check-record-claims.py` was already red on `main` before this branch was cut. Its `roadmap-terminal-rows` row still expected `M129\nM130\nM131\nM132\nM133` while the table reads `M134\nM130\nM131\nM132\nM133`, because M134's archive pass rotated the table without rotating the row; the row's prose was staler still, naming M128 and a 2026-08-22 rotation. Corrected in place with the correction marked, per the rule for a record proven false. It is a records edit with no runtime surface, and it sits on this branch rather than the default branch so the merge gate sees it.
@@ -158,5 +159,120 @@ Diffstat: 10 files, +391 / -356.
   normalized scope, checked by calling `vignette_scope()`/`normalize()` directly.
   The tsv edit and the prose edit ride the same commit, `8a6b18c`.
 - AC4 (2026-08-24) `Rscript data-raw/m117-width-pin-mutations.R` exits 0 against
-  the edited vignette: every prose mutation refused, control clean.
+  the edited vignette: every prose mutation refused, control clean. `insert_after()`
+  hard-stops on a missing anchor, so exit 0 also proves both re-pointed anchors land.
+- AC5 (2026-08-24) Fresh run of the whole block. `devtools::test()`: FAIL 0,
+  WARN 3, SKIP 2, PASS 8861. The three named guards re-run directly
+  (`testthat::test_local(filter = "vignette-claims|vignette-transcripts|doc-skew-caveat")`):
+  0 failed, 0 errors, 2764 passed, 2 skipped, both skips the
+  `test-doc-skew-caveat.R` cases that need installed vignettes, which do run
+  inside `check()`. `devtools::check()` raw `Status: 1 NOTE`, 0 errors,
+  0 warnings, duration 13m 58s; the NOTE is the testthat suite's elapsed time
+  (22m against a 13m threshold), which is what this suite costs (D-011).
+  `devtools::document()` left the tree clean, so no diff.
+  `python3 data-raw/check-record-claims.py` exit 0, 6 registered claims
+  re-derived, 0 failures.
+
+### Consistency gate
+
+- `python3 cairn_validate.py` exit 0 — all 16 checks PASS, 7 advisories OK,
+  `coverage complete` and `binding criteria` among the passes.
+- `cairn_impact.py` skipped: `Principles touched: —`, no DESIGN.md principle
+  changed.
+- Toolchain slot (`cairn/PROFILE.md`, `r-package`): `document()` no diff, PASS.
+  Generated files untouched, PASS. `README.Rmd`/`README.md` not in the diff,
+  PASS. `pkgdown::check_pkgdown()` "No problems found", PASS. No new top-level
+  files, so no `.Rbuildignore` entry owed, PASS. `devtools::check()` 0 errors /
+  0 warnings, PASS.
+- **`NEWS.md` entry for this milestone's user-visible changes — FAIL.** The
+  milestone rewrote five published articles and `NEWS.md` carries no entry for
+  the pass. M134, the sibling milestone over the same surface, wrote a
+  *Documentation* bullet for its three articles (`NEWS.md:342`). The five titles
+  were searched across `NEWS.md`; every hit is an older entry about a different
+  change.
+
+### Review fan-out
+
+Surface tier is user-facing and the diff touches executable surface
+(`data-raw/m117-width-pin-mutations.R`), so the full three-lens fan-out ran, each
+lens fresh-context and none having authored the work.
+
+Findings, ranked as the lenses reported them, with disposition:
+
+1. [O]/[S] `cairn/ROADMAP.md:20`'s retention comment still reads
+   `Kept: M129, M130, M131, M132, M133` while the table's terminal rows are
+   M134, M130, M131, M132, M133. The comment carries the
+   `[claim:roadmap-terminal-rows]` citation for the very ledger row T8
+   corrected, so the correction landed in `record-claims.tsv` and left the cited
+   prose false. Verified at `cairn/ROADMAP.md:20`. **Actioned — fix.**
+2. [O] The prose split moved three substantive MPL claims out of
+   `check-mpl-doc-claims.py`'s candidate net. Verified by enumerating the
+   checker's own candidates over base and head: the count holds at 4 both sides,
+   but the base candidate carrying "it is deliberately conservative -- it
+   over-covers, and is wider than the Monte-Carlo interval at interior cells"
+   plus the near-zero-boundary clause now keys only "That is why it is an opt-in
+   and not the default.", and the base candidate carrying the near-vacuous
+   caveat now keys only the equal-tailed clause. AC3 passes by construction
+   because the checker only requires each candidate to carry a row. Guard
+   coverage over user-facing MPL claims narrowed. **Actioned — fix.**
+3. [O] `vignettes/d-studies-and-replicates.Rmd`: the reason clause "with unequal
+   per-cell counts there is no single effective-occasion divisor with a validated
+   oracle" was an em-dash parenthetical bracketed to the ragged
+   occasion-averaged corner alone; as a following sentence it now reads as the
+   reason for all three open corners. A widening AC2's word list cannot see
+   ("no" is not in it). **Actioned — fix; also the trigger for the AC2
+   amendment below.**
+4. [O] `vignettes/interval-methods.Rmd:359` now reads "Ten Hove et al." The
+   sentence split capitalized a lower-case Dutch surname particle; it is the
+   only capitalized instance in the corpus against 15 lower-case ones across
+   five vignettes. The same split also detached the citation from the
+   "degrades gracefully near zero" clause it was evidence for, so it now reads
+   as a general endorsement of the percentile default. **Actioned — fix.**
+5. [O] `vignettes/engines.Rmd`: "The gap is small-sample noise in the raw
+   variance of only four estimated rater means" identifies the whole 0.284 /
+   0.290 gap as noise, where the base said the raw variance *carries*
+   small-sample noise the mixed model shrinks away. A hedge softened.
+   **Actioned — fix.**
+6. [O] `vignettes/interval-methods.Rmd`: "Two things to read off. The first is
+   the true ICC." The first thing read off is a pattern along the true-ICC axis,
+   not the true ICC, and the paired "In the subject count ..." never gets a
+   matching "The second is", leaving the enumeration half-built.
+   **Actioned — fix.**
+7. [O] `vignettes/comparison-with-other-packages.Rmd`: five capability-matrix
+   `—` cells became `❌`, done to satisfy R1's dash count. The table carries no
+   legend, so both glyphs read as "not provided" against the table's `✅`, but
+   `❌` states it more emphatically about three named third-party packages.
+   **Maintainer call at the gate — no defect established.**
+8. [O] Three added lines exceed the files' ~85-column wrap and the
+   interval-methods read-off region leaves short orphan lines.
+   **Rejected — formatter/style nitpick, out-of-scope taxonomy.**
+9. [O] The corrected `record-claims.tsv` row dates the rotation 2026-08-24 while
+   the table rotated 2026-08-23. **Actioned — one-word fix in the same row.**
+10. [O]/[S] "AC5 is unticked and the Review section has no AC5 entry."
+    **Rejected — both lenses read the in-flight review state this session
+    checkpointed at `e1c86f6`; not a property of the work under review.**
+11. [S] prior-review lens: no prior-review regressions, zero findings. It
+    located archived `## Review` findings for M124/M128/M132, M55/M126/M129,
+    M106/M115/M130, M123/M132, M94, M102/M105/M132 on the touched files, and
+    the `gh api .../pulls/comments` probe returned `[]`, so the GitHub surface
+    was skipped.
+12. The work log's `spelling.Rout.save` open concern: the mismatch reproduces,
+    and the flagged word counts are identical between base and head
+    (`labelling` 2/2, `relabelled` 1/1, `relabellings` 1/1, `unstratified` 1/1,
+    `favouring` 1/1), so this pass introduced none of them. It produces no
+    error, warning or NOTE. **Rejected — pre-existing, the diff did not
+    introduce it.**
+
+### Disposition
+
+**Returned to `in-progress`.** The consistency gate failed on the profile's
+`NEWS.md` slot, which takes step 4's exit. Finding 3 additionally shows AC2 is
+falsified only outside the domain of the procedure it names — its scope-word
+enumeration is fixed by author recall, not decided by a procedure over the
+diff — so AC2 takes the gated criterion-amendment protocol rather than a
+re-worded pass. Findings 1, 2, 4, 5, 6 and 9 are ordinary fix-now work for the
+implement pass. Finding 7 goes to the maintainer.
+
+AC1-AC5 all verified green on this branch as written; nothing here is a failure
+of the prose work's measured targets.
 

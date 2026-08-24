@@ -11,7 +11,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 |---|---|---|---|---|---|
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68, M129, M130, M131, M132, M133, M134, M135, M136 | high | milestones/M48-release-v010.md |
 | M134 | Vignette prose pass — the reader path, and the house style standard | done | — | normal | milestones/archive/M134-vignette-prose-reader-path.md |
-| M135 | Vignette prose pass — the method articles | review | M134 | normal | milestones/M135-vignette-prose-method-articles.md |
+| M135 | Vignette prose pass — the method articles | in-progress | M134 | normal | milestones/M135-vignette-prose-method-articles.md |
 | M136 | Roxygen and README prose pass | planned | M134 | normal | milestones/M136-roxygen-readme-prose.md |
 | M130 | Back the interval-methods vignette's claims, and read it through | done | M129 | high | milestones/archive/M130-interval-methods-claims.md |
 | M131 | Say what each documented method returns, and stop shadowing the shipped dataset | done | — | high | milestones/archive/M131-rd-value-and-shadowed-example.md |
