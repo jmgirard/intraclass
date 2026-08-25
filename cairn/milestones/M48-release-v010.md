@@ -5,7 +5,7 @@
 
 - **Status:** blocked   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
-- **Depends on:** M49, M50, M51, M53, M54, M55, M61, M68, M129, M130, M131, M132, M133   <!-- owner: plan · create/amend-via-gate -->
+- **Depends on:** M49, M50, M51, M53, M54, M55, M61, M68, M129, M130, M131, M132, M133, M134, M135, M136   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP2, GP3   <!-- owner: plan · create/amend-via-gate -->
 - **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
 
@@ -105,6 +105,7 @@ gate before stamping, never folded in silently.
 - 2026-07-19: mirror catch-up by /milestone — Depends-on gained M61 (86d16e8, 2026-07-17 plan gate) and M68 (5a4a7af, 2026-07-18 plan gate: the references provenance backfill clears cairn_validate before M48's consistency gate); both were recorded in ROADMAP only, so this file's Depends-on and work log were behind.
 - 2026-08-21: Depends-on gains M129, M130, M131, M132, M133 by /milestone-plan (plan gate: the maintainer asked for a pre-CRAN hardening slate — vignette transcripts backed, interval-methods claims backed, the Rd `\value`/shadowed-example nits, the two prose-only `icc()` argument values, and a per-`ci_method` trustworthiness table — to land before the first release; the v0.1.0 window was explicitly NOT declared at that gate and this milestone stays `blocked` on it, D-050).
 - 2026-07-19: parked as `blocked` by /milestone — every dependency is satisfied so the mechanical next-action kept nominating this release, but the maintainer's v0.1.0 release window is not open; blocker is the unopened window (D-050), reversed only by the maintainer declaring it.
+- 2026-08-24: mirror catch-up by /milestone — Depends-on gained M134, M135, M136 (recorded in ROADMAP at the 2026-08-23 M134-M136 plan gate; this file's Depends-on was behind). Bookkeeping only; all three are now `done`.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

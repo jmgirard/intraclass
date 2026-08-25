@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-24 (M136 merged and archived; M131's terminal row rotated out to hold the 5-row cap. `cairn_validate` exit 0. Budgets: ROADMAP 23,792 / 24,000, LESSONS 19,935 / 20,000 and 46 / 50 lines after M136's check/test concurrency lesson was folded into M107's line, paid for by trimming that line, M80's deferral sentence and M78's retirement note; `prose-style.md` 119 lines / 6,900 bytes against its stated 120 / 8,000. Doctrine modules otherwise state no byte budget.)_
+_Last hygiene check: 2026-08-24 (no milestone in flight; M48 stays parked `blocked` on the unopened v0.1.0 window, D-050. Fixed: M48's file Depends-on was behind ROADMAP by M134, M135, M136 — mirror catch-up, bookkeeping only. `cairn_validate` exit 0, no WARN. Budgets: ROADMAP 23,787 / 24,000, LESSONS 19,935 / 20,000 and 46 / 50 lines; `prose-style.md` 119 / 6,900 against its stated 120 / 8,000; the other three doctrine modules state no budget. Inboxes: 0 open issues, 0 open PRs.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
