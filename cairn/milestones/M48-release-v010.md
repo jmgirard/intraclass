@@ -109,6 +109,7 @@ gate before stamping, never folded in silently.
 
 - 2026-08-24: Depends-on gains M137 by /milestone-plan (plan gate: the maintainer asked for one more pre-CRAN pass — a claim audit over the prose M134-M136 rewrote — before the release; the v0.1.0 window was again NOT declared and this milestone stays `blocked` on it, D-050).
 - 2026-08-25: maintainer declared the v0.1.0 release window open (D-050's blocker reversed by the only party who can); status blocked -> in-progress by /milestone-implement, branch `m048-release-v010`.
+- 2026-08-25: question gate — (1) T1's exported-API last call goes to a Fable review via /milestone-brief (the irreversible-api tripwire, maintainer's choice); (2) T3 consolidates NEWS by folding the development entries into the matching 0.1.0 sections and dropping entries that only describe changes to unreleased code.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
