@@ -28,8 +28,8 @@ test_that("recovers known population ICCs from simulated data (O3)", {
   pop_a1 <- v_s / (v_s + v_r + v_res)
   pop_ak <- v_s / (v_s + (v_r + v_res) / k)
 
-  a1 <- td[td$index == "ICC(A,1)", ]
-  ak <- td[td$index == "ICC(A,k)", ]
+  a1 <- td[td$term == "ICC(A,1)", ]
+  ak <- td[td$term == "ICC(A,k)", ]
 
   # Point estimates near the population values (generous, honest tolerance).
   expect_equal(a1$estimate, pop_a1, tolerance = 0.05)

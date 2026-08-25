@@ -41,6 +41,32 @@
 
 ## Minor improvements
 
+* `tidy()` names its coefficient-identifying column **`term`**, not `index`, so
+  the tibble follows the broom glossary the re-exported generic belongs to and
+  tools that key on `term` pick the labels up without a manual rename.
+* **Every identifier column of `tidy()` output is now present on every fit**,
+  `NA` where the design does not define it. Previously `occasions` appeared only
+  on a within-cell-replicate fit, and the D-study tidier added or dropped
+  `type`, `level` and `occasions` with the design, so two tidied fits could not
+  be row-bound and any added column changed an existing call's schema.
+* `glance()` reports `var_subject_rater` and `n_o` (both `NA` without within-cell
+  replicates) and the sampler diagnostics `rhat` and `ess_bulk` (`NA` for the
+  engines that do not sample). A replicate fit splits the residual into the
+  subject-by-rater interaction and pure error, so `var_residual` meant something
+  different there with nothing in the row to say so.
+* A choice argument now takes **exactly one value**: passing several — the full
+  set of allowed values included — aborts with a classed error instead of
+  quietly using the first. This affects `raters`, `posterior_summary`, `model`,
+  `engine`, `ci_method` and `autoplot()`'s `what`, whose defaults are now the
+  single value each one resolved to anyway. The arguments that genuinely take
+  several values (`type`, `unit`, `level`) are unchanged.
+* `d_study()` validates `conf_level` and `mc_samples`, aborting with the same
+  classed errors `icc()` raises rather than failing further down with a bare
+  base-R message.
+* `?icc` states which parts of the returned object are safe to depend on: the
+  methods, plus `$fit` and `$call`. The rest of the list is internal and may
+  change without a deprecation cycle.
+
 * `?icc` and the *Confidence-interval methods* article now document a coverage
   limitation of the default Monte-Carlo interval: when the subject effects are
   strongly skewed or heavy-tailed, it under-covers, worst 0.6725 at

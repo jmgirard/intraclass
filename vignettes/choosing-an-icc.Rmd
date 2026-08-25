@@ -180,8 +180,8 @@ random_inc <- tidy(icc(ratings_incomplete, score, subject, rater,
 fixed_inc <- suppressWarnings(tidy(icc(ratings_incomplete, score, subject, rater,
   raters = "fixed", seed = 2024)))
 
-random_inc[, c("index", "estimate", "conf.low", "conf.high")]
-fixed_inc[, c("index", "estimate", "conf.low", "conf.high")]
+random_inc[, c("term", "estimate", "conf.low", "conf.high")]
+fixed_inc[, c("term", "estimate", "conf.low", "conf.high")]
 ```
 
 The random interval is the wider of the two: generalizing to a rater universe

@@ -128,11 +128,11 @@ test_that("mpl reports the engine REML point + deterministic metadata (AC2)", {
 
   d <- mpl_twoway_long()
   mc <- tidy(icc(d, score, subject, rater, ci_method = "montecarlo", seed = 1))
-  mc1 <- mc[mc$index == "ICC(A,1)", ]
+  mc1 <- mc[mc$term == "ICC(A,1)", ]
 
   fit <- icc(d, score, subject, rater, ci_method = "mpl")
   td <- tidy(fit)
-  i1 <- td[td$index == "ICC(A,1)", ]
+  i1 <- td[td$term == "ICC(A,1)", ]
 
   # Deterministic closed form: raw token "mpl", no draws, no SE (D-015).
   expect_identical(fit$ci$method, "mpl")
@@ -180,7 +180,7 @@ test_that("mpl returns an interval where the two-way MC default aborts (AC5)", {
     if (identical(mc, "aborted")) {
       aborted <- TRUE
       fit <- icc(d, score, subject, rater, ci_method = "mpl")
-      i1 <- tidy(fit)[tidy(fit)$index == "ICC(A,1)", ]
+      i1 <- tidy(fit)[tidy(fit)$term == "ICC(A,1)", ]
       expect_true(is.finite(i1$conf.low) && is.finite(i1$conf.high))
       break
     }
@@ -203,8 +203,8 @@ test_that("mpl ICC(A,k) is the exact Spearman-Brown image of ICC(A,1), divisor R
     unit = c("single", "average"),
     ci_method = "mpl"
   ))
-  i1 <- td[td$index == "ICC(A,1)", ]
-  ik <- td[td$index == "ICC(A,k)", ]
+  i1 <- td[td$term == "ICC(A,1)", ]
+  ik <- td[td$term == "ICC(A,k)", ]
   # xiao2013's MPL has no independent ICC(A,k) construction (inheritance, not an anchor
   # -- the D-013 Burch precedent; a "direct" side built by inverting the package's own
   # ICC(A,1) endpoint would be tautological, M82 lesson). The verifiable property is the
@@ -235,12 +235,12 @@ test_that("mpl numeric unit ICC(A,m) is the exact Spearman-Brown image of ICC(A,
   # divisor would break the equality (M82 anti-tautology lesson).
   sb <- function(rho, m) m * rho / (1 + (m - 1) * rho)
   i1 <- tidy(icc(d, score, subject, rater, ci_method = "mpl"))
-  i1 <- i1[i1$index == "ICC(A,1)", ]
+  i1 <- i1[i1$term == "ICC(A,1)", ]
 
   for (m in c(1, 2, 3.5, n_r, 8)) {
     label <- paste0("ICC(A,", format(m, trim = TRUE), ")")
     im <- tidy(icc(d, score, subject, rater, unit = m, ci_method = "mpl"))
-    im <- im[im$index == label, ]
+    im <- im[im$term == label, ]
     expect_equal(nrow(im), 1L)
     expect_equal(im$conf.low, sb(i1$conf.low, m), tolerance = 1e-9)
     expect_equal(im$conf.high, sb(i1$conf.high, m), tolerance = 1e-9)
@@ -252,7 +252,7 @@ test_that("mpl numeric unit ICC(A,m) is the exact Spearman-Brown image of ICC(A,
 
   # m = 1 reduces to ICC(A,1) exactly; m = R matches unit = "average" (both divisor R).
   m1 <- tidy(icc(d, score, subject, rater, unit = 1, ci_method = "mpl"))
-  m1 <- m1[m1$index == "ICC(A,1)", ]
+  m1 <- m1[m1$term == "ICC(A,1)", ]
   expect_equal(m1$conf.low, i1$conf.low, tolerance = 1e-12)
   expect_equal(m1$conf.high, i1$conf.high, tolerance = 1e-12)
   avg <- tidy(icc(
@@ -263,16 +263,16 @@ test_that("mpl numeric unit ICC(A,m) is the exact Spearman-Brown image of ICC(A,
     unit = "average",
     ci_method = "mpl"
   ))
-  avg <- avg[avg$index == "ICC(A,k)", ]
+  avg <- avg[avg$term == "ICC(A,k)", ]
   imr <- tidy(icc(d, score, subject, rater, unit = n_r, ci_method = "mpl"))
-  imr <- imr[imr$index == "ICC(A,4)", ]
+  imr <- imr[imr$term == "ICC(A,4)", ]
   expect_equal(imr$conf.low, avg$conf.low, tolerance = 1e-12)
   expect_equal(imr$conf.high, avg$conf.high, tolerance = 1e-12)
 
   # Mutation proof: the shipped m = 2 endpoint is NOT reproduced by a wrong divisor, so
   # the equalities above test the divisor, not a tautology.
   i2 <- tidy(icc(d, score, subject, rater, unit = 2, ci_method = "mpl"))
-  i2 <- i2[i2$index == "ICC(A,2)", ]
+  i2 <- i2[i2$term == "ICC(A,2)", ]
   expect_false(isTRUE(all.equal(i2$conf.high, sb(i1$conf.high, 3))))
 })
 
@@ -292,9 +292,9 @@ test_that("mpl numeric unit reports the engine ICC(A,m) point, deterministic + m
     ci_method = "montecarlo",
     seed = 1
   ))
-  mc6 <- mc[mc$index == "ICC(A,6)", ]
+  mc6 <- mc[mc$term == "ICC(A,6)", ]
   fit <- icc(d, score, subject, rater, unit = 6, ci_method = "mpl")
-  i6 <- tidy(fit)[tidy(fit)$index == "ICC(A,6)", ]
+  i6 <- tidy(fit)[tidy(fit)$term == "ICC(A,6)", ]
   expect_equal(i6$estimate, mc6$estimate, tolerance = 1e-8)
   expect_true(is.na(fit$ci$samples))
   expect_true(is.na(i6$std.error))
@@ -304,7 +304,7 @@ test_that("mpl numeric unit reports the engine ICC(A,m) point, deterministic + m
     c(1, 2, 4, 8, 20),
     function(m) {
       tm <- tidy(icc(d, score, subject, rater, unit = m, ci_method = "mpl"))
-      tm$conf.low[tm$index == paste0("ICC(A,", m, ")")]
+      tm$conf.low[tm$term == paste0("ICC(A,", m, ")")]
     },
     numeric(1)
   )
@@ -319,7 +319,7 @@ test_that("mpl numeric unit reports the engine ICC(A,m) point, deterministic + m
     unit = c("single", "average", 6),
     ci_method = "mpl"
   ))
-  expect_setequal(tv$index, c("ICC(A,1)", "ICC(A,k)", "ICC(A,6)"))
+  expect_setequal(tv$term, c("ICC(A,1)", "ICC(A,k)", "ICC(A,6)"))
 })
 
 # ---- AC4: the two-way-random-agreement fence + off-grid abort ----------------
@@ -409,7 +409,7 @@ test_that("mpl at conf_level 0.90/0.99 uses that level's calibrated kappa_m (M91
       ci_method = "mpl",
       conf_level = cl
     )))
-    got <- got[got$index == "ICC(A,1)", ]
+    got <- got[got$term == "ICC(A,1)", ]
     expect_equal(got$conf.low, unname(want[["lower"]]), tolerance = 1e-10)
     expect_equal(got$conf.high, unname(want[["upper"]]), tolerance = 1e-10)
     # Deterministic at every level (D-015): no draws, no SE.
@@ -430,7 +430,7 @@ test_that("mpl kappa_m and interval width are strictly ordered in conf_level (M9
       ci_method = "mpl",
       conf_level = cl
     )))
-    a[a$index == "ICC(A,1)", c("conf.low", "conf.high")]
+    a[a$term == "ICC(A,1)", c("conf.low", "conf.high")]
   })
 
   # A deeper level is a strictly wider interval and strictly nests the shallower
@@ -461,7 +461,7 @@ test_that("mpl ICC(A,k)/ICC(A,m) inherit the new levels via Spearman-Brown (M91 
       ci_method = "mpl",
       conf_level = cl
     )))
-    i1 <- i1[i1$index == "ICC(A,1)", ]
+    i1 <- i1[i1$term == "ICC(A,1)", ]
 
     for (m in c(2, 3.5, n_r, 8)) {
       label <- paste0("ICC(A,", format(m, trim = TRUE), ")")
@@ -474,7 +474,7 @@ test_that("mpl ICC(A,k)/ICC(A,m) inherit the new levels via Spearman-Brown (M91 
         ci_method = "mpl",
         conf_level = cl
       )))
-      im <- im[im$index == label, ]
+      im <- im[im$term == label, ]
       expect_equal(nrow(im), 1L)
       expect_equal(im$conf.low, sb(i1$conf.low, m), tolerance = 1e-9)
       expect_equal(im$conf.high, sb(i1$conf.high, m), tolerance = 1e-9)
@@ -568,8 +568,8 @@ test_that("mpl at conf_level 0.95 reproduces the pre-M91 endpoints (M91 AC4)", {
   # 0.95 value all break this test.
   d <- mpl_twoway_long()
   a <- suppressWarnings(tidy(icc(d, score, subject, rater, ci_method = "mpl")))
-  a1 <- a[a$index == "ICC(A,1)", ]
-  ak <- a[a$index == "ICC(A,k)", ]
+  a1 <- a[a$term == "ICC(A,1)", ]
+  ak <- a[a$term == "ICC(A,k)", ]
   expect_equal(a1$conf.low, 0.42467599012062407, tolerance = 1e-12)
   expect_equal(a1$conf.high, 0.86530180057602046, tolerance = 1e-12)
   expect_equal(ak$conf.low, 0.74700222803863625, tolerance = 1e-12)
@@ -583,7 +583,7 @@ test_that("mpl at conf_level 0.95 reproduces the pre-M91 endpoints (M91 AC4)", {
     unit = 2,
     ci_method = "mpl"
   )))
-  u2 <- u2[u2$index == "ICC(A,2)", ]
+  u2 <- u2[u2$term == "ICC(A,2)", ]
   expect_equal(u2$conf.low, 0.5961720321891123, tolerance = 1e-12)
   expect_equal(u2$conf.high, 0.92778745006176289, tolerance = 1e-12)
 
@@ -596,7 +596,7 @@ test_that("mpl at conf_level 0.95 reproduces the pre-M91 endpoints (M91 AC4)", {
     rater,
     ci_method = "mpl"
   )))
-  a25 <- a25[a25$index == "ICC(A,1)", ]
+  a25 <- a25[a25$term == "ICC(A,1)", ]
   expect_equal(a25$conf.low, 0.47848269350346301, tolerance = 1e-12)
   expect_equal(a25$conf.high, 0.89826274702687159, tolerance = 1e-12)
 })

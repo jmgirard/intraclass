@@ -104,10 +104,10 @@ sf_oracle_all <- list(
 # fix the implementation, not the test).
 #
 # Expected contract: generics::tidy(fit) returns a tibble with at least the
-# columns `index` (chr, e.g. "ICC(A,1)") and `estimate` (dbl).
+# columns `term` (chr, e.g. "ICC(A,1)") and `estimate` (dbl).
 icc_estimate <- function(fit, index) {
   td  <- generics::tidy(fit)
-  val <- td$estimate[td$index == index]
+  val <- td$estimate[td$term == index]
   if (length(val) != 1L) {
     stop(sprintf("Expected exactly one row for index '%s'; got %d.",
                  index, length(val)))

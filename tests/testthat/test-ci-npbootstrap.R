@@ -38,7 +38,7 @@ test_that("npbootstrap returns a well-formed ICC(1) interval on balanced one-way
 
   expect_identical(fit$ci$method, "npbootstrap")
   expect_identical(fit$ci$samples, 199L)
-  i1 <- td[td$index == "ICC(1)", ]
+  i1 <- td[td$term == "ICC(1)", ]
   expect_true(is.finite(i1$conf.low) && is.finite(i1$conf.high))
   expect_lt(i1$conf.low, i1$conf.high)
   expect_lte(i1$conf.high, 1)
@@ -71,7 +71,7 @@ test_that("npbootstrap unbalanced serves ICC(1) and ICC(k) but aborts a numeric 
     boot_samples = 199L,
     seed = 1
   ))
-  i1 <- td[td$index == "ICC(1)", ]
+  i1 <- td[td$term == "ICC(1)", ]
   expect_true(is.finite(i1$conf.low) && is.finite(i1$conf.high))
   expect_lt(i1$conf.low, i1$conf.high)
   # unit = "average" now ships the unbalanced ICC(k) interval (M85, GO; MD-1) -- the
@@ -87,8 +87,8 @@ test_that("npbootstrap unbalanced serves ICC(1) and ICC(k) but aborts a numeric 
     boot_samples = 199L,
     seed = 1
   ))
-  expect_setequal(td_def$index, c("ICC(1)", "ICC(k)"))
-  ik <- td_def[td_def$index == "ICC(k)", ]
+  expect_setequal(td_def$term, c("ICC(1)", "ICC(k)"))
+  ik <- td_def[td_def$term == "ICC(k)", ]
   expect_true(is.finite(ik$conf.low) && is.finite(ik$conf.high))
   expect_lt(ik$conf.low, ik$conf.high)
   expect_lte(ik$conf.high, 1)
@@ -125,7 +125,7 @@ test_that("npbootstrap reproduces the RR01-verified prototype endpoints (AC2 par
       seed = e$boot_seed
     )
     i1 <- tidy(fit)
-    i1 <- i1[i1$index == "ICC(1)", ]
+    i1 <- i1[i1$term == "ICC(1)", ]
     # The exported reducer ports the same procedure with the same resample stream,
     # so it reproduces the prototype's endpoints far past 4 dp (identical up to
     # floating-point). Assert the >= 4 dp bar AC2 states.
@@ -151,8 +151,8 @@ test_that("npbootstrap ICC(k) is the exact Spearman-Brown image of ICC(1) (BC2 i
       boot_samples = e$n_boot,
       seed = e$boot_seed
     ))
-    i1 <- td[td$index == "ICC(1)", ]
-    ik <- td[td$index == "ICC(k)", ]
+    i1 <- td[td$term == "ICC(1)", ]
+    ik <- td[td$term == "ICC(k)", ]
     # The ICC(k) endpoint must equal 1 - exp(-logF) computed from the ICC(1) rho
     # endpoint, where logF uses the GROUP SIZE n. This is an exact identity only
     # when the averaging divisor k_eff equals n -- so it doubles as a k_eff = n
@@ -258,7 +258,7 @@ test_that("npbootstrap covers a known one-way population (O1 smoke)", {
     boot_samples = 999L,
     seed = 1
   ))
-  i1 <- td[td$index == "ICC(1)", ]
+  i1 <- td[td$term == "ICC(1)", ]
   expect_lte(i1$conf.low, rho)
   expect_gte(i1$conf.high, rho)
 })

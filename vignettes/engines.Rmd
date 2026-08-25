@@ -47,7 +47,7 @@ the choice is about the fitting backend, not the estimand.
 glmmtmb <- tidy(icc(ratings, score, subject, rater, engine = "glmmTMB", seed = 1))
 lme4 <- tidy(icc(ratings, score, subject, rater, engine = "lme4", seed = 1))
 data.frame(
-  index = glmmtmb$index,
+  index = glmmtmb$term,
   glmmTMB = round(glmmtmb$estimate, 4),
   lme4 = round(lme4$estimate, 4)
 )
@@ -83,7 +83,7 @@ compare <- do.call(rbind, Map(function(type, unit) {
   l <- icc(ratings, score, subject, rater, type = type, unit = unit,
            engine = "lavaan", seed = 1)
   data.frame(
-    index = tidy(g)$index,
+    index = tidy(g)$term,
     glmmTMB = round(tidy(g)$estimate, 4),
     lavaan = round(tidy(l)$estimate, 4)
   )

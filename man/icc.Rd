@@ -11,7 +11,7 @@
 \alias{icc}
 \title{Intraclass correlation coefficient for a two-way design}
 \usage{
-autoplot.icc(object, what = c("coefficients", "components"), ...)
+autoplot.icc(object, what = "coefficients", ...)
 
 \method{plot}{icc}(x, ...)
 
@@ -33,7 +33,7 @@ icc(
   cluster = NULL,
   model = "twoway",
   type = c("agreement", "consistency"),
-  raters = c("random", "fixed"),
+  raters = "random",
   unit = c("single", "average"),
   occasions = "single",
   level = c("subject", "cluster"),
@@ -46,7 +46,7 @@ icc(
   seed = NULL,
   brm_args = list(),
   prior = NULL,
-  posterior_summary = c("percentile", "hpdi")
+  posterior_summary = "percentile"
 )
 }
 \arguments{
@@ -462,16 +462,28 @@ other interval methods already report a percentile interval.}
 variance components, design, engine, interval settings, sample sizes, the
 fitted model, and the call.
 
+\strong{What of that object is stable.} The supported way to read a fit is
+through the methods below, plus two elements of the list itself: \verb{$fit},
+the object the engine returned, and \verb{$call}, the matched call. Everything
+else in the list is internal: its names, nesting, and contents may change
+in any release without a deprecation cycle. Code that reaches into
+\verb{$estimates}, \verb{$components}, \verb{$design}, \verb{$ci}, \verb{$n}, or \verb{$mc} is reading
+an implementation detail; \code{tidy()} and \code{glance()} return the same
+information as a stable table.
+
 The methods documented on this page return:
 \itemize{
-\item \code{tidy.icc()}: a tibble with one row per estimated coefficient. Its
-columns are \code{index}, \code{type}, \code{level}, \code{sf_index}, \code{estimate},
-\code{std.error}, \code{conf.low}, \code{conf.high}, \code{conf.level}, and \code{method}. An
-\code{occasions} column joins them when the design has within-cell replicates,
-inserted after \code{index}, so the list above is not a column order.
+\item \code{tidy.icc()}: a tibble with one row per estimated coefficient, columns
+in this order: \code{term} (the coefficient's ICC index, named for the broom
+glossary), \code{occasions}, \code{type}, \code{level}, \code{sf_index}, \code{estimate},
+\code{std.error}, \code{conf.low}, \code{conf.high}, \code{conf.level}, \code{method}. Every
+column is present on every fit; \code{occasions} is \code{NA} unless the design
+has within-cell replicates.
 \item \code{glance.icc()}: a one-row tibble of model-level summaries:
 the sample sizes, the design flags, the effective rater counts, the
-variance components, and the engine and interval settings.
+variance components, the occasion count, the engine and interval
+settings, and the sampler diagnostics \code{rhat} and \code{ess_bulk} (\code{NA} for
+the non-Bayesian engines, which do not sample).
 \item \code{format.icc()}: a character vector holding the printed report, one line per
 element.
 \item \code{print.icc()}: the \code{icc} object invisibly, having emitted that report.

@@ -90,7 +90,7 @@ test_that("npbootstrap reduces to the balanced M75 prototype endpoints to 1e-10 
       boot_samples = e$n_boot,
       seed = e$boot_seed
     ))
-    i1 <- i1[i1$index == "ICC(1)", ]
+    i1 <- i1[i1$term == "ICC(1)", ]
     expect_equal(i1$conf.low, e$boott_icc1[1], tolerance = 1e-10)
     expect_equal(i1$conf.high, e$boott_icc1[2], tolerance = 1e-10)
   }
@@ -112,7 +112,7 @@ test_that("npbootstrap returns a well-formed, reproducible unbalanced ICC(1) int
   )
   a <- tidy(do.call(icc, args))
   b <- tidy(do.call(icc, args))
-  i1 <- a[a$index == "ICC(1)", ]
+  i1 <- a[a$term == "ICC(1)", ]
   expect_true(is.finite(i1$conf.low) && is.finite(i1$conf.high))
   expect_lt(i1$conf.low, i1$conf.high)
   expect_lte(i1$conf.high, 1)
@@ -135,7 +135,7 @@ test_that("npbootstrap covers a known unbalanced one-way population (O1 smoke)",
     boot_samples = 999L,
     seed = 1
   ))
-  i1 <- i1[i1$index == "ICC(1)", ]
+  i1 <- i1[i1$term == "ICC(1)", ]
   expect_lte(i1$conf.low, 0.5)
   expect_gte(i1$conf.high, 0.5)
 })

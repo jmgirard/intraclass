@@ -112,15 +112,15 @@ test_that("numeric unit in icc() equals the d_study projection at that m", {
   ))
   td <- tidy(x)
   # The projected rows carry the ICC(A,m) label and no Shrout & Fleiss form.
-  expect_true(all(c("ICC(A,3)", "ICC(A,7)") %in% td$index))
-  expect_true(all(is.na(td$sf_index[td$index %in% c("ICC(A,3)", "ICC(A,7)")])))
+  expect_true(all(c("ICC(A,3)", "ICC(A,7)") %in% td$term))
+  expect_true(all(is.na(td$sf_index[td$term %in% c("ICC(A,3)", "ICC(A,7)")])))
 
   d <- d_study(
     icc(sf_ratings_long(), score, subject, rater, type = "agreement", seed = 1),
     m = c(3, 7)
   )
   expect_equal(
-    td$estimate[match(c("ICC(A,3)", "ICC(A,7)"), td$index)],
+    td$estimate[match(c("ICC(A,3)", "ICC(A,7)"), td$term)],
     d$estimate,
     tolerance = 1e-8
   )

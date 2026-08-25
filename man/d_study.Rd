@@ -59,20 +59,21 @@ projected point and columns \code{m}, \code{index} (e.g. \code{"ICC(A,3)"}), \co
 \code{estimate}, \code{std.error}, \code{conf.low}, and \code{conf.high}, carrying the design and
 interval settings as attributes. If the fitted \code{icc} reports both error
 definitions (the default), \code{d_study()} projects \strong{one reliability curve per
-definition} and \code{tidy()} surfaces a \code{type} column to distinguish them. A
-single-type fit projects a single curve. A multilevel projection adds a
-\code{level} column (one curve per level), and a replicate projection an
-\code{occasions} column.
+definition}, distinguished by the \code{type} column. A single-type fit projects
+a single curve. A multilevel projection fills the \code{level} column (one curve
+per level), and a replicate projection the \code{occasions} column. Read the
+projection with \code{tidy()}: the object's own layout is internal, and only the
+tidied columns are a stable contract.
 
 The methods documented on this page return:
 \itemize{
-\item \code{tidy.icc_dstudy()}: a tibble with one row per projected point. Its
-columns are \code{m}, \code{index}, \code{estimate}, \code{std.error}, \code{conf.low},
-\code{conf.high}, \code{conf.level}, and \code{method}. It gains a \code{type} column when
-both error definitions are projected, a \code{level} column for a multilevel
-projection, and an \code{occasions} column for a replicate projection. The
-conditional columns are inserted after \code{index} (\code{type}) and after \code{m}
-(\code{level}, \code{occasions}), so the list above is not a column order.
+\item \code{tidy.icc_dstudy()}: a tibble with one row per projected point, columns
+in this order: \code{m}, \code{occasions}, \code{level}, \code{term} (the projected ICC
+index, named for the broom glossary), \code{type}, \code{estimate}, \code{std.error},
+\code{conf.low}, \code{conf.high}, \code{conf.level}, \code{method}. Every column is present
+on every projection; \code{occasions} is \code{NA} outside a replicate projection,
+\code{level} outside a multilevel one, and \code{type} where the design defines no
+error definition.
 \item \code{glance.icc_dstudy()}: a one-row tibble of projection-level summaries. It
 carries the distinct projected rater counts \code{m} and their range, the
 error definition(s), the rater treatment, the observed rater count, and

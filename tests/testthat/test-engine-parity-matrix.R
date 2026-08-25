@@ -108,9 +108,9 @@ pm_ne <- pm_nested(20, 6, 5, 1.0, 1.2, 0.7, 0.5, seed = 11)
 pm_estimates <- function(fit) {
   td <- tidy(fit)
   keys <- if ("level" %in% names(td) && any(!is.na(td$level))) {
-    paste(td$index, td$level, sep = "/")
+    paste(td$term, td$level, sep = "/")
   } else {
-    td$index
+    td$term
   }
   stats::setNames(td$estimate, keys)
 }

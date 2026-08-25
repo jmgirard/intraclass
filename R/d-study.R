@@ -115,19 +115,20 @@
 #'   `estimate`, `std.error`, `conf.low`, and `conf.high`, carrying the design and
 #'   interval settings as attributes. If the fitted `icc` reports both error
 #'   definitions (the default), `d_study()` projects **one reliability curve per
-#'   definition** and `tidy()` surfaces a `type` column to distinguish them. A
-#'   single-type fit projects a single curve. A multilevel projection adds a
-#'   `level` column (one curve per level), and a replicate projection an
-#'   `occasions` column.
+#'   definition**, distinguished by the `type` column. A single-type fit projects
+#'   a single curve. A multilevel projection fills the `level` column (one curve
+#'   per level), and a replicate projection the `occasions` column. Read the
+#'   projection with `tidy()`: the object's own layout is internal, and only the
+#'   tidied columns are a stable contract.
 #'
 #'   The methods documented on this page return:
-#'   * `tidy.icc_dstudy()`: a tibble with one row per projected point. Its
-#'     columns are `m`, `index`, `estimate`, `std.error`, `conf.low`,
-#'     `conf.high`, `conf.level`, and `method`. It gains a `type` column when
-#'     both error definitions are projected, a `level` column for a multilevel
-#'     projection, and an `occasions` column for a replicate projection. The
-#'     conditional columns are inserted after `index` (`type`) and after `m`
-#'     (`level`, `occasions`), so the list above is not a column order.
+#'   * `tidy.icc_dstudy()`: a tibble with one row per projected point, columns
+#'     in this order: `m`, `occasions`, `level`, `term` (the projected ICC
+#'     index, named for the broom glossary), `type`, `estimate`, `std.error`,
+#'     `conf.low`, `conf.high`, `conf.level`, `method`. Every column is present
+#'     on every projection; `occasions` is `NA` outside a replicate projection,
+#'     `level` outside a multilevel one, and `type` where the design defines no
+#'     error definition.
 #'   * `glance.icc_dstudy()`: a one-row tibble of projection-level summaries. It
 #'     carries the distinct projected rater counts `m` and their range, the
 #'     error definition(s), the rater treatment, the observed rater count, and
@@ -332,6 +333,14 @@ d_study <- function(
   }
   if (is.null(conf_level)) {
     conf_level <- x$ci$conf_level
+  } else {
+    # A supplied level is validated here rather than reaching stats::quantile() as a
+    # bare probability: an un-classed base error there breaks the #8 contract every
+    # other argument on this surface honors (RR04).
+    conf_level <- validate_conf_level(conf_level)
+  }
+  if (!is.null(mc_samples)) {
+    mc_samples <- validate_sample_count(mc_samples, "mc_samples")
   }
   if (is.null(mc_samples)) {
     # `mc_samples` sizes the Monte-Carlo band only (a bootstrap fit reprojects its
@@ -669,9 +678,21 @@ print.icc_dstudy <- function(x, ...) {
 #' @rdname d_study
 #' @export
 tidy.icc_dstudy <- function(x, ...) {
-  out <- tibble::tibble(
+  # Every identifier column is present on every projection, NA where the design does
+  # not define it: `occasions` outside a replicate projection, `level` outside a
+  # multilevel one, `type` where the design defines no error definition (D-035).
+  # A schema that appeared and disappeared with the design made two tidied
+  # projections impossible to row-bind and made any added column a breaking change.
+  n <- length(x$m)
+  # `x` is a data frame, so a missing column has to be tested by name: `$` on one
+  # warns rather than returning NULL.
+  col <- function(nm, fill) if (nm %in% names(x)) x[[nm]] else rep(fill, n)
+  tibble::tibble(
     m = x$m,
-    index = x$index,
+    occasions = col("occasions", NA_integer_),
+    level = as.character(col("level", NA_character_)),
+    term = x$index,
+    type = as.character(col("type", NA_character_)),
     estimate = x$estimate,
     std.error = x$std.error,
     conf.low = x$conf.low,
@@ -679,19 +700,6 @@ tidy.icc_dstudy <- function(x, ...) {
     conf.level = attr(x, "conf.level"),
     method = attr(x, "method")
   )
-  # Carry a `type` column when both error definitions are projected (ADR-054), the
-  # `level` column for a multilevel projection (subject/cluster curves), and the
-  # `occasions` column for a replicate projection (one curve per occasion setting, M22).
-  if (length(unique(x$type[!is.na(x$type)])) >= 2) {
-    out <- tibble::add_column(out, type = x$type, .after = "index")
-  }
-  if (isTRUE(attr(x, "multilevel"))) {
-    out <- tibble::add_column(out, level = x$level, .after = "m")
-  }
-  if (isTRUE(attr(x, "replicates"))) {
-    out <- tibble::add_column(out, occasions = x$occasions, .after = "m")
-  }
-  out
 }
 
 #' @rdname d_study

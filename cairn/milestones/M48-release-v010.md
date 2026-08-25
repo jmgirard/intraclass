@@ -71,12 +71,12 @@ gate before stamping, never folded in silently.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Last-call API audit — one deliberate pass over the exported surface
+- [x] T1: Last-call API audit — one deliberate pass over the exported surface
       (`icc()`, `d_study()`, `choose_icc()`, S3 methods: names, argument
       order, defaults, return shapes) ending in a recorded disposition;
       expected outcome "no changes", anything substantive stops for a gate
       amendment. (RB tripwire: irreversible-api)
-- [ ] T1b: Apply the five accepted RR04 changes plus the two accepted extras —
+- [x] T1b: Apply the five accepted RR04 changes plus the two accepted extras —
       scalar `raters`/`posterior_summary` defaults and a loud abort on a
       multi-valued choice argument; always-present identifier columns in both
       tidiers; `var_subject_rater` + `n_o` in `glance.icc()`; the `icc`
@@ -121,6 +121,8 @@ gate before stamping, never folded in silently.
 - 2026-08-25: blocked on RB04 — the T1 exported-API last call is briefed at `cairn/reviews/RB04-exported-api-last-call.md` (11 questions over the three exported functions, the 13 S3 methods, the tidy/glance shapes, and whether anything should be withheld from the first release).
 - 2026-08-25: RB04 spawned and RR04 returned in-session ([F] review of the exported surface); ingested here, RB/RR pair archived, status back to in-progress.
 - 2026-08-25: gated amendment — Tasks gain T1b and Coverage's AC1 line gains it, executing the RR04 triage below; no acceptance criterion changed.
+- 2026-08-25: T1 done — the last-call audit ran as RB04/RR04 and its disposition is recorded in the Decisions section below: the surface ships as audited but for seven accepted changes, two of them promoted to D-035.
+- 2026-08-25: T1b done — the seven accepted changes applied across `R/icc.R`, `R/icc-methods.R`, `R/d-study.R`, `R/autoplot.R`, with `tests/testthat/test-exported-contract.R` (32 assertions) pinning both D-035 clauses, the `d_study()` validation, and the `glance()` replicate columns; the `index` -> `term` rename swept 20 test files (188 sites, [S] delegation, diff verified) and four vignettes. `devtools::test()` 0 failures, `air format --check` clean, `devtools::document()` rewrote `man/icc.Rd` and `man/d_study.Rd`.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

@@ -66,8 +66,8 @@ test_that("bootstrap interval covers a known population ICC (O1)", {
 
   pop_a1 <- v_s / (v_s + v_r + v_res)
   pop_ak <- v_s / (v_s + (v_r + v_res) / k)
-  a1 <- td[td$index == "ICC(A,1)", ]
-  ak <- td[td$index == "ICC(A,k)", ]
+  a1 <- td[td$term == "ICC(A,1)", ]
+  ak <- td[td$term == "ICC(A,k)", ]
 
   expect_lte(a1$conf.low, pop_a1)
   expect_gte(a1$conf.high, pop_a1)
@@ -486,7 +486,7 @@ test_that("lavaan bootstrap interval covers the known population ICC (O1)", {
     seed = 1
   ))
   pop_c1 <- v_s / (v_s + v_res)
-  c1 <- bs[bs$index == "ICC(C,1)", ]
+  c1 <- bs[bs$term == "ICC(C,1)", ]
 
   expect_lte(c1$conf.low, pop_c1)
   expect_gte(c1$conf.high, pop_c1)

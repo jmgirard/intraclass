@@ -11,8 +11,8 @@ test_that("one-way reproduces the published Shrout & Fleiss values (O-OW textboo
 
   d <- sf_ratings_long()
   ow <- tidy(icc(d, score, subject, rater, model = "oneway", seed = 1))
-  i1 <- ow$estimate[ow$index == "ICC(1)"]
-  ik <- ow$estimate[ow$index == "ICC(k)"]
+  i1 <- ow$estimate[ow$term == "ICC(1)"]
+  ik <- ow$estimate[ow$term == "ICC(k)"]
   # SF Table 4 prints 2 d.p. (.17 / .44); 0.166 / 0.443 are the psych/DescTools
   # reproductions and round to those (M72, D-008). Assert the ABSOLUTE gap so
   # the last-place rounding is not read as a relative-tolerance failure
@@ -38,8 +38,8 @@ test_that("one-way matches psych::ICC ICC1/ICC1k (O-OW independent package)", {
     model = "oneway",
     seed = 1
   ))
-  expect_equal(ow$estimate[ow$index == "ICC(1)"], psych_1, tolerance = 1e-4)
-  expect_equal(ow$estimate[ow$index == "ICC(k)"], psych_k, tolerance = 1e-4)
+  expect_equal(ow$estimate[ow$term == "ICC(1)"], psych_1, tolerance = 1e-4)
+  expect_equal(ow$estimate[ow$term == "ICC(k)"], psych_k, tolerance = 1e-4)
 })
 
 test_that("one-way matches package-independent ANOVA mean squares (O-OW)", {
@@ -54,8 +54,8 @@ test_that("one-way matches package-independent ANOVA mean squares (O-OW)", {
   anova_k <- (msb - msw) / msb
 
   ow <- tidy(icc(d, score, subject, rater, model = "oneway", seed = 1))
-  expect_equal(ow$estimate[ow$index == "ICC(1)"], anova_1, tolerance = 1e-4)
-  expect_equal(ow$estimate[ow$index == "ICC(k)"], anova_k, tolerance = 1e-4)
+  expect_equal(ow$estimate[ow$term == "ICC(1)"], anova_1, tolerance = 1e-4)
+  expect_equal(ow$estimate[ow$term == "ICC(k)"], anova_k, tolerance = 1e-4)
 })
 
 test_that("one-way glmmTMB and lme4 engines agree (O-OW cross-engine)", {
@@ -107,8 +107,8 @@ test_that("one-way recovers known population ICCs with covering intervals (O-OW 
   td <- tidy(icc(grid, score, subject, rater, model = "oneway", seed = 1))
   pop_1 <- v_s / (v_s + v_res)
   pop_k <- v_s / (v_s + v_res / k)
-  i1 <- td[td$index == "ICC(1)", ]
-  ik <- td[td$index == "ICC(k)", ]
+  i1 <- td[td$term == "ICC(1)", ]
+  ik <- td[td$term == "ICC(k)", ]
 
   expect_equal(i1$estimate, pop_1, tolerance = 0.05)
   expect_equal(ik$estimate, pop_k, tolerance = 0.05)
@@ -134,12 +134,12 @@ test_that("one-way ICC(1) is the conservative coefficient vs two-way on `ratings
     seed = 1
   ))
   expect_lte(
-    ow$estimate[ow$index == "ICC(1)"],
-    a$estimate[a$index == "ICC(A,1)"]
+    ow$estimate[ow$term == "ICC(1)"],
+    a$estimate[a$term == "ICC(A,1)"]
   )
   expect_lte(
-    a$estimate[a$index == "ICC(A,1)"],
-    cons$estimate[cons$index == "ICC(C,1)"]
+    a$estimate[a$term == "ICC(A,1)"],
+    cons$estimate[cons$term == "ICC(C,1)"]
   )
 })
 
@@ -168,7 +168,7 @@ test_that("one-way supports numeric unit (D-study projection)", {
     unit = m,
     seed = 1
   ))
-  expect_equal(proj$index, "ICC(6)")
+  expect_equal(proj$term, "ICC(6)")
   expect_equal(proj$estimate, expected, tolerance = 1e-6)
 })
 

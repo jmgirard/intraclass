@@ -89,8 +89,8 @@ test_that("tidy() output honours the estimator contract", {
   td <- generics::tidy(fit)
 
   expect_s3_class(td, "tbl_df")
-  expect_contains(names(td), c("index", "estimate", "conf.low", "conf.high"))
-  expect_contains(td$index, c("ICC(A,1)", "ICC(A,k)"))
+  expect_contains(names(td), c("term", "estimate", "conf.low", "conf.high"))
+  expect_contains(td$term, c("ICC(A,1)", "ICC(A,k)"))
 
   # Every estimate finite and at or below the theoretical upper bound of 1.
   expect_true(all(is.finite(td$estimate)))

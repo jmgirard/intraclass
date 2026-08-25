@@ -90,22 +90,22 @@ test_that("lme4 engine reproduces the published Shrout & Fleiss values", {
     seed = 1
   ))
   expect_equal(
-    s$estimate[s$index == "ICC(A,1)"],
+    s$estimate[s$term == "ICC(A,1)"],
     sf_oracle_all[["ICC(A,1)"]],
     tolerance = 1e-3
   )
   expect_equal(
-    a$estimate[a$index == "ICC(A,k)"],
+    a$estimate[a$term == "ICC(A,k)"],
     sf_oracle_all[["ICC(A,k)"]],
     tolerance = 1e-3
   )
   expect_equal(
-    c1$estimate[c1$index == "ICC(C,1)"],
+    c1$estimate[c1$term == "ICC(C,1)"],
     sf_oracle_all[["ICC(C,1)"]],
     tolerance = 1e-3
   )
   expect_equal(
-    ck$estimate[ck$index == "ICC(C,k)"],
+    ck$estimate[ck$term == "ICC(C,k)"],
     sf_oracle_all[["ICC(C,k)"]],
     tolerance = 1e-3
   )
@@ -454,8 +454,8 @@ test_that("lme4 engine recovers known population ICCs with covering intervals", 
   td <- tidy(icc(grid, score, subject, rater, engine = "lme4", seed = 1))
   pop_a1 <- v_s / (v_s + v_r + v_res)
   pop_ak <- v_s / (v_s + (v_r + v_res) / k)
-  a1 <- td[td$index == "ICC(A,1)", ]
-  ak <- td[td$index == "ICC(A,k)", ]
+  a1 <- td[td$term == "ICC(A,1)", ]
+  ak <- td[td$term == "ICC(A,k)", ]
 
   expect_equal(a1$estimate, pop_a1, tolerance = 0.05)
   expect_equal(ak$estimate, pop_ak, tolerance = 0.05)
@@ -716,7 +716,7 @@ test_that("lme4 fixed recovers known population ICCs with covering intervals", {
     seed = 1
   )))
   pop_a1 <- v_s / (v_s + theta2r + v_res)
-  a1 <- td[td$index == "ICC(A,1)", ]
+  a1 <- td[td$term == "ICC(A,1)", ]
   expect_equal(a1$estimate, pop_a1, tolerance = 0.05)
   expect_lte(a1$conf.low, pop_a1)
   expect_gte(a1$conf.high, pop_a1)
@@ -898,7 +898,7 @@ test_that("lme4 multilevel recovers a known population subject-level ICC", {
   d$subject <- factor(paste(d$cluster, d$subj, sep = "_"))
 
   td <- tidy(icc(d, score, subject, rater, cluster = cluster, seed = 1))
-  a1 <- td[td$index == "ICC(A,1)" & td$level == "subject", ]
+  a1 <- td[td$term == "ICC(A,1)" & td$level == "subject", ]
   pop <- v_sc / (v_sc + v_r + v_res)
   expect_equal(a1$estimate, pop, tolerance = 0.05)
   expect_lte(a1$conf.low, pop)

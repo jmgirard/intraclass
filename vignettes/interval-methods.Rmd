@@ -47,7 +47,7 @@ bs <- tidy(icc(ratings, score, subject, rater,
   ci_method = "bootstrap", boot_samples = 999, seed = 1
 ))
 data.frame(
-  index = mc$index,
+  index = mc$term,
   estimate = round(mc$estimate, 3),
   mc = sprintf("[%.2f, %.2f]", mc$conf.low, mc$conf.high),
   bootstrap = sprintf("[%.2f, %.2f]", bs$conf.low, bs$conf.high)
@@ -251,7 +251,7 @@ np <- tidy(icc(ratings, score, subject, rater,
   model = "oneway", ci_method = "npbootstrap", boot_samples = 199, seed = 1
 ))
 data.frame(
-  index = mc$index,
+  index = mc$term,
   estimate = round(mc$estimate, 3),
   montecarlo = sprintf("[%.2f, %.2f]", mc$conf.low, mc$conf.high),
   searle = sprintf("[%.2f, %.2f]", se$conf.low, se$conf.high),
@@ -309,7 +309,7 @@ sim <- data.frame(
 mc2 <- tidy(icc(sim, score, subject, rater, type = "agreement", seed = 1))
 ml <- tidy(icc(sim, score, subject, rater, type = "agreement", ci_method = "mpl"))
 data.frame(
-  index = mc2$index,
+  index = mc2$term,
   estimate = round(mc2$estimate, 3),
   montecarlo = sprintf("[%.2f, %.2f]", mc2$conf.low, mc2$conf.high),
   mpl = sprintf("[%.2f, %.2f]", ml$conf.low, ml$conf.high)
