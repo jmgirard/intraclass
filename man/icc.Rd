@@ -78,9 +78,9 @@ section. Left \code{NULL} (the default) for an ordinary single-level two-way ICC
 set of raters) or \code{"oneway"} (each subject rated by a possibly different set
 of raters). Under \code{"oneway"} (Shrout & Fleiss Case 1) the raters are treated
 as \strong{interchangeable}. In that design the \code{rater} column is used only to
-count the ratings per subject, and its labels are ignored. It has no rater
-main effect to model, so \code{type} does not apply and the coefficients are
-\code{ICC(1)} / \code{ICC(k)}.
+count the ratings per subject, and its labels are ignored. That design has
+no rater main effect to model, so \code{type} does not apply and the
+coefficients are \code{ICC(1)} / \code{ICC(k)}.
 Fixed raters and a \code{cluster} (multilevel) structure are not defined for a
 one-way design.}
 
@@ -156,9 +156,10 @@ indicator-mean estimator of the rater variance. That estimator is asymptotically
 to the mixed-model one and matches conventional generalizability-theory
 software on real data (Vispoel et al. 2022). But it differs by a
 small-sample term on tiny designs, e.g. 0.284 vs 0.290 on the 6-subject
-example below. \code{"lme4"} covers every design \code{"glmmTMB"} does, on both
-balanced and \strong{incomplete/ragged} data: two-way (random or fixed raters),
-one-way, and the multilevel designs (crossed and nested) at both levels.
+example below. \code{"lme4"} covers every design \code{"glmmTMB"} does: two-way
+(random or fixed raters), one-way, and the multilevel designs (crossed and
+nested) at both levels. It covers them on both balanced and
+\strong{incomplete/ragged} data.
 A ragged fit that lands exactly on a
 variance-component boundary falls back to \code{"glmmTMB"} (which stays finite via its
 log-SD parameterization) with a clear message. \code{"lavaan"}
@@ -447,7 +448,7 @@ informative on purpose. Ignored (must be \code{NULL}) for non-Bayesian engines.}
 interval when \code{ci_method = "posterior"} (the Bayesian engine): \code{"percentile"}
 (the default, a two-sided percentile interval) or \code{"hpdi"} (the
 highest-posterior-density interval, the narrowest interval covering the
-credible mass). Percentile is the default on two grounds. It is
+credible mass). Percentile is the default on several grounds. It is
 monotone-transformation invariant and degrades gracefully as the ICC
 approaches the variance boundary. And ten Hove, Jorgensen & van der Ark
 (2020) found percentile (not HPD) intervals give nominal coverage at small

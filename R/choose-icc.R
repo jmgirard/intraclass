@@ -29,10 +29,10 @@
 #' The two structural facts about your design default to the common case, a crossed,
 #' non-multilevel two-way design, matching [icc()]. They are whether the raters
 #' are crossed (`model`) and whether subjects are nested in clusters
-#' (`multilevel`). The choices that actually select the coefficient have no
-#' silent default: `type`, `unit`, `raters`, and `level` when multilevel. In a
-#' non-interactive session, leaving one unanswered is an error naming the
-#' unanswered decision, rather than quietly picking one for you.
+#' (`multilevel`). The choices that actually select the coefficient are `type`,
+#' `unit`, `raters`, and `level` when multilevel. None of them has a silent
+#' default. In a non-interactive session, leaving one unanswered is an error
+#' naming the unanswered decision, rather than quietly picking one for you.
 #'
 #' @param model `"twoway"` (crossed: the same raters judge every subject) or
 #'   `"oneway"` (raters are interchangeable across subjects). Defaults to

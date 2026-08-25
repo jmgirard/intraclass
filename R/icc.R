@@ -209,9 +209,9 @@
 #'   set of raters) or `"oneway"` (each subject rated by a possibly different set
 #'   of raters). Under `"oneway"` (Shrout & Fleiss Case 1) the raters are treated
 #'   as **interchangeable**. In that design the `rater` column is used only to
-#'   count the ratings per subject, and its labels are ignored. It has no rater
-#'   main effect to model, so `type` does not apply and the coefficients are
-#'   `ICC(1)` / `ICC(k)`.
+#'   count the ratings per subject, and its labels are ignored. That design has
+#'   no rater main effect to model, so `type` does not apply and the
+#'   coefficients are `ICC(1)` / `ICC(k)`.
 #'   Fixed raters and a `cluster` (multilevel) structure are not defined for a
 #'   one-way design.
 #' @param type Error definition(s) (two-way only): `"agreement"` (absolute
@@ -280,9 +280,10 @@
 #'   to the mixed-model one and matches conventional generalizability-theory
 #'   software on real data (Vispoel et al. 2022). But it differs by a
 #'   small-sample term on tiny designs, e.g. 0.284 vs 0.290 on the 6-subject
-#'   example below. `"lme4"` covers every design `"glmmTMB"` does, on both
-#'   balanced and **incomplete/ragged** data: two-way (random or fixed raters),
-#'   one-way, and the multilevel designs (crossed and nested) at both levels.
+#'   example below. `"lme4"` covers every design `"glmmTMB"` does: two-way
+#'   (random or fixed raters), one-way, and the multilevel designs (crossed and
+#'   nested) at both levels. It covers them on both balanced and
+#'   **incomplete/ragged** data.
 #'   A ragged fit that lands exactly on a
 #'   variance-component boundary falls back to `"glmmTMB"` (which stays finite via its
 #'   log-SD parameterization) with a clear message. `"lavaan"`
@@ -563,7 +564,7 @@
 #'   interval when `ci_method = "posterior"` (the Bayesian engine): `"percentile"`
 #'   (the default, a two-sided percentile interval) or `"hpdi"` (the
 #'   highest-posterior-density interval, the narrowest interval covering the
-#'   credible mass). Percentile is the default on two grounds. It is
+#'   credible mass). Percentile is the default on several grounds. It is
 #'   monotone-transformation invariant and degrades gracefully as the ICC
 #'   approaches the variance boundary. And ten Hove, Jorgensen & van der Ark
 #'   (2020) found percentile (not HPD) intervals give nominal coverage at small
