@@ -128,12 +128,12 @@ about its own precision.
 Near the [zero-variance
 boundary](https://jmgirard.github.io/intraclass/articles/glossary.html#zero-variance-boundary)
 the Monte-Carlo default can fail to produce an interval. When it aborts,
-its message names an alternative method, chosen by running the
-candidates on your own data rather than by consulting a table. So in
-practice you rarely need to pick one from scratch. This section is for
-when you do. Four opt-in methods serve exactly that terrain. Each is
-fenced to a specific design and aborts with a classed error anywhere
-else.
+its message names an alternative method where one serves your data,
+chosen by running the candidates on your own data rather than by
+consulting a table. So in practice you rarely need to pick one from
+scratch. This section is for when you do. Four opt-in methods serve
+exactly that terrain. Each is fenced to a specific design and aborts
+with a classed error anywhere else.
 
 ### The transformed bootstrap-*t* (`ci_method = "npbootstrap"`)
 
@@ -310,11 +310,11 @@ deterministic closed form: no resampling, no `seed`. Its calibration
 fixes two fences: `conf_level` must be 0.90, 0.95, or 0.99 (each level
 carries its own calibrated correction constant, never interpolated
 between levels), and the calibration grid spans 2–10 raters and 10–100
-subjects. Unlike the two-way Monte-Carlo default, it does not abort at
-the near-zero-ICC boundary: like `"npbootstrap"`, it returns an interval
-there. It is deliberately conservative: it over-covers, is wider than
-the Monte-Carlo interval at interior cells, and so it is an opt-in and
-not the default. Two reporting caveats come from
+subjects. Like `"npbootstrap"`, it returns an interval at the
+near-zero-ICC boundary where the two-way Monte-Carlo default aborts. It
+is deliberately conservative: it over-covers, is wider than the
+Monte-Carlo interval at interior cells, and so it is an opt-in and not
+the default. Two reporting caveats come from
 [`?icc`](https://jmgirard.github.io/intraclass/reference/icc.md). The
 two-sided interval is not equal-tailed, so a limit must not be read as a
 one-sided bound at half the complementary level, and separately, at
