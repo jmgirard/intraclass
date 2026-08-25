@@ -86,7 +86,7 @@ gate before stamping, never folded in silently.
       Each with a test and a NEWS line.
 - [x] T2: Raise the R floor to `R (>= 4.0.0)` in `DESCRIPTION` (rlang binds
       the Imports chain; no 4.1+ syntax in package code).
-- [ ] T3: Stamp `Version: 0.1.0`; consolidate `NEWS.md` — fold the
+- [x] T3: Stamp `Version: 0.1.0`; consolidate `NEWS.md` — fold the
       "(development version)" entries (M44–M47) into the pending 0.1.0
       changelog below them, one release heading (ADR-022 item d; ADR-055).
 - [ ] T4: Refresh `cran-comments.md` (current R versions/platforms checked,
@@ -124,7 +124,8 @@ gate before stamping, never folded in silently.
 - 2026-08-25: T1 done — the last-call audit ran as RB04/RR04 and its disposition is recorded in the Decisions section below: the surface ships as audited but for seven accepted changes, two of them promoted to D-035.
 - 2026-08-25: T1b done — the seven accepted changes applied across `R/icc.R`, `R/icc-methods.R`, `R/d-study.R`, `R/autoplot.R`, with `tests/testthat/test-exported-contract.R` (32 assertions) pinning both D-035 clauses, the `d_study()` validation, and the `glance()` replicate columns; the `index` -> `term` rename swept 20 test files (188 sites, [S] delegation, diff verified) and four vignettes. `devtools::test()` 0 failures, `air format --check` clean, `devtools::document()` rewrote `man/icc.Rd` and `man/d_study.Rd`.
 - 2026-08-25: T2 done — `Depends: R (>= 4.0.0)` in DESCRIPTION; rlang is the binding Import (its own `Depends` is `R (>= 4.0.0)`, the highest in the chain: glmmTMB 3.6.0, lifecycle/generics 3.6, cli/tibble 3.4). No `|>` or `\(x)` syntax anywhere in `R/`, `tests/`, `vignettes/` or README. DESIGN.md's Platforms bullet corrected in place (it named the 3.5 floor as a leftover to fix here).
-- 2026-08-25: T3 in progress — `Version: 0.1.0` stamped in DESCRIPTION; the NEWS consolidation is not done yet.
+- 2026-08-25: T3 done — `Version: 0.1.0` stamped; NEWS.md consolidated under one `# intraclass 0.1.0` heading, 796 lines -> 407. The development entries fold into the release sections by topic; entries that only described changing unreleased code are dropped (the two `Correction.` bullets withdrawing wording no release ever carried, the Bug fixes section, and the Documentation section's rewrite notes), with each live fact they established kept as a plain statement. Two sections added to hold folded material: `Confidence intervals` (the six shipped `ci_method` values, the skew caveat, the abort-remedy naming, the Spearman-Brown pole) and `Reading a fit` (the tidy/glance contract from T1b). No `(development version)` heading remains.
+- 2026-08-25: RR04's adjacent note settled — both `experimental` lifecycle badges (README package-level, `d_study()`'s roxygen) are kept deliberately for 0.1.0: experimental is the honest stage for a first release, and RR04 declined to withhold `d_study()` precisely because its badge already carries that signal.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
