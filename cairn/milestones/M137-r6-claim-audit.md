@@ -358,9 +358,14 @@ Findings and dispositions, as the reviewer ranked them:
    `--self-test`; the row's quoted clause no longer exists in the prose.
 8. **Row 64's "every figure and fence carried" generous. Rejected:** the
    reviewer grants `same` still defensible.
-9. **`vignettes/interval-methods.Rmd` "When it aborts, its message names an
-   alternative method" is unqualified** — an unmodified line the pass did not
-   touch, so outside the comparison. **Follow-up:** candidate ROADMAP row.
+9. **`vignettes/interval-methods.Rmd:119` "When it aborts, its message names an
+   alternative method" is unqualified** — `R/icc.R:371` says "Where no method
+   serves that data it names none", and ledger row `ecff0cc82845` settles that
+   qualifier. Verified. The line is unmodified by the pass, so outside AC1's
+   comparison, but it sits in the audited domain and the Scope's own-merits
+   clause reaches it. **Fixed now** in place, being one clause: "names an
+   alternative method **where one serves your data**". No candidate row is
+   owed; the sweep found none covering it.
 10. **Orphan short roxygen line inherited by `man/icc.Rd`. Fixed now** —
     rewrapped alongside finding 1; rendering was unaffected either way.
 
@@ -370,9 +375,12 @@ return floor nor an amendment return fires.
 
 ### Re-verification after the fix-now repairs
 
-`NOT_CRAN=true CI=true devtools::test()`: FAIL 0, WARN 2, SKIP 26, PASS 8561.
+`NOT_CRAN=true CI=true devtools::test()`: FAIL 0, WARN 2, SKIP 26, PASS 8561,
+re-run after each of the two repair commits.
 All four `check-references` checkers exit 0 at base and `--self-test`.
 `devtools::document()` regenerates `man/icc.Rd` with no further diff. AC2's
 R-diff still 0 lines; `vignettes/engines.Rmd` joins the changed paths, admitted
 by AC2's `vignettes/*.Rmd` member. Ruler over the whole standard surface: 0
 dashes, 4 over-35, and the clause match returns those same 4 — AC3 holds.
+Finding 9's repair leaves the ruler unchanged (0 dashes, 4 over-35, all
+carriers) and all four checkers green at base and `--self-test`.

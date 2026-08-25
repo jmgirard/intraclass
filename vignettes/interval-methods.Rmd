@@ -116,8 +116,8 @@ visibly skewed data as optimistic about its own precision.
 
 Near the [zero-variance boundary](glossary.html#zero-variance-boundary) the
 Monte-Carlo default can fail to produce an interval. When it aborts, its message
-names an alternative method, chosen by running the candidates on your own data
-rather than by consulting a table. So in practice you rarely need to pick one from
+names an alternative method where one serves your data, chosen by running the
+candidates on your own data rather than by consulting a table. So in practice you rarely need to pick one from
 scratch. This section is for when you do. Four opt-in methods serve exactly that
 terrain. Each is fenced to a specific design and aborts with a classed error
 anywhere else.
