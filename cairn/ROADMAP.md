@@ -9,7 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M48 | v0.1.0 release consolidation — CRAN submission-ready | in-progress | M49, M50, M51, M53, M54, M55, M61, M68, M129, M130, M131, M132, M133, M134, M135, M136, M137 | high | milestones/M48-release-v010.md |
+| M48 | v0.1.0 release consolidation — CRAN submission-ready | review | M49, M50, M51, M53, M54, M55, M61, M68, M129, M130, M131, M132, M133, M134, M135, M136, M137 | high | milestones/M48-release-v010.md |
 | M134 | Vignette prose pass — the reader path, and the house style standard | done | — | normal | milestones/archive/M134-vignette-prose-reader-path.md |
 | M135 | Vignette prose pass — the method articles | done | M134 | normal | milestones/archive/M135-vignette-prose-method-articles.md |
 | M136 | Roxygen and README prose pass | done | M134 | normal | milestones/archive/M136-roxygen-readme-prose.md |

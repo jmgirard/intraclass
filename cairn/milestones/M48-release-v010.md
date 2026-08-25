@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M48: v0.1.0 release consolidation — CRAN submission-ready
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** M49, M50, M51, M53, M54, M55, M61, M68, M129, M130, M131, M132, M133, M134, M135, M136, M137   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP2, GP3   <!-- owner: plan · create/amend-via-gate -->
@@ -99,7 +99,7 @@ gate before stamping, never folded in silently.
       pass with `NOT_CRAN=true CI=true`, then
       `devtools::check(args = "--as-cran", env_vars = c(NOT_CRAN = "false"),
       manual = TRUE)`.
-- [ ] T6: Open the PR and drive the CI matrix green (one blocking
+- [x] T6: Open the PR and drive the CI matrix green (one blocking
       `gh pr checks --watch`; re-run infra flakes).
 
 ## Work log
@@ -131,6 +131,9 @@ gate before stamping, never folded in silently.
 - 2026-08-25: T5 partial — `devtools::document()` no delta, `air format --check` clean, `lintr::lint_package()` 0 lints, `urlchecker::url_check()` all correct, `pkgdown::check_pkgdown()` no problems, `pkgdown::build_site()` clean (every vignette knits), spelling clean, and the six `data-raw/` CI checkers plus their self-tests all exit 0. Installed-package suite with `NOT_CRAN=true CI=true`: FAIL 0 | WARN 2 | SKIP 26 | PASS 8574 (AC5). `devtools::check(--as-cran)` not yet run.
 - 2026-08-25: T5 done — `devtools::check(args = "--as-cran", env_vars = c(NOT_CRAN = "false"), manual = TRUE)` on R 4.6.1 / aarch64-apple-darwin23: **Status: OK, 0 errors | 0 warnings | 0 notes**, duration 2m 2s, PDF and HTML manuals both built (AC4).
 - 2026-08-25: T4 done — `cran-comments.md` refreshed against that run: the check date, environment and 0/0/0 result are the ones just observed, the R-floor rationale is stated, and the Suggests-gating note is unchanged. Nothing left to justify, there being no NOTE.
+- 2026-08-25: T1b follow-up — the `index` -> `term` rename also reached `data-raw/`: the `checkpoint-guard` CI job runs `m120-checkpoint-guard-demo.R`, whose sweep harness read `tidy()$index`, and it reddened on the first PR head. 12 sites across 10 scripts ([S] delegation, diff verified; `$estimates$index` reaches left alone); the demo passes locally and the job is green on the second head.
+- 2026-08-25: T6 done — PR #147 opened; every check on the head is green: `ubuntu-latest (release)` 22m17s, `windows-latest (release)` 25m35s, `test-coverage` 37m34s, `codecov/patch`, `codecov/project`, `checkpoint-guard`, `lint`, `format-check`, `check-references`, `pkgdown`. **Note for the review gate on AC7:** `check-standard.yaml`'s matrix is conditional — the five-cell set (macOS release, Windows release, ubuntu devel/release/oldrel-1) runs on `push` to the default branch only, and a `pull_request` event gets the two-cell set that ran here. The full matrix therefore runs on the merge commit, before any submission, and cannot be run on a PR head as the workflow now stands.
+- 2026-08-25: all tasks checked; status in-progress -> review by /milestone-implement.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
