@@ -80,7 +80,7 @@ repaired in place if cheap, else a candidate row.
       this file's Work log / Review sections — one row per hunk, keyed by
       commit + file + hunk header. No `data-raw/` ledger: a standing table over
       the repo's own prose is apparatus, and the triage is milestone evidence.
-- [ ] T2: Rewrite `cairn/doctrine/prose-style.md` step 5's selection rule from
+- [x] T2: Rewrite `cairn/doctrine/prose-style.md` step 5's selection rule from
       the ten scope words to the class they stood in for — any construction
       carrying a claim's scope that a sentence split can drop. Compress
       elsewhere in the module to stay inside its stated 120-line / 8,000-byte
@@ -105,6 +105,8 @@ repaired in place if cheap, else a candidate row.
 - 2026-08-24: doctrine step 5 rewritten over the class rather than extended by three members — the alternative (adding em dash, parenthesis and frame adverbial to the word list) lost to the standing rule that a counterexample is not answered by a wider enumeration. Falsifier: a fourth escape whose construction the class statement also fails to name.
 
 - 2026-08-24: T1 — domain measured with the three pinned commands: `bb42f8e` 32 hunks, `8aafb0e` 52, `5c274fc` 27; total 111, equal to AC1's figure. The `5c274fc` `R/*.R` side is roxygen-only (the AC2 grep over that commit returns 0 lines), so no code line entered the audited domain. Gate: triage table lives in this work log as one block (option 1 of 3); a repair re-words to the replaced text's scope rather than reverting to its wording, so R1/R2 stay at zero (option 1 of 3).
+
+- 2026-08-24: T2 — `prose-style.md` step 5 rewritten to select every hunk and to name the scope-carrying class (quantifier/absolute, restrictive clause, dash- or parenthesis-set appositive, frame adverbial, conditional, hedge) rather than ten words; R1's proper-noun rationale, the gating paragraph and the R6 paragraph compressed to pay for it. Post-edit: 118 lines / 6,921 bytes against the module's < 120 / < 8,000 budget.
 
 ### Triage table (T1 opens; T3/T4 fill) — 111 hunks
 

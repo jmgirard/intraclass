@@ -18,14 +18,11 @@ rendered-message tests, and stays a ROADMAP candidate row.
 
 - **R1 dash-as-punctuation** — no em dash, `---`, or standalone `--` used as a
   sentence-level break. Not counted: YAML front-matter delimiters, markdown
-  table separator rows, dashes flanked by digits (page and numeric ranges), and
-  unspaced dashes joining two capitalized words (`Spearman--Brown`). That last
-  exclusion is a shape, not a part of speech: the ruler does not separate
-  `Spearman--Brown` from `An ICC—Intraclass`, and separating them would need a
-  hand-kept list of proper nouns. A capital that follows a capitalized word is
-  indistinguishable from a proper-noun join, so a sentence-initial capital or an
-  acronym in that position goes uncounted with the proper nouns. A dash with a
-  space on either side is counted whatever flanks it.
+  table separator rows, dashes flanked by digits, and unspaced dashes joining
+  two capitalized words (`Spearman--Brown`). That last is a shape, not a part
+  of speech: separating `Spearman--Brown` from `An ICC—Intraclass` would need a
+  hand-kept proper-noun list, so a sentence-initial capital or an acronym in
+  that position goes uncounted too. A spaced dash is counted whatever flanks it.
 - **R2 sentence length** — no prose sentence over 35 words.
 - **R3 one idea per sentence** — at most one subordinate clause before the main
   verb.
@@ -39,16 +36,14 @@ rendered-message tests, and stays a ROADMAP candidate row.
 R1 and R2 are gated: `data-raw/prose-profile.py` counts them, and a pass that
 claims to have applied them reports zero. The one exemption is a clause a test
 pins verbatim and that admits no sentence break: a pass carrying such a clause
-records it where it records the pass, with the clause's word count and the
-sentence's. R4 and R5 are counted by the same ruler but carry no target — a
-zero on either has no non-arbitrary threshold and would fight readability.
-R3 and R6 are not counted at all.
+records it with the pass, with the clause's word count and the sentence's. R4
+and R5 are counted by the same ruler but carry no target: a zero on either has
+no non-arbitrary threshold and would fight readability. R3 and R6 are uncounted.
 
 R6 is the one that can silently break something. A dash spliced into two
 sentences, a clause hoisted out of a parenthesis, an "and" turned into a full
-stop — each is an opportunity to promise more than the original did. The repair
-for an overlong sentence is to *split* it, never to compress it by deleting the
-qualifier that bounded it.
+stop: each promises more than the original did. The repair for an overlong
+sentence is to *split* it, never to delete the qualifier that bounded it.
 
 ## What the ruler counts as prose
 
@@ -107,12 +102,16 @@ Run it over a glob; `--verbose` prints every over-35-word sentence with its coun
    a stacked subordinate clause, and its parenthetical and semicolon counts are
    information, not a target.
 4. Re-run the ruler and confirm zero on R1 and R2.
-5. Audit for R6 over the diff. Grep both added **and** removed lines for the
-   scope words — `any`, `each`, `every`, `all`, `only`, `both`, `exactly`,
-   `never`, `always`, `full` — because a deleted qualifier widens a claim just
-   as surely as an added absolute does. For each hunk the grep returns, compare
-   the added text's claim domain against the text it replaced; equal or
-   narrower passes, wider is a defect repaired in place.
+5. Audit for R6 over the diff, every hunk, not a grep's selection. A claim's
+   scope is carried by a class of construction, not by a list of words: a
+   quantifier or absolute (`any`, `every`, `only`, `never`), a restrictive
+   clause, an appositive set off by dashes or parentheses, a frame adverbial
+   ("on the one-way design"), a conditional, a hedge. Each is droppable by a
+   sentence split, and dropping one widens the claim. A word list cannot
+   select that class: M136 closed this rule three times against one and was
+   defeated three times, each by a shape the list did not name. Per hunk,
+   compare the added text's claim domain against the text it replaced; equal
+   or narrower passes, wider is a defect repaired in place.
 
 The ruler is frozen for the duration of a pass. Changing what it counts
 mid-pass makes the before and after figures incomparable, so a correction to
