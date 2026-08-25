@@ -22,28 +22,28 @@
 #' exact [icc()] call that computes them. It does **not** fit a model: there is no
 #' `data` argument. Copy the emitted call and run it on your data.
 #'
-#' Supply the decisions as arguments to get advice programmatically; call
-#' `choose_icc()` with the relevant answers omitted in an interactive session to
+#' Supply the decisions as arguments to get advice programmatically. In an
+#' interactive session, call `choose_icc()` with the relevant answers omitted to
 #' be asked the outstanding questions one at a time.
 #'
-#' The two structural facts about your design -- whether the raters are crossed
-#' (`model`) and whether subjects are nested in clusters (`multilevel`) -- default
-#' to the common case (a crossed, non-multilevel two-way design), matching
-#' [icc()]. The choices that actually select the coefficient (`type`, `unit`,
-#' `raters`, and `level` when multilevel) have no silent default: in a
-#' non-interactive session, leaving one unanswered is an error naming the
-#' unanswered decision (rather than quietly picking one for you).
+#' The two structural facts about your design default to the common case, a crossed,
+#' non-multilevel two-way design, matching [icc()]. They are whether the raters
+#' are crossed (`model`) and whether subjects are nested in clusters
+#' (`multilevel`). The choices that actually select the coefficient are `type`,
+#' `unit`, `raters`, and `level` when multilevel. None of them has a silent
+#' default. In a non-interactive session, leaving one unanswered is an error
+#' naming the unanswered decision, rather than quietly picking one for you.
 #'
 #' @param model `"twoway"` (crossed: the same raters judge every subject) or
 #'   `"oneway"` (raters are interchangeable across subjects). Defaults to
 #'   `"twoway"`. Under `"oneway"` the `type` and `raters` choices do not exist
 #'   (there is no rater term), and supplying them is an error.
-#' @param type `"agreement"` (the value itself must match; systematic rater
-#'   offsets count as error) or `"consistency"` (only rank order matters; a
+#' @param type `"agreement"` (the value itself must match, so systematic rater
+#'   offsets count as error) or `"consistency"` (only rank order matters, so a
 #'   constant per-rater offset is forgiven). Required for a two-way design.
 #' @param unit `"single"` (you will act on one rater's score), `"average"` (the
 #'   mean of your raters), or `"both"`. Required.
-#' @param raters `"random"` (a sample you generalize beyond -- the recommended
+#' @param raters `"random"` (a sample you generalize beyond, and the recommended
 #'   default for interrater reliability) or `"fixed"` (exactly these judges, no
 #'   generalization). Required for a two-way design.
 #' @param multilevel `TRUE` if subjects are nested in higher-level clusters

@@ -17,22 +17,22 @@ coefficients (ICCs)** within the generalizability-theory framework,
 using **modern variance-component estimation** (linear mixed models)
 rather than the classical ANOVA / mean-squares approach.
 
-It aims to (1) fit variance components with modern engines, (2) compute
-the *correct* ICC for a stated design with proper (boundary-aware
-Monte-Carlo) interval estimation, (3) handle imbalanced, incomplete, and
-multilevel designs, and (4) help you decide **which ICC to choose, and
-why** — the docs and website are a place to learn ICC best practice, not
-just call functions.
+It aims to fit variance components with modern engines, and to compute
+the *correct* ICC for a stated design with proper boundary-aware
+Monte-Carlo interval estimation. It also aims to handle imbalanced,
+incomplete, and multilevel designs, and to help you decide **which ICC
+to choose, and why**. The docs and website are a place to learn ICC best
+practice, not just call functions.
 
 > \[!NOTE\] This package is approaching its first release. The full
-> interrater-reliability ICC family is implemented — two-way designs
-> (absolute agreement vs. consistency, single vs. average, random
-> vs. fixed raters) and one-way designs, imbalanced and incomplete
-> (missing-cell) data, and multilevel designs (subject vs. cluster
-> level, with raters crossed with or nested in clusters/subjects) — each
-> with boundary-aware Monte-Carlo intervals. Fits run on `glmmTMB` (the
-> default) or `lme4`, and on `brms` (Bayesian) or `lavaan` (SEM); the
-> [engines
+> interrater-reliability ICC family is implemented. That covers two-way
+> designs (absolute agreement vs. consistency, single vs. average,
+> random vs. fixed raters) and one-way designs. It covers imbalanced and
+> incomplete (missing-cell) data. It also covers multilevel designs, at
+> the subject or cluster level, with raters crossed with or nested in
+> clusters or subjects. Everything just listed comes with boundary-aware
+> Monte-Carlo intervals. Fits run on `glmmTMB` (the default) or `lme4`.
+> Bayesian fits run on `brms`, and SEM fits on `lavaan`. The [engines
 > article](https://jmgirard.github.io/intraclass/articles/engines.html)
 > says which designs each one supports.
 
@@ -53,21 +53,22 @@ considerably larger. One member of that closure is worth naming:
 `glmmTMB` lists `lme4` in its own `Imports:`, so the `lme4` package is
 already on your library path after a plain install, whatever its
 `Suggests:` placement here implies. Having the package is not the same
-as having the engine, though — `engine = "lme4"` also needs `merDeriv`,
+as having the engine, though. `engine = "lme4"` also needs `merDeriv`,
 which every lme4 fit checks for on entry whatever interval method you
-ask for. `merDeriv` does not arrive: it sits in this package’s
-`Suggests:`, as do `brms` (Bayesian) and `lavaan` (SEM), so a plain
-install fetches none of the three — though asking for `merDeriv` brings
-`lavaan` along, because `merDeriv` names it in its own `Depends:`.
-`glmmTMB` is the only engine a plain install leaves you ready to use.
+ask for. `merDeriv` does not arrive. It sits in this package’s
+`Suggests:`, and so do `brms`, the Bayesian engine, and `lavaan`, the
+SEM engine. A plain install fetches none of the three. Asking for
+`merDeriv` does bring `lavaan` along, though, because `merDeriv` names
+it in its own `Depends:`. `glmmTMB` is the only engine a plain install
+leaves you ready to use.
 
 ## Example
 
 `ratings` is the classic Shrout & Fleiss (1979) example, shipped with
 the package. With the defaults a single two-way random fit reports every
-defined formulation — absolute agreement and consistency, single-rater
-and average — grouped by error definition, each with a reproducible
-Monte-Carlo interval:
+defined formulation: absolute agreement and consistency, single-rater
+and average. They are grouped by error definition, each with a
+reproducible Monte-Carlo interval:
 
 ``` r
 library(intraclass)
@@ -100,13 +101,13 @@ autoplot(fit)
 
 <img src="man/figures/README-plot-coefficients-1.png" alt="Forest plot of the four coefficients from the ratings fit: ICC(A,1), ICC(A,k), ICC(C,1) and ICC(C,k), each a labelled point with a horizontal Monte-Carlo interval, and the average-rater coefficients further to the right than their single-rater counterparts." width="100%" />
 
-Which coefficient you want — agreement vs. consistency, single
-vs. average, fixed vs. random raters, complete vs. incomplete — is a
-real modeling decision, and each is an argument to `icc()`. Not sure
-which to report? `choose_icc()` walks the [*Choosing an
+Which coefficient you want is a real modeling decision: agreement vs.
+consistency, single vs. average, fixed vs. random raters, complete vs.
+incomplete. Each of those is an argument to `icc()`. Not sure which to
+report? `choose_icc()` walks the [*Choosing an
 ICC*](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.html)
 decision tree and hands back the coefficient, the reasoning, and the
-exact call to run — no data or fitting required:
+exact call to run. No data or fitting is required:
 
 ``` r
 choose_icc(model = "twoway", type = "consistency", unit = "average", raters = "random")
@@ -128,9 +129,10 @@ choose_icc(model = "twoway", type = "consistency", unit = "average", raters = "r
 #>   - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.
 ```
 
-For **multilevel** data — subjects nested in clusters (pupils in
-classrooms, patients in clinics) — pass a `cluster` column and `icc()`
-reports subject-level and cluster-level reliability separately:
+For **multilevel** data, meaning subjects nested in clusters such as
+pupils in classrooms or patients in clinics, pass a `cluster` column.
+Then `icc()` reports subject-level and cluster-level reliability
+separately:
 
 ``` r
 set.seed(1)
@@ -174,9 +176,8 @@ icc(school, score, subject = pupil, rater = rater, cluster = classroom, seed = 2
 ## How many raters do you need?
 
 `d_study()` projects the variance components of a fit to other rater
-counts, carrying the interval with them — so you can ask what
-reliability two raters would buy, or ten, without running the study
-again:
+counts, carrying the interval with them. So you can ask what reliability
+two raters would buy, or ten, without running the study again:
 
 ``` r
 autoplot(d_study(fit, m = 1:10))
@@ -187,28 +188,28 @@ autoplot(d_study(fit, m = 1:10))
 ## Learn more
 
 - [*Getting
-  started*](https://jmgirard.github.io/intraclass/articles/getting-started.html)
-  — the guided tour
+  started*](https://jmgirard.github.io/intraclass/articles/getting-started.html):
+  the guided tour.
 - [*Choosing an
-  ICC*](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.html)
-  — the decision guide behind `choose_icc()`
+  ICC*](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.html):
+  the decision guide behind `choose_icc()`.
 - [*Multilevel
-  designs*](https://jmgirard.github.io/intraclass/articles/multilevel-designs.html)
-  — incomplete and nested multilevel data
+  designs*](https://jmgirard.github.io/intraclass/articles/multilevel-designs.html):
+  incomplete and nested multilevel data.
 - [*Estimation
-  engines*](https://jmgirard.github.io/intraclass/articles/engines.html)
-  — what each engine buys you
+  engines*](https://jmgirard.github.io/intraclass/articles/engines.html):
+  what each engine buys you.
 - [*Confidence-interval
-  methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.html)
-  — the `ci_method` menu
+  methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.html):
+  the `ci_method` menu.
 - [*D-studies and
-  replicates*](https://jmgirard.github.io/intraclass/articles/d-studies-and-replicates.html)
-  — projection and within-cell replicates
+  replicates*](https://jmgirard.github.io/intraclass/articles/d-studies-and-replicates.html):
+  projection and within-cell replicates.
 - [*Comparison with other
-  packages*](https://jmgirard.github.io/intraclass/articles/comparison-with-other-packages.html)
-  — how the numbers line up
-- [*Glossary*](https://jmgirard.github.io/intraclass/articles/glossary.html)
-  — the vocabulary in one place
+  packages*](https://jmgirard.github.io/intraclass/articles/comparison-with-other-packages.html):
+  how the numbers line up.
+- [*Glossary*](https://jmgirard.github.io/intraclass/articles/glossary.html):
+  the vocabulary in one place.
 
 ## Related work
 
@@ -216,7 +217,7 @@ autoplot(d_study(fit, m = 1:10))
 |----|----|----|
 | Classical ANOVA / mean squares | `psych`, `irr`, `irrNA`, `irrICC`, `ICCDesign` | ANOVA / mean-squares based, mostly assuming balanced data |
 | Model-based variance partition | `performance::icc`, `misty` | A variance-partition coefficient, but not the full interrater-reliability ICC family, the error-variance framing, or a selection framework |
-| **intraclass** | — | Mixed-model estimation, Monte-Carlo confidence intervals, and decision guidance |
+| **intraclass** | (this package) | Mixed-model estimation, Monte-Carlo confidence intervals, and decision guidance |
 
 **intraclass** fills that gap, following ten Hove, Jorgensen & van der
 Ark.

@@ -13,7 +13,7 @@
 
 #' Abort with a classed intraclass condition
 #'
-#' @param message A character vector; formatted with [cli::cli_abort()] styling
+#' @param message A character vector, formatted with [cli::cli_abort()] styling
 #'   (supports `{.arg }`, `{.val }`, etc.). Use a named vector for bullets.
 #' @param class Character. Condition subclass(es), prepended to
 #'   `"intraclass_error"`.
@@ -63,12 +63,12 @@ abort_unidentified <- function(
 #' Warn with a classed intraclass condition
 #'
 #' The warning counterpart of `abort_intraclass()`: all warnings go through
-#' `cli::cli_warn()` with a classed condition (PRINCIPLES.md #8 — no bare
+#' `cli::cli_warn()` with a classed condition (PRINCIPLES.md #8, no bare
 #' `warning()`). Every classed warning subclasses `"intraclass_warning"`, so a
-#' caller can silence the family with `withCallingHandlers()` / `suppressWarnings()`
-#' or match a specific subclass.
+#' caller can silence the family with `withCallingHandlers()` or
+#' `suppressWarnings()`, or match a specific subclass.
 #'
-#' @param message A character vector; formatted with [cli::cli_warn()] styling.
+#' @param message A character vector, formatted with [cli::cli_warn()] styling.
 #' @param class Character. Condition subclass(es), prepended to
 #'   `"intraclass_warning"`.
 #' @param ... Passed to [cli::cli_warn()].
@@ -89,7 +89,7 @@ warn_intraclass <- function(
   )
 }
 
-#' Warn that fixed raters forgo generalization; random is best practice
+#' Warn that fixed raters forgo generalization, and random is best practice
 #'
 #' Fired when `raters = "fixed"` is chosen. Fixed raters is well-posed (a valid
 #' number is still returned), so this is a warning, not an `abort_*()`
@@ -117,10 +117,10 @@ warn_fixed_raters <- function(.envir = rlang::caller_env()) {
 #' Warn that rows with a missing score were dropped before fitting
 #'
 #' Fired when `icc()` removes rows whose `score` is `NA` (M105, D-022). A missing
-#' score is a rating that did not happen — the incomplete design this package
-#' already fits — so this is well-posed and returns a valid number, making it a
-#' warning rather than an `abort_*()` (PRINCIPLES.md #5 governs ill-posed
-#' designs). Classed `intraclass_dropped_rows` so a user working with
+#' score is a rating that did not happen, which is the incomplete design this
+#' package already fits. So this is well-posed and returns a valid number,
+#' making it a warning rather than an `abort_*()` (PRINCIPLES.md #5 governs
+#' ill-posed designs). Classed `intraclass_dropped_rows` so a user working with
 #' routinely-incomplete data can suppress this one warning by class without
 #' silencing the rest, exactly as `warn_fixed_raters()` allows.
 #'
@@ -146,7 +146,7 @@ warn_dropped_rows <- function(n_dropped, .envir = rlang::caller_env()) {
 #' Used by `choose_icc()` (M12, ADR-021): e.g. a `type`/`raters` answer supplied
 #' for a one-way design, where there is no rater term to reason about. The axis is
 #' not merely unimplemented (`abort_unsupported()`) nor a design-identifiability
-#' failure (`abort_unidentified()`) -- it is meaningless for this design, so the
+#' failure (`abort_unidentified()`). It is meaningless for this design, so the
 #' answer is rejected rather than silently ignored (PRINCIPLES.md #5). Classed
 #' `intraclass_inapplicable`.
 #'
