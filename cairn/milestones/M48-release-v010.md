@@ -89,10 +89,10 @@ gate before stamping, never folded in silently.
 - [x] T3: Stamp `Version: 0.1.0`; consolidate `NEWS.md` — fold the
       "(development version)" entries (M44–M47) into the pending 0.1.0
       changelog below them, one release heading (ADR-022 item d; ADR-055).
-- [ ] T4: Refresh `cran-comments.md` (current R versions/platforms checked,
+- [x] T4: Refresh `cran-comments.md` (current R versions/platforms checked,
       NOTE justifications) and re-verify `inst/WORDLIST` via the spelling
       check.
-- [ ] T5: Run the full local release gate and record outputs:
+- [x] T5: Run the full local release gate and record outputs:
       `devtools::document()` (no delta), `air format --check`,
       `lintr::lint_package()`, `urlchecker::url_check()`,
       `pkgdown::check_pkgdown()` + `build_site()`, installed-package test
@@ -129,6 +129,8 @@ gate before stamping, never folded in silently.
 - 2026-08-25: T3 follow-up — the release-gate run caught two guards the consolidation had broken, both restored rather than relaxed: `test-doc-skew-caveat.R` requires NEWS to carry one width-margin and one residual statement in the canonical verbatim clauses (the material the dropped `Correction.` bullets carried), now re-stated as first-release facts; and `data-raw/check-mpl-doc-claims.py` anchors its NEWS sweep on the `* The \`ci_method = "mpl"\` documentation` bullet, restored verbatim so every ledger key stays valid. Both green.
 - 2026-08-25: `inst/WORDLIST` grew 66 -> 94 words; `spelling::spell_check_package()` clean. The 28 additions were already unlisted before this milestone (last touched M123). Five are British forms in an `en-US` package (`colourblind`, `favouring`, `labelling`, `relabelled`, `relabellings`, plus `trialled`); wordlisted rather than respelled, since respelling means rewriting prose the M134-M136 passes own during release week.
 - 2026-08-25: T5 partial — `devtools::document()` no delta, `air format --check` clean, `lintr::lint_package()` 0 lints, `urlchecker::url_check()` all correct, `pkgdown::check_pkgdown()` no problems, `pkgdown::build_site()` clean (every vignette knits), spelling clean, and the six `data-raw/` CI checkers plus their self-tests all exit 0. Installed-package suite with `NOT_CRAN=true CI=true`: FAIL 0 | WARN 2 | SKIP 26 | PASS 8574 (AC5). `devtools::check(--as-cran)` not yet run.
+- 2026-08-25: T5 done — `devtools::check(args = "--as-cran", env_vars = c(NOT_CRAN = "false"), manual = TRUE)` on R 4.6.1 / aarch64-apple-darwin23: **Status: OK, 0 errors | 0 warnings | 0 notes**, duration 2m 2s, PDF and HTML manuals both built (AC4).
+- 2026-08-25: T4 done — `cran-comments.md` refreshed against that run: the check date, environment and 0/0/0 result are the ones just observed, the R-floor rationale is stated, and the Suggests-gating note is unchanged. Nothing left to justify, there being no NOTE.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

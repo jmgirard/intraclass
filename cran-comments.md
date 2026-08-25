@@ -4,7 +4,8 @@ This is the first submission of intraclass (0.1.0), a new package.
 
 ## R CMD check results
 
-Local `R CMD check --as-cran` (R 4.6.1, macOS) returned:
+Local `R CMD check --as-cran` on 2026-08-25 (R 4.6.1, aarch64-apple-darwin23,
+`NOT_CRAN=false`, `manual = TRUE`) returned:
 
     0 errors | 0 warnings | 0 notes
 
@@ -14,7 +15,7 @@ ten Hove, Jorgensen, and van der Ark, and the `doi:` token in the reference.
 
 ## Test environments
 
-- Local: macOS, R 4.6.1.
+- Local: macOS 15 (aarch64), R 4.6.1.
 - GitHub Actions (R-CMD-check workflow, run on every push):
   - ubuntu-latest: R-devel, R-release, R-oldrel-1
   - windows-latest: R-release
@@ -28,9 +29,16 @@ There are no downstream dependencies; this is a new package.
 
 ## Notes
 
+The declared R floor is `R (>= 4.0.0)`, which is what the Imports chain
+requires (rlang declares `R (>= 4.0.0)`; the remaining Imports are lower).
+
 The base install depends only on glmmTMB, cli, rlang, generics, tibble,
-stats, and lifecycle. The alternate estimation engines (lme4, lavaan) and the
-plotting layer (ggplot2) are optional and live in Suggests, gated behind
+stats, and lifecycle. The alternate estimation engines (lme4, lavaan, brms) and
+the plotting layer (ggplot2) are optional and live in Suggests, gated behind
 `rlang::check_installed()`, so they are not required to install or use the
 package's core functionality. Examples and tests that need a Suggested package
 skip gracefully when it is absent.
+
+The full test suite also passes against the installed package with
+`NOT_CRAN=true CI=true`, which runs the longer engine and simulation tests that
+are skipped on CRAN.
