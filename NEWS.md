@@ -126,17 +126,30 @@ alternate engines, and seeded simulations.
   design: two **deterministic classical closed-form** intervals. `"searle"` is the
   exact-F pivot (Searle 1971, Table 9.14; McGraw & Wong 1996, Table 7), exact under
   normality; `"burch"` is the REML-based, kurtosis-adjusted interval of Burch (2011),
-  which dips below the nominal level in fewer cells. Two things `"burch"` is **not**:
+  which dips below the nominal level in fewer cells. One thing `"burch"` is **not**:
   a remedy for heavy tails — a simulation study measured it under-covering on strongly
-  skewed subject effects about as badly as the default, worst 0.6655 — and reliably
-  the wider or the narrower of the pair, since which is tighter depends on what the
-  residual is drawn from. `"searle"` landed closer to nominal coverage in most cells
-  of every distribution family measured, which is the basis for preferring it. Like
+  skewed subject effects about as badly as the default (worst 0.6655). `"searle"`
+  landed closer to nominal coverage in most cells of every distribution family
+  measured, which is the basis for preferring it. Like
   `"npbootstrap"` both are boundary robust and one-way only. Being closed forms they
   take no `mc_samples`, `boot_samples` or `seed` and report no standard error. On data
   with no between-subject variance at all, `"burch"` aborts with the classed
   `intraclass_singular_fit` condition (its kurtosis term divides by the between-subject
   mean square) while `"searle"` still returns an interval.
+* Which of the two classical closed forms gives the **narrower** interval is
+  conditional, and the documentation says so rather than quoting one pooled figure.
+  On both grids that vary only the subject effect, `"burch"` is the narrower of the
+  two in 16 of 16 cells of the smaller grid and 59 of 64 cells of the larger grid, with no
+  distribution family reversing it on its median. That margin holds much the same up to a true ICC of 0.3 rather than shrinking as the true ICC rises (on the larger grid; the smaller grid's margin does shrink across its levels), then collapses to near parity at a true ICC of 0.6, on the one grid reaching that value, where every cell favouring `"searle"` sits, and it shrinks steadily as the subject count grows, measured at 5 raters. That is the only rater count present at every subject count, so an unstratified subject-count figure would be confounded. The *Confidence-interval methods* article tabulates both cuts.
+  What `"burch"` does against `"searle"` also depends on what the residual is drawn
+  from, and the three grids measure that:
+  the two grids that vary only the subject effect put it narrower nearly everywhere, while the third, which draws the residual from the same family as the subject effect, puts it wider at every symmetric heavy-tailed family measured (a median width ratio of 1.2963 at t(5) with 100 subjects) and narrower at every lighter-tailed one, the normal included.
+  Burch (2011) compares against this same exact-F interval and reports a
+  *kurtosis-conditional* ordering, shorter for light-tailed data and wider for
+  symmetric heavy-tailed data where the errors are non-normal too; his length
+  comparison uses symmetric families throughout, so it settles nothing about skewed
+  data either way. Neither interval is described as reliably the tighter one, and the
+  coverage-based preference for `"searle"` stands.
 * `ci_method = "mpl"` for the **balanced-complete two-way random** absolute-agreement
   `ICC(A,1)` (and `ICC(A,k)`): the **modified profile-likelihood** interval of Xiao &
   Liu (2013). Like the closed forms it is boundary robust — it returns a finite
@@ -153,16 +166,23 @@ alternate engines, and seeded simulations.
   `ICC(A,k)` interval, and a numeric `unit`, are the exact Spearman-Brown image of the
   `ICC(A,1)` interval. Its correction constant is calibrated by simulation separately
   for each supported level — never interpolated between levels, which is why other
-  levels abort rather than approximating one — and is linearly interpolated across
-  subject counts between calibrated nodes, a path coverage-validated at each supported
-  level (at the default 0.95 by three off-node cells, each clearing its pre-registered
-  floor); interpolated values are validated at a handful of geometries, not
-  calibrated. Two further properties to know before quoting a limit: the two-sided
+  levels abort rather than approximating one. Two properties to know before quoting a limit: the two-sided
   interval is **not equal-tailed** (where rater variance is large relative to error and
   subjects are many, non-coverage is almost all on one side), so a limit is not a
   one-sided bound at half the complementary level; and at 0.99 with very few raters it
   can be near-vacuous (median width 0.905 at 2 raters and 40 subjects), the cost of a
   deep tail on little rater information.
+* The `ci_method = "mpl"` documentation now states the interpolation evidence
+  behind off-node subject counts: the correction constant is calibrated at
+  subject-count nodes and linearly interpolated between them, and the
+  interpolated path is coverage-validated at each supported confidence level —
+  at the default 0.95 by three off-node cells, each clearing its pre-registered
+  coverage floor. The documentation also says what that validation does not
+  establish (interpolated values are validated at a handful of geometries, not
+  calibrated, and the interval's asymmetry direction is not uniform across rater
+  counts). Every universal or negative claim this documentation makes about the
+  validated cells is settled mechanically, in CI, against the committed coverage
+  fixture (`data-raw/check-mpl-doc-claims.py`).
 * `ci_method = "posterior"` is the Bayesian engine's forced interval method; see
   *Engines* below.
 * **When an interval method aborts on degenerate data, the error names another
