@@ -194,6 +194,7 @@ gate before stamping, never folded in silently.
 - 2026-08-25: all tasks checked; status in-progress -> review by /milestone-implement (second pass).
 - 2026-08-25: review checkpoint (mid-phase, second pass) by /milestone-review — fresh evidence on head `4a1ce09` recorded and ticked for AC1, AC2, AC4, AC7; **AC3 fails** (`spelling::spell_check_package()` returns `disambiguates`, `NEWS.md:358`, absent from `inst/WORDLIST`; introduced by the repair commit `d447172`). AC5 (installed-package suite) and AC6's `pkgdown::build_site()` still running; consistency gate green (`cairn_validate` exit 0). Two of three review lenses returned with zero findings. Status change deferred until the remaining evidence lands so one return names every failure.
 - 2026-08-25: review returns M48 to in-progress by /milestone-review (second pass) — **AC3 fails**: `spelling::spell_check_package()` on head `4a1ce09` returns `disambiguates` (`NEWS.md:358`), absent from `inst/WORDLIST`; the word was introduced by the repair commit `d447172` (T9's narrowing of the `glance()` NEWS bullet) and `tests/spelling.R` cannot red on it (`error = FALSE, skip_on_cran = TRUE`). AC1, AC2, AC4, AC5, AC6 and AC7 all verified with fresh evidence on that head and ticked; consistency gate green. The [O] lens returned seven findings G1-G7 (G1 is the AC3 failure itself); the other two lenses returned none. This is **defect return 2** of this milestone (the 2026-08-25 F1/F2 return was the first); the amendment-return track stays at one (AC7). A third defect return reaches the thrash rule's descope-or-park threshold.
+- 2026-08-25: review triage gate (second pass) — maintainer's dispositions over G2-G7: **fix now** G2 (the false `index` claim on `man/d_study.Rd`), G3 (`choose_icc()`'s silent choice-argument change — NEWS correction, a new D-entry annotating D-036, and a test), G6 (the stale ROADMAP hygiene note and the 12-vs-13 task count) and G7 (the `tidy.icc_dstudy()` comment rationale), alongside AC3's `inst/WORDLIST` fix. **Follow-up** G4 (GP3's own platform cross-product, left out so `cairn_impact.py --changed` does not fall due inside the release round — recorded as a second clause on the existing `R (>= 4.0.0)` floor candidate row) and G5 (the `tidy()$occasions` / `glance()$n_o` doc gap — new candidate row; search-first swept, nothing existing covered it). Nothing rejected.
 ## Decisions
 <!-- owner: implement / review · append-only -->
 
@@ -415,7 +416,8 @@ maintainer's triage decides.**
   carve-out the first-pass [S] lens verified is true of `print.icc()`
   (`R/icc-methods.R:151`), and the repair copied it onto the wrong page. The
   claim about the object is correct. *Disposition: fix now* — a shipped Rd page
-  asserting a column its own printer does not emit.
+  asserting a column its own printer does not emit. **Triaged fix-now at the
+  2026-08-25 gate.**
 - **G3 — `choose_icc()`'s choice arguments changed behaviour silently, and NEWS
   says they did not.** **Reproduced by reading both heads:** `origin/main`'s
   `validate_choice()` opened with `if (identical(value, choices)) return(
@@ -432,7 +434,7 @@ maintainer's triage decides.**
   passes a multi-valued argument to `choose_icc()`. *Disposition: fix now* —
   a silent behaviour change at the one-way door, unpinned and misdescribed;
   the fix is a NEWS correction, a `DECISIONS.md` annotation (append-only, so a
-  new entry) and a test.
+  new entry) and a test. **Triaged fix-now at the 2026-08-25 gate.**
 - **G4 — the F12 `DESIGN.md` repair corrected the commitments bullet and left
   GP3 itself wrong.** `cairn/DESIGN.md:157-159` still reads "(currently R
   release/oldrel-1/devel x macOS/Windows/Ubuntu)" — the exact cross-product
@@ -440,8 +442,11 @@ maintainer's triage decides.**
   reading** against `.github/workflows/check-standard.yaml:37`. The principle
   is the more load-bearing of the two statements, and this milestone's own new
   `Known issues` entry quotes GP3 as authority while the quoted text stays
-  wrong. *Disposition: fix now*, with the consequence noted above — editing
-  GP3's text makes `cairn_impact.py --changed` owed at the next review.
+  wrong. *Disposition: follow-up.* The maintainer triaged it out of the release round
+  at the 2026-08-25 gate rather than make `cairn_impact.py --changed` owed
+  inside it. Search-first swept: the existing `R (>= 4.0.0)` floor candidate
+  row already carries GP3, so this is recorded as a second clause on that row
+  rather than a new one.
 - **G5 — `tidy()$occasions` and `glance()$n_o` carry different quantities
   under near-identical names, undocumented.** On a default 8x3 replicate fit
   with two ratings per cell, `glance()$n_o` is `2` while every row of
@@ -450,8 +455,9 @@ maintainer's triage decides.**
   The docs say only that `occasions` is "`NA` unless the design has within-cell
   replicates" and that `n_o` "gives the occasion count it was split at", so the
   two read as one fact disagreeing with itself. A doc gap in columns this
-  milestone added, not a computation error. *Disposition: fix now* — both
-  columns are new exported surface closing at submission.
+  milestone added, not a computation error. *Disposition: follow-up.* The maintainer triaged it out of the release round
+  at the 2026-08-25 gate. Search-first swept: no existing row covers it, so a
+  new candidate row was added.
 - **G6 — stale figures left in the tracking records.** Four, all read-verified:
   `cairn/ROADMAP.md:4`'s hygiene note says "RR04's deferred chooser row added,
   the two widest candidate rows compressed" where the branch adds two rows and
@@ -462,13 +468,14 @@ maintainer's triage decides.**
   sizing work-log line says "12 tasks" where `cairn_validate` reports 13.
   The two first-pass items are inside the block this pass has already marked
   superseded, and the work log is append-only, so the repairs are a ROADMAP
-  edit and a superseding work-log line. *Disposition: fix now.*
+  edit and a superseding work-log line. *Disposition: fix now* — **triaged
+  fix-now at the 2026-08-25 gate.**
 - **G7 — comment nit in the new `tidy.icc_dstudy()` guard.**
   `R/d-study.R:699-700` says "`$` on one warns rather than returning NULL";
   tibble's `$` on a missing column warns **and** returns `NULL`, so the stated
   reason for the `nm %in% names(x)` test is inaccurate. The guard itself is
   correct. *Disposition: fix now* — a one-line comment correction riding the
-  same round.
+  same round. **Triaged fix-now at the 2026-08-25 gate.**
 
 ### Acceptance-criterion evidence — first pass (superseded, 2026-08-25, head `9328d85`)
 
