@@ -11,9 +11,12 @@
 #      names the replicate split rather than letting `var_residual` change
 #      meaning silently.
 
-# A balanced two-way design with two ratings per subject x rater cell: the one
-# shape where `occasions`, `n_o` and `var_subject_rater` are defined, so it is
-# the control that shows the NA columns below are NA by design, not by accident.
+# A balanced two-way design with two ratings per subject x rater cell: the
+# simplest shape where `occasions`, `n_o` and `var_subject_rater` are defined,
+# so it is the control that shows the NA columns below are NA by design, not by
+# accident. `nested_replicate_frame()` below is the same claim on a
+# block-diagonal design, where the flat subject x rater grid is not the
+# design's own geometry.
 replicate_frame <- function(seed = 4) {
   set.seed(seed)
   grid <- expand.grid(
@@ -96,6 +99,35 @@ test_that("autoplot's `what` is a choice argument on the same terms", {
   expect_s3_class(ggplot2::autoplot(fit, what = "components"), "ggplot")
 })
 
+# Design 2 (raters nested in clusters) with two ratings per cell. The flat
+# subject x rater grid is block-diagonal here, so `summarize_design()` cannot
+# read an occasion count off it and the design-aware count is the only correct
+# one -- the shape that showed `glance()$n_o` reporting NA beside a populated
+# `var_subject_rater` (M48 review F1).
+nested_replicate_frame <- function(seed = 42) {
+  set.seed(seed)
+  nc <- 5L
+  ns <- 6L
+  nr <- 3L
+  grid <- expand.grid(
+    occ = seq_len(2L),
+    r = seq_len(nr),
+    subj = seq_len(ns),
+    cluster = seq_len(nc)
+  )
+  grid$subject <- paste0("c", grid$cluster, "_s", grid$subj)
+  grid$rater <- paste0("c", grid$cluster, "_r", grid$r)
+  ce <- stats::rnorm(nc, 0, 1)
+  se <- stats::rnorm(nc * ns, 0, 1.5)
+  re <- stats::rnorm(nc * nr, 0, 0.7)
+  grid$score <- 10 +
+    ce[grid$cluster] +
+    se[as.integer(factor(grid$subject))] +
+    re[as.integer(factor(grid$rater))] +
+    stats::rnorm(nrow(grid), 0, 0.8)
+  grid
+}
+
 # 2. A stable tidy/glance schema ------------------------------------------------
 
 test_that("tidy.icc names the coefficient column `term` and always carries `occasions`", {
@@ -177,6 +209,25 @@ test_that("glance.icc names the replicate split instead of shifting var_residual
   expect_identical(gl_rep$n_o, 2L)
 })
 
+test_that("glance.icc reports `n_o` on a nested replicate design, not just a crossed one", {
+  gl <- glance(
+    icc(
+      nested_replicate_frame(),
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      design = "nested_in_clusters",
+      seed = 1
+    )
+  )
+  # The block-diagonal design defines an occasion count per cell exactly as the
+  # crossed one does, so the two replicate columns agree about whether the fit
+  # has replicates rather than contradicting each other.
+  expect_false(is.na(gl$var_subject_rater))
+  expect_identical(gl$n_o, 2L)
+})
+
 # 3. d_study validates its interval settings ------------------------------------
 
 test_that("d_study aborts classed on an out-of-range conf_level or sample count", {
@@ -201,4 +252,46 @@ test_that("d_study aborts classed on an out-of-range conf_level or sample count"
   # the reported column rather than merely being accepted.
   ok <- tidy(d_study(fit, m = 2:4, conf_level = 0.9, mc_samples = 500L))
   expect_true(all(ok$conf.level == 0.9))
+})
+
+test_that("tidy.icc_dstudy fills the columns the design defines, and only those", {
+  # The all-NA case above shows the columns are present; these show they are NA
+  # by design rather than never populated (M48 review F10).
+  rep_proj <- tidy(d_study(
+    icc(replicate_frame(), score, subject, rater, seed = 1),
+    m = 2:3
+  ))
+  expect_false(any(is.na(rep_proj$occasions)))
+  expect_false(any(is.na(rep_proj$type)))
+  expect_true(all(is.na(rep_proj$level)))
+
+  oneway_proj <- tidy(
+    d_study(
+      icc(ratings, score, subject, rater, model = "oneway", seed = 1),
+      m = 2:3
+    )
+  )
+  # A one-way design defines no error definition, so `type` is NA where the
+  # two-way projection above fills it.
+  expect_true(all(is.na(oneway_proj$type)))
+  expect_true(all(is.na(oneway_proj$occasions)))
+  expect_true(all(is.na(oneway_proj$level)))
+})
+
+test_that("d_study aborts classed on a multi-valued or non-integer seed", {
+  fit <- icc(ratings, score, subject, rater, seed = 1)
+  # Clause 1 reaches `seed` on this surface too: left unvalidated it took the
+  # first element silently, and a string reached `set.seed()` as a bare base
+  # error (M48 review F2).
+  expect_error(
+    d_study(fit, m = 2:4, seed = c(1, 2)),
+    class = "intraclass_error"
+  )
+  expect_error(d_study(fit, m = 2:4, seed = "abc"), class = "intraclass_error")
+  expect_error(d_study(fit, m = 2:4, seed = 1.5), class = "intraclass_error")
+  # The passing control: a single whole seed still projects, and the same seed
+  # reproduces the same band rather than merely being accepted.
+  a <- tidy(d_study(fit, m = 2:4, seed = 7))
+  b <- tidy(d_study(fit, m = 2:4, seed = 7))
+  expect_identical(a$conf.low, b$conf.low)
 })

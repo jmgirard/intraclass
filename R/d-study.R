@@ -51,7 +51,9 @@
 #' For a multilevel fit (a `cluster` column), `d_study()` projects the rater
 #' count `m` for each correctly-partitioned level on the object, meaning the
 #' **subject** and/or **cluster** level. It returns one reliability curve per
-#' level, and the result gains a `level` column that `autoplot()` facets by.
+#' level, and the returned object gains a `level` column that `autoplot()`
+#' facets by; `tidy()` carries that column on every projection, `NA` where the
+#' fit is not multilevel.
 #' This is the paper-sanctioned rater projection (ten Hove et al. 2022). Here
 #' `m` is the number of raters per cluster, and the cluster-level coefficient
 #' does **not** average over subjects, so there is no "subjects per cluster"
@@ -70,9 +72,11 @@
 #'
 #' * the **rater count `m`** (the default), holding the number of occasions `n_o` at
 #'   the fitted value: the rater and interaction terms divide by `m`, pure error by
-#'   `m * n_o`. The result gains an `occasions` column, one reliability curve per
-#'   occasion setting on the fit (`"single"` and/or `"average"`), so at `m` = the
-#'   observed rater count each curve matches the fitted `ICC(*,k)`.
+#'   `m * n_o`. The returned object gains an `occasions` column, one reliability
+#'   curve per occasion setting on the fit (`"single"` and/or `"average"`), so at
+#'   `m` = the observed rater count each curve matches the fitted `ICC(*,k)`;
+#'   `tidy()` carries that column on every projection, `NA` where the fit has no
+#'   replicates.
 #' * the **occasion count `n_o`** (supply the `n_o` argument), holding raters at the
 #'   observed count: pure error divides by `m * n_o` while the rater and interaction
 #'   terms are unchanged. Because occasion averaging rescales **only pure
@@ -113,7 +117,9 @@
 #' @return `d_study()` returns an `icc_dstudy` object: a tibble with one row per
 #'   projected point and columns `m`, `index` (e.g. `"ICC(A,3)"`), `type`,
 #'   `estimate`, `std.error`, `conf.low`, and `conf.high`, carrying the design and
-#'   interval settings as attributes. If the fitted `icc` reports both error
+#'   interval settings as attributes. `tidy()` names that coefficient column
+#'   `term`, following the broom glossary; the object and the printed report
+#'   both keep `index`. If the fitted `icc` reports both error
 #'   definitions (the default), `d_study()` projects **one reliability curve per
 #'   definition**, distinguished by the `type` column. A single-type fit projects
 #'   a single curve. A multilevel projection fills the `level` column (one curve
@@ -354,6 +360,12 @@ d_study <- function(
   }
   if (is.null(seed)) {
     seed <- x$ci$seed
+  } else {
+    # Same reason as `conf_level` above: unvalidated, a multi-valued seed was
+    # taken on its first element silently -- the behaviour clause 1 of the
+    # exported contract abolishes -- and a non-numeric one reached
+    # `set.seed()` as a bare base error (M48 review F2).
+    seed <- validate_seed(seed)
   }
 
   # One estimand per projected coefficient. Single-level: one per `m`. Multilevel:
@@ -684,7 +696,7 @@ tidy.icc_dstudy <- function(x, ...) {
   # A schema that appeared and disappeared with the design made two tidied
   # projections impossible to row-bind and made any added column a breaking change.
   n <- length(x$m)
-  # `x` is a data frame, so a missing column has to be tested by name: `$` on one
+  # `x` is a tibble, so a missing column has to be tested by name: `$` on one
   # warns rather than returning NULL.
   col <- function(nm, fill) if (nm %in% names(x)) x[[nm]] else rep(fill, n)
   tibble::tibble(

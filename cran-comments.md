@@ -15,13 +15,19 @@ ten Hove, Jorgensen, and van der Ark, and the `doi:` token in the reference.
 
 ## Test environments
 
-- Local: macOS 15 (aarch64), R 4.6.1.
-- GitHub Actions (R-CMD-check workflow, run on every push):
-  - ubuntu-latest: R-devel, R-release, R-oldrel-1
-  - windows-latest: R-release
-  - macos-latest: R-release
-- win-builder (R-devel and R-release) and R-hub will be run immediately before
-  submission.
+Checked so far:
+
+- Local: macOS 15 (aarch64), R 4.6.1 — the `--as-cran` run reported above.
+- GitHub Actions, on the release pull request: ubuntu-latest R-release and
+  windows-latest R-release.
+
+Scheduled before submission, not yet run against this version:
+
+- GitHub Actions, on the merge commit: the full workflow matrix — ubuntu-latest
+  R-devel / R-release / R-oldrel-1, windows-latest R-release, macos-latest
+  R-release. (The five-config matrix runs on push to the default branch; a pull
+  request runs the two configurations listed above.)
+- win-builder (R-devel and R-release) and R-hub.
 
 ## Downstream dependencies
 

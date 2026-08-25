@@ -466,10 +466,10 @@ fitted model, and the call.
 through the methods below, plus two elements of the list itself: \verb{$fit},
 the object the engine returned, and \verb{$call}, the matched call. Everything
 else in the list is internal: its names, nesting, and contents may change
-in any release without a deprecation cycle. Code that reaches into
-\verb{$estimates}, \verb{$components}, \verb{$design}, \verb{$ci}, \verb{$n}, or \verb{$mc} is reading
-an implementation detail; \code{tidy()} and \code{glance()} return the same
-information as a stable table.
+in any release without a deprecation cycle. That is the whole rule --
+\verb{$fit} and \verb{$call} are the list elements you may depend on, and reaching
+into any other one is reading an implementation detail. \code{tidy()} and
+\code{glance()} return the same information as a stable table.
 
 The methods documented on this page return:
 \itemize{
@@ -481,9 +481,11 @@ column is present on every fit; \code{occasions} is \code{NA} unless the design
 has within-cell replicates.
 \item \code{glance.icc()}: a one-row tibble of model-level summaries:
 the sample sizes, the design flags, the effective rater counts, the
-variance components, the occasion count, the engine and interval
-settings, and the sampler diagnostics \code{rhat} and \code{ess_bulk} (\code{NA} for
-the non-Bayesian engines, which do not sample).
+variance components, the occasion count \code{n_o} (\code{NA} unless the design
+has within-cell replicates \emph{and} defines one occasion count per cell --
+ragged replicates leave it \code{NA}), the engine and interval settings, and
+the sampler diagnostics \code{rhat} and \code{ess_bulk} (\code{NA} for the
+non-Bayesian engines, which do not sample).
 \item \code{format.icc()}: a character vector holding the printed report, one line per
 element.
 \item \code{print.icc()}: the \code{icc} object invisibly, having emitted that report.

@@ -54,8 +54,19 @@ gate before stamping, never folded in silently.
 - [x] AC6: `pkgdown::check_pkgdown()` + `pkgdown::build_site()` clean;
       `air format --check` clean; `lintr::lint_package()` clean;
       `urlchecker::url_check()` all-correct.
-- [ ] AC7: full CI matrix green on the PR head (R-devel setup flake → re-run
-      the job, don't debug the diff).
+- [ ] AC7: the release code passes every CI check a pull request can reach.
+      Evidence: `gh pr checks <head SHA>` at a named head SHA, every reported
+      check in the `pass` bucket — none `fail`, `pending`, `skipping` or
+      `cancel` — with the reported list quoted in the Review section and
+      compared against the workflows under `.github/workflows/` that declare a
+      `pull_request` trigger; a path filter drops a skipped workflow from the
+      report entirely, so a workflow declaring that trigger and absent from
+      the list counts as unrun, never as passing. A red check is diagnosed
+      before any re-run, and a re-run is recorded with what made it
+      infrastructural. The macOS, R-oldrel-1 and R-devel configurations of
+      `check-standard.yaml` are not reachable from a pull-request head as that
+      workflow stands; AC3's `cran-comments.md` is what states which
+      environments have actually run.
 
 ## Coverage
 <!-- owner: plan · create/amend-via-gate -->
@@ -102,6 +113,36 @@ gate before stamping, never folded in silently.
 - [x] T6: Open the PR and drive the CI matrix green (one blocking
       `gh pr checks --watch`; re-run infra flakes).
 
+- [x] T7: Review F1 — `glance()$n_o` reported `NA` on a nested (block-diagonal)
+      replicate design because `R/icc.R` stored the flat-grid count instead of
+      the design-aware `n_o_val`. Fix, with a nested-replicate regression test
+      that reds before it, and correct the `?icc` and NEWS claims the old
+      behaviour falsified.
+- [x] T8: Review F2 — `d_study()` did not validate `seed`: a multi-valued seed
+      was taken on its first element and a non-numeric one raised an unclassed
+      base error. Route it through `validate_seed()`, with a regression test,
+      and correct the NEWS bullet that claimed validation `d_study()` did not
+      have (and named a `boot_samples` argument it does not take).
+- [x] T9: Review F3, F4, F5, F9, F11, F12 — documentation and comment
+      corrections: the comparison vignette reads fits through `tidy()`/
+      `glance()` rather than the list interior the new `@return` declares
+      internal; the `@return` states the rule without a partial list of
+      internal names; NEWS and the `validate_choice()` comment name `occasions`
+      as the fourth report-all axis; the `d_study()` prose distinguishes the
+      object's columns from `tidy()`'s; the `glance()` NEWS bullet narrows to
+      the replicate split it actually disambiguates.
+- [x] T10: Review F6, F7, F12 — record corrections: `cran-comments.md`
+      separates what has been checked from what is scheduled before
+      submission; the ROADMAP row reasoning from the retired `R (>= 3.5)`
+      floor is corrected and the row compressed to hold the byte budget;
+      `DESIGN.md`'s platform sentence names which configurations run where;
+      D-036 annotates D-035's report-all enumeration.
+- [x] T11: Review F10 — positive tests for the new tidy/glance columns on the
+      shapes that populate them (the `d_study()` fill cases for `occasions`,
+      `level` and `type`).
+- [ ] T12: Amend AC7 through the gate (the review's amendment return), then
+      re-run the release gate and hand back to `/milestone-review`.
+
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
 
@@ -138,6 +179,16 @@ gate before stamping, never folded in silently.
 - 2026-08-25: review returns M48 to in-progress by /milestone-review — AC7 fails as written (the five-config CI matrix is gated on a push event to the default branch since M77, so it cannot run on a PR head; routed as an amendment return, no criterion text changed here), and the [O] diff-bug lens found two reproduced defects: `glance()$n_o` is NA on nested Design 2 replicate fits while `var_subject_rater` is populated, contradicting `?icc` and NEWS; and NEWS promises classed `boot_samples`/`seed` validation in `d_study()` that does not exist, `d_study(seed = c(1, 2))` silently taking the first element and `seed = "abc"` raising an unclassed error. AC1-AC6 verified with fresh evidence; consistency gate green. Findings and dispositions in the Review section.
 - 2026-08-25: review triage gate — maintainer chose to fix every finding marked fix-now (F1-F7, F9, F10 in part, F11, F12 in part) before re-review, rather than merging or deferring them; the follow-up and rejected dispositions in the Review section stand as recorded.
 
+- 2026-08-25: T7 done — `glance()$n_o` now reports the design-aware count (`R/icc.R`), so a nested (block-diagonal) replicate fit no longer reports NA beside a populated `var_subject_rater`; `tests/testthat/test-exported-contract.R` gains `nested_replicate_frame()` and a glance case that failed with `n_o` NA before the fix and passes after. `?icc` and the NEWS bullet corrected: `n_o` is NA without replicates and on ragged replicates, where no single per-cell count applies.
+- 2026-08-25: T8 done — `d_study()` routes a user-supplied `seed` through `validate_seed()` (`R/d-study.R`), so `seed = c(1, 2)` and `seed = "abc"` now abort `intraclass_error` where the first was taken silently on its first element and the second raised a bare base error; three assertions plus a reproducibility control pin it. The NEWS bullet now names the arguments each function actually validates and drops `boot_samples` from `d_study()`, which has no such argument.
+- 2026-08-25: T9 done — documentation and comment corrections: `vignettes/comparison-with-other-packages.Rmd` reads fits through `tidy()`/`glance()` instead of `$estimates`/`$n`; `icc()`'s `@return` states the public/internal rule without a partial list of internal names; NEWS and the `validate_choice()` comment name `occasions` as the fourth report-all axis; the `d_study()` prose distinguishes the object's columns from `tidy()`'s; the `glance()` NEWS bullet narrows to the replicate split it disambiguates and says what it does not.
+- 2026-08-25: T10 done — record corrections: `cran-comments.md` separates what has been checked from what is scheduled before submission; the M104 ROADMAP row's retired `R (>= 3.5)` premise is corrected in place and the row compressed; `DESIGN.md`'s Platforms bullet names which configurations run where; D-036 appended, annotating D-035's report-all enumeration.
+- 2026-08-25: T11 done — positive fill-case tests for `tidy.icc_dstudy()`: a replicate projection fills `occasions` and `type` and leaves `level` NA, a one-way projection leaves `type` NA, so the all-NA case already pinned is shown to be NA by design rather than never populated.
+- 2026-08-25: correction superseding the T3 line's NEWS figures — it recorded 796 -> 407 lines; the measured figures are 770 at `origin/main`, 409 at `9b11e9e`, and 429 after the T3 follow-up restored the skew-caveat and MPL anchors.
+- 2026-08-25: criteria audit ran in **full** mode (user-facing tier; AC1 carries an RB tripwire tag) over the drafted AC7 replacement, by a fresh-context [O] reader that did not author it. It returned seven findings and the draft was rewritten before being written to this file: the decisive one is that a workflow skipped by a `paths-ignore` filter produces no check run at all, so `gh pr checks` reporting all-pass is compatible with `R CMD check` never having run (verified on `31270eda`, a cairn-only push with five check runs and `check-standard`/`test-coverage` absent). Also fixed from its findings: the unbounded infrastructure-flake licence, the unpinned head, the `skipping`/`cancel` buckets, and a post-merge promise nothing in this milestone could verify.
+- 2026-08-25: amendment return: AC7 — "the release code passes every CI check a pull request can reach. Evidence: `gh pr checks <head SHA>` at a named head SHA, every reported check in the `pass` bucket — none `fail`, `pending`, `skipping` or `cancel` — with the reported list quoted in the Review section and compared against the workflows under `.github/workflows/` that declare a `pull_request` trigger; a path filter drops a skipped workflow from the report entirely, so a workflow declaring that trigger and absent from the list counts as unrun, never as passing. A red check is diagnosed before any re-run, and a re-run is recorded with what made it infrastructural. The macOS, R-oldrel-1 and R-devel configurations of `check-standard.yaml` are not reachable from a pull-request head as that workflow stands; AC3's `cran-comments.md` is what states which environments have actually run."
+- 2026-08-25: amendment gate — maintainer chose the narrowed AC7 over adding a criterion binding the declared R floor to a measurement; the criteria set holds at seven. The R-floor gap goes to a DESIGN.md Known issues entry and a ROADMAP candidate row (search-first swept; no existing row covers it), the maintainer accepting the GP3 tension for this release rather than pinning a 4.0.0 CI job inside a release round.
+- 2026-08-25: sizing advisory noted — `cairn_validate` WARNs the task tripwire at 12 tasks; T7-T12 are repair work under the existing criteria, not new scope, so the milestone is not split.
 ## Decisions
 <!-- owner: implement / review · append-only -->
 

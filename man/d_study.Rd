@@ -57,7 +57,9 @@ or the seed.}
 \code{d_study()} returns an \code{icc_dstudy} object: a tibble with one row per
 projected point and columns \code{m}, \code{index} (e.g. \code{"ICC(A,3)"}), \code{type},
 \code{estimate}, \code{std.error}, \code{conf.low}, and \code{conf.high}, carrying the design and
-interval settings as attributes. If the fitted \code{icc} reports both error
+interval settings as attributes. \code{tidy()} names that coefficient column
+\code{term}, following the broom glossary; the object and the printed report
+both keep \code{index}. If the fitted \code{icc} reports both error
 definitions (the default), \code{d_study()} projects \strong{one reliability curve per
 definition}, distinguished by the \code{type} column. A single-type fit projects
 a single curve. A multilevel projection fills the \code{level} column (one curve
@@ -131,7 +133,9 @@ raters" to project to. \code{d_study()} aborts in that case (use
 For a multilevel fit (a \code{cluster} column), \code{d_study()} projects the rater
 count \code{m} for each correctly-partitioned level on the object, meaning the
 \strong{subject} and/or \strong{cluster} level. It returns one reliability curve per
-level, and the result gains a \code{level} column that \code{autoplot()} facets by.
+level, and the returned object gains a \code{level} column that \code{autoplot()}
+facets by; \code{tidy()} carries that column on every projection, \code{NA} where the
+fit is not multilevel.
 This is the paper-sanctioned rater projection (ten Hove et al. 2022). Here
 \code{m} is the number of raters per cluster, and the cluster-level coefficient
 does \strong{not} average over subjects, so there is no "subjects per cluster"
@@ -152,9 +156,11 @@ where the residual splits into the subject-by-rater interaction and pure error),
 \itemize{
 \item the \strong{rater count \code{m}} (the default), holding the number of occasions \code{n_o} at
 the fitted value: the rater and interaction terms divide by \code{m}, pure error by
-\code{m * n_o}. The result gains an \code{occasions} column, one reliability curve per
-occasion setting on the fit (\code{"single"} and/or \code{"average"}), so at \code{m} = the
-observed rater count each curve matches the fitted \verb{ICC(*,k)}.
+\code{m * n_o}. The returned object gains an \code{occasions} column, one reliability
+curve per occasion setting on the fit (\code{"single"} and/or \code{"average"}), so at
+\code{m} = the observed rater count each curve matches the fitted \verb{ICC(*,k)};
+\code{tidy()} carries that column on every projection, \code{NA} where the fit has no
+replicates.
 \item the \strong{occasion count \code{n_o}} (supply the \code{n_o} argument), holding raters at the
 observed count: pure error divides by \code{m * n_o} while the rater and interaction
 terms are unchanged. Because occasion averaging rescales \strong{only pure

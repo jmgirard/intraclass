@@ -1540,3 +1540,30 @@ present, NA where inapplicable, which is what lets the roadmap's deferred
 extensions fill cells rather than change the schema. Reopening either clause
 after v0.1.0 is a breaking change under the deprecation cycle, not an
 amendment.
+
+### D-036 (2026-08-25): D-035 clause 1 annotated — a scalar default does not make an argument a choice argument; `occasions` is the fourth report-all axis
+
+**Context.** D-035 clause 1 states the rule as a property of the *default*: a
+vector-valued default in the exported signature means report-all, and a choice
+argument given more than one value aborts classed. Its context paragraph names
+`type`/`unit`/`level` as the report-all set. M48's review found a fourth
+argument the rule does not classify: `occasions` defaults to a single value but
+accepts both of its values and reports a curve for each, so reading clause 1
+off the default alone puts it on the wrong side. The release documentation and
+the `validate_choice()` comment had both inherited the three-item enumeration
+and told users that passing two occasions aborts, which it does not.
+
+**Decision.** The discriminator in D-035 clause 1 is whether the argument is
+routed through `validate_choice()`, not what shape its default has. The
+report-all axes at v0.1.0 are `type`, `unit`, `level` and `occasions`; the
+choice arguments are `raters`, `posterior_summary`, `model`, `engine`,
+`ci_method` and `autoplot()`'s `what`. D-035 clause 1 stands unchanged as a
+rule; this entry fixes which arguments it puts on each side, and the
+enumeration in D-035's context paragraph is superseded by the one here.
+
+**Consequences.** `occasions` keeps its scalar default and its acceptance of
+both values, so no exported behaviour changes. What changes is the record and
+the user-facing text: NEWS and the `validate_choice()` comment now name four
+report-all axes. A future argument joins the report-all set by not being routed
+through `validate_choice()`, whatever its default looks like, and adding one
+after v0.1.0 is additive rather than breaking.

@@ -350,10 +350,15 @@ alternate engines, and seeded simulations.
   rename. **Every identifier column is present on every fit**, `NA` where the design does
   not define it — `occasions`, and for a projection `level` and `type` as well — so two
   tidied fits row-bind and a later added column cannot change an existing call's schema.
-* `glance()` reports `var_subject_rater` and `n_o` (both `NA` without within-cell
-  replicates) alongside `var_residual`, so which quantity the residual holds is readable
-  from the row: a replicate fit splits it into the subject-by-rater interaction and pure
-  error. It also reports the sampler diagnostics `rhat` and `ess_bulk`, `NA` for the
+* `glance()` reports `var_subject_rater` and `n_o` alongside `var_residual`, so a
+  replicate fit no longer changes what `var_residual` means without saying so: the
+  interaction term is named, and `n_o` gives the occasion count it was split at.
+  `var_subject_rater` is `NA` without within-cell replicates, and `n_o` is `NA` there
+  too and on ragged replicates, where cells hold different numbers of ratings and no
+  single count applies. This disambiguates the replicate split only — the row does not
+  say whether `var_rater` is a random-rater variance or a fixed-rater finite-population
+  term, nor whether a one-way fit has folded rater variance into `var_residual`.
+  `glance()` also reports the sampler diagnostics `rhat` and `ess_bulk`, `NA` for the
   engines that do not sample.
 * `?icc` states which parts of the returned object are safe to depend on: the documented
   methods, plus `$fit` and `$call`. The rest of the list is internal and may change
@@ -361,8 +366,9 @@ alternate engines, and seeded simulations.
 * A choice argument takes **exactly one value**. Passing several — the full set of allowed
   values included — aborts with a classed error instead of quietly using the first. This
   covers `raters`, `posterior_summary`, `model`, `engine`, `ci_method` and `autoplot()`'s
-  `what`. The arguments that genuinely take several values (`type`, `unit`, `level`) are
-  unaffected.
+  `what`. The arguments that genuinely take several values are unaffected: `type`,
+  `unit` and `level`, which default to reporting every value, and `occasions`, which
+  defaults to one but still accepts both.
 
 ## Data and documentation
 
@@ -400,10 +406,12 @@ alternate engines, and seeded simulations.
 * A degenerate fit with no variance in any component fails loudly instead of returning a
   `NaN` estimate, and an unstable fit whose Monte-Carlo draws overflow is reported rather
   than silently truncated.
-* `mc_samples`, `boot_samples`, `conf_level` and `seed` are validated with classed errors
-  in both `icc()` and `d_study()`; invalid values (`mc_samples = 0`/`1`, a fractional or
-  non-numeric value, a confidence level outside (0, 1)) produce neither a silent `NA`
-  interval nor a bare base-R error.
+* Interval settings are validated with classed errors: `mc_samples`, `boot_samples`,
+  `conf_level` and `seed` in `icc()`, and `mc_samples`, `conf_level` and `seed` in
+  `d_study()`, which takes no `boot_samples`. Invalid values (`mc_samples = 0`/`1`, a
+  fractional or non-numeric value, a confidence level outside (0, 1), a seed that is not
+  a single whole number) produce neither a silent `NA` interval nor a bare base-R
+  error.
 * An incomplete crossed multilevel design in which every subject is rated only once is
   reported as unidentified rather than returning a spurious `ICC = 0.5`.
 * On incomplete crossed multilevel data, requesting an averaged cluster-level `ICC(c,k)`
