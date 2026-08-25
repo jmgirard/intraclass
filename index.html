@@ -75,9 +75,9 @@
 <!-- badges: start -->
 
 <p><strong>intraclass</strong> computes interrater-reliability <strong>intraclass correlation coefficients (ICCs)</strong> within the generalizability-theory framework, using <strong>modern variance-component estimation</strong> (linear mixed models) rather than the classical ANOVA / mean-squares approach.</p>
-<p>It aims to (1) fit variance components with modern engines, (2) compute the <em>correct</em> ICC for a stated design with proper (boundary-aware Monte-Carlo) interval estimation, (3) handle imbalanced, incomplete, and multilevel designs, and (4) help you decide <strong>which ICC to choose, and why</strong> — the docs and website are a place to learn ICC best practice, not just call functions.</p>
+<p>It aims to fit variance components with modern engines, and to compute the <em>correct</em> ICC for a stated design with proper boundary-aware Monte-Carlo interval estimation. It also aims to handle imbalanced, incomplete, and multilevel designs, and to help you decide <strong>which ICC to choose, and why</strong>. The docs and website are a place to learn ICC best practice, not just call functions.</p>
 <blockquote>
-<p>[!NOTE] This package is approaching its first release. The full interrater-reliability ICC family is implemented — two-way designs (absolute agreement vs. consistency, single vs. average, random vs. fixed raters) and one-way designs, imbalanced and incomplete (missing-cell) data, and multilevel designs (subject vs. cluster level, with raters crossed with or nested in clusters/subjects) — each with boundary-aware Monte-Carlo intervals. Fits run on <code>glmmTMB</code> (the default) or <code>lme4</code>, and on <code>brms</code> (Bayesian) or <code>lavaan</code> (SEM); the <a href="https://jmgirard.github.io/intraclass/articles/engines.html">engines article</a> says which designs each one supports.</p>
+<p>[!NOTE] This package is approaching its first release. The full interrater-reliability ICC family is implemented. That covers two-way designs (absolute agreement vs. consistency, single vs. average, random vs. fixed raters) and one-way designs. It covers imbalanced and incomplete (missing-cell) data. It also covers multilevel designs, at the subject or cluster level, with raters crossed with or nested in clusters or subjects. Everything just listed comes with boundary-aware Monte-Carlo intervals. Fits run on <code>glmmTMB</code> (the default) or <code>lme4</code>. Bayesian fits run on <code>brms</code>, and SEM fits on <code>lavaan</code>. The <a href="https://jmgirard.github.io/intraclass/articles/engines.html">engines article</a> says which designs each one supports.</p>
 </blockquote>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -86,12 +86,12 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"jmgirard/intraclass"</span><span class="op">)</span></span></code></pre></div>
-<p>intraclass declares <code>cli</code>, <code>generics</code>, <code>glmmTMB</code>, <code>lifecycle</code>, <code>rlang</code>, and <code>tibble</code> as its non-base <code>Imports:</code>. What an installation retrieves is the full dependency closure of those declarations, which is considerably larger. One member of that closure is worth naming: <code>glmmTMB</code> lists <code>lme4</code> in its own <code>Imports:</code>, so the <code>lme4</code> package is already on your library path after a plain install, whatever its <code>Suggests:</code> placement here implies. Having the package is not the same as having the engine, though — <code>engine = "lme4"</code> also needs <code>merDeriv</code>, which every lme4 fit checks for on entry whatever interval method you ask for. <code>merDeriv</code> does not arrive: it sits in this package’s <code>Suggests:</code>, as do <code>brms</code> (Bayesian) and <code>lavaan</code> (SEM), so a plain install fetches none of the three — though asking for <code>merDeriv</code> brings <code>lavaan</code> along, because <code>merDeriv</code> names it in its own <code>Depends:</code>. <code>glmmTMB</code> is the only engine a plain install leaves you ready to use.</p>
+<p>intraclass declares <code>cli</code>, <code>generics</code>, <code>glmmTMB</code>, <code>lifecycle</code>, <code>rlang</code>, and <code>tibble</code> as its non-base <code>Imports:</code>. What an installation retrieves is the full dependency closure of those declarations, which is considerably larger. One member of that closure is worth naming: <code>glmmTMB</code> lists <code>lme4</code> in its own <code>Imports:</code>, so the <code>lme4</code> package is already on your library path after a plain install, whatever its <code>Suggests:</code> placement here implies. Having the package is not the same as having the engine, though. <code>engine = "lme4"</code> also needs <code>merDeriv</code>, which every lme4 fit checks for on entry whatever interval method you ask for. <code>merDeriv</code> does not arrive. It sits in this package’s <code>Suggests:</code>, and so do <code>brms</code>, the Bayesian engine, and <code>lavaan</code>, the SEM engine. A plain install fetches none of the three. Asking for <code>merDeriv</code> does bring <code>lavaan</code> along, though, because <code>merDeriv</code> names it in its own <code>Depends:</code>. <code>glmmTMB</code> is the only engine a plain install leaves you ready to use.</p>
 </div>
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<p><code>ratings</code> is the classic Shrout &amp; Fleiss (1979) example, shipped with the package. With the defaults a single two-way random fit reports every defined formulation — absolute agreement and consistency, single-rater and average — grouped by error definition, each with a reproducible Monte-Carlo interval:</p>
+<p><code>ratings</code> is the classic Shrout &amp; Fleiss (1979) example, shipped with the package. With the defaults a single two-way random fit reports every defined formulation: absolute agreement and consistency, single-rater and average. They are grouped by error definition, each with a reproducible Monte-Carlo interval:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jmgirard/intraclass" class="external-link">intraclass</a></span><span class="op">)</span></span>
 <span></span>
@@ -117,7 +117,7 @@
 <span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-plot-coefficients-1.png" alt="Forest plot of the four coefficients from the ratings fit: ICC(A,1), ICC(A,k), ICC(C,1) and ICC(C,k), each a labelled point with a horizontal Monte-Carlo interval, and the average-rater coefficients further to the right than their single-rater counterparts." width="100%"></p>
-<p>Which coefficient you want — agreement vs. consistency, single vs. average, fixed vs. random raters, complete vs. incomplete — is a real modeling decision, and each is an argument to <code><a href="reference/icc.html">icc()</a></code>. Not sure which to report? <code><a href="reference/choose_icc.html">choose_icc()</a></code> walks the <a href="https://jmgirard.github.io/intraclass/articles/choosing-an-icc.html"><em>Choosing an ICC</em></a> decision tree and hands back the coefficient, the reasoning, and the exact call to run — no data or fitting required:</p>
+<p>Which coefficient you want is a real modeling decision: agreement vs. consistency, single vs. average, fixed vs. random raters, complete vs. incomplete. Each of those is an argument to <code><a href="reference/icc.html">icc()</a></code>. Not sure which to report? <code><a href="reference/choose_icc.html">choose_icc()</a></code> walks the <a href="https://jmgirard.github.io/intraclass/articles/choosing-an-icc.html"><em>Choosing an ICC</em></a> decision tree and hands back the coefficient, the reasoning, and the exact call to run. No data or fitting is required:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/choose_icc.html">choose_icc</a></span><span class="op">(</span>model <span class="op">=</span> <span class="st">"twoway"</span>, type <span class="op">=</span> <span class="st">"consistency"</span>, unit <span class="op">=</span> <span class="st">"average"</span>, raters <span class="op">=</span> <span class="st">"random"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ── Recommended ICC ─────────────────────────────────────────────────────────────</span></span>
@@ -136,7 +136,7 @@
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Notes:</span></span>
 <span><span class="co">#&gt;   - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.</span></span></code></pre></div>
-<p>For <strong>multilevel</strong> data — subjects nested in clusters (pupils in classrooms, patients in clinics) — pass a <code>cluster</code> column and <code><a href="reference/icc.html">icc()</a></code> reports subject-level and cluster-level reliability separately:</p>
+<p>For <strong>multilevel</strong> data, meaning subjects nested in clusters such as pupils in classrooms or patients in clinics, pass a <code>cluster</code> column. Then <code><a href="reference/icc.html">icc()</a></code> reports subject-level and cluster-level reliability separately:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span>pupil <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, classroom <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">12</span>, rater <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">)</span></span>
@@ -178,7 +178,7 @@
 <div class="section level2">
 <h2 id="how-many-raters-do-you-need">How many raters do you need?<a class="anchor" aria-label="anchor" href="#how-many-raters-do-you-need"></a>
 </h2>
-<p><code><a href="reference/d_study.html">d_study()</a></code> projects the variance components of a fit to other rater counts, carrying the interval with them — so you can ask what reliability two raters would buy, or ten, without running the study again:</p>
+<p><code><a href="reference/d_study.html">d_study()</a></code> projects the variance components of a fit to other rater counts, carrying the interval with them. So you can ask what reliability two raters would buy, or ten, without running the study again:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="fu"><a href="reference/d_study.html">d_study</a></span><span class="op">(</span><span class="va">fit</span>, m <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-plot-dstudy-1.png" alt="Projected reliability against the number of raters, from 1 to 10, as two rising curves with Monte-Carlo interval bands: consistency above, absolute agreement below, both climbing steeply from one to four raters and flattening after that." width="100%"></p>
@@ -188,22 +188,21 @@
 </h2>
 <ul>
 <li>
-<a href="https://jmgirard.github.io/intraclass/articles/getting-started.html"><em>Getting started</em></a> — the guided tour</li>
+<a href="https://jmgirard.github.io/intraclass/articles/getting-started.html"><em>Getting started</em></a>: the guided tour.</li>
 <li>
-<a href="https://jmgirard.github.io/intraclass/articles/choosing-an-icc.html"><em>Choosing an ICC</em></a> — the decision guide behind <code><a href="reference/choose_icc.html">choose_icc()</a></code>
-</li>
+<a href="https://jmgirard.github.io/intraclass/articles/choosing-an-icc.html"><em>Choosing an ICC</em></a>: the decision guide behind <code><a href="reference/choose_icc.html">choose_icc()</a></code>.</li>
 <li>
-<a href="https://jmgirard.github.io/intraclass/articles/multilevel-designs.html"><em>Multilevel designs</em></a> — incomplete and nested multilevel data</li>
+<a href="https://jmgirard.github.io/intraclass/articles/multilevel-designs.html"><em>Multilevel designs</em></a>: incomplete and nested multilevel data.</li>
 <li>
-<a href="https://jmgirard.github.io/intraclass/articles/engines.html"><em>Estimation engines</em></a> — what each engine buys you</li>
+<a href="https://jmgirard.github.io/intraclass/articles/engines.html"><em>Estimation engines</em></a>: what each engine buys you.</li>
 <li>
-<a href="https://jmgirard.github.io/intraclass/articles/interval-methods.html"><em>Confidence-interval methods</em></a> — the <code>ci_method</code> menu</li>
+<a href="https://jmgirard.github.io/intraclass/articles/interval-methods.html"><em>Confidence-interval methods</em></a>: the <code>ci_method</code> menu.</li>
 <li>
-<a href="https://jmgirard.github.io/intraclass/articles/d-studies-and-replicates.html"><em>D-studies and replicates</em></a> — projection and within-cell replicates</li>
+<a href="https://jmgirard.github.io/intraclass/articles/d-studies-and-replicates.html"><em>D-studies and replicates</em></a>: projection and within-cell replicates.</li>
 <li>
-<a href="https://jmgirard.github.io/intraclass/articles/comparison-with-other-packages.html"><em>Comparison with other packages</em></a> — how the numbers line up</li>
+<a href="https://jmgirard.github.io/intraclass/articles/comparison-with-other-packages.html"><em>Comparison with other packages</em></a>: how the numbers line up.</li>
 <li>
-<a href="https://jmgirard.github.io/intraclass/articles/glossary.html"><em>Glossary</em></a> — the vocabulary in one place</li>
+<a href="https://jmgirard.github.io/intraclass/articles/glossary.html"><em>Glossary</em></a>: the vocabulary in one place.</li>
 </ul>
 </div>
 <div class="section level2">
@@ -237,7 +236,7 @@
 </tr>
 <tr>
 <td><strong>intraclass</strong></td>
-<td>—</td>
+<td>(this package)</td>
 <td>Mixed-model estimation, Monte-Carlo confidence intervals, and decision guidance</td>
 </tr>
 </tbody>

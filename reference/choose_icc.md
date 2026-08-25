@@ -37,9 +37,10 @@ print(x, ...)
 
 - type:
 
-  `"agreement"` (the value itself must match; systematic rater offsets
-  count as error) or `"consistency"` (only rank order matters; a
-  constant per-rater offset is forgiven). Required for a two-way design.
+  `"agreement"` (the value itself must match, so systematic rater
+  offsets count as error) or `"consistency"` (only rank order matters,
+  so a constant per-rater offset is forgiven). Required for a two-way
+  design.
 
 - unit:
 
@@ -48,9 +49,9 @@ print(x, ...)
 
 - raters:
 
-  `"random"` (a sample you generalize beyond – the recommended default
-  for interrater reliability) or `"fixed"` (exactly these judges, no
-  generalization). Required for a two-way design.
+  `"random"` (a sample you generalize beyond, and the recommended
+  default for interrater reliability) or `"fixed"` (exactly these
+  judges, no generalization). Required for a two-way design.
 
 - multilevel:
 
@@ -89,19 +90,19 @@ The methods documented on this page return:
 
 ## Details
 
-Supply the decisions as arguments to get advice programmatically; call
-`choose_icc()` with the relevant answers omitted in an interactive
-session to be asked the outstanding questions one at a time.
+Supply the decisions as arguments to get advice programmatically. In an
+interactive session, call `choose_icc()` with the relevant answers
+omitted to be asked the outstanding questions one at a time.
 
-The two structural facts about your design – whether the raters are
-crossed (`model`) and whether subjects are nested in clusters
-(`multilevel`) – default to the common case (a crossed, non-multilevel
-two-way design), matching
-[`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md). The
-choices that actually select the coefficient (`type`, `unit`, `raters`,
-and `level` when multilevel) have no silent default: in a
-non-interactive session, leaving one unanswered is an error naming the
-unanswered decision (rather than quietly picking one for you).
+The two structural facts about your design default to the common case, a
+crossed, non-multilevel two-way design, matching
+[`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md). They
+are whether the raters are crossed (`model`) and whether subjects are
+nested in clusters (`multilevel`). The choices that actually select the
+coefficient are `type`, `unit`, `raters`, and `level` when multilevel.
+None of them has a silent default. In a non-interactive session, leaving
+one unanswered is an error naming the unanswered decision, rather than
+quietly picking one for you.
 
 ## See also
 

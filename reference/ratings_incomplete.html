@@ -70,23 +70,23 @@ matching the long format <code><a href="icc.html">icc()</a></code> expects.</p>
     </div>
     <div class="section level2">
     <h2 id="source">Source<a class="anchor" aria-label="anchor" href="#source"></a></h2>
-    <p>Derived from <a href="ratings.html">ratings</a>; see <code>data-raw/make-ratings.R</code>. Underlying
+    <p>Derived from <a href="ratings.html">ratings</a>. See <code>data-raw/make-ratings.R</code>. Underlying
 values from Shrout, P. E., &amp; Fleiss, J. L. (1979). Intraclass correlations:
 Uses in assessing rater reliability. <em>Psychological Bulletin, 86</em>(2),
 420-428.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The design is deliberately <strong>ragged</strong> – subjects 1-2 have all four raters
-while subjects 3-6 have three – yet the observed subject-by-rater graph
-remains a single <strong>connected</strong> component (raters 1, 3, and 4 rate every
-subject), so the two-way ICC stays identified and <code><a href="icc.html">icc()</a></code> does not abort
+    <p>The design is deliberately <strong>ragged</strong>: subjects 1-2 have all four raters
+while subjects 3-6 have three. The observed subject-by-rater graph still
+remains a single <strong>connected</strong> component, because raters 1, 3, and 4 rate
+every subject. So the two-way ICC stays identified and <code><a href="icc.html">icc()</a></code> does not abort
 (see the connectedness requirement in <code><a href="../articles/choosing-an-icc.html">vignette("choosing-an-icc")</a></code>).</p>
 <p>Because the per-subject rating counts differ, the averaging divisor for
-<code>ICC(*,k)</code> is the effective number of ratings <code>k_eff</code> = 1 / mean(1 / n_i) =
-3.273 (the harmonic mean of the counts 4, 4, 3, 3, 3, 3), not an integer.
-And unlike the balanced <a href="ratings.html">ratings</a> – where <code>raters = "fixed"</code> and
-<code>raters = "random"</code> give the same point estimate – here the two genuinely
+<code>ICC(*,k)</code> is not an integer. It is the effective number of ratings
+<code>k_eff</code> = 1 / mean(1 / n_i) = 3.273, the harmonic mean of the counts 4, 4, 3,
+3, 3, 3. On the balanced <a href="ratings.html">ratings</a>, <code>raters = "fixed"</code> and
+<code>raters = "random"</code> give the same point estimate. Here the two genuinely
 differ. This dataset exists to demonstrate those incomplete-design behaviors
 in the "Choosing an ICC" article.</p>
     </div>

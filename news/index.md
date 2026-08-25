@@ -421,6 +421,18 @@
   reports changed, and every claim the pass touched was checked against
   the text it replaced.
 
+- Every help page and the README have been held to the same standard,
+  and the ones that needed it have been rewritten: long sentences split,
+  and dashes standing in for a colon or a full stop replaced. Nothing
+  about what the package computes or reports changed.
+
+- [`?icc`](https://jmgirard.github.io/intraclass/reference/icc.md)’s
+  `design` entry now names both occasions for declaring a multilevel
+  design rather than one: when the rater labels do not mean what the
+  crossing pattern implies, and when missing cells leave the pattern
+  genuinely ambiguous. This matches the *Multilevel designs* article,
+  which already named both.
+
 - The *Multilevel designs* article now **runs** the `design` argument
   instead of only naming it. The same simulated classroom table is
   fitted three ways — the crossed reading

@@ -23,30 +23,29 @@ A data frame with 20 rows and 3 columns, as in
 ## Source
 
 Derived from
-[ratings](https://jmgirard.github.io/intraclass/reference/ratings.md);
-see `data-raw/make-ratings.R`. Underlying values from Shrout, P. E., &
+[ratings](https://jmgirard.github.io/intraclass/reference/ratings.md).
+See `data-raw/make-ratings.R`. Underlying values from Shrout, P. E., &
 Fleiss, J. L. (1979). Intraclass correlations: Uses in assessing rater
 reliability. *Psychological Bulletin, 86*(2), 420-428.
 
 ## Details
 
-The design is deliberately **ragged** – subjects 1-2 have all four
-raters while subjects 3-6 have three – yet the observed subject-by-rater
-graph remains a single **connected** component (raters 1, 3, and 4 rate
-every subject), so the two-way ICC stays identified and
+The design is deliberately **ragged**: subjects 1-2 have all four raters
+while subjects 3-6 have three. The observed subject-by-rater graph still
+remains a single **connected** component, because raters 1, 3, and 4
+rate every subject. So the two-way ICC stays identified and
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) does
 not abort (see the connectedness requirement in
 [`vignette("choosing-an-icc")`](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.md)).
 
 Because the per-subject rating counts differ, the averaging divisor for
-`ICC(*,k)` is the effective number of ratings `k_eff` = 1 / mean(1 /
-n_i) = 3.273 (the harmonic mean of the counts 4, 4, 3, 3, 3, 3), not an
-integer. And unlike the balanced
-[ratings](https://jmgirard.github.io/intraclass/reference/ratings.md) –
-where `raters = "fixed"` and `raters = "random"` give the same point
-estimate – here the two genuinely differ. This dataset exists to
-demonstrate those incomplete-design behaviors in the "Choosing an ICC"
-article.
+`ICC(*,k)` is not an integer. It is the effective number of ratings
+`k_eff` = 1 / mean(1 / n_i) = 3.273, the harmonic mean of the counts 4,
+4, 3, 3, 3, 3. On the balanced
+[ratings](https://jmgirard.github.io/intraclass/reference/ratings.md),
+`raters = "fixed"` and `raters = "random"` give the same point estimate.
+Here the two genuinely differ. This dataset exists to demonstrate those
+incomplete-design behaviors in the "Choosing an ICC" article.
 
 ## See also
 

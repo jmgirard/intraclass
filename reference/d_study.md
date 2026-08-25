@@ -4,15 +4,15 @@
 
 Projects the reliability of a fitted
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) to the
-mean of an arbitrary number of raters `m` – a generalizability-theory
-**decision (D-) study**, answering "how reliable would the mean of `m`
-raters be?" and, read as a curve, "how many raters do I need?". The
-point estimate and its boundary-aware interval reuse the fit stored on
-`x`; no model is refit. The band follows the fit's `ci_method`: a
-Monte-Carlo fit reprojects one draw from the parameter covariance across
-every `m`, while a **bootstrap** fit reprojects its stored resamples (so
-at `m` = the observed rater count the band matches the fitted `ICC(*,k)`
-interval exactly).
+mean of an arbitrary number of raters `m`. This is a
+generalizability-theory **decision (D-) study**, answering "how reliable
+would the mean of `m` raters be?" and, read as a curve, "how many raters
+do I need?". The point estimate and its boundary-aware interval reuse
+the fit stored on `x`, and no model is refit. The band follows the fit's
+`ci_method`. A Monte-Carlo fit reprojects one draw from the parameter
+covariance across every `m`. A **bootstrap** fit reprojects its stored
+resamples, so at `m` = the observed rater count the band matches the
+fitted `ICC(*,k)` interval exactly.
 
 ## Usage
 
@@ -70,15 +70,15 @@ glance(x, ...)
 - n_o:
 
   Numeric vector of occasion (within-cell replicate) counts to project
-  to (each \\\ge 1\\), holding raters at the observed count – a D-study
-  on the **occasion** facet of a within-cell replicate fit. Mutually
-  exclusive with `m`; supplying both aborts. `NULL` (the default)
-  projects the rater count `m` instead.
+  to (each \\\ge 1\\), holding raters at the observed count. This is a
+  D-study on the **occasion** facet of a within-cell replicate fit.
+  Mutually exclusive with `m`, and supplying both aborts. `NULL` (the
+  default) projects the rater count `m` instead.
 
 - conf_level, mc_samples, seed:
 
-  Interval settings. Each defaults to the value stored on `x` (so a
-  seeded fit yields a reproducible projection); override to change the
+  Interval settings. Each defaults to the value stored on `x`, so a
+  seeded fit yields a reproducible projection. Override to change the
   confidence level, the number of Monte-Carlo draws, or the seed.
 
 ## Value
@@ -90,26 +90,27 @@ design and interval settings as attributes. If the fitted `icc` reports
 both error definitions (the default), `d_study()` projects **one
 reliability curve per definition** and
 [`tidy()`](https://generics.r-lib.org/reference/tidy.html) surfaces a
-`type` column to distinguish them; a single-type fit projects a single
+`type` column to distinguish them. A single-type fit projects a single
 curve. A multilevel projection adds a `level` column (one curve per
 level), and a replicate projection an `occasions` column.
 
 The methods documented on this page return:
 
-- `tidy.icc_dstudy()`: a tibble with one row per projected point
-  carrying the columns `m`, `index`, `estimate`, `std.error`,
-  `conf.low`, `conf.high`, `conf.level`, and `method`, plus a `type`
-  column when both error definitions are projected, a `level` column for
-  a multilevel projection, and an `occasions` column for a replicate
+- `tidy.icc_dstudy()`: a tibble with one row per projected point. Its
+  columns are `m`, `index`, `estimate`, `std.error`, `conf.low`,
+  `conf.high`, `conf.level`, and `method`. It gains a `type` column when
+  both error definitions are projected, a `level` column for a
+  multilevel projection, and an `occasions` column for a replicate
   projection. The conditional columns are inserted after `index`
   (`type`) and after `m` (`level`, `occasions`), so the list above is
   not a column order.
 
-- `glance.icc_dstudy()`: a one-row tibble of projection-level summaries
-  – the distinct projected rater counts `m` and their range (held at the
-  observed rater count when the sweep is over occasions, so this is not
-  a row count), the error definition(s), the rater treatment, the
-  observed rater count, and the interval settings.
+- `glance.icc_dstudy()`: a one-row tibble of projection-level summaries.
+  It carries the distinct projected rater counts `m` and their range,
+  the error definition(s), the rater treatment, the observed rater
+  count, and the interval settings. The count and range are held at the
+  observed rater count when the sweep is over occasions, so they are not
+  a row count.
 
 - `format.icc_dstudy()`: a character vector holding the printed
   projection table, one line per element.
@@ -117,8 +118,8 @@ The methods documented on this page return:
 - `print.icc_dstudy()`: the `icc_dstudy` object invisibly, having
   emitted that table.
 
-- `autoplot.icc_dstudy()`: a `ggplot` object – the reliability curve,
-  faceted by level for a multilevel projection.
+- `autoplot.icc_dstudy()`: a `ggplot` object holding the reliability
+  curve, faceted by level for a multilevel projection.
 
 - `plot.icc_dstudy()`: the `icc_dstudy` object invisibly, having drawn
   that curve.
@@ -129,40 +130,41 @@ The methods documented on this page return:
 
 ## Projection is extrapolation
 
-Projecting to an `m` you did not run is an **extrapolation**, and its
-trustworthiness depends on how well the variance components – especially
-the rater variance \\\sigma^2_r\\, estimated from only as many raters as
-you observed – are pinned down. With few raters that estimate is noisy,
-so the projected interval is honestly wide; the Monte-Carlo interval
-widens automatically (it recomputes \\\Phi(m)\\ on every draw) rather
-than pretending a single plugged-in value. `m` is the number of raters
-and is normally an integer, though non-integer values are permitted.
+Projecting to an `m` you did not run is an **extrapolation**. Its
+trustworthiness depends on how well the variance components are pinned
+down, especially the rater variance \\\sigma^2_r\\, which is estimated
+from only as many raters as you observed. With few raters that estimate
+is noisy, so the projected interval is honestly wide. The Monte-Carlo
+interval widens automatically, recomputing \\\Phi(m)\\ on every draw
+rather than pretending a single plugged-in value. `m` is the number of
+raters and is normally an integer, though non-integer values are
+permitted.
 
 Projection is defined for random raters (both agreement and
 consistency), for fixed-rater **consistency**, and for the **one-way**
 model (a Spearman-Brown projection of `ICC(1)`). It is **not** defined
-for fixed-rater absolute agreement: there the rater term is the
+for fixed-rater absolute agreement. There the rater term is the
 finite-population variance of exactly the raters you observed, so there
-is no "average of `m` freshly sampled raters" to project to, and
-`d_study()` aborts (use `raters = "random"`).
+is no "average of `m` freshly sampled raters" to project to. `d_study()`
+aborts in that case (use `raters = "random"`).
 
 ## Multilevel projections
 
 For a multilevel fit (a `cluster` column), `d_study()` projects the
-rater count `m` for each correctly-partitioned level on the object — the
-**subject** and/or **cluster** level — returning one reliability curve
-per level (the result gains a `level` column, and
+rater count `m` for each correctly-partitioned level on the object,
+meaning the **subject** and/or **cluster** level. It returns one
+reliability curve per level, and the result gains a `level` column that
 [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
-facets by it). This is the paper-sanctioned rater projection (ten Hove
-et al. 2022): `m` is the number of raters per cluster, and the
+facets by. This is the paper-sanctioned rater projection (ten Hove et
+al. 2022). Here `m` is the number of raters per cluster, and the
 cluster-level coefficient does **not** average over subjects, so there
-is no "subjects per cluster" projection — that is a sample-size
-question, not a reliability one. Nested designs project the subject
-level only. The conflated diagnostic (`level = "conflated"`) is not
-projected. On **incomplete** data the **subject** level projects
-(projection moves only the divisor); the **cluster** level is dropped
-with a note, because projecting `m` raters is the averaged `ICC(c,k)`
-case whose ragged divisor is an open modeling question (M9).
+is no "subjects per cluster" projection. That is a sample-size question,
+not a reliability one. Nested designs project the subject level only.
+The conflated diagnostic (`level = "conflated"`) is not projected. On
+**incomplete** data the **subject** level projects, because projection
+moves only the divisor. On that same data the **cluster** level is
+dropped with a note: projecting `m` raters is the averaged `ICC(c,k)`
+case, whose ragged divisor is an open modeling question (M9).
 
 ## Within-cell replicate fits
 
@@ -182,25 +184,25 @@ subject-by-rater interaction and pure error), `d_study()` can project
   raters at the observed count: pure error divides by `m * n_o` while
   the rater and interaction terms are unchanged. Because occasion
   averaging rescales **only pure error**, this curve is well-posed for
-  random **and** fixed raters – including fixed absolute agreement,
-  which the rater projection refuses (occasions are a random facet
-  however the raters are treated). At `n_o` = the fitted occasion count
+  random **and** fixed raters. That includes fixed absolute agreement,
+  which the rater projection refuses, since occasions are a random facet
+  however the raters are treated. At `n_o` = the fitted occasion count
   it matches the fitted `ICC(*,k)`.
 
 **The occasion curve has a finite ceiling.** As `n_o` grows it
 approaches `sigma^2_s / (sigma^2_s + (sigma^2_r + sigma^2_sr) / m)`,
-**not** 1 – averaging more occasions washes out only pure measurement
+**not** 1. Averaging more occasions washes out only pure measurement
 error, never the rater or subject-by-rater variance. Read it as "how
 much does re-rating help?", which plateaus, unlike adding raters.
 
 For a multilevel replicate fit (crossed Design 1 or nested Design 2), a
 **rater** projection moves the subject level across occasion settings
-and the cluster level single-occasion, while an **occasion** projection
-moves the subject level across `n_o` and returns the cluster level as a
-**flat** curve: the cluster-level error set (`{rater, cluster:rater}`)
-has no pure-error term, so averaging occasions cannot change it
-(`d_study()` notes this). **Ragged** replicate fits are refused for
-either axis (the occasion-averaged ragged divisor is an open modeling
+and the cluster level single-occasion. An **occasion** projection moves
+the subject level across `n_o` and returns the cluster level as a
+**flat** curve. The cluster-level error set (`{rater, cluster:rater}`)
+has no pure-error term, so averaging occasions cannot change it, and
+`d_study()` notes this. **Ragged** replicate fits are refused for either
+axis (the occasion-averaged ragged divisor is an open modeling
 question).
 
 ## References
