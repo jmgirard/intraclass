@@ -1510,3 +1510,33 @@ ownership, each page naming its own scope and corrected in place.
 **Consequences.** `DESIGN.md`'s registry line names the directory without
 asserting graduation. A directly-authored module carries no `LESSONS.md`
 lineage to retire, so no maturation exit is owed for it.
+
+### D-035 (2026-08-25): the v0.1.0 exported contract — what of the `icc` object is public, and vector-valued arguments are report-all only
+
+**Context.** M48's last-call audit of the exported surface went to an
+independent review (RB04/RR04) because GP2's one-way door closes at
+submission. The review found the surface sound but named two ambiguities the
+release would freeze: `icc()` carried two *kinds* of vector-valued default in
+one signature — `type`/`unit`/`level` meaning "report every value", and
+`raters`/`posterior_summary` being match.arg-style choice lists — so an
+explicit `raters = c("random", "fixed")` was accepted and silently reduced to
+`"random"`; and the fitted `icc` object's list interior was never declared
+public or internal, so releasing it would make every element a de facto
+contract.
+
+**Decision.** (1) A vector-valued argument default in the exported signature
+means report-all, and nothing else: `raters` and `posterior_summary` take
+scalar defaults, and a choice argument given more than one value aborts
+classed rather than selecting the first. (2) The `icc` object's public surface
+is what `tidy()`, `glance()`, `summary()` and `print()` return, plus `$fit`
+and `$call`; the rest of the list is internal and may change without a
+deprecation cycle. Both are stated in the exported documentation before
+submission.
+
+**Consequences.** `validate_choice()`'s accept-the-full-choice-list shortcut
+is removed, so an explicit multi-value choice argument now fails loudly (#5)
+instead of collapsing. Identifier columns in `tidy()` output are always
+present, NA where inapplicable, which is what lets the roadmap's deferred
+extensions fill cells rather than change the schema. Reopening either clause
+after v0.1.0 is a breaking change under the deprecation cycle, not an
+amendment.

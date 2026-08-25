@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M48: v0.1.0 release consolidation — CRAN submission-ready
 
-- **Status:** blocked   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** M49, M50, M51, M53, M54, M55, M61, M68, M129, M130, M131, M132, M133, M134, M135, M136, M137   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP2, GP3   <!-- owner: plan · create/amend-via-gate -->
@@ -60,7 +60,7 @@ gate before stamping, never folded in silently.
 ## Coverage
 <!-- owner: plan · create/amend-via-gate -->
 
-- AC1 → T1
+- AC1 → T1, T1b
 - AC2 → T2, T3
 - AC3 → T4
 - AC4 → T5
@@ -76,6 +76,14 @@ gate before stamping, never folded in silently.
       order, defaults, return shapes) ending in a recorded disposition;
       expected outcome "no changes", anything substantive stops for a gate
       amendment. (RB tripwire: irreversible-api)
+- [ ] T1b: Apply the five accepted RR04 changes plus the two accepted extras —
+      scalar `raters`/`posterior_summary` defaults and a loud abort on a
+      multi-valued choice argument; always-present identifier columns in both
+      tidiers; `var_subject_rater` + `n_o` in `glance.icc()`; the `icc`
+      object's public/internal boundary stated in `@return`; classed
+      validation of `d_study()`'s `conf_level`/`mc_samples`; `tidy()`'s
+      `index` column renamed `term`; `rhat`/`ess_bulk` in `glance.icc()`.
+      Each with a test and a NEWS line.
 - [ ] T2: Raise the R floor to `R (>= 4.0.0)` in `DESCRIPTION` (rlang binds
       the Imports chain; no 4.1+ syntax in package code).
 - [ ] T3: Stamp `Version: 0.1.0`; consolidate `NEWS.md` — fold the
@@ -111,9 +119,37 @@ gate before stamping, never folded in silently.
 - 2026-08-25: maintainer declared the v0.1.0 release window open (D-050's blocker reversed by the only party who can); status blocked -> in-progress by /milestone-implement, branch `m048-release-v010`.
 - 2026-08-25: question gate — (1) T1's exported-API last call goes to a Fable review via /milestone-brief (the irreversible-api tripwire, maintainer's choice); (2) T3 consolidates NEWS by folding the development entries into the matching 0.1.0 sections and dropping entries that only describe changes to unreleased code.
 - 2026-08-25: blocked on RB04 — the T1 exported-API last call is briefed at `cairn/reviews/RB04-exported-api-last-call.md` (11 questions over the three exported functions, the 13 S3 methods, the tidy/glance shapes, and whether anything should be withheld from the first release).
+- 2026-08-25: RB04 spawned and RR04 returned in-session ([F] review of the exported surface); ingested here, RB/RR pair archived, status back to in-progress.
+- 2026-08-25: gated amendment — Tasks gain T1b and Coverage's AC1 line gains it, executing the RR04 triage below; no acceptance criterion changed.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
+
+- 2026-08-25 (RR04 ingest, T1 disposition): the exported surface ships as
+  audited except for seven accepted changes. **Applied** (RR04 recommendations
+  1-5, accepted at the 2026-08-25 gate): scalar `raters`/`posterior_summary`
+  defaults with a loud abort on a multi-valued choice argument; identifier
+  columns always present in `tidy.icc()`/`tidy.icc_dstudy()`, NA where
+  inapplicable; `var_subject_rater` and `n_o` added to `glance.icc()` so
+  `var_residual` never silently changes meaning on a replicate fit; the `icc`
+  object's public/internal boundary stated in `@return`; classed validation of
+  `d_study()`'s `conf_level` and `mc_samples`. **Also applied** (RR04 6 and 7):
+  `tidy()`'s `index` column renamed `term` for broom-ecosystem interop;
+  `rhat`/`ess_bulk` surfaced in `glance.icc()`. Clauses 1 and 4 are promoted to
+  D-035. Task T1b carries the work.
+- 2026-08-25 (RR04 ingest, deferred): RR04 recommendation 8 — `choose_icc()`
+  accepting `type = "both"` — is additive after release and goes to a ROADMAP
+  candidate row rather than into this milestone.
+- 2026-08-25 (RR04 ingest, reviewer rejections logged, no action): reverting
+  the vectorized `type`/`unit`/`level` defaults (9); renaming
+  `rater`/`raters`, `model`/`design`, or `level` (10) — every traced confusion
+  already aborts classed; dropping `lifecycle` from Imports (11) — it backs the
+  `d_study()` experimental badge and the check-note scaffolding, and the brief's
+  premise that it was unused was wrong; withholding any current export (12);
+  per-method `.Rd` pages (13) — all thirteen methods are aliased onto their
+  objects' pages, which R CMD check accepts. RR04's adjacent note that the
+  release should decide deliberately what the README and `d_study()` lifecycle
+  badges say for a 0.1.0 is carried into T3.
 
 ## Review
 <!-- owner: review · exclusive -->
