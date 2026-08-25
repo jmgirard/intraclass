@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M48: v0.1.0 release consolidation — CRAN submission-ready
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** M49, M50, M51, M53, M54, M55, M61, M68, M129, M130, M131, M132, M133, M134, M135, M136, M137   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP2, GP3   <!-- owner: plan · create/amend-via-gate -->
@@ -35,23 +35,23 @@ gate before stamping, never folded in silently.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [x] AC1: API last-call disposition is recorded in the work log (audit of
+- [ ] AC1: API last-call disposition is recorded in the work log (audit of
       exports, argument names/order, defaults, return shapes); no exported-
       surface change ships after it without a gate amendment. (RB tripwire:
       irreversible-api)
-- [x] AC2: `DESCRIPTION` has `Version: 0.1.0` and `R (>= 4.0.0)`; `NEWS.md`
+- [ ] AC2: `DESCRIPTION` has `Version: 0.1.0` and `R (>= 4.0.0)`; `NEWS.md`
       opens with a single consolidated `# intraclass 0.1.0` changelog (no
       "(development version)" heading; M44's default-shape change framed as
       part of the initial release per ADR-055).
-- [x] AC3: `cran-comments.md` names the actual check environments used and
+- [ ] AC3: `cran-comments.md` names the actual check environments used and
       justifies every remaining NOTE; `inst/WORDLIST`/spelling clean.
-- [x] AC4: fresh `devtools::check(args = "--as-cran", env_vars =
+- [ ] AC4: fresh `devtools::check(args = "--as-cran", env_vars =
       c(NOT_CRAN = "false"), manual = TRUE)` → 0 errors / 0 warnings / only
       NOTEs justified in AC3 (TinyTeX courier installed for the PDF manual).
-- [x] AC5: full test suite green against the **installed** package with
+- [ ] AC5: full test suite green against the **installed** package with
       `NOT_CRAN=true CI=true` (failed + error sum = 0 — the local-gate
       blind spot).
-- [x] AC6: `pkgdown::check_pkgdown()` + `pkgdown::build_site()` clean;
+- [ ] AC6: `pkgdown::check_pkgdown()` + `pkgdown::build_site()` clean;
       `air format --check` clean; `lintr::lint_package()` clean;
       `urlchecker::url_check()` all-correct.
 - [ ] AC7: the release code passes every CI check a pull request can reach.
@@ -140,7 +140,7 @@ gate before stamping, never folded in silently.
 - [x] T11: Review F10 — positive tests for the new tidy/glance columns on the
       shapes that populate them (the `d_study()` fill cases for `occasions`,
       `level` and `type`).
-- [ ] T12: Amend AC7 through the gate (the review's amendment return), then
+- [x] T12: Amend AC7 through the gate (the review's amendment return), then
       re-run the release gate and hand back to `/milestone-review`.
 
 ## Work log
@@ -189,6 +189,9 @@ gate before stamping, never folded in silently.
 - 2026-08-25: amendment return: AC7 — "the release code passes every CI check a pull request can reach. Evidence: `gh pr checks <head SHA>` at a named head SHA, every reported check in the `pass` bucket — none `fail`, `pending`, `skipping` or `cancel` — with the reported list quoted in the Review section and compared against the workflows under `.github/workflows/` that declare a `pull_request` trigger; a path filter drops a skipped workflow from the report entirely, so a workflow declaring that trigger and absent from the list counts as unrun, never as passing. A red check is diagnosed before any re-run, and a re-run is recorded with what made it infrastructural. The macOS, R-oldrel-1 and R-devel configurations of `check-standard.yaml` are not reachable from a pull-request head as that workflow stands; AC3's `cran-comments.md` is what states which environments have actually run."
 - 2026-08-25: amendment gate — maintainer chose the narrowed AC7 over adding a criterion binding the declared R floor to a measurement; the criteria set holds at seven. The R-floor gap goes to a DESIGN.md Known issues entry and a ROADMAP candidate row (search-first swept; no existing row covers it), the maintainer accepting the GP3 tension for this release rather than pinning a 4.0.0 CI job inside a release round.
 - 2026-08-25: sizing advisory noted — `cairn_validate` WARNs the task tripwire at 12 tasks; T7-T12 are repair work under the existing criteria, not new scope, so the milestone is not split.
+- 2026-08-25: T12 done — AC7 amended through the gate above; local verify on the repair head `d447172`: `devtools::document()` leaves a clean tree, `air format --check` exit 0, `lintr::lint_package()` 0 lints, `devtools::test()` FAIL 0 | WARN 3 | SKIP 2 | PASS 8857, and `test-exported-contract.R` 44 assertions passing under `devtools::test(filter = "exported-contract")`. The heavier gate items (`--as-cran`, the installed-package suite, `pkgdown::build_site()`, `urlchecker`) are review's fresh evidence, not re-run here.
+- 2026-08-25: AC1-AC6 unticked — their evidence was gathered on `9328d85` and the repair round moved the head to `d447172`, so under AC fencing they are unverified until re-review records fresh evidence. The superseded evidence stays in the Review section as the record of the first pass.
+- 2026-08-25: all tasks checked; status in-progress -> review by /milestone-implement (second pass).
 ## Decisions
 <!-- owner: implement / review · append-only -->
 
