@@ -359,7 +359,7 @@ np_ci <- function(d, seed) {
         conf_level = np_conf,
         seed = seed
       ))
-      i1 <- td[td$index == "ICC(1)", ]
+      i1 <- td[td$term == "ICC(1)", ]
       list(
         status = "ok",
         cond_class = NA_character_,

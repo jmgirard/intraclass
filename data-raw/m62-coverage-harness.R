@@ -54,7 +54,7 @@ icc_ci <- function(d, method, boot = NULL) {
         args$boot_samples <- boot
       }
       td <- suppressWarnings(tidy(do.call(icc, args)))
-      row <- td[td$index == "ICC(1)", ]
+      row <- td[td$term == "ICC(1)", ]
       c(row$conf.low, row$conf.high)
     },
     error = function(e) c(NA_real_, NA_real_)
