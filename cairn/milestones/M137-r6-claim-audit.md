@@ -8,7 +8,7 @@
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP1, GP8   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** `m137-r6-claim-audit`   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m137-r6-claim-audit` · https://github.com/jmgirard/intraclass/pull/146   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -35,7 +35,7 @@ repaired in place if cheap, else a candidate row.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: Each hunk in the enumerated domain has its added text compared
+- [x] AC1: Each hunk in the enumerated domain has its added text compared
       against the text it replaced, and every discrepancy that comparison
       records — a claim whose domain widened or narrowed — is repaired in the
       shipped prose. The domain is what these three commands report (111 hunks,
@@ -46,7 +46,7 @@ repaired in place if cheap, else a candidate row.
       domain and that its findings are repaired. It does **not** promise that
       no widened claim remains: M136 recorded three closures each defeated by
       a fresh shape, so that promise is unavailable to a reading pass.
-- [ ] AC2: No repair changes what the package computes or reports.
+- [x] AC2: No repair changes what the package computes or reports.
       `git diff --merge-base main -- 'R/*.R' | grep '^[+-]' | grep -v
       '^[+-][+-]' | grep -v "^[+-] *#'"` is empty. Every other changed path is
       one of `vignettes/*.Rmd`, `README.Rmd`, `README.md`, `man/*.Rd`,
@@ -54,7 +54,7 @@ repaired in place if cheap, else a candidate row.
       span — a re-pointed anchor in `tests/testthat/*.R`, `data-raw/*.R`, or
       `data-raw/mpl-doc-claims.tsv`, with no change to any test expectation
       other than such an anchor.
-- [ ] AC3: For every file this branch touches that the house prose standard
+- [x] AC3: For every file this branch touches that the house prose standard
       covers — `vignettes/*.Rmd`, `README.Rmd`, and the roxygen in `R/*.R`, the
       surfaces `cairn/doctrine/prose-style.md` names — `python3
       data-raw/prose-profile.py` reports zero on R1 and R2 (the two rules that
@@ -63,7 +63,7 @@ repaired in place if cheap, else a candidate row.
       TRUE` — the carrier set derived by matching that clause, never stated as
       a count (four at 2026-08-24: two in `R/icc.R`, one in
       `vignettes/glossary.Rmd`, one in `vignettes/interval-methods.Rmd`).
-- [ ] AC4: The installed-package suite at `NOT_CRAN=true CI=true` is green
+- [x] AC4: The installed-package suite at `NOT_CRAN=true CI=true` is green
       (failed + error sum 0), and every checker the `check-references` job runs
       (`.github/workflows/lint.yaml`) passes with `--self-test`.
 
@@ -252,3 +252,55 @@ Verdicts: `same` — the added text's claim domain equals the text it replaced; 
 
 ## Review
 <!-- owner: review · exclusive -->
+
+### Acceptance-criterion evidence (fresh, 2026-08-24)
+
+- **AC1 — pass.** The three pinned commands re-run at review report 32
+  (`bb42f8e`), 52 (`8aafb0e`) and 27 (`5c274fc`) hunks: 111, equal to the
+  criterion's figure. The triage table above carries a verdict for each of the
+  111 — 110 `same`, 1 `wider` (row 67). That discrepancy is repaired in the
+  shipped prose: `vignettes/interval-methods.Rmd` now reads "Like
+  `"npbootstrap"`, it returns an interval at the near-zero-ICC boundary where
+  the two-way Monte-Carlo default aborts", restoring the replaced text's scope.
+- **AC2 — pass.** `git diff --merge-base main -- 'R/*.R' | grep '^[+-]' | grep
+  -v '^[+-][+-]' | grep -v "^[+-] *#'"` returns 0 lines. The eight changed
+  paths are `NEWS.md`, `R/icc.R` (roxygen only), `cairn/ROADMAP.md`,
+  `cairn/doctrine/prose-style.md`, `cairn/milestones/M137-r6-claim-audit.md`,
+  `data-raw/mpl-doc-claims.tsv`, `man/icc.Rd`, `vignettes/interval-methods.Rmd`
+  — each admitted by the criterion's enumeration. Nothing under
+  `tests/testthat/` changed, so no test expectation moved.
+- **AC3 — pass.** The two touched files the house standard covers profile at
+  R1 dash-as-punctuation 0 / 0. Over-35 sentences: `R/icc.R` 2,
+  `vignettes/interval-methods.Rmd` 1. Re-deriving the carrier set by matching
+  the 58-word clause through the ruler's own segmentation returns exactly four
+  sentences across the whole standard surface — two in `R/icc.R`, one in
+  `vignettes/glossary.Rmd`, one in `vignettes/interval-methods.Rmd` — and every
+  over-35 sentence on the surface is one of them.
+- **AC4 — pass.** `NOT_CRAN=true CI=true devtools::test()`: FAIL 0, WARN 2,
+  SKIP 26, PASS 8561 (failed + error sum 0). All four `check-references`
+  checkers exit 0 at base and at `--self-test`:
+  `check-reference-observations.py` (0 falsified),
+  `enumerate-generalizing-claims.py --check`, `check-mpl-doc-claims.py` (60
+  candidates, 12 settled, 0 failures), `check-record-claims.py` (6 claims
+  re-derived, 0 failures).
+
+### Consistency gate
+
+- Universal: `cairn_validate.py` exit 0, all checks passed (115 advisory
+  warnings, all the `work-log format` advisory over the triage table's rows).
+  Coverage completeness passes. No `DESIGN.md` principle changed, so
+  `cairn_impact.py` does not apply.
+- Toolchain (`r-package` profile): `devtools::document()` leaves no diff;
+  `NAMESPACE`/`man/` regenerate; `README.Rmd`/`README.md` untouched and in
+  sync; `pkgdown::check_pkgdown()` reports no problems; `NEWS.md` gains one
+  Documentation bullet naming both corrections; no new top-level files.
+
+### Work log (review phase)
+
+- 2026-08-24: review opened. `main` unmoved since the branch was cut (0 behind,
+  6 ahead), tree clean, no merge needed. Branch pushed; draft PR #146 opened.
+  AC1-AC4 executed with fresh evidence and ticked; consistency gate clean.
+  PR CI green on format-check, check-references, checkpoint-guard, lint,
+  pkgdown, test-coverage and ubuntu-latest (release); windows-latest pending.
+  Local `devtools::check()` and the three fresh-context reviewers still
+  running.
