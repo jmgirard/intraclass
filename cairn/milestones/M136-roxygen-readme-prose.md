@@ -344,3 +344,29 @@ computes. Fix at the step-9 hygiene pass: 8, since that line is rewritten there
 anyway. Reject: 10, because "It" resolves to "the default's coverage", the
 sentence's own topic, and 11, because it is about a work-log paraphrase and not
 about anything shipped.
+
+**Disposition taken at the approval gate (2026-08-24).** The maintainer chose
+"fix 1-7, 9 then merge". All eight are repaired on the branch at `b7c3475`, before
+the approval marker. `NEWS.md` drops the "every claim the pass touched was checked
+against the text it replaced" universal the descope had declined to promise and
+reads "the ones that needed it have been rewritten"; `@param posterior_summary`
+reads "on several grounds", asserting no count; `@param model` reads "That design
+has no rater main effect to model"; the `"lme4"` coverage list is re-attached to
+"every design" and the data clause moved to its own sentence; `choose_icc()`'s
+selecting choices are named in an "are ..." sentence with "None of them has a
+silent default." following; the README NOTE reads "Everything just listed comes
+with boundary-aware Monte-Carlo intervals"; and ledger row `9c736d9cc49c`'s reason
+names the searle-won clause it actually pins. Finding 8 is corrected in the
+step-9 hygiene pass, which rewrites that line. Findings 10 and 11 rejected, with
+the reasons above.
+
+Re-verified over the repairs: ruler `R/*.R` TOTAL 592 sentences / 0 dashes /
+2 over-35 with every other row 0, `README.Rmd` 65 / 0 / 0, and the AC1 exemption
+identity still holds (the over-35 set and the clause-carrier set are the same two
+64-word sentences). `check-mpl-doc-claims.py` 61 / 12 / 0 failures and
+`check-record-claims.py` 6 claims both exit 0. `devtools::document()` and
+`build_readme()` leave the tree clean and `git diff --exit-code README.md` exits 0.
+`devtools::check(document = FALSE)` raw `Status: 1 NOTE` (20m 8.9s), the same
+`NOT_CRAN` spelling diff, with the flagged word set still identical to
+`origin/main`'s 31. `devtools::test()` `[ FAIL 0 | WARN 3 | SKIP 2 | PASS 8827 ]`.
+`cairn_validate.py` all checks passed.
