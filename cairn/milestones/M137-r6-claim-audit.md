@@ -294,6 +294,9 @@ Verdicts: `same` — the added text's claim domain equals the text it replaced; 
   `NAMESPACE`/`man/` regenerate; `README.Rmd`/`README.md` untouched and in
   sync; `pkgdown::check_pkgdown()` reports no problems; `NEWS.md` gains one
   Documentation bullet naming both corrections; no new top-level files.
+  `devtools::check()`: 0 errors, 0 warnings, 1 NOTE — the `checking tests`
+  elapsed-time note (21m wall / 13m CPU on the 8561-assertion suite), a runtime
+  figure this docs-only branch does not touch.
 
 ### Work log (review phase)
 
