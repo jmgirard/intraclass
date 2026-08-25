@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M48: v0.1.0 release consolidation — CRAN submission-ready
 
-- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** M49, M50, M51, M53, M54, M55, M61, M68, M129, M130, M131, M132, M133, M134, M135, M136, M137   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP2, GP3   <!-- owner: plan · create/amend-via-gate -->
@@ -193,6 +193,7 @@ gate before stamping, never folded in silently.
 - 2026-08-25: AC1-AC6 unticked — their evidence was gathered on `9328d85` and the repair round moved the head to `d447172`, so under AC fencing they are unverified until re-review records fresh evidence. The superseded evidence stays in the Review section as the record of the first pass.
 - 2026-08-25: all tasks checked; status in-progress -> review by /milestone-implement (second pass).
 - 2026-08-25: review checkpoint (mid-phase, second pass) by /milestone-review — fresh evidence on head `4a1ce09` recorded and ticked for AC1, AC2, AC4, AC7; **AC3 fails** (`spelling::spell_check_package()` returns `disambiguates`, `NEWS.md:358`, absent from `inst/WORDLIST`; introduced by the repair commit `d447172`). AC5 (installed-package suite) and AC6's `pkgdown::build_site()` still running; consistency gate green (`cairn_validate` exit 0). Two of three review lenses returned with zero findings. Status change deferred until the remaining evidence lands so one return names every failure.
+- 2026-08-25: review returns M48 to in-progress by /milestone-review (second pass) — **AC3 fails**: `spelling::spell_check_package()` on head `4a1ce09` returns `disambiguates` (`NEWS.md:358`), absent from `inst/WORDLIST`; the word was introduced by the repair commit `d447172` (T9's narrowing of the `glance()` NEWS bullet) and `tests/spelling.R` cannot red on it (`error = FALSE, skip_on_cran = TRUE`). AC1, AC2, AC4, AC5, AC6 and AC7 all verified with fresh evidence on that head and ticked; consistency gate green. The [O] lens returned seven findings G1-G7 (G1 is the AC3 failure itself); the other two lenses returned none. This is **defect return 2** of this milestone (the 2026-08-25 F1/F2 return was the first); the amendment-return track stays at one (AC7). A third defect return reaches the thrash rule's descope-or-park threshold.
 ## Decisions
 <!-- owner: implement / review · append-only -->
 
@@ -320,6 +321,155 @@ the record of what was measured on `9328d85` and is superseded by this one.
   latent variance, asserted to abort toward glmmTMB) and
   `test-icc-type-vector.R:286`; the criterion does not bar them.
 
+### Consistency gate — second pass (2026-08-25)
+
+- `cairn_validate.py` exit 0 — every check PASS. One advisory: `sizing (split
+  tripwires)` reports **13 tasks** against a 10 tripwire, which is not a gate
+  failure; the milestone is not split because T7-T12 are repair work under the
+  existing criteria. The `release window` advisory did not fire.
+- `cairn_impact.py` not run: no `DESIGN.md` IP/GP principle text changed on this
+  branch. The file's diff is the Platforms commitment bullet plus a new
+  `Known issues` entry, neither of which is an IPn/GPn definition. (Second-pass
+  finding G4 below would change GP3's text; if the maintainer takes that repair,
+  `cairn_impact.py --changed` becomes owed and must run before the next review.)
+- Toolchain checks, from the `r-package` profile's `consistency-gate` slot:
+  `devtools::document()` leaves a clean tree (the AC4 `--as-cran` run rebuilt
+  the docs with no delta); `NAMESPACE`, `_pkgdown.yml` and `data/` are
+  byte-identical to `origin/main`, so no generated file was hand-edited and no
+  new export is missing a reference-index row; `README.Rmd` and `README.md`
+  were last written by the same commit (`5c274fc`) and neither is touched here;
+  `pkgdown::check_pkgdown()` clean; `NEWS.md` carries this milestone's
+  user-visible changes; a sweep for milestone / ADR / D / RR ids across
+  `NEWS.md`, `README.md`, `man/` and `vignettes/` returns nothing; `git diff
+  --name-status` shows three added files, none at top level, so no
+  `.Rbuildignore` entry is owed; the full `--as-cran` check is the AC4 run
+  above.
+
+### Review fan-out — second pass
+
+Three fresh-context lenses on the repair diff, each on a distinct evidence base,
+none having authored the implementation. Findings are numbered G1-G7 to keep
+them distinct from the first pass's F1-F12.
+
+- **[S] prior-review lens — no findings.** The probe
+  `gh api repos/jmgirard/intraclass/pulls/comments?per_page=1` returned `[]`
+  again, so the per-PR walk was skipped. Across the archived `## Review`
+  sections touching these files (M131 on `@return` conventions, M124 on
+  demonstrating the `tidy()`/`glance()` path over internal list fields, M137 on
+  claim-scope audits, M104's ROADMAP row) it found nothing this diff
+  reintroduces or contradicts; the T9/T10 repairs follow those lessons rather
+  than defeat them. (An earlier run of this lens died to an infrastructure
+  error mid-investigation and was re-run clean; only the completed run is
+  recorded.)
+- **[S] blame-history lens — no actionable findings.** Seven confirmatory
+  items: the removed `identical(value, choices)` shortcut traces to M2
+  (`9c85c0b`), predating ADR-054's report-all vectorization, so it was always a
+  `match.arg` idiom and never the report-all mechanism; `glance()$n_o`'s use of
+  `design_info$n_o` dates to M17 (`d22e9395`) and M20 (`bfc23dc`) added
+  `n_o_val` for the estimand field without updating its metadata sibling, so T7
+  closes a latent M20 bug rather than undoing a deliberate choice;
+  `validate_seed()`/`validate_sample_count()` predate this milestone and T8
+  reuses them rather than reinventing validation; no `R.version`/
+  `getRversion()` gate or 3.5-era workaround exists anywhere in `R/`;
+  `check-standard.yaml`'s push gate landed in M77 (`28923266`), nine days after
+  AC7 was written, confirming the amendment's attribution; the NEWS fold
+  preserved every load-bearing fact it sampled, including both restored guard
+  anchors; the `index` -> `term` sweep is complete and correctly scoped.
+- **[O] diff-bug lens — seven findings**, ranked below. It separately verified
+  clean: the F1 repair (`glance()$n_o` is `2L` on nested Design-2, crossed
+  multilevel and single-level replicates, `NA` on ragged and unreplicated fits,
+  integer on every path); the F2 repair (`seed`, `conf_level` and `mc_samples`
+  all abort classed on every malformed input tried, and the new `is.finite`
+  test also closes `icc(conf_level = NA_real_)`, previously a bare base error);
+  the F3 repair (a repo-wide sweep of `vignettes/`, `README.*` and `man/` for
+  the newly-internal element names returns one hit, on a `glance()` result);
+  the F4, F5, F10 and F11 repairs; tidy/glance column orders on five fit shapes
+  with `rbind()`/`bind_rows()` interop; `NAMESPACE`, `_pkgdown.yml` and `data/`
+  byte-identical; no 4.1+ syntax in shipped code; the five `data-raw/` Python
+  checkers plus `check-abort-remedy-verdicts.R` and `check-checkpoint-sites.R`
+  all exit 0; targeted suites `exported-contract`/`d-study`/`icc-methods`/
+  `choose-icc` FAIL 0 PASS 315 and `doc-skew-caveat` FAIL 0 PASS 2295.
+
+### Findings and dispositions — second pass (G1-G7)
+
+Ranked as the [O] lens ranked them. "Reproduced" marks a finding this review
+re-ran or re-read against the implementation rather than accepting the
+reviewer's account. **Dispositions below are this review's recommendation; the
+maintainer's triage decides.**
+
+- **G1 — the F11 repair introduced a spelling regression, and it fails AC3.**
+  `NEWS.md:358` reads "This **disambiguates** the replicate split only"; the
+  word is absent from `inst/WORDLIST` (94 entries) and from `NEWS.md` at both
+  `origin/main` and `9328d85`. **Reproduced independently** by this review:
+  `spelling::spell_check_package()` returns exactly this one word, and
+  `git log -S 'disambiguates' origin/main..HEAD -- NEWS.md` names `d447172`.
+  `tests/spelling.R` sets `error = FALSE, skip_on_cran = TRUE`, so neither the
+  suite nor the `--as-cran` run can red on it. *Disposition: this is the AC3
+  criterion failure — the return, not a triage item.*
+- **G2 — the F9 repair put a false claim on an exported help page.**
+  `R/d-study.R:121-122` -> `man/d_study.Rd:62` says "the object and the printed
+  report both keep `index`". **Reproduced by reading the implementation:**
+  `format.icc_dstudy()` (`R/d-study.R:627-661`) assembles its headers from the
+  optional `type`, `level` and `occ`/`n_o` columns, then `m`, `estimate` and the
+  CI — there is no `index` column in the D-study report and never was. The
+  carve-out the first-pass [S] lens verified is true of `print.icc()`
+  (`R/icc-methods.R:151`), and the repair copied it onto the wrong page. The
+  claim about the object is correct. *Disposition: fix now* — a shipped Rd page
+  asserting a column its own printer does not emit.
+- **G3 — `choose_icc()`'s choice arguments changed behaviour silently, and NEWS
+  says they did not.** **Reproduced by reading both heads:** `origin/main`'s
+  `validate_choice()` opened with `if (identical(value, choices)) return(
+  choices[[1L]])`, and `R/choose-icc.R:277,306,313,320,325` routes `model`,
+  `unit`, `type`, `raters` and `level` through it — so
+  `choose_icc(type = c("agreement", "consistency"))` used to return the
+  agreement recommendation silently and now aborts `intraclass_error`. The
+  change is right. What is wrong is the record: `NEWS.md:369-371` tells users
+  "the arguments that genuinely take several values are unaffected: `type`,
+  `unit` and `level`", which is false inside `choose_icc()`, and `NEWS.md:368`
+  lists the covered choice arguments without naming `choose_icc()` at all.
+  D-036 classifies arguments by name without naming a function, so
+  `type`/`unit`/`level` land on both sides of its own discriminator. No test
+  passes a multi-valued argument to `choose_icc()`. *Disposition: fix now* —
+  a silent behaviour change at the one-way door, unpinned and misdescribed;
+  the fix is a NEWS correction, a `DECISIONS.md` annotation (append-only, so a
+  new entry) and a test.
+- **G4 — the F12 `DESIGN.md` repair corrected the commitments bullet and left
+  GP3 itself wrong.** `cairn/DESIGN.md:157-159` still reads "(currently R
+  release/oldrel-1/devel x macOS/Windows/Ubuntu)" — the exact cross-product
+  F12 established is false — while `:53-54` was corrected. **Reproduced by
+  reading** against `.github/workflows/check-standard.yaml:37`. The principle
+  is the more load-bearing of the two statements, and this milestone's own new
+  `Known issues` entry quotes GP3 as authority while the quoted text stays
+  wrong. *Disposition: fix now*, with the consequence noted above — editing
+  GP3's text makes `cairn_impact.py --changed` owed at the next review.
+- **G5 — `tidy()$occasions` and `glance()$n_o` carry different quantities
+  under near-identical names, undocumented.** On a default 8x3 replicate fit
+  with two ratings per cell, `glance()$n_o` is `2` while every row of
+  `tidy()$occasions` is `1`: `tidy()`'s column is the estimand's averaging
+  divisor (`R/estimand.R:56-61`), `glance()`'s is the design's per-cell count.
+  The docs say only that `occasions` is "`NA` unless the design has within-cell
+  replicates" and that `n_o` "gives the occasion count it was split at", so the
+  two read as one fact disagreeing with itself. A doc gap in columns this
+  milestone added, not a computation error. *Disposition: fix now* — both
+  columns are new exported surface closing at submission.
+- **G6 — stale figures left in the tracking records.** Four, all read-verified:
+  `cairn/ROADMAP.md:4`'s hygiene note says "RR04's deferred chooser row added,
+  the two widest candidate rows compressed" where the branch adds two rows and
+  compresses more than two; this file's first-pass AC1 evidence says "`R/`
+  touched by exactly one commit, `4ba59ad`", false since `d447172`; the
+  first-pass consistency-gate note says the `DESIGN.md` diff is "only the
+  Platforms commitment bullet", false since the `Known issues` entry; and the
+  sizing work-log line says "12 tasks" where `cairn_validate` reports 13.
+  The two first-pass items are inside the block this pass has already marked
+  superseded, and the work log is append-only, so the repairs are a ROADMAP
+  edit and a superseding work-log line. *Disposition: fix now.*
+- **G7 — comment nit in the new `tidy.icc_dstudy()` guard.**
+  `R/d-study.R:699-700` says "`$` on one warns rather than returning NULL";
+  tibble's `$` on a missing column warns **and** returns `NULL`, so the stated
+  reason for the `nm %in% names(x)` test is inaccurate. The guard itself is
+  correct. *Disposition: fix now* — a one-line comment correction riding the
+  same round.
+
 ### Acceptance-criterion evidence — first pass (superseded, 2026-08-25, head `9328d85`)
 
 - **AC1 — verified.** The last-call disposition is recorded in the work log
@@ -379,7 +529,7 @@ the record of what was measured on `9328d85` and is superseded by this one.
   `ubuntu-latest (release)`) and `windows-latest (release)` was still running
   at this writing. Routed as an amendment return, below.
 
-### Consistency gate
+### Consistency gate — first pass (superseded)
 
 - `cairn_validate.py` exit 0 — every check PASS, every advisory OK; the
   `release window` advisory did not fire.
@@ -396,7 +546,7 @@ the record of what was measured on `9328d85` and is superseded by this one.
   nothing; no new top-level file, so no `.Rbuildignore` entry is owed; the
   full `--as-cran` check is the AC4 run above.
 
-### Review fan-out
+### Review fan-out — first pass
 
 Three fresh-context lenses, each on a distinct evidence base, none having
 authored the implementation. Every reported finding is logged below with its
@@ -427,7 +577,7 @@ disposition.
   meaning across the replicate split; no R 4.1+ syntax or post-4.0 base
   function in shipped code; all five `data-raw/` python checkers exit 0.
 
-### Findings and dispositions
+### Findings and dispositions — first pass (F1-F12, all repaired by T7-T11)
 
 Ranked as the [O] lens ranked them. "Reproduced" marks a finding this review
 re-ran against the implementation rather than accepting the reviewer's account.
