@@ -307,3 +307,72 @@ Verdicts: `same` — the added text's claim domain equals the text it replaced; 
   pkgdown, test-coverage and ubuntu-latest (release); windows-latest pending.
   Local `devtools::check()` and the three fresh-context reviewers still
   running.
+
+### Independent review (three fresh-context reviewers, 2026-08-24)
+
+Full three-lens fan-out (user-facing tier), spawned at the user's selection —
+this session carried a standing instruction not to spawn subagents unasked.
+[S] prior-review lens: no findings; the repo has no inline PR review comments
+at all (`pulls/comments` probe returns empty), and the archived `## Review`
+record shows this diff applying the M130 ledger lesson and the M136 word-list
+lesson rather than regressing either. [S] blame-history lens: no findings; it
+independently reached row 67's `wider` verdict and traced the `@param level`
+wording to M17/ADR-026, superseded by ADR-056 (both `type` forms) and ADR-028
+(incomplete data). [O] diff-bug lens: ten findings, below.
+
+Findings and dispositions, as the reviewer ranked them:
+
+1. **NEWS bullet framing false for one of its two claims** — the bullet opened
+   "corrected against the text they replaced", but `git show 5c274fc^:R/icc.R`
+   line 239 already carried "agreement-only, complete crossed designs", so that
+   repair was own-merits, not a comparison finding. Verified. **Fixed now:**
+   the opening clause dropped.
+2. **`vignettes/engines.Rmd:118` false on its own merits** — "That route takes
+   random raters on complete, balanced data with equal cluster sizes" against
+   `R/icc.R:299-306` and `R/engine-lavaan.R:341`, which give the random-rater
+   two-level fit incomplete and unbalanced data too (the complete/balanced/equal
+   restriction is the *fixed*-rater path). Verified. The pre-M135 text carried
+   the same restriction, so row 54's `same` verdict stands and this is the
+   Scope's own-merits clause, not an AC1 failure. **Fixed now** in place, being
+   one sentence.
+3. **Row 37's `same` on the capability matrix disputed** — eleven `—` cells
+   became `no`. **Rejected:** in a column whose vocabulary is ✅/partial, `—`
+   already reads as the negative, the reviewer grants the claims are true, and
+   the verdict is a defensible judgment call, not a domain move.
+4. **The doctrine's own R6 paragraph widened while being compressed** — "each
+   is an *opportunity to* promise more than the original did" became "each
+   promises more than the original did". Verified, and the rule it states
+   forbids exactly that. **Fixed now:** the hedge restored; 118 lines / 6,941
+   bytes, still inside the module's 120 / 8,000 budget.
+5. **The new `@param level` gloss does not exclude within-cell replicates**
+   (`R/icc.R:1403-1407`) or state the rater-bridging requirement
+   (`R/icc.R:1571`). **Rejected:** the gloss is a pointer that matches the
+   Details section (`R/icc.R:68-69`) verbatim in scope and says "See the
+   *Multilevel designs* section"; the prior wording named neither limit either.
+6. **Triage row 98's note belongs to row 99** — the `@param design` change is in
+   hunk `@@ -227,172 +244,191 @@`, not `@@ -183,40 +196,44 @@`. Verified.
+   Both hunks are `same`, so no verdict moves; the work log is append-only, so
+   this line supersedes the note's placement rather than editing the table.
+7. **Ledger row `0e83d1125bf2` dropped rather than re-keyed. Rejected:** the
+   reviewer grants it defensible and the checker is green at base and
+   `--self-test`; the row's quoted clause no longer exists in the prose.
+8. **Row 64's "every figure and fence carried" generous. Rejected:** the
+   reviewer grants `same` still defensible.
+9. **`vignettes/interval-methods.Rmd` "When it aborts, its message names an
+   alternative method" is unqualified** — an unmodified line the pass did not
+   touch, so outside the comparison. **Follow-up:** candidate ROADMAP row.
+10. **Orphan short roxygen line inherited by `man/icc.Rd`. Fixed now** —
+    rewrapped alongside finding 1; rendering was unaffected either way.
+
+No finding demonstrates an acceptance criterion failing inside its named
+procedure's domain, and none shows a criterion itself wrong, so neither the
+return floor nor an amendment return fires.
+
+### Re-verification after the fix-now repairs
+
+`NOT_CRAN=true CI=true devtools::test()`: FAIL 0, WARN 2, SKIP 26, PASS 8561.
+All four `check-references` checkers exit 0 at base and `--self-test`.
+`devtools::document()` regenerates `man/icc.Rd` with no further diff. AC2's
+R-diff still 0 lines; `vignettes/engines.Rmd` joins the changed paths, admitted
+by AC2's `vignettes/*.Rmd` member. Ruler over the whole standard surface: 0
+dashes, 4 over-35, and the clause match returns those same 4 — AC3 holds.

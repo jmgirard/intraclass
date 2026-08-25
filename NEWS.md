@@ -339,8 +339,7 @@
 
 ## Documentation
 
-* Two documentation claims have been corrected against the text they replaced.
-  The *Interval methods* article had come to say that the modified
+* Two documentation claims have been corrected. The *Interval methods* article had come to say that the modified
   profile-likelihood interval does not abort at the near-zero boundary. What it
   offers there is an interval on the cells where the Monte-Carlo default aborts;
   a degenerate fit or a failed root search still raises a classed error, as

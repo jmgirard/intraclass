@@ -42,7 +42,7 @@ no non-arbitrary threshold and would fight readability. R3 and R6 are uncounted.
 
 R6 is the one that can silently break something. A dash spliced into two
 sentences, a clause hoisted out of a parenthesis, an "and" turned into a full
-stop: each promises more than the original did. The repair for an overlong
+stop: each is an opportunity to promise more than the original did. The repair for an overlong
 sentence is to *split* it, never to delete the qualifier that bounded it.
 
 ## What the ruler counts as prose
