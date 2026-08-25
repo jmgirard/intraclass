@@ -75,7 +75,7 @@ repaired in place if cheap, else a candidate row.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Run the three pinned `git diff` commands; record the per-merge hunk
+- [x] T1: Run the three pinned `git diff` commands; record the per-merge hunk
       count and confirm the total against AC1's 111. Open the triage table in
       this file's Work log / Review sections — one row per hunk, keyed by
       commit + file + hunk header. No `data-raw/` ledger: a standing table over
@@ -85,10 +85,10 @@ repaired in place if cheap, else a candidate row.
       carrying a claim's scope that a sentence split can drop. Compress
       elsewhere in the module to stay inside its stated 120-line / 8,000-byte
       budget (119 / 6,900 at 2026-08-24) and report the post-edit figures.
-- [ ] T3: Triage the 84 vignette hunks from M134 and M135. Per hunk: a verdict,
+- [x] T3: Triage the 84 vignette hunks from M134 and M135. Per hunk: a verdict,
       and where the verdict is a discrepancy, both texts quoted.
-- [ ] T4: Triage the 27 roxygen and README hunks from M136, same form.
-- [ ] T5: Repair every discrepancy T3/T4 recorded. Where a repair falls inside
+- [x] T4: Triage the 27 roxygen and README hunks from M136, same form.
+- [x] T5: Repair every discrepancy T3/T4 recorded. Where a repair falls inside
       a span pinned verbatim (`test-doc-skew-caveat.R`,
       `data-raw/m117-width-pin-mutations.R`), re-point the anchor in the same
       commit — M130's lesson: a doc-surface edit re-keys the claim ledgers.
@@ -114,9 +114,132 @@ Verdicts: `same` — the added text's claim domain equals the text it replaced; 
 
 | # | commit | file | hunk | verdict | note |
 |---|---|---|---|---|---|
+| 1 | `bb42f8e` | `vignettes/choosing-an-icc.Rmd` | `@@ -18,21 +18,20 @@` | `same` |  |
+| 2 | `bb42f8e` | `vignettes/choosing-an-icc.Rmd` | `@@ -42,7 +41,7 @@` | `same` |  |
+| 3 | `bb42f8e` | `vignettes/choosing-an-icc.Rmd` | `@@ -54,9 +53,10 @@` | `same` | conditional split; `Those raters` binds the antecedent, so the one-way frame survives. |
+| 4 | `bb42f8e` | `vignettes/choosing-an-icc.Rmd` | `@@ -69,14 +69,14 @@` | `same` |  |
+| 5 | `bb42f8e` | `vignettes/choosing-an-icc.Rmd` | `@@ -93,7 +93,7 @@` | `same` |  |
+| 6 | `bb42f8e` | `vignettes/choosing-an-icc.Rmd` | `@@ -113,14 +113,14 @@` | `same` |  |
+| 7 | `bb42f8e` | `vignettes/choosing-an-icc.Rmd` | `@@ -132,24 +132,25 @@` | `same` |  |
+| 8 | `bb42f8e` | `vignettes/choosing-an-icc.Rmd` | `@@ -162,7 +163,7 @@` | `same` |  |
+| 9 | `bb42f8e` | `vignettes/choosing-an-icc.Rmd` | `@@ -209,19 +210,20 @@` | `same` |  |
+| 10 | `bb42f8e` | `vignettes/choosing-an-icc.Rmd` | `@@ -252,23 +254,23 @@` | `same` |  |
+| 11 | `bb42f8e` | `vignettes/getting-started.Rmd` | `@@ -17,8 +17,8 @@` | `same` |  |
+| 12 | `bb42f8e` | `vignettes/getting-started.Rmd` | `@@ -27,25 +27,25 @@` | `same` |  |
+| 13 | `bb42f8e` | `vignettes/getting-started.Rmd` | `@@ -54,12 +54,12 @@` | `same` |  |
+| 14 | `bb42f8e` | `vignettes/getting-started.Rmd` | `@@ -80,7 +80,7 @@` | `same` |  |
+| 15 | `bb42f8e` | `vignettes/getting-started.Rmd` | `@@ -89,10 +89,10 @@` | `same` |  |
+| 16 | `bb42f8e` | `vignettes/getting-started.Rmd` | `@@ -101,7 +101,7 @@` | `same` |  |
+| 17 | `bb42f8e` | `vignettes/getting-started.Rmd` | `@@ -112,9 +112,9 @@` | `same` |  |
+| 18 | `bb42f8e` | `vignettes/getting-started.Rmd` | `@@ -130,14 +130,14 @@` | `same` |  |
+| 19 | `bb42f8e` | `vignettes/getting-started.Rmd` | `@@ -146,20 +146,19 @@` | `same` | `icc()` simulates -> `the default interval does not rely on`; the topic sentence already scoped to the reported default, so no move. |
+| 20 | `bb42f8e` | `vignettes/getting-started.Rmd` | `@@ -171,18 +170,18 @@` | `same` | `these choices` -> `Several choices`; the same five follow as questions, and neither wording claims exclusivity. |
+| 21 | `bb42f8e` | `vignettes/glossary.Rmd` | `@@ -12,43 +12,46 @@` | `same` |  |
+| 22 | `bb42f8e` | `vignettes/glossary.Rmd` | `@@ -56,7 +59,7 @@` | `same` |  |
+| 23 | `bb42f8e` | `vignettes/glossary.Rmd` | `@@ -66,19 +69,20 @@` | `same` |  |
+| 24 | `bb42f8e` | `vignettes/glossary.Rmd` | `@@ -86,13 +90,13 @@` | `same` |  |
+| 25 | `bb42f8e` | `vignettes/glossary.Rmd` | `@@ -111,10 +115,10 @@` | `same` |  |
+| 26 | `bb42f8e` | `vignettes/glossary.Rmd` | `@@ -128,13 +132,13 @@` | `same` |  |
+| 27 | `bb42f8e` | `vignettes/glossary.Rmd` | `@@ -144,25 +148,26 @@` | `same` |  |
+| 28 | `bb42f8e` | `vignettes/glossary.Rmd` | `@@ -183,17 +188,18 @@` | `same` |  |
+| 29 | `bb42f8e` | `vignettes/glossary.Rmd` | `@@ -206,7 +212,7 @@` | `same` |  |
+| 30 | `bb42f8e` | `vignettes/glossary.Rmd` | `@@ -230,7 +236,7 @@` | `same` |  |
+| 31 | `bb42f8e` | `vignettes/glossary.Rmd` | `@@ -238,20 +244,20 @@` | `same` |  |
+| 32 | `bb42f8e` | `vignettes/glossary.Rmd` | `@@ -259,37 +265,38 @@` | `same` |  |
+| 33 | `8aafb0e` | `vignettes/comparison-with-other-packages.Rmd` | `@@ -24,7 +24,7 @@` | `same` |  |
+| 34 | `8aafb0e` | `vignettes/comparison-with-other-packages.Rmd` | `@@ -43,10 +43,10 @@` | `same` |  |
+| 35 | `8aafb0e` | `vignettes/comparison-with-other-packages.Rmd` | `@@ -90,15 +90,15 @@` | `same` |  |
+| 36 | `8aafb0e` | `vignettes/comparison-with-other-packages.Rmd` | `@@ -126,8 +126,8 @@` | `same` |  |
+| 37 | `8aafb0e` | `vignettes/comparison-with-other-packages.Rmd` | `@@ -163,58 +163,58 @@` | `same` | capability-matrix cells `—` -> `no`; same negative in a yes/partial/no column. Boundary-aware sentence reordered, `none of the classical tools provide` intact. |
+| 38 | `8aafb0e` | `vignettes/d-studies-and-replicates.Rmd` | `@@ -15,12 +15,13 @@` | `same` |  |
+| 39 | `8aafb0e` | `vignettes/d-studies-and-replicates.Rmd` | `@@ -34,7 +35,7 @@` | `same` |  |
+| 40 | `8aafb0e` | `vignettes/d-studies-and-replicates.Rmd` | `@@ -42,16 +43,16 @@` | `same` |  |
+| 41 | `8aafb0e` | `vignettes/d-studies-and-replicates.Rmd` | `@@ -63,7 +64,7 @@` | `same` |  |
+| 42 | `8aafb0e` | `vignettes/d-studies-and-replicates.Rmd` | `@@ -71,11 +72,11 @@` | `same` |  |
+| 43 | `8aafb0e` | `vignettes/d-studies-and-replicates.Rmd` | `@@ -83,7 +84,7 @@` | `same` |  |
+| 44 | `8aafb0e` | `vignettes/d-studies-and-replicates.Rmd` | `@@ -95,9 +96,9 @@` | `same` |  |
+| 45 | `8aafb0e` | `vignettes/d-studies-and-replicates.Rmd` | `@@ -107,18 +108,17 @@` | `same` |  |
+| 46 | `8aafb0e` | `vignettes/d-studies-and-replicates.Rmd` | `@@ -127,17 +127,17 @@` | `same` |  |
+| 47 | `8aafb0e` | `vignettes/d-studies-and-replicates.Rmd` | `@@ -147,11 +147,12 @@` | `same` |  |
+| 48 | `8aafb0e` | `vignettes/d-studies-and-replicates.Rmd` | `@@ -173,25 +174,26 @@` | `same` |  |
+| 49 | `8aafb0e` | `vignettes/d-studies-and-replicates.Rmd` | `@@ -199,18 +201,19 @@` | `same` |  |
+| 50 | `8aafb0e` | `vignettes/d-studies-and-replicates.Rmd` | `@@ -219,7 +222,7 @@` | `same` |  |
+| 51 | `8aafb0e` | `vignettes/d-studies-and-replicates.Rmd` | `@@ -228,14 +231,14 @@` | `same` |  |
+| 52 | `8aafb0e` | `vignettes/engines.Rmd` | `@@ -15,32 +15,33 @@` | `same` |  |
+| 53 | `8aafb0e` | `vignettes/engines.Rmd` | `@@ -53,20 +54,20 @@` | `same` |  |
+| 54 | `8aafb0e` | `vignettes/engines.Rmd` | `@@ -92,51 +93,52 @@` | `same` | multilevel-SEM restriction moved out of the parenthesis into the next sentence (`That route takes random raters on complete, balanced data with equal cluster sizes`); bound preserved, not dropped. |
+| 55 | `8aafb0e` | `vignettes/engines.Rmd` | `@@ -160,20 +162,20 @@` | `same` |  |
+| 56 | `8aafb0e` | `vignettes/engines.Rmd` | `@@ -192,8 +194,8 @@` | `same` |  |
+| 57 | `8aafb0e` | `vignettes/interval-methods.Rmd` | `@@ -15,16 +15,16 @@` | `same` |  |
+| 58 | `8aafb0e` | `vignettes/interval-methods.Rmd` | `@@ -37,9 +37,9 @@` | `same` |  |
+| 59 | `8aafb0e` | `vignettes/interval-methods.Rmd` | `@@ -57,17 +57,17 @@` | `same` |  |
+| 60 | `8aafb0e` | `vignettes/interval-methods.Rmd` | `@@ -77,21 +77,21 @@` | `same` |  |
+| 61 | `8aafb0e` | `vignettes/interval-methods.Rmd` | `@@ -101,25 +101,25 @@` | `same` |  |
+| 62 | `8aafb0e` | `vignettes/interval-methods.Rmd` | `@@ -127,26 +127,26 @@` | `same` |  |
+| 63 | `8aafb0e` | `vignettes/interval-methods.Rmd` | `@@ -157,10 +157,10 @@` | `same` |  |
+| 64 | `8aafb0e` | `vignettes/interval-methods.Rmd` | `@@ -177,41 +177,43 @@` | `same` | densest hunk; the added `On the larger grid,` makes an implicit frame explicit. Every figure and fence carried. |
+| 65 | `8aafb0e` | `vignettes/interval-methods.Rmd` | `@@ -220,13 +222,13 @@` | `same` |  |
+| 66 | `8aafb0e` | `vignettes/interval-methods.Rmd` | `@@ -258,12 +260,12 @@` | `same` |  |
+| 67 | `8aafb0e` | `vignettes/interval-methods.Rmd` | `@@ -271,22 +273,22 @@` | `wider` | **wider.** Replaced: "Like `"npbootstrap"`, it returns an interval at the near-zero-ICC boundary where the two-way Monte-Carlo default aborts". Added: "Unlike the two-way Monte-Carlo default, it does not abort at the near-zero-ICC boundary: like `"npbootstrap"`, it returns an interval there." The replaced text bound the promise to the cells where the default aborts; the added text promises the method does not abort at that boundary at all. D-019 records two abort paths there (a degenerate fit, a crossing-indicated root-finding failure), and `R/icc.R`'s own `"mpl"` block still carries the bounded wording. Repaired in T5. |
+| 68 | `8aafb0e` | `vignettes/interval-methods.Rmd` | `@@ -314,23 +316,23 @@` | `same` |  |
+| 69 | `8aafb0e` | `vignettes/interval-methods.Rmd` | `@@ -349,18 +351,18 @@` | `same` |  |
+| 70 | `8aafb0e` | `vignettes/interval-methods.Rmd` | `@@ -382,7 +384,7 @@` | `same` |  |
+| 71 | `8aafb0e` | `vignettes/multilevel-designs.Rmd` | `@@ -17,9 +17,9 @@` | `same` |  |
+| 72 | `8aafb0e` | `vignettes/multilevel-designs.Rmd` | `@@ -72,8 +72,8 @@` | `same` |  |
+| 73 | `8aafb0e` | `vignettes/multilevel-designs.Rmd` | `@@ -81,9 +81,9 @@` | `same` |  |
+| 74 | `8aafb0e` | `vignettes/multilevel-designs.Rmd` | `@@ -97,29 +97,30 @@` | `same` |  |
+| 75 | `8aafb0e` | `vignettes/multilevel-designs.Rmd` | `@@ -144,7 +145,7 @@` | `same` |  |
+| 76 | `8aafb0e` | `vignettes/multilevel-designs.Rmd` | `@@ -156,8 +157,8 @@` | `same` |  |
+| 77 | `8aafb0e` | `vignettes/multilevel-designs.Rmd` | `@@ -168,8 +169,8 @@` | `same` |  |
+| 78 | `8aafb0e` | `vignettes/multilevel-designs.Rmd` | `@@ -182,19 +183,19 @@` | `same` |  |
+| 79 | `8aafb0e` | `vignettes/multilevel-designs.Rmd` | `@@ -213,8 +214,8 @@` | `same` |  |
+| 80 | `8aafb0e` | `vignettes/multilevel-designs.Rmd` | `@@ -229,9 +230,9 @@` | `same` |  |
+| 81 | `8aafb0e` | `vignettes/multilevel-designs.Rmd` | `@@ -243,21 +244,22 @@` | `same` |  |
+| 82 | `8aafb0e` | `vignettes/multilevel-designs.Rmd` | `@@ -271,29 +273,29 @@` | `same` |  |
+| 83 | `8aafb0e` | `vignettes/multilevel-designs.Rmd` | `@@ -312,17 +314,17 @@` | `same` |  |
+| 84 | `8aafb0e` | `vignettes/multilevel-designs.Rmd` | `@@ -332,8 +334,8 @@` | `same` |  |
+| 85 | `5c274fc` | `R/abort.R` | `@@ -13,7 +13,7 @@` | `same` |  |
+| 86 | `5c274fc` | `R/abort.R` | `@@ -63,12 +63,12 @@` | `same` |  |
+| 87 | `5c274fc` | `R/abort.R` | `@@ -89,7 +89,7 @@` | `same` |  |
+| 88 | `5c274fc` | `R/abort.R` | `@@ -117,10 +117,10 @@` | `same` |  |
+| 89 | `5c274fc` | `R/abort.R` | `@@ -146,7 +146,7 @@` | `same` |  |
+| 90 | `5c274fc` | `R/choose-icc.R` | `@@ -22,28 +22,28 @@` | `same` |  |
+| 91 | `5c274fc` | `R/d-study.R` | `@@ -19,45 +19,49 @@` | `same` | `On that same data` added at the split, keeping the incomplete-data frame on the cluster-level clause. |
+| 92 | `5c274fc` | `R/d-study.R` | `@@ -71,67 +75,69 @@` | `same` |  |
+| 93 | `5c274fc` | `R/data.R` | `@@ -32,24 +32,24 @@` | `same` |  |
+| 94 | `5c274fc` | `R/icc.R` | `@@ -3,9 +3,9 @@` | `same` |  |
+| 95 | `5c274fc` | `R/icc.R` | `@@ -15,28 +15,29 @@` | `same` |  |
+| 96 | `5c274fc` | `R/icc.R` | `@@ -55,95 +56,107 @@` | `same` |  |
+| 97 | `5c274fc` | `R/icc.R` | `@@ -153,29 +166,29 @@` | `same` |  |
+| 98 | `5c274fc` | `R/icc.R` | `@@ -183,40 +196,44 @@` | `same` | `@param design` gains a second override occasion (ambiguous labels). Not a scope move on an existing claim: the added occasion is separately true and is what the Multilevel section and the multilevel article already state. |
+| 99 | `5c274fc` | `R/icc.R` | `@@ -227,172 +244,191 @@` | `same` |  |
+| 100 | `5c274fc` | `R/icc.R` | `@@ -403,85 +439,88 @@` | `same` |  |
+| 101 | `5c274fc` | `R/icc.R` | `@@ -492,87 +531,88 @@` | `same` |  |
+| 102 | `5c274fc` | `R/icc.R` | `@@ -580,20 +620,22 @@` | `same` |  |
+| 103 | `5c274fc` | `R/icc.R` | `@@ -602,9 +644,10 @@` | `same` |  |
+| 104 | `5c274fc` | `R/icc.R` | `@@ -616,12 +659,12 @@` | `same` |  |
+| 105 | `5c274fc` | `R/icc.R` | `@@ -629,8 +672,8 @@` | `same` |  |
+| 106 | `5c274fc` | `README.Rmd` | `@@ -26,20 +26,22 @@` | `same` | `each with boundary-aware Monte-Carlo intervals` -> `Everything just listed comes with`; ranges over the same three sentences. |
+| 107 | `5c274fc` | `README.Rmd` | `@@ -58,20 +60,20 @@` | `same` |  |
+| 108 | `5c274fc` | `README.Rmd` | `@@ -88,20 +90,21 @@` | `same` |  |
+| 109 | `5c274fc` | `README.Rmd` | `@@ -122,7 +125,7 @@` | `same` |  |
+| 110 | `5c274fc` | `README.Rmd` | `@@ -131,14 +134,14 @@` | `same` |  |
+| 111 | `5c274fc` | `README.Rmd` | `@@ -146,6 +149,6 @@` | `same` | table cell `—` -> `(this package)`; the `fills that gap` sentence that carried the no-comparable-package reading is unchanged. |
+
+- 2026-08-24: T3/T4 — all 111 hunks compared against the text they replaced; table above. 110 `same`, 1 `wider`. Ten borderline comparisons carry a note naming why the verdict is `same`, the recurring shape being a restriction moved out of a dash pair or parenthesis into an adjacent sentence with an explicit frame (`On that same data`, `That route takes`, `In that design`).
+- 2026-08-24: T5 — one repair. `vignettes/interval-methods.Rmd` row 67: the `"mpl"` boundary promise re-bound to the cells where the two-way Monte-Carlo default aborts. `data-raw/mpl-doc-claims.tsv` row `0e83d1125bf2` removed in the same commit (its quote was the widened clause). Also repaired on its own merits, per the Scope's cheap-in-place clause: `R/icc.R` `@param level` described the conflated diagnostic as "agreement-only, complete crossed designs", which `R/estimand.R:87-102` (both `type` forms) and `R/icc.R:1178-1183` ("`type` flows through unfiltered") plus the incomplete-conflated path at `R/icc.R:1486` falsify; now "crossed random-rater designs, balanced or incomplete", matching the Details section. No other claim was found false on its own merits.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
+
+- 2026-08-24 (T5): the `"mpl"` boundary sentence in `vignettes/interval-methods.Rmd`
+  is repaired by restoring the replaced text's scope in new wording, not by
+  reverting: the pre-M135 sentence carried a semicolon splice the pass removed.
+  The repair also drops the `data-raw/mpl-doc-claims.tsv` row keyed on the
+  widened clause. That row existed only because M135's wording created a
+  trigger-carrying sentence; the restored wording enumerates as no candidate
+  (`check-mpl-doc-claims.py` reports 60 candidates, 0 failures), so the row is
+  removed rather than re-keyed.
 
 ## Review
 <!-- owner: review · exclusive -->

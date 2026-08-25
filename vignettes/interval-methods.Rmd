@@ -281,9 +281,9 @@ incomplete data. It is a
 deterministic closed form: no resampling, no `seed`. Its calibration fixes two
 fences: `conf_level` must be 0.90, 0.95, or 0.99 (each level carries its own
 calibrated correction constant, never interpolated between levels), and the
-calibration grid spans 2–10 raters and 10–100 subjects. Unlike the two-way Monte-Carlo default, it does
-not abort at the near-zero-ICC boundary: like `"npbootstrap"`, it returns an
-interval there. It is deliberately conservative: it over-covers, is wider
+calibration grid spans 2–10 raters and 10–100 subjects. Like `"npbootstrap"`, it
+returns an interval at the near-zero-ICC boundary where the two-way Monte-Carlo
+default aborts. It is deliberately conservative: it over-covers, is wider
 than the Monte-Carlo interval at interior cells, and so it is an opt-in
 and not the default. Two reporting caveats come from `?icc`. The two-sided interval
 is not equal-tailed, so a limit must not be read as a one-sided bound at half
