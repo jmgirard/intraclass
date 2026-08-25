@@ -48,7 +48,7 @@ gate before stamping, never folded in silently.
 - [x] AC4: fresh `devtools::check(args = "--as-cran", env_vars =
       c(NOT_CRAN = "false"), manual = TRUE)` → 0 errors / 0 warnings / only
       NOTEs justified in AC3 (TinyTeX courier installed for the PDF manual).
-- [ ] AC5: full test suite green against the **installed** package with
+- [x] AC5: full test suite green against the **installed** package with
       `NOT_CRAN=true CI=true` (failed + error sum = 0 — the local-gate
       blind spot).
 - [x] AC6: `pkgdown::check_pkgdown()` + `pkgdown::build_site()` clean;
@@ -196,6 +196,14 @@ gate before stamping, never folded in silently.
   platform aarch64-apple-darwin23, `--as-cran` confirmed in the check banner.
   **Status: OK — 0 errors | 0 warnings | 0 notes**, duration 2m 9.7s; PDF and
   HTML manuals both built OK.
+- **AC5 — verified.** `R CMD INSTALL` of this head, then
+  `NOT_CRAN=true CI=true Rscript -e 'library(testthat); library(intraclass);
+  test_check("intraclass")'` from `tests/` against the **installed** package
+  (R 4.6.1, aarch64-apple-darwin23): **`[ FAIL 0 | WARN 2 | SKIP 26 |
+  PASS 8574 ]`** — failed + error sum = 0, the criterion's bar. The two
+  warnings are the expected boundary/connectedness signals from
+  `test-icc-lavaan-multilevel.R:402` and `test-icc-type-vector.R:286`, which
+  the criterion does not bar.
 - **AC6 — verified**, all five checks re-run fresh on this head:
   `pkgdown::check_pkgdown()` "No problems found"; `pkgdown::build_site()`
   exit 0, all eight vignettes read and rendered, no error or warning in the
