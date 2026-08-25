@@ -7,7 +7,7 @@
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** M49, M50, M51, M53, M54, M55, M61, M68, M129, M130, M131, M132, M133, M134, M135, M136, M137   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP2, GP3   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** `m048-release-v010`   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m048-release-v010` · https://github.com/jmgirard/intraclass/pull/147   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
