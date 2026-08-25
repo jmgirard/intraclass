@@ -19,8 +19,13 @@ carve-out, as M134.
 
 **In:** every `#'` line outside `@examples` under `R/*.R`, and `README.Rmd`,
 rewritten against rules R1–R6 of `cairn/doctrine/prose-style.md` (M134). R1 and
-R2 are gated by the ruler (AC1); R6 is certified over the census's domain only
-(AC3); R3–R5 are the doctrine's step-3 read-through, recorded in the work log.
+R2 are gated by the ruler (AC1); R3–R5 are the doctrine's step-3 read-through,
+recorded in the work log. The doctrine's step-5 R6 diff audit ran in every
+round, and each round found a fresh widening, so it is on record as a search
+that did not converge. Every widening it named is repaired, and no criterion
+certifies R6 over the branch diff: that certification was descoped at the
+return-3 gate (2026-08-24) and leaves M136 for the ROADMAP candidate row
+"A mechanical check that a prose pass never widens a claim".
 The baseline is what `python3 data-raw/prose-profile.py` reports over those two
 arguments at `$(git merge-base main HEAD)`, extracted with `git archive`.
 
@@ -34,8 +39,7 @@ authoritative surface; the blurb adopts its pair:
    table whose rater labels repeat across clusters), and
 2. missing cells leave the pattern genuinely ambiguous between crossed and nested.
 
-That edit changes meaning by design, so its hunk is named in AC4 and exempt
-from AC3.
+That edit changes meaning by design; AC4 states what the changed text must say.
 
 `data-raw/check-mpl-doc-claims.py` scopes `R/icc.R`, `NEWS.md` and
 `interval-methods.Rmd`, and 45 of the 54 `data-raw/mpl-doc-claims.tsv` rows
@@ -63,23 +67,11 @@ condition text with their own guard
       against the edited `R/icc.R`, and every `data-raw/mpl-doc-claims.tsv` row
       whose key changes carries the edited quote verbatim with its `assertion`
       and `disposition` columns unchanged, in the same commit as the edit.
-- [ ] AC3 Census: over `git diff -U0 $(git merge-base main HEAD)...HEAD -- R/
-      README.Rmd`, attribute each content line (`^[+-][^+-]`) to the `^@@` hunk
-      above it, and select a hunk when any of its content lines matches
-      `grep -iE '\b(any|each|every|all|only|both|exactly|never|always|full)\b'`.
-      Widen each selected hunk to its smallest enclosing paragraph — for
-      roxygen, the run of `#'` lines bounded by a blank `#'` line or the next
-      `@tag`; for `README.Rmd`, the blank-line paragraph — reporting any
-      selected hunk lying in neither for hand adjudication. The census selects
-      at least one hunk in `R/icc.R` and at least one in `README.Rmd`, and in
-      every widened unit it selects other than the one holding `@param design`
-      (AC4 governs that): where the unit has removed lines, its added text
-      states a claim whose domain is equal to or narrower than the removed
-      text; where it has none, the added text either repeats a claim the
-      unchanged lines of that same unit already state, or contains verbatim a
-      clause `residual_template()` or `width_templates()` returns. The census
-      decides nothing about a claim-domain change carrying none of those ten
-      words.
+- [x] AC3 *Descoped at the return-3 gate (2026-08-24). The R6 claim-domain
+      census promises nothing here; it exits to the ROADMAP candidate row "A
+      mechanical check that a prose pass never widens a claim". The number is
+      held rather than reclaimed so the work log and the three recorded review
+      rounds keep pointing at the criteria they were written against.*
 - [x] AC4 The rendered `man/icc.Rd` `design` argument entry names both
       occasions listed in Scope, in the article's terms.
 - [x] AC5 `Rscript -e 'devtools::build_readme()'` followed by
@@ -92,7 +84,7 @@ condition text with their own guard
 
 - AC1 → T1, T2, T3
 - AC2 → T4
-- AC3 → T5
+- AC3 → T5 (descoped; T5 stands as performed history)
 - AC4 → T2
 - AC5 → T6
 - AC6 → T6
@@ -107,7 +99,8 @@ condition text with their own guard
 - [x] T4 Re-key `data-raw/mpl-doc-claims.tsv` for every quote T1 edited, keeping
       `assertion` and `disposition` unchanged; run the checker live before the
       commit carrying the roxygen edit.
-- [x] T5 Run the AC3 census; repair any widening outside the `@param design`
+- [x] T5 Run the AC3 census (AC3 was descoped at the return-3 gate, 2026-08-24;
+      T5 and T7 stand as performed history); repair any widening outside the `@param design`
       unit. Record the total hunk count, the selected count and the
       hand-adjudicated count, and the exempt clause's word count beside each
       carrying sentence's. Probe twice, reverting each: plant a 40-word
@@ -122,6 +115,10 @@ condition text with their own guard
       from a fresh-context reader. Repair every widening it finds.
 
 ## Work log
+
+- 2026-08-24: the five R6 widenings the return-3 reader named, all repaired in `R/icc.R`. `@param model`: the three one-way clauses regain the frame the em dash carried ("In that design the `rater` column ...", "It has no rater main effect ..."), which `R/engine-glmmtmb.R:69` vs `:156` shows is false of the default two-way fit. `@section Estimand`: "In that case only their sum ... is estimable" restores the single-rating-per-cell frame the semicolon carried, which `R/icc.R:135-146` contradicts for within-cell replicates. `@param engine`: "That path is Monte-Carlo only: its fixed-rater bootstrap is not yet available" re-binds the reason to the lavaan multilevel path (`R/engine-lavaan.R:573-575` sets `simulate_refit = NULL` on `raters == "fixed"`), where the promoted `because` clause contradicted `R/icc.R:385-387`. The two unscoped-but-true sites also repaired: the k_eff divisor claim regains "On such data", and lavaan's consistency-ICC agreement regains "Its". Ruler `R/*.R` TOTAL 589 sentences / 0 dashes / 2 over-35; `check-mpl-doc-claims.py` 61 candidates / 12 settled / 0 failures, no re-key needed.
+- 2026-08-24: amendment executing the return-3 descope, accepted at the mini gate. AC3 (the R6 claim-domain census) promises nothing and holds its number as a struck placeholder, because `cairn_validate`'s coverage check counts criteria positionally, so a deleted AC3 would force renumbering and break every work-log and Review reference to AC4, AC5 and AC6. The Scope In paragraph drops the certification clause, names the doctrine's R6 audit as the step-5 diff audit it actually is (the draft called it step 3), and records it as a search that did not converge; the `@param design` sentence drops its AC3 exemption; Coverage marks `AC3 -> T5` descoped; T5 gains a parenthetical so its AC3 reference resolves. AC1, AC2, AC4, AC5 and AC6 are unchanged, and no criterion is added or widened. The census exits to a ROADMAP candidate row, paid for by compressing three candidate rows (ROADMAP 23,991 / 24,000 bytes).
+- 2026-08-24: criteria audit over the amended wording ran in FULL mode with a fresh-context [O] reader that authored none of it. Six findings: R6 misnamed as the doctrine's step 3 when `cairn/doctrine/prose-style.md:110-115` makes it step 5; the draft Scope claiming R6 treatment without saying the audit found unrepaired widenings; the three verified widenings left ownerless by the descope; `its hunk is named in AC4` vacuous once the census is gone (AC4 names a rendered `.Rd` entry, not a hunk); T5/T7 citing a criterion no live section would define. All fixed in the text below. The sixth confirms no surviving criterion depends on AC3, Coverage leaves none unmapped, and nothing in DESIGN.md or DECISIONS.md makes any of the five unreachable.
 
 - 2026-08-24: disposition after defect return 3, chosen by the maintainer at the return gate: DESCOPE. M136 narrows to its five verified criteria (AC1, AC2, AC4, AC5, AC6) via the gated amendment protocol (`/milestone-implement` step 6); AC3 — the R6 claim-domain certification over the census — exits to a candidate row or a split milestone, that choice settled at the amendment gate. Park, `/milestone-brief` escalation and a same-objective re-cut were the other options offered and were not taken. The three user-facing [O] diff-bug findings (`NEWS.md:355`'s false universal, `README.Rmd:152`'s `no alternatives` cell, `README.Rmd:36-42`'s lost antecedent) are to be repaired in the same round whatever AC3's exit; the other six take triage there.
 
