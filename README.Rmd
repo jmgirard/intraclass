@@ -39,7 +39,7 @@ functions.
 > consistency, single vs. average, random vs. fixed raters) and one-way designs.
 > It covers imbalanced and incomplete (missing-cell) data. It also covers
 > multilevel designs, at the subject or cluster level, with raters crossed with
-> or nested in clusters or subjects. Each comes with
+> or nested in clusters or subjects. Every design in that list comes with
 > boundary-aware Monte-Carlo intervals. Fits run on `glmmTMB` (the default) or
 > `lme4`. Bayesian fits run on `brms`, and SEM fits on `lavaan`. The
 > [engines article](https://jmgirard.github.io/intraclass/articles/engines.html)
@@ -149,6 +149,6 @@ autoplot(d_study(fit, m = 1:10))
 |---|---|---|
 | Classical ANOVA / mean squares | `psych`, `irr`, `irrNA`, `irrICC`, `ICCDesign` | ANOVA / mean-squares based, mostly assuming balanced data |
 | Model-based variance partition | `performance::icc`, `misty` | A variance-partition coefficient, but not the full interrater-reliability ICC family, the error-variance framing, or a selection framework |
-| **intraclass** | no alternatives | Mixed-model estimation, Monte-Carlo confidence intervals, and decision guidance |
+| **intraclass** | (this package) | Mixed-model estimation, Monte-Carlo confidence intervals, and decision guidance |
 
 **intraclass** fills that gap, following ten Hove, Jorgensen & van der Ark.

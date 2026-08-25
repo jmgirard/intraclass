@@ -77,9 +77,10 @@ section. Left \code{NULL} (the default) for an ordinary single-level two-way ICC
 \item{model}{Design: \code{"twoway"} (the default, subjects crossed with a common
 set of raters) or \code{"oneway"} (each subject rated by a possibly different set
 of raters). Under \code{"oneway"} (Shrout & Fleiss Case 1) the raters are treated
-as \strong{interchangeable}. The \code{rater} column is used only to count the ratings
-per subject, and its labels are ignored. There is no rater main effect to
-model, so \code{type} does not apply and the coefficients are \code{ICC(1)} / \code{ICC(k)}.
+as \strong{interchangeable}. In that design the \code{rater} column is used only to
+count the ratings per subject, and its labels are ignored. It has no rater
+main effect to model, so \code{type} does not apply and the coefficients are
+\code{ICC(1)} / \code{ICC(k)}.
 Fixed raters and a \code{cluster} (multilevel) structure are not defined for a
 one-way design.}
 
@@ -180,7 +181,7 @@ because resamples cannot reproduce a missingness pattern and the bootstrap
 coverage is validated only on balanced data. With \strong{fixed} raters the
 between-level rater intercepts give the Case-3A finite-population
 \eqn{\theta^2_r} at both levels, on complete, balanced data with equal
-cluster sizes only. That path is Monte-Carlo only, because the fixed-rater
+cluster sizes only. That path is Monte-Carlo only: its fixed-rater
 bootstrap is not yet available. Because lavaan's
 random-rater term is the raw quadratic form, the fixed-rater ICC differs from
 the random-rater one by the finite-population correction, which the
@@ -188,8 +189,9 @@ REML-based mixed-model engines do not carry into their random estimate.
 lavaan's two-level estimator is full-information ML, and there is no REML
 analog. So with few clusters its cluster-level components
 sit slightly below the REML estimates, and its absolute-agreement rater term
-slightly above. Both differences shrink as clusters grow. Consistency ICCs
-are ratios and agree with the mixed-model estimates essentially exactly.
+slightly above. Both differences shrink as clusters grow. Its consistency
+ICCs are ratios, so they agree with the mixed-model estimates essentially
+exactly.
 \code{"brms"} fits the \strong{random}-rater model in a Bayesian
 framework (Stan, via \pkg{brms}), under a sourced half-\emph{t}(4, 0, 1) prior on
 the random-effect SDs (ten Hove et al. 2020). The point estimate is the
@@ -289,8 +291,8 @@ aborts otherwise). It serves both \code{unit = "single"} (ICC(1)) and \code{unit
 (ICC(k)) on \strong{balanced and unbalanced} data (unequal ratings per subject)
 alike. On unbalanced data the effective group size becomes the ANOVA \code{n0} of
 Ohyama (2025). Only a numeric \code{unit} (a D-study projection to \code{m} raters) is
-restricted to balanced data. Unbalanced, use \code{ci_method = "montecarlo"} for a
-projection.
+restricted to balanced data. For a projection on unbalanced data, use
+\code{ci_method = "montecarlo"}.
 It resamples whole subjects
 with replacement (not from the fitted model), stabilizes the variance with the
 \verb{log F} transform, studentizes with an infinitesimal-jackknife SE, and
@@ -445,7 +447,7 @@ informative on purpose. Ignored (must be \code{NULL}) for non-Bayesian engines.}
 interval when \code{ci_method = "posterior"} (the Bayesian engine): \code{"percentile"}
 (the default, a two-sided percentile interval) or \code{"hpdi"} (the
 highest-posterior-density interval, the narrowest interval covering the
-credible mass). Percentile is the default because it is
+credible mass). Percentile is the default on two grounds. It is
 monotone-transformation invariant and degrades gracefully as the ICC
 approaches the variance boundary. And ten Hove, Jorgensen & van der Ark
 (2020) found percentile (not HPD) intervals give nominal coverage at small
@@ -518,8 +520,8 @@ consistency is the classic Shrout & Fleiss \code{ICC(3,1)}.
 \section{Estimand}{
 
 With a single rating per subject-by-rater cell, the subject-by-rater
-interaction and pure error are not separately identified. Only their sum, the
-residual variance \eqn{\sigma^2_{res}}, is estimable. Absolute agreement counts
+interaction and pure error are not separately identified. In that case only
+their sum, the residual variance \eqn{\sigma^2_{res}}, is estimable. Absolute agreement counts
 the rater main effect \eqn{\sigma^2_r} as error. Consistency drops it.
 \deqn{ICC(A,1) = \sigma^2_s / (\sigma^2_s + \sigma^2_r + \sigma^2_{res})}
 \deqn{ICC(A,k) = \sigma^2_s / (\sigma^2_s + (\sigma^2_r + \sigma^2_{res}) / k)}
@@ -581,10 +583,10 @@ for them.
 Mixed patterns (some raters crossed, some nested) are not a supported design and
 raise an error. The \strong{crossed} design (Design 1) additionally supports
 \strong{incomplete} data, meaning subjects rated by different, overlapping rater
-subsets (missing cells). It computes the subject-level ICCs by REML, with the
-averaging divisor set to the effective number of ratings per subject
-(\code{k_eff}, the harmonic mean), exactly as the single-level incomplete two-way
-ICC does. Identifiability is
+subsets (missing cells). On such data it computes the subject-level ICCs by
+REML, with the averaging divisor set to the effective number of ratings per
+subject (\code{k_eff}, the harmonic mean). That is exactly what the single-level
+incomplete two-way ICC does. Identifiability is
 checked first: each cluster's subject-by-rater layout must be connected, and for
 absolute agreement raters must bridge clusters (otherwise the design is really
 rater-nested). When missing cells make the crossed-vs-nested pattern ambiguous,

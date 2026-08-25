@@ -352,8 +352,9 @@
   package computes or reports changed, and every claim the pass touched was
   checked against the text it replaced.
 
-* Every help page and the README have been rewritten to the same standard: long
-  sentences split, and dashes standing in for a colon or a full stop replaced.
+* Every help page and the README have been held to the same standard, and the
+  ones that needed it rewritten: long sentences split, and dashes standing in
+  for a colon or a full stop replaced.
   Nothing about what the package computes or reports changed, and every claim
   the pass touched was checked against the text it replaced.
 

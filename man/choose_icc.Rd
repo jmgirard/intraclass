@@ -72,7 +72,7 @@ Supply the decisions as arguments to get advice programmatically. In an
 interactive session, call \code{choose_icc()} with the relevant answers omitted to
 be asked the outstanding questions one at a time.
 
-Two structural facts about your design default to the common case, a crossed,
+The two structural facts about your design default to the common case, a crossed,
 non-multilevel two-way design, matching \code{\link[=icc]{icc()}}. They are whether the raters
 are crossed (\code{model}) and whether subjects are nested in clusters
 (\code{multilevel}). The choices that actually select the coefficient have no

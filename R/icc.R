@@ -413,8 +413,8 @@
 #'   (ICC(k)) on **balanced and unbalanced** data (unequal ratings per subject)
 #'   alike. On unbalanced data the effective group size becomes the ANOVA `n0` of
 #'   Ohyama (2025). Only a numeric `unit` (a D-study projection to `m` raters) is
-#'   restricted to balanced data. Unbalanced, use `ci_method = "montecarlo"` for a
-#'   projection.
+#'   restricted to balanced data. For a projection on unbalanced data, use
+#'   `ci_method = "montecarlo"`.
 #'   It resamples whole subjects
 #'   with replacement (not from the fitted model), stabilizes the variance with the
 #'   `log F` transform, studentizes with an infinitesimal-jackknife SE, and
@@ -563,7 +563,7 @@
 #'   interval when `ci_method = "posterior"` (the Bayesian engine): `"percentile"`
 #'   (the default, a two-sided percentile interval) or `"hpdi"` (the
 #'   highest-posterior-density interval, the narrowest interval covering the
-#'   credible mass). Percentile is the default because it is
+#'   credible mass). Percentile is the default on two grounds. It is
 #'   monotone-transformation invariant and degrades gracefully as the ICC
 #'   approaches the variance boundary. And ten Hove, Jorgensen & van der Ark
 #'   (2020) found percentile (not HPD) intervals give nominal coverage at small
