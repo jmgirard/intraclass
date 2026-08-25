@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M48: v0.1.0 release consolidation — CRAN submission-ready
 
-- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** M49, M50, M51, M53, M54, M55, M61, M68, M129, M130, M131, M132, M133, M134, M135, M136, M137   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP2, GP3   <!-- owner: plan · create/amend-via-gate -->
@@ -135,6 +135,7 @@ gate before stamping, never folded in silently.
 - 2026-08-25: T6 done — PR #147 opened; every check on the head is green: `ubuntu-latest (release)` 22m17s, `windows-latest (release)` 25m35s, `test-coverage` 37m34s, `codecov/patch`, `codecov/project`, `checkpoint-guard`, `lint`, `format-check`, `check-references`, `pkgdown`. **Note for the review gate on AC7:** `check-standard.yaml`'s matrix is conditional — the five-cell set (macOS release, Windows release, ubuntu devel/release/oldrel-1) runs on `push` to the default branch only, and a `pull_request` event gets the two-cell set that ran here. The full matrix therefore runs on the merge commit, before any submission, and cannot be run on a PR head as the workflow now stands.
 - 2026-08-25: all tasks checked; status in-progress -> review by /milestone-implement.
 - 2026-08-25: review checkpoint (mid-phase) by /milestone-review — AC1-AC4 and AC6 verified with fresh evidence and ticked; AC5 (installed-package suite) still running; AC7's disposition open, the criterion asking for a matrix the workflow cannot run on a PR head since M77. Consistency gate green. Two of three review lenses returned, no actionable findings.
+- 2026-08-25: review returns M48 to in-progress by /milestone-review — AC7 fails as written (the five-config CI matrix is gated on a push event to the default branch since M77, so it cannot run on a PR head; routed as an amendment return, no criterion text changed here), and the [O] diff-bug lens found two reproduced defects: `glance()$n_o` is NA on nested Design 2 replicate fits while `var_subject_rater` is populated, contradicting `?icc` and NEWS; and NEWS promises classed `boot_samples`/`seed` validation in `d_study()` that does not exist, `d_study(seed = c(1, 2))` silently taking the first element and `seed = "abc"` raising an unclassed error. AC1-AC6 verified with fresh evidence; consistency gate green. Findings and dispositions in the Review section.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
@@ -209,3 +210,189 @@ gate before stamping, never folded in silently.
   exit 0, all eight vignettes read and rendered, no error or warning in the
   log; `air format --check .` exit 0; `lintr::lint_package()` 0 lints;
   `urlchecker::url_check()` "All URLs are correct!" over 15 URLs.
+- **AC7 — NOT verified; the criterion cannot hold as written.** AC7 asks for
+  the "full CI matrix green on the PR head" and names R-devel in its
+  parenthetical. `.github/workflows/check-standard.yaml:37` makes the matrix
+  conditional on `github.event_name == 'push'`, and `on.push.branches` is
+  `[main, master]`: a `pull_request` event gets a two-cell set
+  (`ubuntu-latest release`, `windows-latest release`), and a push to a
+  milestone branch does not trigger the workflow at all. The five-cell set
+  (macOS release, Windows release, ubuntu devel/release/oldrel-1) can
+  therefore never run on a PR head. That conditional landed in **M77**
+  (`28923266`, 2026-07-21), nine days after AC7 was written (2026-07-12),
+  when the full matrix *did* run on PR heads — so the criterion was falsified
+  by a later milestone, not by this work, and no work inside M48's Scope can
+  satisfy it. What is measured on the head: eight checks, of which
+  nine are green (`format-check`, `lint`, `pkgdown`, `check-references`,
+  `checkpoint-guard`, `test-coverage`, `codecov/patch`, `codecov/project`,
+  `ubuntu-latest (release)`) and `windows-latest (release)` was still running
+  at this writing. Routed as an amendment return, below.
+
+### Consistency gate
+
+- `cairn_validate.py` exit 0 — every check PASS, every advisory OK; the
+  `release window` advisory did not fire.
+- `cairn_impact.py` not run: no `DESIGN.md` IP/GP principle changed (the
+  file's only diff is the Platforms commitment bullet).
+- Toolchain checks, from the `r-package` profile's `consistency-gate` slot:
+  `devtools::document()` leaves a clean tree; `NAMESPACE`, `_pkgdown.yml` and
+  `data/` are byte-identical to `origin/main`, so no generated file was
+  hand-edited and no new export is missing a reference-index row; `README.Rmd`
+  and `README.md` were last written by the same commit (`5c274fc`) and neither
+  is touched here; `pkgdown::check_pkgdown()` clean; `NEWS.md` carries the
+  user-visible changes of this milestone and a sweep for milestone / ADR / D /
+  RR ids across `NEWS.md`, `README.md`, `man/` and `vignettes/` returns
+  nothing; no new top-level file, so no `.Rbuildignore` entry is owed; the
+  full `--as-cran` check is the AC4 run above.
+
+### Review fan-out
+
+Three fresh-context lenses, each on a distinct evidence base, none having
+authored the implementation. Every reported finding is logged below with its
+disposition.
+
+- **[S] prior-review lens — no findings.** The probe
+  `gh api repos/jmgirard/intraclass/pulls/comments?per_page=1` returned `[]`
+  (no inline review comment exists anywhere in the repo's PR history), so the
+  per-PR walk was skipped. Across the archived `## Review` sections touching
+  these files it found no point this diff reintroduces or contradicts, and
+  verified RR04 recommendations 1-7 applied faithfully, including the
+  deliberate carve-out that the *printed* table header still reads `index`.
+- **[S] blame-history lens — no actionable findings.** Seven items, all
+  confirmatory: the NEWS fold of the withdrawn-claim `Correction.` bullets was
+  caught during T3 by `test-doc-skew-caveat.R` and
+  `check-mpl-doc-claims.py` and restored; the scalar-choice change does not
+  collide with ADR-054's report-all vectorization (the removed
+  `identical(value, choices)` shortcut was a `match.arg` idiom from M2, never
+  the report-all mechanism); `rhat`/`ess_bulk` were an omission, not a
+  withheld guardrail; the 3.5 floor was a `usethis` scaffold default, never a
+  compatibility target, and no 3.5-era workaround code exists in `R/`.
+- **[O] diff-bug lens — twelve findings**, ranked below. It separately
+  verified clean: the `index` -> `term` rename across ~70 sites (every
+  surviving `$index` resolves to an internal field or a locally built frame);
+  `man/` and `NAMESPACE` regenerate with zero delta; every new abort branch
+  fires classed `intraclass_error` on the right condition; `tidy()`'s
+  always-present columns hold on ten fit shapes; `var_residual` keeps one
+  meaning across the replicate split; no R 4.1+ syntax or post-4.0 base
+  function in shipped code; all five `data-raw/` python checkers exit 0.
+
+### Findings and dispositions
+
+Ranked as the [O] lens ranked them. "Reproduced" marks a finding this review
+re-ran against the implementation rather than accepting the reviewer's account.
+
+- **F1 — `glance()$n_o` is `NA` on a nested Design 2 replicate fit, the exact
+  shape the column was added to disambiguate.** `R/icc.R:2497` stores
+  `design_info$n_o` from `summarize_design()`, which requires
+  `n_cells == ns * nr` (`R/design.R:48-51`) and so returns `NA_integer_` for a
+  block-diagonal design; the fit itself uses the design-aware `n_o_val`
+  (`R/icc.R:1430`), and the comment at `R/icc.R:1368-1370` states the nested
+  case is overridden below. **Reproduced** on a 5x6x3x2 nested fit:
+  `var_subject_rater` 0.0180, `var_residual` 0.5299, `n_o` `NA`, with
+  `tidy()$occasions` showing 1 and 2. The row contradicts itself, and
+  falsifies `?icc` ("the occasion count") and `NEWS.md:353` ("both `NA`
+  without within-cell replicates"). Crossed Design 1 replicates are correct.
+  *Disposition: fix now.*
+- **F2 — `NEWS.md:403` promises validation the package does not have, and
+  `d_study()` still does the thing D-035 clause 1 abolished.** The bullet
+  reads "`mc_samples`, `boot_samples`, `conf_level` and `seed` are validated
+  with classed errors in both `icc()` and `d_study()`". **Reproduced:**
+  `d_study()` has no `boot_samples` argument (`formals()`: `x, m, n_o,
+  conf_level, mc_samples, seed`); `d_study(f, m = 1:3, seed = c(1, 2))`
+  succeeds silently on the first element, where `icc(seed = c(1, 2))` aborts
+  `intraclass_error`; `d_study(f, m = 1:3, seed = "abc")` emits a base
+  coercion warning and then a bare `simpleError`, which is a violation of the
+  repo's classed-condition rule. *Disposition: fix now.*
+- **F3 — a shipped vignette teaches the access pattern this release declares
+  internal.** `R/icc.R:661-668` now names `$estimates`, `$components`,
+  `$design`, `$ci`, `$n`, `$mc` as internal; **reproduced by grep**,
+  `vignettes/comparison-with-other-packages.Rmd:62,114,160-162` uses
+  `$estimates$estimate[1]`, `$n$subjects`, `$n$obs`. The `index` -> `term`
+  sweep reached four vignettes and not this one. README and `@examples` are
+  clean. *Disposition: fix now.*
+- **F4 — the `@return` internal enumeration reads as an allow-list.**
+  `R/icc.R:665-667` lists six internal elements and omits `$engine`,
+  `$k_eff`, `$k_c_eff`, `$boot`, which the object also carries
+  (`R/icc.R:2500-2567`). The sentence says "Everything else in the list is
+  internal", so the list is meant as illustration, but a boundary being frozen
+  at a one-way door should not leave four names readable as public.
+  *Disposition: fix now.*
+- **F5 — `occasions` is a fourth report-all argument that D-035, NEWS and the
+  code comment all omit.** `NEWS.md:365` says the arguments that genuinely
+  take several values are "(`type`, `unit`, `level`)"; the comment at
+  `R/icc.R:2597-2600` says the same. **Reproduced:**
+  `icc(..., occasions = c("single", "average"))` returns 8 rows. A user reading
+  NEWS would conclude that call aborts. *Disposition: fix now* for `NEWS.md`
+  and the code comment; `DECISIONS.md` is append-only, so D-035 takes an
+  annotating entry rather than an edit.
+- **F6 — AC7's structural gap, and `cran-comments.md` lists environments this
+  code has not run on.** The AC7 half is the amendment return recorded above.
+  The second half: `cran-comments.md` "Test environments" lists ubuntu
+  R-devel / R-oldrel-1 and macOS-release, none of which has run against this
+  branch, and nothing anywhere exercises the newly declared `R (>= 4.0.0)`
+  floor — the floor is a dependency-chain inference (which the lens
+  independently re-derived as correct: rlang 1.3.0 `Depends: R (>= 4.0.0)`,
+  every other Import lower). A CRAN reviewer reads that section as where the
+  package was checked. *Disposition: fix now* (state what has run and what is
+  scheduled), coupled to the AC7 amendment.
+- **F7 — `cairn/ROADMAP.md:41` still reasons from the floor this diff
+  retired.** The M104-hardening candidate row calls `identical(cell$arm,
+  "zero-between")` "a factor comparison under the declared `R (>= 3.5)`
+  floor"; at `R >= 4.0.0` `stringsAsFactors` defaults `FALSE`, so `cell$arm`
+  is character and the described failure cannot occur. **Reproduced by grep**;
+  the DESCRIPTION change that retired the premise is in this same diff.
+  *Disposition: fix now* — ROADMAP is current knowledge, corrected in place
+  and marked.
+- **F8 — the record-claims ledger asserts three figures at a citation that
+  now carries one.** `data-raw/record-claims.tsv:5` registers
+  `kappa-worst-steps` with claim text naming -0.046 at 0.90, -0.068 at 0.95
+  and -0.162 at 0.99, scope `cairn/ROADMAP.md`; the compressed row
+  (`cairn/ROADMAP.md:44`) states only the 0.95 figure. **Reproduced by
+  reading both.** `check-record-claims.py` exits 0 because the `presence`
+  kind checks only the `[claim:...]` citation and a green re-derivation, never
+  the ledger text against the record. *Disposition: follow-up* — the checker
+  gap is a guard over the repo's own records, D-021 territory; the row itself
+  is accurate as far as it goes.
+- **F9 — doc prose still describes the pre-rename, conditional-column
+  behaviour.** `R/d-study.R:54,73` (-> `man/d_study.Rd:134,155`) say the
+  result "gains a `level` column" / "gains an `occasions` column";
+  `vignettes/d-studies-and-replicates.Rmd:75` says "adding a `type` column";
+  `man/d_study.Rd:58` still names the object's `index` column, the one
+  surviving `index` on an exported doc page. True of the object, but the same
+  `@return` now points readers at `tidy()`, where nothing is ever gained.
+  *Disposition: fix now.*
+- **F10 — the new columns have no positive test on the shapes that populate
+  them.** `rhat`/`ess_bulk` are pinned only in the all-`NA` non-Bayesian case
+  (`test-exported-contract.R:161-168`); `tidy.icc_dstudy` only where
+  `occasions` and `level` are both `NA` (`:152-155`). Nothing asserts they
+  fill. F1 would have been caught by a nested-replicate case in the `glance`
+  test. *Disposition: fix now* for the `d_study` fill cases and a nested
+  replicate `glance` case (both cheap, no Bayesian engine needed); the
+  populated-`rhat` assertion on a real `brms` fit goes *follow-up*, being a
+  slow Suggests-gated fit.
+- **F11 — `glance()` still cannot disambiguate `var_rater`.** On a
+  `raters = "fixed"` fit `var_rater` holds the finite-population theta^2_r,
+  indistinguishable in the row from a random fit; a one-way and a Design-3 fit
+  both fold rater variance into `var_residual`. So `NEWS.md:353-356`'s "which
+  quantity the residual holds is readable from the row" is true of the
+  replicate axis only. Not a regression; the shipped fix is narrower than the
+  sentence describing it. *Disposition: fix now* — narrow the NEWS sentence.
+- **F12 — minor bag, reported for completeness.** `tidy()$occasions` is `int`
+  on a non-replicate fit and `dbl` on a replicate one (row-binds cleanly;
+  cosmetic). `R/icc.R:2529`'s comment says `posterior_summary` is surfaced in
+  `glance()`; it is not (pre-existing). `R/d-study.R:687-688`'s comment
+  mis-attributes the `$`-warning to data frames rather than tibbles.
+  `inst/WORDLIST` was re-sorted case-insensitively, so the next
+  `update_wordlist()` will produce a whole-file diff. Two `data-raw/reviews/`
+  scripts use 4.1+/4.2 syntax — not shipped (`^data-raw$` is
+  `.Rbuildignore`d) and above the floor anyway. The T3 work-log line's NEWS
+  figures are wrong: it says 796 -> 407 lines; **reproduced**, the real
+  numbers are 770 (`origin/main`) -> 409 at `9b11e9e` -> 429 now, after the
+  T3 follow-up restored the skew-caveat and MPL anchors. `cairn/DESIGN.md:53`
+  says the commitment is "R release, oldrel-1, and devel on
+  macOS/Windows/Ubuntu"; devel and oldrel-1 run on Ubuntu only.
+  *Disposition: fix now* for the comment corrections, the DESIGN.md sentence
+  and a superseding work-log line carrying the true NEWS figures; the
+  `int`/`dbl` nit and the WORDLIST sort order are *rejected as cosmetic*, and
+  the `data-raw/reviews/` syntax note is *rejected as out of scope* (not
+  shipped, and the T2 claim was accurate as scoped).
