@@ -51,9 +51,9 @@ vignettes, `cairn/estimand-specs/`). (Design interview, 2026-07-12.)
   deprecation cycle — the paper's examples must keep running. Submission is the
   one-way door; pre-CRAN cleanups happen before it.
 - **Platforms:** the commitment is exactly the CI matrix — R release, oldrel-1,
-  and devel on macOS/Windows/Ubuntu. The declared `R (>= 3.5)` floor is a known
-  leftover to correct honestly (raise to what the dependency chain requires) at
-  release prep.
+  and devel on macOS/Windows/Ubuntu. The declared floor is `R (>= 4.0.0)`
+  (corrected M48): what the dependency chain requires, rlang being the binding
+  Import.
 - **Engine roster: closed at four.** glmmTMB (frequentist default), lme4
   (frequentist oracle), brms (Bayesian), lavaan (SEM) — each paradigm represented
   once. A new engine must enable an estimand the four can't reach, not just be

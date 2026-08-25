@@ -1,6 +1,6 @@
 Package: intraclass
 Title: Modern Intraclass Correlation Coefficients
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R:
     person("Jeffrey", "Girard", , "jeffgirard@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-7359-3746"))
@@ -51,6 +51,6 @@ Language: en-US
 URL: https://github.com/jmgirard/intraclass, https://jmgirard.github.io/intraclass/
 BugReports: https://github.com/jmgirard/intraclass/issues
 Depends: 
-    R (>= 3.5)
+    R (>= 4.0.0)
 LazyData: true
 Config/roxygen2/version: 8.1.0

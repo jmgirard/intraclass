@@ -84,7 +84,7 @@ gate before stamping, never folded in silently.
       validation of `d_study()`'s `conf_level`/`mc_samples`; `tidy()`'s
       `index` column renamed `term`; `rhat`/`ess_bulk` in `glance.icc()`.
       Each with a test and a NEWS line.
-- [ ] T2: Raise the R floor to `R (>= 4.0.0)` in `DESCRIPTION` (rlang binds
+- [x] T2: Raise the R floor to `R (>= 4.0.0)` in `DESCRIPTION` (rlang binds
       the Imports chain; no 4.1+ syntax in package code).
 - [ ] T3: Stamp `Version: 0.1.0`; consolidate `NEWS.md` — fold the
       "(development version)" entries (M44–M47) into the pending 0.1.0
@@ -123,6 +123,8 @@ gate before stamping, never folded in silently.
 - 2026-08-25: gated amendment — Tasks gain T1b and Coverage's AC1 line gains it, executing the RR04 triage below; no acceptance criterion changed.
 - 2026-08-25: T1 done — the last-call audit ran as RB04/RR04 and its disposition is recorded in the Decisions section below: the surface ships as audited but for seven accepted changes, two of them promoted to D-035.
 - 2026-08-25: T1b done — the seven accepted changes applied across `R/icc.R`, `R/icc-methods.R`, `R/d-study.R`, `R/autoplot.R`, with `tests/testthat/test-exported-contract.R` (32 assertions) pinning both D-035 clauses, the `d_study()` validation, and the `glance()` replicate columns; the `index` -> `term` rename swept 20 test files (188 sites, [S] delegation, diff verified) and four vignettes. `devtools::test()` 0 failures, `air format --check` clean, `devtools::document()` rewrote `man/icc.Rd` and `man/d_study.Rd`.
+- 2026-08-25: T2 done — `Depends: R (>= 4.0.0)` in DESCRIPTION; rlang is the binding Import (its own `Depends` is `R (>= 4.0.0)`, the highest in the chain: glmmTMB 3.6.0, lifecycle/generics 3.6, cli/tibble 3.4). No `|>` or `\(x)` syntax anywhere in `R/`, `tests/`, `vignettes/` or README. DESIGN.md's Platforms bullet corrected in place (it named the 3.5 floor as a leftover to fix here).
+- 2026-08-25: T3 in progress — `Version: 0.1.0` stamped in DESCRIPTION; the NEWS consolidation is not done yet.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
