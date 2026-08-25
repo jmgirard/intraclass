@@ -104,6 +104,15 @@ repaired in place if cheap, else a candidate row.
 - 2026-08-24: approach chosen — a reading pass that repairs what it finds, over a mechanical scope-narrowing predicate. The predicate lost because D-021 bars a new guard over this repo's own doc claims absent a defect in what the package computes, and D-029's M116 precedent is directly on point; the ten-word grep it would generalize is also the net M136's three escapes already defeated. Falsifier: a user reaching a widened claim in shipped v0.1.0 prose, which is the candidate row's own promotion condition and would supersede D-021 for this scope.
 - 2026-08-24: doctrine step 5 rewritten over the class rather than extended by three members — the alternative (adding em dash, parenthesis and frame adverbial to the word list) lost to the standing rule that a counterexample is not answered by a wider enumeration. Falsifier: a fourth escape whose construction the class statement also fails to name.
 
+- 2026-08-24: T1 — domain measured with the three pinned commands: `bb42f8e` 32 hunks, `8aafb0e` 52, `5c274fc` 27; total 111, equal to AC1's figure. The `5c274fc` `R/*.R` side is roxygen-only (the AC2 grep over that commit returns 0 lines), so no code line entered the audited domain. Gate: triage table lives in this work log as one block (option 1 of 3); a repair re-words to the replaced text's scope rather than reverting to its wording, so R1/R2 stay at zero (option 1 of 3).
+
+### Triage table (T1 opens; T3/T4 fill) — 111 hunks
+
+Verdicts: `same` — the added text's claim domain equals the text it replaced; `wider` / `narrower` — it moved, and both texts are quoted in the row.
+
+| # | commit | file | hunk | verdict | note |
+|---|---|---|---|---|---|
+
 ## Decisions
 <!-- owner: implement / review · append-only -->
 
