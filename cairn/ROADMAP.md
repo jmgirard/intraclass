@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-24 (M135 merged and archived; M130's terminal row pruned to hold the 5-row cap. M136's descoped AC3 added as a candidate row, paid for by compressing three rows. `cairn_validate` exit 0. Budgets: ROADMAP 23,991 / 24,000, LESSONS 19,980 / 20,000 and 46 / 50 lines after the M135 ruler lesson was folded into M134's line and the M71 line trimmed to pay for it; `prose-style.md` 119 lines / 6,900 bytes against its stated 120 / 8,000. Doctrine modules otherwise state no byte budget.)_
+_Last hygiene check: 2026-08-24 (M136 merged and archived; M131's terminal row rotated out to hold the 5-row cap. `cairn_validate` exit 0. Budgets: ROADMAP 23,792 / 24,000, LESSONS 19,935 / 20,000 and 46 / 50 lines after M136's check/test concurrency lesson was folded into M107's line, paid for by trimming that line, M80's deferral sentence and M78's retirement note; `prose-style.md` 119 lines / 6,900 bytes against its stated 120 / 8,000. Doctrine modules otherwise state no byte budget.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -12,11 +12,10 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68, M129, M130, M131, M132, M133, M134, M135, M136 | high | milestones/M48-release-v010.md |
 | M134 | Vignette prose pass — the reader path, and the house style standard | done | — | normal | milestones/archive/M134-vignette-prose-reader-path.md |
 | M135 | Vignette prose pass — the method articles | done | M134 | normal | milestones/archive/M135-vignette-prose-method-articles.md |
-| M136 | Roxygen and README prose pass | review | M134 | normal | milestones/M136-roxygen-readme-prose.md |
-| M131 | Say what each documented method returns, and stop shadowing the shipped dataset | done | — | high | milestones/archive/M131-rd-value-and-shadowed-example.md |
+| M136 | Roxygen and README prose pass | done | M134 | normal | milestones/archive/M136-roxygen-readme-prose.md |
 | M132 | Make the two prose-only `icc()` argument values reachable from the docs | done | — | normal | milestones/archive/M132-prose-only-icc-arguments.md |
 | M133 | Tell users which interval method is trustworthy for their design | done | M130 | high | milestones/archive/M133-ci-method-trustworthiness-table.md |
-<!-- terminal-row retention: M135 done (2026-08-24) → M130 rotated out (oldest terminal by merge order, archived 2026-08-22; its archive file still resolves there). Kept: M134, M135, M131, M132, M133 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
+<!-- terminal-row retention: M136 done (2026-08-24) → M131 rotated out (oldest terminal by merge order, PR #140; its archive file still resolves there). Kept: M132, M133, M134, M135, M136 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
