@@ -51,7 +51,7 @@ gate before stamping, never folded in silently.
 - [ ] AC5: full test suite green against the **installed** package with
       `NOT_CRAN=true CI=true` (failed + error sum = 0 — the local-gate
       blind spot).
-- [ ] AC6: `pkgdown::check_pkgdown()` + `pkgdown::build_site()` clean;
+- [x] AC6: `pkgdown::check_pkgdown()` + `pkgdown::build_site()` clean;
       `air format --check` clean; `lintr::lint_package()` clean;
       `urlchecker::url_check()` all-correct.
 - [x] AC7: the release code passes every CI check a pull request can reach.
@@ -298,6 +298,15 @@ the record of what was measured on `9328d85` and is superseded by this one.
   `tests/spelling.R` calls `spell_check_test(error = FALSE,
   skip_on_cran = TRUE)` and the run set `NOT_CRAN=false`, so the test skips
   and could not fail even if it ran. Criterion failure — the return below.
+- **AC6 — verified**, all five checks re-run fresh on this head:
+  `pkgdown::check_pkgdown()` "No problems found"; `pkgdown::build_site()`
+  exit 0, all eight vignettes (`choosing-an-icc`,
+  `comparison-with-other-packages`, `d-studies-and-replicates`, `engines`,
+  `getting-started`, `glossary`, `interval-methods`, `multilevel-designs`)
+  read and rendered, and a sweep of the build log for `Error`, `Warning`, `x`
+  and `Quitting from` returns nothing; `air format --check .` exit 0;
+  `lintr::lint_package()` 0 lints; `urlchecker::url_check()` "All URLs are
+  correct!" over 15 URLs.
 
 ### Acceptance-criterion evidence — first pass (superseded, 2026-08-25, head `9328d85`)
 
