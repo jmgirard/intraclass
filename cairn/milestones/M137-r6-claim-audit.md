@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M137: R6 claim audit over the M134-M136 prose diffs
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -51,9 +51,12 @@ repaired in place if cheap, else a candidate row.
       '^[+-][+-]' | grep -v "^[+-] *#'"` is empty. Every other changed path is
       one of `vignettes/*.Rmd`, `README.Rmd`, `README.md`, `man/*.Rd`,
       `NEWS.md`, `cairn/`, or — where a repair lands inside a verbatim-pinned
-      span — a re-pointed anchor in `tests/testthat/*.R` or `data-raw/*.R`,
-      with no change to any test expectation other than such an anchor.
-- [ ] AC3: For every file this branch touches, `python3
+      span — a re-pointed anchor in `tests/testthat/*.R`, `data-raw/*.R`, or
+      `data-raw/mpl-doc-claims.tsv`, with no change to any test expectation
+      other than such an anchor.
+- [ ] AC3: For every file this branch touches that the house prose standard
+      covers — `vignettes/*.Rmd`, `README.Rmd`, and the roxygen in `R/*.R`, the
+      surfaces `cairn/doctrine/prose-style.md` names — `python3
       data-raw/prose-profile.py` reports zero on R1 and R2 (the two rules that
       script defines), and reports an over-35 sentence only where that sentence
       carries the 58-word clause `residual_template()` pins with `fixed =
@@ -92,7 +95,7 @@ repaired in place if cheap, else a candidate row.
       a span pinned verbatim (`test-doc-skew-caveat.R`,
       `data-raw/m117-width-pin-mutations.R`), re-point the anchor in the same
       commit — M130's lesson: a doc-surface edit re-keys the claim ledgers.
-- [ ] T6: Run AC2's diff command, the ruler (AC3), the installed-package suite
+- [x] T6: Run AC2's diff command, the ruler (AC3), the installed-package suite
       and the `check-references` checkers with `--self-test` (AC4). Add a
       `NEWS.md` entry for any repair a user would notice.
 
@@ -230,6 +233,10 @@ Verdicts: `same` — the added text's claim domain equals the text it replaced; 
 - 2026-08-24: T5 — one repair. `vignettes/interval-methods.Rmd` row 67: the `"mpl"` boundary promise re-bound to the cells where the two-way Monte-Carlo default aborts. `data-raw/mpl-doc-claims.tsv` row `0e83d1125bf2` removed in the same commit (its quote was the widened clause). Also repaired on its own merits, per the Scope's cheap-in-place clause: `R/icc.R` `@param level` described the conflated diagnostic as "agreement-only, complete crossed designs", which `R/estimand.R:87-102` (both `type` forms) and `R/icc.R:1178-1183` ("`type` flows through unfiltered") plus the incomplete-conflated path at `R/icc.R:1486` falsify; now "crossed random-rater designs, balanced or incomplete", matching the Details section. No other claim was found false on its own merits.
 
 - 2026-08-24: T6 (partial) — AC2's R-diff command returns 0 lines. AC4 green: `NOT_CRAN=true CI=true devtools::test()` reports FAIL 0, WARN 2, SKIP 26, PASS 8561; all four `check-references` checkers pass at base and `--self-test`. AC3 on the two repaired files: zero dashes; over-35 sentences 2 in `R/icc.R` and 1 in `vignettes/interval-methods.Rmd`, and a clause match for the pinned 58-word residual clause returns exactly those three plus the one in `vignettes/glossary.Rmd`, so the carrier set is AC3's four. Two criteria enumerations came up short against what the work needed, and the amendment gate is open on both: AC2 admits a re-pointed pin anchor in `data-raw/*.R` but the pin that needed re-pointing is `data-raw/mpl-doc-claims.tsv`; and AC3 binds the ruler to every touched file, which the drafted `NEWS.md` entry cannot meet, that file never having been in the prose standard's surface (90 over-35 sentences, 95 dashes at baseline). NEWS entry drafted in the tree pending that gate.
+
+- 2026-08-24: amendment gate — AC2 amended to name `data-raw/mpl-doc-claims.tsv` among the re-pointable pin anchors (chosen over widening the allowance to the whole folder). AC3 amended to bind the ruler to the surfaces `cairn/doctrine/prose-style.md` itself declares — `vignettes/*.Rmd`, `README.Rmd`, roxygen in `R/*.R` — rather than to every touched file; `NEWS.md` was never in that standard's surface, and the alternative (a full ruler pass over `NEWS.md`) is out of this milestone's scope. Both amendments narrow or correct an enumeration rather than promising anything new. The fresh-context [O] read of the amended wording was skipped at the user's selection: this session was started under an instruction not to spawn subagents unless asked. `/milestone-review` still reads the criteria fresh.
+
+- 2026-08-24: T6 — re-verified after the amendments. AC2 R-diff 0 lines; changed paths are `R/icc.R` (roxygen only), `man/icc.Rd`, `vignettes/interval-methods.Rmd`, `NEWS.md`, `data-raw/mpl-doc-claims.tsv`, `cairn/`. Ruler over the standard's surfaces: `R/icc.R` 0 dashes / 2 over-35, `vignettes/*.Rmd` 0 / 2, `README.Rmd` 0 / 0 — the four over-35 sentences are the clause carriers. `devtools::document()` leaves no diff. `NEWS.md` gains one Documentation bullet naming both corrections. Plan-owned body 101 lines. Status to review.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
