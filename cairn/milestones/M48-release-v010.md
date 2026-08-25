@@ -35,23 +35,23 @@ gate before stamping, never folded in silently.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: API last-call disposition is recorded in the work log (audit of
+- [x] AC1: API last-call disposition is recorded in the work log (audit of
       exports, argument names/order, defaults, return shapes); no exported-
       surface change ships after it without a gate amendment. (RB tripwire:
       irreversible-api)
-- [ ] AC2: `DESCRIPTION` has `Version: 0.1.0` and `R (>= 4.0.0)`; `NEWS.md`
+- [x] AC2: `DESCRIPTION` has `Version: 0.1.0` and `R (>= 4.0.0)`; `NEWS.md`
       opens with a single consolidated `# intraclass 0.1.0` changelog (no
       "(development version)" heading; M44's default-shape change framed as
       part of the initial release per ADR-055).
-- [ ] AC3: `cran-comments.md` names the actual check environments used and
+- [x] AC3: `cran-comments.md` names the actual check environments used and
       justifies every remaining NOTE; `inst/WORDLIST`/spelling clean.
-- [ ] AC4: fresh `devtools::check(args = "--as-cran", env_vars =
+- [x] AC4: fresh `devtools::check(args = "--as-cran", env_vars =
       c(NOT_CRAN = "false"), manual = TRUE)` → 0 errors / 0 warnings / only
       NOTEs justified in AC3 (TinyTeX courier installed for the PDF manual).
 - [ ] AC5: full test suite green against the **installed** package with
       `NOT_CRAN=true CI=true` (failed + error sum = 0 — the local-gate
       blind spot).
-- [ ] AC6: `pkgdown::check_pkgdown()` + `pkgdown::build_site()` clean;
+- [x] AC6: `pkgdown::check_pkgdown()` + `pkgdown::build_site()` clean;
       `air format --check` clean; `lintr::lint_package()` clean;
       `urlchecker::url_check()` all-correct.
 - [ ] AC7: full CI matrix green on the PR head (R-devel setup flake → re-run
@@ -134,6 +134,7 @@ gate before stamping, never folded in silently.
 - 2026-08-25: T1b follow-up — the `index` -> `term` rename also reached `data-raw/`: the `checkpoint-guard` CI job runs `m120-checkpoint-guard-demo.R`, whose sweep harness read `tidy()$index`, and it reddened on the first PR head. 12 sites across 10 scripts ([S] delegation, diff verified; `$estimates$index` reaches left alone); the demo passes locally and the job is green on the second head.
 - 2026-08-25: T6 done — PR #147 opened; every check on the head is green: `ubuntu-latest (release)` 22m17s, `windows-latest (release)` 25m35s, `test-coverage` 37m34s, `codecov/patch`, `codecov/project`, `checkpoint-guard`, `lint`, `format-check`, `check-references`, `pkgdown`. **Note for the review gate on AC7:** `check-standard.yaml`'s matrix is conditional — the five-cell set (macOS release, Windows release, ubuntu devel/release/oldrel-1) runs on `push` to the default branch only, and a `pull_request` event gets the two-cell set that ran here. The full matrix therefore runs on the merge commit, before any submission, and cannot be run on a PR head as the workflow now stands.
 - 2026-08-25: all tasks checked; status in-progress -> review by /milestone-implement.
+- 2026-08-25: review checkpoint (mid-phase) by /milestone-review — AC1-AC4 and AC6 verified with fresh evidence and ticked; AC5 (installed-package suite) still running; AC7's disposition open, the criterion asking for a matrix the workflow cannot run on a PR head since M77. Consistency gate green. Two of three review lenses returned, no actionable findings.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
@@ -166,3 +167,37 @@ gate before stamping, never folded in silently.
 
 ## Review
 <!-- owner: review · exclusive -->
+
+### Acceptance-criterion evidence (fresh, 2026-08-25)
+
+- **AC1 — verified.** The last-call disposition is recorded in the work log
+  (2026-08-25, T1) and carried in full by the Decisions section above: the
+  surface ships as audited but for seven accepted RR04 changes, one deferral to
+  a ROADMAP candidate row, and five logged rejections. No exported-surface
+  change shipped after the audit outside a gate: `git log --stat
+  origin/main..HEAD` shows `R/` touched by exactly one commit, `4ba59ad`
+  (T1b), which the 2026-08-25 gated-amendment work-log line authorises;
+  `NAMESPACE` is byte-identical to `origin/main`.
+- **AC2 — verified.** `DESCRIPTION` line 3 `Version: 0.1.0`, lines 53-54
+  `Depends: R (>= 4.0.0)`. `grep '^# ' NEWS.md` returns exactly one heading,
+  `# intraclass 0.1.0`; a case-insensitive sweep for "development version"
+  returns 0 hits.
+- **AC3 — verified.** `cran-comments.md` names the environment the fresh AC4
+  run actually used (R 4.6.1, aarch64-apple-darwin23, `NOT_CRAN=false`,
+  `manual = TRUE`, 2026-08-25) and the 0/0/0 result; with no NOTE there is
+  nothing left to justify, and the file says so. `spelling::spell_check_package()`
+  re-run fresh: no spelling errors found. One qualification, raised as finding
+  R1 below rather than held against the tick: the file's "Test environments"
+  block also lists the GitHub Actions five-config matrix, which the workflow
+  runs only on push to the default branch and which has therefore not yet run
+  against this code.
+- **AC4 — verified.** `devtools::check(args = "--as-cran", env_vars =
+  c(NOT_CRAN = "false"), manual = TRUE)` re-run fresh on this head: R 4.6.1,
+  platform aarch64-apple-darwin23, `--as-cran` confirmed in the check banner.
+  **Status: OK — 0 errors | 0 warnings | 0 notes**, duration 2m 9.7s; PDF and
+  HTML manuals both built OK.
+- **AC6 — verified**, all five checks re-run fresh on this head:
+  `pkgdown::check_pkgdown()` "No problems found"; `pkgdown::build_site()`
+  exit 0, all eight vignettes read and rendered, no error or warning in the
+  log; `air format --check .` exit 0; `lintr::lint_package()` 0 lints;
+  `urlchecker::url_check()` "All URLs are correct!" over 15 URLs.
