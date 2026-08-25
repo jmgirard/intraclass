@@ -35,17 +35,17 @@ gate before stamping, never folded in silently.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: API last-call disposition is recorded in the work log (audit of
+- [x] AC1: API last-call disposition is recorded in the work log (audit of
       exports, argument names/order, defaults, return shapes); no exported-
       surface change ships after it without a gate amendment. (RB tripwire:
       irreversible-api)
-- [ ] AC2: `DESCRIPTION` has `Version: 0.1.0` and `R (>= 4.0.0)`; `NEWS.md`
+- [x] AC2: `DESCRIPTION` has `Version: 0.1.0` and `R (>= 4.0.0)`; `NEWS.md`
       opens with a single consolidated `# intraclass 0.1.0` changelog (no
       "(development version)" heading; M44's default-shape change framed as
       part of the initial release per ADR-055).
 - [ ] AC3: `cran-comments.md` names the actual check environments used and
       justifies every remaining NOTE; `inst/WORDLIST`/spelling clean.
-- [ ] AC4: fresh `devtools::check(args = "--as-cran", env_vars =
+- [x] AC4: fresh `devtools::check(args = "--as-cran", env_vars =
       c(NOT_CRAN = "false"), manual = TRUE)` → 0 errors / 0 warnings / only
       NOTEs justified in AC3 (TinyTeX courier installed for the PDF manual).
 - [ ] AC5: full test suite green against the **installed** package with
@@ -54,7 +54,7 @@ gate before stamping, never folded in silently.
 - [ ] AC6: `pkgdown::check_pkgdown()` + `pkgdown::build_site()` clean;
       `air format --check` clean; `lintr::lint_package()` clean;
       `urlchecker::url_check()` all-correct.
-- [ ] AC7: the release code passes every CI check a pull request can reach.
+- [x] AC7: the release code passes every CI check a pull request can reach.
       Evidence: `gh pr checks <head SHA>` at a named head SHA, every reported
       check in the `pass` bucket — none `fail`, `pending`, `skipping` or
       `cancel` — with the reported list quoted in the Review section and
@@ -192,6 +192,7 @@ gate before stamping, never folded in silently.
 - 2026-08-25: T12 done — AC7 amended through the gate above; local verify on the repair head `d447172`: `devtools::document()` leaves a clean tree, `air format --check` exit 0, `lintr::lint_package()` 0 lints, `devtools::test()` FAIL 0 | WARN 3 | SKIP 2 | PASS 8857, and `test-exported-contract.R` 44 assertions passing under `devtools::test(filter = "exported-contract")`. The heavier gate items (`--as-cran`, the installed-package suite, `pkgdown::build_site()`, `urlchecker`) are review's fresh evidence, not re-run here.
 - 2026-08-25: AC1-AC6 unticked — their evidence was gathered on `9328d85` and the repair round moved the head to `d447172`, so under AC fencing they are unverified until re-review records fresh evidence. The superseded evidence stays in the Review section as the record of the first pass.
 - 2026-08-25: all tasks checked; status in-progress -> review by /milestone-implement (second pass).
+- 2026-08-25: review checkpoint (mid-phase, second pass) by /milestone-review — fresh evidence on head `4a1ce09` recorded and ticked for AC1, AC2, AC4, AC7; **AC3 fails** (`spelling::spell_check_package()` returns `disambiguates`, `NEWS.md:358`, absent from `inst/WORDLIST`; introduced by the repair commit `d447172`). AC5 (installed-package suite) and AC6's `pkgdown::build_site()` still running; consistency gate green (`cairn_validate` exit 0). Two of three review lenses returned with zero findings. Status change deferred until the remaining evidence lands so one return names every failure.
 ## Decisions
 <!-- owner: implement / review · append-only -->
 
@@ -224,7 +225,81 @@ gate before stamping, never folded in silently.
 ## Review
 <!-- owner: review · exclusive -->
 
-### Acceptance-criterion evidence (fresh, 2026-08-25)
+### Acceptance-criterion evidence — second pass (fresh, 2026-08-25, head `4a1ce09`)
+
+Gathered on the repair head after T7-T12; the first-pass block below is kept as
+the record of what was measured on `9328d85` and is superseded by this one.
+
+- **AC1 — verified.** The last-call disposition is recorded in the work log
+  (2026-08-25, T1) and carried in full by the Decisions section above: the
+  surface ships as audited but for seven accepted RR04 changes, one deferral to
+  a ROADMAP candidate row, and five logged rejections. `git log --oneline
+  origin/main..HEAD -- R/ NAMESPACE` returns exactly two commits: `4ba59ad`
+  (T1b), authorised by the 2026-08-25 gated-amendment work-log line, and
+  `d447172` (T7-T11), authorised by the 2026-08-25 review-triage gate at which
+  the maintainer chose to fix every fix-now finding. `git diff
+  origin/main..HEAD -- NAMESPACE` is empty: no export added, removed or
+  renamed.
+- **AC2 — verified.** `DESCRIPTION:3` `Version: 0.1.0`; `DESCRIPTION:53-54`
+  `Depends:` / `R (>= 4.0.0)`. `grep '^# ' NEWS.md` returns exactly one
+  heading, `# intraclass 0.1.0`; a case-insensitive sweep for "development
+  version" returns 0 hits.
+- **AC7 — verified.** PR #147's head is `4a1ce09879767642fcdc4d8636253cf323bfd257`
+  (`gh pr view 147 --json headRefOid`), identical to local `HEAD`. `gh` 2.98
+  does not resolve a bare SHA, so the report was taken as `gh pr checks
+  m048-release-v010` and cross-checked against the check runs GitHub attaches
+  to that SHA (`gh api repos/jmgirard/intraclass/commits/4a1ce09.../check-runs`);
+  the two lists agree exactly. Ten checks reported, **all `pass`** — none
+  `fail`, `pending`, `skipping` or `cancel`:
+
+      check-references          pass  24s
+      checkpoint-guard          pass  1m24s
+      codecov/patch             pass  0
+      codecov/project           pass  0
+      format-check              pass  8s
+      lint                      pass  2m8s
+      pkgdown                   pass  2m52s
+      test-coverage             pass  20m58s
+      ubuntu-latest (release)   pass  24m30s
+      windows-latest (release)  pass  20m13s
+
+  Compared against `.github/workflows/`: five of the six workflows declare a
+  `pull_request` trigger, and every job each of them defines appears above —
+  `check-standard.yaml` (the `R-CMD-check` matrix, two cells on a PR event:
+  `ubuntu-latest (release)`, `windows-latest (release)`), `format.yaml`
+  (`format-check`), `lint.yaml` (`lint`, `check-references`,
+  `checkpoint-guard`), `pkgdown.yaml` (`pkgdown`), `test-coverage.yaml`
+  (`test-coverage`, whose Codecov app adds `codecov/patch` and
+  `codecov/project`). The sixth, `reference-values.yaml`, declares only
+  `schedule` and `workflow_dispatch`, so it owes no check run. No workflow
+  declaring the trigger is absent from the report, so nothing counts as
+  unrun. No check was red and no re-run was performed in this pass.
+- **AC4 — verified.** `devtools::check(args = "--as-cran", env_vars =
+  c(NOT_CRAN = "false"), manual = TRUE)` re-run fresh on head `4a1ce09`:
+  R 4.6.1 (2026-06-24), platform aarch64-apple-darwin23, macOS Tahoe 26.6.2,
+  `--as-cran` confirmed in the check banner, package version read back as
+  `0.1.0`. **Status: OK — 0 errors | 0 warnings | 0 notes**, duration
+  36m 25.5s. PDF and HTML versions of the manual both OK, so the TinyTeX
+  courier path the criterion names is exercised. With no NOTE there is nothing
+  for AC3 to justify.
+- **AC3 — NOT verified; the spelling half fails on this head.**
+  `cran-comments.md` satisfies the first half: it names the environment the
+  fresh AC4 run actually used (R 4.6.1, aarch64-apple-darwin23,
+  `NOT_CRAN=false`, `manual = TRUE`, 2026-08-25) and its 0/0/0 result, and its
+  "Test environments" block now separates what has been checked from what is
+  scheduled before submission (the T10 repair of first-pass F6); with no NOTE
+  there is nothing left to justify. The second half fails:
+  `spelling::spell_check_package()` re-run fresh returns one word,
+  `disambiguates` at `NEWS.md:358`, which is not in `inst/WORDLIST` (94
+  entries). `git log -S` places it in the repair commit `d447172` (T9's
+  narrowing of the `glance()` NEWS bullet); `origin/main`'s `NEWS.md` contains
+  no form of the word, and the first pass measured spelling clean on `9328d85`
+  before it existed. The AC4 `--as-cran` run does not cover this:
+  `tests/spelling.R` calls `spell_check_test(error = FALSE,
+  skip_on_cran = TRUE)` and the run set `NOT_CRAN=false`, so the test skips
+  and could not fail even if it ran. Criterion failure — the return below.
+
+### Acceptance-criterion evidence — first pass (superseded, 2026-08-25, head `9328d85`)
 
 - **AC1 — verified.** The last-call disposition is recorded in the work log
   (2026-08-25, T1) and carried in full by the Decisions section above: the
