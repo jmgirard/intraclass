@@ -3,12 +3,12 @@
      Per-section owners are tagged below. -->
 # M137: R6 claim audit over the M134-M136 prose diffs
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP1, GP8   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m137-r6-claim-audit` · https://github.com/jmgirard/intraclass/pull/146   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -35,7 +35,7 @@ repaired in place if cheap, else a candidate row.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: Each hunk in the enumerated domain has its added text compared
+- [x] AC1: Each hunk in the enumerated domain has its added text compared
       against the text it replaced, and every discrepancy that comparison
       records — a claim whose domain widened or narrowed — is repaired in the
       shipped prose. The domain is what these three commands report (111 hunks,
@@ -46,21 +46,24 @@ repaired in place if cheap, else a candidate row.
       domain and that its findings are repaired. It does **not** promise that
       no widened claim remains: M136 recorded three closures each defeated by
       a fresh shape, so that promise is unavailable to a reading pass.
-- [ ] AC2: No repair changes what the package computes or reports.
+- [x] AC2: No repair changes what the package computes or reports.
       `git diff --merge-base main -- 'R/*.R' | grep '^[+-]' | grep -v
       '^[+-][+-]' | grep -v "^[+-] *#'"` is empty. Every other changed path is
       one of `vignettes/*.Rmd`, `README.Rmd`, `README.md`, `man/*.Rd`,
       `NEWS.md`, `cairn/`, or — where a repair lands inside a verbatim-pinned
-      span — a re-pointed anchor in `tests/testthat/*.R` or `data-raw/*.R`,
-      with no change to any test expectation other than such an anchor.
-- [ ] AC3: For every file this branch touches, `python3
+      span — a re-pointed anchor in `tests/testthat/*.R`, `data-raw/*.R`, or
+      `data-raw/mpl-doc-claims.tsv`, with no change to any test expectation
+      other than such an anchor.
+- [x] AC3: For every file this branch touches that the house prose standard
+      covers — `vignettes/*.Rmd`, `README.Rmd`, and the roxygen in `R/*.R`, the
+      surfaces `cairn/doctrine/prose-style.md` names — `python3
       data-raw/prose-profile.py` reports zero on R1 and R2 (the two rules that
       script defines), and reports an over-35 sentence only where that sentence
       carries the 58-word clause `residual_template()` pins with `fixed =
       TRUE` — the carrier set derived by matching that clause, never stated as
       a count (four at 2026-08-24: two in `R/icc.R`, one in
       `vignettes/glossary.Rmd`, one in `vignettes/interval-methods.Rmd`).
-- [ ] AC4: The installed-package suite at `NOT_CRAN=true CI=true` is green
+- [x] AC4: The installed-package suite at `NOT_CRAN=true CI=true` is green
       (failed + error sum 0), and every checker the `check-references` job runs
       (`.github/workflows/lint.yaml`) passes with `--self-test`.
 
@@ -75,24 +78,24 @@ repaired in place if cheap, else a candidate row.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Run the three pinned `git diff` commands; record the per-merge hunk
+- [x] T1: Run the three pinned `git diff` commands; record the per-merge hunk
       count and confirm the total against AC1's 111. Open the triage table in
       this file's Work log / Review sections — one row per hunk, keyed by
       commit + file + hunk header. No `data-raw/` ledger: a standing table over
       the repo's own prose is apparatus, and the triage is milestone evidence.
-- [ ] T2: Rewrite `cairn/doctrine/prose-style.md` step 5's selection rule from
+- [x] T2: Rewrite `cairn/doctrine/prose-style.md` step 5's selection rule from
       the ten scope words to the class they stood in for — any construction
       carrying a claim's scope that a sentence split can drop. Compress
       elsewhere in the module to stay inside its stated 120-line / 8,000-byte
       budget (119 / 6,900 at 2026-08-24) and report the post-edit figures.
-- [ ] T3: Triage the 84 vignette hunks from M134 and M135. Per hunk: a verdict,
+- [x] T3: Triage the 84 vignette hunks from M134 and M135. Per hunk: a verdict,
       and where the verdict is a discrepancy, both texts quoted.
-- [ ] T4: Triage the 27 roxygen and README hunks from M136, same form.
-- [ ] T5: Repair every discrepancy T3/T4 recorded. Where a repair falls inside
+- [x] T4: Triage the 27 roxygen and README hunks from M136, same form.
+- [x] T5: Repair every discrepancy T3/T4 recorded. Where a repair falls inside
       a span pinned verbatim (`test-doc-skew-caveat.R`,
       `data-raw/m117-width-pin-mutations.R`), re-point the anchor in the same
       commit — M130's lesson: a doc-surface edit re-keys the claim ledgers.
-- [ ] T6: Run AC2's diff command, the ruler (AC3), the installed-package suite
+- [x] T6: Run AC2's diff command, the ruler (AC3), the installed-package suite
       and the `check-references` checkers with `--self-test` (AC4). Add a
       `NEWS.md` entry for any repair a user would notice.
 
@@ -104,8 +107,280 @@ repaired in place if cheap, else a candidate row.
 - 2026-08-24: approach chosen — a reading pass that repairs what it finds, over a mechanical scope-narrowing predicate. The predicate lost because D-021 bars a new guard over this repo's own doc claims absent a defect in what the package computes, and D-029's M116 precedent is directly on point; the ten-word grep it would generalize is also the net M136's three escapes already defeated. Falsifier: a user reaching a widened claim in shipped v0.1.0 prose, which is the candidate row's own promotion condition and would supersede D-021 for this scope.
 - 2026-08-24: doctrine step 5 rewritten over the class rather than extended by three members — the alternative (adding em dash, parenthesis and frame adverbial to the word list) lost to the standing rule that a counterexample is not answered by a wider enumeration. Falsifier: a fourth escape whose construction the class statement also fails to name.
 
+- 2026-08-24: T1 — domain measured with the three pinned commands: `bb42f8e` 32 hunks, `8aafb0e` 52, `5c274fc` 27; total 111, equal to AC1's figure. The `5c274fc` `R/*.R` side is roxygen-only (the AC2 grep over that commit returns 0 lines), so no code line entered the audited domain. Gate: triage table lives in this work log as one block (option 1 of 3); a repair re-words to the replaced text's scope rather than reverting to its wording, so R1/R2 stay at zero (option 1 of 3).
+
+- 2026-08-24: T2 — `prose-style.md` step 5 rewritten to select every hunk and to name the scope-carrying class (quantifier/absolute, restrictive clause, dash- or parenthesis-set appositive, frame adverbial, conditional, hedge) rather than ten words; R1's proper-noun rationale, the gating paragraph and the R6 paragraph compressed to pay for it. Post-edit: 118 lines / 6,921 bytes against the module's < 120 / < 8,000 budget.
+
+### Triage table (T1 opens; T3/T4 fill) — 111 hunks
+
+Verdicts: `same` — the added text's claim domain equals the text it replaced; `wider` / `narrower` — it moved, and both texts are quoted in the row.
+
+| # | commit | file | hunk | verdict | note |
+|---|---|---|---|---|---|
+| 1 | `bb42f8e` | `vignettes/choosing-an-icc.Rmd` | `@@ -18,21 +18,20 @@` | `same` |  |
+| 2 | `bb42f8e` | `vignettes/choosing-an-icc.Rmd` | `@@ -42,7 +41,7 @@` | `same` |  |
+| 3 | `bb42f8e` | `vignettes/choosing-an-icc.Rmd` | `@@ -54,9 +53,10 @@` | `same` | conditional split; `Those raters` binds the antecedent, so the one-way frame survives. |
+| 4 | `bb42f8e` | `vignettes/choosing-an-icc.Rmd` | `@@ -69,14 +69,14 @@` | `same` |  |
+| 5 | `bb42f8e` | `vignettes/choosing-an-icc.Rmd` | `@@ -93,7 +93,7 @@` | `same` |  |
+| 6 | `bb42f8e` | `vignettes/choosing-an-icc.Rmd` | `@@ -113,14 +113,14 @@` | `same` |  |
+| 7 | `bb42f8e` | `vignettes/choosing-an-icc.Rmd` | `@@ -132,24 +132,25 @@` | `same` |  |
+| 8 | `bb42f8e` | `vignettes/choosing-an-icc.Rmd` | `@@ -162,7 +163,7 @@` | `same` |  |
+| 9 | `bb42f8e` | `vignettes/choosing-an-icc.Rmd` | `@@ -209,19 +210,20 @@` | `same` |  |
+| 10 | `bb42f8e` | `vignettes/choosing-an-icc.Rmd` | `@@ -252,23 +254,23 @@` | `same` |  |
+| 11 | `bb42f8e` | `vignettes/getting-started.Rmd` | `@@ -17,8 +17,8 @@` | `same` |  |
+| 12 | `bb42f8e` | `vignettes/getting-started.Rmd` | `@@ -27,25 +27,25 @@` | `same` |  |
+| 13 | `bb42f8e` | `vignettes/getting-started.Rmd` | `@@ -54,12 +54,12 @@` | `same` |  |
+| 14 | `bb42f8e` | `vignettes/getting-started.Rmd` | `@@ -80,7 +80,7 @@` | `same` |  |
+| 15 | `bb42f8e` | `vignettes/getting-started.Rmd` | `@@ -89,10 +89,10 @@` | `same` |  |
+| 16 | `bb42f8e` | `vignettes/getting-started.Rmd` | `@@ -101,7 +101,7 @@` | `same` |  |
+| 17 | `bb42f8e` | `vignettes/getting-started.Rmd` | `@@ -112,9 +112,9 @@` | `same` |  |
+| 18 | `bb42f8e` | `vignettes/getting-started.Rmd` | `@@ -130,14 +130,14 @@` | `same` |  |
+| 19 | `bb42f8e` | `vignettes/getting-started.Rmd` | `@@ -146,20 +146,19 @@` | `same` | `icc()` simulates -> `the default interval does not rely on`; the topic sentence already scoped to the reported default, so no move. |
+| 20 | `bb42f8e` | `vignettes/getting-started.Rmd` | `@@ -171,18 +170,18 @@` | `same` | `these choices` -> `Several choices`; the same five follow as questions, and neither wording claims exclusivity. |
+| 21 | `bb42f8e` | `vignettes/glossary.Rmd` | `@@ -12,43 +12,46 @@` | `same` |  |
+| 22 | `bb42f8e` | `vignettes/glossary.Rmd` | `@@ -56,7 +59,7 @@` | `same` |  |
+| 23 | `bb42f8e` | `vignettes/glossary.Rmd` | `@@ -66,19 +69,20 @@` | `same` |  |
+| 24 | `bb42f8e` | `vignettes/glossary.Rmd` | `@@ -86,13 +90,13 @@` | `same` |  |
+| 25 | `bb42f8e` | `vignettes/glossary.Rmd` | `@@ -111,10 +115,10 @@` | `same` |  |
+| 26 | `bb42f8e` | `vignettes/glossary.Rmd` | `@@ -128,13 +132,13 @@` | `same` |  |
+| 27 | `bb42f8e` | `vignettes/glossary.Rmd` | `@@ -144,25 +148,26 @@` | `same` |  |
+| 28 | `bb42f8e` | `vignettes/glossary.Rmd` | `@@ -183,17 +188,18 @@` | `same` |  |
+| 29 | `bb42f8e` | `vignettes/glossary.Rmd` | `@@ -206,7 +212,7 @@` | `same` |  |
+| 30 | `bb42f8e` | `vignettes/glossary.Rmd` | `@@ -230,7 +236,7 @@` | `same` |  |
+| 31 | `bb42f8e` | `vignettes/glossary.Rmd` | `@@ -238,20 +244,20 @@` | `same` |  |
+| 32 | `bb42f8e` | `vignettes/glossary.Rmd` | `@@ -259,37 +265,38 @@` | `same` |  |
+| 33 | `8aafb0e` | `vignettes/comparison-with-other-packages.Rmd` | `@@ -24,7 +24,7 @@` | `same` |  |
+| 34 | `8aafb0e` | `vignettes/comparison-with-other-packages.Rmd` | `@@ -43,10 +43,10 @@` | `same` |  |
+| 35 | `8aafb0e` | `vignettes/comparison-with-other-packages.Rmd` | `@@ -90,15 +90,15 @@` | `same` |  |
+| 36 | `8aafb0e` | `vignettes/comparison-with-other-packages.Rmd` | `@@ -126,8 +126,8 @@` | `same` |  |
+| 37 | `8aafb0e` | `vignettes/comparison-with-other-packages.Rmd` | `@@ -163,58 +163,58 @@` | `same` | capability-matrix cells `—` -> `no`; same negative in a yes/partial/no column. Boundary-aware sentence reordered, `none of the classical tools provide` intact. |
+| 38 | `8aafb0e` | `vignettes/d-studies-and-replicates.Rmd` | `@@ -15,12 +15,13 @@` | `same` |  |
+| 39 | `8aafb0e` | `vignettes/d-studies-and-replicates.Rmd` | `@@ -34,7 +35,7 @@` | `same` |  |
+| 40 | `8aafb0e` | `vignettes/d-studies-and-replicates.Rmd` | `@@ -42,16 +43,16 @@` | `same` |  |
+| 41 | `8aafb0e` | `vignettes/d-studies-and-replicates.Rmd` | `@@ -63,7 +64,7 @@` | `same` |  |
+| 42 | `8aafb0e` | `vignettes/d-studies-and-replicates.Rmd` | `@@ -71,11 +72,11 @@` | `same` |  |
+| 43 | `8aafb0e` | `vignettes/d-studies-and-replicates.Rmd` | `@@ -83,7 +84,7 @@` | `same` |  |
+| 44 | `8aafb0e` | `vignettes/d-studies-and-replicates.Rmd` | `@@ -95,9 +96,9 @@` | `same` |  |
+| 45 | `8aafb0e` | `vignettes/d-studies-and-replicates.Rmd` | `@@ -107,18 +108,17 @@` | `same` |  |
+| 46 | `8aafb0e` | `vignettes/d-studies-and-replicates.Rmd` | `@@ -127,17 +127,17 @@` | `same` |  |
+| 47 | `8aafb0e` | `vignettes/d-studies-and-replicates.Rmd` | `@@ -147,11 +147,12 @@` | `same` |  |
+| 48 | `8aafb0e` | `vignettes/d-studies-and-replicates.Rmd` | `@@ -173,25 +174,26 @@` | `same` |  |
+| 49 | `8aafb0e` | `vignettes/d-studies-and-replicates.Rmd` | `@@ -199,18 +201,19 @@` | `same` |  |
+| 50 | `8aafb0e` | `vignettes/d-studies-and-replicates.Rmd` | `@@ -219,7 +222,7 @@` | `same` |  |
+| 51 | `8aafb0e` | `vignettes/d-studies-and-replicates.Rmd` | `@@ -228,14 +231,14 @@` | `same` |  |
+| 52 | `8aafb0e` | `vignettes/engines.Rmd` | `@@ -15,32 +15,33 @@` | `same` |  |
+| 53 | `8aafb0e` | `vignettes/engines.Rmd` | `@@ -53,20 +54,20 @@` | `same` |  |
+| 54 | `8aafb0e` | `vignettes/engines.Rmd` | `@@ -92,51 +93,52 @@` | `same` | multilevel-SEM restriction moved out of the parenthesis into the next sentence (`That route takes random raters on complete, balanced data with equal cluster sizes`); bound preserved, not dropped. |
+| 55 | `8aafb0e` | `vignettes/engines.Rmd` | `@@ -160,20 +162,20 @@` | `same` |  |
+| 56 | `8aafb0e` | `vignettes/engines.Rmd` | `@@ -192,8 +194,8 @@` | `same` |  |
+| 57 | `8aafb0e` | `vignettes/interval-methods.Rmd` | `@@ -15,16 +15,16 @@` | `same` |  |
+| 58 | `8aafb0e` | `vignettes/interval-methods.Rmd` | `@@ -37,9 +37,9 @@` | `same` |  |
+| 59 | `8aafb0e` | `vignettes/interval-methods.Rmd` | `@@ -57,17 +57,17 @@` | `same` |  |
+| 60 | `8aafb0e` | `vignettes/interval-methods.Rmd` | `@@ -77,21 +77,21 @@` | `same` |  |
+| 61 | `8aafb0e` | `vignettes/interval-methods.Rmd` | `@@ -101,25 +101,25 @@` | `same` |  |
+| 62 | `8aafb0e` | `vignettes/interval-methods.Rmd` | `@@ -127,26 +127,26 @@` | `same` |  |
+| 63 | `8aafb0e` | `vignettes/interval-methods.Rmd` | `@@ -157,10 +157,10 @@` | `same` |  |
+| 64 | `8aafb0e` | `vignettes/interval-methods.Rmd` | `@@ -177,41 +177,43 @@` | `same` | densest hunk; the added `On the larger grid,` makes an implicit frame explicit. Every figure and fence carried. |
+| 65 | `8aafb0e` | `vignettes/interval-methods.Rmd` | `@@ -220,13 +222,13 @@` | `same` |  |
+| 66 | `8aafb0e` | `vignettes/interval-methods.Rmd` | `@@ -258,12 +260,12 @@` | `same` |  |
+| 67 | `8aafb0e` | `vignettes/interval-methods.Rmd` | `@@ -271,22 +273,22 @@` | `wider` | **wider.** Replaced: "Like `"npbootstrap"`, it returns an interval at the near-zero-ICC boundary where the two-way Monte-Carlo default aborts". Added: "Unlike the two-way Monte-Carlo default, it does not abort at the near-zero-ICC boundary: like `"npbootstrap"`, it returns an interval there." The replaced text bound the promise to the cells where the default aborts; the added text promises the method does not abort at that boundary at all. D-019 records two abort paths there (a degenerate fit, a crossing-indicated root-finding failure), and `R/icc.R`'s own `"mpl"` block still carries the bounded wording. Repaired in T5. |
+| 68 | `8aafb0e` | `vignettes/interval-methods.Rmd` | `@@ -314,23 +316,23 @@` | `same` |  |
+| 69 | `8aafb0e` | `vignettes/interval-methods.Rmd` | `@@ -349,18 +351,18 @@` | `same` |  |
+| 70 | `8aafb0e` | `vignettes/interval-methods.Rmd` | `@@ -382,7 +384,7 @@` | `same` |  |
+| 71 | `8aafb0e` | `vignettes/multilevel-designs.Rmd` | `@@ -17,9 +17,9 @@` | `same` |  |
+| 72 | `8aafb0e` | `vignettes/multilevel-designs.Rmd` | `@@ -72,8 +72,8 @@` | `same` |  |
+| 73 | `8aafb0e` | `vignettes/multilevel-designs.Rmd` | `@@ -81,9 +81,9 @@` | `same` |  |
+| 74 | `8aafb0e` | `vignettes/multilevel-designs.Rmd` | `@@ -97,29 +97,30 @@` | `same` |  |
+| 75 | `8aafb0e` | `vignettes/multilevel-designs.Rmd` | `@@ -144,7 +145,7 @@` | `same` |  |
+| 76 | `8aafb0e` | `vignettes/multilevel-designs.Rmd` | `@@ -156,8 +157,8 @@` | `same` |  |
+| 77 | `8aafb0e` | `vignettes/multilevel-designs.Rmd` | `@@ -168,8 +169,8 @@` | `same` |  |
+| 78 | `8aafb0e` | `vignettes/multilevel-designs.Rmd` | `@@ -182,19 +183,19 @@` | `same` |  |
+| 79 | `8aafb0e` | `vignettes/multilevel-designs.Rmd` | `@@ -213,8 +214,8 @@` | `same` |  |
+| 80 | `8aafb0e` | `vignettes/multilevel-designs.Rmd` | `@@ -229,9 +230,9 @@` | `same` |  |
+| 81 | `8aafb0e` | `vignettes/multilevel-designs.Rmd` | `@@ -243,21 +244,22 @@` | `same` |  |
+| 82 | `8aafb0e` | `vignettes/multilevel-designs.Rmd` | `@@ -271,29 +273,29 @@` | `same` |  |
+| 83 | `8aafb0e` | `vignettes/multilevel-designs.Rmd` | `@@ -312,17 +314,17 @@` | `same` |  |
+| 84 | `8aafb0e` | `vignettes/multilevel-designs.Rmd` | `@@ -332,8 +334,8 @@` | `same` |  |
+| 85 | `5c274fc` | `R/abort.R` | `@@ -13,7 +13,7 @@` | `same` |  |
+| 86 | `5c274fc` | `R/abort.R` | `@@ -63,12 +63,12 @@` | `same` |  |
+| 87 | `5c274fc` | `R/abort.R` | `@@ -89,7 +89,7 @@` | `same` |  |
+| 88 | `5c274fc` | `R/abort.R` | `@@ -117,10 +117,10 @@` | `same` |  |
+| 89 | `5c274fc` | `R/abort.R` | `@@ -146,7 +146,7 @@` | `same` |  |
+| 90 | `5c274fc` | `R/choose-icc.R` | `@@ -22,28 +22,28 @@` | `same` |  |
+| 91 | `5c274fc` | `R/d-study.R` | `@@ -19,45 +19,49 @@` | `same` | `On that same data` added at the split, keeping the incomplete-data frame on the cluster-level clause. |
+| 92 | `5c274fc` | `R/d-study.R` | `@@ -71,67 +75,69 @@` | `same` |  |
+| 93 | `5c274fc` | `R/data.R` | `@@ -32,24 +32,24 @@` | `same` |  |
+| 94 | `5c274fc` | `R/icc.R` | `@@ -3,9 +3,9 @@` | `same` |  |
+| 95 | `5c274fc` | `R/icc.R` | `@@ -15,28 +15,29 @@` | `same` |  |
+| 96 | `5c274fc` | `R/icc.R` | `@@ -55,95 +56,107 @@` | `same` |  |
+| 97 | `5c274fc` | `R/icc.R` | `@@ -153,29 +166,29 @@` | `same` |  |
+| 98 | `5c274fc` | `R/icc.R` | `@@ -183,40 +196,44 @@` | `same` | `@param design` gains a second override occasion (ambiguous labels). Not a scope move on an existing claim: the added occasion is separately true and is what the Multilevel section and the multilevel article already state. |
+| 99 | `5c274fc` | `R/icc.R` | `@@ -227,172 +244,191 @@` | `same` |  |
+| 100 | `5c274fc` | `R/icc.R` | `@@ -403,85 +439,88 @@` | `same` |  |
+| 101 | `5c274fc` | `R/icc.R` | `@@ -492,87 +531,88 @@` | `same` |  |
+| 102 | `5c274fc` | `R/icc.R` | `@@ -580,20 +620,22 @@` | `same` |  |
+| 103 | `5c274fc` | `R/icc.R` | `@@ -602,9 +644,10 @@` | `same` |  |
+| 104 | `5c274fc` | `R/icc.R` | `@@ -616,12 +659,12 @@` | `same` |  |
+| 105 | `5c274fc` | `R/icc.R` | `@@ -629,8 +672,8 @@` | `same` |  |
+| 106 | `5c274fc` | `README.Rmd` | `@@ -26,20 +26,22 @@` | `same` | `each with boundary-aware Monte-Carlo intervals` -> `Everything just listed comes with`; ranges over the same three sentences. |
+| 107 | `5c274fc` | `README.Rmd` | `@@ -58,20 +60,20 @@` | `same` |  |
+| 108 | `5c274fc` | `README.Rmd` | `@@ -88,20 +90,21 @@` | `same` |  |
+| 109 | `5c274fc` | `README.Rmd` | `@@ -122,7 +125,7 @@` | `same` |  |
+| 110 | `5c274fc` | `README.Rmd` | `@@ -131,14 +134,14 @@` | `same` |  |
+| 111 | `5c274fc` | `README.Rmd` | `@@ -146,6 +149,6 @@` | `same` | table cell `—` -> `(this package)`; the `fills that gap` sentence that carried the no-comparable-package reading is unchanged. |
+
+- 2026-08-24: T3/T4 — all 111 hunks compared against the text they replaced; table above. 110 `same`, 1 `wider`. Ten borderline comparisons carry a note naming why the verdict is `same`, the recurring shape being a restriction moved out of a dash pair or parenthesis into an adjacent sentence with an explicit frame (`On that same data`, `That route takes`, `In that design`).
+- 2026-08-24: T5 — one repair. `vignettes/interval-methods.Rmd` row 67: the `"mpl"` boundary promise re-bound to the cells where the two-way Monte-Carlo default aborts. `data-raw/mpl-doc-claims.tsv` row `0e83d1125bf2` removed in the same commit (its quote was the widened clause). Also repaired on its own merits, per the Scope's cheap-in-place clause: `R/icc.R` `@param level` described the conflated diagnostic as "agreement-only, complete crossed designs", which `R/estimand.R:87-102` (both `type` forms) and `R/icc.R:1178-1183` ("`type` flows through unfiltered") plus the incomplete-conflated path at `R/icc.R:1486` falsify; now "crossed random-rater designs, balanced or incomplete", matching the Details section. No other claim was found false on its own merits.
+
+- 2026-08-24: T6 (partial) — AC2's R-diff command returns 0 lines. AC4 green: `NOT_CRAN=true CI=true devtools::test()` reports FAIL 0, WARN 2, SKIP 26, PASS 8561; all four `check-references` checkers pass at base and `--self-test`. AC3 on the two repaired files: zero dashes; over-35 sentences 2 in `R/icc.R` and 1 in `vignettes/interval-methods.Rmd`, and a clause match for the pinned 58-word residual clause returns exactly those three plus the one in `vignettes/glossary.Rmd`, so the carrier set is AC3's four. Two criteria enumerations came up short against what the work needed, and the amendment gate is open on both: AC2 admits a re-pointed pin anchor in `data-raw/*.R` but the pin that needed re-pointing is `data-raw/mpl-doc-claims.tsv`; and AC3 binds the ruler to every touched file, which the drafted `NEWS.md` entry cannot meet, that file never having been in the prose standard's surface (90 over-35 sentences, 95 dashes at baseline). NEWS entry drafted in the tree pending that gate.
+
+- 2026-08-24: amendment gate — AC2 amended to name `data-raw/mpl-doc-claims.tsv` among the re-pointable pin anchors (chosen over widening the allowance to the whole folder). AC3 amended to bind the ruler to the surfaces `cairn/doctrine/prose-style.md` itself declares — `vignettes/*.Rmd`, `README.Rmd`, roxygen in `R/*.R` — rather than to every touched file; `NEWS.md` was never in that standard's surface, and the alternative (a full ruler pass over `NEWS.md`) is out of this milestone's scope. Both amendments narrow or correct an enumeration rather than promising anything new. The fresh-context [O] read of the amended wording was skipped at the user's selection: this session was started under an instruction not to spawn subagents unless asked. `/milestone-review` still reads the criteria fresh.
+
+- 2026-08-24: T6 — re-verified after the amendments. AC2 R-diff 0 lines; changed paths are `R/icc.R` (roxygen only), `man/icc.Rd`, `vignettes/interval-methods.Rmd`, `NEWS.md`, `data-raw/mpl-doc-claims.tsv`, `cairn/`. Ruler over the standard's surfaces: `R/icc.R` 0 dashes / 2 over-35, `vignettes/*.Rmd` 0 / 2, `README.Rmd` 0 / 0 — the four over-35 sentences are the clause carriers. `devtools::document()` leaves no diff. `NEWS.md` gains one Documentation bullet naming both corrections. Plan-owned body 101 lines. Status to review.
+
 ## Decisions
 <!-- owner: implement / review · append-only -->
 
+- 2026-08-24 (T5): the `"mpl"` boundary sentence in `vignettes/interval-methods.Rmd`
+  is repaired by restoring the replaced text's scope in new wording, not by
+  reverting: the pre-M135 sentence carried a semicolon splice the pass removed.
+  The repair also drops the `data-raw/mpl-doc-claims.tsv` row keyed on the
+  widened clause. That row existed only because M135's wording created a
+  trigger-carrying sentence; the restored wording enumerates as no candidate
+  (`check-mpl-doc-claims.py` reports 60 candidates, 0 failures), so the row is
+  removed rather than re-keyed.
+
 ## Review
 <!-- owner: review · exclusive -->
+
+### Acceptance-criterion evidence (fresh, 2026-08-24)
+
+- **AC1 — pass.** The three pinned commands re-run at review report 32
+  (`bb42f8e`), 52 (`8aafb0e`) and 27 (`5c274fc`) hunks: 111, equal to the
+  criterion's figure. The triage table above carries a verdict for each of the
+  111 — 110 `same`, 1 `wider` (row 67). That discrepancy is repaired in the
+  shipped prose: `vignettes/interval-methods.Rmd` now reads "Like
+  `"npbootstrap"`, it returns an interval at the near-zero-ICC boundary where
+  the two-way Monte-Carlo default aborts", restoring the replaced text's scope.
+- **AC2 — pass.** `git diff --merge-base main -- 'R/*.R' | grep '^[+-]' | grep
+  -v '^[+-][+-]' | grep -v "^[+-] *#'"` returns 0 lines. The eight changed
+  paths are `NEWS.md`, `R/icc.R` (roxygen only), `cairn/ROADMAP.md`,
+  `cairn/doctrine/prose-style.md`, `cairn/milestones/M137-r6-claim-audit.md`,
+  `data-raw/mpl-doc-claims.tsv`, `man/icc.Rd`, `vignettes/interval-methods.Rmd`
+  — each admitted by the criterion's enumeration. Nothing under
+  `tests/testthat/` changed, so no test expectation moved.
+- **AC3 — pass.** The two touched files the house standard covers profile at
+  R1 dash-as-punctuation 0 / 0. Over-35 sentences: `R/icc.R` 2,
+  `vignettes/interval-methods.Rmd` 1. Re-deriving the carrier set by matching
+  the 58-word clause through the ruler's own segmentation returns exactly four
+  sentences across the whole standard surface — two in `R/icc.R`, one in
+  `vignettes/glossary.Rmd`, one in `vignettes/interval-methods.Rmd` — and every
+  over-35 sentence on the surface is one of them.
+- **AC4 — pass.** `NOT_CRAN=true CI=true devtools::test()`: FAIL 0, WARN 2,
+  SKIP 26, PASS 8561 (failed + error sum 0). All four `check-references`
+  checkers exit 0 at base and at `--self-test`:
+  `check-reference-observations.py` (0 falsified),
+  `enumerate-generalizing-claims.py --check`, `check-mpl-doc-claims.py` (60
+  candidates, 12 settled, 0 failures), `check-record-claims.py` (6 claims
+  re-derived, 0 failures).
+
+### Consistency gate
+
+- Universal: `cairn_validate.py` exit 0, all checks passed (115 advisory
+  warnings, all the `work-log format` advisory over the triage table's rows).
+  Coverage completeness passes. No `DESIGN.md` principle changed, so
+  `cairn_impact.py` does not apply.
+- Toolchain (`r-package` profile): `devtools::document()` leaves no diff;
+  `NAMESPACE`/`man/` regenerate; `README.Rmd`/`README.md` untouched and in
+  sync; `pkgdown::check_pkgdown()` reports no problems; `NEWS.md` gains one
+  Documentation bullet naming both corrections; no new top-level files.
+  `devtools::check()`: 0 errors, 0 warnings, 1 NOTE — the `checking tests`
+  elapsed-time note (21m wall / 13m CPU on the 8561-assertion suite), a runtime
+  figure this docs-only branch does not touch.
+
+### Work log (review phase)
+
+- 2026-08-24: review opened. `main` unmoved since the branch was cut (0 behind,
+  6 ahead), tree clean, no merge needed. Branch pushed; draft PR #146 opened.
+  AC1-AC4 executed with fresh evidence and ticked; consistency gate clean.
+  PR CI green on format-check, check-references, checkpoint-guard, lint,
+  pkgdown, test-coverage and ubuntu-latest (release); windows-latest pending.
+  Local `devtools::check()` and the three fresh-context reviewers still
+  running.
+
+### Independent review (three fresh-context reviewers, 2026-08-24)
+
+Full three-lens fan-out (user-facing tier), spawned at the user's selection —
+this session carried a standing instruction not to spawn subagents unasked.
+[S] prior-review lens: no findings; the repo has no inline PR review comments
+at all (`pulls/comments` probe returns empty), and the archived `## Review`
+record shows this diff applying the M130 ledger lesson and the M136 word-list
+lesson rather than regressing either. [S] blame-history lens: no findings; it
+independently reached row 67's `wider` verdict and traced the `@param level`
+wording to M17/ADR-026, superseded by ADR-056 (both `type` forms) and ADR-028
+(incomplete data). [O] diff-bug lens: ten findings, below.
+
+Findings and dispositions, as the reviewer ranked them:
+
+1. **NEWS bullet framing false for one of its two claims** — the bullet opened
+   "corrected against the text they replaced", but `git show 5c274fc^:R/icc.R`
+   line 239 already carried "agreement-only, complete crossed designs", so that
+   repair was own-merits, not a comparison finding. Verified. **Fixed now:**
+   the opening clause dropped.
+2. **`vignettes/engines.Rmd:118` false on its own merits** — "That route takes
+   random raters on complete, balanced data with equal cluster sizes" against
+   `R/icc.R:299-306` and `R/engine-lavaan.R:341`, which give the random-rater
+   two-level fit incomplete and unbalanced data too (the complete/balanced/equal
+   restriction is the *fixed*-rater path). Verified. The pre-M135 text carried
+   the same restriction, so row 54's `same` verdict stands and this is the
+   Scope's own-merits clause, not an AC1 failure. **Fixed now** in place, being
+   one sentence.
+3. **Row 37's `same` on the capability matrix disputed** — eleven `—` cells
+   became `no`. **Rejected:** in a column whose vocabulary is ✅/partial, `—`
+   already reads as the negative, the reviewer grants the claims are true, and
+   the verdict is a defensible judgment call, not a domain move.
+4. **The doctrine's own R6 paragraph widened while being compressed** — "each
+   is an *opportunity to* promise more than the original did" became "each
+   promises more than the original did". Verified, and the rule it states
+   forbids exactly that. **Fixed now:** the hedge restored; 118 lines / 6,941
+   bytes, still inside the module's 120 / 8,000 budget.
+5. **The new `@param level` gloss does not exclude within-cell replicates**
+   (`R/icc.R:1403-1407`) or state the rater-bridging requirement
+   (`R/icc.R:1571`). **Rejected:** the gloss is a pointer that matches the
+   Details section (`R/icc.R:68-69`) verbatim in scope and says "See the
+   *Multilevel designs* section"; the prior wording named neither limit either.
+6. **Triage row 98's note belongs to row 99** — the `@param design` change is in
+   hunk `@@ -227,172 +244,191 @@`, not `@@ -183,40 +196,44 @@`. Verified.
+   Both hunks are `same`, so no verdict moves; the work log is append-only, so
+   this line supersedes the note's placement rather than editing the table.
+7. **Ledger row `0e83d1125bf2` dropped rather than re-keyed. Rejected:** the
+   reviewer grants it defensible and the checker is green at base and
+   `--self-test`; the row's quoted clause no longer exists in the prose.
+8. **Row 64's "every figure and fence carried" generous. Rejected:** the
+   reviewer grants `same` still defensible.
+9. **`vignettes/interval-methods.Rmd:119` "When it aborts, its message names an
+   alternative method" is unqualified** — `R/icc.R:371` says "Where no method
+   serves that data it names none", and ledger row `ecff0cc82845` settles that
+   qualifier. Verified. The line is unmodified by the pass, so outside AC1's
+   comparison, but it sits in the audited domain and the Scope's own-merits
+   clause reaches it. **Fixed now** in place, being one clause: "names an
+   alternative method **where one serves your data**". No candidate row is
+   owed; the sweep found none covering it.
+10. **Orphan short roxygen line inherited by `man/icc.Rd`. Fixed now** —
+    rewrapped alongside finding 1; rendering was unaffected either way.
+
+No finding demonstrates an acceptance criterion failing inside its named
+procedure's domain, and none shows a criterion itself wrong, so neither the
+return floor nor an amendment return fires.
+
+### Re-verification after the fix-now repairs
+
+`NOT_CRAN=true CI=true devtools::test()`: FAIL 0, WARN 2, SKIP 26, PASS 8561,
+re-run after each of the two repair commits.
+All four `check-references` checkers exit 0 at base and `--self-test`.
+`devtools::document()` regenerates `man/icc.Rd` with no further diff. AC2's
+R-diff still 0 lines; `vignettes/engines.Rmd` joins the changed paths, admitted
+by AC2's `vignettes/*.Rmd` member. Ruler over the whole standard surface: 0
+dashes, 4 over-35, and the clause match returns those same 4 — AC3 holds.
+Finding 9's repair leaves the ruler unchanged (0 dashes, 4 over-35, all
+carriers) and all four checkers green at base and `--self-test`.

@@ -254,8 +254,8 @@
 #'   report: `"subject"` (within-cluster, distinguishing subjects) and/or
 #'   `"cluster"` (between-cluster, distinguishing cluster means). Defaults to both.
 #'   `"conflated"` may be added for the biased ignore-the-clustering ICC as a
-#'   diagnostic contrast (agreement-only, complete crossed designs). See the
-#'   *Multilevel designs* section. Ignored (and must be left at its default) when
+#'   diagnostic contrast (crossed random-rater designs, balanced or
+#'   incomplete). See the *Multilevel designs* section. Ignored (and must be left at its default) when
 #'   `cluster` is not supplied. Only `"subject"` is available when raters are nested
 #'   in clusters.
 #' @param design Multilevel design (with a `cluster` column). `NULL` (the

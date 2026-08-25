@@ -339,6 +339,14 @@
 
 ## Documentation
 
+* Two documentation claims have been corrected. The *Interval methods* article had come to say that the modified
+  profile-likelihood interval does not abort at the near-zero boundary. What it
+  offers there is an interval on the cells where the Monte-Carlo default aborts;
+  a degenerate fit or a failed root search still raises a classed error, as
+  `?icc` says. Separately, `?icc`'s `level` argument described the conflated
+  diagnostic as agreement-only and complete-data-only. It ships in both `type`
+  forms and on incomplete data, as the *Multilevel designs* section describes.
+
 * The *Getting started*, *Choosing an ICC*, and *Glossary* articles have been
   rewritten for readability: long sentences split, and dashes standing in for a
   colon or a full stop replaced. Nothing about what the package computes or
