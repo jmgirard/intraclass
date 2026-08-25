@@ -48,7 +48,7 @@ gate before stamping, never folded in silently.
 - [x] AC4: fresh `devtools::check(args = "--as-cran", env_vars =
       c(NOT_CRAN = "false"), manual = TRUE)` → 0 errors / 0 warnings / only
       NOTEs justified in AC3 (TinyTeX courier installed for the PDF manual).
-- [ ] AC5: full test suite green against the **installed** package with
+- [x] AC5: full test suite green against the **installed** package with
       `NOT_CRAN=true CI=true` (failed + error sum = 0 — the local-gate
       blind spot).
 - [x] AC6: `pkgdown::check_pkgdown()` + `pkgdown::build_site()` clean;
@@ -307,6 +307,18 @@ the record of what was measured on `9328d85` and is superseded by this one.
   and `Quitting from` returns nothing; `air format --check .` exit 0;
   `lintr::lint_package()` 0 lints; `urlchecker::url_check()` "All URLs are
   correct!" over 15 URLs.
+- **AC5 — verified.** `R CMD INSTALL --preclean .` of this head ("DONE
+  (intraclass)", exit 0), then `NOT_CRAN=true CI=true Rscript -e
+  'library(testthat); library(intraclass); test_check("intraclass")'` from
+  `tests/` against the **installed** package (R 4.6.1,
+  aarch64-apple-darwin23): **`[ FAIL 0 | WARN 2 | SKIP 26 | PASS 8586 ]`**,
+  process exit 0 — failed + error sum = 0, the criterion's bar. PASS rose
+  8574 -> 8586 against the first pass, the twelve added assertions being
+  T7/T11's regression and fill-case tests. The two warnings are the same
+  expected boundary/connectedness signals the first pass recorded, from
+  `test-icc-lavaan-multilevel.R:402` (a between-level Heywood fit, negative
+  latent variance, asserted to abort toward glmmTMB) and
+  `test-icc-type-vector.R:286`; the criterion does not bar them.
 
 ### Acceptance-criterion evidence — first pass (superseded, 2026-08-25, head `9328d85`)
 
