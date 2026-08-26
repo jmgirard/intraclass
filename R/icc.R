@@ -675,12 +675,16 @@
 #'     column is present on every fit; `occasions` is `NA` unless the design
 #'     has within-cell replicates.
 #'   * `glance.icc()`: a one-row tibble of model-level summaries:
-#'     the sample sizes, the design flags, the effective rater counts, the
+#'     the sample sizes, the design flags -- among them the rater treatment
+#'     `raters` (`NA` on a one-way fit, whose raters are interchangeable and
+#'     carry no facet) and `replicates`, whether the design holds more than one
+#'     rating per subject-by-rater cell -- the effective rater counts, the
 #'     variance components, the occasion count `n_o` (`NA` unless the design
 #'     has within-cell replicates *and* defines one occasion count per cell --
 #'     ragged replicates leave it `NA`), the engine and interval settings, and
 #'     the sampler diagnostics `rhat` and `ess_bulk` (`NA` for the
-#'     non-Bayesian engines, which do not sample).
+#'     non-Bayesian engines, which do not sample). Every column is present on
+#'     every fit, so two glanced fits row-bind just as two tidied ones do.
 #'   * `format.icc()`: a character vector holding the printed report, one line per
 #'     element.
 #'   * `print.icc()`: the `icc` object invisibly, having emitted that report.

@@ -355,11 +355,16 @@ alternate engines, and seeded simulations.
   interaction term is named, and `n_o` gives the occasion count it was split at.
   `var_subject_rater` is `NA` without within-cell replicates, and `n_o` is `NA` there
   too and on ragged replicates, where cells hold different numbers of ratings and no
-  single count applies. This disambiguates the replicate split only — the row does not
-  say whether `var_rater` is a random-rater variance or a fixed-rater finite-population
-  term, nor whether a one-way fit has folded rater variance into `var_residual`.
+  single count applies. Two design columns say how to read the variance columns beside
+  them: `raters` gives the rater treatment the fit used, so `var_rater` can be told
+  apart as a random-rater variance or a fixed-rater finite-population term, and is `NA`
+  on a one-way fit, whose interchangeable raters have no facet and whose rater variance
+  is folded into `var_residual`; `replicates` says whether the design holds more than
+  one rating per subject-by-rater cell, which `n_o` alone cannot, being `NA` on a ragged
+  replicate design as well as on an unreplicated one.
   `glance()` also reports the sampler diagnostics `rhat` and `ess_bulk`, `NA` for the
-  engines that do not sample.
+  engines that do not sample. Every column is present on every fit, so two glanced fits
+  row-bind exactly as two tidied ones do.
 * `?icc` states which parts of the returned object are safe to depend on: the documented
   methods, plus `$fit` and `$call`. The rest of the list is internal and may change
   without a deprecation cycle.

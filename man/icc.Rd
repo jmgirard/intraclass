@@ -480,12 +480,16 @@ glossary), \code{occasions}, \code{type}, \code{level}, \code{sf_index}, \code{e
 column is present on every fit; \code{occasions} is \code{NA} unless the design
 has within-cell replicates.
 \item \code{glance.icc()}: a one-row tibble of model-level summaries:
-the sample sizes, the design flags, the effective rater counts, the
+the sample sizes, the design flags -- among them the rater treatment
+\code{raters} (\code{NA} on a one-way fit, whose raters are interchangeable and
+carry no facet) and \code{replicates}, whether the design holds more than one
+rating per subject-by-rater cell -- the effective rater counts, the
 variance components, the occasion count \code{n_o} (\code{NA} unless the design
 has within-cell replicates \emph{and} defines one occasion count per cell --
 ragged replicates leave it \code{NA}), the engine and interval settings, and
 the sampler diagnostics \code{rhat} and \code{ess_bulk} (\code{NA} for the
-non-Bayesian engines, which do not sample).
+non-Bayesian engines, which do not sample). Every column is present on
+every fit, so two glanced fits row-bind just as two tidied ones do.
 \item \code{format.icc()}: a character vector holding the printed report, one line per
 element.
 \item \code{print.icc()}: the \code{icc} object invisibly, having emitted that report.

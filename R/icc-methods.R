@@ -382,6 +382,17 @@ glance.icc <- function(x, ...) {
     n_obs = x$n$obs,
     n_cells = x$n$cells,
     balanced = x$design$balanced,
+    # How the raters were treated, and whether the design has more than one
+    # rating per subject x rater cell. `raters` is NA on a one-way fit, whose
+    # raters are interchangeable and carry no facet; `replicates` is reported in
+    # its own right because `n_o` beside it is also NA on a ragged replicate
+    # design, so replicate status is not recoverable from that column (M138).
+    raters = if (identical(x$design$model, "oneway")) {
+      NA_character_
+    } else {
+      x$design$raters
+    },
+    replicates = isTRUE(x$design$replicates),
     multilevel = isTRUE(x$design$multilevel),
     ml_design = if (isTRUE(x$design$multilevel)) {
       x$design$ml_design
