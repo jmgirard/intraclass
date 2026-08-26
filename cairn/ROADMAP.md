@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-26 (M138-M140 planned: the release-remainder row's eight shipped-surface items and the R-floor row absorbed, the row reduced to M48's AC7 wording defect; M48 done and archived; M133 rotated out; `n_o` and prose-apparatus rows compressed for budget. LESSONS: one line added, M80's retired into M86's, four compressed. `cairn_validate` and the six `data-raw/` checkers pass.)_
+_Last hygiene check: 2026-08-26 (M138 done and archived; M134 rotated out of the terminal rows, with `record-claims.tsv`'s `roadmap-terminal-rows` expectation rotated with it. LESSONS: one line added on `rbind()`'s silent integer/double coercion; the M107, M117, M129 and M130 lines compressed to hold the byte budget. `cairn_validate`, the six `data-raw/` checkers and their four self-tests pass; ROADMAP 57 lines / 23,698 bytes, LESSONS 47 / 19,978, `prose-style.md` 118 / 6,941 against its stated 120 / 8,000.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,15 +9,14 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M138 | Exported-schema remainder — `glance()` gains a rater accessor before the one-way door closes | review | — | high | milestones/M138-glance-schema-remainder.md |
 | M139 | The declared R floor is a measured number CI runs (GP3) | planned | — | high | milestones/M139-r-floor-ci-tested.md |
 | M140 | Release-remainder documentation corrections, and the recorded pre-submission check | planned | M138, M139 | high | milestones/M140-release-remainder-docs.md |
-| M134 | Vignette prose pass — the reader path, and the house style standard | done | — | normal | milestones/archive/M134-vignette-prose-reader-path.md |
 | M135 | Vignette prose pass — the method articles | done | M134 | normal | milestones/archive/M135-vignette-prose-method-articles.md |
 | M136 | Roxygen and README prose pass | done | M134 | normal | milestones/archive/M136-roxygen-readme-prose.md |
 | M137 | R6 claim audit over the M134-M136 prose diffs | done | — | high | milestones/archive/M137-r6-claim-audit.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | done | M49-M55, M61, M68, M129-M137 | high | milestones/archive/M48-release-v010.md |
-<!-- terminal-row retention: M48 done (2026-08-26) → M133 rotated out (oldest terminal by merge order, PR #142; its archive file still resolves there). Kept: M134, M135, M136, M137, M48 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
+| M138 | Exported-schema remainder — `glance()` gains a rater accessor before the one-way door closes | done | — | high | milestones/archive/M138-glance-schema-remainder.md |
+<!-- terminal-row retention: M138 done (2026-08-26) → M134 rotated out (oldest terminal by merge order, PR #143; its archive file still resolves there). Kept: M135, M136, M137, M48, M138 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
