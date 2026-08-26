@@ -118,8 +118,8 @@
 #'   projected point and columns `m`, `index` (e.g. `"ICC(A,3)"`), `type`,
 #'   `estimate`, `std.error`, `conf.low`, and `conf.high`, carrying the design and
 #'   interval settings as attributes. `tidy()` names that coefficient column
-#'   `term`, following the broom glossary; the object and the printed report
-#'   both keep `index`. If the fitted `icc` reports both error
+#'   `term`, following the broom glossary; the object keeps `index`. If the
+#'   fitted `icc` reports both error
 #'   definitions (the default), `d_study()` projects **one reliability curve per
 #'   definition**, distinguished by the `type` column. A single-type fit projects
 #'   a single curve. A multilevel projection fills the `level` column (one curve

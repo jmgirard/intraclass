@@ -58,8 +58,8 @@ or the seed.}
 projected point and columns \code{m}, \code{index} (e.g. \code{"ICC(A,3)"}), \code{type},
 \code{estimate}, \code{std.error}, \code{conf.low}, and \code{conf.high}, carrying the design and
 interval settings as attributes. \code{tidy()} names that coefficient column
-\code{term}, following the broom glossary; the object and the printed report
-both keep \code{index}. If the fitted \code{icc} reports both error
+\code{term}, following the broom glossary; the object keeps \code{index}. If the
+fitted \code{icc} reports both error
 definitions (the default), \code{d_study()} projects \strong{one reliability curve per
 definition}, distinguished by the \code{type} column. A single-type fit projects
 a single curve. A multilevel projection fills the \code{level} column (one curve

@@ -110,7 +110,7 @@ below, so the descriptions here are compressed to their subject (weight cap).
 - [x] T13: AC3 repair — `disambiguates` into `inst/WORDLIST` so
       `spelling::spell_check_package()` is clean, plus a ROADMAP candidate row
       recording that `tests/spelling.R` cannot red on an unlisted word.
-- [ ] T14: Review G2 — drop the false `index` claim from `d_study()`'s
+- [x] T14: Review G2 — drop the false `index` claim from `d_study()`'s
       `@return` (`man/d_study.Rd:62`): the printed D-study report has no
       `index` column; the carve-out is true of `print.icc()` only.
 - [ ] T15: Review G3 — `choose_icc()`'s choice arguments now abort on a
@@ -179,6 +179,8 @@ below, so the descriptions here are compressed to their subject (weight cap).
 - 2026-08-25: minor amendment — Tasks gain T13-T17, carrying the second-pass return (AC3) and the four fix-now findings G2, G3, G6, G7. No acceptance criterion, Goal or Scope text changed; every task sits under an existing criterion (T13 -> AC3, T14-T16 -> AC1's record half and AC6, T17 -> AC4/AC5/AC6).
 
 - 2026-08-25: T13 done — AC3's spelling half repaired: `disambiguates` added to `inst/WORDLIST` (94 -> 95 entries, in case-insensitive sort position), and `spelling::spell_check_package()` re-run returns no errors. The guard gap the maintainer chose not to close in this round is a new ROADMAP candidate row (search-first swept `ROADMAP.md`, `DESIGN.md` and `DECISIONS.md` for `spell_check_test`/`WORDLIST`; nothing existing covered it). That row plus the two G4/G5 rows had put `ROADMAP.md` at 25,340 bytes against the < 24,000 budget, which `origin/main` held at 23,988: the rulebook's compress-widest-rows-first remedy was applied to 15 rows by deleting restatable detail rather than rewording it, and the two M133 rows — the trustworthiness table and the guard that would make it safe, the second of which opens "the guard making the row above safe" — were clustered into one, holding the 60-line cap against the added row. `ROADMAP.md` is now 23,973 bytes / 59 lines. Compressing the Tasks section (79 -> 43 lines; T1-T12 are done and their outcomes are recorded in full in this log) cleared the milestone file's 150-line plan-owned cap, which the T13-T17 addition had broken at 161. `cairn_validate` now fails no check; the five record checkers and `air format --check` all exit 0.
+
+- 2026-08-25: T14 done — the false `index` claim is off `d_study()`'s `@return` (`R/d-study.R:121` -> `man/d_study.Rd:61`), which now says only that the object keeps `index`. Confirmed by running it before editing: `print(d_study(icc(ratings, score, subject, rater), m = 2:3))` emits `type`, `m`, `estimate`, `95% CI` and no `index`, matching `format.icc_dstudy()`'s header assembly; the carve-out the first-pass [S] lens verified is `print.icc()`'s (`R/icc-methods.R:151`), which does emit one. A repo-wide sweep for "printed report" finds no other copy of the claim. `devtools::document()` leaves a clean tree, `air format --check` exit 0, `devtools::test(filter = "d-study|exported-contract")` FAIL 0 | PASS 206.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
