@@ -428,6 +428,22 @@ test_that("glance.icc carries `raters` and `replicates`, one name set per design
     )
   )
 
+  # `replicates` reports the FITTED design's split, not the data layout: a
+  # one-way fit ignores rater identity, so it has no cells to split and reads
+  # FALSE even on data holding two ratings in every subject x rater cell.
+  ow_rep <- icc(
+    replicate_frame(),
+    score,
+    subject,
+    rater,
+    model = "oneway",
+    seed = 1
+  )
+  expect_false(glance(ow_rep)$replicates)
+  expect_true(
+    glance(icc(replicate_frame(), score, subject, rater, seed = 1))$replicates
+  )
+
   # One name set across every design family, so any two rows bind.
   for (g in gls) {
     expect_setequal(names(g), names(gls[[1]]))

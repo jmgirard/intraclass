@@ -385,8 +385,9 @@ glance.icc <- function(x, ...) {
     n_obs = x$n$obs,
     n_cells = x$n$cells,
     balanced = x$design$balanced,
-    # How the raters were treated, and whether the design has more than one
-    # rating per subject x rater cell. `raters` is NA on a one-way fit, whose
+    # How the raters were treated, and whether the fitted design splits
+    # within-cell replicates -- FALSE on a one-way fit, which has no rater facet
+    # and so no cells to split. `raters` is NA on a one-way fit, whose
     # raters are interchangeable and carry no facet; `replicates` is reported in
     # its own right because `n_o` beside it is also NA on a ragged replicate
     # design, so replicate status is not recoverable from that column (M138).

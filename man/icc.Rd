@@ -471,8 +471,9 @@ in any release without a deprecation cycle. That is the whole rule --
 into any other one is reading an implementation detail. \code{tidy()} and
 \code{glance()} are the stable tables, not a re-export of the list: they report
 the estimated coefficients and the model-level summaries, column by column
-as documented below. Anything in the object that neither one gives a column
-is exactly what this rule calls internal.
+as documented below. Those two tables, plus \verb{$fit} and \verb{$call}, are the
+whole supported surface; everything else the list holds falls under the
+rule above, whether or not a table happens to report it.
 
 The methods documented on this page return:
 \itemize{
@@ -485,8 +486,9 @@ has within-cell replicates.
 \item \code{glance.icc()}: a one-row tibble of model-level summaries:
 the sample sizes, the design flags -- among them the rater treatment
 \code{raters} (\code{NA} on a one-way fit, whose raters are interchangeable and
-carry no facet) and \code{replicates}, whether the design holds more than one
-rating per subject-by-rater cell -- the effective rater counts, the
+carry no facet) and \code{replicates}, whether the fitted design splits
+within-cell replicates -- \code{FALSE} on a one-way fit, which has no rater
+facet and so no cells to split -- the effective rater counts, the
 variance components, the occasion count \code{n_o} (\code{NA} unless the design
 has within-cell replicates \emph{and} defines one occasion count per cell --
 ragged replicates leave it \code{NA}), the engine and interval settings, and

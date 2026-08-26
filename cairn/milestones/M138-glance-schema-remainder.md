@@ -71,6 +71,7 @@ Land the three exported-schema corrections descoped from M48 while GP2's one-way
 - 2026-08-26: T7 — D-038 appended. `air format .` clean; the six `data-raw/` checkers pass (the four Python ones under `--self-test`, each reporting every mutation red on a green baseline); `cairn_validate` passes, its single advisory being M139's release window, not this milestone. First `devtools::check()` came back `Status: 1 NOTE` on an unlisted NEWS word; reworded rather than extending the wordlist, and the re-run reports `Status: OK`. Final `devtools::test()` at `NOT_CRAN=true CI=true`: FAIL 0, WARN 2 (both pre-existing), SKIP 26, PASS 8624.
 - 2026-08-26: all tasks done; status to review.
 - 2026-08-26: review — six criteria verified with fresh evidence; `devtools::check()` `Status: OK` (0/0/0), `devtools::test()` FAIL 0 / PASS 8624; `cairn_validate` and the `r-package` consistency-gate slot clean; three fresh-context lenses ran, two reporting nothing and the [O] lens returning nine findings, none reaching the return floor.
+- 2026-08-26: review gate — maintainer directed fixing findings 1, 2, 3, 7 (wrong sentences in `?icc`, `?d_study`, and NEWS) and rejecting 4, 5, 6, 8, 9; fixes landed with a one-way `replicates` pin, `check()` `Status: OK` and `test()` FAIL 0 / PASS 8626 re-run after them.
 
 ## Review
 
@@ -106,3 +107,19 @@ Three fresh-context lenses ran, none having authored the implementation. The [S]
 9. **Unrelated prose edits to two ROADMAP candidate rows rode in on `d35476f`.** The "checkpoint guard's known blind spots" and "M104's deferred remainder" rows were reworded (en-dash → hyphen, "vacuously true" → "vacuous", clause trims) in a commit whose subject is the AC3/AC6 amendment. Nothing is factually wrong; the edits are outside M138's scope and unlogged. Verified against `git diff main..HEAD -- cairn/ROADMAP.md`.
 
 **Return floor.** No finding demonstrates an acceptance criterion failing. Finding 2 is the closest: AC1 promises a `replicates` column "holding whether the design has within-cell replicates", and on a one-way fit the column does report the fitted design's own `replicates` field, which is `FALSE` because a one-way design has no subject-by-rater cells; what is false is the prose in `?icc` and NEWS, which describes the column as a fact about the data layout. So the milestone does not return under the floor, and every finding takes ordinary triage at the gate.
+
+### Triage
+
+Directed by the maintainer at the approval gate (2026-08-26): fix findings 1, 2, 3, and 7 on the branch, reject the rest with reasons.
+
+- **Finding 1 — fixed.** The closing sentence of `?icc`'s stability rule now reads "Those two tables, plus `$fit` and `$call`, are the whole supported surface; everything else the list holds falls under the rule above, whether or not a table happens to report it." `man/icc.Rd` re-roxygenized.
+- **Finding 2 — fixed.** `?icc`'s `glance.icc()` bullet, the `glance.icc()` code comment, and the NEWS bullet now describe `replicates` as whether the *fitted* design splits within-cell replicates, naming `FALSE` on a one-way fit, which has no rater facet and so no cells to split. The corrected claim is pinned: the AC1 test block gained a one-way fit of `replicate_frame()` asserting `replicates` is `FALSE`, beside the two-way fit of the same data asserting `TRUE`, so the pair discriminates the fitted design from the data layout.
+- **Finding 3 — fixed.** `?d_study`'s `glance.icc_dstudy()` bullet now notes that the rater treatment is `NA` on a projection of a one-way fit. `man/d_study.Rd` re-roxygenized.
+- **Finding 7 — fixed.** The NEWS clause now reads "reports that count as given", dropping the contrast with a rounding the package never performed.
+- **Finding 4 — rejected.** The `is.na(raters)` branch is a guard against a hazard this branch itself creates on a path that fires only for objects predating `icc_design_label`. Removing it would leave `switch()` returning `NULL` if that fallback is ever reached; keeping it costs two lines. Reaching it from a test would require constructing a legacy object shape the package no longer produces.
+- **Finding 5 — rejected.** `glance(d3)$raters` was measured `"random"`, agreeing with the projection the test already pins, and the Design 3 asymmetry is already a ROADMAP candidate row whose promotion condition covers exactly the widening this finding anticipates.
+- **Finding 6 — rejected.** A criterion-strength observation, not a defect in the shipped code. AC3's `typeof()` clause is what discriminates the change and it does; the `rbind()` clause states a weaker property that also holds. Rewriting a criterion at review is barred.
+- **Finding 8 — rejected.** `as.numeric()` on an already-double vector is a no-op that documents the branch's intent beside its sibling `NA_real_` fill; removing it would make the two branches read as if only one carried the ptype guarantee.
+- **Finding 9 — rejected as out of scope.** Pre-existing candidate-row prose reworded in an unrelated commit; nothing factually wrong, and both rows are current-knowledge text that any pass may fix in place.
+
+Re-verified after the fixes: `devtools::check()` raw `Status: OK` (0 errors, 0 warnings, 0 notes, 13m 11s); `devtools::test()` at `NOT_CRAN=true CI=true` `FAIL 0 | WARN 2 | SKIP 26 | PASS 8626`, the two added passes being the new one-way `replicates` pair; `devtools::document()` leaves no diff; `air format --check .` clean; the AC4 grep still returns no lines, so the finding-1 rewrite did not reintroduce a claim in a new form.

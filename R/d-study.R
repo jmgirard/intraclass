@@ -137,7 +137,9 @@
 #'     error definition.
 #'   * `glance.icc_dstudy()`: a one-row tibble of projection-level summaries. It
 #'     carries the distinct projected rater counts `m` and their range, the
-#'     error definition(s), the rater treatment, the observed rater count, and
+#'     error definition(s), the rater treatment (`NA` on a projection of a
+#'     one-way fit, whose interchangeable raters carry no facet), the
+#'     observed rater count, and
 #'     the interval settings. The count and range are held at the observed rater
 #'     count when the sweep is over occasions, so they are not a row count.
 #'   * `format.icc_dstudy()`: a character vector holding the printed projection
