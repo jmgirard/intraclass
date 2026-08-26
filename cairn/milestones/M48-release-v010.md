@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M48: v0.1.0 release consolidation — CRAN submission-ready
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** M49, M50, M51, M53, M54, M55, M61, M68, M129, M130, M131, M132, M133, M134, M135, M136, M137   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP2, GP3   <!-- owner: plan · create/amend-via-gate -->
@@ -35,26 +35,26 @@ gate before stamping, never folded in silently.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [x] AC1: API last-call disposition is recorded in the work log (audit of
+- [ ] AC1: API last-call disposition is recorded in the work log (audit of
       exports, argument names/order, defaults, return shapes); no exported-
       surface change ships after it without a gate amendment. (RB tripwire:
       irreversible-api)
-- [x] AC2: `DESCRIPTION` has `Version: 0.1.0` and `R (>= 4.0.0)`; `NEWS.md`
+- [ ] AC2: `DESCRIPTION` has `Version: 0.1.0` and `R (>= 4.0.0)`; `NEWS.md`
       opens with a single consolidated `# intraclass 0.1.0` changelog (no
       "(development version)" heading; M44's default-shape change framed as
       part of the initial release per ADR-055).
 - [ ] AC3: `cran-comments.md` names the actual check environments used and
       justifies every remaining NOTE; `inst/WORDLIST`/spelling clean.
-- [x] AC4: fresh `devtools::check(args = "--as-cran", env_vars =
+- [ ] AC4: fresh `devtools::check(args = "--as-cran", env_vars =
       c(NOT_CRAN = "false"), manual = TRUE)` → 0 errors / 0 warnings / only
       NOTEs justified in AC3 (TinyTeX courier installed for the PDF manual).
-- [x] AC5: full test suite green against the **installed** package with
+- [ ] AC5: full test suite green against the **installed** package with
       `NOT_CRAN=true CI=true` (failed + error sum = 0 — the local-gate
       blind spot).
-- [x] AC6: `pkgdown::check_pkgdown()` + `pkgdown::build_site()` clean;
+- [ ] AC6: `pkgdown::check_pkgdown()` + `pkgdown::build_site()` clean;
       `air format --check` clean; `lintr::lint_package()` clean;
       `urlchecker::url_check()` all-correct.
-- [x] AC7: the release code passes every CI check a pull request can reach.
+- [ ] AC7: the release code passes every CI check a pull request can reach.
       Evidence: `gh pr checks <head SHA>` at a named head SHA, every reported
       check in the `pass` bucket — none `fail`, `pending`, `skipping` or
       `cancel` — with the reported list quoted in the Review section and
@@ -120,7 +120,7 @@ below, so the descriptions here are compressed to their subject (weight cap).
 - [x] T16: Review G6, G7 — correct the stale ROADMAP hygiene note, add a
       superseding work-log line for the task count, and fix the
       `tidy.icc_dstudy()` comment's account of tibble `$` on a missing column.
-- [ ] T17: Re-run the local release gate on the repair head and hand back to
+- [x] T17: Re-run the local release gate on the repair head and hand back to
       `/milestone-review` (third pass).
 
 ## Work log
@@ -186,6 +186,10 @@ below, so the descriptions here are compressed to their subject (weight cap).
 
 - 2026-08-25: T16 done — G6 and G7. The ROADMAP hygiene note is rewritten against what the branch actually did (four candidate rows added, not one; the widest rows compressed and the two M133 rows clustered, not "the two widest") and now carries no count or byte figure, both being the kind of number G6 found stale. G7: `R/d-study.R:699-700` said tibble `$` on a missing column "warns rather than returning NULL"; measured (`tibble::tibble(a = 1)$zzz` warns *and* returns `NULL`), so the comment now states the guard's real reason. The two remaining G6 items sit inside the first-pass evidence block this file already marks superseded and are left there as the record of that pass.
 - 2026-08-25: superseding the 2026-08-25 sizing work-log line, which recorded 12 tasks against `cairn_validate`'s 13 — the count was already wrong when written, and the T13-T17 repair round has since taken it to **18**. The advisory still WARNs (10 tripwire) and the milestone is still not split: T7-T12 and T13-T17 are both repair work under criteria that have not changed. The T13 line's ROADMAP figures ("15 rows", "23,973 bytes / 59 lines") are likewise superseded: the final measurement after this task's edits is **23,892 bytes / 59 lines**, holding both the < 24,000 byte budget and the < 60 line cap.
+
+- 2026-08-25: T17 done — local release gate on the repair head, all green: `devtools::document()` leaves a clean tree, `air format --check .` exit 0, `spelling::spell_check_package()` no errors, `lintr::lint_package()` 0 lints, the six `data-raw/` checkers all exit 0, `cairn_validate` fails no check (the 18-task sizing advisory stands, addressed above), and `devtools::test()` FAIL 0 | WARN 3 | SKIP 2 | PASS 8863. The heavier gate items — `devtools::check(--as-cran)`, the installed-package suite, `pkgdown::build_site()`, `urlchecker::url_check()` — are review's fresh evidence, not re-run here.
+- 2026-08-25: AC1, AC2, AC4, AC5, AC6, AC7 unticked — their second-pass evidence was gathered on `4a1ce09` and this repair round moved the head, so under AC fencing they are unverified until re-review records fresh evidence. AC3 was already unticked, being the second pass's failure. The superseded evidence stays in the Review section as the record of that pass.
+- 2026-08-25: all tasks checked; status in-progress -> review by /milestone-implement (third pass).
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
