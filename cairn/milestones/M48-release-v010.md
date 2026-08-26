@@ -35,17 +35,17 @@ gate before stamping, never folded in silently.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: API last-call disposition is recorded in the work log (audit of
+- [x] AC1: API last-call disposition is recorded in the work log (audit of
       exports, argument names/order, defaults, return shapes); no exported-
       surface change ships after it without a gate amendment. (RB tripwire:
       irreversible-api)
-- [ ] AC2: `DESCRIPTION` has `Version: 0.1.0` and `R (>= 4.0.0)`; `NEWS.md`
+- [x] AC2: `DESCRIPTION` has `Version: 0.1.0` and `R (>= 4.0.0)`; `NEWS.md`
       opens with a single consolidated `# intraclass 0.1.0` changelog (no
       "(development version)" heading; M44's default-shape change framed as
       part of the initial release per ADR-055).
-- [ ] AC3: `cran-comments.md` names the actual check environments used and
+- [x] AC3: `cran-comments.md` names the actual check environments used and
       justifies every remaining NOTE; `inst/WORDLIST`/spelling clean.
-- [ ] AC4: fresh `devtools::check(args = "--as-cran", env_vars =
+- [x] AC4: fresh `devtools::check(args = "--as-cran", env_vars =
       c(NOT_CRAN = "false"), manual = TRUE)` → 0 errors / 0 warnings / only
       NOTEs justified in AC3 (TinyTeX courier installed for the PDF manual).
 - [ ] AC5: full test suite green against the **installed** package with
@@ -190,6 +190,7 @@ below, so the descriptions here are compressed to their subject (weight cap).
 - 2026-08-25: T17 done — local release gate on the repair head, all green: `devtools::document()` leaves a clean tree, `air format --check .` exit 0, `spelling::spell_check_package()` no errors, `lintr::lint_package()` 0 lints, the six `data-raw/` checkers all exit 0, `cairn_validate` fails no check (the 18-task sizing advisory stands, addressed above), and `devtools::test()` FAIL 0 | WARN 3 | SKIP 2 | PASS 8863. The heavier gate items — `devtools::check(--as-cran)`, the installed-package suite, `pkgdown::build_site()`, `urlchecker::url_check()` — are review's fresh evidence, not re-run here.
 - 2026-08-25: AC1, AC2, AC4, AC5, AC6, AC7 unticked — their second-pass evidence was gathered on `4a1ce09` and this repair round moved the head, so under AC fencing they are unverified until re-review records fresh evidence. AC3 was already unticked, being the second pass's failure. The superseded evidence stays in the Review section as the record of that pass.
 - 2026-08-25: all tasks checked; status in-progress -> review by /milestone-implement (third pass).
+- 2026-08-25: review checkpoint (mid-phase, third pass) by /milestone-review — fresh evidence on head `b54ac74` recorded and ticked for AC1, AC2, AC3 and AC4; AC3's spelling half, the second pass's failure, is clean, and `--as-cran` is 0/0/0 again. AC5 (installed-package suite), AC6's `pkgdown::build_site()` and AC7 (three CI checks) are still running. Consistency gate green (`cairn_validate` exit 0; `cairn_impact` not owed). Two of three review lenses returned: the prior-review lens no findings, the blame-history lens one verbatim repeat of G4, already a triaged follow-up.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
@@ -223,7 +224,52 @@ below, so the descriptions here are compressed to their subject (weight cap).
 ## Review
 <!-- owner: review · exclusive -->
 
-### Acceptance-criterion evidence — second pass (fresh, 2026-08-25, head `4a1ce09`)
+### Acceptance-criterion evidence — third pass (fresh, 2026-08-25, head `b54ac74`)
+
+Gathered on the T13-T17 repair head. The second-pass block below is kept as the
+record of what was measured on `4a1ce09` and is superseded by this one.
+
+- **AC1 — verified.** The last-call disposition is recorded in the work log
+  (2026-08-25, T1) and carried in full by the Decisions section above: the
+  surface ships as audited but for seven accepted RR04 changes, one deferral to
+  a ROADMAP candidate row, and five logged rejections. `git log --oneline
+  origin/main..HEAD -- R/ NAMESPACE` returns four commits, each authorised:
+  `4ba59ad` (T1b) by the 2026-08-25 gated-amendment line; `d447172` (T7-T11) by
+  the first review-triage gate; `b96bb48` (T14) and `e44ff7e` (T16) by the
+  second-pass triage gate and the minor amendment that added T13-T17. Read
+  against the implementation, the two late commits change no behaviour: `git
+  show b96bb48 -- R/` is a four-line roxygen edit to `d_study()`'s `@return`
+  and `git show e44ff7e -- R/` is a one-line comment inside
+  `tidy.icc_dstudy()`. `git diff origin/main..HEAD -- NAMESPACE` is empty: no
+  export added, removed or renamed.
+- **AC2 — verified.** `DESCRIPTION:3` `Version: 0.1.0`; `DESCRIPTION:53-54`
+  `Depends:` / `R (>= 4.0.0)`. `grep '^# ' NEWS.md` returns exactly one
+  heading, `# intraclass 0.1.0`; a case-insensitive sweep for "development
+  version" returns 0 hits.
+- **AC4 — verified.** `devtools::check(args = "--as-cran", env_vars =
+  c(NOT_CRAN = "false"), manual = TRUE)` re-run fresh on head `b54ac74`:
+  R 4.6.1 (2026-06-24), platform aarch64-apple-darwin23, macOS Tahoe 26.6.2,
+  `* using option '--as-cran'` in the banner, package version read back as
+  `0.1.0`, run started 2026-08-26 00:59 UTC. **Status: OK — 0 errors |
+  0 warnings | 0 notes**, duration 2m 6.5s. `checking PDF version of manual`
+  and `checking HTML version of manual` both OK, so the TinyTeX courier path
+  the criterion names is exercised. With no NOTE there is nothing for AC3 to
+  justify.
+- **AC3 — verified.** Spelling first, this being the second pass's failure:
+  `spelling::spell_check_package()` re-run fresh on this head returns **"No
+  spelling errors found"** (0 rows), against 95 entries in `inst/WORDLIST` —
+  the T13 repair added `disambiguates`, the one word that failed on `4a1ce09`.
+  `cran-comments.md` matches the AC4 run just made: it names R 4.6.1,
+  aarch64-apple-darwin23, `NOT_CRAN=false`, `manual = TRUE`, 2026-08-25, and
+  the `0 errors | 0 warnings | 0 notes` result, which is what the fresh run
+  reported. Its "Test environments" block separates what has been checked
+  (this local run; the two GitHub Actions configurations a pull request runs)
+  from what is scheduled before submission (the five-config matrix on the merge
+  commit; win-builder and R-hub). With no NOTE there is nothing left to
+  justify; the DESCRIPTION-misspelling note it anticipates from CRAN's incoming
+  checks is named and answered.
+
+### Acceptance-criterion evidence — second pass (superseded, 2026-08-25, head `4a1ce09`)
 
 Gathered on the repair head after T7-T12; the first-pass block below is kept as
 the record of what was measured on `9328d85` and is superseded by this one.
@@ -318,7 +364,35 @@ the record of what was measured on `9328d85` and is superseded by this one.
   latent variance, asserted to abort toward glmmTMB) and
   `test-icc-type-vector.R:286`; the criterion does not bar them.
 
-### Consistency gate — second pass (2026-08-25)
+### Consistency gate — third pass (2026-08-25)
+
+- `cairn_validate.py` exit 0 — every check PASS. One advisory: `sizing (split
+  tripwires)` reports **18 tasks** against a 10 tripwire, which is not a gate
+  failure; the milestone is not split because T7-T12 and T13-T17 are both
+  repair work under criteria that have not changed. The `release window`
+  advisory did not fire.
+- `cairn_impact.py` not run: no `DESIGN.md` IP/GP principle text changed on this
+  branch. `git diff origin/main..HEAD -- cairn/DESIGN.md` is two hunks — the
+  Platforms commitment bullet and the new `Known issues` entry — neither of
+  which is an IPn/GPn definition. GP3's own text is second-pass finding G4,
+  which the maintainer triaged to a follow-up candidate row precisely so this
+  run would not fall due inside the release round.
+- Toolchain checks, from the `r-package` profile's `consistency-gate` slot:
+  `devtools::document()` re-run on this head leaves a clean tree (`git status
+  --porcelain -- NAMESPACE man/ R/ DESCRIPTION` empty); `NAMESPACE`,
+  `_pkgdown.yml` and `data/` are byte-identical to `origin/main`, so no
+  generated file was hand-edited and no new export is missing a
+  reference-index row; `README.Rmd` and `README.md` were last written by the
+  same commit (`5c274fc`) and neither is touched on this branch;
+  `pkgdown::check_pkgdown()` "No problems found"; `NEWS.md` carries this
+  milestone's user-visible changes (348 insertions / 677 deletions, the
+  consolidation, under seven topic headings and one release heading); a sweep
+  for milestone / ADR / D / RR ids across `NEWS.md`, `README.md`, `man/` and
+  `vignettes/` returns 0 hits; `git diff --name-status origin/main..HEAD`
+  shows three added files, none at top level, so no `.Rbuildignore` entry is
+  owed; the full `--as-cran` check is the AC4 run above.
+
+### Consistency gate — second pass (superseded)
 
 - `cairn_validate.py` exit 0 — every check PASS. One advisory: `sizing (split
   tripwires)` reports **13 tasks** against a 10 tripwire, which is not a gate
