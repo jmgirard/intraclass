@@ -1,7 +1,18 @@
 # TEMPORARY measurement instrument for M139 — deleted once the floor is
-# recorded. Runs the candidate R versions on one fixed OS so the only axis
-# that varies is the R version. The permanent pinned-floor job lives in
+# recorded. Runs the candidate R versions on one fixed OS so the only axis that
+# varies is the R version. The permanent pinned-floor job lives in
 # check-standard.yaml.
+#
+# Four outcomes are recorded per version, never collapsed into the job
+# conclusion (every step is continue-on-error, so the job always concludes
+# green and the conclusion carries no information):
+#   setup-r          — could this R version be provisioned on the runner at all?
+#                      A failure here is a runner fact, not a package fact.
+#   imports install  — does the package's own Depends/Imports/LinkingTo chain
+#                      install? This is what a user installing the package needs.
+#   check deps       — does the wider set `R CMD check` needs install (Suggests
+#                      included)? A failure here does not block a user's install.
+#   R CMD check      — does the check itself pass?
 on:
   push:
     branches: [m139-r-floor-ci-tested]
@@ -37,10 +48,18 @@ jobs:
         with:
           r-version: ${{ matrix.r }}
 
+      # The Imports chain alone — Depends/Imports/LinkingTo, no Suggests.
       - uses: r-lib/actions/setup-r-dependencies@v2
-        id: deps
+        id: imports
         continue-on-error: true
         if: steps.setup.outcome == 'success'
+        with:
+          dependencies: '"hard"'
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        id: checkdeps
+        continue-on-error: true
+        if: steps.imports.outcome == 'success'
         with:
           extra-packages: any::rcmdcheck
           needs: check
@@ -48,7 +67,7 @@ jobs:
       - uses: r-lib/actions/check-r-package@v2
         id: check
         continue-on-error: true
-        if: steps.deps.outcome == 'success'
+        if: steps.checkdeps.outcome == 'success'
         with:
           upload-snapshots: false
           build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
@@ -57,9 +76,10 @@ jobs:
         if: always()
         run: |
           {
-            echo "## R ${{ matrix.r }}"
-            echo "- setup-r: ${{ steps.setup.outcome }}"
-            echo "- dependency install: ${{ steps.deps.outcome || 'skipped' }}"
-            echo "- R CMD check: ${{ steps.check.outcome || 'skipped' }}"
-          } >> "$GITHUB_STEP_SUMMARY"
+            echo "FLOOR-SWEEP ${{ matrix.r }}"
+            echo "  setup-r: ${{ steps.setup.outcome || 'skipped' }}"
+            echo "  imports-install: ${{ steps.imports.outcome || 'skipped' }}"
+            echo "  check-deps-install: ${{ steps.checkdeps.outcome || 'skipped' }}"
+            echo "  r-cmd-check: ${{ steps.check.outcome || 'skipped' }}"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
         shell: bash
