@@ -51,7 +51,7 @@ gate before stamping, never folded in silently.
 - [x] AC5: full test suite green against the **installed** package with
       `NOT_CRAN=true CI=true` (failed + error sum = 0 — the local-gate
       blind spot).
-- [ ] AC6: `pkgdown::check_pkgdown()` + `pkgdown::build_site()` clean;
+- [x] AC6: `pkgdown::check_pkgdown()` + `pkgdown::build_site()` clean;
       `air format --check` clean; `lintr::lint_package()` clean;
       `urlchecker::url_check()` all-correct.
 - [ ] AC7: the release code passes every CI check a pull request can reach.
@@ -280,6 +280,15 @@ record of what was measured on `4a1ce09` and is superseded by this one.
   recorded, from `test-icc-lavaan-multilevel.R:402` (a between-level Heywood
   fit, negative latent variance, asserted to abort toward glmmTMB) and
   `test-icc-type-vector.R:286`; the criterion does not bar them.
+- **AC6 — verified**, all five checks re-run fresh on this head:
+  `pkgdown::check_pkgdown()` "No problems found"; `pkgdown::build_site()`
+  exit 0, all eight vignettes (`choosing-an-icc`,
+  `comparison-with-other-packages`, `d-studies-and-replicates`, `engines`,
+  `getting-started`, `glossary`, `interval-methods`, `multilevel-designs`)
+  read and rendered, and a sweep of the build log for `Error`, `Warning`,
+  `Quitting from` and the failure glyphs returns 0 hits; `air format --check .`
+  exit 0; `lintr::lint_package()` 0 lints; `urlchecker::url_check()` "All URLs
+  are correct!" over 15 URLs.
 
 ### Acceptance-criterion evidence — second pass (superseded, 2026-08-25, head `4a1ce09`)
 
