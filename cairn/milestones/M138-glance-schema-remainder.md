@@ -39,7 +39,7 @@ Land the three exported-schema corrections descoped from M48 while GP2's one-way
 
 ## Tasks
 
-- [ ] T1. Write the failing tests first in `tests/testthat/test-exported-contract.R`: the five design families for AC1/AC2 and the four ptype probes for AC3. Red before any source edit.
+- [x] T1. Write the failing tests first in `tests/testthat/test-exported-contract.R`: the five design families for AC1/AC2 and the four ptype probes for AC3. Red before any source edit.
 - [ ] T2. Add `raters` and `replicates` to `glance.icc()` (`R/icc-methods.R:376-410`), sourcing `raters` from `x$design$raters` with `NA_character_` on `model == "oneway"`, and `replicates` from `isTRUE(x$design$replicates)`.
 - [ ] T3. Update the `glance.icc()` bullet in `R/icc.R:677-683` and re-roxygenize; add a NEWS bullet under the 0.1.0 changelog.
 - [ ] T4. Make `tidy.icc()$occasions` double in both branches (`R/icc-methods.R:357-361`): `as.numeric()` on the replicate branch, `NA_real_` replacing `NA_integer_` on the other.
@@ -61,3 +61,4 @@ Land the three exported-schema corrections descoped from M48 while GP2's one-way
 - 2026-08-26: amendment audit ran in FULL mode (user-facing tier) over the amended AC3 and the new AC6, twice, each with a fresh-context [O] reader that authored neither. Round 1 returned 7 findings: the cross-family `rbind()` clause was unsatisfiable (differing column sets), the occasion-axis probe named a fit that aborts, the "values are still `c(1, 1.5, 2)`" clause was false under per-curve recycling, the probes missed the multilevel construction path, AC6's two-way half was under-specified, and Design 3's carve-out was unpinned. Round 2 returned 7 more (ambiguous antecedents, an undefined "plain fit", an unstated "unchanged" baseline, T4/T5 contradicting the amended AC3). All fixed; one round-1 finding went to the user as the Design 3 predicate question.
 - 2026-08-26: round 2's ground claim that the only integer sites are the two NA fills is false — measured `typeof(tidy(d_study(rep_fit, n_o = 1:3))$occasions)` as `"integer"`, an integer `n_o` reaching the column uncoerced. T5 amended to coerce at `R/d-study.R:524`, and AC3 gained the integer-`n_o` probe that sees it.
 - 2026-08-26: T4/T5 amended from "cast to integer" to the double coercion above (minor task edit executing the AC3 amendment); T8 added for AC6.
+- 2026-08-26: T1 — tests written first in `test-exported-contract.R` section 4 (three test_that blocks, two new fixture frames). Run red: 10 failures, all in the new blocks, the rest of the file green. The three `occasions` failures locate the integer sites as the plain fit, the plain rater-axis projection, and the integer-`n_o` occasion axis.
