@@ -66,11 +66,11 @@ test_that("choosing-an-icc.Rmd: one-way ICC(1) is the most conservative on `rati
     type = "consistency",
     seed = 1
   ))
-  i1 <- ow$estimate[ow$index == "ICC(1)"]
-  expect_lte(i1, agr$estimate[agr$index == "ICC(A,1)"])
+  i1 <- ow$estimate[ow$term == "ICC(1)"]
+  expect_lte(i1, agr$estimate[agr$term == "ICC(A,1)"])
   expect_lte(
-    agr$estimate[agr$index == "ICC(A,1)"],
-    con$estimate[con$index == "ICC(C,1)"]
+    agr$estimate[agr$term == "ICC(A,1)"],
+    con$estimate[con$term == "ICC(C,1)"]
   )
 })
 
@@ -149,7 +149,7 @@ test_that("the D-study projection anchors to ICC(A,k) at m = n_raters", {
   proj <- d_study(fit, m = 1:8, seed = 1)
 
   at_k <- proj$estimate[proj$m == fit$n$raters]
-  ick <- tidy(fit)$estimate[tidy(fit)$index == "ICC(A,k)"]
+  ick <- tidy(fit)$estimate[tidy(fit)$term == "ICC(A,k)"]
   expect_equal(at_k, ick, tolerance = 1e-8)
 
   # And the "diminishing returns" curve is monotone increasing.
@@ -280,8 +280,8 @@ test_that("engines.Rmd: lavaan matches glmmTMB on consistency, differs slightly 
     engine = "lavaan",
     seed = 1
   ))
-  ga1 <- ga$estimate[ga$index == "ICC(A,1)"]
-  la1 <- la$estimate[la$index == "ICC(A,1)"]
+  ga1 <- ga$estimate[ga$term == "ICC(A,1)"]
+  la1 <- la$estimate[la$term == "ICC(A,1)"]
   expect_lt(la1, ga1) # lavaan indicator-mean agreement is slightly lower here
   expect_lt(abs(la1 - ga1), 0.02) # but close (asymptotically equivalent)
 })
@@ -321,8 +321,8 @@ test_that("d-studies-and-replicates.Rmd: a numeric `unit` adds the ICC(A,6) d_st
   ))
 
   # The article's own output: three rows, the third labeled ICC(A,6).
-  expect_identical(inline$index, c("ICC(A,1)", "ICC(A,k)", "ICC(A,6)"))
-  at_6 <- inline[inline$index == "ICC(A,6)", ]
+  expect_identical(inline$term, c("ICC(A,1)", "ICC(A,k)", "ICC(A,6)"))
+  at_6 <- inline[inline$term == "ICC(A,6)", ]
   # The numeral the article prints for the ICC(A,6) row.
   expect_equal(round(at_6$estimate, 3), 0.710)
 
@@ -367,7 +367,7 @@ test_that("d-studies-and-replicates.Rmd: fixed-rater agreement refuses a numeric
     unit = c("single", "average", 6),
     seed = 1
   ))
-  expect_true("ICC(A,6)" %in% tidy(random_agr)$index)
+  expect_true("ICC(A,6)" %in% tidy(random_agr)$term)
   fixed_con <- suppressWarnings(icc(
     ratings,
     score,
@@ -378,7 +378,7 @@ test_that("d-studies-and-replicates.Rmd: fixed-rater agreement refuses a numeric
     unit = c("single", "average", 6),
     seed = 1
   ))
-  expect_true("ICC(C,6)" %in% tidy(fixed_con)$index)
+  expect_true("ICC(C,6)" %in% tidy(fixed_con)$term)
 
   # ... and the default (both types) drops the agreement projection with a
   # message rather than aborting, keeping the consistency one.
@@ -394,8 +394,8 @@ test_that("d-studies-and-replicates.Rmd: fixed-rater agreement refuses a numeric
     )),
     "Dropping the .*agreement.* D-study projection"
   )
-  expect_true("ICC(C,6)" %in% tidy(both)$index)
-  expect_false("ICC(A,6)" %in% tidy(both)$index)
+  expect_true("ICC(C,6)" %in% tidy(both)$term)
+  expect_false("ICC(A,6)" %in% tidy(both)$term)
 })
 
 # Multilevel claims (multilevel-designs.Rmd) ------------------------------
@@ -789,7 +789,7 @@ test_that("multilevel-designs.Rmd: a declared `design` overrides the labels' own
   expect_match(comp_line(inferred), "rater 0")
   expect_match(comp_line(inferred), "cluster:rater")
   # The numeral the article prints for this call.
-  expect_equal(round(tidy(d2)$estimate[tidy(d2)$index == "ICC(A,1)"], 3), 0.429)
+  expect_equal(round(tidy(d2)$estimate[tidy(d2)$term == "ICC(A,1)"], 3), 0.429)
 
   # Declared Design 3: no rater term at all, agreement-only ICC(1)/ICC(k).
   d3 <- fit_as("nested_in_subjects")
@@ -799,7 +799,7 @@ test_that("multilevel-designs.Rmd: a declared `design` overrides the labels' own
   expect_false("rater" %in% names(d3$components))
   expect_match(comp_line(d3), "residual .* \\(rater confounded\\)")
   # The numeral the article prints for this call.
-  expect_equal(round(tidy(d3)$estimate[tidy(d3)$index == "ICC(1)"], 3), 0.412)
+  expect_equal(round(tidy(d3)$estimate[tidy(d3)$term == "ICC(1)"], 3), 0.412)
 
   # The three readings really are three different answers.
   a1 <- function(x) tidy(x)$estimate[1]
@@ -1431,12 +1431,12 @@ test_that("interval-methods.Rmd: the `ci-bootstrap` chunk's own comparison holds
   expect_false(all(bs$conf.high >= mc$conf.high))
   expect_false(all(bs$conf.high <= mc$conf.high))
   rounded_equal <- round(bs$conf.high, 2) == round(mc$conf.high, 2)
-  expect_identical(mc$index[rounded_equal], "ICC(A,k)")
+  expect_identical(mc$term[rounded_equal], "ICC(A,k)")
   # And it is the upper bound alone, never the pair: at that same rendering
   # ICC(A,k)'s lower bounds do not agree. This is the claim the article got
   # wrong once (M130 return, F3) -- an assertion on the upper bounds alone
   # would pass with "the pair rounds alike" back in the prose.
-  ak <- mc$index == "ICC(A,k)"
+  ak <- mc$term == "ICC(A,k)"
   expect_false(round(bs$conf.low[ak], 2) == round(mc$conf.low[ak], 2))
 })
 
@@ -1516,10 +1516,10 @@ test_that("interval-methods.Rmd: `\"searle\"` and `\"burch\"` project through th
       args <- c(args, list(boot_samples = 199, seed = 1))
     }
     td <- tidy(do.call(icc, args))
-    single <- td[td$index == "ICC(1)", ]
+    single <- td[td$term == "ICC(1)", ]
     k <- 4 # `ratings` has four raters
     for (target in list(list("ICC(k)", k), list("ICC(7)", m_proj))) {
-      img <- td[td$index == target[[1]], ]
+      img <- td[td$term == target[[1]], ]
       lab <- paste(m, target[[1]])
       expect_identical(nrow(img), 1L, info = lab)
       expect_equal(
@@ -1577,8 +1577,8 @@ test_that("interval-methods.Rmd: at zero between-subject variance `\"burch\"` ab
     model = "oneway",
     ci_method = "searle"
   ))
-  single <- se[se$index == "ICC(1)", ]
-  avg <- se[se$index == "ICC(k)", ]
+  single <- se[se$term == "ICC(1)", ]
+  avg <- se[se$term == "ICC(k)", ]
   expect_identical(nrow(single), 1L)
   expect_identical(nrow(avg), 1L)
   # Single-rater: the finite degenerate endpoints the exact-F form gives at
@@ -1642,8 +1642,8 @@ test_that("interval-methods.Rmd: the `\"mpl\"` fences are the ones the article n
   # Spearman-Brown image of ICC(A,1) (line 270). The numeric-`unit` half went
   # untested until the M130 return (F14), so `m = 7` is swept with `"average"`.
   sb <- function(p, k) k * p / (1 + (k - 1) * p)
-  a1 <- ml[ml$index == "ICC(A,1)", ]
-  ak <- ml[ml$index == "ICC(A,k)", ]
+  a1 <- ml[ml$term == "ICC(A,1)", ]
+  ak <- ml[ml$term == "ICC(A,k)", ]
   expect_equal(ak$conf.low, sb(a1$conf.low, n_r), tolerance = 1e-8)
   expect_equal(ak$conf.high, sb(a1$conf.high, n_r), tolerance = 1e-8)
   m_proj <- 7
@@ -1656,7 +1656,7 @@ test_that("interval-methods.Rmd: the `\"mpl\"` fences are the ones the article n
     ci_method = "mpl",
     unit = c("single", m_proj)
   ))
-  pj <- proj[proj$index == "ICC(A,7)", ]
+  pj <- proj[proj$term == "ICC(A,7)", ]
   expect_identical(nrow(pj), 1L)
   expect_equal(pj$conf.low, sb(a1$conf.low, m_proj), tolerance = 1e-8)
   expect_equal(pj$conf.high, sb(a1$conf.high, m_proj), tolerance = 1e-8)
@@ -2227,8 +2227,8 @@ test_that("icc(): the supported call returns an interval, every frequentist ci_m
     # takes no `info`, so this is the labelled form -- a failure has to name
     # which method moved, and what it returned instead.
     expect_true(
-      setequal(td$index, entry$indices),
-      info = paste0(nm, " -- got: ", paste(td$index, collapse = ", "))
+      setequal(td$term, entry$indices),
+      info = paste0(nm, " -- got: ", paste(td$term, collapse = ", "))
     )
     # The method asked for is the method that produced the interval -- a silent
     # fallback to the Monte-Carlo default would make the pin vacuous.
@@ -2260,7 +2260,7 @@ test_that("icc(): the supported call returns a credible interval, ci_method = \"
   expect_identical(fit$ci$method, "posterior")
 
   td <- tidy(fit)
-  expect_setequal(td$index, c("ICC(A,1)", "ICC(A,k)"))
+  expect_setequal(td$term, c("ICC(A,1)", "ICC(A,k)"))
   expect_false(any(is.na(td$conf.low)))
   expect_true(all(td$conf.low <= td$estimate & td$estimate <= td$conf.high))
 })
@@ -2419,7 +2419,7 @@ test_that("icc(): the second supported call runs, the ci_methods that admit one"
     boot_samples = 99,
     seed = 1
   ))
-  expect_setequal(np2$index, "ICC(2)")
+  expect_setequal(np2$term, "ICC(2)")
   expect_true(all(np2$method == "npbootstrap"))
   expect_false(any(is.na(np2$conf.low)))
   expect_error(
@@ -2451,7 +2451,7 @@ test_that("icc(): the second supported call runs, the ci_methods that admit one"
     ci_method = "mpl",
     unit = c("single", "average", 7)
   ))
-  expect_setequal(m7$index, c("ICC(A,1)", "ICC(A,k)", "ICC(A,7)"))
+  expect_setequal(m7$term, c("ICC(A,1)", "ICC(A,k)", "ICC(A,7)"))
   expect_true(all(m7$method == "mpl"))
   expect_false(any(is.na(m7$conf.low)))
 

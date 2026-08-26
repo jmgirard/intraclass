@@ -113,12 +113,12 @@ test_that("searle/burch report the engine REML point and a finite interval (AC1,
     ci_method = "montecarlo",
     seed = 1
   ))
-  mc1 <- mc[mc$index == "ICC(1)", ]
+  mc1 <- mc[mc$term == "ICC(1)", ]
 
   for (m in c("searle", "burch")) {
     fit <- icc(d, score, subject, rater, model = "oneway", ci_method = m)
     td <- tidy(fit)
-    i1 <- td[td$index == "ICC(1)", ]
+    i1 <- td[td$term == "ICC(1)", ]
     # Method + deterministic metadata (BC5 analog): closed form, no draws, no SE.
     expect_identical(fit$ci$method, m)
     expect_true(is.na(fit$ci$samples))
@@ -184,7 +184,7 @@ test_that("searle ICC(k) equals the mcgraw Table 7 ICC(1,k) limits from the raw 
     unit = c("single", "average"),
     ci_method = "searle"
   ))
-  ik <- td[td$index == "ICC(k)", ]
+  ik <- td[td$term == "ICC(k)", ]
 
   # Independent one-way ANOVA from the raw data (not the package's ICC(1) output).
   groups <- split(d$score, d$subject)
@@ -222,8 +222,8 @@ test_that("burch ICC(k) is the exact Spearman-Brown image of ICC(1), divisor n (
     unit = c("single", "average"),
     ci_method = "burch"
   ))
-  i1 <- td[td$index == "ICC(1)", ]
-  ik <- td[td$index == "ICC(k)", ]
+  i1 <- td[td$term == "ICC(1)", ]
+  ik <- td[td$term == "ICC(k)", ]
   # Burch's ICC(k) has no independent published anchor (D-013: inheritance, not an
   # anchor; the ICC(1) core is pinned by AC1). The verifiable property is that
   # ICC(k) is the exact monotone Spearman-Brown image of ICC(1) with divisor n --

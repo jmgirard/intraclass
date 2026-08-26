@@ -171,7 +171,7 @@ one_rep <- function(mu_rc, pop, seed) {
     raters = "fixed",
     engine = "glmmTMB"
   )))
-  reml_a1 <- g$estimate[g$index == "ICC(A,1)" & g$level == "subject"]
+  reml_a1 <- g$estimate[g$term == "ICC(A,1)" & g$level == "subject"]
   out <- data.frame(
     map_icc = summ$point,
     cover = summ$conf.low <= pop && pop <= summ$conf.high,

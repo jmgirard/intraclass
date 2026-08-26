@@ -1622,7 +1622,7 @@ test_that("brms fits the two-way random ICC end to end (O-Bayes-agree sanity)", 
   # An explicit `type = "agreement"` reports the agreement family (single + average); consistency
   # is a separate call. Both rows must be finite probabilities with the point in its interval.
   td <- tidy(fit)
-  expect_setequal(td$index, c("ICC(A,1)", "ICC(A,k)"))
+  expect_setequal(td$term, c("ICC(A,1)", "ICC(A,k)"))
   expect_true(all(td$estimate >= 0 & td$estimate <= 1))
   expect_true(all(td$conf.low <= td$estimate & td$estimate <= td$conf.high))
 
@@ -1632,11 +1632,11 @@ test_that("brms fits the two-way random ICC end to end (O-Bayes-agree sanity)", 
   # components (MAP(ICC) != icc_point(MAP components), ADR-033), so on a wide skewed
   # n = 6 posterior it legitimately sits below the REML plug-in.
   g <- tidy(icc(d, score, subject, rater, engine = "glmmTMB", seed = 1))
-  by_index <- function(x, i) x$estimate[x$index == i]
+  by_index <- function(x, i) x$estimate[x$term == i]
   for (i in c("ICC(A,1)", "ICC(A,k)")) {
     reml <- by_index(g, i)
-    expect_gte(reml, td$conf.low[td$index == i])
-    expect_lte(reml, td$conf.high[td$index == i])
+    expect_gte(reml, td$conf.low[td$term == i])
+    expect_lte(reml, td$conf.high[td$term == i])
   }
 
   # The header reports a Bayesian (MCMC) engine and a CREDIBLE interval (format() is the
@@ -1682,7 +1682,7 @@ test_that("brms fits the one-way random ICC end to end (O-Bayes-OW-agree)", {
   # A one-way call reports the single-argument family ICC(1) / ICC(1,k) -- NO agreement/
   # consistency split (raters are interchangeable).
   td <- tidy(fit)
-  expect_setequal(td$index, c("ICC(1)", "ICC(k)"))
+  expect_setequal(td$term, c("ICC(1)", "ICC(k)"))
   expect_true(all(td$estimate >= 0 & td$estimate <= 1))
   # The interval is well-ordered and on [0, 1]. We do NOT assert the point lies inside its
   # own credible interval here: on this tiny (n = 6) one-way posterior the MAP piles at the
@@ -1705,13 +1705,13 @@ test_that("brms fits the one-way random ICC end to end (O-Bayes-OW-agree)", {
     engine = "glmmTMB",
     seed = 1
   ))
-  by_index <- function(x, i) x$estimate[x$index == i]
+  by_index <- function(x, i) x$estimate[x$term == i]
   expect_equal(by_index(g, "ICC(1)"), 0.166, tolerance = 5e-3)
   expect_equal(by_index(g, "ICC(k)"), 0.443, tolerance = 5e-3)
   for (i in c("ICC(1)", "ICC(k)")) {
     reml <- by_index(g, i)
-    expect_gte(reml, td$conf.low[td$index == i])
-    expect_lte(reml, td$conf.high[td$index == i])
+    expect_gte(reml, td$conf.low[td$term == i])
+    expect_lte(reml, td$conf.high[td$term == i])
   }
 
   # lme4 the second independent REML oracle, when present.
@@ -1781,8 +1781,8 @@ test_that("brms fits the fixed-rater two-way ICC end to end (O-Bayes-Fixed-agree
 
   ta <- tidy(fa)
   tc <- tidy(fc)
-  expect_setequal(ta$index, c("ICC(A,1)", "ICC(A,k)"))
-  expect_setequal(tc$index, c("ICC(C,1)", "ICC(C,k)"))
+  expect_setequal(ta$term, c("ICC(A,1)", "ICC(A,k)"))
+  expect_setequal(tc$term, c("ICC(C,1)", "ICC(C,k)"))
   expect_true(all(
     c(ta$estimate, tc$estimate) >= 0 & c(ta$estimate, tc$estimate) <= 1
   ))
@@ -1808,20 +1808,20 @@ test_that("brms fits the fixed-rater two-way ICC end to end (O-Bayes-Fixed-agree
     engine = "glmmTMB",
     seed = 1
   )))
-  by_index <- function(x, i) x$estimate[x$index == i]
+  by_index <- function(x, i) x$estimate[x$term == i]
   expect_equal(by_index(gf, "ICC(A,1)"), 0.290, tolerance = 5e-3)
   expect_equal(by_index(gf, "ICC(A,k)"), 0.620, tolerance = 5e-3)
   expect_equal(by_index(gc, "ICC(C,1)"), 0.715, tolerance = 5e-3)
   expect_equal(by_index(gc, "ICC(C,k)"), 0.909, tolerance = 5e-3)
   for (i in c("ICC(A,1)", "ICC(A,k)")) {
     reml <- by_index(gf, i)
-    expect_gte(reml, ta$conf.low[ta$index == i])
-    expect_lte(reml, ta$conf.high[ta$index == i])
+    expect_gte(reml, ta$conf.low[ta$term == i])
+    expect_lte(reml, ta$conf.high[ta$term == i])
   }
   for (i in c("ICC(C,1)", "ICC(C,k)")) {
     reml <- by_index(gc, i)
-    expect_gte(reml, tc$conf.low[tc$index == i])
-    expect_lte(reml, tc$conf.high[tc$index == i])
+    expect_gte(reml, tc$conf.low[tc$term == i])
+    expect_lte(reml, tc$conf.high[tc$term == i])
   }
 })
 
@@ -1874,7 +1874,7 @@ test_that("brms fits the ragged fixed-rater two-way ICC end to end (O-Bayes-IFix
   expect_setequal(names(fa$components), c("subject", "rater", "residual"))
 
   ta <- tidy(fa)
-  expect_setequal(ta$index, c("ICC(A,1)", "ICC(A,k)"))
+  expect_setequal(ta$term, c("ICC(A,1)", "ICC(A,k)"))
   expect_true(all(ta$estimate >= 0 & ta$estimate <= 1))
   # Ragged -> the fixed and random agreement values genuinely differ (theta^2_r != sigma^2_r):
   # the low <= point <= high interval is well-formed and strictly inside [0, 1].
@@ -1891,11 +1891,11 @@ test_that("brms fits the ragged fixed-rater two-way ICC end to end (O-Bayes-IFix
     engine = "glmmTMB",
     seed = 1
   )))
-  by_index <- function(x, i) x$estimate[x$index == i]
+  by_index <- function(x, i) x$estimate[x$term == i]
   for (i in c("ICC(A,1)", "ICC(A,k)")) {
     reml <- by_index(gf, i)
-    expect_gte(reml, ta$conf.low[ta$index == i])
-    expect_lte(reml, ta$conf.high[ta$index == i])
+    expect_gte(reml, ta$conf.low[ta$term == i])
+    expect_lte(reml, ta$conf.high[ta$term == i])
   }
 })
 
@@ -1962,7 +1962,7 @@ test_that("brms fits the ragged crossed fixed multilevel ICC end to end (O-Bayes
   ta <- tidy(fa)
   # Subject level only for fixed crossed multilevel (cluster-level fixed IRR is deferred).
   expect_setequal(unique(ta$level), "subject")
-  expect_setequal(ta$index, c("ICC(A,1)", "ICC(A,k)"))
+  expect_setequal(ta$term, c("ICC(A,1)", "ICC(A,k)"))
   expect_true(all(ta$estimate >= 0 & ta$estimate <= 1))
 
   # CONTAINMENT: the glmmTMB M18 Slice 1 incomplete fixed subject point sits inside each brms
@@ -1978,11 +1978,11 @@ test_that("brms fits the ragged crossed fixed multilevel ICC end to end (O-Bayes
     seed = 1
   )))
   gf <- gf[gf$level == "subject", ]
-  by_index <- function(x, i) x$estimate[x$index == i]
+  by_index <- function(x, i) x$estimate[x$term == i]
   for (i in c("ICC(A,1)", "ICC(A,k)")) {
     reml <- by_index(gf, i)
-    expect_gte(reml, ta$conf.low[ta$index == i])
-    expect_lte(reml, ta$conf.high[ta$index == i])
+    expect_gte(reml, ta$conf.low[ta$term == i])
+    expect_lte(reml, ta$conf.high[ta$term == i])
   }
 })
 
@@ -2047,7 +2047,7 @@ test_that("brms fits the ragged nested Design-2 random ICC end to end (O-Bayes-I
   ta <- tidy(fa)
   # Subject level only (nested designs define no cluster-level IRR); agreement via explicit `type`.
   expect_setequal(unique(ta$level), "subject")
-  expect_setequal(ta$index, c("ICC(A,1)", "ICC(A,k)"))
+  expect_setequal(ta$term, c("ICC(A,1)", "ICC(A,k)"))
   expect_true(all(ta$estimate >= 0 & ta$estimate <= 1))
 
   # CONTAINMENT: the glmmTMB M19 incomplete nested random subject point sits inside each brms
@@ -2062,11 +2062,11 @@ test_that("brms fits the ragged nested Design-2 random ICC end to end (O-Bayes-I
     seed = 1
   ))
   gf <- gf[gf$level == "subject", ]
-  by_index <- function(x, i) x$estimate[x$index == i]
+  by_index <- function(x, i) x$estimate[x$term == i]
   for (i in c("ICC(A,1)", "ICC(A,k)")) {
     reml <- by_index(gf, i)
-    expect_gte(reml, ta$conf.low[ta$index == i])
-    expect_lte(reml, ta$conf.high[ta$index == i])
+    expect_gte(reml, ta$conf.low[ta$term == i])
+    expect_lte(reml, ta$conf.high[ta$term == i])
   }
 })
 
@@ -2136,7 +2136,7 @@ test_that("brms fits the ragged nested Design-2 FIXED ICC end to end (O-Bayes-IF
   tb <- tidy(fb)
   # Nested designs define only the subject level; both single and average ship (M36).
   expect_setequal(tb$level, "subject")
-  expect_setequal(tb$index, c("ICC(A,1)", "ICC(A,k)"))
+  expect_setequal(tb$term, c("ICC(A,1)", "ICC(A,k)"))
   expect_true(all(
     tb$conf.low >= 0 & tb$conf.high <= 1 & tb$conf.low <= tb$conf.high
   ))
@@ -2152,11 +2152,11 @@ test_that("brms fits the ragged nested Design-2 FIXED ICC end to end (O-Bayes-IF
     design = "nested_in_clusters",
     engine = "glmmTMB"
   )))
-  by_index <- function(x, i) x$estimate[x$index == i]
+  by_index <- function(x, i) x$estimate[x$term == i]
   for (i in c("ICC(A,1)", "ICC(A,k)")) {
     reml <- by_index(gm, i)
-    expect_gte(reml, tb$conf.low[tb$index == i])
-    expect_lte(reml, tb$conf.high[tb$index == i])
+    expect_gte(reml, tb$conf.low[tb$term == i])
+    expect_lte(reml, tb$conf.high[tb$term == i])
   }
 })
 
@@ -2219,7 +2219,7 @@ test_that("brms fits the ragged nested Design-3 random ICC end to end (O-Bayes-I
   ta <- tidy(fa)
   # Subject level only, one-way labels (Design 3 is the multilevel one-way, agreement-only).
   expect_setequal(unique(ta$level), "subject")
-  expect_setequal(ta$index, c("ICC(1)", "ICC(k)"))
+  expect_setequal(ta$term, c("ICC(1)", "ICC(k)"))
   expect_true(all(ta$estimate >= 0 & ta$estimate <= 1))
 
   # CONTAINMENT: the glmmTMB M19 incomplete nested random subject point sits inside each brms
@@ -2234,11 +2234,11 @@ test_that("brms fits the ragged nested Design-3 random ICC end to end (O-Bayes-I
     seed = 1
   ))
   gf <- gf[gf$level == "subject", ]
-  by_index <- function(x, i) x$estimate[x$index == i]
+  by_index <- function(x, i) x$estimate[x$term == i]
   for (i in c("ICC(1)", "ICC(k)")) {
     reml <- by_index(gf, i)
-    expect_gte(reml, ta$conf.low[ta$index == i])
-    expect_lte(reml, ta$conf.high[ta$index == i])
+    expect_gte(reml, ta$conf.low[ta$term == i])
+    expect_lte(reml, ta$conf.high[ta$term == i])
   }
 })
 
@@ -2296,7 +2296,7 @@ test_that("brms fits the crossed multilevel ICC end to end (O-Bayes-ML-agree)", 
   expect_identical(fit$engine, "brms")
   expect_identical(fit$ci$method, "posterior")
   td <- tidy(fit)
-  expect_setequal(td$index, c("ICC(A,1)", "ICC(A,k)"))
+  expect_setequal(td$term, c("ICC(A,1)", "ICC(A,k)"))
   expect_setequal(td$level, c("subject", "cluster"))
   # Every row is a valid probability interval. We do NOT assert the MAP point lies inside
   # its own percentile interval: the point (mode of the ICC draws) and the interval
@@ -2306,7 +2306,7 @@ test_that("brms fits the crossed multilevel ICC end to end (O-Bayes-ML-agree)", 
     td$conf.low >= 0 & td$conf.high <= 1 & td$conf.low <= td$conf.high
   ))
 
-  key <- function(x) paste(x$index, x$level)
+  key <- function(x) paste(x$term, x$level)
   g <- tidy(icc(
     d,
     score,
@@ -2416,12 +2416,12 @@ test_that("brms fits the crossed multilevel FIXED cluster-level ICC (O-Bayes-FCL
   expect_identical(fit_fixed$engine, "brms")
   td <- tidy(fit_fixed)
   expect_setequal(td$level, c("subject", "cluster"))
-  expect_setequal(td$index, c("ICC(A,1)", "ICC(A,k)"))
+  expect_setequal(td$term, c("ICC(A,1)", "ICC(A,k)"))
   expect_true(all(
     td$conf.low >= 0 & td$conf.high <= 1 & td$conf.low <= td$conf.high
   ))
 
-  key <- function(x) paste(x$index, x$level)
+  key <- function(x) paste(x$term, x$level)
   cl <- function(x) x[x$level == "cluster", ]
 
   # (b) Containment: the glmmTMB M37 fixed cluster-level point sits inside the brms fixed
@@ -2516,8 +2516,8 @@ test_that("brms fits the conflated diagnostic end to end (O-Bayes-Conflated-agre
   expect_identical(fit$ci$method, "posterior")
   td <- tidy(fit)
   expect_true("conflated" %in% td$level)
-  cf <- td[td$level == "conflated" & td$index == "ICC(A,1)", ]
-  sj <- td[td$level == "subject" & td$index == "ICC(A,1)", ]
+  cf <- td[td$level == "conflated" & td$term == "ICC(A,1)", ]
+  sj <- td[td$level == "subject" & td$term == "ICC(A,1)", ]
   expect_true(is.na(cf$sf_index))
   # Every conflated row is a valid probability interval.
   expect_true(all(
@@ -2535,7 +2535,7 @@ test_that("brms fits the conflated diagnostic end to end (O-Bayes-Conflated-agre
     level = "conflated",
     engine = "glmmTMB"
   ))
-  g1 <- g[g$index == "ICC(A,1)", ]
+  g1 <- g[g$term == "ICC(A,1)", ]
   expect_true(g1$estimate >= cf$conf.low && g1$estimate <= cf$conf.high)
 
   # Distinctness: the conflated ICC is visibly above the subject level (the diagnostic's point).
@@ -3095,8 +3095,8 @@ test_that("brms fits the crossed fixed-rater multilevel ICC end to end (O-Bayes-
   )
   ta <- tidy(fa)
   tc <- tidy(fc)
-  expect_setequal(ta$index, c("ICC(A,1)", "ICC(A,k)"))
-  expect_setequal(tc$index, c("ICC(C,1)", "ICC(C,k)"))
+  expect_setequal(ta$term, c("ICC(A,1)", "ICC(A,k)"))
+  expect_setequal(tc$term, c("ICC(C,1)", "ICC(C,k)"))
   expect_setequal(ta$level, "subject")
   expect_true(all(
     c(ta$estimate, tc$estimate) >= 0 &
@@ -3132,16 +3132,16 @@ test_that("brms fits the crossed fixed-rater multilevel ICC end to end (O-Bayes-
     level = "subject",
     engine = "glmmTMB"
   )))
-  by_index <- function(x, i) x$estimate[x$index == i]
+  by_index <- function(x, i) x$estimate[x$term == i]
   for (i in c("ICC(A,1)", "ICC(A,k)")) {
     reml <- by_index(ga, i)
-    expect_gte(reml, ta$conf.low[ta$index == i])
-    expect_lte(reml, ta$conf.high[ta$index == i])
+    expect_gte(reml, ta$conf.low[ta$term == i])
+    expect_lte(reml, ta$conf.high[ta$term == i])
   }
   for (i in c("ICC(C,1)", "ICC(C,k)")) {
     reml <- by_index(gcons, i)
-    expect_gte(reml, tc$conf.low[tc$index == i])
-    expect_lte(reml, tc$conf.high[tc$index == i])
+    expect_gte(reml, tc$conf.low[tc$term == i])
+    expect_lte(reml, tc$conf.high[tc$term == i])
   }
   # Pointwise MCMC ~ MLE at the well-identified subject level (ten Hove 2022's MCMC ~ MLE
   # regime; ~80 subjects, so well-powered even at k = 3).
@@ -3248,8 +3248,8 @@ test_that("brms fits the nested fixed-rater multilevel ICC end to end (O-Bayes-F
   expect_setequal(names(fa$components), c("subject", "rater", "residual"))
   ta <- tidy(fa)
   tc <- tidy(fc)
-  expect_setequal(ta$index, c("ICC(A,1)", "ICC(A,k)"))
-  expect_setequal(tc$index, c("ICC(C,1)", "ICC(C,k)"))
+  expect_setequal(ta$term, c("ICC(A,1)", "ICC(A,k)"))
+  expect_setequal(tc$term, c("ICC(C,1)", "ICC(C,k)"))
   expect_setequal(ta$level, "subject")
   expect_true(all(
     c(ta$estimate, tc$estimate) >= 0 & c(ta$estimate, tc$estimate) <= 1
@@ -3277,16 +3277,16 @@ test_that("brms fits the nested fixed-rater multilevel ICC end to end (O-Bayes-F
     raters = "fixed",
     engine = "glmmTMB"
   )))
-  by_index <- function(x, i) x$estimate[x$index == i]
+  by_index <- function(x, i) x$estimate[x$term == i]
   for (i in c("ICC(A,1)", "ICC(A,k)")) {
     reml <- by_index(ga, i)
-    expect_gte(reml, ta$conf.low[ta$index == i])
-    expect_lte(reml, ta$conf.high[ta$index == i])
+    expect_gte(reml, ta$conf.low[ta$term == i])
+    expect_lte(reml, ta$conf.high[ta$term == i])
   }
   for (i in c("ICC(C,1)", "ICC(C,k)")) {
     reml <- by_index(gcons, i)
-    expect_gte(reml, tc$conf.low[tc$index == i])
-    expect_lte(reml, tc$conf.high[tc$index == i])
+    expect_gte(reml, tc$conf.low[tc$term == i])
+    expect_lte(reml, tc$conf.high[tc$term == i])
   }
   # Pointwise MCMC ~ MLE at the well-identified subject level (~70 subjects).
   expect_equal(
@@ -3377,13 +3377,13 @@ test_that("brms fits the nested Design 2 ICC end to end (O-Bayes-NML-agree)", {
   expect_identical(fit$engine, "brms")
   expect_identical(fit$ci$method, "posterior")
   td <- tidy(fit)
-  expect_setequal(td$index, c("ICC(A,1)", "ICC(A,k)"))
+  expect_setequal(td$term, c("ICC(A,1)", "ICC(A,k)"))
   expect_setequal(td$level, "subject")
   expect_true(all(
     td$conf.low >= 0 & td$conf.high <= 1 & td$conf.low <= td$conf.high
   ))
 
-  key <- function(x) paste(x$index, x$level)
+  key <- function(x) paste(x$term, x$level)
   g <- tidy(icc(
     d,
     score,
@@ -3496,13 +3496,13 @@ test_that("brms fits the nested Design 3 ICC end to end (O-Bayes-NML-agree)", {
   expect_identical(fit$engine, "brms")
   expect_identical(fit$ci$method, "posterior")
   td <- tidy(fit)
-  expect_setequal(td$index, c("ICC(1)", "ICC(k)"))
+  expect_setequal(td$term, c("ICC(1)", "ICC(k)"))
   expect_setequal(td$level, "subject")
   expect_true(all(
     td$conf.low >= 0 & td$conf.high <= 1 & td$conf.low <= td$conf.high
   ))
 
-  key <- function(x) paste(x$index, x$level)
+  key <- function(x) paste(x$term, x$level)
   g <- tidy(icc(
     d,
     score,
@@ -3563,7 +3563,7 @@ test_that("brms fits the nested Design 3 ICC end to end (O-Bayes-NML-agree)", {
     cluster = cluster,
     engine = "glmmTMB"
   ))
-  g0 <- g0[order(g0$index), ]
+  g0 <- g0[order(g0$term), ]
   ow <- tidy(icc(
     d0,
     score,
@@ -3572,7 +3572,7 @@ test_that("brms fits the nested Design 3 ICC end to end (O-Bayes-NML-agree)", {
     engine = "glmmTMB",
     model = "oneway"
   ))
-  ow <- ow[order(ow$index), ]
+  ow <- ow[order(ow$term), ]
   expect_equal(g0$estimate, ow$estimate, tolerance = 0.02)
 
   # The header names the nested (raters nested in subjects) design + a credible interval.

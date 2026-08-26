@@ -168,7 +168,7 @@ bh_usable <- function(d, method, args = list()) {
   # STRICTER floor than production's on unbalanced cells, so the named == usable
   # identity was judged against a mis-specified predicate (M97 review F6).
   n0 <- 1 / mean(1 / as.numeric(table(d$subject)))
-  floor_rho <- ifelse(tb$index == "ICC(1)" & n0 > 1, -1 / (n0 - 1), -Inf)
+  floor_rho <- ifelse(tb$term == "ICC(1)" & n0 > 1, -1 / (n0 - 1), -Inf)
   all(
     is.finite(tb$conf.low) &
       is.finite(tb$conf.high) &

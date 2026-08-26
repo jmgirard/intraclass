@@ -158,7 +158,7 @@ plot.icc_dstudy <- function(x, ...) {
 # S3 method for ggplot2::autoplot (a Suggests generic), lazily registered in
 # zzz.R; see the icc_dstudy note above for why object_name_linter is suppressed.
 # nolint start: object_name_linter.
-autoplot.icc <- function(object, what = c("coefficients", "components"), ...) {
+autoplot.icc <- function(object, what = "coefficients", ...) {
   # nolint end
   rlang::check_installed("ggplot2", reason = "to plot an {.cls icc} object.")
   what <- validate_choice(what, c("coefficients", "components"), "what")

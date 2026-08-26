@@ -52,7 +52,7 @@ safe_icc <- function(fn) {
   tryCatch(
     {
       td <- generics::tidy(fn())
-      i1 <- td[td$index == "ICC(1)", ]
+      i1 <- td[td$term == "ICC(1)", ]
       c(lower = i1$conf.low, upper = i1$conf.high)
     },
     intraclass_singular_fit = function(e) c(lower = NA_real_, upper = NA_real_)

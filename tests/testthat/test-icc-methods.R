@@ -62,7 +62,7 @@ test_that("printed numbers equal tidy()/glance() to displayed precision (M43)", 
     # the coefficient's data row is the one carrying its label AND a "[" CI (the
     # Shrout & Fleiss note also names the label but has no bracket).
     row <- lines[
-      grepl(td$index[i], lines, fixed = TRUE) &
+      grepl(td$term[i], lines, fixed = TRUE) &
         grepl("[", lines, fixed = TRUE)
     ]
     expect_length(row, 1L)

@@ -76,12 +76,12 @@ test_that("lavaan reproduces the published Shrout & Fleiss consistency values", 
     seed = 1
   ))
   expect_equal(
-    c1$estimate[c1$index == "ICC(C,1)"],
+    c1$estimate[c1$term == "ICC(C,1)"],
     sf_oracle_all[["ICC(C,1)"]],
     tolerance = 1e-3
   )
   expect_equal(
-    ck$estimate[ck$index == "ICC(C,k)"],
+    ck$estimate[ck$term == "ICC(C,k)"],
     sf_oracle_all[["ICC(C,k)"]],
     tolerance = 1e-3
   )
@@ -112,8 +112,8 @@ test_that("lavaan agreement implements Jorgensen (2021) Eq. 6 exactly", {
     engine = "lavaan",
     seed = 1
   ))
-  expect_equal(a$estimate[a$index == "ICC(A,1)"], 0.2843, tolerance = 1e-3)
-  expect_equal(a$estimate[a$index == "ICC(A,k)"], 0.6137, tolerance = 1e-3)
+  expect_equal(a$estimate[a$term == "ICC(A,1)"], 0.2843, tolerance = 1e-3)
+  expect_equal(a$estimate[a$term == "ICC(A,k)"], 0.6137, tolerance = 1e-3)
 })
 
 test_that("lavaan agreement converges to glmmTMB and the population at large N", {
@@ -141,8 +141,8 @@ test_that("lavaan agreement converges to glmmTMB and the population at large N",
   tmb <- tidy(icc(grid, score, subject, rater, engine = "glmmTMB", seed = 1))
   pop_a1 <- v_s / (v_s + v_r + v_res)
 
-  la1 <- lav$estimate[lav$index == "ICC(A,1)"]
-  ta1 <- tmb$estimate[tmb$index == "ICC(A,1)"]
+  la1 <- lav$estimate[lav$term == "ICC(A,1)"]
+  ta1 <- tmb$estimate[tmb$term == "ICC(A,1)"]
   expect_equal(la1, ta1, tolerance = 0.02) # engines agree at large N
   expect_equal(la1, pop_a1, tolerance = 0.05) # and recover the population
 })
@@ -340,8 +340,8 @@ test_that("fixed-rater SEM agreement is the Case-3A theta^2_r, distinct from raw
   fa <- tidy(fix)
   ra <- tidy(raw)
   expect_gt(
-    fa$estimate[fa$index == "ICC(A,1)"],
-    ra$estimate[ra$index == "ICC(A,1)"]
+    fa$estimate[fa$term == "ICC(A,1)"],
+    ra$estimate[ra$term == "ICC(A,1)"]
   )
 })
 
@@ -393,13 +393,13 @@ test_that("balanced fixed-rater SEM reduces to glmmTMB fixed AND random (O-FSEM)
     # leave a documented ~1e-3 absolute gap (relative ~4e-3); the large-N test below
     # is the tight (1e-3) convergence pin. Honest small-sample tolerance, not tuned.
     expect_equal(
-      lav$estimate[lav$index == idx],
-      gf$estimate[gf$index == idx],
+      lav$estimate[lav$term == idx],
+      gf$estimate[gf$term == idx],
       tolerance = 1e-2
     )
     expect_equal(
-      lav$estimate[lav$index == idx],
-      gr$estimate[gr$index == idx],
+      lav$estimate[lav$term == idx],
+      gr$estimate[gr$term == idx],
       tolerance = 1e-2
     )
   }
@@ -440,8 +440,8 @@ test_that("fixed-rater SEM converges to glmmTMB fixed at large N (O-FSEM)", {
   )))
   # Bias -> 0 as the intercepts stabilise, so the estimators agree tightly.
   expect_equal(
-    lav$estimate[lav$index == "ICC(A,1)"],
-    gf$estimate[gf$index == "ICC(A,1)"],
+    lav$estimate[lav$term == "ICC(A,1)"],
+    gf$estimate[gf$term == "ICC(A,1)"],
     tolerance = 1e-3
   )
 })
@@ -582,8 +582,8 @@ test_that("incomplete lavaan fits via FIML and matches glmmTMB consistency (O-FI
     ))
     idx <- if (u == "single") "ICC(C,1)" else "ICC(C,k)"
     expect_equal(
-      lav$estimate[lav$index == idx],
-      tmb$estimate[tmb$index == idx],
+      lav$estimate[lav$term == idx],
+      tmb$estimate[tmb$term == idx],
       tolerance = 8e-3
     )
   }
@@ -619,8 +619,8 @@ test_that("incomplete lavaan agreement matches glmmTMB via FIML (O-FIML)", {
     ))
     idx <- if (u == "single") "ICC(A,1)" else "ICC(A,k)"
     expect_equal(
-      lav$estimate[lav$index == idx],
-      tmb$estimate[tmb$index == idx],
+      lav$estimate[lav$term == idx],
+      tmb$estimate[tmb$term == idx],
       tolerance = 1.5e-2
     )
   }
@@ -657,7 +657,7 @@ test_that("incomplete lavaan recovers the population at large N (O-FIML)", {
     seed = 1
   ))
   pop_c1 <- v_s / (v_s + v_res)
-  expect_equal(lav$estimate[lav$index == "ICC(C,1)"], pop_c1, tolerance = 0.05)
+  expect_equal(lav$estimate[lav$term == "ICC(C,1)"], pop_c1, tolerance = 0.05)
 })
 
 test_that("incomplete lavaan interval is finite, in [0, 1], and brackets the estimate", {

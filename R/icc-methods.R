@@ -347,8 +347,18 @@ summary.icc <- function(object, ...) {
 #' @rdname icc
 #' @export
 tidy.icc <- function(x, ...) {
-  out <- tibble::tibble(
-    index = x$estimates$index,
+  # `term` rather than `index`: the broom glossary the re-exported generic belongs to
+  # keys the coefficient-identifying column as `term`, which is what the wider
+  # tidy ecosystem (modelsummary and friends) looks for (D-035).
+  # `occasions` is present on every fit, NA where the design has no within-cell
+  # replicates, so two tidied fits always row-bind (D-035).
+  tibble::tibble(
+    term = x$estimates$index,
+    occasions = if (isTRUE(x$design$replicates)) {
+      x$estimates$occasions
+    } else {
+      rep(NA_integer_, length(x$estimates$index))
+    },
     type = x$estimates$type,
     level = x$estimates$level,
     sf_index = x$estimates$sf_index,
@@ -359,15 +369,6 @@ tidy.icc <- function(x, ...) {
     conf.level = x$ci$conf_level,
     method = x$ci$method
   )
-  # Within-cell replicates carry the occasion count averaged into each coefficient.
-  if (isTRUE(x$design$replicates)) {
-    out <- tibble::add_column(
-      out,
-      occasions = x$estimates$occasions,
-      .after = "index"
-    )
-  }
-  out
 }
 
 #' @rdname icc
@@ -393,9 +394,20 @@ glance.icc <- function(x, ...) {
     var_subject = x$components$subject,
     var_rater = or_na(x$components$rater),
     var_cluster_rater = or_na(x$components$cluster_rater),
+    # A within-cell-replicate fit splits the residual into the subject-by-rater
+    # interaction and pure error, so `var_residual` means something different there
+    # than on an unreplicated fit. Reporting the interaction and the occasion count
+    # beside it -- both NA when the design has no replicates -- makes which of the
+    # two is in `var_residual` readable from the row itself (RR04).
+    var_subject_rater = or_na(x$components$subject_rater),
     var_residual = x$components$residual,
+    n_o = if (isTRUE(x$design$replicates)) x$design$n_o else NA_integer_,
     engine = x$engine,
     ci_method = x$ci$method,
-    conf.level = x$ci$conf_level
+    conf.level = x$ci$conf_level,
+    # Sampler diagnostics for a Bayesian fit (worst R-hat, smallest bulk-ESS);
+    # NA for every other engine, which does not sample.
+    rhat = or_na(x$ci$rhat),
+    ess_bulk = or_na(x$ci$ess_bulk)
   )
 }

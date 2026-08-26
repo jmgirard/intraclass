@@ -25,6 +25,6 @@ test_that("glmmTMB point estimates match lme4 (independent engine oracle)", {
   lme4_ak <- vs / (vs + (vr + vres) / k)
 
   td <- tidy(icc(d, score, subject, rater, seed = 1))
-  expect_equal(td$estimate[td$index == "ICC(A,1)"], lme4_a1, tolerance = 1e-4)
-  expect_equal(td$estimate[td$index == "ICC(A,k)"], lme4_ak, tolerance = 1e-4)
+  expect_equal(td$estimate[td$term == "ICC(A,1)"], lme4_a1, tolerance = 1e-4)
+  expect_equal(td$estimate[td$term == "ICC(A,k)"], lme4_ak, tolerance = 1e-4)
 })

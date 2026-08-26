@@ -32,6 +32,6 @@ test_that("engine variance components match ANOVA method-of-moments (O2)", {
   a1 <- vs / (vs + vr + vres)
   ak <- vs / (vs + (vr + vres) / k)
   td <- tidy(icc(d, score, subject, rater, seed = 1))
-  expect_equal(td$estimate[td$index == "ICC(A,1)"], a1, tolerance = 1e-4)
-  expect_equal(td$estimate[td$index == "ICC(A,k)"], ak, tolerance = 1e-4)
+  expect_equal(td$estimate[td$term == "ICC(A,1)"], a1, tolerance = 1e-4)
+  expect_equal(td$estimate[td$term == "ICC(A,k)"], ak, tolerance = 1e-4)
 })

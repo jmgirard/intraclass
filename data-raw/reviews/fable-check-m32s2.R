@@ -125,8 +125,8 @@ freq_row <- function(d, keff) {
         seed = 1L
       )
       td <- generics::tidy(fit)
-      i1 <- td[td$index == "ICC(1)", ]
-      ik <- td[td$index == "ICC(k)", ]
+      i1 <- td[td$term == "ICC(1)", ]
+      ik <- td[td$term == "ICC(k)", ]
       p1 <- pop_subject(1)
       pk <- pop_subject(keff)
       data.frame(

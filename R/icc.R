@@ -658,15 +658,29 @@
 #'   variance components, design, engine, interval settings, sample sizes, the
 #'   fitted model, and the call.
 #'
+#'   **What of that object is stable.** The supported way to read a fit is
+#'   through the methods below, plus two elements of the list itself: `$fit`,
+#'   the object the engine returned, and `$call`, the matched call. Everything
+#'   else in the list is internal: its names, nesting, and contents may change
+#'   in any release without a deprecation cycle. That is the whole rule --
+#'   `$fit` and `$call` are the list elements you may depend on, and reaching
+#'   into any other one is reading an implementation detail. `tidy()` and
+#'   `glance()` return the same information as a stable table.
+#'
 #'   The methods documented on this page return:
-#'   * `tidy.icc()`: a tibble with one row per estimated coefficient. Its
-#'     columns are `index`, `type`, `level`, `sf_index`, `estimate`,
-#'     `std.error`, `conf.low`, `conf.high`, `conf.level`, and `method`. An
-#'     `occasions` column joins them when the design has within-cell replicates,
-#'     inserted after `index`, so the list above is not a column order.
+#'   * `tidy.icc()`: a tibble with one row per estimated coefficient, columns
+#'     in this order: `term` (the coefficient's ICC index, named for the broom
+#'     glossary), `occasions`, `type`, `level`, `sf_index`, `estimate`,
+#'     `std.error`, `conf.low`, `conf.high`, `conf.level`, `method`. Every
+#'     column is present on every fit; `occasions` is `NA` unless the design
+#'     has within-cell replicates.
 #'   * `glance.icc()`: a one-row tibble of model-level summaries:
 #'     the sample sizes, the design flags, the effective rater counts, the
-#'     variance components, and the engine and interval settings.
+#'     variance components, the occasion count `n_o` (`NA` unless the design
+#'     has within-cell replicates *and* defines one occasion count per cell --
+#'     ragged replicates leave it `NA`), the engine and interval settings, and
+#'     the sampler diagnostics `rhat` and `ess_bulk` (`NA` for the
+#'     non-Bayesian engines, which do not sample).
 #'   * `format.icc()`: a character vector holding the printed report, one line per
 #'     element.
 #'   * `print.icc()`: the `icc` object invisibly, having emitted that report.
@@ -717,7 +731,7 @@ icc <- function(
   cluster = NULL,
   model = "twoway",
   type = c("agreement", "consistency"),
-  raters = c("random", "fixed"),
+  raters = "random",
   unit = c("single", "average"),
   occasions = "single",
   level = c("subject", "cluster"),
@@ -730,7 +744,7 @@ icc <- function(
   seed = NULL,
   brm_args = list(),
   prior = NULL,
-  posterior_summary = c("percentile", "hpdi")
+  posterior_summary = "percentile"
 ) {
   if (!is.data.frame(data)) {
     abort_intraclass("{.arg data} must be a data frame.")
@@ -1015,14 +1029,7 @@ icc <- function(
   if (raters == "fixed" && !(multilevel && "conflated" %in% level)) {
     warn_fixed_raters()
   }
-  if (
-    !is.numeric(conf_level) ||
-      length(conf_level) != 1L ||
-      conf_level <= 0 ||
-      conf_level >= 1
-  ) {
-    abort_intraclass("{.arg conf_level} must be a single number in (0, 1).")
-  }
+  conf_level <- validate_conf_level(conf_level)
 
   # Capture the columns with tidy-eval and canonicalize to subject/rater/score.
   score_v <- rlang::eval_tidy(rlang::enquo(score), data)
@@ -2489,7 +2496,13 @@ icc <- function(
         ml_design = if (multilevel) ml_design else NA_character_,
         levels = if (multilevel) level else NULL,
         replicates = replicates,
-        n_o = if (replicates) design_info$n_o else NA_integer_
+        # The design-aware count, not `design_info$n_o`: the latter reads the
+        # flat subject x rater grid, which a block-diagonal (nested) design
+        # never fills, so it reported NA on a replicate fit whose
+        # `var_subject_rater` was populated (M48 review F1). NA survives here
+        # only where the design defines no single count per cell -- ragged
+        # replicates.
+        n_o = if (replicates) n_o_val else NA_integer_
       ),
       # The replicate path averages over distinct raters (k_eff_raters), not total
       # ratings, so report that divisor (estimand-spec M17-within-cell-replicates §4).
@@ -2524,7 +2537,7 @@ icc <- function(
         seed = seed,
         # How the posterior draws were summarized into the credible interval
         # ("percentile" or "hpdi", M34 Slice 2); NA for the non-Bayesian methods, which
-        # do not produce a posterior. Surfaced in the printed header + glance().
+        # do not produce a posterior. Surfaced in the printed header.
         posterior_summary = if (ci_method == "posterior") {
           posterior_summary
         } else {
@@ -2589,15 +2602,35 @@ require_supported <- function(
 }
 
 # Match a scalar argument against its supported set, raising a classed intraclass
-# error (PRINCIPLES.md #8) rather than rlang::arg_match's un-classed one. Accepts
-# the default vector (takes the first element) or a single supplied value.
+# error (PRINCIPLES.md #8) rather than rlang::arg_match's un-classed one. A choice
+# argument takes exactly one value: passing several -- including the full choice
+# list -- aborts rather than quietly selecting the first (D-035; a vector default in
+# this signature means "report every value"). The report-all arguments are
+# `type`, `unit`, `level` and `occasions` -- the last carries a scalar default
+# but still accepts both of its values, so it is not routed through here.
 validate_choice <- function(value, choices, arg, call = rlang::caller_env()) {
-  if (identical(value, choices)) {
-    return(choices[[1L]])
-  }
   if (!is.character(value) || length(value) != 1L || !value %in% choices) {
     abort_intraclass(
       "{.arg {arg}} must be one of {.val {choices}}.",
+      call = call
+    )
+  }
+  value
+}
+
+# Validate a confidence level: a single number strictly inside (0, 1). Shared by
+# `icc()` and `d_study()`, which both accept one and would otherwise fail far
+# downstream with an un-classed base error (#8).
+validate_conf_level <- function(value, call = rlang::caller_env()) {
+  if (
+    !is.numeric(value) ||
+      length(value) != 1L ||
+      !is.finite(value) ||
+      value <= 0 ||
+      value >= 1
+  ) {
+    abort_intraclass(
+      "{.arg conf_level} must be a single number in (0, 1).",
       call = call
     )
   }

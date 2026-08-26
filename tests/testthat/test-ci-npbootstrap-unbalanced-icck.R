@@ -115,8 +115,8 @@ test_that("the shipped unbalanced ICC(k) interval is the exact SB image of ICC(1
       boot_samples = 299L,
       seed = s
     ))
-    i1 <- td[td$index == "ICC(1)", ]
-    ik <- td[td$index == "ICC(k)", ]
+    i1 <- td[td$term == "ICC(1)", ]
+    ik <- td[td$term == "ICC(k)", ]
     expect_equal(ik$conf.low, npb_sb(i1$conf.low, k_eff), tolerance = 1e-12)
     expect_equal(ik$conf.high, npb_sb(i1$conf.high, k_eff), tolerance = 1e-12)
     # Strictly monotone map -> ordered, finite, and bounded above by 1.
@@ -157,8 +157,8 @@ test_that("ICC(k) coverage inherits from ICC(1) rep-by-rep, tolerance 0 (AC2 ide
       next
     }
     n_ok <- n_ok + 1L
-    i1 <- td[td$index == "ICC(1)", ]
-    ik <- td[td$index == "ICC(k)", ]
+    i1 <- td[td$term == "ICC(1)", ]
+    ik <- td[td$term == "ICC(k)", ]
     cov1 <- i1$conf.low <= rho && rho <= i1$conf.high
     truth_k <- npb_sb(rho, k_eff)
     covk <- ik$conf.low <= truth_k && truth_k <= ik$conf.high

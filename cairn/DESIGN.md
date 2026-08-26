@@ -50,10 +50,12 @@ vignettes, `cairn/estimand-specs/`). (Design interview, 2026-07-12.)
   first CRAN submission; from then on every breaking change takes a lifecycle
   deprecation cycle — the paper's examples must keep running. Submission is the
   one-way door; pre-CRAN cleanups happen before it.
-- **Platforms:** the commitment is exactly the CI matrix — R release, oldrel-1,
-  and devel on macOS/Windows/Ubuntu. The declared `R (>= 3.5)` floor is a known
-  leftover to correct honestly (raise to what the dependency chain requires) at
-  release prep.
+- **Platforms:** the commitment is exactly the CI matrix — R release on macOS,
+  Windows and Ubuntu, plus R devel and oldrel-1 on Ubuntu only (corrected M48).
+  That five-config matrix runs on push to the default branch; a pull request
+  gets ubuntu-release and windows-release. The declared floor is
+  `R (>= 4.0.0)` (corrected M48): what the dependency chain requires, rlang
+  being the binding Import.
 - **Engine roster: closed at four.** glmmTMB (frequentist default), lme4
   (frequentist oracle), brms (Bayesian), lavaan (SEM) — each paradigm represented
   once. A new engine must enable an estimand the four can't reach, not just be
@@ -251,6 +253,18 @@ paths (`theta2r_moment_draws()` / `brms_theta2r_moment_draws()`); ADR-038
 (frequentist) / ADR-037 (brms); GP7-guarded.
 
 ## Known issues
+
+- **The declared R floor is not tested by CI.** v0.1.0 declares
+  `R (>= 4.0.0)`, which is what the Imports chain requires (rlang's own
+  `Depends`); CI's oldest configuration is `oldrel-1`, several releases above
+  it, so no run anywhere exercises the declared floor. This is a live tension
+  with GP3, whose text reads "no declared floor CI doesn't test". Accepted at
+  the M48 review gate (2026-08-25) rather than resolved: raising the declared
+  floor to what CI tests would turn away users whose R would in fact run the
+  package, and pinning a CI job to 4.0.0 is new infrastructure inside a release
+  round. The pre-submission win-builder and R-hub runs cover more platforms
+  than CI does, but neither reaches 4.0.0 either. A ROADMAP candidate row
+  carries the fix.
 
 - ~~No cairn-canonical oracle-registry home yet~~ — RESOLVED by M63 (D-007): the
   registry is [`references/ORACLES.md`](references/ORACLES.md), declared in the

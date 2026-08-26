@@ -72,7 +72,7 @@ the projection rather than the model, reporting the swept range (`n_m`, `m_min`,
 We fit with `type = "agreement"` here because the dependability coefficient
 \eqn{\Phi(m)} above *is* the absolute-agreement projection. A default `icc()` reports
 both agreement and consistency, and `d_study()` then projects **one curve per error
-definition**, adding a `type` column. That is handy when you want both, but for
+definition**, told apart by the `type` column. That is handy when you want both, but for
 this walkthrough one curve keeps the picture clear.
 
 Read as a curve, this is the classic "how many raters?" picture. Plot it with

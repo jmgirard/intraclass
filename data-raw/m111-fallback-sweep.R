@@ -96,7 +96,7 @@ mc_ci <- function(d, seed) {
         mc_samples = 10000L,
         seed = seed
       ))
-      i1 <- td[td$index == "ICC(1)", ]
+      i1 <- td[td$term == "ICC(1)", ]
       list(status = "ok", lower = i1$conf.low, upper = i1$conf.high)
     },
     intraclass_singular_fit = function(e) {
