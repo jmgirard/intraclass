@@ -43,7 +43,7 @@ gate before stamping, never folded in silently.
       opens with a single consolidated `# intraclass 0.1.0` changelog (no
       "(development version)" heading; M44's default-shape change framed as
       part of the initial release per ADR-055).
-- [x] AC3: `cran-comments.md` names the actual check environments used and
+- [ ] AC3: `cran-comments.md` names the actual check environments used and
       justifies every remaining NOTE; `inst/WORDLIST`/spelling clean.
 - [x] AC4: fresh `devtools::check(args = "--as-cran", env_vars =
       c(NOT_CRAN = "false"), manual = TRUE)` → 0 errors / 0 warnings / only
@@ -255,19 +255,29 @@ record of what was measured on `4a1ce09` and is superseded by this one.
   and `checking HTML version of manual` both OK, so the TinyTeX courier path
   the criterion names is exercised. With no NOTE there is nothing for AC3 to
   justify.
-- **AC3 — verified.** Spelling first, this being the second pass's failure:
-  `spelling::spell_check_package()` re-run fresh on this head returns **"No
-  spelling errors found"** (0 rows), against 95 entries in `inst/WORDLIST` —
-  the T13 repair added `disambiguates`, the one word that failed on `4a1ce09`.
-  `cran-comments.md` matches the AC4 run just made: it names R 4.6.1,
-  aarch64-apple-darwin23, `NOT_CRAN=false`, `manual = TRUE`, 2026-08-25, and
-  the `0 errors | 0 warnings | 0 notes` result, which is what the fresh run
-  reported. Its "Test environments" block separates what has been checked
-  (this local run; the two GitHub Actions configurations a pull request runs)
-  from what is scheduled before submission (the five-config matrix on the merge
-  commit; win-builder and R-hub). With no NOTE there is nothing left to
-  justify; the DESCRIPTION-misspelling note it anticipates from CRAN's incoming
-  checks is named and answered.
+- **AC3 — NOT verified; the `cran-comments.md` half fails on this head.**
+  (This entry supersedes the "verified" reading recorded earlier in this same
+  pass, which checked the R version, platform triple, `NOT_CRAN`, `manual` and
+  date but never the operating-system version. Third-pass finding O3 caught
+  what that reading missed.) The spelling half is clean, this being the second
+  pass's failure: `spelling::spell_check_package()` re-run fresh on this head
+  returns **"No spelling errors found"** (0 rows), against 95 entries in
+  `inst/WORDLIST` — the T13 repair added `disambiguates`, the one word that
+  failed on `4a1ce09`. The first half fails. `cran-comments.md:20` reads
+  "Local: macOS **15** (aarch64), R 4.6.1 — the `--as-cran` run reported
+  above", and the machine that ran it is macOS **26.6.2** (Tahoe):
+  `sw_vers` returns `ProductVersion: 26.6.2`, `sessionInfo()$running` returns
+  `"macOS Tahoe 26.6.2"`, and the AC4 check banner recorded above reads
+  `running under: macOS Tahoe 26.6.2`. The wrong version is an addition of
+  this branch — `git show origin/main:cran-comments.md` says only "Local:
+  macOS, R 4.6.1", and `git log -S "macOS 15"` names `be9d013` (T4). The
+  criterion asks that the file name **the actual check environments used**;
+  the environment it names for the local run is not the one used. Everything
+  else in the file holds: R 4.6.1, aarch64-apple-darwin23, `NOT_CRAN=false`,
+  `manual = TRUE`, 2026-08-25, the `0 errors | 0 warnings | 0 notes` result
+  the fresh AC4 run reproduced, and a "Test environments" block separating
+  what has been checked from what is scheduled before submission. With no NOTE
+  there is nothing left to justify. Criterion failure — see finding O3.
 - **AC5 — verified.** `R CMD INSTALL --preclean .` of this head ("DONE
   (intraclass)", exit 0), then `NOT_CRAN=true CI=true Rscript -e
   'library(testthat); library(intraclass); test_check("intraclass")'` from
@@ -437,6 +447,50 @@ the record of what was measured on `9328d85` and is superseded by this one.
   `.Rbuildignore` entry is owed; the full `--as-cran` check is the AC4 run
   above.
 
+### Review fan-out — third pass
+
+Three fresh-context lenses on the branch diff at `b54ac74`, each on a distinct
+evidence base, none having authored the implementation. Findings are numbered
+O1-O6 to keep them distinct from F1-F12 (first pass) and G1-G7 (second).
+
+- **[S] prior-review lens — no findings.** The probe
+  `gh api repos/jmgirard/intraclass/pulls/comments?per_page=1` returned `[]`
+  again, so the per-PR walk was skipped. It searched this file's own `## Review`
+  section (F1-F12, G1-G7 with dispositions) and the archived sections touching
+  these files (M131 on `@return` conventions, M124 on reading fits through
+  `tidy()`/`glance()`, M104 on ROADMAP row form), and re-diffed the five tail
+  commits `7667036`, `b96bb48`, `522b405`, `e44ff7e`, `b54ac74` rather than
+  trusting this file's account of them. Nothing in the diff reintroduces a past
+  finding or contradicts a recorded disposition.
+- **[S] blame-history lens — one finding, a verbatim repeat of G4.** Confirmed
+  clean, each traced to the commit that set the line: the `inst/WORDLIST` resort
+  is additive-only (no word dropped); `validate_choice()`'s removed
+  `identical(value, choices)` shortcut traces to M2 (`9c85c0b`) and was never
+  load-bearing for `choose_icc()`, whose formals default to `NULL` and resolve
+  to scalars before reaching it, so T15's narrowing is accurate; `R (>= 3.5)`
+  traces to the M0 scaffold (`6dc3daf`) and was never a deliberate
+  compatibility target; `autoplot.icc`'s `what` scalarization aligns the
+  signature with roxygen M11 (`3368299`) already carried;
+  `check-mpl-doc-claims.py`'s NEWS anchor still matches `NEWS.md:175` verbatim
+  after the consolidation; the NEWS fold is a rewrite, not a truncation, every
+  sampled fact surviving; `rhat`/`ess_bulk` are net-new (`git log -S` finds no
+  prior occurrence), not a reversed omission; `test-icc-brms.R`'s 124-line diff
+  is the `$index` -> `$term` rename only, no assertion loosened and no expected
+  value changed; D-035/D-036/D-037 append without editing prior entries.
+- **[O] diff-bug lens — six findings plus a nit**, ranked below. It separately
+  verified clean: every validation claim in `NEWS.md:413-418` (nine
+  invalid-value cases across `icc()` and `d_study()` all abort classed, and
+  `d_study()` genuinely has no `boot_samples`); every choice argument in
+  `NEWS.md:366-375` aborting on its full choice list, while
+  `icc(occasions = c("single", "average"))` still returns 8 rows on a replicate
+  fit; the `index` -> `term` sweep complete, every surviving `$index`
+  resolving to `$estimates$index`, a locally built frame, or `print.icc()`'s
+  header; documented tidy/glance column orders exact on both tidy methods,
+  with replicate and non-replicate results row-binding; `glance()$n_o`
+  integer-typed on every path; the R-floor derivation (installed `rlang` 1.3.0
+  declares `R (>= 4.0.0)`, every other Import lower) and the `cran-comments.md`
+  Imports list matching `DESCRIPTION`; G7's repair factually right.
+
 ### Review fan-out — second pass
 
 Three fresh-context lenses on the repair diff, each on a distinct evidence base,
@@ -481,6 +535,96 @@ them distinct from the first pass's F1-F12.
   checkers plus `check-abort-remedy-verdicts.R` and `check-checkpoint-sites.R`
   all exit 0; targeted suites `exported-contract`/`d-study`/`icc-methods`/
   `choose-icc` FAIL 0 PASS 315 and `doc-skew-caveat` FAIL 0 PASS 2295.
+
+### Findings and dispositions — third pass (O1-O6)
+
+Ranked as the [O] lens ranked them. "Reproduced" marks a finding this review
+re-ran or re-read against the implementation rather than accepting the
+reviewer's account; all six were. **Dispositions below are this review's
+recommendation; the maintainer's triage decides.**
+
+- **O1 — `glance()$n_o` is `NA` on an incomplete but uniformly-replicated fit,
+  and two shipped documentation surfaces state a rule that behaviour breaks.**
+  This is the F1 shape on a second axis. **Reproduced** on an 8x3 design with
+  two ratings per cell and the (subject 1, rater 1) cell dropped whole, so
+  every *observed* cell holds exactly 2: the fit succeeds with no warning and
+  `glance()` returns `n_o = NA` beside `var_subject_rater = 1.28e-08` — the
+  self-contradicting row RR04 added `n_o` to prevent. With the cell present the
+  same frame gives `n_o = 2L`. Root cause `R/design.R:48-51`:
+  `replicates_uniform` requires `n_cells == ns * nr`, grid completeness, which
+  the F1 repair changed for the nested path (`R/icc.R:2505` reads the
+  design-aware `n_o_val`) but not for the single-level incomplete path. The
+  false claims are `R/icc.R:679-681` -> `man/icc.Rd:484-486` ("`NA` unless the
+  design has within-cell replicates *and* defines one occasion count per cell
+  -- ragged replicates leave it `NA`") and `NEWS.md:356-358` ("`n_o` is `NA`
+  ... on ragged replicates, where cells hold different numbers of ratings and
+  no single count applies"); this design has replicates, defines one count per
+  cell, and no cell holds a different number. The comment at `R/icc.R:2503-2505`
+  states the same false rule. Reachable by any user calling `icc()` then
+  `glance()` on an incomplete replicated design. *Disposition: fix now* — the
+  repair is either to report the observed count here (the code fix) or to widen
+  both doc sentences to "incomplete **or** unequal" (the doc fix); the doc fix
+  is the release-round-sized one.
+- **O2 — `?icc` claims `tidy()` and `glance()` "return the same information" as
+  the object, which is false, and that sentence is what justifies freezing
+  every other list element as internal.** `R/icc.R:668` -> `man/icc.Rd:472`.
+  **Reproduced:** on a bootstrap fit, `$mc` carries `estimate, vcov,
+  to_components` and `$boot` carries `components` (3 draws x 20), while
+  `glance()`'s 22 columns and `tidy()`'s 11 carry no representation of either.
+  A user computing a custom interval from `$boot$components` is told in one
+  paragraph both that the element may vanish without deprecation and that the
+  methods already give the same information. *Disposition: fix now* — the
+  narrower true statement is the one D-035 makes: the methods are the stable
+  *reporting* surface.
+- **O3 — `cran-comments.md` names an operating-system version the check did not
+  run on, and it fails AC3.** `cran-comments.md:20` reads "Local: macOS **15**
+  (aarch64), R 4.6.1". **Reproduced:** `sw_vers` returns `ProductVersion:
+  26.6.2`, `sessionInfo()$running` returns `"macOS Tahoe 26.6.2"`, and the AC4
+  check banner reads `running under: macOS Tahoe 26.6.2`. Introduced by this
+  branch: `origin/main` said only "Local: macOS, R 4.6.1", and
+  `git log -S "macOS 15" origin/main..HEAD` names `be9d013` (T4). It ships to
+  CRAN as the submission's environment record. *Disposition: this is the AC3
+  criterion failure — the return, not a triage item.*
+- **O4 — NEWS and D-037 attribute four report-all arguments to `d_study()`,
+  which has none of them.** `NEWS.md:370-372` and `cairn/DECISIONS.md:1587`
+  read "In `icc()` and `d_study()` the arguments that genuinely take several
+  values are unaffected: `type`, `unit` and `level` ... and `occasions`".
+  **Reproduced:** `names(formals(d_study))` is `x, m, n_o, conf_level,
+  mc_samples, seed` — none of the four. Written by the T15 repair, which scoped
+  the sentence to `icc()`/`d_study()` to exclude `choose_icc()` and in doing so
+  asserted a signature `d_study()` does not have. A reader following it gets an
+  `unused argument` error. *Disposition: fix now* for the NEWS sentence, which
+  ships; `DECISIONS.md` is append-only, so its copy takes a superseding entry
+  rather than an edit.
+- **O5 — `man/d_study.Rd`'s `@return` says a projection "fills" `level` and
+  `occasions`, but on the object those columns are added, not
+  present-and-`NA`.** `R/d-study.R:125-127` -> `man/d_study.Rd:65-67`, inside
+  the paragraph whose subject is the `icc_dstudy` object. **Reproduced:** a
+  plain projection's object columns are `m, index, type, estimate, std.error,
+  conf.low, conf.high`; a replicate projection's are the same plus `occasions`.
+  `tidy()` does carry both always — that is the D-035 change, correctly
+  documented in the bullet below it — but the object still gains them
+  conditionally. *Disposition: fix now* — a one-word verb correction riding the
+  same round.
+- **O6 — two duplicates of already-triaged findings, re-confirmed on this
+  head.** Both were triaged to follow-up candidate rows at the second-pass gate
+  and both still ship in v0.1.0; reported because a repeat costs less than a
+  filtered finding. **G5:** on the default 8x3 replicate fit `glance()$n_o` is
+  `2L` while every row of `tidy()$occasions` is `1`. **G4:** `cairn/DESIGN.md:157-159`
+  still reads "(currently R release/oldrel-1/devel x macOS/Windows/Ubuntu)"
+  against `check-standard.yaml:37`, and the new `Known issues` entry cites GP3
+  as authority while the quoted text stays wrong. The [S] blame-history lens
+  reported G4 independently. *Disposition: reject at triage* — out-of-scope
+  taxonomy, an intentional deferral this milestone's plan gate recorded; the
+  candidate rows already carry them.
+- **Nit — `d_study()` validates its interval settings after emitting
+  user-visible output.** `R/d-study.R:346,349,368` run
+  `validate_conf_level()`/`validate_sample_count()`/`validate_seed()` after the
+  axis, level and fixed-agreement gates at `:258,:277,:318`, some of which
+  `cli_inform()` first, so an invalid `conf_level` prints a projection notice
+  before aborting. **Read-verified** from the source ordering. Cosmetic; no
+  wrong result. *Disposition: reject at triage* — a pure ordering nitpick the
+  diff did not introduce.
 
 ### Findings and dispositions — second pass (G1-G7)
 
