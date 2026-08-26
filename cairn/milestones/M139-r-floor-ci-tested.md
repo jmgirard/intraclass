@@ -1,10 +1,11 @@
 # M139: The declared R floor is a measured number CI runs (GP3)
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP3
+- **Branch:** `m139-r-floor-ci-tested`
 
 ## Goal
 
@@ -53,3 +54,5 @@ Replace the inferred `R (>= 4.0.0)` floor with the oldest R release that actuall
 - 2026-08-26: plan gate chose measuring the true floor over raising it to oldrel-1's current number because `oldrel-1` is a moving label whose numeric value drifts out of truth at each R release, and over a 4.0.0 container job because a date-pinned snapshot would check archived dependency versions rather than the shipped Imports chain; falsified by the candidate sweep finding no version between 4.0.0 and oldrel-1 that installs, which would make the measurement and the raise the same act.
 - 2026-08-26: `cairn_validate`'s release-window advisory fired on this file (the phrase "at the next R release" in its Scope). The release-shaped tripwire is answered, not deferred: the user declared the window in their own words at the plan gate — "can we do 1 and 2 before i submit to cran?" — so M138-M140 are the work queued ahead of a submission the maintainer performs out of band (ADR-022). No milestone here ships a version, so none is parked as `blocked`.
 - 2026-08-26: plan gate declined a standing checker over the CI matrix and required-check set (M48's AC7 defect), keeping it a ROADMAP candidate under D-021; falsified by a user reaching a platform claim the vanished matrix cell made false.
+- 2026-08-26: implement question gate — measure on GitHub CI (Docker's daemon is down locally and older `rocker/r-ver` tags lack arm64 builds); add 4.4.0 to the candidate set (AC1 amendment, pending the criteria audit); the pinned floor job runs on both `push` and `pull_request`, which AC3 requires. Local CRAN-metadata derivation over the 63-package recursive Imports closure puts the hard floor at R >= 4.4.0 (`MASS` 7.3-66, `Matrix` 1.7-6, `mgcv` 1.9-4); the sweep measures rather than assumes it.
+- 2026-08-26: T1 in progress — temporary `.github/workflows/r-floor-sweep.yaml` runs the candidate set on a fixed `ubuntu-22.04` runner so the R version is the only varying axis; each job records setup-r, dependency-install, and `R CMD check` outcomes separately so an infrastructure failure is not recorded as a dependency failure.
