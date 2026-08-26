@@ -226,6 +226,8 @@ below, so the descriptions here are compressed to their subject (weight cap).
 
 - 2026-08-26: review checkpoint (fourth pass) by /milestone-review — fresh evidence on head `9afd3d9` recorded and ticked for all six live criteria (AC1, AC2, AC4, AC5, AC6, AC7); AC3 stays descoped. `--as-cran` 0/0/0 in 2m 0.5s, installed-package suite FAIL 0 | WARN 2 | SKIP 26 | PASS 8592, pkgdown/lint/format/URLs clean, and all ten PR checks pass with `gh pr checks` and the SHA's check-runs agreeing exactly. Consistency gate green (`cairn_validate` exit 0 with the sizing advisory; `cairn_impact` not owed — GP2 and GP3 are byte-identical to `origin/main`). Three-lens fan-out: [O] ten findings, [S] blame eight, [S] prior-review none and no regression. Triaged as P1-P12 — seven rejected as already carried by candidate rows or as the maintainer's recorded descope, three sent to follow-up (P3, P4, P6), one nit rejected, and P5 (five vignette tables labelling a column `index` while sourcing `$term`, an inconsistency this branch's rename sweep introduced) put to the maintainer at the gate. No finding demonstrates a live criterion failing, so no return floor fires.
 
+- 2026-08-26: fourth-pass gate — the maintainer chose **fix now** over deferral for P5. `601d5e5` renames the five vignette display labels from `index` to `term` and the one `!duplicated()` reference; the three `print.icc()` transcript lines keep `index`, which run-checking confirms is what that printer still emits. The full local gate re-ran on the fix head (`--as-cran` 0/0/0 in 2m 56.1s, installed suite FAIL 0 | WARN 2 | SKIP 26 | PASS 8592, pkgdown/lint/format/URLs clean) and all ten PR checks pass on `601d5e5`. Approval re-requested at the gate, the fix having touched shipped vignettes.
+
 ## Decisions
 <!-- owner: implement / review · append-only -->
 
@@ -350,11 +352,34 @@ third-pass block below being the record of what was measured on `b54ac74`.
   evaluates them over the PR's whole changed set, which includes `R/` and
   `tests/` — so no workflow declaring the trigger is absent from the report
   and nothing counts as unrun. No check was red and no re-run was performed
-  in this pass. Per the criterion's closing sentence, the three
+  in this pass. **Re-taken on the P5 fix head `601d5e5`:** the same ten names,
+  `gh pr checks 147` and `gh api .../commits/601d5e5.../check-runs` agreeing
+  exactly, every `conclusion` `success` — `check-references` 25s,
+  `checkpoint-guard` 1m22s, `codecov/patch` and `codecov/project`,
+  `format-check` 7s, `lint` 1m52s, `pkgdown` 3m20s, `test-coverage` 22m14s,
+  `ubuntu-latest (release)` 20m20s, `windows-latest (release)` 25m35s. The two
+  `paths-ignore` filters again dropped nothing, the vignette edit being an
+  `**/*.Rmd` path but the pull request's changed set still carrying `R/` and
+  `tests/`. Per the criterion's closing sentence, the three
   configurations `check-standard.yaml` yields only on a push to `main` or
   `master` — `macos-latest (release)`, `ubuntu-latest (devel)`,
   `ubuntu-latest (oldrel-1)` — are not reachable from a pull-request head and
   are not promised here; they run post-merge on the push to `main`.
+
+**Re-verification after the P5 fix (head `601d5e5`).** The fix edits two
+shipped vignettes, so every criterion that reads them was re-run whole rather
+than argued to be unaffected. **AC4:** `--as-cran` **0 errors | 0 warnings |
+0 notes**, duration 2m 56.1s, PDF and HTML manual both OK — the vignettes
+rebuild inside this run. **AC5:** `R CMD INSTALL --preclean .` exit 0, then the
+installed-package suite `[ FAIL 0 | WARN 2 | SKIP 26 | PASS 8592 ]`, exit 0 —
+identical counts to `9afd3d9`. **AC6:** `pkgdown::check_pkgdown()` "No problems
+found"; `build_site()` exit 0 with 0 `Error`/`Warning`/`Quitting from` hits
+across the eight vignettes; `air format --check .` exit 0;
+`lintr::lint_package()` "No lints found"; `urlchecker::url_check()` "All URLs
+are correct!" over 15 URLs. **AC1, AC2:** untouched by the fix — `git diff
+--stat 9afd3d9..601d5e5` is the two vignettes and nothing else, so
+`DESCRIPTION`, `NEWS.md` and `NAMESPACE` are byte-identical. **AC7:** re-taken
+on `601d5e5` below.
 
 ### Consistency gate — fourth pass (2026-08-26)
 
@@ -483,7 +508,15 @@ finding is logged with its disposition; none is silently dropped.
   article and then calling `tidy()` gets a column called `term`. This is a
   defect *inside* an intentional change (the D-035 rename), not the intentional
   change itself, so the out-of-scope taxonomy does not cover it.
-  **Disposition: maintainer's call at the gate** — see the presentation.
+  **Disposition: fixed now**, the maintainer's choice at the gate over
+  deferring it to the follow-on row. `601d5e5` renames the five display labels
+  to `term` and the one downstream reference (`compare[!duplicated(compare$term
+  ), ]`, `engines.Rmd:91`). The three remaining `index` strings in the two
+  files — `engines.Rmd:155`, `interval-methods.Rmd:346` and `:378` — are
+  transcripts of `print.icc()` output and stay: run fresh, `print.icc()` still
+  emits an `index` header, so those are correct as written. No test reads
+  these tables; `test-vignette-claims.R`'s `$index` hits are all
+  `$estimates$index`, the internal frame the rename deliberately left alone.
 - **P6 ([O] 8) — `occasions` has an unstable ptype across fits.** Verified by
   running: `class(tidy(fit)$occasions)` is `integer` on a non-replicate fit
   (the `NA_integer_` fill, `R/icc-methods.R:360`, `R/d-study.R:704`) and
