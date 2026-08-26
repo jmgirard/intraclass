@@ -9,7 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M139 | The declared R floor is a measured number CI runs (GP3) | blocked | — | high | milestones/M139-r-floor-ci-tested.md |
+| M139 | The declared R floor is a measured number CI runs (GP3) | in-progress | — | high | milestones/M139-r-floor-ci-tested.md |
 | M140 | Release-remainder documentation corrections, and the recorded pre-submission check | planned | M138, M139 | high | milestones/M140-release-remainder-docs.md |
 | M135 | Vignette prose pass — the method articles | done | M134 | normal | milestones/archive/M135-vignette-prose-method-articles.md |
 | M136 | Roxygen and README prose pass | done | M134 | normal | milestones/archive/M136-roxygen-readme-prose.md |
