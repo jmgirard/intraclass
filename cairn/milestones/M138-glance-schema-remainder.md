@@ -1,6 +1,6 @@
 # M138: Exported-schema remainder — `glance()` gains a rater accessor before the one-way door closes
 
-- **Status:** in-progress
+- **Status:** review
 - **Branch:** `m138-glance-schema-remainder`
 - **Priority:** high
 - **Depends on:** —
@@ -46,7 +46,7 @@ Land the three exported-schema corrections descoped from M48 while GP2's one-way
 - [x] T5. Do the same for the `d_study()` projection path: coerce the column at `R/d-study.R:524` (an integer `n_o` reaches it uncoerced) and fill with `NA_real_` at `R/d-study.R:704`.
 - [x] T6. Replace the `R/icc.R:668` sentence; re-roxygenize so `man/icc.Rd:472` follows; run the AC4 grep.
 - [x] T8. Set `d_study()`'s `icc_raters` attribute to `NA_character_` on a `model = "oneway"` fit (`R/d-study.R:531`), keying on `oneway` and not on `ml_oneway`; check `icc_design_phrase()`'s NA path stays unreached. Probe the four AC6 fits.
-- [ ] T7. Append a D-entry recording what `glance()` gained, that `type` was refused and why, and that column order is deliberately not contract. Run `air format .`, the four `data-raw/` checkers with `--self-test`, then `devtools::check()`.
+- [x] T7. Append a D-entry recording what `glance()` gained, that `type` was refused and why, and that column order is deliberately not contract. Run `air format .`, the four `data-raw/` checkers with `--self-test`, then `devtools::check()`.
 
 ## Work log
 
@@ -67,3 +67,5 @@ Land the three exported-schema corrections descoped from M48 while GP2's one-way
 - 2026-08-26: T4-T5 — `occasions` is double on both `tidy()` methods: `as.numeric()` on the replicate branch, `NA_real_` on the other, `as.numeric(row_occ)` at the projection's `add_column()` (the site an integer `n_o` reaches uncoerced) and `NA_real_` at the projection fill. NEWS gains the ptype sentence. AC3 green; AC6's is the suite's only remaining red.
 - 2026-08-26: T8 — `icc_raters` is `NA_character_` on a one-way projection, keyed on `oneway` and not `ml_oneway`; `icc_design_phrase()` gained an NA guard so the legacy-object fallback in `format.icc_dstudy()` cannot return `character(0)` if it is ever reached. Suite: FAIL 0, PASS 8624, WARN 2 (both pre-existing). The three new fixed-rater fits wrap in `suppressWarnings()`, the file's existing idiom for the teaching warning.
 - 2026-08-26: T6 — the `?icc` sentence now says `tidy()`/`glance()` are the stable tables rather than a re-export of the list. `man/icc.Rd` re-roxygenized. AC4 grep returns nothing; a control pattern over the same five paths returns hits, so the domain is non-empty. `README.Rmd` carries no match either.
+- 2026-08-26: T7 — D-038 appended. `air format .` clean; the six `data-raw/` checkers pass (the four Python ones under `--self-test`, each reporting every mutation red on a green baseline); `cairn_validate` passes, its single advisory being M139's release window, not this milestone. First `devtools::check()` came back `Status: 1 NOTE` on an unlisted NEWS word; reworded rather than extending the wordlist, and the re-run reports `Status: OK`. Final `devtools::test()` at `NOT_CRAN=true CI=true`: FAIL 0, WARN 2 (both pre-existing), SKIP 26, PASS 8624.
+- 2026-08-26: all tasks done; status to review.

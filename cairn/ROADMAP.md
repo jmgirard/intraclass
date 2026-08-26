@@ -9,7 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M138 | Exported-schema remainder — `glance()` gains a rater accessor before the one-way door closes | in-progress | — | high | milestones/M138-glance-schema-remainder.md |
+| M138 | Exported-schema remainder — `glance()` gains a rater accessor before the one-way door closes | review | — | high | milestones/M138-glance-schema-remainder.md |
 | M139 | The declared R floor is a measured number CI runs (GP3) | planned | — | high | milestones/M139-r-floor-ci-tested.md |
 | M140 | Release-remainder documentation corrections, and the recorded pre-submission check | planned | M138, M139 | high | milestones/M140-release-remainder-docs.md |
 | M134 | Vignette prose pass — the reader path, and the house style standard | done | — | normal | milestones/archive/M134-vignette-prose-reader-path.md |
