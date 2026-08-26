@@ -364,7 +364,7 @@ alternate engines, and seeded simulations.
   on a one-way fit, whose interchangeable raters have no facet and whose rater variance
   is folded into `var_residual`; `replicates` says whether the design holds more than
   one rating per subject-by-rater cell, which `n_o` alone cannot, being `NA` on a ragged
-  replicate design as well as on an unreplicated one.
+  replicate design as well as on one with no replicates at all.
   `glance()` also reports the sampler diagnostics `rhat` and `ess_bulk`, `NA` for the
   engines that do not sample. Every column is present on every fit, so two glanced fits
   row-bind exactly as two tidied ones do.
