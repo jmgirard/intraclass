@@ -88,6 +88,46 @@ test_that("the scalar defaults still fit, and each choice is still accepted", {
   )
 })
 
+test_that("every choose_icc() answer is a choice argument (D-037)", {
+  # The chooser asks one question at a time, so `type`, `unit` and `level` are
+  # answers here where they are report-all axes in `icc()` -- the same names on
+  # opposite sides of D-036's discriminator, which is why D-037 classifies by
+  # (function, argument) pair. Before v0.1.0 `validate_choice()` opened with an
+  # `identical(value, choices)` shortcut, so passing the exact full choice list
+  # returned the first value silently (M48 review G3).
+  base <- list(
+    model = "twoway",
+    type = "agreement",
+    unit = "single",
+    raters = "random"
+  )
+  multi <- list(
+    model = c("twoway", "oneway"),
+    type = c("agreement", "consistency"),
+    unit = c("single", "average", "both"),
+    raters = c("random", "fixed")
+  )
+  for (arg in names(multi)) {
+    args <- utils::modifyList(base, stats::setNames(list(multi[[arg]]), arg))
+    expect_error(do.call(choose_icc, args), class = "intraclass_error")
+  }
+  # `level` only applies to a multilevel design, so it needs its own call.
+  expect_error(
+    choose_icc(
+      model = "twoway",
+      type = "agreement",
+      unit = "single",
+      raters = "random",
+      multilevel = TRUE,
+      level = c("subject", "cluster", "both")
+    ),
+    class = "intraclass_error"
+  )
+  # The passing control: the abort is about arity, not the values -- each single
+  # answer still recommends.
+  expect_s3_class(do.call(choose_icc, base), "icc_recommendation")
+})
+
 test_that("autoplot's `what` is a choice argument on the same terms", {
   skip_if_not_installed("ggplot2")
   fit <- icc(ratings, score, subject, rater, seed = 1)

@@ -365,10 +365,14 @@ alternate engines, and seeded simulations.
   without a deprecation cycle.
 * A choice argument takes **exactly one value**. Passing several — the full set of allowed
   values included — aborts with a classed error instead of quietly using the first. This
-  covers `raters`, `posterior_summary`, `model`, `engine`, `ci_method` and `autoplot()`'s
-  `what`. The arguments that genuinely take several values are unaffected: `type`,
-  `unit` and `level`, which default to reporting every value, and `occasions`, which
-  defaults to one but still accepts both.
+  covers `raters`, `posterior_summary`, `model`, `engine`, `ci_method`, `autoplot()`'s
+  `what`, and every question `choose_icc()` asks (`model`, `unit`, `type`, `raters`,
+  `level`), the chooser taking one answer per question. In `icc()` and `d_study()` the
+  arguments that genuinely take several values are unaffected: `type`, `unit` and `level`,
+  which default to reporting every value, and `occasions`, which defaults to one but still
+  accepts both. Note the same names mean different things in the chooser, where they are
+  answers rather than axes: `choose_icc(type = c("agreement", "consistency"))` now aborts
+  where it used to recommend a single coefficient for agreement.
 
 ## Data and documentation
 

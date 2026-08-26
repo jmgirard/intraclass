@@ -1567,3 +1567,36 @@ the user-facing text: NEWS and the `validate_choice()` comment now name four
 report-all axes. A future argument joins the report-all set by not being routed
 through `validate_choice()`, whatever its default looks like, and adding one
 after v0.1.0 is additive rather than breaking.
+
+### D-037 (2026-08-25): D-036's argument classification is per function x argument, not per argument name
+
+**Context.** D-036 fixed which arguments D-035 clause 1 puts on each side by
+enumerating them by name: `type`, `unit`, `level` and `occasions` report all,
+`raters`, `posterior_summary`, `model`, `engine` and `autoplot()`'s `what` are
+choice arguments. `choose_icc()` breaks that enumeration. It routes all five of
+its answer arguments — `model`, `unit`, `type`, `raters`, `level`
+(`R/choose-icc.R:277,306,313,320,325`) — through `validate_choice()`, so three
+names land on both sides of D-036's own discriminator. M48's review found the
+consequence in the release text: NEWS tells users `type`, `unit` and `level` are
+"unaffected", which is false of the chooser, where
+`choose_icc(type = c("agreement", "consistency"))` returned the agreement
+recommendation before v0.1.0 and aborts classed now.
+
+**Decision.** The unit of classification is the (function, argument) pair, not
+the argument name. D-036's discriminator — routed through `validate_choice()` or
+not — stands unchanged and settles every pair on its own. At v0.1.0: in `icc()`
+and `d_study()` the report-all axes are `type`, `unit`, `level` and `occasions`;
+in `choose_icc()` every answer argument is a choice argument, the chooser asking
+one question at a time by design; the remaining choice arguments are `raters`,
+`posterior_summary`, `model`, `engine`, `ci_method` and `autoplot()`'s `what`.
+D-036's enumeration is superseded by this one; its rule is not.
+
+**Consequences.** One shipped behaviour change is now on the record rather than
+silent: `choose_icc()` given the exact full choice list for `model`, `unit`,
+`type`, `raters` or `level` aborts `intraclass_error` where `origin/main`
+returned the first value. The blast radius is exactly that — `origin/main`'s
+shortcut was `identical(value, choices)`, so a partial multi-value already
+aborted. NEWS names the chooser in the covered set and scopes the "unaffected"
+sentence to `icc()`/`d_study()`, and a test pins the abort on all five
+arguments. A future argument is classified by asking whether its own function
+routes it through `validate_choice()`.
