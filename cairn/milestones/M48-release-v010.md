@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M48: v0.1.0 release consolidation — CRAN submission-ready
 
-- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** M49, M50, M51, M53, M54, M55, M61, M68, M129, M130, M131, M132, M133, M134, M135, M136, M137   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP2, GP3   <!-- owner: plan · create/amend-via-gate -->
@@ -54,7 +54,7 @@ gate before stamping, never folded in silently.
 - [x] AC6: `pkgdown::check_pkgdown()` + `pkgdown::build_site()` clean;
       `air format --check` clean; `lintr::lint_package()` clean;
       `urlchecker::url_check()` all-correct.
-- [ ] AC7: the release code passes every CI check a pull request can reach.
+- [x] AC7: the release code passes every CI check a pull request can reach.
       Evidence: `gh pr checks <head SHA>` at a named head SHA, every reported
       check in the `pass` bucket — none `fail`, `pending`, `skipping` or
       `cancel` — with the reported list quoted in the Review section and
@@ -191,6 +191,7 @@ below, so the descriptions here are compressed to their subject (weight cap).
 - 2026-08-25: AC1, AC2, AC4, AC5, AC6, AC7 unticked — their second-pass evidence was gathered on `4a1ce09` and this repair round moved the head, so under AC fencing they are unverified until re-review records fresh evidence. AC3 was already unticked, being the second pass's failure. The superseded evidence stays in the Review section as the record of that pass.
 - 2026-08-25: all tasks checked; status in-progress -> review by /milestone-implement (third pass).
 - 2026-08-25: review checkpoint (mid-phase, third pass) by /milestone-review — fresh evidence on head `b54ac74` recorded and ticked for AC1, AC2, AC3 and AC4; AC3's spelling half, the second pass's failure, is clean, and `--as-cran` is 0/0/0 again. AC5 (installed-package suite), AC6's `pkgdown::build_site()` and AC7 (three CI checks) are still running. Consistency gate green (`cairn_validate` exit 0; `cairn_impact` not owed). Two of three review lenses returned: the prior-review lens no findings, the blame-history lens one verbatim repeat of G4, already a triaged follow-up.
+- 2026-08-25: review returns M48 to in-progress by /milestone-review (third pass) — **AC3 fails**: `cran-comments.md:20` names the local check environment as "macOS 15 (aarch64), R 4.6.1" and the machine that ran it is macOS 26.6.2 (Tahoe), which `sw_vers`, `sessionInfo()$running` and the AC4 check banner all report; the wrong version was introduced by this branch at `be9d013` (T4), `origin/main` having said only "macOS, R 4.6.1". AC1, AC2, AC4, AC5, AC6 and AC7 all verified with fresh evidence on head `b54ac74` and ticked; consistency gate green (`cairn_validate` exit 0, `cairn_impact` not owed). The [O] lens returned six findings O1-O6 plus a nit (O3 is the AC3 failure itself; O1 reproduces the F1 shape on the incomplete-design axis, where `glance()$n_o` is NA beside a populated `var_subject_rater` and two shipped doc surfaces say it will not be); the [S] blame-history lens returned one verbatim repeat of G4 and the [S] prior-review lens none. This is **defect return 3** of this milestone (F1/F2 was 1, AC3 spelling was 2); the amendment-return track stays at one (AC7). The thrash rule's threshold (a) is reached, and (b) fires too — AC3 has now failed twice, each time on a hand-authored release-artifact fact that no check the milestone runs can catch. Disposition goes to the maintainer.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
@@ -246,6 +247,40 @@ record of what was measured on `4a1ce09` and is superseded by this one.
   `Depends:` / `R (>= 4.0.0)`. `grep '^# ' NEWS.md` returns exactly one
   heading, `# intraclass 0.1.0`; a case-insensitive sweep for "development
   version" returns 0 hits.
+- **AC7 — verified.** PR #147's head is `b54ac744f09d6e69f4a6974a4b4f640854c2e3c4`
+  (`gh pr view 147 --json headRefOid`), identical to local `HEAD` at the time of
+  measurement. `gh` 2.98 does not resolve a bare SHA, so the report was taken
+  as `gh pr checks 147` and cross-checked against the check runs GitHub
+  attaches to that SHA (`gh api
+  repos/jmgirard/intraclass/commits/b54ac74.../check-runs`); the two lists
+  agree exactly, ten names each, every `conclusion` `success`. Ten checks
+  reported, **all `pass`** — none `fail`, `pending`, `skipping` or `cancel`:
+
+      check-references          pass  26s
+      checkpoint-guard          pass  1m38s
+      codecov/patch             pass  0
+      codecov/project           pass  0
+      format-check              pass  6s
+      lint                      pass  3m4s
+      pkgdown                   pass  2m48s
+      test-coverage             pass  20m40s
+      ubuntu-latest (release)   pass  23m32s
+      windows-latest (release)  pass  24m22s
+
+  Compared against `.github/workflows/`, read fresh: six workflows, five of
+  which declare a `pull_request` trigger, and every job each of them defines
+  appears above — `check-standard.yaml` (the `R-CMD-check` matrix, whose
+  `config` expression yields the two-cell PR set `ubuntu-latest (release)`,
+  `windows-latest (release)`), `format.yaml` (`format-check`), `lint.yaml`
+  (`lint`, `check-references`, `checkpoint-guard`), `pkgdown.yaml` (`pkgdown`),
+  `test-coverage.yaml` (`test-coverage`, whose Codecov app adds
+  `codecov/patch` and `codecov/project`). The sixth,
+  `reference-values.yaml`, declares only `schedule` and `workflow_dispatch`,
+  so it owes no check run. The `paths-ignore` filters on `check-standard.yaml`
+  and `test-coverage.yaml` did not drop either workflow — both produced check
+  runs on this head — so no workflow declaring the trigger is absent from the
+  report and nothing counts as unrun. No check was red and no re-run was
+  performed in this pass.
 - **AC4 — verified.** `devtools::check(args = "--as-cran", env_vars =
   c(NOT_CRAN = "false"), manual = TRUE)` re-run fresh on head `b54ac74`:
   R 4.6.1 (2026-06-24), platform aarch64-apple-darwin23, macOS Tahoe 26.6.2,
