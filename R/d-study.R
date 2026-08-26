@@ -521,7 +521,14 @@ d_study <- function(
     tbl <- tibble::add_column(tbl, level = row_level, .after = "m")
   }
   if (replicates) {
-    tbl <- tibble::add_column(tbl, occasions = row_occ, .after = "m")
+    # `as.numeric`, not the raw vector: on the occasion axis `row_occ` is the
+    # user's `n_o`, which arrives integer from `d_study(fit, n_o = 1:3)` and
+    # double from a fractional sweep. One ptype either way (M138).
+    tbl <- tibble::add_column(
+      tbl,
+      occasions = as.numeric(row_occ),
+      .after = "m"
+    )
   }
 
   structure(
@@ -701,7 +708,7 @@ tidy.icc_dstudy <- function(x, ...) {
   col <- function(nm, fill) if (nm %in% names(x)) x[[nm]] else rep(fill, n)
   tibble::tibble(
     m = x$m,
-    occasions = col("occasions", NA_integer_),
+    occasions = as.numeric(col("occasions", NA_real_)),
     level = as.character(col("level", NA_character_)),
     term = x$index,
     type = as.character(col("type", NA_character_)),

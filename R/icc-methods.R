@@ -351,13 +351,16 @@ tidy.icc <- function(x, ...) {
   # keys the coefficient-identifying column as `term`, which is what the wider
   # tidy ecosystem (modelsummary and friends) looks for (D-035).
   # `occasions` is present on every fit, NA where the design has no within-cell
-  # replicates, so two tidied fits always row-bind (D-035).
+  # replicates, so two tidied fits always row-bind (D-035). It is double on every
+  # fit and every projection: `d_study()` takes a non-integer occasion count on
+  # purpose (symmetry with `m`), so an integer column would report a projected
+  # 1.5 as 1 (M138).
   tibble::tibble(
     term = x$estimates$index,
     occasions = if (isTRUE(x$design$replicates)) {
-      x$estimates$occasions
+      as.numeric(x$estimates$occasions)
     } else {
-      rep(NA_integer_, length(x$estimates$index))
+      rep(NA_real_, length(x$estimates$index))
     },
     type = x$estimates$type,
     level = x$estimates$level,

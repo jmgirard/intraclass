@@ -350,6 +350,9 @@ alternate engines, and seeded simulations.
   rename. **Every identifier column is present on every fit**, `NA` where the design does
   not define it — `occasions`, and for a projection `level` and `type` as well — so two
   tidied fits row-bind and a later added column cannot change an existing call's schema.
+  `occasions` is a double column on every fit and every projection, so its type does not
+  shift with the design either, and a `d_study()` occasion sweep at a non-integer count
+  reports that count instead of rounding it.
 * `glance()` reports `var_subject_rater` and `n_o` alongside `var_residual`, so a
   replicate fit no longer changes what `var_residual` means without saying so: the
   interaction term is named, and `n_o` gives the occasion count it was split at.
