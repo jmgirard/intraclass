@@ -152,11 +152,11 @@ reproducible.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">  index     estimate   95% CI</span></span></span>
 <span><span class="co">#&gt; <span style="font-weight: bold;">  Absolute agreement</span></span></span>
-<span><span class="co">#&gt;   ICC(A,1)  <span style="font-weight: bold;">   0.290</span>   <span style="font-weight: 100;">[0.050, 0.713]</span></span></span>
-<span><span class="co">#&gt;   ICC(A,k)  <span style="font-weight: bold;">   0.620</span>   <span style="font-weight: 100;">[0.173, 0.909]</span></span></span>
+<span><span class="co">#&gt;   ICC(A,1)  <span style="font-weight: bold;">   0.290</span>   <span style="font-weight: 100;">[0.050, 0.711]</span></span></span>
+<span><span class="co">#&gt;   ICC(A,k)  <span style="font-weight: bold;">   0.620</span>   <span style="font-weight: 100;">[0.173, 0.908]</span></span></span>
 <span><span class="co">#&gt; <span style="font-weight: bold;">  Consistency</span></span></span>
-<span><span class="co">#&gt;   ICC(C,1)  <span style="font-weight: bold;">   0.715</span>   <span style="font-weight: 100;">[0.343, 0.924]</span></span></span>
-<span><span class="co">#&gt;   ICC(C,k)  <span style="font-weight: bold;">   0.909</span>   <span style="font-weight: 100;">[0.676, 0.980]</span></span></span>
+<span><span class="co">#&gt;   ICC(C,1)  <span style="font-weight: bold;">   0.715</span>   <span style="font-weight: 100;">[0.340, 0.926]</span></span></span>
+<span><span class="co">#&gt;   ICC(C,k)  <span style="font-weight: bold;">   0.909</span>   <span style="font-weight: 100;">[0.673, 0.980]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Variance components: subject 2.556, rater 5.244, residual 1.019</span></span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)</span></span></span></code></pre></div>
@@ -171,22 +171,23 @@ one-row model summary, including the variance components.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 11</span></span></span>
 <span><span class="co">#&gt;   term     occasions type   level sf_index estimate std.error conf.low conf.high</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ICC(A,1)        <span style="color: #BB0000;">NA</span> agree… <span style="color: #BB0000;">NA</span>    ICC(2,1)    0.290    0.180    0.049<span style="text-decoration: underline;">8</span>     0.713</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ICC(A,k)        <span style="color: #BB0000;">NA</span> agree… <span style="color: #BB0000;">NA</span>    ICC(2,k)    0.620    0.201    0.173      0.909</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ICC(C,1)        <span style="color: #BB0000;">NA</span> consi… <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>          0.715    0.155    0.343      0.924</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ICC(C,k)        <span style="color: #BB0000;">NA</span> consi… <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>          0.909    0.081<span style="text-decoration: underline;">0</span>   0.676      0.980</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ICC(A,1)        <span style="color: #BB0000;">NA</span> agree… <span style="color: #BB0000;">NA</span>    ICC(2,1)    0.290    0.180    0.049<span style="text-decoration: underline;">8</span>     0.711</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ICC(A,k)        <span style="color: #BB0000;">NA</span> agree… <span style="color: #BB0000;">NA</span>    ICC(2,k)    0.620    0.201    0.173      0.908</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ICC(C,1)        <span style="color: #BB0000;">NA</span> consi… <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>          0.715    0.155    0.340      0.926</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ICC(C,k)        <span style="color: #BB0000;">NA</span> consi… <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>          0.909    0.080<span style="text-decoration: underline;">9</span>   0.673      0.980</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: conf.level &lt;dbl&gt;, method &lt;chr&gt;</span></span></span>
 <span></span>
 <span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 22</span></span></span>
-<span><span class="co">#&gt;   n_subjects n_raters n_clusters n_obs n_cells balanced multilevel ml_design</span></span>
-<span><span class="co">#&gt;        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>          6        4         <span style="color: #BB0000;">NA</span>    24      24 TRUE     FALSE      <span style="color: #BB0000;">NA</span>       </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 14 more variables: k_eff &lt;dbl&gt;, k_c_eff &lt;dbl&gt;, var_cluster &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   var_subject &lt;dbl&gt;, var_rater &lt;dbl&gt;, var_cluster_rater &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   var_subject_rater &lt;dbl&gt;, var_residual &lt;dbl&gt;, n_o &lt;int&gt;, engine &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   ci_method &lt;chr&gt;, conf.level &lt;dbl&gt;, rhat &lt;dbl&gt;, ess_bulk &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 24</span></span></span>
+<span><span class="co">#&gt;   n_subjects n_raters n_clusters n_obs n_cells balanced raters replicates</span></span>
+<span><span class="co">#&gt;        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>          6        4         <span style="color: #BB0000;">NA</span>    24      24 TRUE     random FALSE     </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 16 more variables: multilevel &lt;lgl&gt;, ml_design &lt;chr&gt;, k_eff &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   k_c_eff &lt;dbl&gt;, var_cluster &lt;dbl&gt;, var_subject &lt;dbl&gt;, var_rater &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   var_cluster_rater &lt;dbl&gt;, var_subject_rater &lt;dbl&gt;, var_residual &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   n_o &lt;int&gt;, engine &lt;chr&gt;, ci_method &lt;chr&gt;, conf.level &lt;dbl&gt;, rhat &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   ess_bulk &lt;dbl&gt;</span></span></span></code></pre></div>
 <p><code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> is the other reading of the same fit. It
 reprints the report above, then appends a short <strong>interpretive
 note for each error definition present</strong>, plus one about what a
@@ -200,11 +201,11 @@ are read off the design, so they track whatever you fitted:</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">  index     estimate   95% CI</span></span></span>
 <span><span class="co">#&gt; <span style="font-weight: bold;">  Absolute agreement</span></span></span>
-<span><span class="co">#&gt;   ICC(A,1)  <span style="font-weight: bold;">   0.290</span>   <span style="font-weight: 100;">[0.050, 0.713]</span></span></span>
-<span><span class="co">#&gt;   ICC(A,k)  <span style="font-weight: bold;">   0.620</span>   <span style="font-weight: 100;">[0.173, 0.909]</span></span></span>
+<span><span class="co">#&gt;   ICC(A,1)  <span style="font-weight: bold;">   0.290</span>   <span style="font-weight: 100;">[0.050, 0.711]</span></span></span>
+<span><span class="co">#&gt;   ICC(A,k)  <span style="font-weight: bold;">   0.620</span>   <span style="font-weight: 100;">[0.173, 0.908]</span></span></span>
 <span><span class="co">#&gt; <span style="font-weight: bold;">  Consistency</span></span></span>
-<span><span class="co">#&gt;   ICC(C,1)  <span style="font-weight: bold;">   0.715</span>   <span style="font-weight: 100;">[0.343, 0.924]</span></span></span>
-<span><span class="co">#&gt;   ICC(C,k)  <span style="font-weight: bold;">   0.909</span>   <span style="font-weight: 100;">[0.676, 0.980]</span></span></span>
+<span><span class="co">#&gt;   ICC(C,1)  <span style="font-weight: bold;">   0.715</span>   <span style="font-weight: 100;">[0.340, 0.926]</span></span></span>
+<span><span class="co">#&gt;   ICC(C,k)  <span style="font-weight: bold;">   0.909</span>   <span style="font-weight: 100;">[0.673, 0.980]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Variance components: subject 2.556, rater 5.244, residual 1.019</span></span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)</span></span></span>
@@ -313,8 +314,8 @@ the error, so it is never smaller than the agreement coefficient:</p>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">  index     estimate   95% CI</span></span></span>
-<span><span class="co">#&gt;   ICC(C,1)  <span style="font-weight: bold;">   0.715</span>   <span style="font-weight: 100;">[0.343, 0.924]</span></span></span>
-<span><span class="co">#&gt;   ICC(C,k)  <span style="font-weight: bold;">   0.909</span>   <span style="font-weight: 100;">[0.676, 0.980]</span></span></span>
+<span><span class="co">#&gt;   ICC(C,1)  <span style="font-weight: bold;">   0.715</span>   <span style="font-weight: 100;">[0.340, 0.926]</span></span></span>
+<span><span class="co">#&gt;   ICC(C,k)  <span style="font-weight: bold;">   0.909</span>   <span style="font-weight: 100;">[0.673, 0.980]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Variance components: subject 2.556, rater 5.244, residual 1.019</span></span></span></code></pre></div>
 <p>The gap between the two (here <code>ICC(C,1)</code> = 0.71

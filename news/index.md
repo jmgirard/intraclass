@@ -464,21 +464,31 @@ simulations.
   column is present on every fit**, `NA` where the design does not
   define it — `occasions`, and for a projection `level` and `type` as
   well — so two tidied fits row-bind and a later added column cannot
-  change an existing call’s schema.
+  change an existing call’s schema. `occasions` is a double column on
+  every fit and every projection, so its type does not shift with the
+  design either, and a
+  [`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)
+  occasion sweep at a non-integer count reports that count as given.
 - [`glance()`](https://generics.r-lib.org/reference/glance.html) reports
   `var_subject_rater` and `n_o` alongside `var_residual`, so a replicate
   fit no longer changes what `var_residual` means without saying so: the
   interaction term is named, and `n_o` gives the occasion count it was
   split at. `var_subject_rater` is `NA` without within-cell replicates,
   and `n_o` is `NA` there too and on ragged replicates, where cells hold
-  different numbers of ratings and no single count applies. This
-  disambiguates the replicate split only — the row does not say whether
-  `var_rater` is a random-rater variance or a fixed-rater
-  finite-population term, nor whether a one-way fit has folded rater
-  variance into `var_residual`.
+  different numbers of ratings and no single count applies. Two design
+  columns say how to read the variance columns beside them: `raters`
+  gives the rater treatment the fit used, so `var_rater` can be told
+  apart as a random-rater variance or a fixed-rater finite-population
+  term, and is `NA` on a one-way fit, whose interchangeable raters have
+  no facet and whose rater variance is folded into `var_residual`;
+  `replicates` says whether the fitted design splits within-cell
+  replicates — `FALSE` on a one-way fit, which has no rater facet and so
+  no cells to split — which `n_o` alone cannot say, being `NA` on a
+  ragged replicate design as well as on one with no replicates at all.
   [`glance()`](https://generics.r-lib.org/reference/glance.html) also
   reports the sampler diagnostics `rhat` and `ess_bulk`, `NA` for the
-  engines that do not sample.
+  engines that do not sample. Every column is present on every fit, so
+  two glanced fits row-bind exactly as two tidied ones do.
 - [`?icc`](https://jmgirard.github.io/intraclass/reference/icc.md)
   states which parts of the returned object are safe to depend on: the
   documented methods, plus `$fit` and `$call`. The rest of the list is

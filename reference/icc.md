@@ -548,8 +548,12 @@ contents may change in any release without a deprecation cycle. That is
 the whole rule – `$fit` and `$call` are the list elements you may depend
 on, and reaching into any other one is reading an implementation detail.
 [`tidy()`](https://generics.r-lib.org/reference/tidy.html) and
-[`glance()`](https://generics.r-lib.org/reference/glance.html) return
-the same information as a stable table.
+[`glance()`](https://generics.r-lib.org/reference/glance.html) are the
+stable tables, not a re-export of the list: they report the estimated
+coefficients and the model-level summaries, column by column as
+documented below. Those two tables, plus `$fit` and `$call`, are the
+whole supported surface; everything else the list holds falls under the
+rule above, whether or not a table happens to report it.
 
 The methods documented on this page return:
 
@@ -561,12 +565,17 @@ The methods documented on this page return:
   has within-cell replicates.
 
 - `glance.icc()`: a one-row tibble of model-level summaries: the sample
-  sizes, the design flags, the effective rater counts, the variance
+  sizes, the design flags – among them the rater treatment `raters`
+  (`NA` on a one-way fit, whose raters are interchangeable and carry no
+  facet) and `replicates`, whether the fitted design splits within-cell
+  replicates – `FALSE` on a one-way fit, which has no rater facet and so
+  no cells to split – the effective rater counts, the variance
   components, the occasion count `n_o` (`NA` unless the design has
   within-cell replicates *and* defines one occasion count per cell –
   ragged replicates leave it `NA`), the engine and interval settings,
   and the sampler diagnostics `rhat` and `ess_bulk` (`NA` for the
-  non-Bayesian engines, which do not sample).
+  non-Bayesian engines, which do not sample). Every column is present on
+  every fit, so two glanced fits row-bind just as two tidied ones do.
 
 - `format.icc()`: a character vector holding the printed report, one
   line per element.
@@ -925,11 +934,11 @@ icc(ratings, score, subject, rater, seed = 1)
 #> 
 #>   index     estimate   95% CI
 #>   Absolute agreement
-#>   ICC(A,1)     0.290   [0.050, 0.706]
-#>   ICC(A,k)     0.620   [0.175, 0.906]
+#>   ICC(A,1)     0.290   [0.050, 0.712]
+#>   ICC(A,k)     0.620   [0.173, 0.908]
 #>   Consistency
-#>   ICC(C,1)     0.715   [0.339, 0.924]
-#>   ICC(C,k)     0.909   [0.672, 0.980]
+#>   ICC(C,1)     0.715   [0.335, 0.925]
+#>   ICC(C,k)     0.909   [0.668, 0.980]
 #> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
