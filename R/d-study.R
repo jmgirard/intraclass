@@ -535,7 +535,12 @@ d_study <- function(
     tbl,
     class = c("icc_dstudy", class(tbl)),
     icc_type = type,
-    icc_raters = raters,
+    # NA where the design has no rater facet, so `glance()` on a projection reads
+    # the same as `glance()` on the fit it came from. Keyed on `oneway` alone,
+    # not `ml_oneway`: a Design 3 fit keeps its nominal treatment, matching what
+    # the sibling `icc_type` attribute does on that same design (M138). The local
+    # `raters` still carries the fitted value into `make_estimand()` above.
+    icc_raters = if (oneway) NA_character_ else raters,
     icc_design_label = icc_design_label(x$design),
     multilevel = multilevel,
     replicates = replicates,

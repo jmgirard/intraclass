@@ -393,7 +393,9 @@ test_that("glance.icc carries `raters` and `replicates`, one name set per design
   fits <- list(
     oneway = icc(ratings, score, subject, rater, model = "oneway", seed = 1),
     random = icc(ratings, score, subject, rater, seed = 1),
-    fixed = icc(ratings, score, subject, rater, raters = "fixed", seed = 1),
+    fixed = suppressWarnings(
+      icc(ratings, score, subject, rater, raters = "fixed", seed = 1)
+    ),
     multilevel = icc(
       ml[ml$occ == 1L, ],
       score,
@@ -478,7 +480,7 @@ test_that("glance() on a projection reads `raters` as glance() on the fit does",
   expect_identical(glance(d_study(ow, m = 1:3))$raters, NA_character_)
   rnd <- icc(ratings, score, subject, rater, seed = 1)
   expect_identical(glance(d_study(rnd, m = 1:3))$raters, "random")
-  fx <- icc(
+  fx <- suppressWarnings(icc(
     ratings,
     score,
     subject,
@@ -486,7 +488,7 @@ test_that("glance() on a projection reads `raters` as glance() on the fit does",
     raters = "fixed",
     type = "consistency",
     seed = 1
-  )
+  ))
   expect_identical(glance(d_study(fx, m = 1:3))$raters, "fixed")
   # Design 3 has no rater component either, and stays nominal on purpose: the
   # sibling `type` column reports "agreement" on that same row, where the
@@ -495,7 +497,7 @@ test_that("glance() on a projection reads `raters` as glance() on the fit does",
   expect_identical(glance(d_study(d3, m = 1:3))$raters, "random")
   # The occasion axis is the only one a fixed-rater agreement fit projects on,
   # so it is the only route by which that design reaches this column.
-  fxa <- icc(
+  fxa <- suppressWarnings(icc(
     replicate_frame(),
     score,
     subject,
@@ -503,6 +505,6 @@ test_that("glance() on a projection reads `raters` as glance() on the fit does",
     raters = "fixed",
     type = "agreement",
     seed = 1
-  )
+  ))
   expect_identical(glance(d_study(fxa, n_o = 1:3))$raters, "fixed")
 })

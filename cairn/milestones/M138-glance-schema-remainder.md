@@ -44,8 +44,8 @@ Land the three exported-schema corrections descoped from M48 while GP2's one-way
 - [x] T3. Update the `glance.icc()` bullet in `R/icc.R:677-683` and re-roxygenize; add a NEWS bullet under the 0.1.0 changelog.
 - [x] T4. Make `tidy.icc()$occasions` double in both branches (`R/icc-methods.R:357-361`): `as.numeric()` on the replicate branch, `NA_real_` replacing `NA_integer_` on the other.
 - [x] T5. Do the same for the `d_study()` projection path: coerce the column at `R/d-study.R:524` (an integer `n_o` reaches it uncoerced) and fill with `NA_real_` at `R/d-study.R:704`.
-- [ ] T6. Replace the `R/icc.R:668` sentence; re-roxygenize so `man/icc.Rd:472` follows; run the AC4 grep.
-- [ ] T8. Set `d_study()`'s `icc_raters` attribute to `NA_character_` on a `model = "oneway"` fit (`R/d-study.R:531`), keying on `oneway` and not on `ml_oneway`; check `icc_design_phrase()`'s NA path stays unreached. Probe the four AC6 fits.
+- [x] T6. Replace the `R/icc.R:668` sentence; re-roxygenize so `man/icc.Rd:472` follows; run the AC4 grep.
+- [x] T8. Set `d_study()`'s `icc_raters` attribute to `NA_character_` on a `model = "oneway"` fit (`R/d-study.R:531`), keying on `oneway` and not on `ml_oneway`; check `icc_design_phrase()`'s NA path stays unreached. Probe the four AC6 fits.
 - [ ] T7. Append a D-entry recording what `glance()` gained, that `type` was refused and why, and that column order is deliberately not contract. Run `air format .`, the four `data-raw/` checkers with `--self-test`, then `devtools::check()`.
 
 ## Work log
@@ -65,3 +65,5 @@ Land the three exported-schema corrections descoped from M48 while GP2's one-way
 - 2026-08-26: T2 — `glance.icc()` gains `raters` (NA on a one-way fit) and `replicates`, placed beside `balanced`. AC1 and AC2 tests go green; the suite's only remaining reds are the four the occasions and projection criteria own.
 - 2026-08-26: T3 — `?icc`'s `glance.icc()` bullet and the NEWS "Reading a fit" bullet name both new columns; the NEWS sentence saying the row cannot tell a random-rater from a fixed-rater `var_rater` is now false and was rewritten in place. Re-roxygenized; `man/icc.Rd` follows.
 - 2026-08-26: T4-T5 — `occasions` is double on both `tidy()` methods: `as.numeric()` on the replicate branch, `NA_real_` on the other, `as.numeric(row_occ)` at the projection's `add_column()` (the site an integer `n_o` reaches uncoerced) and `NA_real_` at the projection fill. NEWS gains the ptype sentence. AC3 green; AC6's is the suite's only remaining red.
+- 2026-08-26: T8 — `icc_raters` is `NA_character_` on a one-way projection, keyed on `oneway` and not `ml_oneway`; `icc_design_phrase()` gained an NA guard so the legacy-object fallback in `format.icc_dstudy()` cannot return `character(0)` if it is ever reached. Suite: FAIL 0, PASS 8624, WARN 2 (both pre-existing). The three new fixed-rater fits wrap in `suppressWarnings()`, the file's existing idiom for the teaching warning.
+- 2026-08-26: T6 — the `?icc` sentence now says `tidy()`/`glance()` are the stable tables rather than a re-export of the list. `man/icc.Rd` re-roxygenized. AC4 grep returns nothing; a control pattern over the same five paths returns hits, so the domain is non-empty. `README.Rmd` carries no match either.

@@ -665,7 +665,10 @@
 #'   in any release without a deprecation cycle. That is the whole rule --
 #'   `$fit` and `$call` are the list elements you may depend on, and reaching
 #'   into any other one is reading an implementation detail. `tidy()` and
-#'   `glance()` return the same information as a stable table.
+#'   `glance()` are the stable tables, not a re-export of the list: they report
+#'   the estimated coefficients and the model-level summaries, column by column
+#'   as documented below. Anything in the object that neither one gives a column
+#'   is exactly what this rule calls internal.
 #'
 #'   The methods documented on this page return:
 #'   * `tidy.icc()`: a tibble with one row per estimated coefficient, columns
