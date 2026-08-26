@@ -236,17 +236,17 @@ random_inc <- tidy(icc(ratings_incomplete, score, subject, rater,
 fixed_inc <- suppressWarnings(tidy(icc(ratings_incomplete, score, subject, rater,
   raters = "fixed", seed = 2024)))
 
-random_inc[, c("index", "estimate", "conf.low", "conf.high")]
+random_inc[, c("term", "estimate", "conf.low", "conf.high")]
 #> # A tibble: 4 × 4
-#>   index    estimate conf.low conf.high
+#>   term     estimate conf.low conf.high
 #>   <chr>       <dbl>    <dbl>     <dbl>
 #> 1 ICC(A,1)    0.249   0.0380     0.693
 #> 2 ICC(A,k)    0.521   0.114      0.881
 #> 3 ICC(C,1)    0.629   0.228      0.906
 #> 4 ICC(C,k)    0.847   0.491      0.969
-fixed_inc[, c("index", "estimate", "conf.low", "conf.high")]
+fixed_inc[, c("term", "estimate", "conf.low", "conf.high")]
 #> # A tibble: 4 × 4
-#>   index    estimate conf.low conf.high
+#>   term     estimate conf.low conf.high
 #>   <chr>       <dbl>    <dbl>     <dbl>
 #> 1 ICC(A,1)    0.236   0.0574     0.630
 #> 2 ICC(A,k)    0.503   0.166      0.848

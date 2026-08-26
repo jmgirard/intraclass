@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">intraclass</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -119,11 +119,11 @@ the fitting backend, not the estimand.</p>
 <span><span class="co">#&gt; Please re-install glmmTMB from source or restore original 'TMB' package (see '?reinstalling' for more information)</span></span>
 <span><span class="va">lme4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, engine <span class="op">=</span> <span class="st">"lme4"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  index <span class="op">=</span> <span class="va">glmmtmb</span><span class="op">$</span><span class="va">index</span>,</span>
+<span>  term <span class="op">=</span> <span class="va">glmmtmb</span><span class="op">$</span><span class="va">term</span>,</span>
 <span>  glmmTMB <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">glmmtmb</span><span class="op">$</span><span class="va">estimate</span>, <span class="fl">4</span><span class="op">)</span>,</span>
 <span>  lme4 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">lme4</span><span class="op">$</span><span class="va">estimate</span>, <span class="fl">4</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt;      index glmmTMB   lme4</span></span>
+<span><span class="co">#&gt;       term glmmTMB   lme4</span></span>
 <span><span class="co">#&gt; 1 ICC(A,1)  0.2898 0.2898</span></span>
 <span><span class="co">#&gt; 2 ICC(A,k)  0.6201 0.6201</span></span>
 <span><span class="co">#&gt; 3 ICC(C,1)  0.7148 0.7148</span></span>
@@ -163,13 +163,13 @@ for.</p>
 <span>  <span class="va">l</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, type <span class="op">=</span> <span class="va">type</span>, unit <span class="op">=</span> <span class="va">unit</span>,</span>
 <span>           engine <span class="op">=</span> <span class="st">"lavaan"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>    index <span class="op">=</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span><span class="op">$</span><span class="va">index</span>,</span>
+<span>    term <span class="op">=</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span><span class="op">$</span><span class="va">term</span>,</span>
 <span>    glmmTMB <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span><span class="op">$</span><span class="va">estimate</span>, <span class="fl">4</span><span class="op">)</span>,</span>
 <span>    lavaan <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">l</span><span class="op">)</span><span class="op">$</span><span class="va">estimate</span>, <span class="fl">4</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">}</span>, <span class="va">axes</span><span class="op">$</span><span class="va">type</span>, <span class="va">axes</span><span class="op">$</span><span class="va">unit</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">compare</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/duplicated.html" class="external-link">duplicated</a></span><span class="op">(</span><span class="va">compare</span><span class="op">$</span><span class="va">index</span><span class="op">)</span>, <span class="op">]</span></span>
-<span><span class="co">#&gt;                 index glmmTMB lavaan</span></span>
+<span><span class="va">compare</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/duplicated.html" class="external-link">duplicated</a></span><span class="op">(</span><span class="va">compare</span><span class="op">$</span><span class="va">term</span><span class="op">)</span>, <span class="op">]</span></span>
+<span><span class="co">#&gt;                  term glmmTMB lavaan</span></span>
 <span><span class="co">#&gt; agreement    ICC(A,1)  0.2898 0.2843</span></span>
 <span><span class="co">#&gt; consistency  ICC(C,1)  0.7148 0.7148</span></span>
 <span><span class="co">#&gt; agreement1   ICC(A,k)  0.6201 0.6137</span></span>

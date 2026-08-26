@@ -100,23 +100,24 @@ one-row model summary, including the variance components.
 ``` r
 
 tidy(fit)
-#> # A tibble: 4 × 10
-#>   index    type  level sf_index estimate std.error conf.low conf.high conf.level
-#>   <chr>    <chr> <chr> <chr>       <dbl>     <dbl>    <dbl>     <dbl>      <dbl>
-#> 1 ICC(A,1) agre… NA    ICC(2,1)    0.290    0.180    0.0498     0.713       0.95
-#> 2 ICC(A,k) agre… NA    ICC(2,k)    0.620    0.201    0.173      0.909       0.95
-#> 3 ICC(C,1) cons… NA    NA          0.715    0.155    0.343      0.924       0.95
-#> 4 ICC(C,k) cons… NA    NA          0.909    0.0810   0.676      0.980       0.95
-#> # ℹ 1 more variable: method <chr>
+#> # A tibble: 4 × 11
+#>   term     occasions type   level sf_index estimate std.error conf.low conf.high
+#>   <chr>        <int> <chr>  <chr> <chr>       <dbl>     <dbl>    <dbl>     <dbl>
+#> 1 ICC(A,1)        NA agree… NA    ICC(2,1)    0.290    0.180    0.0498     0.713
+#> 2 ICC(A,k)        NA agree… NA    ICC(2,k)    0.620    0.201    0.173      0.909
+#> 3 ICC(C,1)        NA consi… NA    NA          0.715    0.155    0.343      0.924
+#> 4 ICC(C,k)        NA consi… NA    NA          0.909    0.0810   0.676      0.980
+#> # ℹ 2 more variables: conf.level <dbl>, method <chr>
 
 glance(fit)
-#> # A tibble: 1 × 18
+#> # A tibble: 1 × 22
 #>   n_subjects n_raters n_clusters n_obs n_cells balanced multilevel ml_design
 #>        <int>    <int>      <int> <int>   <int> <lgl>    <lgl>      <chr>    
 #> 1          6        4         NA    24      24 TRUE     FALSE      NA       
-#> # ℹ 10 more variables: k_eff <dbl>, k_c_eff <dbl>, var_cluster <dbl>,
+#> # ℹ 14 more variables: k_eff <dbl>, k_c_eff <dbl>, var_cluster <dbl>,
 #> #   var_subject <dbl>, var_rater <dbl>, var_cluster_rater <dbl>,
-#> #   var_residual <dbl>, engine <chr>, ci_method <chr>, conf.level <dbl>
+#> #   var_subject_rater <dbl>, var_residual <dbl>, n_o <int>, engine <chr>,
+#> #   ci_method <chr>, conf.level <dbl>, rhat <dbl>, ess_bulk <dbl>
 ```
 
 [`summary()`](https://rdrr.io/r/base/summary.html) is the other reading

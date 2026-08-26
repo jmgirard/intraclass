@@ -52,11 +52,11 @@ glmmtmb <- tidy(icc(ratings, score, subject, rater, engine = "glmmTMB", seed = 1
 #> Please re-install glmmTMB from source or restore original 'TMB' package (see '?reinstalling' for more information)
 lme4 <- tidy(icc(ratings, score, subject, rater, engine = "lme4", seed = 1))
 data.frame(
-  index = glmmtmb$index,
+  term = glmmtmb$term,
   glmmTMB = round(glmmtmb$estimate, 4),
   lme4 = round(lme4$estimate, 4)
 )
-#>      index glmmTMB   lme4
+#>       term glmmTMB   lme4
 #> 1 ICC(A,1)  0.2898 0.2898
 #> 2 ICC(A,k)  0.6201 0.6201
 #> 3 ICC(C,1)  0.7148 0.7148
@@ -98,13 +98,13 @@ compare <- do.call(rbind, Map(function(type, unit) {
   l <- icc(ratings, score, subject, rater, type = type, unit = unit,
            engine = "lavaan", seed = 1)
   data.frame(
-    index = tidy(g)$index,
+    term = tidy(g)$term,
     glmmTMB = round(tidy(g)$estimate, 4),
     lavaan = round(tidy(l)$estimate, 4)
   )
 }, axes$type, axes$unit))
-compare[!duplicated(compare$index), ]
-#>                 index glmmTMB lavaan
+compare[!duplicated(compare$term), ]
+#>                  term glmmTMB lavaan
 #> agreement    ICC(A,1)  0.2898 0.2843
 #> consistency  ICC(C,1)  0.7148 0.7148
 #> agreement1   ICC(A,k)  0.6201 0.6137

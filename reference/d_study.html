@@ -27,7 +27,7 @@ band matches the fitted ICC(*,k) interval exactly."><meta property="og:image" co
 
     <a class="navbar-brand me-2" href="../index.html">intraclass</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -150,19 +150,22 @@ or the seed.</p></dd>
     <p><code>d_study()</code> returns an <code>icc_dstudy</code> object: a tibble with one row per
 projected point and columns <code>m</code>, <code>index</code> (e.g. <code>"ICC(A,3)"</code>), <code>type</code>,
 <code>estimate</code>, <code>std.error</code>, <code>conf.low</code>, and <code>conf.high</code>, carrying the design and
-interval settings as attributes. If the fitted <code>icc</code> reports both error
+interval settings as attributes. <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code> names that coefficient column
+<code>term</code>, following the broom glossary; the object keeps <code>index</code>. If the
+fitted <code>icc</code> reports both error
 definitions (the default), <code>d_study()</code> projects <strong>one reliability curve per
-definition</strong> and <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code> surfaces a <code>type</code> column to distinguish them. A
-single-type fit projects a single curve. A multilevel projection adds a
-<code>level</code> column (one curve per level), and a replicate projection an
-<code>occasions</code> column.</p>
-<p>The methods documented on this page return:</p><ul><li><p><code>tidy.icc_dstudy()</code>: a tibble with one row per projected point. Its
-columns are <code>m</code>, <code>index</code>, <code>estimate</code>, <code>std.error</code>, <code>conf.low</code>,
-<code>conf.high</code>, <code>conf.level</code>, and <code>method</code>. It gains a <code>type</code> column when
-both error definitions are projected, a <code>level</code> column for a multilevel
-projection, and an <code>occasions</code> column for a replicate projection. The
-conditional columns are inserted after <code>index</code> (<code>type</code>) and after <code>m</code>
-(<code>level</code>, <code>occasions</code>), so the list above is not a column order.</p></li>
+definition</strong>, distinguished by the <code>type</code> column. A single-type fit projects
+a single curve. A multilevel projection fills the <code>level</code> column (one curve
+per level), and a replicate projection the <code>occasions</code> column. Read the
+projection with <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code>: the object's own layout is internal, and only the
+tidied columns are a stable contract.</p>
+<p>The methods documented on this page return:</p><ul><li><p><code>tidy.icc_dstudy()</code>: a tibble with one row per projected point, columns
+in this order: <code>m</code>, <code>occasions</code>, <code>level</code>, <code>term</code> (the projected ICC
+index, named for the broom glossary), <code>type</code>, <code>estimate</code>, <code>std.error</code>,
+<code>conf.low</code>, <code>conf.high</code>, <code>conf.level</code>, <code>method</code>. Every column is present
+on every projection; <code>occasions</code> is <code>NA</code> outside a replicate projection,
+<code>level</code> outside a multilevel one, and <code>type</code> where the design defines no
+error definition.</p></li>
 <li><p><code>glance.icc_dstudy()</code>: a one-row tibble of projection-level summaries. It
 carries the distinct projected rater counts <code>m</code> and their range, the
 error definition(s), the rater treatment, the observed rater count, and
@@ -206,7 +209,9 @@ raters" to project to. <code>d_study()</code> aborts in that case (use
 <p>For a multilevel fit (a <code>cluster</code> column), <code>d_study()</code> projects the rater
 count <code>m</code> for each correctly-partitioned level on the object, meaning the
 <strong>subject</strong> and/or <strong>cluster</strong> level. It returns one reliability curve per
-level, and the result gains a <code>level</code> column that <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> facets by.
+level, and the returned object gains a <code>level</code> column that <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code>
+facets by; <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code> carries that column on every projection, <code>NA</code> where the
+fit is not multilevel.
 This is the paper-sanctioned rater projection (ten Hove et al. 2022). Here
 <code>m</code> is the number of raters per cluster, and the cluster-level coefficient
 does <strong>not</strong> average over subjects, so there is no "subjects per cluster"
@@ -226,9 +231,11 @@ averaged <code>ICC(c,k)</code> case, whose ragged divisor is an open modeling qu
 where the residual splits into the subject-by-rater interaction and pure error),
 <code>d_study()</code> can project <strong>either</strong> axis (one per call):</p><ul><li><p>the <strong>rater count <code>m</code></strong> (the default), holding the number of occasions <code>n_o</code> at
 the fitted value: the rater and interaction terms divide by <code>m</code>, pure error by
-<code>m * n_o</code>. The result gains an <code>occasions</code> column, one reliability curve per
-occasion setting on the fit (<code>"single"</code> and/or <code>"average"</code>), so at <code>m</code> = the
-observed rater count each curve matches the fitted <code>ICC(*,k)</code>.</p></li>
+<code>m * n_o</code>. The returned object gains an <code>occasions</code> column, one reliability
+curve per occasion setting on the fit (<code>"single"</code> and/or <code>"average"</code>), so at
+<code>m</code> = the observed rater count each curve matches the fitted <code>ICC(*,k)</code>;
+<code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code> carries that column on every projection, <code>NA</code> where the fit has no
+replicates.</p></li>
 <li><p>the <strong>occasion count <code>n_o</code></strong> (supply the <code>n_o</code> argument), holding raters at the
 observed count: pure error divides by <code>m * n_o</code> while the rater and interaction
 terms are unchanged. Because occasion averaging rescales <strong>only pure

@@ -76,17 +76,18 @@ summarizes the projection as a whole:
 ``` r
 
 tidy(proj)
-#> # A tibble: 8 × 8
-#>       m index    estimate std.error conf.low conf.high conf.level method    
-#>   <int> <chr>       <dbl>     <dbl>    <dbl>     <dbl>      <dbl> <chr>     
-#> 1     1 ICC(A,1)    0.290     0.180   0.0503     0.706       0.95 montecarlo
-#> 2     2 ICC(A,2)    0.449     0.203   0.0959     0.828       0.95 montecarlo
-#> 3     3 ICC(A,3)    0.550     0.205   0.137      0.878       0.95 montecarlo
-#> 4     4 ICC(A,4)    0.620     0.202   0.175      0.906       0.95 montecarlo
-#> 5     5 ICC(A,5)    0.671     0.196   0.210      0.923       0.95 montecarlo
-#> 6     6 ICC(A,6)    0.710     0.189   0.241      0.935       0.95 montecarlo
-#> 7     7 ICC(A,7)    0.741     0.182   0.271      0.944       0.95 montecarlo
-#> 8     8 ICC(A,8)    0.765     0.176   0.298      0.950       0.95 montecarlo
+#> # A tibble: 8 × 11
+#>       m occasions level term     type      estimate std.error conf.low conf.high
+#>   <int>     <int> <chr> <chr>    <chr>        <dbl>     <dbl>    <dbl>     <dbl>
+#> 1     1        NA NA    ICC(A,1) agreement    0.290     0.180   0.0503     0.706
+#> 2     2        NA NA    ICC(A,2) agreement    0.449     0.203   0.0959     0.828
+#> 3     3        NA NA    ICC(A,3) agreement    0.550     0.205   0.137      0.878
+#> 4     4        NA NA    ICC(A,4) agreement    0.620     0.202   0.175      0.906
+#> 5     5        NA NA    ICC(A,5) agreement    0.671     0.196   0.210      0.923
+#> 6     6        NA NA    ICC(A,6) agreement    0.710     0.189   0.241      0.935
+#> 7     7        NA NA    ICC(A,7) agreement    0.741     0.182   0.271      0.944
+#> 8     8        NA NA    ICC(A,8) agreement    0.765     0.176   0.298      0.950
+#> # ℹ 2 more variables: conf.level <dbl>, method <chr>
 
 glance(proj)
 #> # A tibble: 1 × 9
@@ -109,9 +110,9 @@ coefficient above *is* the absolute-agreement projection. A default
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
 reports both agreement and consistency, and
 [`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)
-then projects **one curve per error definition**, adding a `type`
-column. That is handy when you want both, but for this walkthrough one
-curve keeps the picture clear.
+then projects **one curve per error definition**, told apart by the
+`type` column. That is handy when you want both, but for this
+walkthrough one curve keeps the picture clear.
 
 Read as a curve, this is the classic “how many raters?” picture. Plot it
 with

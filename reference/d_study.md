@@ -86,24 +86,28 @@ glance(x, ...)
 `d_study()` returns an `icc_dstudy` object: a tibble with one row per
 projected point and columns `m`, `index` (e.g. `"ICC(A,3)"`), `type`,
 `estimate`, `std.error`, `conf.low`, and `conf.high`, carrying the
-design and interval settings as attributes. If the fitted `icc` reports
-both error definitions (the default), `d_study()` projects **one
-reliability curve per definition** and
-[`tidy()`](https://generics.r-lib.org/reference/tidy.html) surfaces a
-`type` column to distinguish them. A single-type fit projects a single
-curve. A multilevel projection adds a `level` column (one curve per
-level), and a replicate projection an `occasions` column.
+design and interval settings as attributes.
+[`tidy()`](https://generics.r-lib.org/reference/tidy.html) names that
+coefficient column `term`, following the broom glossary; the object
+keeps `index`. If the fitted `icc` reports both error definitions (the
+default), `d_study()` projects **one reliability curve per definition**,
+distinguished by the `type` column. A single-type fit projects a single
+curve. A multilevel projection fills the `level` column (one curve per
+level), and a replicate projection the `occasions` column. Read the
+projection with
+[`tidy()`](https://generics.r-lib.org/reference/tidy.html): the object's
+own layout is internal, and only the tidied columns are a stable
+contract.
 
 The methods documented on this page return:
 
-- `tidy.icc_dstudy()`: a tibble with one row per projected point. Its
-  columns are `m`, `index`, `estimate`, `std.error`, `conf.low`,
-  `conf.high`, `conf.level`, and `method`. It gains a `type` column when
-  both error definitions are projected, a `level` column for a
-  multilevel projection, and an `occasions` column for a replicate
-  projection. The conditional columns are inserted after `index`
-  (`type`) and after `m` (`level`, `occasions`), so the list above is
-  not a column order.
+- `tidy.icc_dstudy()`: a tibble with one row per projected point,
+  columns in this order: `m`, `occasions`, `level`, `term` (the
+  projected ICC index, named for the broom glossary), `type`,
+  `estimate`, `std.error`, `conf.low`, `conf.high`, `conf.level`,
+  `method`. Every column is present on every projection; `occasions` is
+  `NA` outside a replicate projection, `level` outside a multilevel one,
+  and `type` where the design defines no error definition.
 
 - `glance.icc_dstudy()`: a one-row tibble of projection-level summaries.
   It carries the distinct projected rater counts `m` and their range,
@@ -153,9 +157,12 @@ aborts in that case (use `raters = "random"`).
 For a multilevel fit (a `cluster` column), `d_study()` projects the
 rater count `m` for each correctly-partitioned level on the object,
 meaning the **subject** and/or **cluster** level. It returns one
-reliability curve per level, and the result gains a `level` column that
+reliability curve per level, and the returned object gains a `level`
+column that
 [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
-facets by. This is the paper-sanctioned rater projection (ten Hove et
+facets by; [`tidy()`](https://generics.r-lib.org/reference/tidy.html)
+carries that column on every projection, `NA` where the fit is not
+multilevel. This is the paper-sanctioned rater projection (ten Hove et
 al. 2022). Here `m` is the number of raters per cluster, and the
 cluster-level coefficient does **not** average over subjects, so there
 is no "subjects per cluster" projection. That is a sample-size question,
@@ -175,10 +182,12 @@ subject-by-rater interaction and pure error), `d_study()` can project
 
 - the **rater count `m`** (the default), holding the number of occasions
   `n_o` at the fitted value: the rater and interaction terms divide by
-  `m`, pure error by `m * n_o`. The result gains an `occasions` column,
-  one reliability curve per occasion setting on the fit (`"single"`
-  and/or `"average"`), so at `m` = the observed rater count each curve
-  matches the fitted `ICC(*,k)`.
+  `m`, pure error by `m * n_o`. The returned object gains an `occasions`
+  column, one reliability curve per occasion setting on the fit
+  (`"single"` and/or `"average"`), so at `m` = the observed rater count
+  each curve matches the fitted `ICC(*,k)`;
+  [`tidy()`](https://generics.r-lib.org/reference/tidy.html) carries
+  that column on every projection, `NA` where the fit has no replicates.
 
 - the **occasion count `n_o`** (supply the `n_o` argument), holding
   raters at the observed count: pure error divides by `m * n_o` while

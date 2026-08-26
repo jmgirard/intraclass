@@ -11,7 +11,7 @@ of `k` raters (`ICC(*,k)`), treating the raters as a random sample (Case
 ## Usage
 
 ``` r
-autoplot.icc(object, what = c("coefficients", "components"), ...)
+autoplot.icc(object, what = "coefficients", ...)
 
 # S3 method for class 'icc'
 plot(x, ...)
@@ -39,7 +39,7 @@ icc(
   cluster = NULL,
   model = "twoway",
   type = c("agreement", "consistency"),
-  raters = c("random", "fixed"),
+  raters = "random",
   unit = c("single", "average"),
   occasions = "single",
   level = c("subject", "cluster"),
@@ -52,7 +52,7 @@ icc(
   seed = NULL,
   brm_args = list(),
   prior = NULL,
-  posterior_summary = c("percentile", "hpdi")
+  posterior_summary = "percentile"
 )
 ```
 
@@ -540,18 +540,33 @@ icc(
 variance components, design, engine, interval settings, sample sizes,
 the fitted model, and the call.
 
+**What of that object is stable.** The supported way to read a fit is
+through the methods below, plus two elements of the list itself: `$fit`,
+the object the engine returned, and `$call`, the matched call.
+Everything else in the list is internal: its names, nesting, and
+contents may change in any release without a deprecation cycle. That is
+the whole rule – `$fit` and `$call` are the list elements you may depend
+on, and reaching into any other one is reading an implementation detail.
+[`tidy()`](https://generics.r-lib.org/reference/tidy.html) and
+[`glance()`](https://generics.r-lib.org/reference/glance.html) return
+the same information as a stable table.
+
 The methods documented on this page return:
 
-- `tidy.icc()`: a tibble with one row per estimated coefficient. Its
-  columns are `index`, `type`, `level`, `sf_index`, `estimate`,
-  `std.error`, `conf.low`, `conf.high`, `conf.level`, and `method`. An
-  `occasions` column joins them when the design has within-cell
-  replicates, inserted after `index`, so the list above is not a column
-  order.
+- `tidy.icc()`: a tibble with one row per estimated coefficient, columns
+  in this order: `term` (the coefficient's ICC index, named for the
+  broom glossary), `occasions`, `type`, `level`, `sf_index`, `estimate`,
+  `std.error`, `conf.low`, `conf.high`, `conf.level`, `method`. Every
+  column is present on every fit; `occasions` is `NA` unless the design
+  has within-cell replicates.
 
 - `glance.icc()`: a one-row tibble of model-level summaries: the sample
   sizes, the design flags, the effective rater counts, the variance
-  components, and the engine and interval settings.
+  components, the occasion count `n_o` (`NA` unless the design has
+  within-cell replicates *and* defines one occasion count per cell –
+  ragged replicates leave it `NA`), the engine and interval settings,
+  and the sampler diagnostics `rhat` and `ess_bulk` (`NA` for the
+  non-Bayesian engines, which do not sample).
 
 - `format.icc()`: a character vector holding the printed report, one
   line per element.

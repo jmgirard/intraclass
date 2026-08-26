@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">intraclass</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -112,12 +112,12 @@ slower.</p>
 <span>  ci_method <span class="op">=</span> <span class="st">"bootstrap"</span>, boot_samples <span class="op">=</span> <span class="fl">999</span>, seed <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  index <span class="op">=</span> <span class="va">mc</span><span class="op">$</span><span class="va">index</span>,</span>
+<span>  term <span class="op">=</span> <span class="va">mc</span><span class="op">$</span><span class="va">term</span>,</span>
 <span>  estimate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">mc</span><span class="op">$</span><span class="va">estimate</span>, <span class="fl">3</span><span class="op">)</span>,</span>
 <span>  mc <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"[%.2f, %.2f]"</span>, <span class="va">mc</span><span class="op">$</span><span class="va">conf.low</span>, <span class="va">mc</span><span class="op">$</span><span class="va">conf.high</span><span class="op">)</span>,</span>
 <span>  bootstrap <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"[%.2f, %.2f]"</span>, <span class="va">bs</span><span class="op">$</span><span class="va">conf.low</span>, <span class="va">bs</span><span class="op">$</span><span class="va">conf.high</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt;      index estimate           mc    bootstrap</span></span>
+<span><span class="co">#&gt;       term estimate           mc    bootstrap</span></span>
 <span><span class="co">#&gt; 1 ICC(A,1)    0.290 [0.05, 0.71] [0.02, 0.72]</span></span>
 <span><span class="co">#&gt; 2 ICC(A,k)    0.620 [0.17, 0.91] [0.09, 0.91]</span></span>
 <span><span class="co">#&gt; 3 ICC(C,1)    0.715 [0.34, 0.92] [0.15, 0.90]</span></span>
@@ -379,14 +379,14 @@ beside it.</p>
 <span>  model <span class="op">=</span> <span class="st">"oneway"</span>, ci_method <span class="op">=</span> <span class="st">"npbootstrap"</span>, boot_samples <span class="op">=</span> <span class="fl">199</span>, seed <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  index <span class="op">=</span> <span class="va">mc</span><span class="op">$</span><span class="va">index</span>,</span>
+<span>  term <span class="op">=</span> <span class="va">mc</span><span class="op">$</span><span class="va">term</span>,</span>
 <span>  estimate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">mc</span><span class="op">$</span><span class="va">estimate</span>, <span class="fl">3</span><span class="op">)</span>,</span>
 <span>  montecarlo <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"[%.2f, %.2f]"</span>, <span class="va">mc</span><span class="op">$</span><span class="va">conf.low</span>, <span class="va">mc</span><span class="op">$</span><span class="va">conf.high</span><span class="op">)</span>,</span>
 <span>  searle <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"[%.2f, %.2f]"</span>, <span class="va">se</span><span class="op">$</span><span class="va">conf.low</span>, <span class="va">se</span><span class="op">$</span><span class="va">conf.high</span><span class="op">)</span>,</span>
 <span>  burch <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"[%.2f, %.2f]"</span>, <span class="va">bu</span><span class="op">$</span><span class="va">conf.low</span>, <span class="va">bu</span><span class="op">$</span><span class="va">conf.high</span><span class="op">)</span>,</span>
 <span>  npbootstrap <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"[%.2f, %.2f]"</span>, <span class="va">np</span><span class="op">$</span><span class="va">conf.low</span>, <span class="va">np</span><span class="op">$</span><span class="va">conf.high</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt;    index estimate   montecarlo        searle         burch   npbootstrap</span></span>
+<span><span class="co">#&gt;     term estimate   montecarlo        searle         burch   npbootstrap</span></span>
 <span><span class="co">#&gt; 1 ICC(1)    0.166 [0.01, 0.83] [-0.13, 0.72] [-0.13, 0.56] [-0.05, 0.89]</span></span>
 <span><span class="co">#&gt; 2 ICC(k)    0.443 [0.03, 0.95] [-0.88, 0.91] [-0.90, 0.84] [-0.26, 0.97]</span></span></code></pre></div>
 <p>All four columns share the same point estimate:
@@ -442,12 +442,12 @@ balanced two-way design inside it:</p>
 <span><span class="va">mc2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">sim</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, type <span class="op">=</span> <span class="st">"agreement"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">ml</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">sim</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, type <span class="op">=</span> <span class="st">"agreement"</span>, ci_method <span class="op">=</span> <span class="st">"mpl"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  index <span class="op">=</span> <span class="va">mc2</span><span class="op">$</span><span class="va">index</span>,</span>
+<span>  term <span class="op">=</span> <span class="va">mc2</span><span class="op">$</span><span class="va">term</span>,</span>
 <span>  estimate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">mc2</span><span class="op">$</span><span class="va">estimate</span>, <span class="fl">3</span><span class="op">)</span>,</span>
 <span>  montecarlo <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"[%.2f, %.2f]"</span>, <span class="va">mc2</span><span class="op">$</span><span class="va">conf.low</span>, <span class="va">mc2</span><span class="op">$</span><span class="va">conf.high</span><span class="op">)</span>,</span>
 <span>  mpl <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"[%.2f, %.2f]"</span>, <span class="va">ml</span><span class="op">$</span><span class="va">conf.low</span>, <span class="va">ml</span><span class="op">$</span><span class="va">conf.high</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt;      index estimate   montecarlo          mpl</span></span>
+<span><span class="co">#&gt;       term estimate   montecarlo          mpl</span></span>
 <span><span class="co">#&gt; 1 ICC(A,1)    0.709 [0.47, 0.84] [0.42, 0.87]</span></span>
 <span><span class="co">#&gt; 2 ICC(A,k)    0.907 [0.78, 0.95] [0.75, 0.96]</span></span></code></pre></div>
 <p>The two point estimates agree, from the same REML fit. The

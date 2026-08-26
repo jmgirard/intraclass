@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">intraclass</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -169,23 +169,24 @@ estimate and confidence interval. <code><a href="https://generics.r-lib.org/refe
 one-row model summary, including the variance components.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 10</span></span></span>
-<span><span class="co">#&gt;   index    type  level sf_index estimate std.error conf.low conf.high conf.level</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ICC(A,1) agre… <span style="color: #BB0000;">NA</span>    ICC(2,1)    0.290    0.180    0.049<span style="text-decoration: underline;">8</span>     0.713       0.95</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ICC(A,k) agre… <span style="color: #BB0000;">NA</span>    ICC(2,k)    0.620    0.201    0.173      0.909       0.95</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ICC(C,1) cons… <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>          0.715    0.155    0.343      0.924       0.95</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ICC(C,k) cons… <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>          0.909    0.081<span style="text-decoration: underline;">0</span>   0.676      0.980       0.95</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: method &lt;chr&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 11</span></span></span>
+<span><span class="co">#&gt;   term     occasions type   level sf_index estimate std.error conf.low conf.high</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ICC(A,1)        <span style="color: #BB0000;">NA</span> agree… <span style="color: #BB0000;">NA</span>    ICC(2,1)    0.290    0.180    0.049<span style="text-decoration: underline;">8</span>     0.713</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ICC(A,k)        <span style="color: #BB0000;">NA</span> agree… <span style="color: #BB0000;">NA</span>    ICC(2,k)    0.620    0.201    0.173      0.909</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ICC(C,1)        <span style="color: #BB0000;">NA</span> consi… <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>          0.715    0.155    0.343      0.924</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ICC(C,k)        <span style="color: #BB0000;">NA</span> consi… <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>          0.909    0.081<span style="text-decoration: underline;">0</span>   0.676      0.980</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: conf.level &lt;dbl&gt;, method &lt;chr&gt;</span></span></span>
 <span></span>
 <span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 18</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 22</span></span></span>
 <span><span class="co">#&gt;   n_subjects n_raters n_clusters n_obs n_cells balanced multilevel ml_design</span></span>
 <span><span class="co">#&gt;        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>          6        4         <span style="color: #BB0000;">NA</span>    24      24 TRUE     FALSE      <span style="color: #BB0000;">NA</span>       </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 10 more variables: k_eff &lt;dbl&gt;, k_c_eff &lt;dbl&gt;, var_cluster &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 14 more variables: k_eff &lt;dbl&gt;, k_c_eff &lt;dbl&gt;, var_cluster &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   var_subject &lt;dbl&gt;, var_rater &lt;dbl&gt;, var_cluster_rater &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   var_residual &lt;dbl&gt;, engine &lt;chr&gt;, ci_method &lt;chr&gt;, conf.level &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;">#   var_subject_rater &lt;dbl&gt;, var_residual &lt;dbl&gt;, n_o &lt;int&gt;, engine &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   ci_method &lt;chr&gt;, conf.level &lt;dbl&gt;, rhat &lt;dbl&gt;, ess_bulk &lt;dbl&gt;</span></span></span></code></pre></div>
 <p><code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> is the other reading of the same fit. It
 reprints the report above, then appends a short <strong>interpretive
 note for each error definition present</strong>, plus one about what a

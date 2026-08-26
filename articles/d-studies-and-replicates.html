@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">intraclass</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -135,17 +135,18 @@ point, and <code><a href="https://generics.r-lib.org/reference/glance.html" clas
 whole:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">proj</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 8 × 8</span></span></span>
-<span><span class="co">#&gt;       m index    estimate std.error conf.low conf.high conf.level method    </span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1 ICC(A,1)    0.290     0.180   0.050<span style="text-decoration: underline;">3</span>     0.706       0.95 montecarlo</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2 ICC(A,2)    0.449     0.203   0.095<span style="text-decoration: underline;">9</span>     0.828       0.95 montecarlo</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     3 ICC(A,3)    0.550     0.205   0.137      0.878       0.95 montecarlo</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>     4 ICC(A,4)    0.620     0.202   0.175      0.906       0.95 montecarlo</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>     5 ICC(A,5)    0.671     0.196   0.210      0.923       0.95 montecarlo</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>     6 ICC(A,6)    0.710     0.189   0.241      0.935       0.95 montecarlo</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span>     7 ICC(A,7)    0.741     0.182   0.271      0.944       0.95 montecarlo</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span>     8 ICC(A,8)    0.765     0.176   0.298      0.950       0.95 montecarlo</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 8 × 11</span></span></span>
+<span><span class="co">#&gt;       m occasions level term     type      estimate std.error conf.low conf.high</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1        <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>    ICC(A,1) agreement    0.290     0.180   0.050<span style="text-decoration: underline;">3</span>     0.706</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2        <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>    ICC(A,2) agreement    0.449     0.203   0.095<span style="text-decoration: underline;">9</span>     0.828</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     3        <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>    ICC(A,3) agreement    0.550     0.205   0.137      0.878</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>     4        <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>    ICC(A,4) agreement    0.620     0.202   0.175      0.906</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>     5        <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>    ICC(A,5) agreement    0.671     0.196   0.210      0.923</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>     6        <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>    ICC(A,6) agreement    0.710     0.189   0.241      0.935</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span>     7        <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>    ICC(A,7) agreement    0.741     0.182   0.271      0.944</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span>     8        <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>    ICC(A,8) agreement    0.765     0.176   0.298      0.950</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: conf.level &lt;dbl&gt;, method &lt;chr&gt;</span></span></span>
 <span></span>
 <span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">proj</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 9</span></span></span>
@@ -163,9 +164,9 @@ reporting the swept range (<code>n_m</code>, <code>m_min</code>,
 dependability coefficient above <em>is</em> the absolute-agreement
 projection. A default <code><a href="../reference/icc.html">icc()</a></code> reports both agreement and
 consistency, and <code><a href="../reference/d_study.html">d_study()</a></code> then projects <strong>one curve
-per error definition</strong>, adding a <code>type</code> column. That
-is handy when you want both, but for this walkthrough one curve keeps
-the picture clear.</p>
+per error definition</strong>, told apart by the <code>type</code>
+column. That is handy when you want both, but for this walkthrough one
+curve keeps the picture clear.</p>
 <p>Read as a curve, this is the classic “how many raters?” picture. Plot
 it with <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code>, which needs
 <strong>ggplot2</strong>:</p>

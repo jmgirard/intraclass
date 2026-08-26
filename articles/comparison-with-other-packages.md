@@ -41,8 +41,8 @@ The table shows how close they land here:
 
 wm <- to_wide(ratings)
 ic <- function(model, type, unit) {
-  icc(ratings, subject = subject, rater = rater, score = score,
-      model = model, type = type, unit = unit)$estimates$estimate[1]
+  tidy(icc(ratings, subject = subject, rater = rater, score = score,
+           model = model, type = type, unit = unit))$estimate[1]
 }
 ps <- psych::ICC(wm)$results
 psv <- stats::setNames(ps$ICC, ps$type)
@@ -109,8 +109,9 @@ gwet_frame <- data.frame(
   J1 = w$score.1, J2 = w$score.2, J3 = w$score.3, J4 = w$score.4
 )
 gwet_agree <- irrICC::icc2.inter.fn(gwet_frame)$icc2r
-intraclass_a1 <- icc(ratings, subject = subject, rater = rater, score = score,
-                     model = "twoway", type = "agreement", unit = "single")$estimates$estimate[1]
+intraclass_a1 <- tidy(icc(ratings, subject = subject, rater = rater, score = score,
+                          model = "twoway", type = "agreement",
+                          unit = "single"))$estimate[1]
 
 data.frame(
   source   = c("intraclass ICC(A,1)", "irrICC icc2r (Gwet)"),
@@ -177,10 +178,11 @@ ratings](https://jmgirard.github.io/intraclass/articles/glossary.html#effective-
 
 fit_inc <- icc(ratings_incomplete, subject = subject, rater = rater, score = score,
                model = "twoway", type = "agreement", unit = "average")
-c(estimate = fit_inc$estimates$estimate[1],
-  subjects_used = fit_inc$n$subjects,
-  ratings_used = fit_inc$n$obs,
-  k_eff = fit_inc$k_eff)
+gl_inc <- glance(fit_inc)
+c(estimate = tidy(fit_inc)$estimate[1],
+  subjects_used = gl_inc$n_subjects,
+  ratings_used = gl_inc$n_obs,
+  k_eff = gl_inc$k_eff)
 #>      estimate subjects_used  ratings_used         k_eff 
 #>     0.5205561     6.0000000    20.0000000     3.2727273
 ```

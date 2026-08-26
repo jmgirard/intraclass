@@ -44,12 +44,12 @@ bs <- tidy(icc(ratings, score, subject, rater,
   ci_method = "bootstrap", boot_samples = 999, seed = 1
 ))
 data.frame(
-  index = mc$index,
+  term = mc$term,
   estimate = round(mc$estimate, 3),
   mc = sprintf("[%.2f, %.2f]", mc$conf.low, mc$conf.high),
   bootstrap = sprintf("[%.2f, %.2f]", bs$conf.low, bs$conf.high)
 )
-#>      index estimate           mc    bootstrap
+#>       term estimate           mc    bootstrap
 #> 1 ICC(A,1)    0.290 [0.05, 0.71] [0.02, 0.72]
 #> 2 ICC(A,k)    0.620 [0.17, 0.91] [0.09, 0.91]
 #> 3 ICC(C,1)    0.715 [0.34, 0.92] [0.15, 0.90]
@@ -274,14 +274,14 @@ np <- tidy(icc(ratings, score, subject, rater,
   model = "oneway", ci_method = "npbootstrap", boot_samples = 199, seed = 1
 ))
 data.frame(
-  index = mc$index,
+  term = mc$term,
   estimate = round(mc$estimate, 3),
   montecarlo = sprintf("[%.2f, %.2f]", mc$conf.low, mc$conf.high),
   searle = sprintf("[%.2f, %.2f]", se$conf.low, se$conf.high),
   burch = sprintf("[%.2f, %.2f]", bu$conf.low, bu$conf.high),
   npbootstrap = sprintf("[%.2f, %.2f]", np$conf.low, np$conf.high)
 )
-#>    index estimate   montecarlo        searle         burch   npbootstrap
+#>     term estimate   montecarlo        searle         burch   npbootstrap
 #> 1 ICC(1)    0.166 [0.01, 0.83] [-0.13, 0.72] [-0.13, 0.56] [-0.05, 0.89]
 #> 2 ICC(k)    0.443 [0.03, 0.95] [-0.88, 0.91] [-0.90, 0.84] [-0.26, 0.97]
 ```
@@ -341,12 +341,12 @@ sim <- data.frame(
 mc2 <- tidy(icc(sim, score, subject, rater, type = "agreement", seed = 1))
 ml <- tidy(icc(sim, score, subject, rater, type = "agreement", ci_method = "mpl"))
 data.frame(
-  index = mc2$index,
+  term = mc2$term,
   estimate = round(mc2$estimate, 3),
   montecarlo = sprintf("[%.2f, %.2f]", mc2$conf.low, mc2$conf.high),
   mpl = sprintf("[%.2f, %.2f]", ml$conf.low, ml$conf.high)
 )
-#>      index estimate   montecarlo          mpl
+#>       term estimate   montecarlo          mpl
 #> 1 ICC(A,1)    0.709 [0.47, 0.84] [0.42, 0.87]
 #> 2 ICC(A,k)    0.907 [0.78, 0.95] [0.75, 0.96]
 ```
