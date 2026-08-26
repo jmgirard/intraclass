@@ -1,6 +1,6 @@
 # M139: The declared R floor is a measured number CI runs (GP3)
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -45,7 +45,7 @@ Replace the inferred `R (>= 4.0.0)` floor with the oldest R release that actuall
 - [x] T3. Add the pinned-version job to the matrix at `.github/workflows/check-standard.yaml:38`, on the `push` event at minimum.
 - [x] T4. Rewrite GP3's parenthetical per-event; resolve the Known-issues entry.
 - [x] T5. Append the superseding D-entry to `cairn/DECISIONS.md`; run `python3 /Users/jmgirard/github/cairn/scripts/cairn_impact.py --changed`, GP3 being edited, and record its output in the work log.
-- [ ] T6. `air format .`, the four `data-raw/` checkers with `--self-test`, `devtools::check()`; open the PR and read the check-runs API against the pinned head SHA.
+- [x] T6. `air format .`, the four `data-raw/` checkers with `--self-test`, `devtools::check()`; open the PR and read the check-runs API against the pinned head SHA.
 - [x] T7. Register the measured floor in `data-raw/record-claims.tsv` as a `cited` row whose command reads the literal out of `DESCRIPTION`, and carry its `[claim:<id>]` marker on the `cairn/DESIGN.md` figure; delete `.github/workflows/r-floor-sweep.yaml`.
 
 ## Work log
@@ -69,3 +69,5 @@ Replace the inferred `R (>= 4.0.0)` floor with the oldest R release that actuall
 - 2026-08-26: T2-T5, T7 done. `DESCRIPTION` declares `R (>= 4.5.0)`; NEWS gains a Requirements section; the 4.5.0 job joins `check-standard.yaml` on both events, the matrix staying on line 38 so AC4's locator still resolves; GP3's parenthetical is rewritten per event; the stale five-config Platforms bullet (`DESIGN.md:53-58`) and `cran-comments.md`'s 4.0.0 floor note are corrected in place, both having been made false by this milestone's own edit; D-039 appended. `cairn_impact.py --changed` reported GP3 with 13 references, none stale. The `r-floor-declared` ledger row was proved able to fail: planting `R (>= 4.4.0)` in `DESCRIPTION` reds it with `match-mismatch`, and the row is green on the real literal.
 - 2026-08-26: T7's deletion of `.github/workflows/r-floor-sweep.yaml` moved ahead of T6 (minor amendment) so the final `devtools::check()` runs on the tree that ships.
 - 2026-08-26: the cairn merge guard denies `git merge <anything>` naming the default branch whatever the direction, so merging `origin/main` into this branch needed the branch checked out in its own prior Bash call; the guard reads the branch before the command runs.
+- 2026-08-26: T6 done. `air format .` left the tree unchanged and `format-check` is green; all five `data-raw/` python checkers and `check-checkpoint-sites.R` pass, the four carrying `--self-test` included; `cairn_validate` passes every check and advisory. `devtools::check()` reports `Status: OK` with 0 errors, 0 warnings, 0 notes; `devtools::test()` at `NOT_CRAN=true CI=true` reports `[ FAIL 0 | WARN 2 | SKIP 26 | PASS 8630 ]`, re-run on the final tree. PR #150 opened; `gh api repos/jmgirard/intraclass/commits/6602cf27f4ccb7920d69f6a98d7b6721810c48c3/check-runs` against the `headRefOid` from `gh pr view 150` reports all eleven check-runs completed/success, `ubuntu-latest (4.5.0)` among them.
+- 2026-08-26: all tasks checked and local checks clean; status to `review`.
