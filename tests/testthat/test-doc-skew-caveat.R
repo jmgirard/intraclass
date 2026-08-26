@@ -531,8 +531,14 @@ dep_list_surface_reachable <- function(source_readme, installed_readme) {
 }
 
 test_that("the dependency-list leg reports whether any surface can reach it", {
-  present <- testthat::test_path("..", "..", "README.md")
+  # Fabricated paths, never repo-relative ones: `../../README.md` does not
+  # exist under `R CMD check` (the suite runs from `.Rcheck/tests/testthat`),
+  # which is the very layout fact under test here.
+  present <- tempfile(fileext = ".md")
+  writeLines("x", present)
+  on.exit(unlink(present), add = TRUE)
   absent <- file.path(tempdir(), "no-such-README.md")
+  unlink(absent)
 
   # `load_all`: source tree present, nothing installed under that name.
   expect_true(dep_list_surface_reachable(present, ""))
