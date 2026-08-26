@@ -75,6 +75,8 @@ Replace the inferred `R (>= 4.0.0)` floor with the oldest R release that actuall
 
 - 2026-08-26: review — every acceptance criterion executed with fresh evidence and ticked; consistency gate clean; three fresh-context reviewers returned twelve findings, dispositions in the Review section.
 
+- 2026-08-26: gate approved with fixes — `cran-comments.md` matrix description and the ledger row wording corrected on the branch; merge authorized for PR #150.
+
 ## Review
 
 **AC1 — measured floor.** Re-read the sweep run 33016177595 (commit a94e5ef, one fixed `ubuntu-22.04` runner) directly from the Actions API rather than from the work log. Each of the eight candidate jobs' `Report outcome` step prints its own quad, and all eight match the work-log transcription exactly: `setup-r: success` on every version, so no candidate is a provisioning failure; `imports-install: failure` on 4.0.0, 4.1.3, 4.2.3, 4.3.3, 4.4.0 and 4.4.3 with `check-deps-install` and `r-cmd-check` skipped behind it, so no failure is confined to the check-dependency set; all four outcomes `success` on 4.5.0 and 4.5.1. The named causes are in the job logs: `* pbkrtest: Needs R >= 4.2.0` at 4.0.0 and 4.1.3, `Failed to build Deriv 4.3.0` at 4.2.3 through 4.4.3. Lowest passing 4.5.0, highest failing 4.4.3, adjacent in the r-project release list (no 4.4.4 exists), and the one member above the floor, 4.5.1, passes.
@@ -111,3 +113,7 @@ Three fresh-context reviewers, none having authored the work. The blame-history 
 10. `NEWS.md:13-16` carries CI detail in a user-facing changelog and asserts "Nothing in the package's own code needs it", which no test establishes. **Rejected** — the sentence is the reason a user is being told to upgrade, and it is derived from the same sweep: the failure is in the dependency chain's install, before any of this package's code runs.
 11. The work-log line at `cairn/milestones/M139-r-floor-ci-tested.md:64` attributes the pre-hotfix failure to "R 4.4.x and 4.5.1" and to the `oldrel-1` job, which ran a 4.5.x R. **Logged, not edited** — work logs are append-only history (IP4); nothing shipped depends on the attribution, and the hotfix's own record carries the versions.
 12. All six acceptance-criterion boxes were unticked at `review`. **Already fixed in this pass** — AC fencing ticks each one against the evidence recorded above, which is what this phase does.
+
+### Gate outcome
+
+2026-08-26: the maintainer chose to fix findings 1 and 3 on the branch and merge. `cran-comments.md`'s Test-environments section now names three pull-request configurations and the six-config push matrix, matching `.github/workflows/check-standard.yaml:38`; the `r-floor-declared` ledger row's claim sentence now says what its command settles — the row pins `DESCRIPTION`, the source of truth, and does not re-read the `cairn/DESIGN.md` figure that cites it. `check-record-claims.py` and its `--self-test` pass on the reworded row. Finding 9 was not taken: the platform-honesty principle keeps its wording and the path filter goes unrecorded, at the maintainer's decision.
