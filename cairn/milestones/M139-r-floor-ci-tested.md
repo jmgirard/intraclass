@@ -1,6 +1,6 @@
 # M139: The declared R floor is a measured number CI runs (GP3)
 
-- **Status:** in-progress
+- **Status:** blocked
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -21,7 +21,7 @@ Replace the inferred `R (>= 4.0.0)` floor with the oldest R release that actuall
 
 ## Acceptance criteria
 
-- [ ] AC1. For each R version in the enumerated candidate set {4.0.0, 4.1.3, 4.2.3, 4.3.3, 4.4.3, 4.5.1}, a recorded run states whether the package's Imports chain installs and `R CMD check` passes, with the failing dependency named where it does not. The lowest passing version is the measured floor.
+- [ ] AC1. `DESCRIPTION`'s declared floor is the measured floor: the lowest member of the candidate set {4.0.0, 4.1.3, 4.2.3, 4.3.3, 4.4.0, 4.4.3, 4.5.1} at which the package's `Depends`/`Imports`/`LinkingTo` chain installs and `R CMD check` passes on CI, with every member above it also passing. Two outcomes are recorded but never raise the floor: an R version the runner cannot provision, and a failure confined to the wider dependency set `R CMD check` needs (Suggests included). Where the lowest passing and the highest failing member are not adjacent in the r-project release list, the gap is bisected until they are. Evidence: the per-version outcome quad from the `r-floor-sweep.yaml` run, cited by run id and transcribed into the work log.
 - [ ] AC2. `DESCRIPTION`'s `Depends: R (>= X)` names the AC1 measured floor as a literal three-part version, not a moving label.
 - [ ] AC3. A CI job in `.github/workflows/check-standard.yaml` runs `R CMD check` at that same literal version and is green on this milestone's pull request, verified by reading `gh api repos/jmgirard/intraclass/commits/<head-sha>/check-runs` against the SHA from `gh pr view <n> --json headRefOid`.
 - [ ] AC4. GP3's parenthetical in `cairn/DESIGN.md` states, for the `push` event and for the `pull_request` event separately, which R versions run on which OS, agreeing with `.github/workflows/check-standard.yaml:38`.
@@ -34,17 +34,18 @@ Replace the inferred `R (>= 4.0.0)` floor with the oldest R release that actuall
 - AC2 → T2
 - AC3 → T3, T6
 - AC4 → T4
-- AC5 → T4, T5
+- AC5 → T4, T5, T7
 - AC6 → T6
 
 ## Tasks
 
-- [ ] T1. Measure the floor: run `R CMD check` in a `rocker/r-ver:<v>` container for each candidate version, oldest first, recording the outcome and the blocking dependency per version. `Matrix` 1.7-5 declares `Depends: R (>= 4.4)` and glmmTMB is ABI-coupled to TMB/Matrix, so 4.0.0-4.3.3 are expected to fail on Matrix; record what actually happens rather than assuming it.
+- [ ] T1. Measure the floor with the temporary `.github/workflows/r-floor-sweep.yaml`, which runs the candidate set on one fixed `ubuntu-22.04` runner and records four outcomes per version (`setup-r`, Imports-chain install, check-dependency install, `R CMD check`) so a provisioning failure and a Suggests-only failure are each distinguishable from a package floor. Transcribe the quad table into the work log; delete the workflow at T6.
 - [ ] T2. Set `DESCRIPTION`'s `Depends:` to the measured version; add a NEWS bullet stating the raise and its reason.
 - [ ] T3. Add the pinned-version job to the matrix at `.github/workflows/check-standard.yaml:38`, on the `push` event at minimum.
 - [ ] T4. Rewrite GP3's parenthetical per-event; resolve the Known-issues entry.
 - [ ] T5. Append the superseding D-entry to `cairn/DECISIONS.md`; run `python3 /Users/jmgirard/github/cairn/scripts/cairn_impact.py --changed`, GP3 being edited, and record its output in the work log.
 - [ ] T6. `air format .`, the four `data-raw/` checkers with `--self-test`, `devtools::check()`; open the PR and read the check-runs API against the pinned head SHA.
+- [ ] T7. Register the measured floor in `data-raw/record-claims.tsv` as a `cited` row whose command reads the literal out of `DESCRIPTION`, and carry its `[claim:<id>]` marker on the `cairn/DESIGN.md` figure; delete `.github/workflows/r-floor-sweep.yaml`.
 
 ## Work log
 - 2026-08-26: the maintainer declared the v0.1.0 release window open at the M138 review close, so M139 stays `planned` rather than parking as `blocked` under D-050.
@@ -58,3 +59,5 @@ Replace the inferred `R (>= 4.0.0)` floor with the oldest R release that actuall
 - 2026-08-26: T1 in progress — temporary `.github/workflows/r-floor-sweep.yaml` runs the candidate set on a fixed `ubuntu-22.04` runner so the R version is the only varying axis; each job records setup-r, dependency-install, and `R CMD check` outcomes separately so an infrastructure failure is not recorded as a dependency failure.
 - 2026-08-26: sweep run 1 (id 33003639356) is void as floor evidence — `setup-r-dependencies` defaults to installing every dependency including Suggests, so its install step measured the check-dependency set, not the Imports chain, and it failed on 4.0.0-4.4.3 while succeeding on 4.5.1. Every step carrying `continue-on-error` also makes each job conclude green regardless, so the job conclusion carries no information; the recorded outcomes are the evidence. Instrument rebuilt to install the Imports chain (`dependencies: '"hard"'`) separately from the check-dependency set and to record four outcomes per version.
 - 2026-08-26: AC1 amendment audit — a fresh-context [O] reader that authored none of the wording ran the full audit (user-facing tier) twice: once on the plain `4.4.0` insertion, once on the deliverable-bound rewrite the mini gate chose. Round 1 returned seven findings, round 2 eight. Fixed without a gate: the failure clause presuming an install failure; the missing re-derivable artifact; the unchecked monotonicity assumption; the untested 4.4.1/4.4.2 gap. Round 2's remaining findings go to the user, this criterion having already had its one post-gate reader pass.
+- 2026-08-26: AC1 amended (substantive, mini gate 2026-08-26). The criterion now binds `DESCRIPTION`'s declared floor rather than the existence of a record; 4.4.0 joins the candidate set; a provisioning failure and a Suggests-only failure are named as outcomes that never raise the floor; adjacency is anchored to the r-project release list; the evidence quad is transcribed into the work log because the sweep workflow is deleted at T6 and Actions logs expire. T1 restated to the rebuilt instrument; T7 added for the claim-ledger row; AC5 coverage extended to T7.
+- 2026-08-26: blocked. `test-doc-skew-caveat.R:2494`'s anti-vacuity floor (`expect_gt(length(hits), 0L)`, the dependency-list-attributed-to-Imports test) fails under `R CMD check` on R 4.4.x and 4.5.1 and passes on 4.6.1 and 4.7.0; it is red on the default branch (`check-standard.yaml` run 33002388932, `ubuntu-latest (oldrel-1)`, commit 0a99f9ed) and reproduced at 4.5.1 in sweep run 33003639356. AC3 and AC6 cannot be met until it is fixed. Gate chose the hotfix route over folding the repair into this milestone.
