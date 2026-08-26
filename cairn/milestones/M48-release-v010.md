@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M48: v0.1.0 release consolidation — CRAN submission-ready
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** M49, M50, M51, M53, M54, M55, M61, M68, M129, M130, M131, M132, M133, M134, M135, M136, M137   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP2, GP3   <!-- owner: plan · create/amend-via-gate -->
@@ -140,7 +140,7 @@ below, so the descriptions here are compressed to their subject (weight cap).
       and AC7 repointed off it, Scope's `cran-comments.md` item carved out.
 - [x] T19: Record the exiting work as ROADMAP rows and hold that file's line
       cap and byte budget.
-- [ ] T20: Re-run the local release gate on the amendment head and hand back
+- [x] T20: Re-run the local release gate on the amendment head and hand back
       to `/milestone-review` (fourth pass).
 
 ## Work log
@@ -221,6 +221,8 @@ below, so the descriptions here are compressed to their subject (weight cap).
 - 2026-08-25: T18 done — AC3 is descoped with its number held, in the shape M136 set at `5c274fc` (a ticked item whose text states it promises nothing and names where it exits), because `cairn_validate`'s coverage check numbers criteria positionally and a gap FAILs it: removing the item outright reported "AC3 not referenced in Coverage" and "Coverage references AC7 but file has 6 criteria". Coverage regains `AC3 → T4 (descoped; T4 and T13 stand as performed history)`. AC4's note-justification clause now names `cran-comments.md`, AC7's closing sentence discloses rather than hands off and its evidence clause names the procedure both passes actually ran, and Scope's `cran-comments.md` item carries the accuracy carve-out. T13's title still reads "AC3 repair", which stays accurate: the number is held and T13's work was performed while AC3 was live. `cairn_validate` fails no check.
 - 2026-08-25: AC4 and AC7 unticked — both were amended above, so their third-pass evidence on `b54ac74` was measured against wording that no longer stands. AC1, AC2, AC5 and AC6 keep their third-pass ticks: their wording is unchanged and `git diff --name-status b54ac74..HEAD` is `cairn/` files only, so every artifact those four measured is byte-identical. The Goal's "CRAN-submission-ready" overclaims what the narrowed set proves — accepted at the gate above, recorded here rather than edited (create-only).
 - 2026-08-25: T19 done — one ROADMAP candidate row records the descoped remainder (the `cran-comments.md` environment line, the four documentation findings O1/O2/O4/O5, and AC7's cross-check gap) as work that lands before the CRAN upload; O1's behaviour gap is absorbed as a second clause on the existing `glance()$n_o` row (search-first swept ROADMAP, DESIGN.md and DECISIONS.md; that row was the only overlap). Adding a row broke both the < 60-line cap and the < 24,000-byte budget, so four sibling pairs were clustered into one row each — the two M104 rows, the two checkpoint rows, the two plotting rows, the two prose-apparatus rows — and the widest rows compressed by deleting restatable detail, every promotion condition kept. The file is now 56 lines.
+- 2026-08-25: T20 done — local gate on the amendment head, all green: `devtools::document()` leaves a clean tree, `air format --check .` exit 0, `devtools::test()` FAIL 0 | WARN 3 | SKIP 2 | PASS 8863 (the same figures T17 recorded on `b54ac74`), `cairn_validate` fails no check, and all seven `data-raw/` checkers plus the record-claims self-tests exit 0. `git diff --name-status b54ac74..HEAD` is two `cairn/` files and `git diff --stat b54ac74..HEAD -- R/ tests/ man/ NAMESPACE NEWS.md DESCRIPTION vignettes/ data-raw/ inst/` is empty, so no shipped artifact changed in this round. The heavier gate items — `devtools::check(--as-cran)`, the installed-package suite, `pkgdown::build_site()`, `urlchecker::url_check()` — are review's fresh evidence, not re-run here.
+- 2026-08-25: all tasks checked; status in-progress -> review by /milestone-implement (fourth pass).
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
