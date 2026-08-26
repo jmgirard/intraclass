@@ -1600,3 +1600,57 @@ aborted. NEWS names the chooser in the covered set and scopes the "unaffected"
 sentence to `icc()`/`d_study()`, and a test pins the abort on all five
 arguments. A future argument is classified by asking whether its own function
 routes it through `validate_choice()`.
+
+### D-038 (2026-08-26): `glance()`'s v0.1.0 column set — the rater treatment and the replicate flag are columns, `type` is not, column order is not contract, and `tidy()$occasions` is double everywhere
+
+**Context.** GP2 makes the v0.1.0 exported surface a one-way door: after the
+CRAN submission, adding, removing or retyping a `tidy()`/`glance()` column costs
+a deprecation cycle. M48 descoped three schema corrections for want of room.
+M138 lands them while the door is open. D-035 fixed what of the `icc` object is
+public and required every identifier column to be present on every fit, `NA`
+where the design does not define it; D-037 fixed the report-all/choice
+classification per (function, argument) pair.
+
+**Decision.** `glance.icc()` gains exactly two columns.
+
+1. `raters` — the fit's rater treatment as a character scalar, `NA_character_`
+   on a `model = "oneway"` fit, whose raters are interchangeable and carry no
+   facet. `glance()` on a `d_study()` projection reads the same way, so the
+   column name means one thing across both exported tables. A multilevel
+   Design 3 fit (`ml_design = "nested_in_subjects"`) has no rater component
+   either but keeps its nominal `"random"`: the sibling `type` column reports
+   `"agreement"` on that same row, where the agreement/consistency distinction
+   is likewise undefined, so giving `raters` alone the `NA` treatment would
+   split one column's convention from the other's. What the pair should report
+   on Design 3 is a ROADMAP candidate row, promoted on a user reading either
+   cell as a facet that exists.
+2. `replicates` — a logical saying whether the design holds more than one rating
+   per subject-by-rater cell. It is not recoverable from `n_o` beside it, which
+   is `NA` on a ragged replicate design as well as on an unreplicated one.
+
+**Refused: a `type` column on `glance()`.** `type` is a per-coefficient
+report-all axis in `icc()` (D-037) and `tidy()` already carries it per row. A
+one-row `glance()` would have to collapse a vector into one cell.
+`glance.icc_dstudy()` does exactly that, and can only because a projection
+carries one design.
+
+**Column order is deliberately not contract.** `glance()`'s promise is the set
+of names, not their positions; a consumer indexing it positionally is reading
+something this package does not promise. Freezing order would make any later
+reordering a deprecation-cycle item for no user-visible gain.
+
+**`tidy()$occasions` is double on every fit and every projection.** It was
+`integer` on an unreplicated fit and `double` on a replicated one, so its type
+shifted with the design. Unifying on `integer` was rejected because `d_study()`
+admits a non-integer occasion count on purpose, for symmetry with `m`
+(`validate_n_o()`), and an integer column would report a projected 1.5 as 1.
+Unifying on `double` costs nothing a caller can observe except that a
+whole-number occasion count is stored as a double.
+
+**Consequences.** Two new `glance()` columns, one retyped `tidy()` column, and
+one changed `glance()` cell on a one-way projection — all inside the v0.1.0
+window, so none is a deprecation-cycle item. `?icc`'s claim that `tidy()` and
+`glance()` "return the same information" as the object is withdrawn: they are
+the stable tables, not a re-export of the list. The probe set behind each of
+these, and the two amendment audits that fixed the criteria stating them, are in
+`cairn/milestones/M138-glance-schema-remainder.md`.

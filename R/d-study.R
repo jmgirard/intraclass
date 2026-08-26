@@ -137,7 +137,9 @@
 #'     error definition.
 #'   * `glance.icc_dstudy()`: a one-row tibble of projection-level summaries. It
 #'     carries the distinct projected rater counts `m` and their range, the
-#'     error definition(s), the rater treatment, the observed rater count, and
+#'     error definition(s), the rater treatment (`NA` on a projection of a
+#'     one-way fit, whose interchangeable raters carry no facet), the
+#'     observed rater count, and
 #'     the interval settings. The count and range are held at the observed rater
 #'     count when the sweep is over occasions, so they are not a row count.
 #'   * `format.icc_dstudy()`: a character vector holding the printed projection
@@ -521,14 +523,26 @@ d_study <- function(
     tbl <- tibble::add_column(tbl, level = row_level, .after = "m")
   }
   if (replicates) {
-    tbl <- tibble::add_column(tbl, occasions = row_occ, .after = "m")
+    # `as.numeric`, not the raw vector: on the occasion axis `row_occ` is the
+    # user's `n_o`, which arrives integer from `d_study(fit, n_o = 1:3)` and
+    # double from a fractional sweep. One ptype either way (M138).
+    tbl <- tibble::add_column(
+      tbl,
+      occasions = as.numeric(row_occ),
+      .after = "m"
+    )
   }
 
   structure(
     tbl,
     class = c("icc_dstudy", class(tbl)),
     icc_type = type,
-    icc_raters = raters,
+    # NA where the design has no rater facet, so `glance()` on a projection reads
+    # the same as `glance()` on the fit it came from. Keyed on `oneway` alone,
+    # not `ml_oneway`: a Design 3 fit keeps its nominal treatment, matching what
+    # the sibling `icc_type` attribute does on that same design (M138). The local
+    # `raters` still carries the fitted value into `make_estimand()` above.
+    icc_raters = if (oneway) NA_character_ else raters,
     icc_design_label = icc_design_label(x$design),
     multilevel = multilevel,
     replicates = replicates,
@@ -701,7 +715,7 @@ tidy.icc_dstudy <- function(x, ...) {
   col <- function(nm, fill) if (nm %in% names(x)) x[[nm]] else rep(fill, n)
   tibble::tibble(
     m = x$m,
-    occasions = col("occasions", NA_integer_),
+    occasions = as.numeric(col("occasions", NA_real_)),
     level = as.character(col("level", NA_character_)),
     term = x$index,
     type = as.character(col("type", NA_character_)),

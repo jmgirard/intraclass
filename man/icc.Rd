@@ -469,7 +469,11 @@ else in the list is internal: its names, nesting, and contents may change
 in any release without a deprecation cycle. That is the whole rule --
 \verb{$fit} and \verb{$call} are the list elements you may depend on, and reaching
 into any other one is reading an implementation detail. \code{tidy()} and
-\code{glance()} return the same information as a stable table.
+\code{glance()} are the stable tables, not a re-export of the list: they report
+the estimated coefficients and the model-level summaries, column by column
+as documented below. Those two tables, plus \verb{$fit} and \verb{$call}, are the
+whole supported surface; everything else the list holds falls under the
+rule above, whether or not a table happens to report it.
 
 The methods documented on this page return:
 \itemize{
@@ -480,12 +484,17 @@ glossary), \code{occasions}, \code{type}, \code{level}, \code{sf_index}, \code{e
 column is present on every fit; \code{occasions} is \code{NA} unless the design
 has within-cell replicates.
 \item \code{glance.icc()}: a one-row tibble of model-level summaries:
-the sample sizes, the design flags, the effective rater counts, the
+the sample sizes, the design flags -- among them the rater treatment
+\code{raters} (\code{NA} on a one-way fit, whose raters are interchangeable and
+carry no facet) and \code{replicates}, whether the fitted design splits
+within-cell replicates -- \code{FALSE} on a one-way fit, which has no rater
+facet and so no cells to split -- the effective rater counts, the
 variance components, the occasion count \code{n_o} (\code{NA} unless the design
 has within-cell replicates \emph{and} defines one occasion count per cell --
 ragged replicates leave it \code{NA}), the engine and interval settings, and
 the sampler diagnostics \code{rhat} and \code{ess_bulk} (\code{NA} for the
-non-Bayesian engines, which do not sample).
+non-Bayesian engines, which do not sample). Every column is present on
+every fit, so two glanced fits row-bind just as two tidied ones do.
 \item \code{format.icc()}: a character vector holding the printed report, one line per
 element.
 \item \code{print.icc()}: the \code{icc} object invisibly, having emitted that report.

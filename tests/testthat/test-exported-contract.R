@@ -335,3 +335,192 @@ test_that("d_study aborts classed on a multi-valued or non-integer seed", {
   b <- tidy(d_study(fit, m = 2:4, seed = 7))
   expect_identical(a$conf.low, b$conf.low)
 })
+
+# 4. The schema remainder closed before the one-way door shuts (M138) -----------
+
+# A crossed multilevel design (Design 1) with two ratings per subject x rater
+# cell. Its `d_study()` projection builds the `occasions` column per level --
+# holding the cluster curve at `min(proj_occ)` -- rather than off one flat grid,
+# so it is the only shape that exercises that construction.
+multilevel_replicate_frame <- function(seed = 11) {
+  set.seed(seed)
+  nc <- 5L
+  ns <- 6L
+  nr <- 3L
+  grid <- expand.grid(
+    occ = seq_len(2L),
+    rater = seq_len(nr),
+    subj = seq_len(ns),
+    cluster = seq_len(nc)
+  )
+  ce <- stats::rnorm(nc, 0, 1)
+  se <- stats::rnorm(nc * ns, 0, 1.5)
+  re <- stats::rnorm(nr, 0, 0.8)
+  grid$subject <- factor(paste0("c", grid$cluster, "_s", grid$subj))
+  grid$score <- 10 +
+    ce[grid$cluster] +
+    se[(grid$cluster - 1L) * ns + grid$subj] +
+    re[grid$rater] +
+    stats::rnorm(nrow(grid), 0, 1)
+  grid$cluster <- factor(grid$cluster)
+  grid$rater <- factor(grid$rater)
+  grid
+}
+
+# Design 3 (raters nested in subjects): one-way-style ICC(1)/ICC(k) labels and
+# no rater component, yet `design$raters` holds the untouched "random".
+design3_frame <- function(seed = 7) {
+  set.seed(seed)
+  nc <- 20L
+  ns <- 6L
+  k <- 4L
+  cl <- stats::rnorm(nc, 0, 1)
+  d <- expand.grid(subj = seq_len(ns), r = seq_len(k), cluster = seq_len(nc))
+  sc <- stats::rnorm(nc * ns, 0, 1.2)
+  d$score <- 10 +
+    cl[d$cluster] +
+    sc[(d$cluster - 1L) * ns + d$subj] +
+    stats::rnorm(nrow(d), 0, 0.7)
+  d$cluster <- factor(d$cluster)
+  d$subject <- factor(paste(d$cluster, d$subj, sep = "_"))
+  d$rater <- factor(paste(d$cluster, d$subj, d$r, sep = "_"))
+  d
+}
+
+test_that("glance.icc carries `raters` and `replicates`, one name set per design", {
+  skip_if_not_installed("glmmTMB")
+  ml <- multilevel_replicate_frame()
+  fits <- list(
+    oneway = icc(ratings, score, subject, rater, model = "oneway", seed = 1),
+    random = icc(ratings, score, subject, rater, seed = 1),
+    fixed = suppressWarnings(
+      icc(ratings, score, subject, rater, raters = "fixed", seed = 1)
+    ),
+    multilevel = icc(
+      ml[ml$occ == 1L, ],
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      seed = 1
+    ),
+    replicate = icc(replicate_frame(), score, subject, rater, seed = 1)
+  )
+  gls <- lapply(fits, glance)
+
+  # A one-way design has no rater facet, so the treatment does not apply there;
+  # every other design reports the treatment it was fitted under.
+  expect_identical(gls$oneway$raters, NA_character_)
+  expect_identical(gls$random$raters, "random")
+  expect_identical(gls$fixed$raters, "fixed")
+  expect_identical(gls$multilevel$raters, "random")
+  expect_identical(gls$replicate$raters, "random")
+  # `replicates` is not inferable from `n_o`, which is also NA on a ragged
+  # replicate design, so it is reported in its own right.
+  expect_identical(
+    vapply(gls, function(g) g$replicates, logical(1)),
+    c(
+      oneway = FALSE,
+      random = FALSE,
+      fixed = FALSE,
+      multilevel = FALSE,
+      replicate = TRUE
+    )
+  )
+
+  # `replicates` reports the FITTED design's split, not the data layout: a
+  # one-way fit ignores rater identity, so it has no cells to split and reads
+  # FALSE even on data holding two ratings in every subject x rater cell.
+  ow_rep <- icc(
+    replicate_frame(),
+    score,
+    subject,
+    rater,
+    model = "oneway",
+    seed = 1
+  )
+  expect_false(glance(ow_rep)$replicates)
+  expect_true(
+    glance(icc(replicate_frame(), score, subject, rater, seed = 1))$replicates
+  )
+
+  # One name set across every design family, so any two rows bind.
+  for (g in gls) {
+    expect_setequal(names(g), names(gls[[1]]))
+  }
+  expect_identical(nrow(do.call(rbind, gls)), length(gls))
+})
+
+test_that("tidy()$occasions is double on every fit and every projection", {
+  skip_if_not_installed("glmmTMB")
+  f_two <- icc(ratings, score, subject, rater, seed = 1)
+  f_rep <- icc(replicate_frame(), score, subject, rater, seed = 1)
+  f_mlrep <- icc(
+    multilevel_replicate_frame(),
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    seed = 1
+  )
+  tidied_fits <- list(tidy(f_two), tidy(f_rep))
+  tidied_projs <- list(
+    tidy(d_study(f_two, m = 2:3)),
+    tidy(d_study(f_rep, m = 2:3)),
+    tidy(d_study(f_mlrep, m = 2:3)),
+    tidy(d_study(f_rep, n_o = 1:3)),
+    tidy(d_study(f_rep, n_o = c(1, 1.5, 2)))
+  )
+  for (td in c(tidied_fits, tidied_projs)) {
+    expect_identical(typeof(td$occasions), "double")
+  }
+  # `d_study()` allows a non-integer occasion count on purpose (symmetry with
+  # `m`), so an integer column would report a projected 1.5 as 1.
+  expect_identical(
+    sort(unique(tidied_projs[[5]]$occasions)),
+    c(1, 1.5, 2)
+  )
+  expect_identical(
+    nrow(do.call(rbind, tidied_fits)),
+    sum(vapply(tidied_fits, nrow, integer(1)))
+  )
+  expect_identical(
+    nrow(do.call(rbind, tidied_projs)),
+    sum(vapply(tidied_projs, nrow, integer(1)))
+  )
+})
+
+test_that("glance() on a projection reads `raters` as glance() on the fit does", {
+  skip_if_not_installed("glmmTMB")
+  ow <- icc(ratings, score, subject, rater, model = "oneway", seed = 1)
+  expect_identical(glance(d_study(ow, m = 1:3))$raters, NA_character_)
+  rnd <- icc(ratings, score, subject, rater, seed = 1)
+  expect_identical(glance(d_study(rnd, m = 1:3))$raters, "random")
+  fx <- suppressWarnings(icc(
+    ratings,
+    score,
+    subject,
+    rater,
+    raters = "fixed",
+    type = "consistency",
+    seed = 1
+  ))
+  expect_identical(glance(d_study(fx, m = 1:3))$raters, "fixed")
+  # Design 3 has no rater component either, and stays nominal on purpose: the
+  # sibling `type` column reports "agreement" on that same row, where the
+  # agreement/consistency distinction is likewise undefined.
+  d3 <- icc(design3_frame(), score, subject, rater, cluster = cluster, seed = 1)
+  expect_identical(glance(d_study(d3, m = 1:3))$raters, "random")
+  # The occasion axis is the only one a fixed-rater agreement fit projects on,
+  # so it is the only route by which that design reaches this column.
+  fxa <- suppressWarnings(icc(
+    replicate_frame(),
+    score,
+    subject,
+    rater,
+    raters = "fixed",
+    type = "agreement",
+    seed = 1
+  ))
+  expect_identical(glance(d_study(fxa, n_o = 1:3))$raters, "fixed")
+})

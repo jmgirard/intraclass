@@ -222,7 +222,11 @@ oneway_sf_label <- function(index) {
 
 # Human-readable design phrase for the report header (M2 spec §5; M6 spec §6).
 icc_design_phrase <- function(type, raters, oneway = FALSE) {
-  if (oneway) {
+  # `raters` is NA where the design has no rater facet -- what a one-way
+  # projection now carries (M138). `format.icc_dstudy()`'s legacy-object fallback
+  # cannot pass `oneway`, so read it off the NA as well, rather than let
+  # `switch(NA_character_, ...)` return NULL and empty the header.
+  if (oneway || is.na(raters)) {
     return("one-way random")
   }
   design <- switch(raters, random = "two-way random", fixed = "two-way mixed")

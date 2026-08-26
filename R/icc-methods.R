@@ -351,13 +351,16 @@ tidy.icc <- function(x, ...) {
   # keys the coefficient-identifying column as `term`, which is what the wider
   # tidy ecosystem (modelsummary and friends) looks for (D-035).
   # `occasions` is present on every fit, NA where the design has no within-cell
-  # replicates, so two tidied fits always row-bind (D-035).
+  # replicates, so two tidied fits always row-bind (D-035). It is double on every
+  # fit and every projection: `d_study()` takes a non-integer occasion count on
+  # purpose (symmetry with `m`), so an integer column would report a projected
+  # 1.5 as 1 (M138).
   tibble::tibble(
     term = x$estimates$index,
     occasions = if (isTRUE(x$design$replicates)) {
-      x$estimates$occasions
+      as.numeric(x$estimates$occasions)
     } else {
-      rep(NA_integer_, length(x$estimates$index))
+      rep(NA_real_, length(x$estimates$index))
     },
     type = x$estimates$type,
     level = x$estimates$level,
@@ -382,6 +385,18 @@ glance.icc <- function(x, ...) {
     n_obs = x$n$obs,
     n_cells = x$n$cells,
     balanced = x$design$balanced,
+    # How the raters were treated, and whether the fitted design splits
+    # within-cell replicates -- FALSE on a one-way fit, which has no rater facet
+    # and so no cells to split. `raters` is NA on a one-way fit, whose
+    # raters are interchangeable and carry no facet; `replicates` is reported in
+    # its own right because `n_o` beside it is also NA on a ragged replicate
+    # design, so replicate status is not recoverable from that column (M138).
+    raters = if (identical(x$design$model, "oneway")) {
+      NA_character_
+    } else {
+      x$design$raters
+    },
+    replicates = isTRUE(x$design$replicates),
     multilevel = isTRUE(x$design$multilevel),
     ml_design = if (isTRUE(x$design$multilevel)) {
       x$design$ml_design
