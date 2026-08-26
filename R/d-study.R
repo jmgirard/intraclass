@@ -697,7 +697,7 @@ tidy.icc_dstudy <- function(x, ...) {
   # projections impossible to row-bind and made any added column a breaking change.
   n <- length(x$m)
   # `x` is a tibble, so a missing column has to be tested by name: `$` on one
-  # warns rather than returning NULL.
+  # returns NULL but warns while doing it, and this guard runs on every call.
   col <- function(nm, fill) if (nm %in% names(x)) x[[nm]] else rep(fill, n)
   tibble::tibble(
     m = x$m,
