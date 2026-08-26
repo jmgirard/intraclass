@@ -517,6 +517,47 @@ source_doc_surfaces <- function() {
   stats::setNames(out, sub(paste0("^", root, "/"), "", paths))
 }
 
+# `README.md` carries the only dependency-list sentence on any swept surface,
+# so the leg below is vacuous when no leg can reach it. That is a property of
+# the LAYOUT, not of the docs: `R CMD INSTALL` began copying `README.md` into
+# the installed package in R 4.6.0, so under `R CMD check` on an earlier R the
+# source tree is gone (the suite runs from `.Rcheck/tests/testthat`) AND
+# `system.file("README.md")` is empty, and the anti-vacuity floor fired on a
+# correct README. Observed 2026-08-26: red on `oldrel-1` and on R 4.5.1, green
+# on 4.6.1 and 4.7.0. Split out as a function of the two facts so the
+# unreachable layout is testable on any R version.
+dep_list_surface_reachable <- function(source_readme, installed_readme) {
+  isTRUE(file.exists(source_readme)) || isTRUE(nzchar(installed_readme))
+}
+
+test_that("the dependency-list leg reports whether any surface can reach it", {
+  # Fabricated paths, never repo-relative ones: `../../README.md` does not
+  # exist under `R CMD check` (the suite runs from `.Rcheck/tests/testthat`),
+  # which is the very layout fact under test here.
+  present <- tempfile(fileext = ".md")
+  writeLines("x", present)
+  on.exit(unlink(present), add = TRUE)
+  absent <- file.path(tempdir(), "no-such-README.md")
+  unlink(absent)
+
+  # `load_all`: source tree present, nothing installed under that name.
+  expect_true(dep_list_surface_reachable(present, ""))
+  # `R CMD check` on R >= 4.6.0: no source tree, `README.md` installed.
+  expect_true(dep_list_surface_reachable(
+    absent,
+    "/some/lib/intraclass/README.md"
+  ))
+  # `R CMD check` on R < 4.6.0: neither leg can reach it. The regression --
+  # this layout must report unreachable, so the leg skips instead of failing
+  # its anti-vacuity floor on a README that is in fact correct.
+  expect_false(dep_list_surface_reachable(absent, ""))
+  # Both legs present.
+  expect_true(dep_list_surface_reachable(
+    present,
+    "/some/lib/intraclass/README.md"
+  ))
+})
+
 test_that("no installed surface still carries a withdrawn claim", {
   surfaces <- installed_doc_surfaces()
 
@@ -2490,7 +2531,17 @@ test_that("a dependency list on any swept surface is attributed to Imports", {
   }
 
   # Anti-vacuity: the rule is worthless if it enumerates nothing. The README's
-  # install sentence is always one such sentence, on both legs.
+  # install sentence is the one such sentence, so the floor stands exactly when
+  # a leg can reach `README.md` -- see `dep_list_surface_reachable()` for why
+  # an R < 4.6.0 `R CMD check` layout can reach neither.
+  reachable <- dep_list_surface_reachable(
+    testthat::test_path("..", "..", "README.md"),
+    system.file("README.md", package = "intraclass")
+  )
+  skip_if(
+    !reachable,
+    "no leg reaches README.md in this layout (R < 4.6.0 under R CMD check)"
+  )
   expect_gt(length(hits), 0L)
 
   for (h in hits) {
