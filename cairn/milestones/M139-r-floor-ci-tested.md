@@ -46,6 +46,7 @@ Replace the inferred `R (>= 4.0.0)` floor with the oldest R release that actuall
 - [ ] T6. `air format .`, the four `data-raw/` checkers with `--self-test`, `devtools::check()`; open the PR and read the check-runs API against the pinned head SHA.
 
 ## Work log
+- 2026-08-26: the maintainer declared the v0.1.0 release window open at the M138 review close, so M139 stays `planned` rather than parking as `blocked` under D-050.
 
 - 2026-08-26: created by /milestone-plan.
 - 2026-08-26: plan-gate criteria audit ran in FULL mode (user-facing tier); a fresh-context [O] reader that authored none of the criteria returned findings on all three drafted criteria. Fixed at the gate: the two-branch AC1 split into a measurement criterion and a separate DESCRIPTION criterion, its (a) branch having been unreachable (Matrix 1.7-5 needs R >= 4.4) and its (b) branch resting on the moving label `oldrel-1`; "matching check-standard.yaml line by line" given a referent by naming the event, the matrix being a single-line conditional ternary; the `cairn_impact.py` criterion moved to a task (instrument-bound, D-118) and its path corrected, `cairn/scripts/cairn_impact.py` not existing. One finding posed at the question gate (how to close GP3).
