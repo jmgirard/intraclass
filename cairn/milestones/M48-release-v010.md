@@ -52,7 +52,7 @@ gate before stamping, never folded in silently.
       descoped remainder — lands before the CRAN upload". The number is held
       rather than reclaimed so the work log and the three recorded review
       rounds keep pointing at the criteria they were written against.*
-- [ ] AC4: fresh `devtools::check(args = "--as-cran", env_vars =
+- [x] AC4: fresh `devtools::check(args = "--as-cran", env_vars =
       c(NOT_CRAN = "false"), manual = TRUE)` → 0 errors / 0 warnings / only
       NOTEs justified in `cran-comments.md` (TinyTeX courier installed for the
       PDF manual).
@@ -62,7 +62,7 @@ gate before stamping, never folded in silently.
 - [x] AC6: `pkgdown::check_pkgdown()` + `pkgdown::build_site()` clean;
       `air format --check` clean; `lintr::lint_package()` clean;
       `urlchecker::url_check()` all-correct.
-- [ ] AC7: the release code passes every CI check a pull request can reach.
+- [x] AC7: the release code passes every CI check a pull request can reach.
       Evidence: the head SHA pinned with `gh pr view <n> --json headRefOid`,
       the check report taken with `gh pr checks <n>` and cross-checked against
       the check runs GitHub attaches to that SHA (`gh api
@@ -224,6 +224,8 @@ below, so the descriptions here are compressed to their subject (weight cap).
 - 2026-08-25: T20 done — local gate on the amendment head, all green: `devtools::document()` leaves a clean tree, `air format --check .` exit 0, `devtools::test()` FAIL 0 | WARN 3 | SKIP 2 | PASS 8863 (the same figures T17 recorded on `b54ac74`), `cairn_validate` fails no check, and all seven `data-raw/` checkers plus the record-claims self-tests exit 0. `git diff --name-status b54ac74..HEAD` is two `cairn/` files and `git diff --stat b54ac74..HEAD -- R/ tests/ man/ NAMESPACE NEWS.md DESCRIPTION vignettes/ data-raw/ inst/` is empty, so no shipped artifact changed in this round. The heavier gate items — `devtools::check(--as-cran)`, the installed-package suite, `pkgdown::build_site()`, `urlchecker::url_check()` — are review's fresh evidence, not re-run here.
 - 2026-08-25: all tasks checked; status in-progress -> review by /milestone-implement (fourth pass).
 
+- 2026-08-26: review checkpoint (fourth pass) by /milestone-review — fresh evidence on head `9afd3d9` recorded and ticked for all six live criteria (AC1, AC2, AC4, AC5, AC6, AC7); AC3 stays descoped. `--as-cran` 0/0/0 in 2m 0.5s, installed-package suite FAIL 0 | WARN 2 | SKIP 26 | PASS 8592, pkgdown/lint/format/URLs clean, and all ten PR checks pass with `gh pr checks` and the SHA's check-runs agreeing exactly. Consistency gate green (`cairn_validate` exit 0 with the sizing advisory; `cairn_impact` not owed — GP2 and GP3 are byte-identical to `origin/main`). Three-lens fan-out: [O] ten findings, [S] blame eight, [S] prior-review none and no regression. Triaged as P1-P12 — seven rejected as already carried by candidate rows or as the maintainer's recorded descope, three sent to follow-up (P3, P4, P6), one nit rejected, and P5 (five vignette tables labelling a column `index` while sourcing `$term`, an inconsistency this branch's rename sweep introduced) put to the maintainer at the gate. No finding demonstrates a live criterion failing, so no return floor fires.
+
 ## Decisions
 <!-- owner: implement / review · append-only -->
 
@@ -255,6 +257,284 @@ below, so the descriptions here are compressed to their subject (weight cap).
 
 ## Review
 <!-- owner: review · exclusive -->
+
+### Acceptance-criterion evidence — fourth pass (fresh, 2026-08-26, head `9afd3d9`)
+
+Gathered on the T18-T20 amendment head, against the **narrowed** criteria set
+(AC3 descoped; AC4 and AC7 amended). Every criterion is re-measured here, the
+third-pass block below being the record of what was measured on `b54ac74`.
+
+- **AC1 — verified.** The last-call disposition is recorded in the work log
+  (2026-08-25, T1) and carried in full by the Decisions section above: the
+  surface ships as audited but for seven accepted RR04 changes, one deferral to
+  a ROADMAP candidate row, and five logged rejections. `git log --oneline
+  origin/main..HEAD -- R/ NAMESPACE` returns the same four commits the third
+  pass authorised and no fifth — `4ba59ad` (T1b), `d447172` (T7-T11),
+  `b96bb48` (T14), `e44ff7e` (T16); the T18-T20 amendment round added none.
+  `git diff origin/main..HEAD -- NAMESPACE` is empty (0 lines): no export
+  added, removed or renamed. No exported-surface change has shipped since the
+  disposition, so the criterion's second clause holds with nothing to amend.
+- **AC2 — verified.** `DESCRIPTION:3` `Version: 0.1.0`; `DESCRIPTION:53-54`
+  `Depends:` / `R (>= 4.0.0)`. `grep '^# ' NEWS.md` returns exactly one
+  heading, `# intraclass 0.1.0` at line 1; a case-insensitive sweep of
+  `NEWS.md` and `DESCRIPTION` for "development version" returns 0 hits.
+- **AC4 — verified against the amended wording.** `devtools::check(args =
+  "--as-cran", env_vars = c(NOT_CRAN = "false"), manual = TRUE)` re-run fresh
+  on head `9afd3d9`, started 2026-08-26 02:10 UTC: banner reads R 4.6.1
+  (2026-06-24), platform aarch64-apple-darwin23, running under macOS Tahoe
+  26.6.2, `* using option '--as-cran'`, package version read back as `0.1.0`.
+  **Status: OK — 0 errors | 0 warnings | 0 notes**, duration 2m 0.5s.
+  `checking PDF version of manual` and `checking HTML version of manual` are
+  both OK, so the TinyTeX courier path the criterion names is exercised. With
+  0 notes the amended note-justification clause (NOTEs justified in
+  `cran-comments.md`) is vacuous on this head, as the criteria audit
+  recorded when it was written.
+
+- **AC5 — verified.** `R CMD INSTALL --preclean .` of this head ("* DONE
+  (intraclass)", exit 0), then `NOT_CRAN=true CI=true Rscript -e
+  'library(testthat); library(intraclass); test_check("intraclass")'` run from
+  `tests/` against the **installed** package (R 4.6.1,
+  aarch64-apple-darwin23): **`[ FAIL 0 | WARN 2 | SKIP 26 | PASS 8592 ]`**,
+  process exit 0 — failed + error sum = 0, the criterion's bar. The counts
+  reproduce the third pass exactly, as expected: `git diff --stat
+  b54ac74..HEAD -- R/ tests/ man/ NAMESPACE NEWS.md DESCRIPTION vignettes/
+  data-raw/ inst/` is empty. The two warnings are the same expected
+  boundary/connectedness signals every earlier pass recorded
+  (`test-icc-lavaan-multilevel.R:402`, a between-level Heywood fit asserted to
+  abort toward glmmTMB; `test-icc-type-vector.R:286`); the criterion does not
+  bar them.
+
+- **AC6 — verified**, all five checks re-run fresh on this head:
+  `pkgdown::check_pkgdown()` "No problems found"; `pkgdown::build_site()`
+  exit 0, all eight vignettes (`choosing-an-icc`,
+  `comparison-with-other-packages`, `d-studies-and-replicates`, `engines`,
+  `getting-started`, `glossary`, `interval-methods`, `multilevel-designs`)
+  read and rendered, and a case-insensitive sweep of the build log for
+  `Error`, `Warning` and `Quitting from` returns 0 hits; `air format --check .`
+  exit 0 with no output; `lintr::lint_package()` "No lints found";
+  `urlchecker::url_check()` "All URLs are correct!" over 15 URLs.
+
+- **AC7 — verified against the amended wording.** PR #147's head is
+  `9afd3d9ec7dcbf98fb0099f8112b571c9a825581` (`gh pr view 147 --json
+  headRefOid`), identical to local `HEAD`. `gh` 2.98.0 does not resolve a bare
+  SHA, so — as the amended evidence clause names — the report was taken with
+  `gh pr checks 147` and cross-checked against the check runs GitHub attaches
+  to that SHA (`gh api repos/jmgirard/intraclass/commits/9afd3d9.../
+  check-runs`). The two lists agree exactly: ten names each, every
+  `conclusion` `success`. Ten checks reported, **all `pass`** — none `fail`,
+  `pending`, `skipping` or `cancel`:
+
+      check-references          pass  27s
+      checkpoint-guard          pass  2m11s
+      codecov/patch             pass  1s
+      codecov/project           pass  1s
+      format-check              pass  7s
+      lint                      pass  2m6s
+      pkgdown                   pass  2m49s
+      test-coverage             pass  22m20s
+      ubuntu-latest (release)   pass  29m39s
+      windows-latest (release)  pass  26m55s
+
+  Compared against `.github/workflows/`, read fresh on this head: six
+  workflows, five declaring a `pull_request` trigger, and every job each
+  defines appears above — `check-standard.yaml` (the `R-CMD-check` matrix,
+  whose `config` expression yields the two-cell PR set `ubuntu-latest
+  (release)`, `windows-latest (release)`), `format.yaml` (`format-check`),
+  `lint.yaml` (`lint`, `check-references`, `checkpoint-guard`),
+  `pkgdown.yaml` (`pkgdown`), `test-coverage.yaml` (`test-coverage`, whose
+  Codecov app adds `codecov/patch` and `codecov/project`). The sixth,
+  `reference-values.yaml`, declares only `schedule` and `workflow_dispatch`,
+  so it owes no check run. The identical `paths-ignore` filters on
+  `check-standard.yaml` and `test-coverage.yaml` (`cairn/**`, `man/**`,
+  `README.md`, `**/*.Rmd`) dropped neither workflow — the pull-request event
+  evaluates them over the PR's whole changed set, which includes `R/` and
+  `tests/` — so no workflow declaring the trigger is absent from the report
+  and nothing counts as unrun. No check was red and no re-run was performed
+  in this pass. Per the criterion's closing sentence, the three
+  configurations `check-standard.yaml` yields only on a push to `main` or
+  `master` — `macos-latest (release)`, `ubuntu-latest (devel)`,
+  `ubuntu-latest (oldrel-1)` — are not reachable from a pull-request head and
+  are not promised here; they run post-merge on the push to `main`.
+
+### Consistency gate — fourth pass (2026-08-26)
+
+**Universal cairn-file checks.** `cairn_validate.py` exit 0 — every check PASS
+or OK, with one advisory: `sizing (split tripwires)` WARNs at 21 tasks against
+the 10 tripwire. That advisory is answered on the record by the 2026-08-25
+work-log line: T7-T12, T13-T17 and T18-T20 are all repair and amendment work
+under criteria that have not been widened, so the milestone is not split. It is
+an advisory, not a gate failure. `coverage complete` PASSes, AC3's descoped
+entry included. `cairn_impact.py --changed` is **not owed**: `git diff
+origin/main..HEAD -- cairn/DESIGN.md` touches the Commitments "Platforms"
+bullet and adds a Known-issues entry, but the numbered principles are
+byte-identical — GP2 (`DESIGN.md:153`) and GP3 (`DESIGN.md:157-159`) are both
+unchanged, GP3's inaccuracy being a deferred candidate row rather than an edit
+this milestone made.
+
+**Toolchain checks (r-package profile `consistency-gate` slot).**
+`devtools::document()` exit 0 leaving a clean tree (`git status --porcelain`
+shows only this milestone file, edited by this review). No generated file is
+hand-edited: `NAMESPACE`, `man/` and `data/*.rda` all survive the no-diff
+`document()` run. `README.Rmd` is present and `git diff origin/main..HEAD --
+README.Rmd README.md` is empty, so nothing on this branch put the pair out of
+sync and no re-knit is owed. `pkgdown::check_pkgdown()` "No problems found"
+(AC6 above). `NEWS.md` carries this milestone's user-visible changes under the
+single `# intraclass 0.1.0` heading and a sweep for milestone numbers
+(`M[0-9]{2,3}`) in it returns 0 hits. The three files this branch adds are all
+under already-ignored paths (`cairn/` is `^cairn$` in `.Rbuildignore`;
+`tests/testthat/test-exported-contract.R` is inside the package) — no new
+top-level file, and the AC4 `--as-cran` run reports 0 notes, so no
+`.Rbuildignore` NOTE exists to answer. The slot's "full check at review" is
+subsumed by AC4's stricter `--as-cran` run: 0 errors / 0 warnings / 0 notes.
+
+Gate result: **green**, one advisory (sizing), already answered in the work log.
+
+### Review fan-out — fourth pass
+
+The diff touches executable surface (`R/`, `tests/`, `vignettes/`, `data-raw/`),
+so the full three-lens fan-out ran, each lens fresh-context on a distinct
+evidence base and none having seen the implementation.
+
+- **[O] diff-bug (Opus)** — the full `git diff origin/main..HEAD` against the
+  narrowed criteria, `DESIGN.md` and `DECISIONS.md`. Ten ranked findings,
+  most verified by running R rather than by reading. It also reported the
+  gate state honestly: at the time it looked, the two R-CMD-check jobs and
+  `test-coverage` were still `in_progress`, so AC7 was not yet evidenceable.
+  Its clean list is long — `air format --check` 0, `spell_check_package()`
+  clean, `test-exported-contract.R` FAIL 0 / PASS 50, the `data-raw/`
+  checkers 0, no post-4.0 base call anywhere in `R/` (so the declared floor
+  matches the code, whatever CI reaches), the corrected Platforms bullet
+  matching `check-standard.yaml:35` exactly, no `$index` left on any
+  `tidy()` result, and an empty `NAMESPACE` diff.
+- **[S] blame-history (Sonnet)** — `git log -L` / `git blame origin/main` over
+  every modified region, judged against the intent of the code it touches and
+  against `DECISIONS.md` + `legacy/DECISIONS.md`. Eight findings, of which
+  five are the descoped doc claims restated from the history side, one is the
+  D-037 blast radius, and two are process observations. Its own clean list is
+  load-bearing: `validate_choice()`'s removed `identical(value, choices)`
+  shortcut (M2, `9c85c0b`) is safe to drop because every argument that relied
+  on it became a scalar default in the same commit; the `n_o` and `seed`
+  fixes reuse existing helpers rather than adding parallel logic; and
+  `inst/WORDLIST` is additions-only (36 added, 0 removed).
+- **[S] prior-review (Sonnet)** — archived `## Review` findings in
+  `cairn/milestones/archive/` for every touched file (M84/M85/M89/M91/M115/
+  M117/M128/M131/M137 on `R/icc.R`; M116/M119/M132 on `man/icc.Rd`;
+  M116/M117/M123/M126/M129/M133/M136 on `NEWS.md`; and the vignette and test
+  sets), plus the probe `gh api .../pulls/comments?per_page=1`, which returned
+  `[]` — no real inline PR review comments exist on this repo, so the
+  per-PR walk was correctly skipped. **No regression found**: the Burch/Searle
+  width hedging (M116/M117), the lme4/merDeriv/brms install disclosure
+  (M123/M126) and the M128/M89 `R/icc.R` regions all survive the diff intact.
+  Zero findings.
+
+### Findings and dispositions — fourth pass (P1-P12)
+
+Ranked as reported, consolidated where two lenses found the same thing. Every
+finding is logged with its disposition; none is silently dropped.
+
+- **P1 ([O] 1, [S] 5) — `glance()$n_o` is `NA` on an incomplete-but-uniformly-
+  replicated design, and `man/icc.Rd:484-486` / `NEWS.md:356-358` say it is
+  `NA` only where "cells hold different numbers of ratings".** Independently
+  re-derived by running a 10x4x2 fit with one whole cell dropped: every
+  observed cell rated twice, `design$replicates` `TRUE`, `n_o` `NA`,
+  `var_subject_rater` 0.1274; root cause `replicates_uniform` requiring
+  `n_cells == ns * nr` (`R/design.R:48-51`). This is a verbatim rediscovery
+  of third-pass O1. **Disposition: reject — already carried.** The doc
+  widening is item (2) on the "v0.1.0 release round's descoped remainder"
+  candidate row, which lands before the CRAN upload; the behaviour gap is the
+  second clause on the `tidy()$occasions` / `glance()$n_o` row.
+- **P2 ([O] 2, [S] 1) — `cran-comments.md:20` names macOS 15 where the machine
+  is macOS 26.6.2.** Re-verified by running `sw_vers`. This is third-pass O3,
+  the criterion failure that ended that round. **Disposition: reject — already
+  carried**, as item (1) on the same candidate row, and the criterion that
+  promised it (AC3) is descoped. The milestone as narrowed merges with this
+  line still wrong; the follow-on lands before the upload, which stays the
+  maintainer's own act.
+- **P3 ([O] 3, [S] 2) — `?icc`'s "`tidy()` and `glance()` return the same
+  information as a stable table" is false, and the gap has a consequence
+  nothing has yet recorded: `glance.icc()` reports no `raters`, `type` or
+  `replicates` (22 columns, verified by running `names(glance(fit))`), so
+  after this release a caller distinguishing a fixed-rater fit from a
+  random-rater one programmatically must read `fit$design$raters` — which the
+  same paragraph declares internal and free to change. `glance.icc_dstudy()`
+  does report `raters` (`R/d-study.R:735`), so the asymmetry is inside the
+  package.** The false sentence is item (3) on the candidate row; the missing
+  accessor is **new**. Adding a column would be an exported-surface change
+  after the AC1 last call, so it cannot be a review-side fix.
+  **Disposition: follow-up** — recorded on the descoped-remainder row so the
+  sentence-softening and the accessor question are decided together before the
+  upload.
+- **P4 ([O] 4) — the newly frozen `glance.icc()` schema has no test that can
+  red on a dropped or reordered column, where its sibling `tidy()` does.**
+  `test-exported-contract.R:169-186` and `:205-222` pin `names(tidy(...))` as
+  an exact vector; `:231-234` pins only `c("var_subject_rater", "n_o",
+  "rhat", "ess_bulk") %in% names(gl)`, and `test-icc-methods.R:11` uses
+  `expect_contains`. Read-verified. D-035 makes the `glance()` schema a
+  release contract, so this is a coverage gap on a contract the milestone
+  itself created. **Disposition: follow-up** — a candidate row, not a
+  branch fix: adding an exact-names pin now would freeze a column list the
+  P3 question may still change.
+- **P5 ([O] 9) — five vignette tables label a display column `index` while
+  sourcing it from `$term`, an inconsistency this branch introduced.**
+  `vignettes/engines.Rmd:50,86` and `vignettes/interval-methods.Rmd:50,254,312`
+  read `data.frame(index = <tidy>$term, ...)`. Confirmed against the diff:
+  `origin/main` had `index = glmmtmb$index` at each site, so label and source
+  agreed before the rename sweep and disagree after it. A reader following the
+  article and then calling `tidy()` gets a column called `term`. This is a
+  defect *inside* an intentional change (the D-035 rename), not the intentional
+  change itself, so the out-of-scope taxonomy does not cover it.
+  **Disposition: maintainer's call at the gate** — see the presentation.
+- **P6 ([O] 8) — `occasions` has an unstable ptype across fits.** Verified by
+  running: `class(tidy(fit)$occasions)` is `integer` on a non-replicate fit
+  (the `NA_integer_` fill, `R/icc-methods.R:360`, `R/d-study.R:704`) and
+  `numeric` on a replicate one; `m` is likewise `integer` on a rater sweep.
+  `rbind()` and `dplyr::bind_rows()` both succeed because integer promotes, so
+  D-035's stated goal — the two schemas row-bind — holds; a `vctrs`-strict
+  consumer sees an unstable prototype. `level` and `type` are already wrapped
+  in `as.character()`; `occasions` is not. **Disposition: follow-up** —
+  a candidate row, same reasoning as P4.
+- **P7 ([O] 5, [S] 4) — `R/d-study.R:124-126` / `man/d_study.Rd:64-66` say a
+  projection "fills" `level`/`occasions` where the returned object gains them
+  (`origin/main` said "adds", which was accurate).** Run-verified: the
+  `d_study()` object's names carry neither column. **Disposition: reject —
+  already carried**, item (5) on the candidate row.
+- **P8 ([O] 6, [S] 3) — `NEWS.md:370-372` credits `d_study()` with `type`,
+  `unit`, `level` and `occasions` arguments; its signature is `(x, m, n_o,
+  conf_level, mc_samples, seed)`.** **Disposition: reject — already
+  carried**, item (4) on the candidate row.
+- **P9 ([O] 7, [S] 7) — `tidy()$occasions` (1, the per-coefficient divisor) and
+  `glance()$n_o` (2, the design's per-cell count) are different quantities
+  under near-identical names on the same 8x3x2 replicate fit, and neither doc
+  says what the other means.** **Disposition: reject — already carried** by
+  the `tidy()$occasions` / `glance()$n_o` candidate row (second-pass G5).
+- **P10 ([O] 10) — `R/d-study.R:349-357` uses two adjacent complementary `if`s
+  where the `conf_level` block above uses `if`/`else`.** Behaviourally
+  correct; the reporter itself names it a stylistic asymmetry.
+  **Disposition: reject** — a pure style nitpick this branch did not
+  introduce, and the same nit the third-pass triage already rejected.
+- **P11 ([S] 6) — D-037's blast radius is the widest behavioural change on the
+  branch:** five choice arguments across `icc()` and `choose_icc()` that once
+  accepted their full default vector silently now abort classed. Intentional,
+  gated through RB04/RR04, recorded as D-035/D-036/D-037, and pinned by
+  `test-exported-contract.R:97`. The lens flags it not as a defect but because
+  GP2 makes it irreversible at submission. **Disposition: surfaced for the
+  maintainer's eyeball at the gate; no action** — it is the change the plan
+  called for, carried out as planned.
+- **P12 ([S] 8) — AC3 is descoped rather than closed, which is the mechanism by
+  which P1, P2, P7 and P8 ship uncorrected.** **Disposition: reject** — that
+  is the maintainer's recorded decision at the third-pass triage gate, taken
+  with the thrash rule's threshold reached, and it is logged openly in the
+  work log, the criterion text and the ROADMAP row.
+
+**Return floor.** No finding on the actioned list demonstrates a live
+acceptance criterion failing: AC3, the criterion P1/P2/P7/P8 would have
+falsified, is descoped, and the narrowed set (AC1, AC2, AC4, AC5, AC6, AC7)
+promises nothing about `cran-comments.md` accuracy or those doc sentences. P3,
+P4, P5 and P6 fall outside every criterion's text. The floor's second clause —
+a load-bearing defect in what the package does for its users — is the
+maintainer's judgment and is put to them at the gate. No status change from
+this pass; the defect-return count stays at 3 and the amendment-return track
+at 1 (AC7).
 
 ### Acceptance-criterion evidence — third pass (fresh, 2026-08-25, head `b54ac74`)
 
