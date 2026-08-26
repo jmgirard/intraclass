@@ -51,11 +51,12 @@ vignettes, `cairn/estimand-specs/`). (Design interview, 2026-07-12.)
   deprecation cycle — the paper's examples must keep running. Submission is the
   one-way door; pre-CRAN cleanups happen before it.
 - **Platforms:** the commitment is exactly the CI matrix — R release on macOS,
-  Windows and Ubuntu, plus R devel and oldrel-1 on Ubuntu only (corrected M48).
-  That five-config matrix runs on push to the default branch; a pull request
-  gets ubuntu-release and windows-release. The declared floor is
-  `R (>= 4.0.0)` (corrected M48): what the dependency chain requires, rlang
-  being the binding Import.
+  Windows and Ubuntu, plus R devel, oldrel-1 and the declared floor on Ubuntu
+  only (corrected M139). That six-config matrix runs on push to the default
+  branch; a pull request gets ubuntu-release, windows-release and the floor job.
+  The declared floor is `R (>= 4.5.0)` [claim:r-floor-declared] (corrected
+  M139): the lowest R release on which the Imports chain installs, measured
+  across 4.0.0–4.5.1 rather than read off a `Depends` field.
 - **Engine roster: closed at four.** glmmTMB (frequentist default), lme4
   (frequentist oracle), brms (Bayesian), lavaan (SEM) — each paradigm represented
   once. A new engine must enable an estimand the four can't reach, not just be
@@ -155,8 +156,10 @@ D-entry).
   lifecycle deprecation cycle — the companion paper's examples must keep
   running.
 - GP3: **Platform honesty.** Support commitments are exactly what CI verifies
-  (currently R release/oldrel-1/devel × macOS/Windows/Ubuntu); no declared floor
-  CI doesn't test.
+  (`check-standard.yaml:38`). On `push` to the default branch: R release on
+  macOS, Windows and Ubuntu; R devel, oldrel-1 and the declared floor 4.5.0 on
+  Ubuntu. On `pull_request`: R release on Ubuntu and Windows, and the declared
+  floor 4.5.0 on Ubuntu. No declared floor CI doesn't test.
 - GP4: **Engine roster closed at four.** glmmTMB, lme4, brms, lavaan — one per
   paradigm. A new engine must enable an estimand the four cannot reach, not just
   be another fitter; per-estimator parity cost stays capped at ×4.
@@ -254,17 +257,12 @@ paths (`theta2r_moment_draws()` / `brms_theta2r_moment_draws()`); ADR-038
 
 ## Known issues
 
-- **The declared R floor is not tested by CI.** v0.1.0 declares
-  `R (>= 4.0.0)`, which is what the Imports chain requires (rlang's own
-  `Depends`); CI's oldest configuration is `oldrel-1`, several releases above
-  it, so no run anywhere exercises the declared floor. This is a live tension
-  with GP3, whose text reads "no declared floor CI doesn't test". Accepted at
-  the M48 review gate (2026-08-25) rather than resolved: raising the declared
-  floor to what CI tests would turn away users whose R would in fact run the
-  package, and pinning a CI job to 4.0.0 is new infrastructure inside a release
-  round. The pre-submission win-builder and R-hub runs cover more platforms
-  than CI does, but neither reaches 4.0.0 either. A ROADMAP candidate row
-  carries the fix.
+- ~~The declared R floor is not tested by CI~~ — RESOLVED by M139 (D-039):
+  the floor was measured across R 4.0.0–4.5.1 rather than inferred, and
+  `DESCRIPTION` now declares `R (>= 4.5.0)` with a CI job pinned to that
+  literal version on both the `push` and `pull_request` events. The premise
+  the M48 gate reasoned from — that a lower floor would still run the package
+  — was false: the Imports chain does not install below 4.5.0.
 
 - ~~No cairn-canonical oracle-registry home yet~~ — RESOLVED by M63 (D-007): the
   registry is [`references/ORACLES.md`](references/ORACLES.md), declared in the

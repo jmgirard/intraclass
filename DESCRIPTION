@@ -51,6 +51,6 @@ Language: en-US
 URL: https://github.com/jmgirard/intraclass, https://jmgirard.github.io/intraclass/
 BugReports: https://github.com/jmgirard/intraclass/issues
 Depends: 
-    R (>= 4.0.0)
+    R (>= 4.5.0)
 LazyData: true
 Config/roxygen2/version: 8.1.0

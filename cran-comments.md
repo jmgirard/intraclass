@@ -35,8 +35,11 @@ There are no downstream dependencies; this is a new package.
 
 ## Notes
 
-The declared R floor is `R (>= 4.0.0)`, which is what the Imports chain
-requires (rlang declares `R (>= 4.0.0)`; the remaining Imports are lower).
+The declared R floor is `R (>= 4.5.0)`, the lowest R release on which the
+Imports chain installs, measured across R 4.0.0-4.5.1 on CI rather than read
+off a `Depends` field: glmmTMB requires pbkrtest (R >= 4.2.0), which requires
+doBy and Deriv, and Deriv 4.3.0 does not compile before R 4.5.0. A CI job runs
+`R CMD check` on exactly 4.5.0.
 
 The base install depends only on glmmTMB, cli, rlang, generics, tibble,
 stats, and lifecycle. The alternate estimation engines (lme4, lavaan, brms) and

@@ -1654,3 +1654,39 @@ window, so none is a deprecation-cycle item. `?icc`'s claim that `tidy()` and
 the stable tables, not a re-export of the list. The probe set behind each of
 these, and the two amendment audits that fixed the criteria stating them, are in
 `cairn/milestones/M138-glance-schema-remainder.md`.
+
+### D-039 (2026-08-26): the declared R floor is measured, not inferred — `R (>= 4.5.0)`, superseding the M48 review gate's decision to leave 4.0.0 untested
+
+**Context.** GP3 says support commitments are exactly what CI verifies, and that
+no declared floor goes untested. v0.1.0 declared `R (>= 4.0.0)`, inferred from
+`rlang`'s own `Depends`, while CI's oldest job was `oldrel-1`. The M48 review
+gate recorded that tension under DESIGN.md's Known issues rather than resolving
+it, for this stated reason: "raising the declared floor to what CI tests would
+turn away users whose R would in fact run the package, and pinning a CI job to
+4.0.0 is new infrastructure inside a release round."
+
+**What changed it.** M139 measured the floor instead of inferring it: the
+package's `Depends`/`Imports`/`LinkingTo` chain and `R CMD check` were run on
+each candidate R version on one fixed CI runner, with provisioning, install and
+check recorded separately so a runner fact could not be read as a package fact.
+The chain does not install on any release below 4.5.0 — `pbkrtest` declares
+`R >= 4.2.0`, and below 4.5.0 `Deriv` fails to compile against an R internal it
+uses. The per-version outcomes are recorded in
+`cairn/milestones/M139-r-floor-ci-tested.md`.
+
+That falsifies the premise the M48 gate reasoned from. Below 4.5.0 there are no
+users whose R would in fact run the package: the install fails outright. The old
+floor was not a generous promise, it was a false one.
+
+**Decision.** `DESCRIPTION` declares `R (>= 4.5.0)` — a literal three-part
+version, never a moving label — and `.github/workflows/check-standard.yaml` runs
+`R CMD check` at exactly 4.5.0 on both the `push` and the `pull_request` event.
+GP3's parenthetical states the matrix per event, and the Known-issues entry is
+resolved.
+
+**What this floor tracks.** 4.5.0 is set by the dependency chain
+`glmmTMB` -> `pbkrtest` -> `doBy` -> `Deriv`, not by anything in this package's
+own code. If those packages regain support for older R the floor can be
+re-measured and lowered — by a fresh measurement and a new decision, never by
+inference from a `Depends` field. A floor is only ever declared at a version CI
+runs.
