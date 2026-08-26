@@ -82,66 +82,46 @@ gate before stamping, never folded in silently.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [x] T1: Last-call API audit — one deliberate pass over the exported surface
-      (`icc()`, `d_study()`, `choose_icc()`, S3 methods: names, argument
-      order, defaults, return shapes) ending in a recorded disposition;
-      expected outcome "no changes", anything substantive stops for a gate
-      amendment. (RB tripwire: irreversible-api)
-- [x] T1b: Apply the five accepted RR04 changes plus the two accepted extras —
-      scalar `raters`/`posterior_summary` defaults and a loud abort on a
-      multi-valued choice argument; always-present identifier columns in both
-      tidiers; `var_subject_rater` + `n_o` in `glance.icc()`; the `icc`
-      object's public/internal boundary stated in `@return`; classed
-      validation of `d_study()`'s `conf_level`/`mc_samples`; `tidy()`'s
-      `index` column renamed `term`; `rhat`/`ess_bulk` in `glance.icc()`.
-      Each with a test and a NEWS line.
-- [x] T2: Raise the R floor to `R (>= 4.0.0)` in `DESCRIPTION` (rlang binds
-      the Imports chain; no 4.1+ syntax in package code).
-- [x] T3: Stamp `Version: 0.1.0`; consolidate `NEWS.md` — fold the
-      "(development version)" entries (M44–M47) into the pending 0.1.0
-      changelog below them, one release heading (ADR-022 item d; ADR-055).
-- [x] T4: Refresh `cran-comments.md` (current R versions/platforms checked,
-      NOTE justifications) and re-verify `inst/WORDLIST` via the spelling
-      check.
-- [x] T5: Run the full local release gate and record outputs:
-      `devtools::document()` (no delta), `air format --check`,
-      `lintr::lint_package()`, `urlchecker::url_check()`,
-      `pkgdown::check_pkgdown()` + `build_site()`, installed-package test
-      pass with `NOT_CRAN=true CI=true`, then
-      `devtools::check(args = "--as-cran", env_vars = c(NOT_CRAN = "false"),
-      manual = TRUE)`.
-- [x] T6: Open the PR and drive the CI matrix green (one blocking
-      `gh pr checks --watch`; re-run infra flakes).
+T1-T12 are complete; each one's outcome is recorded in full in the work log
+below, so the descriptions here are compressed to their subject (weight cap).
 
-- [x] T7: Review F1 — `glance()$n_o` reported `NA` on a nested (block-diagonal)
-      replicate design because `R/icc.R` stored the flat-grid count instead of
-      the design-aware `n_o_val`. Fix, with a nested-replicate regression test
-      that reds before it, and correct the `?icc` and NEWS claims the old
-      behaviour falsified.
-- [x] T8: Review F2 — `d_study()` did not validate `seed`: a multi-valued seed
-      was taken on its first element and a non-numeric one raised an unclassed
-      base error. Route it through `validate_seed()`, with a regression test,
-      and correct the NEWS bullet that claimed validation `d_study()` did not
-      have (and named a `boot_samples` argument it does not take).
+- [x] T1: Last-call API audit over the exported surface, ending in a recorded
+      disposition. (RB tripwire: irreversible-api)
+- [x] T1b: Apply the seven accepted RR04 changes, each with a test and a NEWS
+      line.
+- [x] T2: Raise the R floor to `R (>= 4.0.0)` in `DESCRIPTION`.
+- [x] T3: Stamp `Version: 0.1.0`; consolidate `NEWS.md` under one release
+      heading (ADR-022 item d; ADR-055).
+- [x] T4: Refresh `cran-comments.md` and re-verify `inst/WORDLIST`.
+- [x] T5: Run the full local release gate and record outputs.
+- [x] T6: Open the PR and drive CI green.
+- [x] T7: Review F1 — `glance()$n_o` was `NA` on a nested replicate design;
+      fix, regression test, and correct the claims it falsified.
+- [x] T8: Review F2 — route `d_study()`'s `seed` through `validate_seed()`,
+      with a regression test and the NEWS correction.
 - [x] T9: Review F3, F4, F5, F9, F11, F12 — documentation and comment
-      corrections: the comparison vignette reads fits through `tidy()`/
-      `glance()` rather than the list interior the new `@return` declares
-      internal; the `@return` states the rule without a partial list of
-      internal names; NEWS and the `validate_choice()` comment name `occasions`
-      as the fourth report-all axis; the `d_study()` prose distinguishes the
-      object's columns from `tidy()`'s; the `glance()` NEWS bullet narrows to
-      the replicate split it actually disambiguates.
-- [x] T10: Review F6, F7, F12 — record corrections: `cran-comments.md`
-      separates what has been checked from what is scheduled before
-      submission; the ROADMAP row reasoning from the retired `R (>= 3.5)`
-      floor is corrected and the row compressed to hold the byte budget;
-      `DESIGN.md`'s platform sentence names which configurations run where;
-      D-036 annotates D-035's report-all enumeration.
-- [x] T11: Review F10 — positive tests for the new tidy/glance columns on the
-      shapes that populate them (the `d_study()` fill cases for `occasions`,
-      `level` and `type`).
-- [x] T12: Amend AC7 through the gate (the review's amendment return), then
-      re-run the release gate and hand back to `/milestone-review`.
+      corrections.
+- [x] T10: Review F6, F7, F12 — record corrections across `cran-comments.md`,
+      ROADMAP, `DESIGN.md` and a D-036 entry.
+- [x] T11: Review F10 — positive fill-case tests for the new tidy/glance
+      columns.
+- [x] T12: Amend AC7 through the gate, re-run the release gate, hand back.
+
+- [x] T13: AC3 repair — `disambiguates` into `inst/WORDLIST` so
+      `spelling::spell_check_package()` is clean, plus a ROADMAP candidate row
+      recording that `tests/spelling.R` cannot red on an unlisted word.
+- [ ] T14: Review G2 — drop the false `index` claim from `d_study()`'s
+      `@return` (`man/d_study.Rd:62`): the printed D-study report has no
+      `index` column; the carve-out is true of `print.icc()` only.
+- [ ] T15: Review G3 — `choose_icc()`'s choice arguments now abort on a
+      multi-valued value and NEWS says otherwise: correct the NEWS sentence, add
+      a `DECISIONS.md` entry annotating D-036 (the classification is per
+      function x argument, not per argument name), and pin it with a test.
+- [ ] T16: Review G6, G7 — correct the stale ROADMAP hygiene note, add a
+      superseding work-log line for the task count, and fix the
+      `tidy.icc_dstudy()` comment's account of tibble `$` on a missing column.
+- [ ] T17: Re-run the local release gate on the repair head and hand back to
+      `/milestone-review` (third pass).
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
@@ -195,6 +175,11 @@ gate before stamping, never folded in silently.
 - 2026-08-25: review checkpoint (mid-phase, second pass) by /milestone-review — fresh evidence on head `4a1ce09` recorded and ticked for AC1, AC2, AC4, AC7; **AC3 fails** (`spelling::spell_check_package()` returns `disambiguates`, `NEWS.md:358`, absent from `inst/WORDLIST`; introduced by the repair commit `d447172`). AC5 (installed-package suite) and AC6's `pkgdown::build_site()` still running; consistency gate green (`cairn_validate` exit 0). Two of three review lenses returned with zero findings. Status change deferred until the remaining evidence lands so one return names every failure.
 - 2026-08-25: review returns M48 to in-progress by /milestone-review (second pass) — **AC3 fails**: `spelling::spell_check_package()` on head `4a1ce09` returns `disambiguates` (`NEWS.md:358`), absent from `inst/WORDLIST`; the word was introduced by the repair commit `d447172` (T9's narrowing of the `glance()` NEWS bullet) and `tests/spelling.R` cannot red on it (`error = FALSE, skip_on_cran = TRUE`). AC1, AC2, AC4, AC5, AC6 and AC7 all verified with fresh evidence on that head and ticked; consistency gate green. The [O] lens returned seven findings G1-G7 (G1 is the AC3 failure itself); the other two lenses returned none. This is **defect return 2** of this milestone (the 2026-08-25 F1/F2 return was the first); the amendment-return track stays at one (AC7). A third defect return reaches the thrash rule's descope-or-park threshold.
 - 2026-08-25: review triage gate (second pass) — maintainer's dispositions over G2-G7: **fix now** G2 (the false `index` claim on `man/d_study.Rd`), G3 (`choose_icc()`'s silent choice-argument change — NEWS correction, a new D-entry annotating D-036, and a test), G6 (the stale ROADMAP hygiene note and the 12-vs-13 task count) and G7 (the `tidy.icc_dstudy()` comment rationale), alongside AC3's `inst/WORDLIST` fix. **Follow-up** G4 (GP3's own platform cross-product, left out so `cairn_impact.py --changed` does not fall due inside the release round — recorded as a second clause on the existing `R (>= 4.0.0)` floor candidate row) and G5 (the `tidy()$occasions` / `glance()$n_o` doc gap — new candidate row; search-first swept, nothing existing covered it). Nothing rejected.
+- 2026-08-25: question gate (second-pass repairs) — AC3 is repaired by the `inst/WORDLIST` entry the triage named, and `tests/spelling.R` keeps `spell_check_test(error = FALSE, skip_on_cran = TRUE)`: hardening a guard over this repo's own prose inside the release round is D-021-adjacent, the defect being in documentation text rather than in what the package computes. The gap is recorded as a ROADMAP candidate row instead (maintainer's choice).
+- 2026-08-25: minor amendment — Tasks gain T13-T17, carrying the second-pass return (AC3) and the four fix-now findings G2, G3, G6, G7. No acceptance criterion, Goal or Scope text changed; every task sits under an existing criterion (T13 -> AC3, T14-T16 -> AC1's record half and AC6, T17 -> AC4/AC5/AC6).
+
+- 2026-08-25: T13 done — AC3's spelling half repaired: `disambiguates` added to `inst/WORDLIST` (94 -> 95 entries, in case-insensitive sort position), and `spelling::spell_check_package()` re-run returns no errors. The guard gap the maintainer chose not to close in this round is a new ROADMAP candidate row (search-first swept `ROADMAP.md`, `DESIGN.md` and `DECISIONS.md` for `spell_check_test`/`WORDLIST`; nothing existing covered it). That row plus the two G4/G5 rows had put `ROADMAP.md` at 25,340 bytes against the < 24,000 budget, which `origin/main` held at 23,988: the rulebook's compress-widest-rows-first remedy was applied to 15 rows by deleting restatable detail rather than rewording it, and the two M133 rows — the trustworthiness table and the guard that would make it safe, the second of which opens "the guard making the row above safe" — were clustered into one, holding the 60-line cap against the added row. `ROADMAP.md` is now 23,973 bytes / 59 lines. Compressing the Tasks section (79 -> 43 lines; T1-T12 are done and their outcomes are recorded in full in this log) cleared the milestone file's 150-line plan-owned cap, which the T13-T17 addition had broken at 161. `cairn_validate` now fails no check; the five record checkers and `air format --check` all exit 0.
+
 ## Decisions
 <!-- owner: implement / review · append-only -->
 
