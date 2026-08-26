@@ -21,8 +21,10 @@ Consolidate the post-M44–M47 package state into a CRAN-submission-ready v0.1.0
 **In:** last-call exported-API audit (GP2's one-way door closes at submission);
 honest R floor (`R (>= 4.0.0)`, rlang-bound — GP3, plan gate 2026-07-12);
 version stamp `0.1.0` + NEWS consolidated under one `# intraclass 0.1.0`
-heading (ADR-022 item d, ADR-055 mechanics); refreshed `cran-comments.md`;
-the full release gate re-run fresh (the 81a53ae green state is stale by
+heading (ADR-022 item d, ADR-055 mechanics); refreshed `cran-comments.md` —
+its accuracy against the machine that ran the checks moved out at the
+2026-08-25 descope gate, to the follow-on that lands before the upload; the
+full release gate re-run fresh (the 81a53ae green state is stale by
 M44–M47 + the cairn migration). All mechanics as milestone tasks — the
 `/cairn-release` skill is deliberately not used (plan gate 2026-07-12).
 
@@ -43,37 +45,47 @@ gate before stamping, never folded in silently.
       opens with a single consolidated `# intraclass 0.1.0` changelog (no
       "(development version)" heading; M44's default-shape change framed as
       part of the initial release per ADR-055).
-- [ ] AC3: `cran-comments.md` names the actual check environments used and
-      justifies every remaining NOTE; `inst/WORDLIST`/spelling clean.
-- [x] AC4: fresh `devtools::check(args = "--as-cran", env_vars =
+- [x] AC3: *Descoped at the third-pass triage gate (2026-08-25). This
+      milestone promises nothing about `cran-comments.md` or the spelling
+      surface; that file's environment record exits, with findings O1, O2, O4
+      and O5, to the ROADMAP candidate row "The v0.1.0 release round's
+      descoped remainder — lands before the CRAN upload". The number is held
+      rather than reclaimed so the work log and the three recorded review
+      rounds keep pointing at the criteria they were written against.*
+- [ ] AC4: fresh `devtools::check(args = "--as-cran", env_vars =
       c(NOT_CRAN = "false"), manual = TRUE)` → 0 errors / 0 warnings / only
-      NOTEs justified in AC3 (TinyTeX courier installed for the PDF manual).
+      NOTEs justified in `cran-comments.md` (TinyTeX courier installed for the
+      PDF manual).
 - [x] AC5: full test suite green against the **installed** package with
       `NOT_CRAN=true CI=true` (failed + error sum = 0 — the local-gate
       blind spot).
 - [x] AC6: `pkgdown::check_pkgdown()` + `pkgdown::build_site()` clean;
       `air format --check` clean; `lintr::lint_package()` clean;
       `urlchecker::url_check()` all-correct.
-- [x] AC7: the release code passes every CI check a pull request can reach.
-      Evidence: `gh pr checks <head SHA>` at a named head SHA, every reported
-      check in the `pass` bucket — none `fail`, `pending`, `skipping` or
-      `cancel` — with the reported list quoted in the Review section and
-      compared against the workflows under `.github/workflows/` that declare a
-      `pull_request` trigger; a path filter drops a skipped workflow from the
-      report entirely, so a workflow declaring that trigger and absent from
-      the list counts as unrun, never as passing. A red check is diagnosed
-      before any re-run, and a re-run is recorded with what made it
-      infrastructural. The macOS, R-oldrel-1 and R-devel configurations of
-      `check-standard.yaml` are not reachable from a pull-request head as that
-      workflow stands; AC3's `cran-comments.md` is what states which
-      environments have actually run.
+- [ ] AC7: the release code passes every CI check a pull request can reach.
+      Evidence: the head SHA pinned with `gh pr view <n> --json headRefOid`,
+      the check report taken with `gh pr checks <n>` and cross-checked against
+      the check runs GitHub attaches to that SHA (`gh api
+      repos/<owner>/<repo>/commits/<sha>/check-runs`), every reported check in
+      the `pass` bucket — none `fail`, `pending`, `skipping` or `cancel` —
+      with the reported list quoted in the Review section and compared against
+      the workflows under `.github/workflows/` that declare a `pull_request`
+      trigger; a path filter drops a skipped workflow from the report
+      entirely, so a workflow declaring that trigger and absent from the list
+      counts as unrun, never as passing. A red check is diagnosed before any
+      re-run, and a re-run is recorded with what made it infrastructural. The
+      configurations `check-standard.yaml` yields only on a push event, and
+      only to the branches its own push trigger lists, are not reachable from
+      a pull-request head, and this criterion does not promise they have run;
+      the two a pull-request event does yield are covered by the comparison
+      above.
 
 ## Coverage
 <!-- owner: plan · create/amend-via-gate -->
 
 - AC1 → T1, T1b
 - AC2 → T2, T3
-- AC3 → T4
+- AC3 → T4 (descoped; T4 and T13 stand as performed history)
 - AC4 → T5
 - AC5 → T5
 - AC6 → T5
@@ -122,6 +134,14 @@ below, so the descriptions here are compressed to their subject (weight cap).
       `tidy.icc_dstudy()` comment's account of tibble `$` on a missing column.
 - [x] T17: Re-run the local release gate on the repair head and hand back to
       `/milestone-review` (third pass).
+
+- [x] T18: Execute the third-pass triage's descope through the gated
+      criterion-amendment protocol — AC3 descoped with its number held, AC4
+      and AC7 repointed off it, Scope's `cran-comments.md` item carved out.
+- [x] T19: Record the exiting work as ROADMAP rows and hold that file's line
+      cap and byte budget.
+- [ ] T20: Re-run the local release gate on the amendment head and hand back
+      to `/milestone-review` (fourth pass).
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
@@ -193,6 +213,14 @@ below, so the descriptions here are compressed to their subject (weight cap).
 - 2026-08-25: review checkpoint (mid-phase, third pass) by /milestone-review — fresh evidence on head `b54ac74` recorded and ticked for AC1, AC2, AC3 and AC4; AC3's spelling half, the second pass's failure, is clean, and `--as-cran` is 0/0/0 again. AC5 (installed-package suite), AC6's `pkgdown::build_site()` and AC7 (three CI checks) are still running. Consistency gate green (`cairn_validate` exit 0; `cairn_impact` not owed). Two of three review lenses returned: the prior-review lens no findings, the blame-history lens one verbatim repeat of G4, already a triaged follow-up.
 - 2026-08-25: review returns M48 to in-progress by /milestone-review (third pass) — **AC3 fails**: `cran-comments.md:20` names the local check environment as "macOS 15 (aarch64), R 4.6.1" and the machine that ran it is macOS 26.6.2 (Tahoe), which `sw_vers`, `sessionInfo()$running` and the AC4 check banner all report; the wrong version was introduced by this branch at `be9d013` (T4), `origin/main` having said only "macOS, R 4.6.1". AC1, AC2, AC4, AC5, AC6 and AC7 all verified with fresh evidence on head `b54ac74` and ticked; consistency gate green (`cairn_validate` exit 0, `cairn_impact` not owed). The [O] lens returned six findings O1-O6 plus a nit (O3 is the AC3 failure itself; O1 reproduces the F1 shape on the incomplete-design axis, where `glance()$n_o` is NA beside a populated `var_subject_rater` and two shipped doc surfaces say it will not be); the [S] blame-history lens returned one verbatim repeat of G4 and the [S] prior-review lens none. This is **defect return 3** of this milestone (F1/F2 was 1, AC3 spelling was 2); the amendment-return track stays at one (AC7). The thrash rule's threshold (a) is reached, and (b) fires too — AC3 has now failed twice, each time on a hand-authored release-artifact fact that no check the milestone runs can catch. Disposition goes to the maintainer.
 - 2026-08-25: review triage gate (third pass) — with the thrash rule's threshold reached, the maintainer chose **descope over another retry**: M48 narrows to the six criteria verified on `b54ac74` (AC1, AC2, AC4, AC5, AC6, AC7) and merges the release code, while AC3's `cran-comments.md` accuracy and the four fix-now findings O1, O2, O4 and O5 exit to a follow-on milestone that must land before the CRAN upload — which stays the maintainer's out-of-band act, so nothing reaches CRAN in between. The narrowing runs through the gated criterion-amendment protocol (/milestone-implement step 6), then the narrowed set is re-reviewed. **O1's repair is the documentation fix**, not the behaviour fix: `man/icc.Rd:484-486` and `NEWS.md:356-358` widen to say the occasion count is also absent on an incomplete design, and `glance()$n_o` keeps its current behaviour rather than changing a shipped column at the API last call; the behaviour gap goes to a candidate row. **Rejected** at triage: O6's two repeats (already carried by candidate rows as recorded deferrals) and the `d_study()` validation-ordering nit (a pure ordering nitpick this branch did not introduce). Note for the follow-on: M48 as narrowed merges with the wrong macOS version in `cran-comments.md` and the two false `n_o` statements still on shipped surfaces.
+
+- 2026-08-25: question gate (descope round) — the maintainer chose to drop AC3 whole rather than keep its passing spelling half, and to record the exiting work as one ROADMAP candidate row planned after the merge rather than plan the follow-on before merging. Removing AC3 left AC4 and AC7 pointing at it, which a mini gate settled by repointing both at `cran-comments.md`.
+- 2026-08-25: criteria audit ran in **full** mode (user-facing tier; AC1 carries an RB tripwire tag) over the two repointed clauses, by a fresh-context [O] reader that authored neither. Seven findings. The decisive one: AC7's repoint was not promise-preserving — dropping the `AC3's` prefix kept the assurance that a record covers the three unrun platform configurations while no surviving criterion constrains that record, and the review had already proved it wrong on that axis. Also from it: AC7 hand-pinned a member list `check-standard.yaml` derives; AC7 cross-checks workflows while promising checks, and app-posted checks sit outside both enumerators (both pre-existing, sent to the follow-on row); AC4's repoint is extensionally identical and vacuous on this head (0 notes), recommended to stand; T13's title and Scope's `cran-comments.md` item both depended on AC3; and the Goal's "CRAN-submission-ready" now claims more than the narrowed set establishes.
+- 2026-08-25: mini gate over the audit — AC7's closing sentence is rewritten to disclose the unrun configurations without handing off to an unverified record, Scope's item gains the carve-out, and the Goal's overclaim is accepted and recorded rather than sent back for a re-cut (all three the maintainer's choice). The criteria set narrows; nothing was widened. AC7's cross-check gap is item 6 on the new candidate row rather than a criterion change, per the return-adjacent direction rule on a milestone carrying three defect returns.
+- 2026-08-25: AC7's fixed wording re-entered the audit questions once with its own fresh-context [O] reader, in **full** mode, before being written. It cleared the replacement as a narrowing asserting nothing false, and returned four findings: the sentence credited the matrix expression with a default-branch condition that comes from the workflow's own push trigger, and `gh pr checks <head SHA>` is not a runnable command — `gh` takes a number, URL or branch, and both earlier passes substituted the head-pinning procedure off the record. Both fixed at a second mini gate (maintainer's choice); the other two findings are the pre-existing granularity and app-check gaps already on the candidate row.
+- 2026-08-25: T18 done — AC3 is descoped with its number held, in the shape M136 set at `5c274fc` (a ticked item whose text states it promises nothing and names where it exits), because `cairn_validate`'s coverage check numbers criteria positionally and a gap FAILs it: removing the item outright reported "AC3 not referenced in Coverage" and "Coverage references AC7 but file has 6 criteria". Coverage regains `AC3 → T4 (descoped; T4 and T13 stand as performed history)`. AC4's note-justification clause now names `cran-comments.md`, AC7's closing sentence discloses rather than hands off and its evidence clause names the procedure both passes actually ran, and Scope's `cran-comments.md` item carries the accuracy carve-out. T13's title still reads "AC3 repair", which stays accurate: the number is held and T13's work was performed while AC3 was live. `cairn_validate` fails no check.
+- 2026-08-25: AC4 and AC7 unticked — both were amended above, so their third-pass evidence on `b54ac74` was measured against wording that no longer stands. AC1, AC2, AC5 and AC6 keep their third-pass ticks: their wording is unchanged and `git diff --name-status b54ac74..HEAD` is `cairn/` files only, so every artifact those four measured is byte-identical. The Goal's "CRAN-submission-ready" overclaims what the narrowed set proves — accepted at the gate above, recorded here rather than edited (create-only).
+- 2026-08-25: T19 done — one ROADMAP candidate row records the descoped remainder (the `cran-comments.md` environment line, the four documentation findings O1/O2/O4/O5, and AC7's cross-check gap) as work that lands before the CRAN upload; O1's behaviour gap is absorbed as a second clause on the existing `glance()$n_o` row (search-first swept ROADMAP, DESIGN.md and DECISIONS.md; that row was the only overlap). Adding a row broke both the < 60-line cap and the < 24,000-byte budget, so four sibling pairs were clustered into one row each — the two M104 rows, the two checkpoint rows, the two plotting rows, the two prose-apparatus rows — and the widest rows compressed by deleting restatable detail, every promotion condition kept. The file is now 56 lines.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
