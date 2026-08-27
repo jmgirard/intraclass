@@ -5,7 +5,7 @@
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP7, GP8, #5, #8
-- **Branch/PR:** `m141-n-o-disposition-grid`
+- **Branch/PR:** `m141-n-o-disposition-grid` / https://github.com/jmgirard/intraclass/pull/152
 
 ## Goal
 
@@ -31,7 +31,7 @@ entry for the reworded abort → not needed, the message is new in the unrelease
 
 ## Acceptance criteria
 
-- [ ] AC1 — `tests/testthat/test-n-o-disposition-grid.R` builds its cases with
+- [x] AC1 — `tests/testthat/test-n-o-disposition-grid.R` builds its cases with
       `expand.grid()` over the axes it names in place (`multilevel`,
       `ml_design`, `raters`, whether `level` includes `"conflated"`, and the
       replicate shape: uniform-and-complete / unequal counts / a cell the
@@ -57,7 +57,7 @@ entry for the reworded abort → not needed, the message is new in the unrelease
       together with the conditions raised ahead of it, captured and compared
       as a whole set rather than asserted uniformly. Every case's assertion
       passes.
-- [ ] AC2 — the same file asserts that the number of distinct dispatch branches
+- [x] AC2 — the same file asserts that the number of distinct dispatch branches
       its abort cases identify equals the number of `abort_*()` calls inside
       the within-cell-replicate dispatch block, the calls matched by a pattern
       admitting any `abort_` helper (not `abort_unsupported(` alone) and the
@@ -66,7 +66,7 @@ entry for the reworded abort → not needed, the message is new in the unrelease
       absent under `R CMD check`. Two probes turn the assertion red:
       temporarily adding a sixth `abort_unsupported()` call inside the block,
       and adding one raised through a different helper.
-- [ ] AC3 — five planted defects, applied and reverted one at a time, each
+- [x] AC3 — five planted defects, applied and reverted one at a time, each
       turning a NAMED grid case red: (i) `R/design.R:49`, drop
       `n_cells == ns * nr` — a single-level random missing-cell case reports a
       number where it must report `NA`; (ii) `R/design.R:50`, drop
@@ -81,7 +81,7 @@ entry for the reworded abort → not needed, the message is new in the unrelease
       only if the grid's unequal-counts case keeps a full cell grid and its
       missing-cell case keeps equal counts in the cells it has; both cases are
       built that way.
-- [ ] AC4 — the fixed-rater abort at `R/icc.R:1459-1465` opens "Ragged or
+- [x] AC4 — the fixed-rater abort at `R/icc.R:1459-1465` opens "Ragged or
       incomplete within-cell replicates are not supported for fixed raters
       yet.", mirroring the multilevel sibling at `R/icc.R:1436-1443`, and its
       two `i =` hints are reworded so the deferral clause and the remedy
@@ -90,7 +90,7 @@ entry for the reworded abort → not needed, the message is new in the unrelease
       against the real abort, rendered with `cli::cli_fmt()` /
       `format_message()` (M93 lesson), on both a ragged fixed-rater design and
       a missing-cell fixed-rater design. (RB tripwire: ip-touching)
-- [ ] AC5 — `cairn/DECISIONS.md` gains an entry superseding D-038 clause 2's
+- [x] AC5 — `cairn/DECISIONS.md` gains an entry superseding D-038 clause 2's
       under-statement that `n_o` is "`NA` on a ragged replicate design as well
       as on an unreplicated one": it is `NA` on a design missing a cell it
       defines too. The entry states the condition `replicates_uniform`
@@ -98,7 +98,7 @@ entry for the reworded abort → not needed, the message is new in the unrelease
       (`R/design.R:215-228`) guarantee, and names
       `tests/testthat/test-n-o-disposition-grid.R` as the grid's home.
       D-038 is not edited.
-- [ ] AC6 — `Rscript -e 'devtools::test()'` reports `FAIL 0` and no warning whose
+- [x] AC6 — `Rscript -e 'devtools::test()'` reports `FAIL 0` and no warning whose
       rendered message text is absent from the set the same `devtools::test()`
       invocation reports at this milestone's merge-base, both runs made in this
       session and both sets recorded in the work log. `Rscript -e
@@ -173,7 +173,157 @@ entry for the reworded abort → not needed, the message is new in the unrelease
 - 2026-08-27: ROADMAP gained a candidate row for the three escaping suite warnings (search-first: no overlapping row). `cairn/ROADMAP.md` is 57 lines / 24,707 bytes — inside the 60-line cap, over the 24,000-byte budget, which it already was at 24,200 before this milestone touched it. Compressed what M141 owns: the `tidy()$occasions` / `glance()$n_o` row's second half, now held by D-041 and the grid test, became a cross-reference (-246 bytes). The remaining overage is unrelated rows and belongs to the post-merge hygiene pass. `cairn/LESSONS.md` sits at exactly 20,000 bytes against its <20,000 budget, untouched by this milestone.
 - 2026-08-27: note for review, no amendment sought — AC4 and the Scope line cite the fixed-rater abort at `R/icc.R:1459-1465`, its location when the plan was written. T5's rewording moved it to `R/icc.R:1463-1472`; the multilevel sibling AC4 cites at `R/icc.R:1436-1443` is unmoved. The criterion is read as written; only the line numbers are stale.
 - 2026-08-27: status review; all tasks checked.
+- 2026-08-27: review run; PR #152 opened as a draft. Six acceptance criteria executed with fresh evidence, all pass; consistency gate clean (`cairn_validate` exit 0, `document()` no diff, `pkgdown::check_pkgdown()` clean, `check()` `Status: OK`, six `data-raw/` checkers self-test green). Three-lens fan-out: [S] blame-history and [S] prior-PR-comments no findings, [O] diff-bug eleven, none an acceptance-criterion failure — four fix-now, one follow-up, six rejected. No defect return.
 
 ## Decisions
 
 ## Review
+
+Review run 2026-08-27 on `m141-n-o-disposition-grid` @ `3be1849`, PR
+https://github.com/jmgirard/intraclass/pull/152. `origin/main` had not moved
+since the branch was cut (merge-base `3abc2a4` == `origin/main`), so no merge
+was needed. Every figure below was measured this session by command; nothing is
+carried from the implement phase's work log.
+
+### Acceptance-criteria evidence
+
+- **AC1 — passes.** `tests/testthat/test-n-o-disposition-grid.R:133-141` builds
+  the case set with `expand.grid()` over the five named axes; the drop rule and
+  its justification sit beside the call at `:142-151`. The nested-with-conflated
+  rows survive it (`keep <- multilevel | (crossed & !conflated)`), giving 36
+  multilevel + 6 single-level = 42 cases. Expectations are keyed by axis values
+  (`case_key()`, `:157-172`) and set equality is asserted in both directions
+  plus a duplicate-key check (`:383-387`). Aborts are matched by rendered
+  message substring with the class asserted in addition, never instead
+  (`:422-430`). Measured: `devtools::test(filter = "n-o-disposition-grid")`
+  reports `FAIL 0 | WARN 0 | SKIP 0 | PASS 195`.
+- **AC2 — passes.** The block is located inside `deparse(body(icc))` by its own
+  code strings (`icc_dispatch_block()`, `:442-450`); nothing reads `R/icc.R`
+  from disk. The call pattern is `\babort_[A-Za-z0-9_.]*\(`, admitting any
+  helper. Both probes were re-run this session, each applied and reverted:
+  a sixth `abort_unsupported()` inside the block and one raised through
+  `abort_unidentified()`. Each reddened exactly one expectation —
+  `test-n-o-disposition-grid.R:467`, "Expected `length(branches)` to be
+  identical to `calls`", actual 5, expected 6 — leaving `FAIL 1 | PASS 194`.
+- **AC3 — passes.** All five planted defects re-applied and reverted one at a
+  time this session, each reddening a named case: (i) dropping
+  `n_cells == ns * nr` reddens `single/random/missing_cell` (`n_o` 2, expected
+  `NA`); (ii) dropping the equal-counts clause reddens `single/random/ragged`
+  (`n_o` 3, expected `NA`); (iii) returning `length(observed)` reddens
+  `single/random/uniform` and `single/fixed/uniform` (`n_o` 32, expected 2);
+  (iv) forcing `multilevel_replicate_facts()`'s `complete` to `TRUE` reddens
+  `ml/crossed/random/plain/missing_cell` (fits where it must abort); (v)
+  restricting the fixed-rater dispatch guard to unequal counts alone reddens
+  `single/fixed/missing_cell` (fits where it must abort). (i) and (ii) reddened
+  different named cases, so the two clauses of `replicates_uniform` are
+  separably pinned. Working tree clean after every revert.
+- **AC4 — passes.** Rendered this session from a real missing-cell fixed-rater
+  abort via `cli::format_message()`: the message opens "Ragged or incomplete
+  within-cell replicates are not supported for fixed raters yet.", the same
+  opener its multilevel sibling carries; the first `i =` hint names "the ragged
+  and incomplete cases", the second "for ragged or incomplete replicated data
+  ... in every cell of a complete subject-by-rater grid". All three bullets are
+  pinned by substring on both the ragged and the missing-cell shape
+  (`:491-508`), and the shared opener is pinned against the multilevel sibling
+  (`:510-530`); those pins are part of the 195 passing expectations above.
+- **AC5 — passes.** `cairn/DECISIONS.md` gains D-041, which supersedes D-038
+  clause 2's enumeration, states the condition `replicates_uniform`
+  (`R/design.R:48-50`) and `multilevel_replicate_facts()` (`R/design.R:215-228`)
+  guarantee, and names `tests/testthat/test-n-o-disposition-grid.R` as the
+  grid's home. The `cairn/DECISIONS.md` diff against `main` contains no
+  deletions, so D-038 is not edited (IP4).
+- **AC6 — passes.** Both `devtools::test()` runs made this session. Branch:
+  `FAIL 0 | WARN 3 | SKIP 2 | PASS 9091`. Merge-base `3abc2a4`, in a temporary
+  worktree since removed: `FAIL 0 | WARN 3 | SKIP 2 | PASS 8896`. The two
+  warning sets are identical by rendered message text — "The lavaan engine
+  reported a fitting warning.", "The glmmTMB engine reported a fitting
+  warning.", "Modeling raters as fixed restricts inference to exactly these
+  raters; you cannot generalize to other raters." — so the set difference
+  (branch minus merge-base) is empty. `devtools::check()` raw `Status:` line:
+  `Status: OK`; 0 errors, 0 warnings, 0 notes, duration 13m 9.3s. No NOTE to
+  justify. The work log records that AC6 reads the profile's `verify` slot word
+  "clean" as "no warning the branch adds"; that relaxation is carried here
+  deliberately and is what the criterion, as amended, promises.
+
+### Consistency gate
+
+`cairn_validate.py` exit 0, all checks pass, every advisory OK — the `release
+window` advisory did not fire. No `DESIGN.md` principle changed, so
+`cairn_impact.py` was skipped. Toolchain checks from the `r-package` profile's
+`consistency-gate` slot: `devtools::document()` leaves no diff; `NAMESPACE`,
+`man/` and `data/` are untouched by the branch; `README.Rmd`/`README.md` are
+untouched and in sync; `pkgdown::check_pkgdown()` reports no problems; `NEWS.md`
+takes no entry, the reworded message being new in the unreleased 0.1.0 (Scope);
+no new top-level files, so no `.Rbuildignore` entry is owed; the full check is
+`Status: OK` above. Beyond the slot, all six `data-raw/` checkers pass
+`--self-test` (M130 lesson — a tracking edit re-keys them).
+
+### Independent review — three-lens fan-out
+
+Executable surface touched, so the full fan-out ran, each reviewer
+fresh-context and none having authored the implementation.
+
+**[S] blame-history — no findings.** Traced the touched `R/icc.R` lines to
+`e475e986` (M20 Slice 3, ADR-030), confirmed the controlling condition
+`!design_info$replicates_uniform` is byte-identical before and after, and that
+`replicates_uniform` has always required grid completeness — so the diff
+corrects prose about already-shipped behaviour rather than changing it.
+
+**[S] prior-PR-comments — no findings.** The one prior-review item touching
+these files is M140's deferred finding "the fixed-rater abort calling a
+missing-cell design ragged"
+(`cairn/milestones/archive/M140-release-remainder-docs.md:11`); this diff
+resolves it rather than reintroducing it. The GitHub probe
+(`gh api .../pulls/comments?per_page=1`) returned `[]`, so the secondary
+surface was skipped.
+
+**[O] diff-bug — eleven findings, ranked, all in the instrument and the
+records; no shipped-behaviour bug.** Dispositions below. None demonstrates an
+acceptance criterion failing inside its named procedure's domain, so none
+qualifies under the return floor.
+
+1. `render_condition()` feeds an already-rendered `conditionMessage()` back
+   through `cli::format_message()`, so a message containing a literal brace
+   throws instead of failing that case. **Verified against the implementation**
+   this session: a condition whose text contains `{1|subject:rater}` makes
+   `render_condition()` error with "Could not evaluate cli `{}` expression".
+   Benign today (no in-scope message renders braces), latent for a standing
+   grid. **Follow-up** — a ROADMAP candidate row.
+2. The branch-count check ends the block at the first `replicates <- TRUE`,
+   which is a statement inside the block, not its closing brace. **Verified**:
+   `deparse(body(icc))` puts the anchor at line 287 and the block's `}` at 288,
+   so an abort added on that one line escapes the count; the section comment
+   claims more than the check enforces. **Fix now** — extend the located range
+   through the block's closing brace.
+3. The condition comparison is a count plus per-pattern membership, not a
+   one-to-one set match. **Rejected** — every case's expected condition set has
+   length 0 or 1, so count-plus-membership is exact set equality today; the
+   concern is hypothetical and AC1's "compared as a whole set" is met.
+4. The test file's own header cites the dispatch as `R/icc.R:1393-1468`; the
+   block runs to 1481. **Fix now** — a one-line comment correction.
+5. The `branch` labels are free-form strings nothing ties to the branch they
+   name, so AC2's equality is cardinality only. **Rejected** — the plan gate
+   chose a count deliberately over a snapshot grid, and AC2 promises exactly
+   that count.
+6. The ROADMAP compression dropped the promote trigger "or reaching an `NA`
+   count on such a design" from the `tidy()$occasions`/`n_o` candidate row and
+   calls the gap settled, while D-041 states nothing in the computation
+   changes. **Verified** in the ROADMAP diff. **Fix now** — restore the trigger.
+7. The reworded hint widens a forward promise ("the ragged and incomplete cases
+   are planned for a later milestone") that no ROADMAP row backs. **Rejected** —
+   AC4 requires the deferral clause to cover the missing-cell shape, and the
+   promise was already unbacked in the same shape before M141; a pre-existing
+   issue the diff did not introduce.
+8. Four `expect_gt()` non-emptiness guards are credited in comments with
+   protection `stopifnot()` already provides. **Fix now** — trimmed with the
+   comment correction in 4.
+9. "balanced, complete data" in the message reads against the package's
+   internal `balanced` flag, which is `FALSE` for any replicated design.
+   **Rejected** — pre-existing in the multilevel sibling, and the parenthetical
+   gloss makes the user-facing meaning unambiguous.
+10. The fixture header says `missing_cell` "drops one subject's rating from one
+    of its own raters"; both constructors drop the whole cell. **Fix now** — a
+    comment correction.
+11. `fixture_seed()` is order-insensitive, so anagram keys would collide.
+    **Rejected** — no collision among the six keys in use, and the consequence
+    would be shared data, not a wrong assertion.
