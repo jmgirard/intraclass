@@ -389,10 +389,10 @@ glance.icc <- function(x, ...) {
     # within-cell replicates -- FALSE on a one-way fit, which has no rater facet
     # and so no cells to split. `raters` is NA on a one-way fit, whose
     # raters are interchangeable and carry no facet; `replicates` is reported in
-    # its own right because `n_o` beside it is also NA on a single-level
-    # replicated design with ragged counts or a missing cell -- the multilevel
-    # replicate path aborts on both shapes rather than reaching NA (R/icc.R,
-    # multilevel_replicate_facts guard) -- so replicate status is not
+    # its own right because `n_o` beside it can be NA on a replicated design
+    # too -- a random-rater single-level design with ragged counts or a
+    # missing cell reports NA, `replicates_uniform` demanding equal counts and
+    # the full grid (R/design.R:48-51) -- so replicate status is not
     # recoverable from that column (M138).
     raters = if (identical(x$design$model, "oneway")) {
       NA_character_

@@ -684,13 +684,13 @@
 #'     carry no facet) and `replicates`, whether the fitted design splits
 #'     within-cell replicates -- `FALSE` on a one-way fit, which has no rater
 #'     facet and so no cells to split -- the effective rater counts, the
-#'     variance components, the occasion count `n_o` (`NA` unless the design
-#'     has within-cell replicates *and* defines one occasion count per cell --
-#'     the same number of ratings in every cell, and every cell the design
-#'     defines present, which is the full subject-by-rater grid when crossed
-#'     and the block-diagonal one when raters are nested in clusters; a
-#'     single-level design failing either leaves it `NA`, while a multilevel
-#'     one aborts instead of reporting `NA`), the engine and interval
+#'     variance components, the occasion count `n_o` (`NA` unless the fitted
+#'     design splits within-cell replicates *and* defines one occasion count
+#'     per cell -- the same number of ratings in every cell, and every cell
+#'     the design defines present, which is the full subject-by-rater grid
+#'     when crossed and the block-diagonal one when raters are nested in
+#'     clusters; a design failing either condition is reported as `NA` or
+#'     refused with an error, depending on the design), the engine and interval
 #'     settings, and the sampler diagnostics `rhat` and `ess_bulk` (`NA` for the
 #'     non-Bayesian engines, which do not sample). Every column is present on
 #'     every fit, so two glanced fits row-bind just as two tidied ones do.
@@ -2513,9 +2513,10 @@ icc <- function(
         # flat subject x rater grid, which a block-diagonal (nested) design
         # never fills, so it reported NA on a replicate fit whose
         # `var_subject_rater` was populated (M48 review F1). NA survives here
-        # only where the design defines no single count per cell -- ragged
-        # replicates, and a single-level replicated design with a missing cell
-        # (`replicates_uniform` requires the full grid, R/design.R:48-51).
+        # only on the random-rater single-level path, whose ragged and
+        # missing-cell shapes both fail `replicates_uniform` -- it demands
+        # equal per-cell counts and the full grid (R/design.R:48-51). The
+        # fixed-rater and multilevel paths abort above rather than reach here.
         n_o = if (replicates) n_o_val else NA_integer_
       ),
       # The replicate path averages over distinct raters (k_eff_raters), not total

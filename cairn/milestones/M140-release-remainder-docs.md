@@ -1,6 +1,6 @@
 # M140: Release-remainder documentation corrections, and the recorded pre-submission check
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** M138, M139
 - **Driving RR:** —
@@ -35,6 +35,7 @@ Correct the four false documentation claims descoped from M48 and re-run `R CMD 
 - AC3 → T2, T3
 - AC4 → T4
 - AC5 → T5, T6
+- AC2 → T7
 
 ## Tasks
 
@@ -43,6 +44,7 @@ Correct the four false documentation claims descoped from M48 and re-run `R CMD 
 - [x] T3. Append the D-entry superseding D-037's `d_study()` clause (`cairn/DECISIONS.md:1592-1594`), keeping D-036's routed-through-`validate_choice()` discriminator unchanged.
 - [x] T4. Fix the "fills" sentence at `R/d-study.R:125-126`; re-roxygenize so `man/d_study.Rd:65-66` follows.
 - [x] T5. `air format .`, the four `data-raw/` checkers with `--self-test`, then `R CMD check --as-cran` with `NOT_CRAN=false`; copy the platform, R version and date from that run's own output into `cran-comments.md:5-20`.
+- [x] T7. Round-2 AC2 repair: drop the per-family disposition prediction from every `n_o` `NA` claim, leaving the condition the code guarantees; fold in the round-2 findings on the internal comment, the definability wording and the file pointer.
 - [x] T6. Measure spelling against a detached worktree at the default branch, per the M128 lesson, rather than padding `inst/WORDLIST`.
 
 ## Work log
@@ -62,6 +64,7 @@ Correct the four false documentation claims descoped from M48 and re-run `R CMD 
 - 2026-08-26: return repair for AC2. `NEWS.md:366-370` and `:376-378` now scope the missing-cell case to single-level designs and say a multilevel replicated design that is ragged or incomplete aborts instead of reporting `NA`; the same scoping landed at `R/icc.R:687-693` / `man/icc.Rd:492-498` and `R/icc-methods.R:392-396`. Review finding 4 folded in: `R/icc.R:2622-2627`'s report-all comment is now per function, naming `icc()`'s four and `d_study()`'s projection axes `m` and `n_o`; `d_study()` calls `validate_choice()` nowhere (its callers are `icc()`, `autoplot()`, `choose_icc()`). The rule was measured, not recalled: a nested Design 2 replicated fit with 48 of 192 flat cells present reports `n_o` `2`; a crossed multilevel replicated fit with a cell dropped and a nested one with a rating dropped both abort `intraclass_unsupported`; single-level missing-cell and ragged fits both report `NA`.
 - 2026-08-26: `NOT_CRAN=false devtools::check(manual = TRUE)` re-run on the repaired tree: raw `Status: OK` at line 104 of the run log, summary 0 errors / 0 warnings / 0 notes, 13m 18s. `cran-comments.md` needed no edit — this run reports the same platform `aarch64-apple-darwin23`, R 4.6.1 (2026-06-24), macOS Tahoe 26.6.2 and UTC date 2026-08-27 the file already records. Status set to `review`.
 - 2026-08-26: review round 2 returned M140 to in-progress. AC2 fails again, by a new mechanism of the same shape: `R/icc.R:689-691`, `man/icc.Rd:494-496`, `R/icc-methods.R:392-396` and `NEWS.md:366-370` say a single-level replicated design failing completeness or equal counts leaves `n_o` at `NA`, but measured with `raters = "fixed"` both shapes abort `intraclass_unsupported` (`R/icc.R:1456-1465`); only the random-rater sibling reports `NA`. AC1, AC3, AC4 and AC5 met with fresh evidence; consistency gate clean. Defect returns on this milestone: 2. Thrash trigger (b) fires; escalation offered.
+- 2026-08-26: T7 (round-2 AC2 repair). Every `n_o` `NA` claim now states only the condition the code guarantees — the fitted design splits within-cell replicates and defines one occasion count per cell (equal counts, every cell the design defines present) — and no longer predicts what a design failing it does, beyond the true disjunction that it is reported as `NA` or refused. Sites: `R/icc.R:687-693` and its `man/icc.Rd`, `NEWS.md:366-371` and `:377-380`, `R/icc-methods.R:392-396`, `R/icc.R:2516-2519`. Round-2 findings 2, 3 and 4 folded in: the internal comment now scopes `NA` to the random-rater single-level path and names the fixed-rater and multilevel aborts; `NEWS.md` no longer folds completeness into definability; the `R/design.R:48-51` pointer replaces the wrong-file one. Derived by measuring the full disposition grid, not recalled: no replicates `NA`, one-way replicated `NA`, single-level random complete `2` / ragged `NA` / missing-cell `NA`, single-level fixed complete `2` / ragged abort / missing-cell abort, multilevel nested complete `2` / ragged abort / missing-cell abort, multilevel crossed ragged and missing-cell abort. `air format` clean; `devtools::test()` at `NOT_CRAN=true CI=true` FAIL 0 / PASS 8630.
 
 ## Review
 
