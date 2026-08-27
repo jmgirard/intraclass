@@ -1,11 +1,11 @@
 # M142: NEWS.md's 0.1.0 entry reads as first-release notes, not a development log
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP1, GP8
-- **Branch/PR:** —
+- **Branch/PR:** `m142-news-release-notes`
 
 ## Goal
 
@@ -54,20 +54,27 @@ scope. A second `#` version entry → none exists; 0.1.0 is unreleased.
 
 - [ ] AC1 — `NEWS.md` holds exactly one `#` heading (`grep -c '^# '` returns 1)
       and is at most 18,100 bytes by `wc -c` (merge base 36,201). No bullet
-      exceeds 500 bytes, measured by `data-raw/m142-bullet-lines.awk` (tracked
-      since `32454c5`), whose rule is: a bullet is a line matching `^\* ` plus
-      every following line until the next `^\* `, `^#`, or blank line, its size
-      being those lines joined with single spaces. The cap is BYTES, not lines,
-      because a line cap is defeated by reflow alone — measured 2026-08-27,
-      rewrapping every bullet in the merge-base file onto one physical line
-      takes "25 bullets over six lines" to 0 without changing a word, and the
-      file already carries 620- and 354-character lines. At the merge base 25
-      bullets exceed 500 bytes, the same 25 that exceed six lines. One bullet is
-      exempt and named here: the `news_scope()` anchor bullet, opening `* The
-      \`ci_method = "mpl"\` documentation`, which AC3 requires to hold its three
-      quoted ledger claims inside a single bullet; it is 1,008 bytes at the
-      merge base and is no larger on the branch. The exemption is this one
-      bullet, not a class.
+      exceeds 500 bytes, measured by `data-raw/m142-bullet-lines.awk`, whose
+      rule is: a bullet is a line matching `^\* ` plus every following line
+      until the next `^\* `, `^#`, or blank line, its size being those lines,
+      each stripped of leading and trailing whitespace, joined with single
+      spaces. The line-counting form of that program entered the tree at
+      `32454c5`; the byte-printing form this criterion needs ships on this
+      branch, and it is the branch's ruler that is run over BOTH revisions:
+      `LC_ALL=C awk -f data-raw/m142-bullet-lines.awk NEWS.md` for the branch
+      figure, and the same command over a
+      `git show <merge-base>:NEWS.md > mb-news.md` copy for the merge-base
+      figure. That program measures a strict superset of the rule above — it
+      also counts `-` and `+` markers as bullets, and continues a bullet across
+      a blank line — so a clean run establishes the rule as stated a fortiori;
+      its header records why. The cap is BYTES, not lines, because a line cap is
+      defeated by reflow alone; the measurement behind that is in the work log.
+      At the merge base 25 bullets exceed 500 bytes, the same 25 that exceed six
+      lines. One bullet is exempt and named here: the `news_scope()`
+      anchor bullet, opening `* The \`ci_method = "mpl"\` documentation`, which
+      AC3 requires to hold its three quoted ledger claims inside a single
+      bullet; it is 808 bytes at the merge base and must be no larger than that
+      on the branch. The exemption is this one bullet, not a class.
 - [ ] AC2 — `python3 data-raw/prose-profile.py NEWS.md` reports 0 in its `dash`
       column (R1). Every sentence it counts over 35 words (R2) carries a clause
       that a shipped test pins verbatim AND whose own word count exceeds 35 —
@@ -79,7 +86,6 @@ scope. A second `#` version entry → none exists; 0.1.0 is unreleased.
       exactly one pinned clause qualifies — `residual_template()`'s, at 58
       words; the `flat`, `parity` and `subjects` templates are 32, 17 and 11
       words and so force no long carrier, and their carriers must come under 35.
-      `cairn/doctrine/prose-style.md`'s scope sentence names `NEWS.md`.
       `cairn/doctrine/prose-style.md`'s scope sentence names `NEWS.md`.
 - [ ] AC3 — the guards keyed on NEWS text pass, run at review:
       `python3 data-raw/check-mpl-doc-claims.py` and the same script with
@@ -114,13 +120,13 @@ scope. A second `#` version entry → none exists; 0.1.0 is unreleased.
 
 ## Tasks
 
-- [ ] T1 — Measure the merge base and record it: `wc -c`, the ruler's four
+- [x] T1 — Measure the merge base and record it: `wc -c`, the ruler's four
       columns, the per-bullet counts from `data-raw/m142-bullet-lines.awk`
       (committed with this plan, already reproducing 47 bullets / 25 over six /
       an 11-line anchor bullet), the four `NEWS.md` ledger rows with their
       quoted text, and the runs the `width`/`residual` pins locate in NEWS
       today. Nothing predicted from reading.
-- [ ] T2 — Cut section by section by DELETION and CROSS-REFERENCE — point at
+- [x] T2 — Cut section by section by DELETION and CROSS-REFERENCE — point at
       `?icc` or the vignette that already carries the detail — never by
       composing a shorter claim from a reading of the old one. No criterion
       gates this after the descope, so it is the read-through at review that
@@ -129,13 +135,13 @@ scope. A second `#` version entry → none exists; 0.1.0 is unreleased.
       first-release orienting sentence is genuinely wanted, write it — and say
       so in the work log, so the reviewer reads it as new rather than hunting
       its source.
-- [ ] T3 — Re-measure with the ruler and the `awk` rule after the LAST content
+- [x] T3 — Re-measure with the ruler and the `awk` rule after the LAST content
       commit, never at the task that wrote the prose (M135 lesson).
-- [ ] T4 — Add `NEWS.md` to `cairn/doctrine/prose-style.md`'s scope sentence;
+- [x] T4 — Add `NEWS.md` to `cairn/doctrine/prose-style.md`'s scope sentence;
       re-check the module against its stated 120-line / 8,000-byte budget
       (118 / 6,941 at the merge base). Record each R2 carrier with its word
       count and the pinned clause it carries, as that module's exemption asks.
-- [ ] T5 — Re-key the ledger rows and any pin the moved text broke, in the same
+- [x] T5 — Re-key the ledger rows and any pin the moved text broke, in the same
       commit as the move; run every `data-raw/` checker with `--self-test`.
 - [ ] T6 — Gate: full suite, merge-base suite in a temporary worktree,
       `devtools::check()`, `pkgdown::build_news()`, `devtools::document()`.
@@ -159,6 +165,18 @@ scope. A second `#` version entry → none exists; 0.1.0 is unreleased.
 - 2026-08-27: criteria audit pass 3 disposed. Eleven findings; six concerned criteria the descope removed and are moot. Four live, all verified by command before disposal. (1) AC1's six-line bullet cap was defeated by REFLOW alone — rewrapping every bullet onto one physical line takes 25-over-six to 0 without changing a word, since the `awk` counts newlines; the cap is now 500 BYTES per bullet, which selects the same 25 bullets at the merge base, with the exempt anchor bullet held at its measured 1,008 bytes. (2) AC2's containment let a 200-word sentence pass by containing an 11-word pinned template; an over-35 sentence must now carry a pinned clause whose OWN word count exceeds 35, which is what `prose-style.md`'s "admits no sentence break" actually tests. Measured: only `residual_template()` qualifies at 58 words, against `flat` 32, `parity` 17, `subjects` 11. (3) The Scope now prices the one new `data-raw/` instrument against D-029 rather than leaving it unargued. (4) Finding 6, that `m142-bullet-lines.awk` was untracked when AC1 called it committed, was already resolved — it entered the tree at `32454c5`, which AC1 now cites.
 - 2026-08-27: SUPERSEDES this session's earlier work-log line reading "so the release-shaped tripwire does not fire and D-050 is not engaged". `D-050` is a cairn-plugin id, not one this repo defines (its `DECISIONS.md` ends at D-041), and D-020 Amendment 3 requires a plugin id be qualified. Read it as "cairn D-050". The substance is unchanged: the user declared no release window, and this is ordinary documentation work.
 - 2026-08-27: pass 3 also confirmed, and this milestone accepts, that no criterion binds the Goal's register — and that AC1's exempt anchor bullet positively preserves one development-log sentence, "The `ci_method = \"mpl\"` documentation now states…", because AC3 requires its three ledger claims to stay in one bullet. Accepted at the descope: register is the maintainer's judgment at the merge gate. A reflow-plus-deletion pass keeping the present retrospective voice would satisfy all five criteria, and only the read-through would catch it.
+
+- 2026-08-27: branch `m142-news-release-notes` cut from `deee860`. T1 merge-base measurement, taken by command, not read: 463 lines, 36,201 bytes, one `#` heading; 47 bullets, 25 over 500 bytes, the same 25 over six lines, longest 34 lines; `prose-profile.py` 172 sentences / 45 over 35 words / 63 dashes / longest 271. Every Goal figure reproduces. One does not: the exempt `news_scope()` anchor bullet is **808** bytes under AC1's own rule, not the 1,008 AC1 recited — no join variant of its eleven lines reaches 1,008 (trimmed-join 808, raw-join-space 826, raw-join-newline 826, lines-plus-newlines 827).
+- 2026-08-27: implementation question gate, three questions. User chose: correct AC1's anchor figure to the measured 808 (a substantive amendment, below); rewrite the entry into FOUR first-release sections rather than keeping the development log's nine; and cut to 12-14 KB rather than sitting just under AC1's 18,100-byte ceiling.
+- 2026-08-27: **SUBSTANTIVE AMENDMENT to AC1**, at the user's selection at that gate. The exempt anchor bullet's figure goes 1,008 -> 808; the criterion now names the byte-exact invocation and a distinct merge-base invocation, states that the byte-printing ruler ships on THIS branch (the form tracked at `32454c5` counts lines), records that the ruler measures a strict superset of AC1's stated rule, and binds the exemption as a ceiling ("must be no larger than that") rather than a recital. Nothing gated is widened: the only pass/fail delta is that a branch anchor bullet between 809 and 1,008 bytes now fails where it passed, which narrows. AC2 also lost an exactly duplicated sentence (`prose-style.md`'s scope sentence names `NEWS.md`, written twice); no promise changed.
+- 2026-08-27: SUPERSEDES this session's earlier work-log line reading "with the exempt anchor bullet held at its measured 1,008 bytes". That figure is not reproducible by the program AC1 names, under any join variant of the bullet's eleven lines. Read it as 808 bytes. Nothing else in that line changes.
+- 2026-08-27: the amended AC1 wording was audited twice by fresh-context [O] readers that did not author it, per the amendment protocol, in FULL mode at the declared user-facing tier. Pass 1 returned four defects, all repaired before the text was written: the criterion cited `32454c5` for a byte-printing program that commit does not contain (the tracked form prints line counts, so a reviewer running the named command got `11`, not `808`, and could not check the 500-byte cap at all); the amendment retired one of two copies of 1,008, leaving the other in the work log; the named command reads the working file, so it establishes the branch figure and not the merge-base one; and a forensic sentence quantified over an unbounded class no command settles. Pass 2 on the repaired text confirmed every figure by command, found no widening, and confirmed the exemption still binds exactly one bullet.
+- 2026-08-27: pass 2 also found two blind spots in the INSTRUMENT, both closed in `data-raw/m142-bullet-lines.awk` rather than by weakening the criterion. (a) A blank line ended a bullet, so everything after it dropped out of measurement: a bullet split in two by whitespace alone measured only its first paragraph, and ~600 bytes of a constructed 1,024-byte file vanished. (b) The rule keyed on `^* ` only, so a file written with `-` markers measured ZERO bullets and passed "no bullet exceeds 500 bytes" as a 15 kB monolith. The ruler now counts `-` and `+` markers and continues a bullet across a blank line, which can only raise a measured size or add a measured bullet — a strict superset of AC1's rule, so a clean run establishes the rule a fortiori. Re-measured after the change: merge base still 47 bullets / 25 over 500 / 25 over six lines / anchor 808; branch still 44 bullets / one over 500 (the exempt anchor, 797). Neither revision uses a `-` marker or a blank-line-split bullet.
+- 2026-08-27: T2 rewrite. The nine development-log sections become four: *Estimating ICCs*, *Confidence intervals*, *Engines and tooling*, *When a call fails*. Cut by DELETION and CROSS-REFERENCE throughout, never by composing a shorter claim from a reading of a longer one; where an old bullet carried detail an article already carries, the bullet keeps the capability sentence and points at the article. Long bullets were SPLIT at existing sentence boundaries rather than resummarized, which is how the R2 and 500-byte gates were met without rewording claims. Deliberately NEW sentences, named here so review reads them as new rather than hunting a source: none. Every sentence in the branch file is an unedited, split, or shortened form of a merge-base sentence, except for connective repairs at split points and the four canonical-shape restorations in the next line.
+- 2026-08-27: T2/T5 — four repairs the shipped pins demanded, each found by running the pin, not by reading. `test-doc-skew-caveat.R` rejected "three grids" (its canonical shape is `the (two|three) grids`), "59 of 64 cells of the larger" (the shape wants "of the larger grid"), and a sentence-final "worst 0.6655." (the `worst ([0-9.]+)` shape swallowed the full stop, coerced `0.6655.` to `NA`, and failed); the merge-base wording was restored in each case. `check-mpl-doc-claims.py` reported one stale key: the `settle` row keyed `87f0dfc36b75` is re-keyed to `0be2190a0d90` in this commit, its quoted claim "each clearing its pre-registered coverage floor" unchanged and still inside the `news_scope()` anchor bullet. The other three `NEWS.md` ledger rows are untouched, their sentences byte-identical to the merge base.
+- 2026-08-27: T4 — `cairn/doctrine/prose-style.md`'s scope sentence now names `NEWS.md`; the module is 119 lines / 6,997 bytes against its stated 120-line / 8,000-byte budget. The R2 exemption record AC2 asks for, DERIVED by running the pins' own template constructors against their committed fixtures rather than hand-listed (GP8): `residual_template()`'s clause is **58** words, `width_templates()`'s `flat` **32**, `parity` **17**, `subjects` **11**, and all four are present verbatim in the branch `NEWS.md`. The branch file has exactly ONE sentence over 35 words, at 74 words, and it is the carrier of the 58-word residual clause. The three width templates each sit in their own carrier, all under 35 words.
+- 2026-08-27: T3 re-measurement, taken after the last content commit rather than at the task that wrote the prose (M135 lesson). Branch `NEWS.md`: 14,050 bytes (merge base 36,201, cap 18,100), one `#` heading, 44 bullets, one over 500 bytes and it is the named exemption at 797 (merge base 808). `prose-profile.py`: 106 sentences, 1 over 35 words, **0** dashes, 1 long parenthetical, 2 semicolons, longest sentence 74 words.
+- 2026-08-27: the reflow measurement AC1 used to recite, moved here at the amendment's compression pass so the criterion carries only what a command settles. Measured 2026-08-27 at `deee860`: rewrapping every bullet in the merge-base file onto one physical line takes "25 bullets over six lines" to 0 without changing a word, and that file already carries 620- and 354-character lines (`LC_ALL=C awk '{print length}' mb-news.md | sort -nr`). That is why the cap is bytes. Removing the sentence gates nothing less: the 500-byte cap and the 25-bullet figure it explains both stay in AC1.
 
 ## Decisions
 
