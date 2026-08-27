@@ -18,15 +18,15 @@ ten Hove, Jorgensen, and van der Ark, and the `doi:` token in the reference.
 Checked so far:
 
 - Local: macOS 15 (aarch64), R 4.6.1 — the `--as-cran` run reported above.
-- GitHub Actions, on the release pull request: ubuntu-latest R-release and
-  windows-latest R-release.
+- GitHub Actions, on the release pull request: ubuntu-latest R-release,
+  windows-latest R-release, and ubuntu-latest R 4.5.0 (the declared floor).
 
 Scheduled before submission, not yet run against this version:
 
 - GitHub Actions, on the merge commit: the full workflow matrix — ubuntu-latest
-  R-devel / R-release / R-oldrel-1, windows-latest R-release, macos-latest
-  R-release. (The five-config matrix runs on push to the default branch; a pull
-  request runs the two configurations listed above.)
+  R-devel / R-release / R-oldrel-1 / R 4.5.0, windows-latest R-release,
+  macos-latest R-release. (The six-config matrix runs on push to the default
+  branch; a pull request runs the three configurations listed above.)
 - win-builder (R-devel and R-release) and R-hub.
 
 ## Downstream dependencies
@@ -35,8 +35,11 @@ There are no downstream dependencies; this is a new package.
 
 ## Notes
 
-The declared R floor is `R (>= 4.0.0)`, which is what the Imports chain
-requires (rlang declares `R (>= 4.0.0)`; the remaining Imports are lower).
+The declared R floor is `R (>= 4.5.0)`, the lowest R release on which the
+Imports chain installs, measured across R 4.0.0-4.5.1 on CI rather than read
+off a `Depends` field: glmmTMB requires pbkrtest (R >= 4.2.0), which requires
+doBy and Deriv, and Deriv 4.3.0 does not compile before R 4.5.0. A CI job runs
+`R CMD check` on exactly 4.5.0.
 
 The base install depends only on glmmTMB, cli, rlang, generics, tibble,
 stats, and lifecycle. The alternate estimation engines (lme4, lavaan, brms) and

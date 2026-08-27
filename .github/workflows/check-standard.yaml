@@ -32,10 +32,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Full 5-config matrix on push to main; slim ubuntu+windows release on
-        # PRs (the full matrix still runs post-merge on push). Windows is kept
-        # on PRs because some bugs here surface only on Windows CI (M56).
-        config: ${{ github.event_name == 'push' && fromJSON('[{"os":"macos-latest","r":"release"},{"os":"windows-latest","r":"release"},{"os":"ubuntu-latest","r":"devel","http-user-agent":"release"},{"os":"ubuntu-latest","r":"release"},{"os":"ubuntu-latest","r":"oldrel-1"}]') || fromJSON('[{"os":"ubuntu-latest","r":"release"},{"os":"windows-latest","r":"release"}]') }}
+        # Full 6-config matrix on push to main; slim 3-config set on PRs (the
+        # full matrix still runs post-merge on push). Windows is kept on PRs for
+        # Windows-only bugs (M56); 4.5.0 is DESCRIPTION's floor, on both events.
+        config: ${{ github.event_name == 'push' && fromJSON('[{"os":"macos-latest","r":"release"},{"os":"windows-latest","r":"release"},{"os":"ubuntu-latest","r":"devel","http-user-agent":"release"},{"os":"ubuntu-latest","r":"release"},{"os":"ubuntu-latest","r":"oldrel-1"},{"os":"ubuntu-latest","r":"4.5.0"}]') || fromJSON('[{"os":"ubuntu-latest","r":"release"},{"os":"windows-latest","r":"release"},{"os":"ubuntu-latest","r":"4.5.0"}]') }}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
