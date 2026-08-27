@@ -72,7 +72,7 @@ capability gap → M144.
 
 ## Tasks
 
-- [ ] T1. Append the superseding D-entry: D-038 clause 1's Design 3 sentence rests
+- [x] T1. Append the superseding D-entry: D-038 clause 1's Design 3 sentence rests
       on a sibling `glance()$type` column that D-038 itself refuses and that does
       not exist, and on `tidy()$type`, which already reports `NA` on Design 3
       (measured 2026-08-27). The pair it deferred is therefore not two cells, so
@@ -95,11 +95,15 @@ capability gap → M144.
 ## Work log
 
 - 2026-08-27: created by /milestone-plan.
+- 2026-08-27: implement gate chose the one-way-parallel nesting sentence for `summary()` and one shared internal predicate over per-site conditions, the duplication having been why D-038's one-way rule reached `glance.icc()` and not `icc_raters`.
+- 2026-08-27: T1 — appended D-042, superseding D-038 clause 1's Design 3 sentence.
 - 2026-08-27: /milestone-implement started; branch `m143-design3-rater-facet` cut from `main` at 2fac62d.
 - 2026-08-27: criteria audit ran in FULL mode (user-facing tier). Returned a finding on all five drafted criteria: AC1 forbidden by live D-038 clause 1 and blind to the second `raters` producer at `R/d-study.R:546` plus its pin at `test-exported-contract.R:513`; AC2 asserting the fixture constant `Raters: 480` and controlling on `format.icc()`'s single-level branch rather than the multilevel one it edits; AC3 and AC4 making universals ("no sentence", "names no third") no named procedure enumerates; AC5 promising over `d_study()`'s projection table, which D-035 clause 2 does not cover. All six fixed at the gate; none became a question.
 - 2026-08-27: plan gate chose changing `raters` alone over deciding the `raters`/`type` pair together (D-038's framing) because the pair does not exist: D-038 refuses a `glance()$type` column and `tidy()$type` already reports `NA` here, so the split it feared is already the shipped state. Falsified by a public surface reporting an agreement/consistency label for Design 3 that this milestone leaves standing.
 - 2026-08-27: plan gate chose `NA_character_` over documenting the nominal cell in place because GP2 makes the schema a one-way door at submission while documentation amends freely. Falsified by a consumer relying on `glance()$raters` being non-`NA` on every multilevel fit.
 
 ## Decisions
+
+- 2026-08-27: measured on the `design3_frame()` fixture (seed 7): `tidy()$type` is `NA` on both rows, `glance()$raters` is `"random"`, `design$type` is `"agreement"`, `design$model` is `"twoway"`. This is the measurement D-042 cites.
 
 ## Review
