@@ -257,6 +257,17 @@ paths (`theta2r_moment_draws()` / `brms_theta2r_moment_draws()`); ADR-038
 
 ## Known issues
 
+- **CI's path filter qualifies GP3.** `check-standard.yaml`'s `paths-ignore`
+  skips the whole matrix for a diff confined to `cairn/**`, `man/**`,
+  `README.md` or `**/*.Rmd`, on both events, so "support commitments are
+  exactly what CI verifies" holds for every diff that reaches the package and
+  not for those. Surfaced at the M139 review and accepted there (2026-08-26):
+  GP3 keeps its wording rather than carrying a filter clause, since a
+  docs-only diff changes nothing a platform commitment is about. On a
+  `pull_request` the filter reads the whole PR diff, not the pushing commit,
+  so a tracking-only commit on a branch that also touched package files still
+  re-runs the matrix.
+
 - ~~The declared R floor is not tested by CI~~ — RESOLVED by M139 (D-039):
   the floor was measured across R 4.0.0–4.5.1 rather than inferred, and
   `DESCRIPTION` now declares `R (>= 4.5.0)` with a CI job pinned to that
