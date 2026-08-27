@@ -48,6 +48,10 @@
 <h2 class="pkg-version" data-toc-text="0.1.0" id="intraclass-010">intraclass 0.1.0<a class="anchor" aria-label="anchor" href="#intraclass-010"></a></h2>
 <p>First public release. <strong>intraclass</strong> estimates interrater-reliability intraclass correlation coefficients (ICCs) within the generalizability-theory framework using modern mixed-model variance-component estimation (rather than the classical ANOVA mean-squares approach), with boundary-aware Monte-Carlo confidence intervals and guidance on choosing the right coefficient. Every estimator is verified against independent oracles — published worked examples, <code>psych</code>/ANOVA cross-checks, alternate engines, and seeded simulations.</p>
 <div class="section level3">
+<h3 id="requirements-0-1-0">Requirements<a class="anchor" aria-label="anchor" href="#requirements-0-1-0"></a></h3>
+<ul><li>Requires <strong>R 4.5.0 or newer</strong>, and CI runs <code>R CMD check</code> on exactly that version. Nothing in the package’s own code needs it: the constraint comes from the dependency chain <code>glmmTMB</code> -&gt; <code>pbkrtest</code> -&gt; <code>doBy</code> -&gt; <code>Deriv</code>, which does not install on earlier R.</li>
+</ul></div>
+<div class="section level3">
 <h3 id="estimating-iccs-0-1-0">Estimating ICCs<a class="anchor" aria-label="anchor" href="#estimating-iccs-0-1-0"></a></h3>
 <ul><li>
 <code><a href="../reference/icc.html">icc()</a></code> computes the full interrater-reliability ICC family from a linear mixed model: absolute agreement vs. consistency (<code>type</code>), single vs. average (<code>unit</code>), random vs. fixed raters (<code>raters</code>), and one-way vs. two-way (<code>model</code>) designs — the classic Shrout &amp; Fleiss / McGraw &amp; Wong coefficients — each reported with a boundary-aware confidence interval and its Shrout &amp; Fleiss equivalent.</li>

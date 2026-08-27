@@ -12,6 +12,13 @@ estimator is verified against independent oracles — published worked
 examples, `psych`/ANOVA cross-checks, alternate engines, and seeded
 simulations.
 
+### Requirements
+
+- Requires **R 4.5.0 or newer**, and CI runs `R CMD check` on exactly
+  that version. Nothing in the package’s own code needs it: the
+  constraint comes from the dependency chain `glmmTMB` -\> `pbkrtest`
+  -\> `doBy` -\> `Deriv`, which does not install on earlier R.
+
 ### Estimating ICCs
 
 - [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
