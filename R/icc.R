@@ -1454,14 +1454,21 @@ icc <- function(
         # per-cell), and no textbook/independent oracle pins one, so shipping a guessed
         # divisor would violate #1/#4. Gated at the occasions check below.
         if (raters == "fixed") {
-          # Ragged x fixed replicates are a deferred compound corner (one imbalance
-          # dimension at a time, ADR-030): fixed-rater replicates ship BALANCED only.
+          # Ragged OR INCOMPLETE x fixed replicates are a deferred compound corner (one
+          # imbalance dimension at a time, ADR-030): fixed-rater replicates ship
+          # balanced AND complete only. The guard is `!replicates_uniform`, which fails
+          # on unequal per-cell counts and on a missing cell alike (R/design.R:48-50),
+          # so the message names both shapes -- mirroring the multilevel sibling above
+          # (M141; D-041).
           abort_unsupported(c(
-            "Ragged within-cell replicates are not supported for fixed raters yet.",
-            i = "Fixed-rater replicates ship for balanced, complete data; the ragged \\
-                 case is planned for a later milestone.",
-            i = "Use {.code raters = \"random\"} for ragged replicated data, or \\
-                 provide an equal number of ratings in every cell."
+            "Ragged or incomplete within-cell replicates are not supported for fixed \\
+             raters yet.",
+            i = "Fixed-rater replicates ship for balanced, complete data (every cell \\
+                 present and rated the same number of times); the ragged and \\
+                 incomplete cases are planned for a later milestone.",
+            i = "Use {.code raters = \"random\"} for ragged or incomplete replicated \\
+                 data, or provide an equal number of ratings in every cell of a \\
+                 complete subject-by-rater grid."
           ))
         }
         ragged_replicates <- TRUE
