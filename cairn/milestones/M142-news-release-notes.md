@@ -325,21 +325,22 @@ https://github.com/jmgirard/intraclass/pull/153. Merge base `deee860`;
 `git fetch` shows `origin/main` still at `deee860`, unmoved since the branch was
 cut, so no merge was needed. Round 1's evidence and findings are superseded by
 this section and live in git at `63ad231`/`d689d74`. Every figure below was
-produced by running the named command in this session, on the committed tree at
-`f6a1277`.
+produced by running the named command in this session. Every figure was
+RE-TAKEN after the gate fix round (below), so the numbers here describe the
+final tree, not the `f6a1277` tree the fan-out reviewed.
 
 ### Acceptance-criterion evidence
 
-- **AC1 — PASS.** `grep -c '^# ' NEWS.md` returns 1. `wc -c NEWS.md` is 4,937
+- **AC1 — PASS.** `grep -c '^# ' NEWS.md` returns 1. `wc -c NEWS.md` is 5,262
   bytes against the 18,100 ceiling (merge base 36,201, reproduced by `wc -c` over
   a `git show deee860:NEWS.md` copy). `LC_ALL=C awk -f
-  data-raw/m142-bullet-lines.awk NEWS.md` reports 14 bullets, exactly one over
+  data-raw/m142-bullet-lines.awk NEWS.md` reports 15 bullets, exactly one over
   500 bytes; that one is the named `news_scope()` anchor exemption opening ``The
   `ci_method = "mpl"` documentation``, at 797 bytes. The same program over the
   merge-base copy reports 47 bullets, 25 over 500 bytes and the same 25 over six
   lines, with the anchor at 808 — so the exemption's ceiling holds (797 <= 808)
   and every merge-base figure AC1 recites reproduces.
-- **AC2 — PASS.** `python3 data-raw/prose-profile.py NEWS.md`: 43 sentences,
+- **AC2 — PASS.** `python3 data-raw/prose-profile.py NEWS.md`: 46 sentences,
   1 over 35 words, **0** in the `dash` column, 1 long parenthetical, 2
   semicolons, longest 74. The four template word counts were DERIVED, not
   hand-listed (GP8): the constructors in `tests/testthat/test-doc-skew-caveat.R`
@@ -365,7 +366,7 @@ produced by running the named command in this session, on the committed tree at
   that no row needed re-keying there. `Rscript -e 'devtools::test(filter =
   "doc-skew-caveat")'` reports FAIL 0 / WARN 0 / SKIP 2 / PASS 2293.
 - **AC4 — PASS.** `git diff deee860..HEAD --name-only` lists `NEWS.md`,
-  `cairn/ROADMAP.md`, `cairn/doctrine/prose-style.md`,
+  `cairn/DESIGN.md`, `cairn/ROADMAP.md`, `cairn/doctrine/prose-style.md`,
   `cairn/milestones/M142-news-release-notes.md`,
   `data-raw/m142-bullet-lines.awk` and `data-raw/mpl-doc-claims.tsv` — a subset
   of the permitted set. `tests/testthat/test-doc-skew-caveat.R` has no hunk at
@@ -574,3 +575,15 @@ file — are not criterion failures. They reach the gate under the return floor'
 second clause, as the maintainer's judgment on whether they are load-bearing
 defects in the deliverable. Defect-return count for M142 standing at this gate:
 1. Amendment returns: 0.
+
+At the gate the maintainer selected "Fix factual defects, then merge". Findings
+1-6 and 9-11 were fixed on the branch and the branch re-pushed before the
+approval marker; 8, 13, 14 and 15 were filed as one ROADMAP candidate row; 7,
+12 and 16-19 were rejected at triage. The fix round is verified on the final
+tree by the same commands: `devtools::test()` FAIL 0 / WARN 3 / SKIP 2 / PASS
+9085 with the same three warning texts, `devtools::check(document = FALSE)`
+`Status: OK`, `devtools::test(filter = "doc-skew-caveat")` FAIL 0 / PASS 2293,
+`check-mpl-doc-claims.py` and `--self-test` exit 0 with `news_scope()` still
+795 bytes, `pkgdown::build_news()` clean, and the AC1/AC2/AC4 figures above
+re-taken. No criterion changed and none was reinterpreted; the milestone did
+not return.
