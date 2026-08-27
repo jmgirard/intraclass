@@ -1,11 +1,12 @@
 # M140: Release-remainder documentation corrections, and the recorded pre-submission check
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** M138, M139
 - **Driving RR:** —
 - **Principles touched:** —
 - **Branch:** `m140-release-remainder-docs`
+- **PR:** https://github.com/jmgirard/intraclass/pull/151
 
 ## Goal
 
@@ -21,11 +22,11 @@ Correct the four false documentation claims descoped from M48 and re-run `R CMD 
 
 ## Acceptance criteria
 
-- [ ] AC1. `cran-comments.md` reports an `R CMD check --as-cran` run made during this milestone, and its stated platform, R version and date are read from that run's own session output rather than from any earlier record.
+- [x] AC1. `cran-comments.md` reports an `R CMD check --as-cran` run made during this milestone, and its stated platform, R version and date are read from that run's own session output rather than from any earlier record.
 - [ ] AC2. Every line matched by `grep -rn "n_o\|occasion count" man/ NEWS.md R/ README.md vignettes/` that states when the occasion count is `NA` states the shipped rule — within-cell replicates present, equal per-cell counts, and completeness in the design's own sense (full subject-by-rater grid when crossed, block-complete when nested) — rather than naming ragged replicates alone.
-- [ ] AC3. `NEWS.md`'s report-all sentence names, per function, arguments that function's own signature has; a `cairn/DECISIONS.md` entry supersedes D-037's `d_study()` enumeration and states what `d_study()`'s vector-valued arguments actually are.
-- [ ] AC4. `R/d-study.R:125-126` and `man/d_study.Rd:65-66` say the projection object *gains* `level` and `occasions` where they apply and that `tidy()` carries them on every projection, agreeing with `R/d-study.R:54-55` and `:75-78`.
-- [ ] AC5. `devtools::check()`'s raw `Status:` line reports 0 errors, 0 warnings, 0 notes; `devtools::test()` at `NOT_CRAN=true CI=true` reports FAIL 0; `spelling::spell_check_package()` against a detached worktree at the default branch flags no word this milestone introduced.
+- [x] AC3. `NEWS.md`'s report-all sentence names, per function, arguments that function's own signature has; a `cairn/DECISIONS.md` entry supersedes D-037's `d_study()` enumeration and states what `d_study()`'s vector-valued arguments actually are.
+- [x] AC4. `R/d-study.R:125-126` and `man/d_study.Rd:65-66` say the projection object *gains* `level` and `occasions` where they apply and that `tidy()` carries them on every projection, agreeing with `R/d-study.R:54-55` and `:75-78`.
+- [x] AC5. `devtools::check()`'s raw `Status:` line reports 0 errors, 0 warnings, 0 notes; `devtools::test()` at `NOT_CRAN=true CI=true` reports FAIL 0; `spelling::spell_check_package()` against a detached worktree at the default branch flags no word this milestone introduced.
 
 ## Coverage
 
@@ -57,3 +58,36 @@ Correct the four false documentation claims descoped from M48 and re-run `R CMD 
 - 2026-08-26: T6. `spelling::spell_check_package()` run twice — against a detached worktree at `origin/main` (42da692) and against this branch's tree. Both flag zero words, so this milestone introduces none; `inst/WORDLIST` was not touched. The check was shown able to fail: a planted misspelling in `NEWS.md` was flagged by name, then reverted.
 - 2026-08-26: T5 minor amendment — the task said "the four `data-raw/` checkers with `--self-test`"; the repo has six checkers, five of which take `--self-test` (`data-raw/README.md`). Ran all six plus all five self-tests, a superset of what the task asked; all pass.
 - 2026-08-26: T5. `R CMD check --as-cran` re-run on this branch with `NOT_CRAN=false`, `manual = TRUE`; raw `Status: OK` at `check.log:104`, and the printed summary agrees at 0 errors / 0 warnings / 0 notes (51m 8.7s). `cran-comments.md:7-9` and `:21-22` now carry that run's own header lines — R 4.6.1 (2026-06-24), platform `aarch64-apple-darwin23`, running under macOS Tahoe 26.6.2, current time 2026-08-27 01:15:09 UTC — replacing the 2026-08-25 date and the `macOS 15` line, which named a release this machine does not run. `air format .` clean; `devtools::test()` at `NOT_CRAN=true CI=true` FAIL 0 / PASS 8630 on the final tree.
+- 2026-08-26: review gate returned M140 to in-progress. AC2 fails at `NEWS.md:366-369` and `NEWS.md:375-377`, which say `n_o` is `NA` "on a replicated design with a missing cell" with no design qualifier; measured, a nested Design 2 replicated fit with 48 of 192 flat cells present reports `n_o` `2`, and an incomplete crossed multilevel one aborts rather than reporting `NA`. AC1, AC3, AC4 and AC5 met with fresh evidence; consistency gate clean; PR #151 open as a draft. Defect returns on this milestone: 1.
+
+## Review
+
+_Fresh evidence, gathered 2026-08-26 on branch `m140-release-remainder-docs` (PR #151), default branch unmoved since the cut._
+
+- **AC1 — met.** `Rscript -e 'R.version.string; R.version$platform; sessionInfo()$running'` on this machine reports R 4.6.1 (2026-06-24), `aarch64-apple-darwin23`, macOS Tahoe 26.6.2 — the three facts `cran-comments.md:6-8` and `:21-22` now state, replacing the `macOS 15` line that named a release this machine does not run. The recorded date 2026-08-27 (UTC) is the run's own clock: `Sys.time()` in UTC reads 2026-08-27 at review time, one day ahead of the local date, so the recorded run falls inside this milestone.
+- **AC2 — NOT met.** The stated grep matches 136 lines. Four of the six rewritten sites state the shipped rule in the design's own sense; two do not. `NEWS.md:366-369` and `NEWS.md:375-377` say `n_o` is `NA` "on a replicated design with a missing cell" with no design qualifier, which is the flat crossed grid's sense of "missing" and is false for a nested design. Measured on this branch: a nested Design 2 replicated fit (4 clusters x 4 subjects x 3 own raters x 2 replicates) has 48 of 192 flat subject-by-rater cells present and `glance()$n_o` is `2`, not `NA`; and a crossed multilevel replicated design with a cell dropped never reaches an `NA` either, because `R/icc.R:1431-1442` aborts `intraclass_unsupported` first. AC2 names completeness "in the design's own sense (full subject-by-rater grid when crossed, block-complete when nested)", so those two lines replace one false claim with another. The design-aware leading clause at `R/icc.R:687-691` and `man/icc.Rd:492-496` ("every cell the design defines present") is true, but the same sentence closes with the unqualified phrasing, and `R/icc-methods.R:391-394` carries the unqualified form alone; `R/icc.R:2514-2516` gets it right, scoping the claim to the single-level path. Verified against the code, not the prose: `R/design.R:48-51` gates `replicates_uniform` on the full crossed grid plus equal counts, and `R/design.R:216-227` on equal counts plus the design's own balance check. The four remaining `NA`-adjacent matches (`NEWS.md:338`, `R/d-study.R:407`, `R/design.R:43-46`, `R/estimand.R:171`) state something else or already state the rule; no site outside the grep's roots was missed.
+- **AC3 — met.** `d_study()`'s signature at `R/d-study.R:167-174` is `(x, m, n_o, conf_level, mc_samples, seed)`; the rewritten `NEWS.md:388-393` names `m` and `n_o` for `d_study()` and keeps `type`/`unit`/`level`/`occasions` scoped to `icc()`, whose signature at `R/icc.R:737-753` has all four. D-040 is present in `cairn/DECISIONS.md`, supersedes D-037's `d_study()` enumeration alone, and states the two projection axes; D-036's `validate_choice()` discriminator and D-037's `icc()`/`choose_icc()` clauses are unedited. The both-axes abort the NEWS sentence asserts is at `R/d-study.R:215-223` and pinned at `tests/testthat/test-d-study.R:1126-1129`.
+- **AC4 — met.** `R/d-study.R:125-129` and `man/d_study.Rd:65-69` now say the object *gains* a `level` column and an `occasions` column, each where it applies, with `tidy()` carrying both on every projection — the wording of the same page's `:54-56` and `:75-79`. Run, not read: on a replicated 8x3 fit an occasion projection tidies to `m, occasions, level, term, type, ...`, and a plain rater projection off a non-replicated fit tidies to the same columns with `occasions` and `level` all `NA`.
+- **AC5 — met.** `NOT_CRAN=false devtools::check(manual = TRUE)` on this branch: raw `Status: OK` at line 104 of the run log, summary `0 errors | 0 warnings | 0 notes`, 14m 2.7s. `NOT_CRAN=true CI=true devtools::test()`: `FAIL 0 | WARN 2 | SKIP 26 | PASS 8630`. `spelling::spell_check_package()` run against a detached worktree at `origin/main` (42da692) and against this branch's tree — "No spelling errors found" on both, so this milestone introduces no word and `inst/WORDLIST` needed no padding.
+
+### Consistency gate
+
+Universal: `cairn_validate.py` exits 0, all 16 checks PASS and all 7 advisories OK — including the `release window` advisory, which did not fire. No principle changed (`Principles touched: —`), so `cairn_impact.py` was not run. Toolchain (`r-package` profile): `devtools::document()` leaves `man/` and `NAMESPACE` clean; `pkgdown::check_pkgdown()` reports no problems; `README.Rmd` is untouched by this branch, so `README.md` is in sync; `NEWS.md` carries this milestone's corrections; no new top-level file, so no `.Rbuildignore` entry is owed; `devtools::check()` clean as recorded under AC5. `air format --check .` exits 0.
+
+### Independent review
+
+Three fresh-context reviewers, distinct evidence bases, none having authored the implementation. Ranked findings and their dispositions:
+
+1. **[O] `NEWS.md:367-369` and `:375-377` state the missing-cell condition unqualified, which is false for multilevel designs.** Confirmed by measurement (see AC2 above). **Floor return** — it demonstrates AC2 failing inside the domain of the grep AC2 names.
+2. **[O] `man/icc.Rd:492-496` / `R/icc.R:687-691` close a true design-aware sentence with the same unqualified clause.** Confirmed. Fixed in the returned work.
+3. **[O] `R/icc-methods.R:391-394` carries the unqualified claim alone in the `glance()` comment.** Confirmed. Fixed in the returned work.
+4. **[O] `R/icc.R:2620-2622` still pairs the report-all enumeration across functions** — the `validate_choice()` comment says flatly "The report-all arguments are `type`, `unit`, `level` and `occasions`", the pairing D-040 unpairs; read in a shared helper it claims to hold for every caller, and `d_study()` has none of the four. Confirmed by reading the comment. Outside AC3's named scope (`NEWS.md` + `DECISIONS.md`), so not itself a floor return; folded into the returned work, which is reopening the same claim.
+5. **[O] D-040 cites `R/d-study.R:214-222` for the both-axes abort; the guard is at `:215` and the abort block at `:216-223`.** Confirmed, off by one. **Rejected** — a D-entry is history and is superseded, never edited, and a one-line citation drift does not earn a superseding entry.
+6. **[O] `NEWS.md:369`'s "since no single per-cell count describes either" has a dangling antecedent.** Confirmed. Fixed with finding 1, which rewrites that sentence.
+7. **[O] `cran-comments.md:6` records 2026-08-27 where the machine's local date is 2026-08-26.** Confirmed, and it is the run's own UTC clock, which AC1 asks for; the line labels it as such. **Rejected** — the criterion required exactly this.
+8. **[S blame-history] `R/icc.R:679-680`'s `tidy()` sentence ("`occasions` is `NA` unless the design has within-cell replicates") may carry the same latent imprecision.** **Rejected** — refuted against the implementation, not the report: `tidy()`'s `occasions` is the requested occasion setting, not the design's per-cell count (`R/estimand.R:171`). Measured, a ragged replicate fit tidies to `occasions` `1` (not `NA`) and a non-replicated fit to `NA`, so the sentence is true as written.
+9. **[S prior-PR-comments]** No prior-review regression. Archived `## Review` sections on the touched files (M48, M138 among others) were read; the GitHub inline-comment probe returned empty, so that surface was not walked. The `cran-comments.md` rewrite was noted as the closest topical echo of an M48 finding and judged to resolve it rather than regress it.
+
+### Outcome
+
+Returned to `in-progress` on the AC2 failure (finding 1). Defect returns on M140 so far: 1. No amendment return — AC2's promise is right; the prose inside its domain does not yet meet it.
