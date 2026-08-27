@@ -466,3 +466,65 @@ test_that("the grid's abort cases identify every abort branch in the dispatch", 
 
   expect_identical(length(branches), calls)
 })
+
+# ---- the fixed-rater abort names the condition it actually guards --------------
+#
+# The guard is `!design_info$replicates_uniform` (`R/icc.R:1446`), which fails on
+# unequal per-cell counts AND on a design missing a cell it defines
+# (`R/design.R:48-50`), so the message must name both shapes -- as its multilevel
+# sibling already does. It said only "Ragged" until M141 (D-041).
+
+FIXED_ABORT_BULLETS <- c(
+  "Ragged or incomplete within-cell replicates are not supported for fixed raters yet.",
+  paste(
+    "Fixed-rater replicates ship for balanced, complete data (every cell",
+    "present and rated the same number of times); the ragged and incomplete",
+    "cases are planned for a later milestone."
+  ),
+  paste(
+    "Use `raters = \"random\"` for ragged or incomplete replicated data, or",
+    "provide an equal number of ratings in every cell of a complete",
+    "subject-by-rater grid."
+  )
+)
+
+test_that("the fixed-rater replicate abort names both shapes it fires on", {
+  skip_if_not_installed("glmmTMB")
+  for (shape in c("ragged", "missing_cell")) {
+    d <- grid_single(shape)
+    cnd <- suppressWarnings(tryCatch(
+      icc(d, score, subject, rater, raters = "fixed"),
+      intraclass_unsupported = function(e) e
+    ))
+    expect_s3_class(cnd, "intraclass_unsupported")
+    rendered <- render_condition(cnd)
+    for (bullet in FIXED_ABORT_BULLETS) {
+      expect_true(
+        grepl(bullet, rendered, fixed = TRUE),
+        info = paste0(shape, ": missing bullet <", bullet, "> in ", rendered)
+      )
+    }
+  }
+})
+
+test_that("the fixed-rater and multilevel replicate aborts open alike", {
+  skip_if_not_installed("glmmTMB")
+  shared <- "Ragged or incomplete within-cell replicates are not supported for"
+  fixed <- suppressWarnings(tryCatch(
+    icc(grid_single("ragged"), score, subject, rater, raters = "fixed"),
+    intraclass_unsupported = function(e) e
+  ))
+  multilevel <- tryCatch(
+    icc(
+      grid_multilevel("ragged", "crossed"),
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      design = "crossed"
+    ),
+    intraclass_unsupported = function(e) e
+  )
+  expect_true(grepl(shared, render_condition(fixed), fixed = TRUE))
+  expect_true(grepl(shared, render_condition(multilevel), fixed = TRUE))
+})

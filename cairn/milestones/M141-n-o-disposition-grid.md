@@ -133,7 +133,7 @@ entry for the reworded abort → not needed, the message is new in the unrelease
 - [x] T4 — Apply AC3's five planted defects one at a time, each reverted before
       the next; record which named case went red for each, verbatim, in the
       work log.
-- [ ] T5 — Reword the abort at `R/icc.R:1459-1465` and the block comments at
+- [x] T5 — Reword the abort at `R/icc.R:1459-1465` and the block comments at
       `R/icc.R:1447-1458` that carry the same ragged/missing-cell conflation;
       add the three-bullet rendered-message pins for both fixed-rater shapes.
       (RB tripwire: ip-touching)
@@ -160,6 +160,7 @@ entry for the reworded abort → not needed, the message is new in the unrelease
 - 2026-08-27: T2b probe — a temporary `cli::cli_inform()` raised immediately ahead of `if (design_info$has_replicates)` reddened the named case `single/random/uniform` on the condition-set comparison (expected 0 conditions, got 1: "M141 T2b probe: a stray condition ahead of the dispatch."). Reverted.
 - 2026-08-27: T3 — the branch-count assertion locates the dispatch block in `deparse(body(icc))` between the trimmed lines `if (design_info$has_replicates) {` and the first following `replicates <- TRUE`, never by reading `R/icc.R` from disk, and counts 5 `abort_` calls against the 5 distinct branches the grid's abort cases name. Both probes red at 5 vs 6: a sixth `abort_unsupported()` inside the block, and one raised through `abort_unidentified()`. Reverted.
 - 2026-08-27: T4 — five planted defects, applied and reverted one at a time, each reddening a named case. (i) drop `n_cells == ns * nr`: `single/random/missing_cell` reports a number where it must report `NA`. (ii) drop the equal-counts clause: `single/random/ragged` reports a number. (iii) return `length(observed)`: `single/random/uniform` and `single/fixed/uniform` report the wrong count. (iv) force `multilevel_replicate_facts()`'s `complete` to `TRUE`: `ml/crossed/random/plain/missing_cell` fits where it must abort. (v) restrict the fixed-rater guard to unequal counts alone: `single/fixed/missing_cell` fits where it must abort. (i) and (ii) reddened different named cases, so the two clauses of `replicates_uniform` are separably pinned.
+- 2026-08-27: T5 — the fixed-rater replicate abort now opens "Ragged or incomplete within-cell replicates are not supported for fixed raters yet.", the same phrase its multilevel sibling opens with, and both `i =` hints name the missing-cell shape beside the unequal-count one. The block comment above it, which called the corner "Ragged x fixed" and the shipped scope "BALANCED only", now says ragged-or-incomplete and balanced-and-complete, and points at the guard `!replicates_uniform` it describes. All three rendered bullets are pinned by substring on both a ragged and a missing-cell fixed-rater design, plus the shared opener against the multilevel sibling; reverting `R/icc.R` to the pre-M141 message turns all three bullet pins red on both shapes.
 
 ## Decisions
 
