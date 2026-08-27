@@ -1717,3 +1717,34 @@ of `n_o` both predate this entry and are pinned in
 `tests/testthat/test-d-study.R`. A future `d_study()` argument is classified
 the way D-037 says: by asking whether `d_study()` itself routes it through
 `validate_choice()`.
+
+### D-041 (2026-08-27): `glance()$n_o` is `NA` on a replicated design missing a cell it defines, not only on a ragged one — superseding D-038 clause 2's enumeration
+
+**Context.** D-038 clause 2 justified the new `replicates` column by saying
+`n_o` "is `NA` on a ragged replicate design as well as on an unreplicated one".
+That names two of the three shapes it is `NA` on, and reads — and has been read
+— as the full list.
+
+**Decision.** The condition under which `n_o` reports a number is *uniform and
+complete*, not merely *unragged*. On the single-level path `replicates_uniform`
+(`R/design.R:48-50`) requires all three of: some cell holds more than one
+rating; every cell of the subject-by-rater grid is present
+(`n_cells == ns * nr`); and every observed cell holds the same count. `n_o` is
+that shared count when all three hold and `NA_integer_` otherwise
+(`R/design.R:51`). On the multilevel path `multilevel_replicate_facts()`
+(`R/design.R:215-228`) pairs equal counts across observed cells with the
+design's own completeness notion — a full grid for a crossed design,
+block-completeness for a nested one — applied to the de-replicated data. So
+`n_o` is `NA` on a design whose observed cells all hold the same count but
+which omits a cell it defines. D-038 clause 2's conclusion — that `replicates`
+is not recoverable from `n_o` — is unaffected and stands; only its enumeration
+of when `n_o` is `NA` is superseded. D-038 is not edited (IP4).
+
+**Consequences.** Nothing in the shipped computation changes; this entry
+corrects the record of what it already does. Every disposition of the
+within-cell-replicate dispatch — the value `n_o` reports, the abort raised
+instead, and the conditions signalled ahead of either — now lives as a
+generated grid in `tests/testthat/test-n-o-disposition-grid.R`, which is where
+a future change to the condition has to go to stay green. The case set, the
+measurement behind it, and the planted defects that show the grid able to fail
+are in `cairn/milestones/M141-n-o-disposition-grid.md`.
