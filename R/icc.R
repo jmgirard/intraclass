@@ -689,9 +689,9 @@
 #'     per cell -- the same number of ratings in every cell, and every cell
 #'     the design defines present, which is the full subject-by-rater grid
 #'     when crossed and the block-diagonal one when raters are nested in
-#'     clusters; a design failing either condition is reported as `NA` or
-#'     refused with an error, depending on the design), the engine and interval
-#'     settings, and the sampler diagnostics `rhat` and `ess_bulk` (`NA` for the
+#'     clusters; on a design failing either condition, `n_o` is reported as
+#'     `NA` or the fit refused with an error, depending on the design), the
+#'     engine and interval settings, and the sampler diagnostics `rhat` and `ess_bulk` (`NA` for the
 #'     non-Bayesian engines, which do not sample). Every column is present on
 #'     every fit, so two glanced fits row-bind just as two tidied ones do.
 #'   * `format.icc()`: a character vector holding the printed report, one line per
@@ -2512,11 +2512,14 @@ icc <- function(
         # The design-aware count, not `design_info$n_o`: the latter reads the
         # flat subject x rater grid, which a block-diagonal (nested) design
         # never fills, so it reported NA on a replicate fit whose
-        # `var_subject_rater` was populated (M48 review F1). NA survives here
-        # only on the random-rater single-level path, whose ragged and
-        # missing-cell shapes both fail `replicates_uniform` -- it demands
-        # equal per-cell counts and the full grid (R/design.R:48-51). The
-        # fixed-rater and multilevel paths abort above rather than reach here.
+        # `var_subject_rater` was populated (M48 review F1). Among replicated
+        # fits, NA survives here only on the random-rater single-level path,
+        # whose ragged and missing-cell shapes both fail `replicates_uniform`
+        # -- it demands equal per-cell counts and the full grid
+        # (R/design.R:48-51); the fixed-rater and multilevel shapes that fail
+        # their own uniformity check abort above rather than reach here. A fit
+        # with no replicates takes the `else` branch below, whatever its
+        # design.
         n_o = if (replicates) n_o_val else NA_integer_
       ),
       # The replicate path averages over distinct raters (k_eff_raters), not total
@@ -2621,7 +2624,8 @@ require_supported <- function(
 # argument takes exactly one value: passing several -- including the full choice
 # list -- aborts rather than quietly selecting the first (D-035; a vector default in
 # this signature means "report every value"). The report-all arguments are per
-# function, not shared across the callers of this helper (D-040): in `icc()` they
+# function, not shared across the callers of this helper (D-037, whose `d_study()`
+# enumeration D-040 corrects): in `icc()` they
 # are `type`, `unit`, `level` and `occasions` -- the last carries a scalar default
 # but still accepts both of its values, so it is not routed through here; `d_study()`
 # has none of the four and never calls this helper, its vector-valued arguments being

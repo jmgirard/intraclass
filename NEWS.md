@@ -366,11 +366,10 @@ alternate engines, and seeded simulations.
   `var_subject_rater` is `NA` without within-cell replicates, and `n_o` is `NA` there
   too. `n_o` is reported only where the fitted design defines one occasion count per
   cell — the same number of ratings in every cell, and every cell the design defines
-  present. A design failing either condition is reported as `NA` or refused with an
-  error, depending on the design: a random-rater single-level design with ragged
-  counts or a missing cell reports `NA`.
-  Two design columns say how to read the variance columns
-  beside them: `raters` gives the rater treatment the fit used, so `var_rater` can be told
+  present. On a design failing either condition, `n_o` is reported as `NA` or the fit
+  refused with an error, depending on the design: a random-rater single-level design
+  with ragged counts or a missing cell reports `NA`.
+  Two design columns say how to read the variance columns beside them: `raters` gives the rater treatment the fit used, so `var_rater` can be told
   apart as a random-rater variance or a fixed-rater finite-population term, and is `NA`
   on a one-way fit, whose interchangeable raters have no facet and whose rater variance
   is folded into `var_residual`; `replicates` says whether the fitted design splits

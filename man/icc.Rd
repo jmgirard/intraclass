@@ -494,9 +494,9 @@ design splits within-cell replicates \emph{and} defines one occasion count
 per cell -- the same number of ratings in every cell, and every cell
 the design defines present, which is the full subject-by-rater grid
 when crossed and the block-diagonal one when raters are nested in
-clusters; a design failing either condition is reported as \code{NA} or
-refused with an error, depending on the design), the engine and interval
-settings, and the sampler diagnostics \code{rhat} and \code{ess_bulk} (\code{NA} for the
+clusters; on a design failing either condition, \code{n_o} is reported as
+\code{NA} or the fit refused with an error, depending on the design), the
+engine and interval settings, and the sampler diagnostics \code{rhat} and \code{ess_bulk} (\code{NA} for the
 non-Bayesian engines, which do not sample). Every column is present on
 every fit, so two glanced fits row-bind just as two tidied ones do.
 \item \code{format.icc()}: a character vector holding the printed report, one line per
