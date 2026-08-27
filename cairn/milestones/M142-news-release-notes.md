@@ -203,6 +203,101 @@ scope. A second `#` version entry → none exists; 0.1.0 is unreleased.
   fences were deleted with no cross-reference carrying them. Defect-return count
   for M142: 1.
 
+- 2026-08-27: repair round after the defect return. Implementation question
+  gate, three questions (scope, byte budget, criteria). The user took none of
+  the offered options and directed a hybrid instead: drop everything from the
+  0.1.0 entry except what the guards need verbatim, then write a short overview
+  of what the package ships at launch. That resolves findings 1-11 and 13-16 by
+  DELETION rather than by restoring qualifiers -- no capability bullet survives
+  to carry a dropped bound. It narrows the deliverable; no criterion is widened
+  and no amendment is taken.
+- 2026-08-27: one correction to the review record, established by command before
+  it was acted on. Finding 13 quoted its deleted caveat as "a dropped row no
+  longer counts toward the design, so a frame that looked balanced only because
+  of such rows is correctly seen as unbalanced -- `ci_method = "searle"` and
+  `"burch"` are refused on it (they require balance), while `"npbootstrap"`
+  becomes available." That is NOT merge-base text. `deee860:NEWS.md:42-43`
+  carries only "A frame that looked balanced only because of such rows is
+  correctly seen as unbalanced."; the longer form was `bc844c3`'s and was
+  trimmed before the merge base. The [S] blame-history lens quoted from git
+  history, not from the merge base. Restoring it would have been a fresh
+  widening, so the repair rule was: restore from the merge base or delete,
+  never from older history. The other three deleted caveats (findings 14, 15,
+  16) do have merge-base sources, at `mb-news.md:115-118`, `170-172` and
+  `95-96`; the hybrid deletes their bullets outright rather than restoring them.
+- 2026-08-27: the verbatim-pinned set was DERIVED by reading the guards, not
+  recalled. Exactly three regions of `NEWS.md` are pinned: the width-margin run
+  (`width_expected_runs["NEWS.md"] == 1`, carrying `width_templates()`'s `flat`,
+  `parity` and `subjects` clauses verbatim), the residual run
+  (`residual_expected_runs["NEWS.md"] == 1`, carrying `residual_template()`'s
+  58-word clause), and the `news_scope()` anchor bullet that
+  `check-mpl-doc-claims.py` locates by `^\* The \`ci_method = "mpl"\`
+  documentation` and whose three ledger rows quote from it. All three were
+  carried over byte-identical; everything else in the entry was deleted and
+  replaced.
+- 2026-08-27: SUPERSEDES this session's earlier work-log line reading
+  "Deliberately NEW sentences, named here so review reads them as new rather
+  than hunting a source for it: none." That was false of the first rewrite
+  (review finding 12: three article pointers and an invented "Seven articles"
+  count had no merge-base source) and is false by design of this one. The
+  deliberately NEW prose in the branch `NEWS.md` is now stated plainly: the
+  opening overview paragraph, and every bullet of the *What ships*, *Engines*,
+  *Confidence intervals* and *When a call fails* sections EXCEPT the three
+  pinned regions named above. Its facts were derived by command, not from the
+  old prose -- exports and methods from `NAMESPACE`, the R 4.5.0 floor from
+  `DESCRIPTION:53-54`, the engine tiers from `DESCRIPTION`'s Imports/Suggests,
+  the eight article titles from the `title:` field of each `vignettes/*.Rmd`,
+  the datasets from `data/`. The new prose states what ships and points at
+  `?icc` and the articles for the conditions; it asserts no bounded capability
+  of its own, which is the class that returned this milestone.
+- 2026-08-27: review finding 5 fixed at its root. "Seven articles ship with the
+  package" is gone; the branch says eight, and `ls vignettes/*.Rmd` returns 8
+  files whose titles are the eight listed.
+- 2026-08-27: review finding 18 fixed. `cairn/doctrine/prose-style.md`'s scope
+  edit carried "(brought in at M142, with the 0.1.0 rewrite)" -- the record of
+  which pass applied the module, four lines above that module's own sentence
+  saying it does not own that record. The parenthetical is deleted; the module
+  is 119 lines / 6,952 bytes against its 120 / 8,000 budget.
+- 2026-08-27: review finding 19 fixed by deletion -- the bullet carrying the
+  stray `\pkg{brms}` Rd markup is not in the rewritten entry. Findings 22 and 23
+  are likewise moot: the two overlong unwrapped lines are gone, and of the three
+  register residues only the `news_scope()` anchor bullet remains, which AC1
+  exempts by name. Finding 20 is NOT moot and is not claimed to be: the anchor
+  bullet still ends by citing `data-raw/check-mpl-doc-claims.py`, which
+  `.Rbuildignore`'s `^data-raw$` keeps out of the tarball, so a reader of the
+  installed NEWS is pointed at a file they do not have. It survives because the
+  bullet is carried byte-identical to keep the three ledger rows keyed; editing
+  it is a re-key, which is AC3 work and not this repair round's. Pre-existing at
+  the merge base.
+- 2026-08-27: review finding 21 fixed in the instrument's HEADER, not its code,
+  because the finding is a documentation over-claim and not a measurement
+  defect. The header had implied the `-`/`+` widening made the cap
+  vacuity-proof; it now states that the marker must sit at column 1 followed by
+  a space, exactly as AC1's rule says, so an indented bullet or ordered list is
+  outside both. Column 2's label is corrected from "lines" to "non-blank
+  lines". Behavior is unchanged, and the merge-base figures AC1 recites
+  reproduce under the edited program: 47 bullets, 25 over 500 bytes, anchor 808.
+- 2026-08-27: re-measurement after the rewrite, by command. Branch `NEWS.md`:
+  4,937 bytes (merge base 36,201, AC1 ceiling 18,100), one `#` heading, 15
+  bullets, one over 500 bytes and it is the named exemption at 797 (merge base
+  808, so the ceiling holds). `python3 data-raw/prose-profile.py NEWS.md`: 43
+  sentences, 1 over 35 words, **0** dashes, 1 long parenthetical, 2 semicolons,
+  longest 74 -- that one sentence is the residual carrier, as before.
+  `check-mpl-doc-claims.py` and its `--self-test` both exit 0.
+  `Rscript -e 'devtools::test(filter = "doc-skew-caveat")'` reports FAIL 0 /
+  WARN 0 / SKIP 2 / PASS 2293, unchanged from the review run, so all three
+  pinned regions survived the cut.
+- 2026-08-27: three universals tightened in the NEW prose after a self-read,
+  before the gate: "every point estimate is reported with a boundary-aware
+  confidence interval" (a blanket adjective true of the default but not of
+  `"posterior"`) became "A point estimate is never reported without an interval,
+  and `ci_method` selects which interval that is"; "Coverage of every method was
+  measured by simulation" (the skew fixture measures three) became "Interval
+  coverage was studied by simulation"; and `d_study()`'s projection sentence now
+  hands the designs it supports and where it refuses to the article rather than
+  implying every projection is available. Each is the exact shape that returned
+  this milestone, caught in prose this session wrote.
+
 ## Decisions
 
 ## Review
