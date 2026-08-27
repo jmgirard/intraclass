@@ -390,7 +390,8 @@ glance.icc <- function(x, ...) {
     # and so no cells to split. `raters` is NA on a one-way fit, whose
     # raters are interchangeable and carry no facet; `replicates` is reported in
     # its own right because `n_o` beside it is also NA on a ragged replicate
-    # design, so replicate status is not recoverable from that column (M138).
+    # design and on a replicated design with a missing cell, so replicate
+    # status is not recoverable from that column (M138).
     raters = if (identical(x$design$model, "oneway")) {
       NA_character_
     } else {

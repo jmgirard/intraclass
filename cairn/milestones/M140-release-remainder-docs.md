@@ -1,10 +1,11 @@
 # M140: Release-remainder documentation corrections, and the recorded pre-submission check
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** M138, M139
 - **Driving RR:** —
 - **Principles touched:** —
+- **Branch:** `m140-release-remainder-docs`
 
 ## Goal
 
@@ -36,7 +37,7 @@ Correct the four false documentation claims descoped from M48 and re-run `R CMD 
 
 ## Tasks
 
-- [ ] T1. Run the AC2 grep; rewrite each matched claim to the `replicates_uniform` rule, which is computed on two paths: the flat crossed one at `R/design.R:48-51` and the design-aware multilevel one at `R/design.R:214-226`. Known sites: `R/icc.R:681` / `man/icc.Rd:484-486`, `NEWS.md:356-358`.
+- [x] T1. Run the AC2 grep; rewrite each matched claim to the `replicates_uniform` rule, which is computed on two paths: the flat crossed one at `R/design.R:48-51` and the design-aware multilevel one at `R/design.R:214-226`. Known sites: `R/icc.R:681` / `man/icc.Rd:484-486`, `NEWS.md:356-358`.
 - [ ] T2. Rewrite `NEWS.md:370-372` so the "unaffected" sentence is scoped per function, `d_study()`'s vector-valued arguments being the mutually exclusive projection axes `m` and `n_o` (`R/d-study.R:205-218`).
 - [ ] T3. Append the D-entry superseding D-037's `d_study()` clause (`cairn/DECISIONS.md:1592-1594`), keeping D-036's routed-through-`validate_choice()` discriminator unchanged.
 - [ ] T4. Fix the "fills" sentence at `R/d-study.R:125-126`; re-roxygenize so `man/d_study.Rd:65-66` follows.
@@ -49,3 +50,5 @@ Correct the four false documentation claims descoped from M48 and re-run `R CMD 
 - 2026-08-26: plan-gate criteria audit ran in FULL mode (user-facing tier); a fresh-context [O] reader that authored none of the criteria returned findings on 3 of 4 drafted criteria. Fixed at the gate: AC1 rewritten to bind a check run this milestone makes, the drafted form having pinned an unobservable historical fact about the 2026-08-25 session; AC2's search roots widened and its promise narrowed to what the stated grep sweeps (bounded-promise, proxy domain). One finding rejected after checking the repo — the audit called AC4 vacuous, citing `R/d-study.R:54-55` and `:75-78`, but the false "fills" sentence is a different paragraph on the same page and is live at `R/d-study.R:125-126` and `man/d_study.Rd:65-66`; the page contradicts itself, so AC4 stands with the site named. One finding posed at the question gate (how to make the `cran-comments.md` criterion satisfiable).
 - 2026-08-26: plan gate chose re-running `--as-cran` and recording that run's own platform over editing the version string in place, because nothing otherwise ties the recorded platform to the recorded 0/0/0 result and the `darwin23` token in the check header would stay inconsistent with it; falsified by the re-run reporting a different result than the recorded one, which would make the edit a separate question from the record.
 - 2026-08-26: plan gate weighed no alternative on the three shipped-documentation corrections, each having one true statement to make.
+- 2026-08-26: implement question gate — the submission record names both the platform string the check prints and the macOS release R reports; the DECISIONS correction is scoped to `d_study()` alone.
+- 2026-08-26: T1. The AC2 grep matches 135 lines; the four stating an NA condition for the occasion count were rewritten to the shipped rule (`R/icc.R:687-691` and its `man/icc.Rd`, `NEWS.md:366-369`, `NEWS.md:374-376`, `R/icc-methods.R:391-393`), plus the same false claim in the `R/icc.R:2508` comment. The rule was measured, not recalled: on an 8x3 replicated design with one cell dropped and 2 ratings in every remaining cell, `glance()$n_o` is `NA` with `replicates` `TRUE`; the complete sibling reports 2. `devtools::test()` FAIL 0.
