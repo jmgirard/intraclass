@@ -173,6 +173,7 @@ entry for the reworded abort → not needed, the message is new in the unrelease
 - 2026-08-27: ROADMAP gained a candidate row for the three escaping suite warnings (search-first: no overlapping row). `cairn/ROADMAP.md` is 57 lines / 24,707 bytes — inside the 60-line cap, over the 24,000-byte budget, which it already was at 24,200 before this milestone touched it. Compressed what M141 owns: the `tidy()$occasions` / `glance()$n_o` row's second half, now held by D-041 and the grid test, became a cross-reference (-246 bytes). The remaining overage is unrelated rows and belongs to the post-merge hygiene pass. `cairn/LESSONS.md` sits at exactly 20,000 bytes against its <20,000 budget, untouched by this milestone.
 - 2026-08-27: note for review, no amendment sought — AC4 and the Scope line cite the fixed-rater abort at `R/icc.R:1459-1465`, its location when the plan was written. T5's rewording moved it to `R/icc.R:1463-1472`; the multilevel sibling AC4 cites at `R/icc.R:1436-1443` is unmoved. The criterion is read as written; only the line numbers are stale.
 - 2026-08-27: status review; all tasks checked.
+- 2026-08-27: merge gate — four fix-now findings applied on the branch (block-end anchor extended through the closing brace and made to fail loudly; three comment corrections; the dropped promote trigger restored), one follow-up filed as a candidate row, six rejected. Grid test green after each; `air format .` clean.
 - 2026-08-27: review run; PR #152 opened as a draft. Six acceptance criteria executed with fresh evidence, all pass; consistency gate clean (`cairn_validate` exit 0, `document()` no diff, `pkgdown::check_pkgdown()` clean, `check()` `Status: OK`, six `data-raw/` checkers self-test green). Three-lens fan-out: [S] blame-history and [S] prior-PR-comments no findings, [O] diff-bug eleven, none an acceptance-criterion failure — four fix-now, one follow-up, six rejected. No defect return.
 
 ## Decisions
@@ -327,3 +328,22 @@ qualifies under the return floor.
 11. `fixture_seed()` is order-insensitive, so anagram keys would collide.
     **Rejected** — no collision among the six keys in use, and the consequence
     would be shared data, not a wrong assertion.
+
+### Gate fixes applied
+
+Directed at the merge gate 2026-08-27 and committed on the branch before the
+approval marker. [O] finding 2: `icc_dispatch_block()` now extends the located
+range through the block's closing brace and refuses, with a message naming the
+line it found, if `replicates <- TRUE` no longer sits last. Probed both ways —
+an abort added between that statement and the brace, previously invisible, now
+errors ("the dispatch block's end anchor no longer sits last ... line 288 is
+<if (FALSE)>"), and AC2's original probe still reddens the count assertion
+(actual 5, expected 6). Findings 4, 8 and 10: the file-header block cite
+corrected to `R/icc.R:1393-1481`, the non-emptiness comment restated to name the
+case it actually guards rather than the one `stopifnot()` catches, and the
+fixture header corrected to say `missing_cell` drops a whole cell, both
+replicate rows. Finding 6: the `tidy()$occasions`/`n_o` candidate row regains
+"or reaching an `NA` count on such a design" and now says the computation is
+unchanged. Finding 1 filed as its own candidate row. `devtools::test(filter =
+"n-o-disposition-grid")`: `FAIL 0 | WARN 0 | SKIP 0 | PASS 195` after every fix;
+`air format .` clean; `cairn_validate` exit 0.

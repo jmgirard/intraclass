@@ -1,7 +1,7 @@
 # The `n_o` disposition grid (M141) ---------------------------------------------
 #
 # Every disposition of `icc()`'s within-cell-replicate dispatch
-# (`R/icc.R:1393-1468`), pinned as a standing grid: what `glance()$n_o` reports
+# (`R/icc.R:1393-1481`), pinned as a standing grid: what `glance()$n_o` reports
 # when a fit is returned, which abort is raised when one is not, and which
 # conditions are signalled ahead of either.
 #
@@ -27,9 +27,10 @@
 # counts on purpose: that is what separates the two clauses of
 # `replicates_uniform` (`R/design.R:48-50`) under AC3's planted defects.
 #
-# Under `ml_design = "nested_in_subjects"` (Design 3) the cells a design defines
-# are the observed subject-by-own-rater pairs, so "missing_cell" drops one
-# subject's rating from one of its own raters.
+# "missing_cell" drops a whole cell -- both of its replicate rows -- not a single
+# rating. Under `ml_design = "nested_in_subjects"` (Design 3) the cells a design
+# defines are the observed subject-by-own-rater pairs, so the dropped cell is one
+# subject paired with one of its own raters.
 
 # Provenance: both fixtures are generated in place by the constructors below,
 # each seeded from its own arguments (`fixture_seed()`), so a case's data does
@@ -446,13 +447,29 @@ icc_dispatch_block <- function() {
   closing <- which(src == "replicates <- TRUE")
   closing <- closing[closing > start]
   stopifnot(length(closing) >= 1L)
-  src[seq(start, closing[[1L]])]
+  # `replicates <- TRUE` is the block's last STATEMENT, not its end: an abort
+  # added between it and the closing brace would sit outside a range that
+  # stopped there. Take the brace itself.
+  end <- closing[[1L]] + 1L
+  if (!identical(src[[end]], "}")) {
+    stop(
+      "the dispatch block's end anchor no longer sits last: `deparse(body(icc))` ",
+      "line ",
+      end,
+      " is <",
+      src[[end]],
+      ">, not the block's closing brace. ",
+      "Re-anchor before trusting the branch count."
+    )
+  }
+  src[seq(start, end)]
 }
 
 test_that("the grid's abort cases identify every abort branch in the dispatch", {
   block <- icc_dispatch_block()
-  # The located domain is non-empty: an anchor that stopped matching would
-  # otherwise make the count trivially agree at zero.
+  # `icc_dispatch_block()` already stops on a missing or ambiguous anchor; this
+  # guards the remaining case -- anchors that still match but bracket a short or
+  # empty range, which would make the count agree trivially.
   expect_gt(length(block), 1L)
 
   # Any `abort_` helper, not `abort_unsupported(` alone -- a branch raised
