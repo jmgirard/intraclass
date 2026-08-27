@@ -1,6 +1,6 @@
 # M142: NEWS.md's 0.1.0 entry reads as first-release notes, not a development log
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -297,6 +297,18 @@ scope. A second `#` version entry → none exists; 0.1.0 is unreleased.
   hands the designs it supports and where it refuses to the article rather than
   implying every projection is available. Each is the exact shape that returned
   this milestone, caught in prose this session wrote.
+- 2026-08-27: repair-round gate, run on the COMMITTED tree at `2b9e6e7` (the
+  first `devtools::check()` of this round was stopped and re-run, because it had
+  been launched before the three universals were tightened and so did not
+  correspond to what is committed). `Rscript -e 'devtools::test()'` FAIL 0 /
+  WARN 3 / SKIP 2 / PASS 9085, identical to the review run's counts and its
+  three warning texts. `Rscript -e 'devtools::check(document = FALSE)'`
+  `Status: OK` -- 0 errors, 0 warnings, 0 notes.
+  `Rscript -e 'devtools::document()'` leaves a clean tree.
+  `Rscript -e 'pkgdown::build_news()'` renders the changelog without error.
+  `air format .` is a no-op. AC5's warning-set comparison against a merge-base
+  run stays with the review session, which AC5 requires make both runs there.
+  Status set to review.
 
 ## Decisions
 
