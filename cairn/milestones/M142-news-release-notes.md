@@ -1,6 +1,6 @@
 # M142: NEWS.md's 0.1.0 entry reads as first-release notes, not a development log
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -187,6 +187,21 @@ scope. A second `#` version entry → none exists; 0.1.0 is unreleased.
   of the [O] lens's assertions re-verified here by command against `R/icc.R`,
   `vignettes/` and the merge-base `NEWS.md`; all nine matched. Findings and
   dispositions recorded in the Review section; disposition put to the user.
+
+- 2026-08-27: RETURNED to in-progress at the merge gate, at the user's explicit
+  selection. What failed: no acceptance criterion — all five pass on fresh
+  evidence — but the review read-through found the class of defect the descoped
+  check was left to catch. Condensation dropped bounding qualifiers, and in four
+  places the resulting sentence asserts a capability `icc()` refuses with a
+  classed abort: cluster-level ICCs for nested raters (`R/icc.R:1279`), lavaan on
+  fixed-rater incomplete/unbalanced multilevel data (`R/icc.R:974`), npbootstrap
+  with a numeric `unit` on unbalanced data (`R/icc.R:1701`), and `occasions`
+  averaging on ragged replicates (`R/icc.R:1915`). A fifth, "Seven articles ship
+  with the package", is false (eight do) and is an invented figure with no
+  merge-base source. Six further findings drop a qualifier without inventing a
+  capability, and four caveats traced to D-022, D-019 and two deliberate scope
+  fences were deleted with no cross-reference carrying them. Defect-return count
+  for M142: 1.
 
 ## Decisions
 
