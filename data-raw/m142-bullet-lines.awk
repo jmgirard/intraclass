@@ -19,8 +19,14 @@
 #     heading, or EOF does. Under AC1's literal rule an inserted blank line
 #     drops everything after it from measurement, so a bullet split in two by
 #     whitespace alone measures only its first paragraph.
-# Both widenings can only raise a measured size or add a measured bullet, never
-# lower or remove one.
+# The blank-line widening can only raise a measured size, never lower one. The
+# marker widening cannot LOWER the size of a bullet the program already sees,
+# but it can SPLIT one: a `-` or `+` line that AC1's rule would fold into the
+# preceding bullet as a continuation line starts a new bullet here, so
+# `* alpha bravo` / `- charlie delta` measures 13 and 15 bytes where AC1's rule
+# makes one 28-byte bullet. Neither revision of NEWS.md uses a `-` or `+`
+# marker, checked, so the a-fortiori reading of AC1's cap holds on this file;
+# it is not a general property of the program. (M142 review round 2.)
 #
 # Prints "<bytes>\t<non-blank lines>\t<opening text>" per bullet. Column 2
 # skips blank lines, so on a bullet split by whitespace it is below the

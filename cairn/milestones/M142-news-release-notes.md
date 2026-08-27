@@ -311,6 +311,10 @@ scope. A second `#` version entry → none exists; 0.1.0 is unreleased.
   Status set to review.
 - 2026-08-27: review round 2 ran on the committed tree at `f6a1277`. All five criteria pass on fresh evidence, the consistency gate is clean, and the three-lens fan-out returned 22 findings; two ([O]1 lme4 is fetched by a plain install, [O]2 no `summary()` method for `icc_dstudy`) are false statements in the shipping file, and one ([O]13/[S]2) is the omission of multilevel and incomplete-data support from the overview. Evidence and dispositions in the Review section; disposition put to the user at the gate.
 
+- 2026-08-27: SUPERSEDES this session's earlier work-log line reading "All three were carried over byte-identical; everything else in the entry was deleted and replaced." Round-2 review finding 3, verified by printing both revisions: the `news_scope()` anchor bullet was reflowed — "now" deleted, a colon turned into a period, an em dash into a comma — which is why it measures 797 bytes against the merge base's 808. What is verbatim is the four pinned TEMPLATE CLAUSES, which is what the guards check; the three regions around them are not byte-identical. Read the superseded line that way.
+- 2026-08-27: SUPERSEDES this session's earlier work-log line reading "15 bullets" for the post-rewrite re-measurement. At that commit the ruler and `grep -c '^\* '` both returned 14; the file reaches 15 bullets only after the round-2 gate fixes below split the engine bullet. Round-2 review finding 5.
+- 2026-08-27: round-2 gate fix round, at the user's explicit selection ("Fix factual defects, then merge"). NEWS.md: the lme4 install claim rewritten from README.md:48-61's own wording (finding 1); `summary()` moved out of the both-classes list, with `ggplot2`'s `Suggests` placement restored (findings 2, 11); the *Multilevel designs* entry given the vignette's actual title (finding 9); the per-method universal narrowed to "Where a method does not apply to the design, the call aborts with a classed error" (finding 10). `cairn/DESIGN.md:112` names `NEWS.md` in its prose-style pointer (finding 6). The `m142-bullet-lines.awk` header's a-fortiori claim is corrected to state the marker widening SPLITS rather than only widens, with the counterexample and the checked fact that neither revision uses `-`/`+` (finding 4). Findings 8, 13, 14 and 15 filed as one ROADMAP candidate row; 7, 12, 16-19 rejected at triage.
+- 2026-08-27: the finding-1 rewrite made the engine bullet 573 bytes, over AC1's 500-byte cap and not the exempt anchor; it is split into two bullets, taking the file to 15 bullets with the exempt anchor again the only one over 500. Caught by re-running the ruler, not by reading.
 
 ## Decisions
 
@@ -415,14 +419,19 @@ Findings as reported, most severe first, with the disposition of each.
    ("`glmmTMB` lists `lme4` in its own `Imports:`, so the `lme4` package is …"),
    and the merge base said the same. New prose contradicting a shipped surface —
    the same class of dropped bound that returned this milestone in round 1.
-   DISPOSITION: put to the maintainer at the gate.
+   DISPOSITION: FIXED at the gate — the bullet now carries README.md:48-61's
+   own wording: `lme4` is on the library path after a plain install because
+   `glmmTMB` imports it, the lme4 engine additionally needs `merDeriv`, and
+   `merDeriv`/`lavaan`/`brms` sit in `Suggests` where a plain install fetches
+   none of the three.
 2. **[O] `NEWS.md:25-27` — asserts a method that does not exist: "`print()`,
    `format()`, `summary()`, `plot()` and `ggplot2::autoplot()` methods are
    provided for both classes."** VERIFIED here: `NAMESPACE` registers
    `S3method(summary,icc)` and no `summary` method for `icc_dstudy`;
    `print`/`format`/`plot` are registered for both. `summary()` on a `d_study()`
-   result falls through to `summary.default`. DISPOSITION: put to the maintainer
-   at the gate.
+   result falls through to `summary.default`. DISPOSITION: FIXED at the gate —
+   `print()`, `format()`, `plot()` and `autoplot()` are stated for both classes
+   and `summary()` for an `icc()` fit.
 3. **[O] work log — "All three were carried over byte-identical" is false.**
    VERIFIED here by printing both revisions of the anchor bullet: the branch
    deletes "now", turns a colon into a period and an em dash into a comma, and
@@ -430,7 +439,8 @@ Findings as reported, most severe first, with the disposition of each.
    the same work log records. Only the four pinned template clauses are verbatim,
    which is what the guards actually check. A record defect, not a deliverable
    defect: it would tell a later reader not to re-read those regions.
-   DISPOSITION: put to the maintainer at the gate.
+   DISPOSITION: FIXED at the gate — a superseding work-log line states what is
+   verbatim (the four pinned template clauses) and what is not.
 4. **[O] `data-raw/m142-bullet-lines.awk` header — the a-fortiori claim is false
    as written.** The header says both widenings "can only raise a measured size
    or add a measured bullet, never lower or remove one". VERIFIED here by
@@ -439,21 +449,26 @@ Findings as reported, most severe first, with the disposition of each.
    treating `-` as a bullet start SPLITS a continuation line out of the bullet it
    belongs to. No effect on either revision of `NEWS.md` (neither uses a `-`
    marker, checked), so AC1's measurement stands; the justification recited in
-   AC1 and the header does not. DISPOSITION: put to the maintainer at the gate.
+   AC1 and the header does not. DISPOSITION: FIXED at the gate in the
+   instrument's header, which now states the split, carries the counterexample,
+   and records that neither revision uses a `-`/`+` marker so the a-fortiori
+   reading holds on this file and not in general. AC1's recital is left as
+   written: amending it would be a criterion amendment for a recital the gate
+   does not turn on.
 5. **[O] the Review section's recorded AC evidence no longer describes HEAD** —
    round 1's 14,050 bytes / 44 bullets / 106 sentences against HEAD's 4,937 / 14
    / 43, and round-1 line citations into a file that is now 77 lines. Also: the
    repair-round work-log line says "15 bullets"; `awk -f
    data-raw/m142-bullet-lines.awk NEWS.md | wc -l` and `grep -c '^\* ' NEWS.md`
    both return 14. VERIFIED here. Resolved by this section, which replaces round
-   1's; the work-log "15 bullets" line stands uncorrected unless the gate directs
-   otherwise. DISPOSITION: put to the maintainer at the gate.
+   1's. DISPOSITION: FIXED at the gate — this section replaces round 1's, and a
+   superseding work-log line records that the ruler returned 14 at that commit.
 6. **[O] `cairn/DESIGN.md:112-114` was not updated with the scope widening.** It
    still describes `prose-style.md` as the standard "for the vignettes, roxygen,
    and `README.Rmd`" while `cairn/doctrine/prose-style.md:8` now names `NEWS.md`
    too. VERIFIED here against both files. AC4 permits paths under `cairn/`, so
-   nothing blocked the pointer update. DISPOSITION: put to the maintainer at the
-   gate.
+   nothing blocked the pointer update. DISPOSITION: FIXED at the gate —
+   `cairn/DESIGN.md:112` now names `NEWS.md`.
 7. **[O] `NEWS.md:51-54` — negative claim widened.** Branch: the default
    under-covers "when the subject effects are strongly skewed or heavy-tailed …
    `"burch"` is no remedy there (worst 0.6655)". VERIFIED here against
@@ -468,23 +483,28 @@ Findings as reported, most severe first, with the disposition of each.
    grid or naming which methods are closed forms; the bullets that defined them
    were deleted, and "classical" was dropped from "the two classical closed
    forms". VERIFIED here by reading the branch file end to end. A first-time
-   reader cannot resolve any of these references. DISPOSITION: put to the
-   maintainer at the gate.
+   reader cannot resolve any of these references. DISPOSITION: follow-up —
+   filed as (a) of the ROADMAP candidate row "What the 0.1.0 NEWS entry no
+   longer says"; the bullets sit against the `test-doc-skew-caveat.R` pins, so
+   the repair is an orienting sentence around them, not inside them.
 9. **[O] and [S] prior-review lens, converging — `NEWS.md:30-32` lists
    "*Multilevel designs*" but the vignette's title is "Multilevel designs:
    subject and cluster level".** VERIFIED here by `grep '^title:'` over all eight
    `vignettes/*.Rmd`: the other seven match exactly. The work log states the
    eight titles were taken from the `title:` field, so the log's derivation claim
-   is overstated for this one. DISPOSITION: put to the maintainer at the gate.
+   is overstated for this one. DISPOSITION: FIXED at the gate — the entry now
+   reads *Multilevel designs: subject and cluster level*.
 10. **[O] `NEWS.md:46-47` — unbounded universal.** "Each method states the
     designs it applies to and aborts with a classed error elsewhere", asserted
     over all seven `ci_method` values including `"montecarlo"`, which has no
     design restriction to abort outside of. No merge-base sentence makes this
-    claim about the set. DISPOSITION: put to the maintainer at the gate.
+    claim about the set. DISPOSITION: FIXED at the gate — the sentence now reads
+    "Where a method does not apply to the design, the call aborts with a classed
+    error", which quantifies over the refusals rather than over the methods.
 11. **[O] `NEWS.md:26-27` — `ggplot2::autoplot()` offered with no install
     fact.** `R/zzz.R` registers the methods lazily and `ggplot2` is `Suggests`;
     the merge base carried "`ggplot2` is a `Suggests` dependency", dropped here.
-    DISPOSITION: put to the maintainer at the gate.
+    DISPOSITION: FIXED at the gate — that sentence is restored.
 12. **[O] and [S] prior-review lens — `NEWS.md` cites
     `data-raw/check-mpl-doc-claims.py`, which `.Rbuildignore`'s `^data-raw$`
     excludes from the tarball.** Pre-existing at the merge base, inside the
@@ -504,20 +524,22 @@ Findings as reported, most severe first, with the disposition of each.
     crossed, M37/M46 cluster-level). It is an omission, not an over-claim, and it
     is the direct consequence of the maintainer's own "delete rather than
     restore" repair direction — but it bears on whether the Goal ("what the
-    package does for someone meeting it") is met. DISPOSITION: put to the
-    maintainer at the gate.
+    package does for someone meeting it") is met. DISPOSITION: follow-up — filed as (b) of the
+    ROADMAP candidate row "What the 0.1.0 NEWS entry no longer says".
 14. **[S] blame-history — D-019's own text says its NEWS documentation exists.**
     VERIFIED here at `cairn/DECISIONS.md:678`: "Perfect/near-perfect-agreement
     data now errors where it got [0, 1] (documented in NEWS)." The MPL
     boundary-vs-root-finding-failure distinction that parenthetical names is gone
     from `NEWS.md` with no replacement. The lens rates this its severest finding,
     distinguishing it from the other deleted caveats because the decision record
-    names NEWS by name. DISPOSITION: put to the maintainer at the gate.
+    names NEWS by name. DISPOSITION: follow-up — filed as (c) of the ROADMAP
+    candidate row "What the 0.1.0 NEWS entry no longer says".
 15. **[S] blame-history — the `brms` engine's documented guarantees vanished
     wholesale**: the sourced half-*t*(4, 0, 1) prior, the
     `intraclass_custom_prior` warning, and the posterior-mode/percentile
     description; only "`"posterior"` under **brms**" survives. Same shape as 13.
-    DISPOSITION: put to the maintainer at the gate.
+    DISPOSITION: follow-up — filed as (d) of the ROADMAP candidate row "What the
+    0.1.0 NEWS entry no longer says".
 16. **[S] blame-history — D-022's NA-row/balance consequence still absent**
     (round-1 finding 13). The lens re-verified the absence and notes that, unlike
     D-019, D-022's own text does not name NEWS. DISPOSITION: reject — an

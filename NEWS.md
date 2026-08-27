@@ -23,29 +23,35 @@ newer.
   reasoning, and prints the `icc()` call to run. It gives advice only. See
   *Choosing an ICC*.
 * `tidy()` and `glance()` return tidy summaries of a fit or a projection.
-  `print()`, `format()`, `summary()`, `plot()` and `ggplot2::autoplot()`
-  methods are provided for both classes.
+  `print()`, `format()`, `plot()` and `ggplot2::autoplot()` methods are
+  provided for both classes, and `summary()` for an `icc()` fit. `ggplot2` is
+  a `Suggests` dependency.
 * Datasets `ratings` and `ratings_incomplete`, used throughout the
   documentation.
-* Eight articles: *Getting started*, *Choosing an ICC*, *Multilevel designs*,
-  *Estimation engines*, *Confidence-interval methods*, *D-studies and
-  within-cell replicates*, *Glossary*, and *Comparison with other packages*.
+* Eight articles: *Getting started*, *Choosing an ICC*, *Multilevel designs:
+  subject and cluster level*, *Estimation engines*, *Confidence-interval
+  methods*, *D-studies and within-cell replicates*, *Glossary*, and
+  *Comparison with other packages*.
 
 ## Engines
 
 * The default engine is **glmmTMB**, the package's only hard engine
-  dependency. Selectable `engine = "lme4"` (by way of **merDeriv**),
-  `engine = "lavaan"` and `engine = "brms"` live in `Suggests`, so a plain
-  install fetches none of them. Which designs each engine covers, and where it
-  refuses, is documented in *Estimation engines* and `?icc`.
+  dependency. `engine = "lme4"`, `engine = "lavaan"` and `engine = "brms"` are
+  selectable. Which designs each engine covers, and where it refuses, is
+  documented in *Estimation engines* and `?icc`.
+* The `lme4` package itself is already on your library path after a plain
+  install, because `glmmTMB` lists it in its own `Imports`, but the lme4 engine
+  also needs **merDeriv**, which does not arrive. `merDeriv`, `lavaan` and
+  `brms` sit in this package's `Suggests`, and a plain install fetches none of
+  the three.
 
 ## Confidence intervals
 
 * `ci_method` selects the interval: `"montecarlo"` (the default),
   `"bootstrap"`, `"npbootstrap"`, `"searle"`, `"burch"`, `"mpl"`, and
-  `"posterior"` under **brms**. Each method states the designs it applies to
-  and aborts with a classed error elsewhere. *Confidence-interval methods*
-  compares them; `?icc` gives the per-method conditions.
+  `"posterior"` under **brms**. Where a method does not apply to the design,
+  the call aborts with a classed error. *Confidence-interval methods* compares
+  them; `?icc` gives the per-method conditions.
 * Interval coverage was studied by simulation before release, and the
   limitations those studies found are documented rather than smoothed over.
   The Monte-Carlo default under-covers when the subject effects are strongly

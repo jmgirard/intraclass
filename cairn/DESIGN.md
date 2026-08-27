@@ -110,8 +110,8 @@ vignettes, `cairn/estimand-specs/`). (Design interview, 2026-07-12.)
   run-all-four-before-push rule),
   [`source-ingestion.md`](doctrine/source-ingestion.md) (verifying PDF
   extractions), and [`prose-style.md`](doctrine/prose-style.md) (the house
-  writing standard R1–R6 for the vignettes, roxygen, and `README.Rmd`, and what
-  the `data-raw/prose-profile.py` ruler counts).
+  writing standard R1–R6 for the vignettes, roxygen, `README.Rmd` and
+  `NEWS.md`, and what the `data-raw/prose-profile.py` ruler counts).
 
 ## Design Principles
 
