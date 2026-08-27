@@ -185,8 +185,8 @@ case_key <- function(cases) {
 #   ahead of the disposition, compared as a WHOLE SET: a condition the grid does
 #   not expect reddens its case.
 
-FIXED_ADVISORY <- "restricts inference to exactly these raters"
-DESIGN3_DROP <- "not defined when raters are nested within subjects (Design 3)"
+fixed_advisory <- "restricts inference to exactly these raters"
+design3_drop <- "not defined when raters are nested within subjects (Design 3)"
 
 fitted_case <- function(n_o, conditions = character()) {
   list(
@@ -209,14 +209,17 @@ aborted_case <- function(abort, class, branch, conditions = character()) {
 }
 
 n_o_grid_expectations <- function() {
-  e <- list()
-  add <- function(key, value) e[[key]] <<- value
+  # An environment, not `<<-`: reference semantics let `add()` write with a plain
+  # `<-`, which is what the package's lintr config asks for.
+  acc <- new.env(parent = emptyenv())
+  acc$e <- list()
+  add <- function(key, value) acc$e[[key]] <- value
 
   # -- single level -------------------------------------------------------------
   add("single/random/uniform", fitted_case(2L))
   add("single/random/ragged", fitted_case(NA_integer_))
   add("single/random/missing_cell", fitted_case(NA_integer_))
-  add("single/fixed/uniform", fitted_case(2L, FIXED_ADVISORY))
+  add("single/fixed/uniform", fitted_case(2L, fixed_advisory))
   for (shape in c("ragged", "missing_cell")) {
     add(
       paste0("single/fixed/", shape),
@@ -224,7 +227,7 @@ n_o_grid_expectations <- function() {
         "within-cell replicates are not supported for fixed raters yet",
         "intraclass_unsupported",
         "single_fixed_nonuniform",
-        FIXED_ADVISORY
+        fixed_advisory
       )
     )
   }
@@ -250,7 +253,7 @@ n_o_grid_expectations <- function() {
         "Within-cell replicates are not defined when raters are nested within subjects",
         "intraclass_unsupported",
         "ml_design3",
-        DESIGN3_DROP
+        design3_drop
       )
     )
   }
@@ -264,7 +267,7 @@ n_o_grid_expectations <- function() {
           "Within-cell replicates are not supported for fixed-rater multilevel designs yet",
           "intraclass_unsupported",
           "ml_fixed",
-          FIXED_ADVISORY
+          fixed_advisory
         )
       )
     }
@@ -277,7 +280,7 @@ n_o_grid_expectations <- function() {
         "Fixed raters are not defined when raters are nested within subjects",
         "intraclass_unsupported",
         NA_character_,
-        FIXED_ADVISORY
+        fixed_advisory
       )
     )
   }
@@ -322,7 +325,7 @@ n_o_grid_expectations <- function() {
     }
   }
 
-  e
+  acc$e
 }
 
 # ---- running one case ---------------------------------------------------------
@@ -491,7 +494,7 @@ test_that("the grid's abort cases identify every abort branch in the dispatch", 
 # (`R/design.R:48-50`), so the message must name both shapes -- as its multilevel
 # sibling already does. It said only "Ragged" until M141 (D-041).
 
-FIXED_ABORT_BULLETS <- c(
+fixed_abort_bullets <- c(
   "Ragged or incomplete within-cell replicates are not supported for fixed raters yet.",
   paste(
     "Fixed-rater replicates ship for balanced, complete data (every cell",
@@ -515,7 +518,7 @@ test_that("the fixed-rater replicate abort names both shapes it fires on", {
     ))
     expect_s3_class(cnd, "intraclass_unsupported")
     rendered <- render_condition(cnd)
-    for (bullet in FIXED_ABORT_BULLETS) {
+    for (bullet in fixed_abort_bullets) {
       expect_true(
         grepl(bullet, rendered, fixed = TRUE),
         info = paste0(shape, ": missing bullet <", bullet, "> in ", rendered)

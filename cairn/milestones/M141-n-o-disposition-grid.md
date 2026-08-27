@@ -174,6 +174,7 @@ entry for the reworded abort → not needed, the message is new in the unrelease
 - 2026-08-27: note for review, no amendment sought — AC4 and the Scope line cite the fixed-rater abort at `R/icc.R:1459-1465`, its location when the plan was written. T5's rewording moved it to `R/icc.R:1463-1472`; the multilevel sibling AC4 cites at `R/icc.R:1436-1443` is unmoved. The criterion is read as written; only the line numbers are stale.
 - 2026-08-27: status review; all tasks checked.
 - 2026-08-27: merge gate — four fix-now findings applied on the branch (block-end anchor extended through the closing brace and made to fail loudly; three comment corrections; the dropped promote trigger restored), one follow-up filed as a candidate row, six rejected. Grid test green after each; `air format .` clean.
+- 2026-08-27: CI red on `lint` at the merge gate — `lintr::lint_package()` reported four style lints in the new test file (three SCREAMING_CASE constants, one `<<-`), a surface neither `devtools::test()` nor `devtools::check()` reaches, so the implement phase's local gate never saw them. Fixed on the branch: constants renamed to snake_case, the expectations accumulator moved from `<<-` into an environment written with `<-`. `lintr::lint_package()` now reports 0 lints package-wide; grid test `FAIL 0 | PASS 195`; `air format .` clean. Mechanical, no assertion changed, so approval was not re-requested.
 - 2026-08-27: review run; PR #152 opened as a draft. Six acceptance criteria executed with fresh evidence, all pass; consistency gate clean (`cairn_validate` exit 0, `document()` no diff, `pkgdown::check_pkgdown()` clean, `check()` `Status: OK`, six `data-raw/` checkers self-test green). Three-lens fan-out: [S] blame-history and [S] prior-PR-comments no findings, [O] diff-bug eleven, none an acceptance-criterion failure — four fix-now, one follow-up, six rejected. No defect return.
 
 ## Decisions
@@ -347,3 +348,14 @@ replicate rows. Finding 6: the `tidy()$occasions`/`n_o` candidate row regains
 unchanged. Finding 1 filed as its own candidate row. `devtools::test(filter =
 "n-o-disposition-grid")`: `FAIL 0 | WARN 0 | SKIP 0 | PASS 195` after every fix;
 `air format .` clean; `cairn_validate` exit 0.
+
+### CI
+
+`lint` failed on the first CI run of PR #152: four style lints in
+`tests/testthat/test-n-o-disposition-grid.R` (`fixed_advisory`, `design3_drop`
+and `fixed_abort_bullets` were SCREAMING_CASE; the expectations accumulator used
+`<<-`). Neither `devtools::test()` nor `devtools::check()` runs `lintr`, so the
+implement phase's gate could not have caught them. Fixed on the branch —
+snake_case names and an environment-backed accumulator written with `<-` — and
+re-verified: `lintr::lint_package()` 0 lints, grid test `FAIL 0 | WARN 0 |
+SKIP 0 | PASS 195`, `air format .` clean.
