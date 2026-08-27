@@ -1,6 +1,6 @@
 # M142: NEWS.md's 0.1.0 entry reads as first-release notes, not a development log
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -143,7 +143,7 @@ scope. A second `#` version entry → none exists; 0.1.0 is unreleased.
       count and the pinned clause it carries, as that module's exemption asks.
 - [x] T5 — Re-key the ledger rows and any pin the moved text broke, in the same
       commit as the move; run every `data-raw/` checker with `--self-test`.
-- [ ] T6 — Gate: full suite, merge-base suite in a temporary worktree,
+- [x] T6 — Gate: full suite, merge-base suite in a temporary worktree,
       `devtools::check()`, `pkgdown::build_news()`, `devtools::document()`.
 
 ## Work log
@@ -177,6 +177,7 @@ scope. A second `#` version entry → none exists; 0.1.0 is unreleased.
 - 2026-08-27: T4 — `cairn/doctrine/prose-style.md`'s scope sentence now names `NEWS.md`; the module is 119 lines / 6,997 bytes against its stated 120-line / 8,000-byte budget. The R2 exemption record AC2 asks for, DERIVED by running the pins' own template constructors against their committed fixtures rather than hand-listed (GP8): `residual_template()`'s clause is **58** words, `width_templates()`'s `flat` **32**, `parity` **17**, `subjects` **11**, and all four are present verbatim in the branch `NEWS.md`. The branch file has exactly ONE sentence over 35 words, at 74 words, and it is the carrier of the 58-word residual clause. The three width templates each sit in their own carrier, all under 35 words.
 - 2026-08-27: T3 re-measurement, taken after the last content commit rather than at the task that wrote the prose (M135 lesson). Branch `NEWS.md`: 14,050 bytes (merge base 36,201, cap 18,100), one `#` heading, 44 bullets, one over 500 bytes and it is the named exemption at 797 (merge base 808). `prose-profile.py`: 106 sentences, 1 over 35 words, **0** dashes, 1 long parenthetical, 2 semicolons, longest sentence 74 words.
 - 2026-08-27: the reflow measurement AC1 used to recite, moved here at the amendment's compression pass so the criterion carries only what a command settles. Measured 2026-08-27 at `deee860`: rewrapping every bullet in the merge-base file onto one physical line takes "25 bullets over six lines" to 0 without changing a word, and that file already carries 620- and 354-character lines (`LC_ALL=C awk '{print length}' mb-news.md | sort -nr`). That is why the cap is bytes. Removing the sentence gates nothing less: the 500-byte cap and the 25-bullet figure it explains both stay in AC1.
+- 2026-08-27: T6 gate. `Rscript -e 'devtools::test()'` FAIL 0 / WARN 3 / SKIP 2 / PASS 9085. `Rscript -e 'devtools::check(document = FALSE)'` 0 errors, 0 warnings, 0 notes on its own `Status:` line (14m 45s). `Rscript -e 'devtools::document()'` leaves a clean tree. `Rscript -e 'pkgdown::build_news()'` renders the changelog without error. `air format .` is a no-op. AC5's warning-set comparison against a merge-base run is left to the review session, as AC5 requires both runs be made there. Status set to review.
 
 ## Decisions
 
