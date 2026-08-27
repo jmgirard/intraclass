@@ -39,90 +39,107 @@ scope. A second `#` version entry → none exists; 0.1.0 is unreleased.
 
 ## Acceptance criteria
 
-- [ ] AC1 — `NEWS.md` holds exactly one `#` heading (`grep -c '^# ' NEWS.md`
-      returns 1), is at most 18,100 bytes by `wc -c` (merge base 36,201), and
-      carries no bullet spanning more than six lines. A bullet is the line
-      matching `^\* ` plus every following line until the next `^\* `, `^#`, or
-      blank line; the count is produced by that rule stated as one `awk` program
-      in the milestone file and re-run at review. Every `^## ` heading the entry
-      carries also appears in the merge-base entry's `^## ` set — the entry may
-      carry fewer sections, never a new one.
+- [ ] AC1 — `NEWS.md` holds exactly one `#` heading (`grep -c '^# '` returns 1)
+      and is at most 18,100 bytes by `wc -c` (merge base 36,201). No bullet
+      spans more than six lines, counted by the `awk` program committed at
+      `data-raw/m142-bullet-lines.awk` in the same commit as this plan, whose
+      rule is: a bullet is a line matching `^\* ` plus every following line
+      until the next `^\* `, `^#`, or blank line. One bullet is exempt and named
+      here: the `news_scope()` anchor bullet, opening `* The \`ci_method =
+      "mpl"\` documentation`, which AC4 requires to hold its three quoted ledger
+      claims inside a single bullet; it spans 11 lines at the merge base and
+      spans no more than 11 on the branch. The exemption is this one bullet, not
+      a class.
 - [ ] AC2 — `python3 data-raw/prose-profile.py NEWS.md` reports 0 in its `dash`
-      column (R1). Every sentence it counts over 35 words (R2) is a carrier for
-      a clause that a shipped test pins verbatim and that admits no sentence
-      break — `cairn/doctrine/prose-style.md`'s own stated exemption — and the
-      exempt set is derived by running those pins' own sweep over the new entry,
-      never by a hand list; each carrier is recorded with the clause's word
-      count and the sentence's, as that exemption requires. The one such clause
-      known at plan time is `residual_template()`'s, measured this session at 72
-      words in its shortest viable carrier, so the R2 count is not zero and the
-      criterion does not ask it to be. `cairn/doctrine/prose-style.md`'s scope
-      sentence names `NEWS.md` among the surfaces it owns.
-- [ ] AC3 — no claim is widened and none is invented (R6). Both revisions of the
-      entry are segmented into sentences by `prose-profile.py`'s own
-      segmentation, imported rather than reimplemented, and every sentence of
-      the new entry either appears verbatim among the merge-base entry's
-      sentences or is listed in a triage table in this milestone file against
-      the merge-base sentence or sentences it replaces, carrying a verdict of
-      `narrower`, `split`, or `pointer`. No verdict is `wider`, and the table
-      leaves no new sentence unlisted — the two sentence sets, not a hand list,
-      enumerate the domain, and the file asserts that every unmatched new
-      sentence has a table row.
-- [ ] AC4 — the guards keyed on NEWS text pass, run in the review session:
+      column (R1). Every sentence it counts over 35 words (R2) carries a clause
+      that a shipped test pins verbatim, the carrier set derived by running
+      those pins' own sweeps over the new entry rather than hand-listed (GP8) —
+      so a long sentence carrying no pinned clause fails the criterion, and no
+      sentence is exempted by hand. The relation is containment, not equality:
+      a pinned clause short enough to sit in a sentence under 35 words SHOULD
+      be split down to one, and doing so must not fail the criterion.
+      `cairn/doctrine/prose-style.md`'s scope sentence names `NEWS.md`.
+- [ ] AC3 — no claim is invented, widened, or silently unbounded (R6), checked
+      in both directions over raw text. `data-raw/m142-news-sentence-diff.py`
+      segments both revisions of the entry by importing `prose-profile.py`'s own
+      `paragraphs()` and `sentences()` with a normalization that applies every
+      step of the ruler's `normalize()` EXCEPT its code-span collapse — the
+      ruler rewrites every `` `x` `` span to the word `code`, which would make a
+      swapped identifier compare as unchanged (measured 2026-08-27). The script
+      asserts its own sentence count equals `profile_file()`'s on both
+      revisions, so a segmentation that drifts from the ruler's fails loudly
+      rather than silently re-partitioning. Every merge-base sentence with no
+      verbatim counterpart on the branch, and every branch sentence with no
+      verbatim counterpart at the merge base, appears in a triage table in this
+      milestone file with a verdict of `removed`, `narrower`, `split`,
+      `pointer`, or `new`; no verdict is `wider`, and each `removed` row states
+      which surviving sentence, if any, the removed text bounded. The two
+      set-differences enumerate the domain, and the script fails if either holds
+      a sentence the table does not list.
+- [ ] AC4 — the guards keyed on NEWS text pass, run at review:
       `python3 data-raw/check-mpl-doc-claims.py` and the same script with
       `--self-test` both exit 0, its `news_scope()` anchor bullet still
       locatable, and each of the four `data-raw/mpl-doc-claims.tsv` rows whose
       file column is `NEWS.md` — the three quoted rows `87f0dfc36b75`,
       `f00273a96e77`, `c6eb48429ddb` and the `absent` refusal row whose regex
       must match nowhere in the news scope — is re-keyed, deleted or added in
-      the same commit as the text change that required it (M130 lesson);
+      the same commit as the text change that required it (M130 lesson).
       `Rscript -e 'devtools::test(filter = "doc-skew-caveat")'` reports
-      `FAIL 0`, with the NEWS legs of `width_expected_runs` and
-      `residual_expected_runs` still satisfied.
+      `FAIL 0`.
 - [ ] AC5 — `git diff <merge-base>..HEAD --name-only` lists only `NEWS.md`,
-      `data-raw/mpl-doc-claims.tsv`, `tests/testthat/test-doc-skew-caveat.R`,
+      `data-raw/mpl-doc-claims.tsv`, `data-raw/m142-news-sentence-diff.py`,
+      `data-raw/m142-bullet-lines.awk`, `tests/testthat/test-doc-skew-caveat.R`,
       `cairn/doctrine/prose-style.md`, and paths under `cairn/`. Any hunk in the
-      test file is a pin re-key and nothing else, each named in the Review
-      section with the NEWS text whose move forced it.
+      test file is a pin re-key and nothing else.
 - [ ] AC6 — `Rscript -e 'devtools::test()'` reports `FAIL 0` and no warning whose
       rendered message text is absent from the set the same `devtools::test()`
       invocation reports at this milestone's merge-base, both runs made in the
-      review session and both sets recorded in the work log; `Rscript -e
-      'devtools::check()'` reports 0 errors and 0 warnings on `R CMD check`'s own
-      `Status:` line, and any NOTE it reports is justified in the Review section;
-      `Rscript -e 'pkgdown::build_news()'` renders the changelog without error.
+      review session; `Rscript -e 'devtools::check()'` reports 0 errors and 0
+      warnings on `R CMD check`'s own `Status:` line, any NOTE justified in the
+      Review section; `Rscript -e 'pkgdown::build_news()'` renders the changelog
+      without error.
 
 ## Coverage
 
-- AC1 → T2, T3
+- AC1 → T1, T2, T3
 - AC2 → T3, T4
-- AC3 → T3, T5
-- AC4 → T6
-- AC5 → T6, T7
-- AC6 → T7
+- AC3 → T5, T6
+- AC4 → T7
+- AC5 → T7, T8
+- AC6 → T8
 
 ## Tasks
 
-- [ ] T1 — Measure the merge base and record it: `wc -c`, the `^## ` heading set
-      in order, the per-bullet line counts under AC1's `awk` rule, the ruler's
-      four columns, the four `NEWS.md` ledger rows with their quoted text, and
-      the exact runs the `width`/`residual` pins locate in NEWS today. Commit
-      the `awk` program with the measurement. Nothing is predicted from reading.
+- [ ] T1 — Measure the merge base and record it: `wc -c`, the ruler's four
+      columns, the per-bullet counts from `data-raw/m142-bullet-lines.awk`
+      (committed with this plan, already reproducing 47 bullets / 25 over six),
+      the four `NEWS.md` ledger rows with their quoted text, and the runs the
+      `width`/`residual` pins locate in NEWS today. Nothing predicted from
+      reading.
 - [ ] T2 — Cut section by section by DELETION and CROSS-REFERENCE — point at
       `?icc` or the vignette that already carries the detail — never by
       composing a shorter claim from a reading of the old one. This is the
       milestone's whole risk: M133, M136 and M123 each returned repeatedly on
-      composed prose, and M137 passed in one round by deriving instead.
+      composed prose; M137 passed in one round by deriving instead. Where a
+      first-release orienting sentence is genuinely wanted, write it and take
+      the AC3 `new` verdict, which exists for exactly that.
 - [ ] T3 — Re-measure with the ruler and the `awk` rule after the LAST content
       commit, never at the task that wrote the prose (M135 lesson).
 - [ ] T4 — Add `NEWS.md` to `cairn/doctrine/prose-style.md`'s scope sentence;
-      re-check the module against its stated 120-line / 8,000-byte budget.
-- [ ] T5 — Build the AC3 triage table by importing `prose-profile.py`'s
-      segmentation and differencing the two sentence sets; triage each unmatched
-      new sentence against what it replaces.
-- [ ] T6 — Re-key the ledger rows and any pin the moved text broke, in the same
+      re-check the module against its stated 120-line / 8,000-byte budget
+      (118 / 6,941 at the merge base). Record each R2 carrier with its word
+      count and the pinned clause it carries, as that module's exemption asks.
+- [ ] T5 — Write `data-raw/m142-news-sentence-diff.py`: import
+      `prose-profile.py`'s `paragraphs()`/`sentences()`, apply every
+      `normalize()` step except the code-span collapse, assert the sentence
+      count matches `profile_file()`'s on both revisions, and emit the two
+      set-differences. Prove it able to fail before trusting it: plant a swapped
+      identifier, a deleted bounding clause, and an invented sentence, and show
+      each surfaces (check-discrimination rule).
+- [ ] T6 — Triage every row the script emits; write the table into this file.
+- [ ] T7 — Re-key the ledger rows and any pin the moved text broke, in the same
       commit as the move; run every `data-raw/` checker with `--self-test`.
-- [ ] T7 — Gate: full suite, merge-base suite in a temporary worktree,
+- [ ] T8 — Gate: full suite, merge-base suite in a temporary worktree,
       `devtools::check()`, `pkgdown::build_news()`, `devtools::document()`.
 
 ## Work log
@@ -133,7 +150,12 @@ scope. A second `#` version entry → none exists; 0.1.0 is unreleased.
 - 2026-08-27: the 35-word bar and the doctrine-scope answer compose: `prose-style.md` already states an exemption for a clause a shipped test pins verbatim that admits no sentence break. Measured this session with the ruler — `residual_template()`'s clause needs a 72-word carrier sentence, so R2 cannot reach zero and AC2 says so rather than promising it. This corrects a pre-gate statement that the pinned clauses were short enough for a flat 35-word bar; the width clauses are, the residual one is not.
 - 2026-08-27: Goal's bullet figures corrected from 46/24 to 47/25 — the first count used a looser `awk` than the rule AC1 names; the Goal now carries the figures AC1's own program produces.
 - 2026-08-27: plan gate chose condensation by DELETION and CROSS-REFERENCE over rewriting each bullet into a shorter summary, because this repo's prose milestones fail by composing claims from a reading (M133 reverted its deliverable, M136 took four rounds, M123 four attempts) and the one that passed in a single round, M137, derived instead; falsified by an AC3 triage table in which the `pointer` and `narrower` verdicts cannot carry the required cut, forcing `wider` verdicts to meet AC1's byte ceiling.
-- 2026-08-27: CHECKPOINT, plan not yet complete. Criteria audit pass 2 over the rewritten six criteria was in flight when this was committed; its findings are not yet disposed, and the remainder ledger and durable-record preview are not yet presented. Do not start implementation until pass 2 is disposed with a work-log line.
+- 2026-08-27: criteria audit pass 2 ran in FULL mode over the rewritten six criteria, [O] fresh reader, not the author. Fourteen findings; the four load-bearing ones verified by command before disposal. (a) Still no criterion bound the Goal — deleting half the entry and stripping the dashes passed all six. (b) AC3 triaged only NEW sentences, so widening by DELETING a bounding qualifier was invisible. (c) AC3's closed verdict set left a genuine first-release orienting sentence no legal verdict, so the criteria forbade the prose the Goal asks for. (d) AC3's "verbatim" ran over `normalize()`, which rewrites every code span to the word `code`: measured this session, `` `glance()$raters` gives the rater treatment the fit used`` and the same sentence naming `` `glance()$type` `` normalize IDENTICALLY, so a swapped identifier compared as unchanged. Also: AC1's six-line bullet cap collided with the 11-line `news_scope()` anchor bullet that AC4 requires to keep three quoted claims in one bullet (measured 11 lines at `NEWS.md:182`); the "72 words" figure in AC2 was unreproducible (the clause is 58 words standing alone; 72 was a carrier with a lead-in) and hand-pinned against GP8; the heading rule forced release notes to reuse the development log's section names; the permitted-paths list left a derivation script no legal home; five criteria still bound recording acts; and `prose-profile.py` exposes no file-to-sentence entry point.
+- 2026-08-27: question gate round 2, two questions — the design was the user's call, not a wording fix. User chose to REPAIR the claim check rather than retire it to a read-through (raw-text comparison so identifiers survive, two-sided so a deleted qualifier surfaces, plus a justified `new` verdict so release-notes prose is permitted), and to EXEMPT the one anchor bullet from the six-line cap rather than raise the cap or compress that bullet.
+- 2026-08-27: plan gate chose the repaired mechanical claim check over retiring R6 to a reviewer read-through, at the user's explicit selection and against `cairn/doctrine/prose-style.md`'s own treatment of R6 as uncounted judgment; falsified by the milestone returning on the diff script's edge cases rather than on the prose, which is how M134 spent four rounds. The Goal itself is NOT bound by any criterion and is not pretended to be: the criteria prevent the degenerate outcomes (blind truncation, widened or invented claim, dev-log sentence length), and whether the result reads as first-release notes is the maintainer's judgment at the merge gate.
+- 2026-08-27: three measurements taken this session rather than asserted. `data-raw/m142-bullet-lines.awk`, committed with this plan, reproduces 47 bullets / 25 over six lines / an 11-line anchor bullet, so the Goal's figures and AC1's procedure agree. Dropping ONLY the code-span step from the ruler's `normalize()` leaves segmentation unchanged on the current NEWS.md — 172 sentences either way — so AC3's self-consistency assertion is satisfiable and its script buildable. The residual clause is 58 words standing alone under the ruler, so the wrong 72-word figure is gone from AC2 entirely rather than corrected in place.
+- 2026-08-27: AC2 defect found by the author, not the audit: it required the over-35 set to EQUAL the pinned-carrier set, which fails the milestone for doing the right thing — splitting a width clause down under 35 words removes it from the over-35 set while it stays a carrier. Reworded to containment, with the intent stated so review cannot read it the other way.
+- 2026-08-27: CHECKPOINT, plan still not complete. Criteria audit pass 3 over this third criteria set was in flight when this was committed; its findings are not yet disposed, and the remainder ledger and durable-record preview are not yet presented. Do not start implementation until pass 3 is disposed with a work-log line.
 
 ## Decisions
 
