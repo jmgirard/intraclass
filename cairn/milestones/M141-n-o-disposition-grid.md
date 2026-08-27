@@ -1,6 +1,6 @@
 # M141: The `n_o` disposition grid is pinned, and the fixed-rater replicate abort names the right condition
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -141,7 +141,7 @@ entry for the reworded abort → not needed, the message is new in the unrelease
       add the three-bullet rendered-message pins for both fixed-rater shapes.
       (RB tripwire: ip-touching)
 - [x] T6 — Append the superseding entry to `cairn/DECISIONS.md`.
-- [ ] T7 — Gate: `devtools::document()` produces no diff; every `data-raw/`
+- [x] T7 — Gate: `devtools::document()` produces no diff; every `data-raw/`
       checker run with `--self-test` (M130 lesson — a tracking edit re-keys
       them); `R CMD check`'s raw `Status:` line read and transcribed into the
       Review section, with any NOTE and its justification recorded there.
@@ -169,6 +169,10 @@ entry for the reworded abort → not needed, the message is new in the unrelease
 - 2026-08-27: amendment (substantive, mini gate, user selected): AC6 narrowed. It promised 0 warnings, which the suite does not deliver and which this milestone's diff (`R/icc.R` plus one new test file) does not control. It now promises `FAIL 0` and no warning whose rendered message text is absent from the merge-base set, both sets measured this session and recorded here. The criteria set gains no criterion; AC6's promise domain narrows from every warning to the warnings this branch adds, and picks up the NOTE-justification half of the profile's full-check slot, which the original omitted.
 - 2026-08-27: criteria audit ran in FULL mode over the amended AC6, two [O] fresh-reader passes, neither reader the author. Pass 1 returned four findings: "the three that predate this branch" quantified over a set no named procedure enumerated; the criterion pinned testthat srcref line numbers, which are reporter attribution artifacts rather than deliverable properties; a shared causal clause ("each reaching the reporter because its test asserts a different condition") false for the brms warning, which comes from an unwrapped call; and the stale T2 work-log line, superseded above. Pass 2 confirmed the first three resolved and returned three more, all fixed in the accepted text: no stated identity relation for two warnings being "the same" (now rendered message text), "the same suite" false at the merge-base since this branch adds a test file (now the same `devtools::test()` invocation), and "0 errors" unreadable off testthat 3e's `FAIL | WARN | SKIP | PASS` line, which folds errors into FAIL (now `FAIL 0`).
 - 2026-08-27: AC6 defines the profile's `verify` slot word "clean" as "no warning the branch adds", not "no warning at all" — a deliberate relaxation of the slot's literal text, flagged here for the review gate rather than left implicit.
+- 2026-08-27: T7 complete. Merge-base measurement, `devtools::test()` on `main` (3abc2a4) in a separate git worktree: `FAIL 0 | WARN 3 | SKIP 2 | PASS 8896`. Branch: `FAIL 0 | WARN 3 | SKIP 2 | PASS 9091`. The two warning sets are identical by rendered message text — "The lavaan engine reported a fitting warning.", "The glmmTMB engine reported a fitting warning.", "Modeling raters as fixed restricts inference to exactly these raters; you cannot generalize to other raters." — so the set difference (branch minus merge-base) is empty and AC6 holds. The 195 added passes are the grid file's. Worktree removed.
+- 2026-08-27: ROADMAP gained a candidate row for the three escaping suite warnings (search-first: no overlapping row). `cairn/ROADMAP.md` is 57 lines / 24,707 bytes — inside the 60-line cap, over the 24,000-byte budget, which it already was at 24,200 before this milestone touched it. Compressed what M141 owns: the `tidy()$occasions` / `glance()$n_o` row's second half, now held by D-041 and the grid test, became a cross-reference (-246 bytes). The remaining overage is unrelated rows and belongs to the post-merge hygiene pass. `cairn/LESSONS.md` sits at exactly 20,000 bytes against its <20,000 budget, untouched by this milestone.
+- 2026-08-27: note for review, no amendment sought — AC4 and the Scope line cite the fixed-rater abort at `R/icc.R:1459-1465`, its location when the plan was written. T5's rewording moved it to `R/icc.R:1463-1472`; the multilevel sibling AC4 cites at `R/icc.R:1436-1443` is unmoved. The criterion is read as written; only the line numbers are stale.
+- 2026-08-27: status review; all tasks checked.
 
 ## Decisions
 
