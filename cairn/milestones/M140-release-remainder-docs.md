@@ -1,6 +1,6 @@
 # M140: Release-remainder documentation corrections, and the recorded pre-submission check
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** M138, M139
 - **Driving RR:** —
@@ -41,7 +41,7 @@ Correct the four false documentation claims descoped from M48 and re-run `R CMD 
 - [x] T2. Rewrite `NEWS.md:370-372` so the "unaffected" sentence is scoped per function, `d_study()`'s vector-valued arguments being the mutually exclusive projection axes `m` and `n_o` (`R/d-study.R:205-218`).
 - [x] T3. Append the D-entry superseding D-037's `d_study()` clause (`cairn/DECISIONS.md:1592-1594`), keeping D-036's routed-through-`validate_choice()` discriminator unchanged.
 - [x] T4. Fix the "fills" sentence at `R/d-study.R:125-126`; re-roxygenize so `man/d_study.Rd:65-66` follows.
-- [ ] T5. `air format .`, the four `data-raw/` checkers with `--self-test`, then `R CMD check --as-cran` with `NOT_CRAN=false`; copy the platform, R version and date from that run's own output into `cran-comments.md:5-20`.
+- [x] T5. `air format .`, the four `data-raw/` checkers with `--self-test`, then `R CMD check --as-cran` with `NOT_CRAN=false`; copy the platform, R version and date from that run's own output into `cran-comments.md:5-20`.
 - [x] T6. Measure spelling against a detached worktree at the default branch, per the M128 lesson, rather than padding `inst/WORDLIST`.
 
 ## Work log
@@ -55,3 +55,5 @@ Correct the four false documentation claims descoped from M48 and re-run `R CMD 
 - 2026-08-26: T2, T3. `NEWS.md`'s "unaffected" sentence is now scoped per function — `icc()` keeps `type`/`unit`/`level`/`occasions`, `d_study()` names its two projection axes `m` and `n_o`, supplied one per call. D-040 supersedes D-037's `d_study()` enumeration only, leaving D-036's `validate_choice()` discriminator and D-037's `icc()`/`choose_icc()` clauses standing. The both-axes abort the NEWS sentence now asserts is pinned at `tests/testthat/test-d-study.R:1126-1129`; the axis behaviour was run, not recalled (`m = 1:4` sweeps m, `n_o = 1:3` sweeps occasions, both together abort `intraclass_unsupported`). `devtools::test()` FAIL 0.
 - 2026-08-26: T4. `R/d-study.R:124-128` and its `man/d_study.Rd` now say a multilevel projection *gains* a `level` column and a replicate projection an `occasions` column, each where it applies, with `tidy()` carrying both on every projection — the same page's `:54-56` and `:75-79` wording. Derived by running both projections: a replicate projection's object carries `occasions` and a plain one does not, and `tidy()` returns `m, occasions, level, ...` on both, `NA` where undefined. The code landed in the previous commit (`git add -A` swept it in ahead of this line); nothing else changed for it here. `devtools::test()` FAIL 0.
 - 2026-08-26: T6. `spelling::spell_check_package()` run twice — against a detached worktree at `origin/main` (42da692) and against this branch's tree. Both flag zero words, so this milestone introduces none; `inst/WORDLIST` was not touched. The check was shown able to fail: a planted misspelling in `NEWS.md` was flagged by name, then reverted.
+- 2026-08-26: T5 minor amendment — the task said "the four `data-raw/` checkers with `--self-test`"; the repo has six checkers, five of which take `--self-test` (`data-raw/README.md`). Ran all six plus all five self-tests, a superset of what the task asked; all pass.
+- 2026-08-26: T5. `R CMD check --as-cran` re-run on this branch with `NOT_CRAN=false`, `manual = TRUE`; raw `Status: OK` at `check.log:104`, and the printed summary agrees at 0 errors / 0 warnings / 0 notes (51m 8.7s). `cran-comments.md:7-9` and `:21-22` now carry that run's own header lines — R 4.6.1 (2026-06-24), platform `aarch64-apple-darwin23`, running under macOS Tahoe 26.6.2, current time 2026-08-27 01:15:09 UTC — replacing the 2026-08-25 date and the `macOS 15` line, which named a release this machine does not run. `air format .` clean; `devtools::test()` at `NOT_CRAN=true CI=true` FAIL 0 / PASS 8630 on the final tree.
