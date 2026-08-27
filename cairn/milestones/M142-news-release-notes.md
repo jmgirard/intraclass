@@ -309,39 +309,45 @@ scope. A second `#` version entry → none exists; 0.1.0 is unreleased.
   `air format .` is a no-op. AC5's warning-set comparison against a merge-base
   run stays with the review session, which AC5 requires make both runs there.
   Status set to review.
+- 2026-08-27: review round 2 ran on the committed tree at `f6a1277`. All five criteria pass on fresh evidence, the consistency gate is clean, and the three-lens fan-out returned 22 findings; two ([O]1 lme4 is fetched by a plain install, [O]2 no `summary()` method for `icc_dstudy`) are false statements in the shipping file, and one ([O]13/[S]2) is the omission of multilevel and incomplete-data support from the overview. Evidence and dispositions in the Review section; disposition put to the user at the gate.
+
 
 ## Decisions
 
 ## Review
 
-Reviewed 2026-08-27. PR https://github.com/jmgirard/intraclass/pull/153. Merge
-base `deee860`; `origin/main` had not moved since the branch was cut, so no
-merge was needed. Every figure below was produced by running the named command
-in this session.
+Round 2, reviewed 2026-08-27, after the defect return and the repair round. PR
+https://github.com/jmgirard/intraclass/pull/153. Merge base `deee860`;
+`git fetch` shows `origin/main` still at `deee860`, unmoved since the branch was
+cut, so no merge was needed. Round 1's evidence and findings are superseded by
+this section and live in git at `63ad231`/`d689d74`. Every figure below was
+produced by running the named command in this session, on the committed tree at
+`f6a1277`.
 
 ### Acceptance-criterion evidence
 
-- **AC1 — PASS.** `grep -c '^# ' NEWS.md` returns 1. `wc -c NEWS.md` is 14,050
+- **AC1 — PASS.** `grep -c '^# ' NEWS.md` returns 1. `wc -c NEWS.md` is 4,937
   bytes against the 18,100 ceiling (merge base 36,201, reproduced by `wc -c` over
   a `git show deee860:NEWS.md` copy). `LC_ALL=C awk -f
-  data-raw/m142-bullet-lines.awk NEWS.md` reports 44 bullets, exactly one over
+  data-raw/m142-bullet-lines.awk NEWS.md` reports 14 bullets, exactly one over
   500 bytes; that one is the named `news_scope()` anchor exemption opening ``The
   `ci_method = "mpl"` documentation``, at 797 bytes. The same program over the
-  merge-base copy reports 47 bullets, 25 over 500 bytes (the same 25 over six
-  lines), and the anchor bullet at 808 — so the exemption's ceiling holds
-  (797 <= 808) and the merge-base figures AC1 recites reproduce.
-- **AC2 — PASS.** `python3 data-raw/prose-profile.py NEWS.md`: 106 sentences,
-  1 over 35 words, **0** in the `dash` column, 1 long parenthetical,
-  2 semicolons, longest 74. The single over-35 sentence, printed by the ruler's
-  own verbose mode, is the 74-word carrier of `residual_template()`'s clause.
-  The four template word counts were DERIVED, not hand-listed (GP8): the
-  constructors in `tests/testthat/test-doc-skew-caveat.R` were evaluated against
-  their committed fixtures, giving `residual` 58 words, `flat` 32, `parity` 17,
-  `subjects` 11, all four present verbatim in the branch `NEWS.md`. Only
-  `residual` exceeds 35, and `grepl(fixed = TRUE)` confirms the 74-word sentence
-  contains it verbatim — so the one long sentence carries a pinned clause whose
-  own count exceeds 35, and the three short templates force no long carrier.
-  `cairn/doctrine/prose-style.md:8` names `NEWS.md` in its scope sentence.
+  merge-base copy reports 47 bullets, 25 over 500 bytes and the same 25 over six
+  lines, with the anchor at 808 — so the exemption's ceiling holds (797 <= 808)
+  and every merge-base figure AC1 recites reproduces.
+- **AC2 — PASS.** `python3 data-raw/prose-profile.py NEWS.md`: 43 sentences,
+  1 over 35 words, **0** in the `dash` column, 1 long parenthetical, 2
+  semicolons, longest 74. The four template word counts were DERIVED, not
+  hand-listed (GP8): the constructors in `tests/testthat/test-doc-skew-caveat.R`
+  were evaluated against their committed fixtures, giving `residual` 58 words,
+  `flat` 32, `parity` 17, `subjects` 11, all four present verbatim in the branch
+  `NEWS.md` by `grepl(fixed = TRUE)`. The single over-35 sentence, extracted with
+  the ruler's own `paragraphs()`/`sentences()`/`words()`, is the 74-word carrier
+  of `residual_template()`'s clause, and `grepl(fixed = TRUE)` confirms it
+  contains that 58-word clause — so the one long sentence carries a pinned clause
+  whose own count exceeds 35, and the three short templates force no long
+  carrier. `cairn/doctrine/prose-style.md:8` names `NEWS.md` in its scope
+  sentence.
 - **AC3 — PASS.** `python3 data-raw/check-mpl-doc-claims.py` exits 0 ("60 claim
   candidates, 12 settled against data-raw/m92-interp-sweep.rds, 0 failure(s)");
   `--self-test` exits 0. `news_scope()` called on the branch `NEWS.md` returns a
@@ -349,15 +355,17 @@ in this session.
   four `NEWS.md` ledger rows, the `absent` refusal row, `f00273a96e77` and
   `c6eb48429ddb` are unchanged, and `87f0dfc36b75` is re-keyed to `0be2190a0d90`
   in `56a282b` — the same commit as the NEWS text change that required it
-  (`git log --name-only` shows `NEWS.md` and `data-raw/mpl-doc-claims.tsv` in
-  that one commit). `Rscript -e 'devtools::test(filter = "doc-skew-caveat")'`
-  reports FAIL 0 / WARN 0 / SKIP 2 / PASS 2293.
+  (`git log --name-only deee860..HEAD -- NEWS.md data-raw/mpl-doc-claims.tsv`
+  shows both files in that one commit). The repair commit `2b9e6e7` changed
+  `NEWS.md` without touching the ledger, and the checker's clean exit establishes
+  that no row needed re-keying there. `Rscript -e 'devtools::test(filter =
+  "doc-skew-caveat")'` reports FAIL 0 / WARN 0 / SKIP 2 / PASS 2293.
 - **AC4 — PASS.** `git diff deee860..HEAD --name-only` lists `NEWS.md`,
-  `data-raw/mpl-doc-claims.tsv`, `data-raw/m142-bullet-lines.awk`,
-  `cairn/doctrine/prose-style.md`, `cairn/ROADMAP.md` and
-  `cairn/milestones/M142-news-release-notes.md` — a subset of the permitted set.
-  `tests/testthat/test-doc-skew-caveat.R` has no hunk at all, so the pin-re-key
-  restriction on it is satisfied vacuously.
+  `cairn/ROADMAP.md`, `cairn/doctrine/prose-style.md`,
+  `cairn/milestones/M142-news-release-notes.md`,
+  `data-raw/m142-bullet-lines.awk` and `data-raw/mpl-doc-claims.tsv` — a subset
+  of the permitted set. `tests/testthat/test-doc-skew-caveat.R` has no hunk at
+  all, so the pin-re-key restriction on it is satisfied vacuously.
 - **AC5 — PASS.** `Rscript -e 'devtools::test()'` on the branch: FAIL 0 / WARN 3
   / SKIP 2 / PASS 9085. The merge-base comparison run was made in this same
   session, in a temporary worktree at `deee860` (removed afterwards): FAIL 0 /
@@ -374,147 +382,173 @@ in this session.
 
 ### Consistency gate
 
-- `cairn_validate.py` exits 0; all 16 checks PASS, all 7 advisories OK. The
-  `release window` advisory did NOT fire.
+- `cairn_validate.py` exits 0; all 16 checks PASS, 4 advisories OK. The `release
+  window` advisory did NOT fire. One advisory did: `work-log format (115)`,
+  every hit a wrapped multi-line work-log entry in this milestone's own log,
+  written from round 1 onward. Advisory, not a gate failure; recorded, not fixed,
+  since the file is replaced by a 25-line archive summary at hygiene.
 - `cairn_impact.py` skipped: the diff changes no `DESIGN.md` principle.
-- Toolchain checks (r-package profile `consistency-gate` slot): `devtools::document()`
-  leaves a clean tree; `README.Rmd`/`README.md` untouched by this diff and last
-  written by the same commit, so they are in sync; `pkgdown::check_pkgdown()`
-  reports "No problems found."; `NEWS.md` is itself this milestone's deliverable
-  and names no milestone numbers; the one new file, `data-raw/m142-bullet-lines.awk`,
-  is not top-level and sits under the existing `^data-raw$` `.Rbuildignore` entry;
+- Toolchain checks (r-package profile `consistency-gate` slot):
+  `Rscript -e 'devtools::document()'` leaves a clean tree; `README.Rmd` and
+  `README.md` are untouched by this diff and last written by the same commit
+  (`5c274fc`), so they are in sync; `pkgdown::check_pkgdown()` reports "No
+  problems found."; `NEWS.md` is itself this milestone's deliverable and names no
+  milestone numbers; the one new file, `data-raw/m142-bullet-lines.awk`, is not
+  top-level and sits under the existing `^data-raw$` `.Rbuildignore` entry;
   `devtools::check()` is `Status: OK`. `air format .` is a no-op.
 
-### Independent fresh-context review
+### Independent fresh-context review — round 2
 
-Declared surface tier is **user-facing**, so the full three-lens fan-out ran,
-each reviewer fresh-context and none having authored the implementation.
+Declared surface tier is **user-facing**, so the full three-lens fan-out ran
+again on the repaired diff, each reviewer fresh-context, none having authored the
+implementation, each on a distinct evidence base. 22 findings. The [O] lens's
+factual assertions were re-verified here by command before disposal; each
+verification is named with the finding.
 
-**[S] prior-PR-comments — no findings.** Prior-review evidence exists on the
-touched files (M130, M135, M136, M137, M114/M121/M122), and the lens checked the
-diff against each applicable lesson: the M130 same-commit ledger re-key rule is
-complied with, the M114/M121/M122 terminal-row rule is not engaged (the ROADMAP
-edit only flips this milestone's own status), the M136/M137 struck framing is not
-reintroduced, and the M92/D-022/M137 struck claims are absent. The GitHub probe
-`gh api repos/jmgirard/intraclass/pulls/comments?per_page=1` returned `[]`, so no
-PR-thread walk was owed.
+Findings as reported, most severe first, with the disposition of each.
 
-**[O] diff-bug and [S] blame-history — findings below.** The two lenses converge:
-the branch's condensation dropped qualifiers that bounded claims, and in several
-places the resulting sentence asserts a capability `icc()` refuses with a classed
-abort. Nine of the [O] lens's factual assertions were re-verified here by command
-against `R/icc.R`, `vignettes/`, and the merge-base `NEWS.md`; all nine matched.
-
-Findings, as reported, most severe first, with the disposition of each.
-
-1. **[O] `NEWS.md:32-36` — false capability: cluster-level ICCs for nested
-   designs.** Merge base kept two sentences, the second scoping the design list:
-   "Supply a `cluster` column to get subject-level (within-cluster) and
-   cluster-level (between-cluster) coefficients via `level`. Covers raters
-   crossed with clusters (Design 1) or nested in clusters/subjects (Designs
-   2–3), complete or incomplete crossed data." Branch fuses them: "Supply a
-   `cluster` column to get subject-level and cluster-level coefficients through
-   `level`, for raters crossed with clusters or nested in clusters or subjects,
-   on complete or incomplete data." The fused sentence says cluster-level
-   coefficients are available for nested raters. `R/icc.R:1279` aborts exactly
-   there: "Cluster-level IRR is not defined when raters are nested in clusters
-   or subjects." The join also drops "crossed" from "incomplete crossed data".
-   VERIFIED here at `R/icc.R:1279` and against both revisions of the sentence.
-2. **[O] `NEWS.md:117-121` — lavaan refusal list narrowed while the FIML claim
-   was generalized.** Merge base: "Nested designs, within-cell replicates, and
-   fixed-rater incomplete/unbalanced multilevel SEM remain loud, classed
-   refusals." Branch keeps only the first two while asserting the engine fits
-   "the two-way and crossed multilevel designs, with missing cells estimated by
-   full information maximum likelihood". `R/icc.R:974` refuses fixed-rater
-   incomplete/unbalanced multilevel lavaan. VERIFIED here at `R/icc.R:974`.
-3. **[O] `NEWS.md:58` — npbootstrap: "Balanced and unbalanced data are both
-   covered."** Merge base scoped this: only a numeric `unit` is balanced-only.
-   `R/icc.R:1701` aborts with `abort_unsupported()` on a numeric `unit` over
-   unbalanced npbootstrap. VERIFIED here at `R/icc.R:1701`.
-4. **[O] `NEWS.md:42-47` — `occasions` averaging stated without its fence.**
-   Branch: "An `occasions` argument averages over the replicates, giving the
-   reliability of a rater's mean score." Merge base scoped replicate support to
-   balanced, complete replicated two-way designs and stated the ragged
-   occasion-averaged coefficient is unsupported; `R/icc.R:1915` aborts there.
-   Same shape in the `d_study()` bullet: the merge base's ragged-unsupported note
-   and the `n_o`/`m` mutual exclusion are both dropped.
-5. **[O] `NEWS.md:157` — "Seven articles ship with the package" is false; eight
-   do.** The sentence names seven, the next sentence describes an eighth
-   (*Comparison with other packages*). VERIFIED here: `vignettes/` holds 8
-   `.Rmd` files and `_pkgdown.yml` lists all 8. No count sentence exists at the
-   merge base, so this is a newly invented figure — which also contradicts the
-   work log's "Deliberately NEW sentences … none."
-6. **[O] `NEWS.md:161-162` — comparison claim lost "on balanced data".** Merge
-   base: "reproduces `psych::ICC` and `irr::icc` across the McGraw & Wong family
-   **on balanced data**". VERIFIED here: the branch sentence ends at "family."
-7. **[O] `NEWS.md:81` — "The *Confidence-interval methods* article tabulates
-   every cut."** Merge base said "tabulates **both** cuts". A bounded claim about
-   two specific cuts became universal. VERIFIED here against both revisions.
-8. **[O] `NEWS.md:106-107` — Spearman-Brown pole lost a necessary condition.**
-   Merge base: "when the requested `m` is large relative to the ratings per
-   subject **and the lower limit falls low enough**." Branch keeps only the first
-   conjunct. VERIFIED here against both revisions.
-9. **[O] `NEWS.md:195` — moment-correction coverage lost its engine list.** Merge
-   base named `"glmmTMB"`, `"lme4"` and `"lavaan"`; the branch drops the list,
-   implying `brms` too. VERIFIED here against both revisions.
-10. **[O] `NEWS.md:204-206` — `ICC(c,k)` drop claim lost its data scope.** Merge
-    base opened "On incomplete crossed multilevel data, …"; the branch sentence
-    stands alone. Self-limiting via "where it is unsupported", so lower severity.
-11. **[O] `NEWS.md:157-159` — palette scope generalized**, and "`ggplot2` is a
-    `Suggests` dependency" dropped, an install fact a first-time reader needs.
-12. **[O] work log overstates provenance.** "Deliberately NEW sentences … none."
-    At least four sentences have no merge-base source: three article pointers
-    (legal under T2's cross-reference licence) and the "Seven articles" count.
-    The log's claim is the one statement standing in for the descoped check.
-13. **[S] blame-history: D-022's behavioral consequence of the NA-row fix is
-    deleted with no replacement.** "a dropped row no longer counts toward the
-    design, so a frame that looked balanced only because of such rows is
-    correctly seen as unbalanced — `ci_method = "searle"` and `"burch"` are
-    refused on it (they require balance), while `"npbootstrap"` becomes
-    available." Added by `bc844c3`, recorded as D-022.
-14. **[S] blame-history: the parametric-bootstrap zero-variance boundary caveat
-    is deleted with no replacement.** Introduced by `34c9ab9` specifically so a
-    lower limit above the point estimate would not read as a bug.
-15. **[S] blame-history: the MPL boundary-vs-root-finding-failure distinction is
-    deleted with no replacement.** Traces to `2ec648b` (M99), recorded as D-019,
-    whose own text says it narrows the D-014/D-015 "interval on every dataset"
-    framing.
-16. **[S] blame-history: the ragged-Design-3 occasion-averaging scope limit is
-    deleted with no replacement.** From `e475e98`, an explicit attempt-then-
-    degrade under #1/#4. Overlaps [O] finding 4.
-17. **[S] blame-history: the `choose_icc()` breaking-change sentence is deleted.**
-    A "used to work this way" statement with no meaning for a first release; the
-    lens itself judged this not a defect.
-18. **[O] `cairn/doctrine/prose-style.md:8-9` — the edit records which pass
-    applied it**, which four lines below the module says it does not own. The
-    scope change itself is correct and in budget (119 / 6,997).
-19. **[O] `NEWS.md:127` — `\pkg{brms}` Rd markup survives in a Markdown file**,
-    so `news()` and pkgdown print it literally. Pre-existing at the merge base,
-    but the branch stripped every `\eqn{}` and left this one. VERIFIED here.
-20. **[O] `NEWS.md:171` — NEWS cites `data-raw/check-mpl-doc-claims.py`**, which
-    `.Rbuildignore`'s `^data-raw$` excludes from the tarball. Pre-existing.
-21. **[O] `data-raw/m142-bullet-lines.awk` — the vacuity blind spot is only
-    partly closed, and column 2 is mislabelled.** The pattern is anchored
-    `^[*+-] ` at column 1, so indented bullets, ordered lists, or a tab after the
-    marker still measure zero bullets; and blank lines are skipped without
-    incrementing `n`, so the "lines" column counts non-blank lines. Neither
-    defect can under-measure a bullet the program does see, so AC1's a-fortiori
-    argument survives — the header just over-claims.
-22. **[O] `NEWS.md:78-79` — two 380- and 457-character unwrapped lines**,
-    inherited from the merge base.
-23. **[O] register: mostly fixed, three residues.** The `news_scope()` anchor
-    bullet's "The `ci_method = "mpl"` documentation states…" (AC1's exemption
-    forces this bullet to stay whole; accepted at plan time); ~1,300 bytes of
-    searle/burch simulation-study figures; and "the **first** Bayesian engine",
-    a history word in a document with no prior release.
+1. **[O] `NEWS.md:36-40` — false install claim: "`engine = "lme4"` (by way of
+   **merDeriv**), `engine = "lavaan"` and `engine = "brms"` live in `Suggests`,
+   so a plain install fetches none of them."** False for `lme4`. VERIFIED here:
+   `packageDescription("glmmTMB")$Imports` lists `lme4 (>= 1.1-18.9000)`, so a
+   plain install does fetch it; `README.md:53` says so on a shipped surface
+   ("`glmmTMB` lists `lme4` in its own `Imports:`, so the `lme4` package is …"),
+   and the merge base said the same. New prose contradicting a shipped surface —
+   the same class of dropped bound that returned this milestone in round 1.
+   DISPOSITION: put to the maintainer at the gate.
+2. **[O] `NEWS.md:25-27` — asserts a method that does not exist: "`print()`,
+   `format()`, `summary()`, `plot()` and `ggplot2::autoplot()` methods are
+   provided for both classes."** VERIFIED here: `NAMESPACE` registers
+   `S3method(summary,icc)` and no `summary` method for `icc_dstudy`;
+   `print`/`format`/`plot` are registered for both. `summary()` on a `d_study()`
+   result falls through to `summary.default`. DISPOSITION: put to the maintainer
+   at the gate.
+3. **[O] work log — "All three were carried over byte-identical" is false.**
+   VERIFIED here by printing both revisions of the anchor bullet: the branch
+   deletes "now", turns a colon into a period and an em dash into a comma, and
+   reflows — which is why it measures 797 against the merge base's 808, a figure
+   the same work log records. Only the four pinned template clauses are verbatim,
+   which is what the guards actually check. A record defect, not a deliverable
+   defect: it would tell a later reader not to re-read those regions.
+   DISPOSITION: put to the maintainer at the gate.
+4. **[O] `data-raw/m142-bullet-lines.awk` header — the a-fortiori claim is false
+   as written.** The header says both widenings "can only raise a measured size
+   or add a measured bullet, never lower or remove one". VERIFIED here by
+   counterexample: on `* alpha bravo` / `- charlie delta` the program reports two
+   bullets of 13 and 15 bytes where AC1's stated rule makes one 28-byte bullet —
+   treating `-` as a bullet start SPLITS a continuation line out of the bullet it
+   belongs to. No effect on either revision of `NEWS.md` (neither uses a `-`
+   marker, checked), so AC1's measurement stands; the justification recited in
+   AC1 and the header does not. DISPOSITION: put to the maintainer at the gate.
+5. **[O] the Review section's recorded AC evidence no longer describes HEAD** —
+   round 1's 14,050 bytes / 44 bullets / 106 sentences against HEAD's 4,937 / 14
+   / 43, and round-1 line citations into a file that is now 77 lines. Also: the
+   repair-round work-log line says "15 bullets"; `awk -f
+   data-raw/m142-bullet-lines.awk NEWS.md | wc -l` and `grep -c '^\* ' NEWS.md`
+   both return 14. VERIFIED here. Resolved by this section, which replaces round
+   1's; the work-log "15 bullets" line stands uncorrected unless the gate directs
+   otherwise. DISPOSITION: put to the maintainer at the gate.
+6. **[O] `cairn/DESIGN.md:112-114` was not updated with the scope widening.** It
+   still describes `prose-style.md` as the standard "for the vignettes, roxygen,
+   and `README.Rmd`" while `cairn/doctrine/prose-style.md:8` now names `NEWS.md`
+   too. VERIFIED here against both files. AC4 permits paths under `cairn/`, so
+   nothing blocked the pointer update. DISPOSITION: put to the maintainer at the
+   gate.
+7. **[O] `NEWS.md:51-54` — negative claim widened.** Branch: the default
+   under-covers "when the subject effects are strongly skewed or heavy-tailed …
+   `"burch"` is no remedy there (worst 0.6655)". VERIFIED here against
+   `deee860:NEWS.md:136-138`, which states "One thing `"burch"` is **not**: a
+   remedy for heavy tails", and attaches the 0.6655 figure to skewed effects.
+   The heavy-tailed reach of "no remedy" IS merge-base supported; only the
+   figure's attachment is loosened. DISPOSITION: reject — the claim the finding
+   calls unsupported is stated at the merge base in as many words.
+8. **[O] `NEWS.md:55-59` — the surviving simulation bullets have no
+   antecedents.** The entry says "both grids", "the smaller grid", "the larger
+   grid", "the three grids" and "the two closed forms" without ever introducing a
+   grid or naming which methods are closed forms; the bullets that defined them
+   were deleted, and "classical" was dropped from "the two classical closed
+   forms". VERIFIED here by reading the branch file end to end. A first-time
+   reader cannot resolve any of these references. DISPOSITION: put to the
+   maintainer at the gate.
+9. **[O] and [S] prior-review lens, converging — `NEWS.md:30-32` lists
+   "*Multilevel designs*" but the vignette's title is "Multilevel designs:
+   subject and cluster level".** VERIFIED here by `grep '^title:'` over all eight
+   `vignettes/*.Rmd`: the other seven match exactly. The work log states the
+   eight titles were taken from the `title:` field, so the log's derivation claim
+   is overstated for this one. DISPOSITION: put to the maintainer at the gate.
+10. **[O] `NEWS.md:46-47` — unbounded universal.** "Each method states the
+    designs it applies to and aborts with a classed error elsewhere", asserted
+    over all seven `ci_method` values including `"montecarlo"`, which has no
+    design restriction to abort outside of. No merge-base sentence makes this
+    claim about the set. DISPOSITION: put to the maintainer at the gate.
+11. **[O] `NEWS.md:26-27` — `ggplot2::autoplot()` offered with no install
+    fact.** `R/zzz.R` registers the methods lazily and `ggplot2` is `Suggests`;
+    the merge base carried "`ggplot2` is a `Suggests` dependency", dropped here.
+    DISPOSITION: put to the maintainer at the gate.
+12. **[O] and [S] prior-review lens — `NEWS.md` cites
+    `data-raw/check-mpl-doc-claims.py`, which `.Rbuildignore`'s `^data-raw$`
+    excludes from the tarball.** Pre-existing at the merge base, inside the
+    byte-carried anchor bullet, knowingly retained so the ledger rows stay keyed.
+    Both lenses flag it as a residual rather than a regression. DISPOSITION:
+    reject at triage as a pre-existing issue the diff did not introduce; editing
+    the bullet is an AC3 re-key.
+13. **[O] and [S] blame-history, converging — "What ships" omits the
+    capabilities `DESCRIPTION` headlines.** Multilevel and nested designs,
+    cluster-level coefficients, incomplete and unbalanced data, and within-cell
+    replicates appear nowhere in the entry's body text; the only trace is the
+    article title "*Multilevel designs*". VERIFIED here: `grep -in
+    'cluster\|multilevel\|level ='` over the branch `NEWS.md` matches only that
+    article title, while `DESCRIPTION:12-14` sells those capabilities. The [S]
+    lens rates this its finding 2 and traces the capability to roughly thirty
+    milestones (M5/ADR-011 `level`, M8/ADR-016 nested, M9/ADR-018 incomplete
+    crossed, M37/M46 cluster-level). It is an omission, not an over-claim, and it
+    is the direct consequence of the maintainer's own "delete rather than
+    restore" repair direction — but it bears on whether the Goal ("what the
+    package does for someone meeting it") is met. DISPOSITION: put to the
+    maintainer at the gate.
+14. **[S] blame-history — D-019's own text says its NEWS documentation exists.**
+    VERIFIED here at `cairn/DECISIONS.md:678`: "Perfect/near-perfect-agreement
+    data now errors where it got [0, 1] (documented in NEWS)." The MPL
+    boundary-vs-root-finding-failure distinction that parenthetical names is gone
+    from `NEWS.md` with no replacement. The lens rates this its severest finding,
+    distinguishing it from the other deleted caveats because the decision record
+    names NEWS by name. DISPOSITION: put to the maintainer at the gate.
+15. **[S] blame-history — the `brms` engine's documented guarantees vanished
+    wholesale**: the sourced half-*t*(4, 0, 1) prior, the
+    `intraclass_custom_prior` warning, and the posterior-mode/percentile
+    description; only "`"posterior"` under **brms**" survives. Same shape as 13.
+    DISPOSITION: put to the maintainer at the gate.
+16. **[S] blame-history — D-022's NA-row/balance consequence still absent**
+    (round-1 finding 13). The lens re-verified the absence and notes that, unlike
+    D-019, D-022's own text does not name NEWS. DISPOSITION: reject — an
+    intentional change the maintainer's repair direction called for, already
+    dispositioned at the round-1 return.
+17. **[S] blame-history — the parametric-bootstrap zero-variance boundary caveat
+    still absent** (round-1 finding 14), reported for completeness. DISPOSITION:
+    reject, same reason as 16.
+18. **[S] blame-history — the ragged-Design-3 occasion-averaging scope limit
+    still absent** (round-1 finding 16), reported for completeness. DISPOSITION:
+    reject, same reason as 16.
+19. **[S] blame-history — the `choose_icc()` breaking-change sentence stays
+    deleted**; the lens itself judges this not a defect for a first release.
+    DISPOSITION: reject, agreed on the lens's own reasoning.
+20. **[S] prior-review lens — no regression of any prior lesson.** The lens
+    checked the diff against round 1's own 23 findings and the archived reviews of
+    M130, M136 and M137: round-1 findings 1-5 and 9 are absent from HEAD rather
+    than reworded, the M130 same-commit ledger re-key rule is complied with, the
+    M114/M121/M122 terminal-row rule is not engaged (the ROADMAP edit only flips
+    this milestone's own status), and the M92/D-022/M105/M117/M118 struck framings
+    do not reappear. `gh api repos/jmgirard/intraclass/pulls/comments?per_page=1`
+    returned `[]`, so no PR-thread walk was owed. No finding.
 
 ### Verification of the gate outcome
 
-Every acceptance criterion passes on fresh evidence, and the consistency gate is
-clean. The defects above are not criterion failures: the criteria gate size,
-bullet shape, sentence length and dashes, and the mechanical check against an
-invented or widened claim was descoped at the user's decision, with the work log
-recording plainly that "Nothing now mechanically stops a claim being invented or
-widened in NEWS" and that the reviewer read-through at `/milestone-review` is the
-remaining protection. That read-through has now run and has found the class of
-defect it was left to catch.
+Every acceptance criterion passes on fresh evidence and the consistency gate is
+clean; `cairn_validate` returns exit 0 with the `release window` advisory not
+fired. The criteria gate size, bullet shape, sentence length and dashes; the
+mechanical check against an invented or widened claim was descoped at the user's
+decision, so findings 1, 2 and 9 — false or overstated statements in a shipping
+file — are not criterion failures. They reach the gate under the return floor's
+second clause, as the maintainer's judgment on whether they are load-bearing
+defects in the deliverable. Defect-return count for M142 standing at this gate:
+1. Amendment returns: 0.
