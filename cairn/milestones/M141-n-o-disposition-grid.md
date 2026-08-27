@@ -118,26 +118,26 @@ entry for the reworded abort → not needed, the message is new in the unrelease
       and record the observed disposition per case — reported value, or the
       abort's opening line — in the work log. The measurement decides the
       expectations; nothing is predicted from reading the branches.
-- [ ] T2 — Write `tests/testthat/test-n-o-disposition-grid.R`: the
+- [x] T2 — Write `tests/testthat/test-n-o-disposition-grid.R`: the
       `expand.grid()` call, the stated infeasibility rule, the per-shape
       fixture constructors, and one assertion block per case carrying its exact
       value or message substring and its expected condition stream.
       `devtools::test()` clean.
-- [ ] T2b — Probe the condition-stream comparison: temporarily raise an extra
+- [x] T2b — Probe the condition-stream comparison: temporarily raise an extra
       `cli::cli_inform()` ahead of the dispatch, record in the work log which
       named case reddens, and revert.
-- [ ] T3 — Add AC2's branch-count assertion over `deparse(body(icc))`; run both
+- [x] T3 — Add AC2's branch-count assertion over `deparse(body(icc))`; run both
       probes, one temporary `abort_unsupported()` and one raised through a
       different `abort_` helper, and record each red in the work log before
       reverting.
-- [ ] T4 — Apply AC3's five planted defects one at a time, each reverted before
+- [x] T4 — Apply AC3's five planted defects one at a time, each reverted before
       the next; record which named case went red for each, verbatim, in the
       work log.
 - [ ] T5 — Reword the abort at `R/icc.R:1459-1465` and the block comments at
       `R/icc.R:1447-1458` that carry the same ragged/missing-cell conflation;
       add the three-bullet rendered-message pins for both fixed-rater shapes.
       (RB tripwire: ip-touching)
-- [ ] T6 — Append the superseding entry to `cairn/DECISIONS.md`.
+- [x] T6 — Append the superseding entry to `cairn/DECISIONS.md`.
 - [ ] T7 — Gate: `devtools::document()` produces no diff; every `data-raw/`
       checker run with `--self-test` (M130 lesson — a tracking edit re-keys
       them); `R CMD check`'s raw `Status:` line read and transcribed into the
@@ -156,6 +156,10 @@ entry for the reworded abort → not needed, the message is new in the unrelease
 - 2026-08-27: criteria audit ran in FULL mode (surface tier user-facing) over the amended AC1, two [O] fresh-reader passes, neither reader the author. Pass 1 returned four findings: the exclusion clause's justification false, a hand-pinned two-site condition-stream enumeration against GP8, an instrument-vs-deliverable question on "every case's assertion passes", and a citation off by one (`R/icc.R:1211` is a closing brace; the guard is 1212). Pass 1's own proposed replacement rationale was itself falsified by execution — `icc()` does not silently ignore `design=`/`level=` without a `cluster`, it aborts at `R/icc.R:944-956`. Pass 2 over the repaired wording returned three more: the drop rationale a non sequitur, an untested sensitivity claim, and positional expectations defeating the generated grid. Instrument finding disposed as no-change (the grid test is this milestone's deliverable, and AC3's plants falsify the recorded behaviour); the sensitivity claim disposed at the user's selection as a task (T2b), not a criterion; the rest fixed in the amended text.
 - 2026-08-27: T2b added to Tasks and to AC1's Coverage row — the condition-stream comparison is probed by a temporary extra `cli_inform()`, so the check is shown able to fail without widening the criteria set.
 - 2026-08-27: checkpoint (T2, T6 written, neither checked off). `tests/testthat/test-n-o-disposition-grid.R` written and passing on its own file (42 cases, 179 expectations); `cairn/DECISIONS.md` gained D-041. Two fixture defects found and fixed during T2: the fixed-rater advisory and the Design 3 consistency-drop inform were pinned on invented substrings, and the first multilevel fixtures carried no cluster, rater or interaction variance, so the nested_in_clusters uniform case died in the Monte-Carlo interval (`intraclass_singular_fit`, 49% non-finite draws) instead of fitting. Both fixtures now draw all five components and seed from their own arguments, so a case's data does not depend on the order the grid is walked. T2/T6 stay unchecked until the full `devtools::test()` run completes — it was still running at the checkpoint.
+- 2026-08-27: full `devtools::test()` after T2: `FAIL 0 | WARN 3 | SKIP 2 | PASS 9077`. All three warnings are fixed-rater advisories leaking from unwrapped `icc(raters = "fixed", ...)` calls in `tests/testthat/test-icc-brms.R` (last touched at M48), none from this branch; AC6's 0-warnings clause is carried to T7 with the exact sites in hand. T2 and T6 checked off.
+- 2026-08-27: T2b probe — a temporary `cli::cli_inform()` raised immediately ahead of `if (design_info$has_replicates)` reddened the named case `single/random/uniform` on the condition-set comparison (expected 0 conditions, got 1: "M141 T2b probe: a stray condition ahead of the dispatch."). Reverted.
+- 2026-08-27: T3 — the branch-count assertion locates the dispatch block in `deparse(body(icc))` between the trimmed lines `if (design_info$has_replicates) {` and the first following `replicates <- TRUE`, never by reading `R/icc.R` from disk, and counts 5 `abort_` calls against the 5 distinct branches the grid's abort cases name. Both probes red at 5 vs 6: a sixth `abort_unsupported()` inside the block, and one raised through `abort_unidentified()`. Reverted.
+- 2026-08-27: T4 — five planted defects, applied and reverted one at a time, each reddening a named case. (i) drop `n_cells == ns * nr`: `single/random/missing_cell` reports a number where it must report `NA`. (ii) drop the equal-counts clause: `single/random/ragged` reports a number. (iii) return `length(observed)`: `single/random/uniform` and `single/fixed/uniform` report the wrong count. (iv) force `multilevel_replicate_facts()`'s `complete` to `TRUE`: `ml/crossed/random/plain/missing_cell` fits where it must abort. (v) restrict the fixed-rater guard to unequal counts alone: `single/fixed/missing_cell` fits where it must abort. (i) and (ii) reddened different named cases, so the two clauses of `replicates_uniform` are separably pinned.
 
 ## Decisions
 

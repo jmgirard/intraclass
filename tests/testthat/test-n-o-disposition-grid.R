@@ -431,3 +431,38 @@ test_that("every case reports the n_o disposition or the abort the grid declares
     }
   }
 })
+
+# ---- the dispatch block covers no branch the grid misses -----------------------
+#
+# The grid is a hand-declared set of dispositions, so a branch added to the
+# dispatch later would ship unpinned unless something counts them. Located from
+# `deparse(body(icc))` -- the installed function -- never by reading `R/icc.R`
+# from disk, which is absent under `R CMD check`.
+
+icc_dispatch_block <- function() {
+  src <- trimws(deparse(body(icc)))
+  start <- which(src == "if (design_info$has_replicates) {")
+  stopifnot(length(start) == 1L)
+  closing <- which(src == "replicates <- TRUE")
+  closing <- closing[closing > start]
+  stopifnot(length(closing) >= 1L)
+  src[seq(start, closing[[1L]])]
+}
+
+test_that("the grid's abort cases identify every abort branch in the dispatch", {
+  block <- icc_dispatch_block()
+  # The located domain is non-empty: an anchor that stopped matching would
+  # otherwise make the count trivially agree at zero.
+  expect_gt(length(block), 1L)
+
+  # Any `abort_` helper, not `abort_unsupported(` alone -- a branch raised
+  # through a differently-named helper must still be counted.
+  calls <- sum(grepl("\\babort_[A-Za-z0-9_.]*\\(", block))
+  expect_gt(calls, 0L)
+
+  branch <- vapply(n_o_grid_expectations(), function(x) x$branch, character(1))
+  branches <- unique(branch[!is.na(branch)])
+  expect_gt(length(branches), 0L)
+
+  expect_identical(length(branches), calls)
+})
