@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-27 (M141 done and archived; PR #152 merged on the first review round, no defect return. Four [O] findings fixed at the merge gate, one filed as a candidate row, six rejected; CI then reddened twice on surfaces the local gate cannot reach — `lintr` style, and `covr` defeating a source-reading check — both fixed on the branch. M137 rotated out of the terminal rows with its `record-claims.tsv` expectation. LESSONS: one line added on those two CI surfaces; M140's line trimmed to its uncovered half, its `n_o` enumeration now enforced by `test-n-o-disposition-grid.R`. D-041 added; nothing accepted as a limitation. `cairn_validate` and the six `data-raw/` checkers pass; ROADMAP 57 / 23,898, LESSONS 49 / 19,994, doctrine modules unchanged.)_
+_Last hygiene check: 2026-08-27 (M142 done and archived; PR #153 merged after two review rounds. Round 1 returned it — no criterion failed, but the read-through found the class the descoped claim check was left to catch: condensation had dropped bounding qualifiers and asserted four capabilities `icc()` refuses. The repair round deleted those bullets rather than restoring their bounds. Round 2: all five criteria pass, 22 findings, ten fixed at the merge gate — including a false install claim (`lme4` DOES arrive, via `glmmTMB`'s Imports) and a `summary()` method asserted for a class that has none — four filed as the new "What the 0.1.0 NEWS entry no longer says" row, seven rejected. M48 rotated out of the terminal rows; `record-claims.tsv`'s `roadmap-terminal-rows` row re-keyed with it. LESSONS: one line added on re-measuring after a gate fix and on deriving dependency claims; M72's graduated tail trimmed and M82's line pruned to make room. No D-entry; nothing accepted as a limitation. `cairn_validate` and the six `data-raw/` checkers pass; ROADMAP 58 / 25,732, LESSONS 49 / 19,892, doctrine modules unchanged except prose-style.md 119 / 6,952 against its 120 / 8,000 budget.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,13 +9,12 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M142 | NEWS.md's 0.1.0 entry reads as first-release notes, not a development log | review | — | high | milestones/M142-news-release-notes.md |
+| M142 | NEWS.md's 0.1.0 entry reads as first-release notes, not a development log | done | — | high | milestones/archive/M142-news-release-notes.md |
 | M141 | The `n_o` disposition grid is pinned, and the fixed-rater replicate abort names the right condition | done | — | high | milestones/archive/M141-n-o-disposition-grid.md |
 | M140 | Release-remainder documentation corrections, and the recorded pre-submission check | done | M138, M139 | high | milestones/archive/M140-release-remainder-docs.md |
-| M48 | v0.1.0 release consolidation — CRAN submission-ready | done | M49-M55, M61, M68, M129-M137 | high | milestones/archive/M48-release-v010.md |
 | M138 | Exported-schema remainder — `glance()` gains a rater accessor before the one-way door closes | done | — | high | milestones/archive/M138-glance-schema-remainder.md |
 | M139 | The declared R floor is a measured number CI runs (GP3) | done | — | high | milestones/archive/M139-r-floor-ci-tested.md |
-<!-- terminal-row retention: M141 done (2026-08-27) → M137 rotated out (oldest terminal by merge order; its archive file still resolves there). Kept: M141, M140, M48, M138, M139 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
+<!-- terminal-row retention: M142 done (2026-08-27) → M48 rotated out (oldest terminal by merge order, merged 2026-08-25; its archive file still resolves there). Kept: M142, M141, M140, M138, M139 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
