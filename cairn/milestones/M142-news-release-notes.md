@@ -29,6 +29,11 @@ records-apparatus door.
 `NEWS.md` rows of `data-raw/mpl-doc-claims.tsv` and on the pins in
 `tests/testthat/test-doc-skew-caveat.R`.
 
+This milestone commits one new `data-raw/` instrument, `m142-bullet-lines.awk`.
+It is a ruler over the deliverable's own shape, not a guard over the repo's
+records — the class D-029 warns against smuggling in as documentation — and it
+asserts nothing; AC1 does. D-021 is not engaged by it.
+
 **Out:** a mechanical check that no claim is invented or widened — a two-sided
 sentence diff over both revisions — descoped at the user's decision 2026-08-27
 after three audit passes: its scaffolding was costing more than the rewrite it
@@ -49,23 +54,32 @@ scope. A second `#` version entry → none exists; 0.1.0 is unreleased.
 
 - [ ] AC1 — `NEWS.md` holds exactly one `#` heading (`grep -c '^# '` returns 1)
       and is at most 18,100 bytes by `wc -c` (merge base 36,201). No bullet
-      spans more than six lines, counted by the `awk` program committed at
-      `data-raw/m142-bullet-lines.awk` in the same commit as this plan, whose
-      rule is: a bullet is a line matching `^\* ` plus every following line
-      until the next `^\* `, `^#`, or blank line. One bullet is exempt and named
-      here: the `news_scope()` anchor bullet, opening `* The \`ci_method =
-      "mpl"\` documentation`, which AC4 requires to hold its three quoted ledger
-      claims inside a single bullet; it spans 11 lines at the merge base and
-      spans no more than 11 on the branch. The exemption is this one bullet, not
-      a class.
+      exceeds 500 bytes, measured by `data-raw/m142-bullet-lines.awk` (tracked
+      since `32454c5`), whose rule is: a bullet is a line matching `^\* ` plus
+      every following line until the next `^\* `, `^#`, or blank line, its size
+      being those lines joined with single spaces. The cap is BYTES, not lines,
+      because a line cap is defeated by reflow alone — measured 2026-08-27,
+      rewrapping every bullet in the merge-base file onto one physical line
+      takes "25 bullets over six lines" to 0 without changing a word, and the
+      file already carries 620- and 354-character lines. At the merge base 25
+      bullets exceed 500 bytes, the same 25 that exceed six lines. One bullet is
+      exempt and named here: the `news_scope()` anchor bullet, opening `* The
+      \`ci_method = "mpl"\` documentation`, which AC3 requires to hold its three
+      quoted ledger claims inside a single bullet; it is 1,008 bytes at the
+      merge base and is no larger on the branch. The exemption is this one
+      bullet, not a class.
 - [ ] AC2 — `python3 data-raw/prose-profile.py NEWS.md` reports 0 in its `dash`
       column (R1). Every sentence it counts over 35 words (R2) carries a clause
-      that a shipped test pins verbatim, the carrier set derived by running
-      those pins' own sweeps over the new entry rather than hand-listed (GP8) —
-      so a long sentence carrying no pinned clause fails the criterion, and no
-      sentence is exempted by hand. The relation is containment, not equality:
-      a pinned clause short enough to sit in a sentence under 35 words SHOULD
-      be split down to one, and doing so must not fail the criterion.
+      that a shipped test pins verbatim AND whose own word count exceeds 35 —
+      the test `prose-style.md`'s exemption actually states, "a clause … that
+      admits no sentence break". Bare containment is not enough: it would pass a
+      200-word sentence that happens to contain an 11-word pinned template.
+      Both word counts are derived by running those pins' own sweeps and
+      measuring their templates, never hand-listed (GP8). Measured 2026-08-27,
+      exactly one pinned clause qualifies — `residual_template()`'s, at 58
+      words; the `flat`, `parity` and `subjects` templates are 32, 17 and 11
+      words and so force no long carrier, and their carriers must come under 35.
+      `cairn/doctrine/prose-style.md`'s scope sentence names `NEWS.md`.
       `cairn/doctrine/prose-style.md`'s scope sentence names `NEWS.md`.
 - [ ] AC3 — the guards keyed on NEWS text pass, run at review:
       `python3 data-raw/check-mpl-doc-claims.py` and the same script with
@@ -142,6 +156,9 @@ scope. A second `#` version entry → none exists; 0.1.0 is unreleased.
 - 2026-08-27: DESCOPED at the user's explicit decision — "descope it, gate size and sentence length only". AC3, the two-sided sentence diff against an invented or widened claim, is removed as a criterion along with the two tasks that built it; the criteria set goes from six to five and the milestone gates size, bullet shape, sentence length and dashes, plus the two shipped guards and the standard gate. The descoped check is absorbed into the standing "Three prose-apparatus deferrals" candidate row as its (c), not dropped. Rationale recorded rather than inferred: three audit passes over three criteria sets, each killing the previous attempt to mechanize "reads as first-release notes" — the scaffolding was costing more than the rewrite it guarded.
 - 2026-08-27: what the descope gives up, stated plainly so review does not read the narrowed set as covering it. Nothing now mechanically stops a claim being invented or widened in NEWS. R6 protection is: the reviewer read-through at `/milestone-review`, which `cairn/doctrine/prose-style.md` already names as R6's home (R6 is uncounted there by that module's own text); `check-mpl-doc-claims.py`, which settles every universal and negative claim in the MPL bullet against the committed coverage fixture; and `test-doc-skew-caveat.R`, which pins the width and residual statements. Claims outside those two guards' reach are covered by judgment alone. T2 carries the deletion-and-cross-reference discipline and asks that any deliberately new sentence be named in the work log so the reviewer reads it as new rather than hunting a source for it.
 - 2026-08-27: criteria audit pass 3 was in flight when the descope landed and is superseded for the two criteria the descope removed; its findings on the surviving AC1/AC2 wording, whose text the descope did not change, are disposed in the next work-log line if it returns any. Plan is otherwise complete: remainder ledger and durable-record preview presented this turn.
+- 2026-08-27: criteria audit pass 3 disposed. Eleven findings; six concerned criteria the descope removed and are moot. Four live, all verified by command before disposal. (1) AC1's six-line bullet cap was defeated by REFLOW alone — rewrapping every bullet onto one physical line takes 25-over-six to 0 without changing a word, since the `awk` counts newlines; the cap is now 500 BYTES per bullet, which selects the same 25 bullets at the merge base, with the exempt anchor bullet held at its measured 1,008 bytes. (2) AC2's containment let a 200-word sentence pass by containing an 11-word pinned template; an over-35 sentence must now carry a pinned clause whose OWN word count exceeds 35, which is what `prose-style.md`'s "admits no sentence break" actually tests. Measured: only `residual_template()` qualifies at 58 words, against `flat` 32, `parity` 17, `subjects` 11. (3) The Scope now prices the one new `data-raw/` instrument against D-029 rather than leaving it unargued. (4) Finding 6, that `m142-bullet-lines.awk` was untracked when AC1 called it committed, was already resolved — it entered the tree at `32454c5`, which AC1 now cites.
+- 2026-08-27: SUPERSEDES this session's earlier work-log line reading "so the release-shaped tripwire does not fire and D-050 is not engaged". `D-050` is a cairn-plugin id, not one this repo defines (its `DECISIONS.md` ends at D-041), and D-020 Amendment 3 requires a plugin id be qualified. Read it as "cairn D-050". The substance is unchanged: the user declared no release window, and this is ordinary documentation work.
+- 2026-08-27: pass 3 also confirmed, and this milestone accepts, that no criterion binds the Goal's register — and that AC1's exempt anchor bullet positively preserves one development-log sentence, "The `ci_method = \"mpl\"` documentation now states…", because AC3 requires its three ledger claims to stay in one bullet. Accepted at the descope: register is the maintainer's judgment at the merge gate. A reflow-plus-deletion pass keeping the present retrospective voice would satisfy all five criteria, and only the read-through would catch it.
 
 ## Decisions
 
