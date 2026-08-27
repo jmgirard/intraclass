@@ -385,10 +385,12 @@ alternate engines, and seeded simulations.
   values included — aborts with a classed error instead of quietly using the first. This
   covers `raters`, `posterior_summary`, `model`, `engine`, `ci_method`, `autoplot()`'s
   `what`, and every question `choose_icc()` asks (`model`, `unit`, `type`, `raters`,
-  `level`), the chooser taking one answer per question. In `icc()` and `d_study()` the
-  arguments that genuinely take several values are unaffected: `type`, `unit` and `level`,
-  which default to reporting every value, and `occasions`, which defaults to one but still
-  accepts both. Note the same names mean different things in the chooser, where they are
+  `level`), the chooser taking one answer per question. Arguments that genuinely take
+  several values are unaffected, and which arguments those are depends on the function: in
+  `icc()` they are `type`, `unit` and `level`, which default to reporting every value, and
+  `occasions`, which defaults to one but still accepts both; in `d_study()` they are the
+  two projection axes `m` and `n_o`, each a numeric vector, supplied one per call — asking
+  for both aborts. Note the same names mean different things in the chooser, where they are
   answers rather than axes: `choose_icc(type = c("agreement", "consistency"))` now aborts
   where it used to recommend a single coefficient for agreement.
 

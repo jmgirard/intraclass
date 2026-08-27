@@ -62,10 +62,11 @@ interval settings as attributes. \code{tidy()} names that coefficient column
 fitted \code{icc} reports both error
 definitions (the default), \code{d_study()} projects \strong{one reliability curve per
 definition}, distinguished by the \code{type} column. A single-type fit projects
-a single curve. A multilevel projection fills the \code{level} column (one curve
-per level), and a replicate projection the \code{occasions} column. Read the
-projection with \code{tidy()}: the object's own layout is internal, and only the
-tidied columns are a stable contract.
+a single curve. A multilevel projection gains a \code{level} column (one curve
+per level) and a replicate projection an \code{occasions} column, each where it
+applies; \code{tidy()} carries both columns on every projection, \code{NA} where the
+fit does not define them. Read the projection with \code{tidy()}: the object's
+own layout is internal, and only the tidied columns are a stable contract.
 
 The methods documented on this page return:
 \itemize{

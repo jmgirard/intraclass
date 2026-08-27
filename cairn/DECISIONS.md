@@ -1690,3 +1690,30 @@ own code. If those packages regain support for older R the floor can be
 re-measured and lowered — by a fresh measurement and a new decision, never by
 inference from a `Depends` field. A floor is only ever declared at a version CI
 runs.
+
+### D-040 (2026-08-26): D-037's report-all enumeration is corrected for `d_study()` — its vector-valued arguments are the projection axes `m` and `n_o`
+
+**Context.** D-037 settled which arguments report every value and which take
+exactly one, per (function, argument) pair, and named the report-all axes in
+`icc()` and `d_study()` together as `type`, `unit`, `level` and `occasions`.
+`d_study()`'s signature is `(x, m, n_o, conf_level, mc_samples, seed)`; it has
+none of those four. The pairing reached the release text, which told users
+those four arguments are "unaffected" in `d_study()` as well as in `icc()`.
+
+**Decision.** D-037's rule — classification is per (function, argument) pair,
+decided by whether that function routes the argument through
+`validate_choice()` — stands unchanged, as does D-036's discriminator behind
+it. Only D-037's `d_study()` enumeration is superseded: `d_study()` has no
+report-all axis. Its vector-valued arguments are the two projection axes `m`
+and `n_o` — numeric vectors that sweep a curve, not choice arguments selecting
+one of a fixed set. They are mutually exclusive, and supplying both aborts
+(`R/d-study.R:214-222`). D-037's `icc()` and `choose_icc()` clauses are
+untouched; nothing has shown either wrong.
+
+**Consequences.** `NEWS.md`'s "unaffected" sentence is scoped per function:
+`icc()` keeps its four axes, `d_study()` names `m` and `n_o`. No shipped
+behaviour changes — the abort on both axes and the numeric-vector validation
+of `n_o` both predate this entry and are pinned in
+`tests/testthat/test-d-study.R`. A future `d_study()` argument is classified
+the way D-037 says: by asking whether `d_study()` itself routes it through
+`validate_choice()`.
