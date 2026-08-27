@@ -404,13 +404,23 @@ test_that("glance.icc carries `raters` and `replicates`, one name set per design
       cluster = cluster,
       seed = 1
     ),
-    replicate = icc(replicate_frame(), score, subject, rater, seed = 1)
+    replicate = icc(replicate_frame(), score, subject, rater, seed = 1),
+    design3 = icc(
+      design3_frame(),
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      seed = 1
+    )
   )
   gls <- lapply(fits, glance)
 
-  # A one-way design has no rater facet, so the treatment does not apply there;
-  # every other design reports the treatment it was fitted under.
+  # A one-way design has no rater facet, and neither does Design 3, whose raters
+  # are nested in subjects: the treatment does not apply on either, so both read
+  # NA (D-042). Every other design reports the treatment it was fitted under.
   expect_identical(gls$oneway$raters, NA_character_)
+  expect_identical(gls$design3$raters, NA_character_)
   expect_identical(gls$random$raters, "random")
   expect_identical(gls$fixed$raters, "fixed")
   expect_identical(gls$multilevel$raters, "random")
@@ -424,7 +434,8 @@ test_that("glance.icc carries `raters` and `replicates`, one name set per design
       random = FALSE,
       fixed = FALSE,
       multilevel = FALSE,
-      replicate = TRUE
+      replicate = TRUE,
+      design3 = FALSE
     )
   )
 

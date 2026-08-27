@@ -386,6 +386,43 @@ test_that("O-NML/incomplete: ragged Design 3 reduces to the incomplete one-way",
   expect_equal(pick(x_ml, "ICC(k)"), ow("ICC(k)"), tolerance = 1e-2)
 })
 
+test_that("Design 3 reports no rater treatment, at four geometries", {
+  skip_if_not_installed("glmmTMB")
+  # Raters nested in subjects leaves no separable rater main effect, so the
+  # rater-treatment cell would name a facet the fit does not estimate. The rule
+  # keys on the nesting alone: cluster variance, grid size and balance do not
+  # enter it (D-042), so all four geometries this file already fits report the
+  # same. `d_study()` projects a Design 3 fit on the rater axis, and its
+  # projection reads the column the same way.
+  fits <- list(
+    oracle = sim_design3(30, 8, 6, 1.0, 1.2, 0.5, seed = 20260707),
+    reduction = sim_design3(50, 20, 6, 0, 1.2, 0.5, seed = 99),
+    detection = sim_design3(20, 6, 4, 1.0, 1.2, 0.5, seed = 7),
+    ragged = drop_cells(sim_design3(50, 20, 6, 0, 1.2, 0.5, seed = 99), 0.25, 7)
+  )
+  got <- vapply(
+    fits,
+    function(d) {
+      x <- icc(d, score, subject, rater, cluster = cluster, seed = 1)
+      expect_identical(x$design$ml_design, "nested_in_subjects")
+      c(
+        fit = glance(x)$raters,
+        projection = glance(d_study(x, m = 1:3))$raters
+      )
+    },
+    character(2)
+  )
+  expect_identical(
+    got,
+    matrix(
+      NA_character_,
+      nrow = 2L,
+      ncol = 4L,
+      dimnames = list(c("fit", "projection"), names(fits))
+    )
+  )
+})
+
 test_that("incomplete nested d_study projects the subject level (M18 path)", {
   skip_if_not_installed("glmmTMB")
   # Lifting the balance guard makes incomplete-nested d_study() reachable: nested
