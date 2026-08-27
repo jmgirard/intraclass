@@ -175,6 +175,7 @@ entry for the reworded abort → not needed, the message is new in the unrelease
 - 2026-08-27: status review; all tasks checked.
 - 2026-08-27: merge gate — four fix-now findings applied on the branch (block-end anchor extended through the closing brace and made to fail loudly; three comment corrections; the dropped promote trigger restored), one follow-up filed as a candidate row, six rejected. Grid test green after each; `air format .` clean.
 - 2026-08-27: CI red on `lint` at the merge gate — `lintr::lint_package()` reported four style lints in the new test file (three SCREAMING_CASE constants, one `<<-`), a surface neither `devtools::test()` nor `devtools::check()` reaches, so the implement phase's local gate never saw them. Fixed on the branch: constants renamed to snake_case, the expectations accumulator moved from `<<-` into an environment written with `<-`. `lintr::lint_package()` now reports 0 lints package-wide; grid test `FAIL 0 | PASS 195`; `air format .` clean. Mechanical, no assertion changed, so approval was not re-requested.
+- 2026-08-27: CI red a second time, on `test-coverage` — `covr` rewrites every function body to thread its counters, so under instrumentation `deparse(body(icc))` holds no line matching the dispatch block's own source and `icc_dispatch_block()` errored (`length(start) == 1L is not TRUE`, `test-n-o-disposition-grid.R:472`). The three `R CMD check` matrix jobs all passed; only the coverage job instruments. Fixed with `skip_on_covr()` on that one structural test, first use of the helper in this repo. Verified both ways: with a planted sixth branch the assertion still reds in a normal run (actual 5, expected 6), and under `R_COVR=true` the file reports `FAIL 0 | SKIP 1 | PASS 191`.
 - 2026-08-27: review run; PR #152 opened as a draft. Six acceptance criteria executed with fresh evidence, all pass; consistency gate clean (`cairn_validate` exit 0, `document()` no diff, `pkgdown::check_pkgdown()` clean, `check()` `Status: OK`, six `data-raw/` checkers self-test green). Three-lens fan-out: [S] blame-history and [S] prior-PR-comments no findings, [O] diff-bug eleven, none an acceptance-criterion failure — four fix-now, one follow-up, six rejected. No defect return.
 
 ## Decisions
@@ -359,3 +360,14 @@ implement phase's gate could not have caught them. Fixed on the branch —
 snake_case names and an environment-backed accumulator written with `<-` — and
 re-verified: `lintr::lint_package()` 0 lints, grid test `FAIL 0 | WARN 0 |
 SKIP 0 | PASS 195`, `air format .` clean.
+
+A second CI failure followed, on `test-coverage` only: `covr` instruments every
+function body, so `deparse(body(icc))` under coverage holds no line matching the
+dispatch block's source and `icc_dispatch_block()` errored. AC2's assertion is
+structural and tells a coverage run nothing, so it now carries `skip_on_covr()`
+— the first use of that helper in this repo — rather than anchoring on covr's
+rewriting. This narrows where AC2's assertion runs: it still runs under
+`devtools::test()` and under `R CMD check` on all three CI platforms, and no
+longer under the coverage job. Re-verified: a planted sixth branch still reds
+the count (actual 5, expected 6) in a normal run, and `R_COVR=true` gives
+`FAIL 0 | WARN 0 | SKIP 1 | PASS 191`.

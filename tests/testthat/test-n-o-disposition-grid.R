@@ -469,6 +469,13 @@ icc_dispatch_block <- function() {
 }
 
 test_that("the grid's abort cases identify every abort branch in the dispatch", {
+  # `covr` rewrites every function body to thread its counters through, so
+  # `deparse(body(icc))` under instrumentation holds no line matching this
+  # block's own source. The check is structural, not behavioural, and reports
+  # nothing a coverage run wants: skip it there rather than anchor on covr's
+  # rewriting. It still runs under `devtools::test()` and `R CMD check` on
+  # every CI platform.
+  skip_on_covr()
   block <- icc_dispatch_block()
   # `icc_dispatch_block()` already stops on a missing or ambiguous anchor; this
   # guards the remaining case -- anchors that still match but bracket a short or
