@@ -1,11 +1,11 @@
 # M141: The `n_o` disposition grid is pinned, and the fixed-rater replicate abort names the right condition
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP7, GP8, #5, #8
-- **Branch/PR:** —
+- **Branch/PR:** `m141-n-o-disposition-grid`
 
 ## Goal
 
@@ -35,19 +35,28 @@ entry for the reworded abort → not needed, the message is new in the unrelease
       `expand.grid()` over the axes it names in place (`multilevel`,
       `ml_design`, `raters`, whether `level` includes `"conflated"`, and the
       replicate shape: uniform-and-complete / unequal counts / a cell the
-      design defines but the data omits), never as a hand-written row list
-      (GP8). Combinations the argument grammar makes infeasible are dropped by
-      a rule stated beside the call, among them `ml_design =
-      "nested_in_clusters"` with `"conflated"`, which `R/icc.R:1291` overrides
-      to `"subject"` before the dispatch is reached. Every surviving case
-      declares the exact disposition it expects — `expect_identical(glance(fit)$n_o,
-      <int>)`, `expect_identical(glance(fit)$n_o, NA_integer_)`, or an abort
-      identified by a message substring, never by the `intraclass_unsupported`
-      class alone, since guards outside the dispatch abort with that same class
-      (`R/icc.R:1232`) — together with the condition stream expected ahead of
-      it, derived per case from the advisory's own rule at `R/icc.R:1042`
-      (`raters == "fixed" && !(multilevel && "conflated" %in% level)`) rather
-      than asserted uniformly. Every case's assertion passes.
+      design defines but the data omits), every unnamed `icc()` argument held
+      at its default, never as a hand-written row list (GP8). The rule stated
+      beside the call drops the rows on which an axis does not apply: without
+      a `cluster` column an `ml_design` or a `"conflated"` level has no
+      argument to ride on, so such a row's call is identical to the plain
+      single-level row's and is not a distinct case (the refusals those
+      arguments would draw, `R/icc.R:944-956`, are pre-dispatch and out of
+      scope). A nested `ml_design` with `"conflated"` is not dropped: it
+      reaches `icc()` and is refused at the fixed-rater guard (`R/icc.R:1204`)
+      or the non-crossed guard (`R/icc.R:1212`), so the grid carries it.
+      Each generated case is joined to its expectation by its axis values,
+      never by row position, and the file asserts the generated set and the
+      expectation set differ in neither direction, so an added axis value
+      fails loudly rather than re-aligning silently. Every surviving case
+      declares the exact disposition it expects —
+      `expect_identical(glance(fit)$n_o, <int>)`,
+      `expect_identical(glance(fit)$n_o, NA_integer_)`, or an abort identified
+      by a message substring, never by a condition class alone, since guards
+      outside the dispatch abort with the same class (`R/icc.R:1232`) —
+      together with the conditions raised ahead of it, captured and compared
+      as a whole set rather than asserted uniformly. Every case's assertion
+      passes.
 - [ ] AC2 — the same file asserts that the number of distinct dispatch branches
       its abort cases identify equals the number of `abort_*()` calls inside
       the within-cell-replicate dispatch block, the calls matched by a pattern
@@ -95,7 +104,7 @@ entry for the reworded abort → not needed, the message is new in the unrelease
 
 ## Coverage
 
-- AC1 → T1, T2
+- AC1 → T1, T2, T2b
 - AC2 → T3
 - AC3 → T4
 - AC4 → T5
@@ -104,7 +113,7 @@ entry for the reworded abort → not needed, the message is new in the unrelease
 
 ## Tasks
 
-- [ ] T1 — Measure the whole grid before asserting any of it (M140 lesson):
+- [x] T1 — Measure the whole grid before asserting any of it (M140 lesson):
       build a fixture per replicate shape, run every feasible axis combination,
       and record the observed disposition per case — reported value, or the
       abort's opening line — in the work log. The measurement decides the
@@ -114,6 +123,9 @@ entry for the reworded abort → not needed, the message is new in the unrelease
       fixture constructors, and one assertion block per case carrying its exact
       value or message substring and its expected condition stream.
       `devtools::test()` clean.
+- [ ] T2b — Probe the condition-stream comparison: temporarily raise an extra
+      `cli::cli_inform()` ahead of the dispatch, record in the work log which
+      named case reddens, and revert.
 - [ ] T3 — Add AC2's branch-count assertion over `deparse(body(icc))`; run both
       probes, one temporary `abort_unsupported()` and one raised through a
       different `abort_` helper, and record each red in the work log before
@@ -137,6 +149,12 @@ entry for the reworded abort → not needed, the message is new in the unrelease
 - 2026-08-27: plan-gate criteria audit ran in FULL mode (declared surface tier user-facing), two [O] passes over the drafted wording. Pass 1 returned findings on five of six criteria: a `covr` 100%-line gate conflicting with PRINCIPLES.md #11 and enumerating a proxy range, a self-satisfying "a row per design shape", two probes sharing one location and one mutation form, a hand-pinned grid duplicated into `DECISIONS.md` against GP8, and an undefined "clean". Pass 2 over the repaired wording returned six more: a condition stream false for the multilevel-fixed-conflated case, abort cases identified by class alone that pre-dispatch guards also satisfy, a branch-count equality that cannot hold row-for-row, a probe blind to a differently-named `abort_` helper, a `readLines("R/icc.R")` implementation that errors under `R CMD check`, and two wrong line ranges. All disposed at the gate; one finding — whether the grid carries a mechanical completeness check at all — went to the question gate and became AC2.
 - 2026-08-27: plan gate chose a mechanical abort-branch count over a snapshot grid because a later-added branch would otherwise ship unpinned, the shape the standing merDeriv-guard candidate row records as recurring; falsified by a branch-count assertion reddening on a change that adds no new disposition.
 - 2026-08-27: plan gate chose mirroring the multilevel sibling's "Ragged or incomplete" wording over a condition-first rewrite because the two aborts guard the same condition and should read alike; falsified by a user reading the shared phrase as naming only the ragged shape.
+- 2026-08-27: branch `m141-n-o-disposition-grid` cut from `main`; status in-progress.
+- 2026-08-27: T1 measured the whole grid by executing `icc()`, nothing predicted from reading branches. 42 grammatical combinations, not the 30 the plan implied: 36 multilevel (3 `ml_design` x 2 `raters` x 2 conflated x 3 replicate shapes) + 6 single-level (2 `raters` x 3 shapes). Dispositions: `n_o = 2L` on the four uniform-and-complete fitting cases (single-level random/fixed, multilevel crossed and nested_in_clusters random, plain levels); `NA_integer_` on the single-level random ragged and missing-cell cases; the other 36 abort, across seven distinct messages. The measurement is transcribed into the grid test as its expectations.
+- 2026-08-27: T1 measurement falsified two AC1 clauses. Nested `ml_design` with `"conflated"` is not overridden to `"subject"` at `R/icc.R:1291` as AC1 stated — it never reaches there, aborting at `R/icc.R:1204` (fixed) or `R/icc.R:1212` (random). And the conditions raised ahead of a disposition come from two sites, not the one `R/icc.R:1042` advisory AC1 named: the Design 3 consistency-drop `cli_inform()` at `R/icc.R:1308-1312` fires on every nested_in_subjects random case.
+- 2026-08-27: amendment (substantive, mini gate, user selected): AC1 rewritten. The infeasibility clause and its false justification are replaced by a drop rule covering only the single-level rows whose `ml_design`/`"conflated"` value has no argument to ride on; nested-with-conflated joins the grid (30 cases -> 42); the condition stream is compared as a whole set instead of derived from one named advisory rule; expectations are keyed to each case's axis values with set equality asserted in both directions. Criteria set widened by no new criterion; AC1's promise domain grew from 30 cases to 42 and its GP8 clause from construction to lookup.
+- 2026-08-27: criteria audit ran in FULL mode (surface tier user-facing) over the amended AC1, two [O] fresh-reader passes, neither reader the author. Pass 1 returned four findings: the exclusion clause's justification false, a hand-pinned two-site condition-stream enumeration against GP8, an instrument-vs-deliverable question on "every case's assertion passes", and a citation off by one (`R/icc.R:1211` is a closing brace; the guard is 1212). Pass 1's own proposed replacement rationale was itself falsified by execution — `icc()` does not silently ignore `design=`/`level=` without a `cluster`, it aborts at `R/icc.R:944-956`. Pass 2 over the repaired wording returned three more: the drop rationale a non sequitur, an untested sensitivity claim, and positional expectations defeating the generated grid. Instrument finding disposed as no-change (the grid test is this milestone's deliverable, and AC3's plants falsify the recorded behaviour); the sensitivity claim disposed at the user's selection as a task (T2b), not a criterion; the rest fixed in the amended text.
+- 2026-08-27: T2b added to Tasks and to AC1's Coverage row — the condition-stream comparison is probed by a temporary extra `cli_inform()`, so the check is shown able to fail without widening the criteria set.
 
 ## Decisions
 

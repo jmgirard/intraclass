@@ -9,7 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M141 | The `n_o` disposition grid is pinned, and the fixed-rater replicate abort names the right condition | planned | — | high | milestones/M141-n-o-disposition-grid.md |
+| M141 | The `n_o` disposition grid is pinned, and the fixed-rater replicate abort names the right condition | in-progress | — | high | milestones/M141-n-o-disposition-grid.md |
 | M140 | Release-remainder documentation corrections, and the recorded pre-submission check | done | M138, M139 | high | milestones/archive/M140-release-remainder-docs.md |
 | M137 | R6 claim audit over the M134-M136 prose diffs | done | — | high | milestones/archive/M137-r6-claim-audit.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | done | M49-M55, M61, M68, M129-M137 | high | milestones/archive/M48-release-v010.md |
