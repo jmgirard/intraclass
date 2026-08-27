@@ -29,7 +29,15 @@ records-apparatus door.
 `NEWS.md` rows of `data-raw/mpl-doc-claims.tsv` and on the pins in
 `tests/testthat/test-doc-skew-caveat.R`.
 
-**Out:** extending `check-mpl-doc-claims.py`'s `news_scope()` past its one
+**Out:** a mechanical check that no claim is invented or widened — a two-sided
+sentence diff over both revisions — descoped at the user's decision 2026-08-27
+after three audit passes: its scaffolding was costing more than the rewrite it
+guards. R6 protection here is the reviewer read-through at
+`/milestone-review`, which `cairn/doctrine/prose-style.md` already treats as R6's
+home, plus the two shipped guards that pin the specific claims that matter
+(`check-mpl-doc-claims.py` and `test-doc-skew-caveat.R`, both gated by AC3
+below) → absorbed into the standing "Two prose-apparatus deferrals" candidate
+row as its (c). Extending `check-mpl-doc-claims.py`'s `news_scope()` past its one
 anchor bullet → the standing "Harden `data-raw/check-mpl-doc-claims.py`"
 candidate row, which D-021 still bars and D-029 explicitly declines to reopen
 for apparatus dressed as documentation. Any change to what the package computes,
@@ -59,24 +67,7 @@ scope. A second `#` version entry → none exists; 0.1.0 is unreleased.
       a pinned clause short enough to sit in a sentence under 35 words SHOULD
       be split down to one, and doing so must not fail the criterion.
       `cairn/doctrine/prose-style.md`'s scope sentence names `NEWS.md`.
-- [ ] AC3 — no claim is invented, widened, or silently unbounded (R6), checked
-      in both directions over raw text. `data-raw/m142-news-sentence-diff.py`
-      segments both revisions of the entry by importing `prose-profile.py`'s own
-      `paragraphs()` and `sentences()` with a normalization that applies every
-      step of the ruler's `normalize()` EXCEPT its code-span collapse — the
-      ruler rewrites every `` `x` `` span to the word `code`, which would make a
-      swapped identifier compare as unchanged (measured 2026-08-27). The script
-      asserts its own sentence count equals `profile_file()`'s on both
-      revisions, so a segmentation that drifts from the ruler's fails loudly
-      rather than silently re-partitioning. Every merge-base sentence with no
-      verbatim counterpart on the branch, and every branch sentence with no
-      verbatim counterpart at the merge base, appears in a triage table in this
-      milestone file with a verdict of `removed`, `narrower`, `split`,
-      `pointer`, or `new`; no verdict is `wider`, and each `removed` row states
-      which surviving sentence, if any, the removed text bounded. The two
-      set-differences enumerate the domain, and the script fails if either holds
-      a sentence the table does not list.
-- [ ] AC4 — the guards keyed on NEWS text pass, run at review:
+- [ ] AC3 — the guards keyed on NEWS text pass, run at review:
       `python3 data-raw/check-mpl-doc-claims.py` and the same script with
       `--self-test` both exit 0, its `news_scope()` anchor bullet still
       locatable, and each of the four `data-raw/mpl-doc-claims.tsv` rows whose
@@ -86,12 +77,12 @@ scope. A second `#` version entry → none exists; 0.1.0 is unreleased.
       the same commit as the text change that required it (M130 lesson).
       `Rscript -e 'devtools::test(filter = "doc-skew-caveat")'` reports
       `FAIL 0`.
-- [ ] AC5 — `git diff <merge-base>..HEAD --name-only` lists only `NEWS.md`,
-      `data-raw/mpl-doc-claims.tsv`, `data-raw/m142-news-sentence-diff.py`,
-      `data-raw/m142-bullet-lines.awk`, `tests/testthat/test-doc-skew-caveat.R`,
+- [ ] AC4 — `git diff <merge-base>..HEAD --name-only` lists only `NEWS.md`,
+      `data-raw/mpl-doc-claims.tsv`, `data-raw/m142-bullet-lines.awk`,
+      `tests/testthat/test-doc-skew-caveat.R`,
       `cairn/doctrine/prose-style.md`, and paths under `cairn/`. Any hunk in the
       test file is a pin re-key and nothing else.
-- [ ] AC6 — `Rscript -e 'devtools::test()'` reports `FAIL 0` and no warning whose
+- [ ] AC5 — `Rscript -e 'devtools::test()'` reports `FAIL 0` and no warning whose
       rendered message text is absent from the set the same `devtools::test()`
       invocation reports at this milestone's merge-base, both runs made in the
       review session; `Rscript -e 'devtools::check()'` reports 0 errors and 0
@@ -103,43 +94,36 @@ scope. A second `#` version entry → none exists; 0.1.0 is unreleased.
 
 - AC1 → T1, T2, T3
 - AC2 → T3, T4
-- AC3 → T5, T6
-- AC4 → T7
-- AC5 → T7, T8
-- AC6 → T8
+- AC3 → T5
+- AC4 → T5, T6
+- AC5 → T6
 
 ## Tasks
 
 - [ ] T1 — Measure the merge base and record it: `wc -c`, the ruler's four
       columns, the per-bullet counts from `data-raw/m142-bullet-lines.awk`
-      (committed with this plan, already reproducing 47 bullets / 25 over six),
-      the four `NEWS.md` ledger rows with their quoted text, and the runs the
-      `width`/`residual` pins locate in NEWS today. Nothing predicted from
-      reading.
+      (committed with this plan, already reproducing 47 bullets / 25 over six /
+      an 11-line anchor bullet), the four `NEWS.md` ledger rows with their
+      quoted text, and the runs the `width`/`residual` pins locate in NEWS
+      today. Nothing predicted from reading.
 - [ ] T2 — Cut section by section by DELETION and CROSS-REFERENCE — point at
       `?icc` or the vignette that already carries the detail — never by
-      composing a shorter claim from a reading of the old one. This is the
-      milestone's whole risk: M133, M136 and M123 each returned repeatedly on
-      composed prose; M137 passed in one round by deriving instead. Where a
-      first-release orienting sentence is genuinely wanted, write it and take
-      the AC3 `new` verdict, which exists for exactly that.
+      composing a shorter claim from a reading of the old one. No criterion
+      gates this after the descope, so it is the read-through at review that
+      catches a breach: M133, M136 and M123 each returned repeatedly on composed
+      prose, and M137 passed in one round by deriving instead. Where a
+      first-release orienting sentence is genuinely wanted, write it — and say
+      so in the work log, so the reviewer reads it as new rather than hunting
+      its source.
 - [ ] T3 — Re-measure with the ruler and the `awk` rule after the LAST content
       commit, never at the task that wrote the prose (M135 lesson).
 - [ ] T4 — Add `NEWS.md` to `cairn/doctrine/prose-style.md`'s scope sentence;
       re-check the module against its stated 120-line / 8,000-byte budget
       (118 / 6,941 at the merge base). Record each R2 carrier with its word
       count and the pinned clause it carries, as that module's exemption asks.
-- [ ] T5 — Write `data-raw/m142-news-sentence-diff.py`: import
-      `prose-profile.py`'s `paragraphs()`/`sentences()`, apply every
-      `normalize()` step except the code-span collapse, assert the sentence
-      count matches `profile_file()`'s on both revisions, and emit the two
-      set-differences. Prove it able to fail before trusting it: plant a swapped
-      identifier, a deleted bounding clause, and an invented sentence, and show
-      each surfaces (check-discrimination rule).
-- [ ] T6 — Triage every row the script emits; write the table into this file.
-- [ ] T7 — Re-key the ledger rows and any pin the moved text broke, in the same
+- [ ] T5 — Re-key the ledger rows and any pin the moved text broke, in the same
       commit as the move; run every `data-raw/` checker with `--self-test`.
-- [ ] T8 — Gate: full suite, merge-base suite in a temporary worktree,
+- [ ] T6 — Gate: full suite, merge-base suite in a temporary worktree,
       `devtools::check()`, `pkgdown::build_news()`, `devtools::document()`.
 
 ## Work log
@@ -155,7 +139,9 @@ scope. A second `#` version entry → none exists; 0.1.0 is unreleased.
 - 2026-08-27: plan gate chose the repaired mechanical claim check over retiring R6 to a reviewer read-through, at the user's explicit selection and against `cairn/doctrine/prose-style.md`'s own treatment of R6 as uncounted judgment; falsified by the milestone returning on the diff script's edge cases rather than on the prose, which is how M134 spent four rounds. The Goal itself is NOT bound by any criterion and is not pretended to be: the criteria prevent the degenerate outcomes (blind truncation, widened or invented claim, dev-log sentence length), and whether the result reads as first-release notes is the maintainer's judgment at the merge gate.
 - 2026-08-27: three measurements taken this session rather than asserted. `data-raw/m142-bullet-lines.awk`, committed with this plan, reproduces 47 bullets / 25 over six lines / an 11-line anchor bullet, so the Goal's figures and AC1's procedure agree. Dropping ONLY the code-span step from the ruler's `normalize()` leaves segmentation unchanged on the current NEWS.md — 172 sentences either way — so AC3's self-consistency assertion is satisfiable and its script buildable. The residual clause is 58 words standing alone under the ruler, so the wrong 72-word figure is gone from AC2 entirely rather than corrected in place.
 - 2026-08-27: AC2 defect found by the author, not the audit: it required the over-35 set to EQUAL the pinned-carrier set, which fails the milestone for doing the right thing — splitting a width clause down under 35 words removes it from the over-35 set while it stays a carrier. Reworded to containment, with the intent stated so review cannot read it the other way.
-- 2026-08-27: CHECKPOINT, plan still not complete. Criteria audit pass 3 over this third criteria set was in flight when this was committed; its findings are not yet disposed, and the remainder ledger and durable-record preview are not yet presented. Do not start implementation until pass 3 is disposed with a work-log line.
+- 2026-08-27: DESCOPED at the user's explicit decision — "descope it, gate size and sentence length only". AC3, the two-sided sentence diff against an invented or widened claim, is removed as a criterion along with the two tasks that built it; the criteria set goes from six to five and the milestone gates size, bullet shape, sentence length and dashes, plus the two shipped guards and the standard gate. The descoped check is absorbed into the standing "Three prose-apparatus deferrals" candidate row as its (c), not dropped. Rationale recorded rather than inferred: three audit passes over three criteria sets, each killing the previous attempt to mechanize "reads as first-release notes" — the scaffolding was costing more than the rewrite it guarded.
+- 2026-08-27: what the descope gives up, stated plainly so review does not read the narrowed set as covering it. Nothing now mechanically stops a claim being invented or widened in NEWS. R6 protection is: the reviewer read-through at `/milestone-review`, which `cairn/doctrine/prose-style.md` already names as R6's home (R6 is uncounted there by that module's own text); `check-mpl-doc-claims.py`, which settles every universal and negative claim in the MPL bullet against the committed coverage fixture; and `test-doc-skew-caveat.R`, which pins the width and residual statements. Claims outside those two guards' reach are covered by judgment alone. T2 carries the deletion-and-cross-reference discipline and asks that any deliberately new sentence be named in the work log so the reviewer reads it as new rather than hunting a source for it.
+- 2026-08-27: criteria audit pass 3 was in flight when the descope landed and is superseded for the two criteria the descope removed; its findings on the surviving AC1/AC2 wording, whose text the descope did not change, are disposed in the next work-log line if it returns any. Plan is otherwise complete: remainder ledger and durable-record preview presented this turn.
 
 ## Decisions
 
