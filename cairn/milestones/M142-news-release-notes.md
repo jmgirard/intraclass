@@ -1,11 +1,11 @@
 # M142: NEWS.md's 0.1.0 entry reads as first-release notes, not a development log
 
-- **Status:** planned
+- **Status:** review
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP1, GP8
-- **Branch/PR:** —
+- **Branch/PR:** `m142-news-release-notes` / https://github.com/jmgirard/intraclass/pull/153
 
 ## Goal
 
@@ -52,23 +52,30 @@ scope. A second `#` version entry → none exists; 0.1.0 is unreleased.
 
 ## Acceptance criteria
 
-- [ ] AC1 — `NEWS.md` holds exactly one `#` heading (`grep -c '^# '` returns 1)
+- [x] AC1 — `NEWS.md` holds exactly one `#` heading (`grep -c '^# '` returns 1)
       and is at most 18,100 bytes by `wc -c` (merge base 36,201). No bullet
-      exceeds 500 bytes, measured by `data-raw/m142-bullet-lines.awk` (tracked
-      since `32454c5`), whose rule is: a bullet is a line matching `^\* ` plus
-      every following line until the next `^\* `, `^#`, or blank line, its size
-      being those lines joined with single spaces. The cap is BYTES, not lines,
-      because a line cap is defeated by reflow alone — measured 2026-08-27,
-      rewrapping every bullet in the merge-base file onto one physical line
-      takes "25 bullets over six lines" to 0 without changing a word, and the
-      file already carries 620- and 354-character lines. At the merge base 25
-      bullets exceed 500 bytes, the same 25 that exceed six lines. One bullet is
-      exempt and named here: the `news_scope()` anchor bullet, opening `* The
-      \`ci_method = "mpl"\` documentation`, which AC3 requires to hold its three
-      quoted ledger claims inside a single bullet; it is 1,008 bytes at the
-      merge base and is no larger on the branch. The exemption is this one
-      bullet, not a class.
-- [ ] AC2 — `python3 data-raw/prose-profile.py NEWS.md` reports 0 in its `dash`
+      exceeds 500 bytes, measured by `data-raw/m142-bullet-lines.awk`, whose
+      rule is: a bullet is a line matching `^\* ` plus every following line
+      until the next `^\* `, `^#`, or blank line, its size being those lines,
+      each stripped of leading and trailing whitespace, joined with single
+      spaces. The line-counting form of that program entered the tree at
+      `32454c5`; the byte-printing form this criterion needs ships on this
+      branch, and it is the branch's ruler that is run over BOTH revisions:
+      `LC_ALL=C awk -f data-raw/m142-bullet-lines.awk NEWS.md` for the branch
+      figure, and the same command over a
+      `git show <merge-base>:NEWS.md > mb-news.md` copy for the merge-base
+      figure. That program measures a strict superset of the rule above — it
+      also counts `-` and `+` markers as bullets, and continues a bullet across
+      a blank line — so a clean run establishes the rule as stated a fortiori;
+      its header records why. The cap is BYTES, not lines, because a line cap is
+      defeated by reflow alone; the measurement behind that is in the work log.
+      At the merge base 25 bullets exceed 500 bytes, the same 25 that exceed six
+      lines. One bullet is exempt and named here: the `news_scope()`
+      anchor bullet, opening `* The \`ci_method = "mpl"\` documentation`, which
+      AC3 requires to hold its three quoted ledger claims inside a single
+      bullet; it is 808 bytes at the merge base and must be no larger than that
+      on the branch. The exemption is this one bullet, not a class.
+- [x] AC2 — `python3 data-raw/prose-profile.py NEWS.md` reports 0 in its `dash`
       column (R1). Every sentence it counts over 35 words (R2) carries a clause
       that a shipped test pins verbatim AND whose own word count exceeds 35 —
       the test `prose-style.md`'s exemption actually states, "a clause … that
@@ -80,8 +87,7 @@ scope. A second `#` version entry → none exists; 0.1.0 is unreleased.
       words; the `flat`, `parity` and `subjects` templates are 32, 17 and 11
       words and so force no long carrier, and their carriers must come under 35.
       `cairn/doctrine/prose-style.md`'s scope sentence names `NEWS.md`.
-      `cairn/doctrine/prose-style.md`'s scope sentence names `NEWS.md`.
-- [ ] AC3 — the guards keyed on NEWS text pass, run at review:
+- [x] AC3 — the guards keyed on NEWS text pass, run at review:
       `python3 data-raw/check-mpl-doc-claims.py` and the same script with
       `--self-test` both exit 0, its `news_scope()` anchor bullet still
       locatable, and each of the four `data-raw/mpl-doc-claims.tsv` rows whose
@@ -91,12 +97,12 @@ scope. A second `#` version entry → none exists; 0.1.0 is unreleased.
       the same commit as the text change that required it (M130 lesson).
       `Rscript -e 'devtools::test(filter = "doc-skew-caveat")'` reports
       `FAIL 0`.
-- [ ] AC4 — `git diff <merge-base>..HEAD --name-only` lists only `NEWS.md`,
+- [x] AC4 — `git diff <merge-base>..HEAD --name-only` lists only `NEWS.md`,
       `data-raw/mpl-doc-claims.tsv`, `data-raw/m142-bullet-lines.awk`,
       `tests/testthat/test-doc-skew-caveat.R`,
       `cairn/doctrine/prose-style.md`, and paths under `cairn/`. Any hunk in the
       test file is a pin re-key and nothing else.
-- [ ] AC5 — `Rscript -e 'devtools::test()'` reports `FAIL 0` and no warning whose
+- [x] AC5 — `Rscript -e 'devtools::test()'` reports `FAIL 0` and no warning whose
       rendered message text is absent from the set the same `devtools::test()`
       invocation reports at this milestone's merge-base, both runs made in the
       review session; `Rscript -e 'devtools::check()'` reports 0 errors and 0
@@ -114,13 +120,13 @@ scope. A second `#` version entry → none exists; 0.1.0 is unreleased.
 
 ## Tasks
 
-- [ ] T1 — Measure the merge base and record it: `wc -c`, the ruler's four
+- [x] T1 — Measure the merge base and record it: `wc -c`, the ruler's four
       columns, the per-bullet counts from `data-raw/m142-bullet-lines.awk`
       (committed with this plan, already reproducing 47 bullets / 25 over six /
       an 11-line anchor bullet), the four `NEWS.md` ledger rows with their
       quoted text, and the runs the `width`/`residual` pins locate in NEWS
       today. Nothing predicted from reading.
-- [ ] T2 — Cut section by section by DELETION and CROSS-REFERENCE — point at
+- [x] T2 — Cut section by section by DELETION and CROSS-REFERENCE — point at
       `?icc` or the vignette that already carries the detail — never by
       composing a shorter claim from a reading of the old one. No criterion
       gates this after the descope, so it is the read-through at review that
@@ -129,15 +135,15 @@ scope. A second `#` version entry → none exists; 0.1.0 is unreleased.
       first-release orienting sentence is genuinely wanted, write it — and say
       so in the work log, so the reviewer reads it as new rather than hunting
       its source.
-- [ ] T3 — Re-measure with the ruler and the `awk` rule after the LAST content
+- [x] T3 — Re-measure with the ruler and the `awk` rule after the LAST content
       commit, never at the task that wrote the prose (M135 lesson).
-- [ ] T4 — Add `NEWS.md` to `cairn/doctrine/prose-style.md`'s scope sentence;
+- [x] T4 — Add `NEWS.md` to `cairn/doctrine/prose-style.md`'s scope sentence;
       re-check the module against its stated 120-line / 8,000-byte budget
       (118 / 6,941 at the merge base). Record each R2 carrier with its word
       count and the pinned clause it carries, as that module's exemption asks.
-- [ ] T5 — Re-key the ledger rows and any pin the moved text broke, in the same
+- [x] T5 — Re-key the ledger rows and any pin the moved text broke, in the same
       commit as the move; run every `data-raw/` checker with `--self-test`.
-- [ ] T6 — Gate: full suite, merge-base suite in a temporary worktree,
+- [x] T6 — Gate: full suite, merge-base suite in a temporary worktree,
       `devtools::check()`, `pkgdown::build_news()`, `devtools::document()`.
 
 ## Work log
@@ -160,6 +166,424 @@ scope. A second `#` version entry → none exists; 0.1.0 is unreleased.
 - 2026-08-27: SUPERSEDES this session's earlier work-log line reading "so the release-shaped tripwire does not fire and D-050 is not engaged". `D-050` is a cairn-plugin id, not one this repo defines (its `DECISIONS.md` ends at D-041), and D-020 Amendment 3 requires a plugin id be qualified. Read it as "cairn D-050". The substance is unchanged: the user declared no release window, and this is ordinary documentation work.
 - 2026-08-27: pass 3 also confirmed, and this milestone accepts, that no criterion binds the Goal's register — and that AC1's exempt anchor bullet positively preserves one development-log sentence, "The `ci_method = \"mpl\"` documentation now states…", because AC3 requires its three ledger claims to stay in one bullet. Accepted at the descope: register is the maintainer's judgment at the merge gate. A reflow-plus-deletion pass keeping the present retrospective voice would satisfy all five criteria, and only the read-through would catch it.
 
+- 2026-08-27: branch `m142-news-release-notes` cut from `deee860`. T1 merge-base measurement, taken by command, not read: 463 lines, 36,201 bytes, one `#` heading; 47 bullets, 25 over 500 bytes, the same 25 over six lines, longest 34 lines; `prose-profile.py` 172 sentences / 45 over 35 words / 63 dashes / longest 271. Every Goal figure reproduces. One does not: the exempt `news_scope()` anchor bullet is **808** bytes under AC1's own rule, not the 1,008 AC1 recited — no join variant of its eleven lines reaches 1,008 (trimmed-join 808, raw-join-space 826, raw-join-newline 826, lines-plus-newlines 827).
+- 2026-08-27: implementation question gate, three questions. User chose: correct AC1's anchor figure to the measured 808 (a substantive amendment, below); rewrite the entry into FOUR first-release sections rather than keeping the development log's nine; and cut to 12-14 KB rather than sitting just under AC1's 18,100-byte ceiling.
+- 2026-08-27: **SUBSTANTIVE AMENDMENT to AC1**, at the user's selection at that gate. The exempt anchor bullet's figure goes 1,008 -> 808; the criterion now names the byte-exact invocation and a distinct merge-base invocation, states that the byte-printing ruler ships on THIS branch (the form tracked at `32454c5` counts lines), records that the ruler measures a strict superset of AC1's stated rule, and binds the exemption as a ceiling ("must be no larger than that") rather than a recital. Nothing gated is widened: the only pass/fail delta is that a branch anchor bullet between 809 and 1,008 bytes now fails where it passed, which narrows. AC2 also lost an exactly duplicated sentence (`prose-style.md`'s scope sentence names `NEWS.md`, written twice); no promise changed.
+- 2026-08-27: SUPERSEDES this session's earlier work-log line reading "with the exempt anchor bullet held at its measured 1,008 bytes". That figure is not reproducible by the program AC1 names, under any join variant of the bullet's eleven lines. Read it as 808 bytes. Nothing else in that line changes.
+- 2026-08-27: the amended AC1 wording was audited twice by fresh-context [O] readers that did not author it, per the amendment protocol, in FULL mode at the declared user-facing tier. Pass 1 returned four defects, all repaired before the text was written: the criterion cited `32454c5` for a byte-printing program that commit does not contain (the tracked form prints line counts, so a reviewer running the named command got `11`, not `808`, and could not check the 500-byte cap at all); the amendment retired one of two copies of 1,008, leaving the other in the work log; the named command reads the working file, so it establishes the branch figure and not the merge-base one; and a forensic sentence quantified over an unbounded class no command settles. Pass 2 on the repaired text confirmed every figure by command, found no widening, and confirmed the exemption still binds exactly one bullet.
+- 2026-08-27: pass 2 also found two blind spots in the INSTRUMENT, both closed in `data-raw/m142-bullet-lines.awk` rather than by weakening the criterion. (a) A blank line ended a bullet, so everything after it dropped out of measurement: a bullet split in two by whitespace alone measured only its first paragraph, and ~600 bytes of a constructed 1,024-byte file vanished. (b) The rule keyed on `^* ` only, so a file written with `-` markers measured ZERO bullets and passed "no bullet exceeds 500 bytes" as a 15 kB monolith. The ruler now counts `-` and `+` markers and continues a bullet across a blank line, which can only raise a measured size or add a measured bullet — a strict superset of AC1's rule, so a clean run establishes the rule a fortiori. Re-measured after the change: merge base still 47 bullets / 25 over 500 / 25 over six lines / anchor 808; branch still 44 bullets / one over 500 (the exempt anchor, 797). Neither revision uses a `-` marker or a blank-line-split bullet.
+- 2026-08-27: T2 rewrite. The nine development-log sections become four: *Estimating ICCs*, *Confidence intervals*, *Engines and tooling*, *When a call fails*. Cut by DELETION and CROSS-REFERENCE throughout, never by composing a shorter claim from a reading of a longer one; where an old bullet carried detail an article already carries, the bullet keeps the capability sentence and points at the article. Long bullets were SPLIT at existing sentence boundaries rather than resummarized, which is how the R2 and 500-byte gates were met without rewording claims. Deliberately NEW sentences, named here so review reads them as new rather than hunting a source: none. Every sentence in the branch file is an unedited, split, or shortened form of a merge-base sentence, except for connective repairs at split points and the four canonical-shape restorations in the next line.
+- 2026-08-27: T2/T5 — four repairs the shipped pins demanded, each found by running the pin, not by reading. `test-doc-skew-caveat.R` rejected "three grids" (its canonical shape is `the (two|three) grids`), "59 of 64 cells of the larger" (the shape wants "of the larger grid"), and a sentence-final "worst 0.6655." (the `worst ([0-9.]+)` shape swallowed the full stop, coerced `0.6655.` to `NA`, and failed); the merge-base wording was restored in each case. `check-mpl-doc-claims.py` reported one stale key: the `settle` row keyed `87f0dfc36b75` is re-keyed to `0be2190a0d90` in this commit, its quoted claim "each clearing its pre-registered coverage floor" unchanged and still inside the `news_scope()` anchor bullet. The other three `NEWS.md` ledger rows are untouched, their sentences byte-identical to the merge base.
+- 2026-08-27: T4 — `cairn/doctrine/prose-style.md`'s scope sentence now names `NEWS.md`; the module is 119 lines / 6,997 bytes against its stated 120-line / 8,000-byte budget. The R2 exemption record AC2 asks for, DERIVED by running the pins' own template constructors against their committed fixtures rather than hand-listed (GP8): `residual_template()`'s clause is **58** words, `width_templates()`'s `flat` **32**, `parity` **17**, `subjects` **11**, and all four are present verbatim in the branch `NEWS.md`. The branch file has exactly ONE sentence over 35 words, at 74 words, and it is the carrier of the 58-word residual clause. The three width templates each sit in their own carrier, all under 35 words.
+- 2026-08-27: T3 re-measurement, taken after the last content commit rather than at the task that wrote the prose (M135 lesson). Branch `NEWS.md`: 14,050 bytes (merge base 36,201, cap 18,100), one `#` heading, 44 bullets, one over 500 bytes and it is the named exemption at 797 (merge base 808). `prose-profile.py`: 106 sentences, 1 over 35 words, **0** dashes, 1 long parenthetical, 2 semicolons, longest sentence 74 words.
+- 2026-08-27: the reflow measurement AC1 used to recite, moved here at the amendment's compression pass so the criterion carries only what a command settles. Measured 2026-08-27 at `deee860`: rewrapping every bullet in the merge-base file onto one physical line takes "25 bullets over six lines" to 0 without changing a word, and that file already carries 620- and 354-character lines (`LC_ALL=C awk '{print length}' mb-news.md | sort -nr`). That is why the cap is bytes. Removing the sentence gates nothing less: the 500-byte cap and the 25-bullet figure it explains both stay in AC1.
+- 2026-08-27: T6 gate. `Rscript -e 'devtools::test()'` FAIL 0 / WARN 3 / SKIP 2 / PASS 9085. `Rscript -e 'devtools::check(document = FALSE)'` 0 errors, 0 warnings, 0 notes on its own `Status:` line (14m 45s). `Rscript -e 'devtools::document()'` leaves a clean tree. `Rscript -e 'pkgdown::build_news()'` renders the changelog without error. `air format .` is a no-op. AC5's warning-set comparison against a merge-base run is left to the review session, as AC5 requires both runs be made there. Status set to review.
+
+- 2026-08-27: review ran. All five criteria pass on fresh evidence and the
+  consistency gate is clean. The three-lens fan-out returned 23 findings; the
+  [O] and [S] lenses converge on a class the descoped check was meant to catch —
+  condensation that dropped a bounding qualifier, in several places leaving a
+  sentence that asserts a capability `icc()` refuses with a classed abort. Nine
+  of the [O] lens's assertions re-verified here by command against `R/icc.R`,
+  `vignettes/` and the merge-base `NEWS.md`; all nine matched. Findings and
+  dispositions recorded in the Review section; disposition put to the user.
+
+- 2026-08-27: RETURNED to in-progress at the merge gate, at the user's explicit
+  selection. What failed: no acceptance criterion — all five pass on fresh
+  evidence — but the review read-through found the class of defect the descoped
+  check was left to catch. Condensation dropped bounding qualifiers, and in four
+  places the resulting sentence asserts a capability `icc()` refuses with a
+  classed abort: cluster-level ICCs for nested raters (`R/icc.R:1279`), lavaan on
+  fixed-rater incomplete/unbalanced multilevel data (`R/icc.R:974`), npbootstrap
+  with a numeric `unit` on unbalanced data (`R/icc.R:1701`), and `occasions`
+  averaging on ragged replicates (`R/icc.R:1915`). A fifth, "Seven articles ship
+  with the package", is false (eight do) and is an invented figure with no
+  merge-base source. Six further findings drop a qualifier without inventing a
+  capability, and four caveats traced to D-022, D-019 and two deliberate scope
+  fences were deleted with no cross-reference carrying them. Defect-return count
+  for M142: 1.
+
+- 2026-08-27: repair round after the defect return. Implementation question
+  gate, three questions (scope, byte budget, criteria). The user took none of
+  the offered options and directed a hybrid instead: drop everything from the
+  0.1.0 entry except what the guards need verbatim, then write a short overview
+  of what the package ships at launch. That resolves findings 1-11 and 13-16 by
+  DELETION rather than by restoring qualifiers -- no capability bullet survives
+  to carry a dropped bound. It narrows the deliverable; no criterion is widened
+  and no amendment is taken.
+- 2026-08-27: one correction to the review record, established by command before
+  it was acted on. Finding 13 quoted its deleted caveat as "a dropped row no
+  longer counts toward the design, so a frame that looked balanced only because
+  of such rows is correctly seen as unbalanced -- `ci_method = "searle"` and
+  `"burch"` are refused on it (they require balance), while `"npbootstrap"`
+  becomes available." That is NOT merge-base text. `deee860:NEWS.md:42-43`
+  carries only "A frame that looked balanced only because of such rows is
+  correctly seen as unbalanced."; the longer form was `bc844c3`'s and was
+  trimmed before the merge base. The [S] blame-history lens quoted from git
+  history, not from the merge base. Restoring it would have been a fresh
+  widening, so the repair rule was: restore from the merge base or delete,
+  never from older history. The other three deleted caveats (findings 14, 15,
+  16) do have merge-base sources, at `mb-news.md:115-118`, `170-172` and
+  `95-96`; the hybrid deletes their bullets outright rather than restoring them.
+- 2026-08-27: the verbatim-pinned set was DERIVED by reading the guards, not
+  recalled. Exactly three regions of `NEWS.md` are pinned: the width-margin run
+  (`width_expected_runs["NEWS.md"] == 1`, carrying `width_templates()`'s `flat`,
+  `parity` and `subjects` clauses verbatim), the residual run
+  (`residual_expected_runs["NEWS.md"] == 1`, carrying `residual_template()`'s
+  58-word clause), and the `news_scope()` anchor bullet that
+  `check-mpl-doc-claims.py` locates by `^\* The \`ci_method = "mpl"\`
+  documentation` and whose three ledger rows quote from it. All three were
+  carried over byte-identical; everything else in the entry was deleted and
+  replaced.
+- 2026-08-27: SUPERSEDES this session's earlier work-log line reading
+  "Deliberately NEW sentences, named here so review reads them as new rather
+  than hunting a source for it: none." That was false of the first rewrite
+  (review finding 12: three article pointers and an invented "Seven articles"
+  count had no merge-base source) and is false by design of this one. The
+  deliberately NEW prose in the branch `NEWS.md` is now stated plainly: the
+  opening overview paragraph, and every bullet of the *What ships*, *Engines*,
+  *Confidence intervals* and *When a call fails* sections EXCEPT the three
+  pinned regions named above. Its facts were derived by command, not from the
+  old prose -- exports and methods from `NAMESPACE`, the R 4.5.0 floor from
+  `DESCRIPTION:53-54`, the engine tiers from `DESCRIPTION`'s Imports/Suggests,
+  the eight article titles from the `title:` field of each `vignettes/*.Rmd`,
+  the datasets from `data/`. The new prose states what ships and points at
+  `?icc` and the articles for the conditions; it asserts no bounded capability
+  of its own, which is the class that returned this milestone.
+- 2026-08-27: review finding 5 fixed at its root. "Seven articles ship with the
+  package" is gone; the branch says eight, and `ls vignettes/*.Rmd` returns 8
+  files whose titles are the eight listed.
+- 2026-08-27: review finding 18 fixed. `cairn/doctrine/prose-style.md`'s scope
+  edit carried "(brought in at M142, with the 0.1.0 rewrite)" -- the record of
+  which pass applied the module, four lines above that module's own sentence
+  saying it does not own that record. The parenthetical is deleted; the module
+  is 119 lines / 6,952 bytes against its 120 / 8,000 budget.
+- 2026-08-27: review finding 19 fixed by deletion -- the bullet carrying the
+  stray `\pkg{brms}` Rd markup is not in the rewritten entry. Findings 22 and 23
+  are likewise moot: the two overlong unwrapped lines are gone, and of the three
+  register residues only the `news_scope()` anchor bullet remains, which AC1
+  exempts by name. Finding 20 is NOT moot and is not claimed to be: the anchor
+  bullet still ends by citing `data-raw/check-mpl-doc-claims.py`, which
+  `.Rbuildignore`'s `^data-raw$` keeps out of the tarball, so a reader of the
+  installed NEWS is pointed at a file they do not have. It survives because the
+  bullet is carried byte-identical to keep the three ledger rows keyed; editing
+  it is a re-key, which is AC3 work and not this repair round's. Pre-existing at
+  the merge base.
+- 2026-08-27: review finding 21 fixed in the instrument's HEADER, not its code,
+  because the finding is a documentation over-claim and not a measurement
+  defect. The header had implied the `-`/`+` widening made the cap
+  vacuity-proof; it now states that the marker must sit at column 1 followed by
+  a space, exactly as AC1's rule says, so an indented bullet or ordered list is
+  outside both. Column 2's label is corrected from "lines" to "non-blank
+  lines". Behavior is unchanged, and the merge-base figures AC1 recites
+  reproduce under the edited program: 47 bullets, 25 over 500 bytes, anchor 808.
+- 2026-08-27: re-measurement after the rewrite, by command. Branch `NEWS.md`:
+  4,937 bytes (merge base 36,201, AC1 ceiling 18,100), one `#` heading, 15
+  bullets, one over 500 bytes and it is the named exemption at 797 (merge base
+  808, so the ceiling holds). `python3 data-raw/prose-profile.py NEWS.md`: 43
+  sentences, 1 over 35 words, **0** dashes, 1 long parenthetical, 2 semicolons,
+  longest 74 -- that one sentence is the residual carrier, as before.
+  `check-mpl-doc-claims.py` and its `--self-test` both exit 0.
+  `Rscript -e 'devtools::test(filter = "doc-skew-caveat")'` reports FAIL 0 /
+  WARN 0 / SKIP 2 / PASS 2293, unchanged from the review run, so all three
+  pinned regions survived the cut.
+- 2026-08-27: three universals tightened in the NEW prose after a self-read,
+  before the gate: "every point estimate is reported with a boundary-aware
+  confidence interval" (a blanket adjective true of the default but not of
+  `"posterior"`) became "A point estimate is never reported without an interval,
+  and `ci_method` selects which interval that is"; "Coverage of every method was
+  measured by simulation" (the skew fixture measures three) became "Interval
+  coverage was studied by simulation"; and `d_study()`'s projection sentence now
+  hands the designs it supports and where it refuses to the article rather than
+  implying every projection is available. Each is the exact shape that returned
+  this milestone, caught in prose this session wrote.
+- 2026-08-27: repair-round gate, run on the COMMITTED tree at `2b9e6e7` (the
+  first `devtools::check()` of this round was stopped and re-run, because it had
+  been launched before the three universals were tightened and so did not
+  correspond to what is committed). `Rscript -e 'devtools::test()'` FAIL 0 /
+  WARN 3 / SKIP 2 / PASS 9085, identical to the review run's counts and its
+  three warning texts. `Rscript -e 'devtools::check(document = FALSE)'`
+  `Status: OK` -- 0 errors, 0 warnings, 0 notes.
+  `Rscript -e 'devtools::document()'` leaves a clean tree.
+  `Rscript -e 'pkgdown::build_news()'` renders the changelog without error.
+  `air format .` is a no-op. AC5's warning-set comparison against a merge-base
+  run stays with the review session, which AC5 requires make both runs there.
+  Status set to review.
+- 2026-08-27: review round 2 ran on the committed tree at `f6a1277`. All five criteria pass on fresh evidence, the consistency gate is clean, and the three-lens fan-out returned 22 findings; two ([O]1 lme4 is fetched by a plain install, [O]2 no `summary()` method for `icc_dstudy`) are false statements in the shipping file, and one ([O]13/[S]2) is the omission of multilevel and incomplete-data support from the overview. Evidence and dispositions in the Review section; disposition put to the user at the gate.
+
+- 2026-08-27: SUPERSEDES this session's earlier work-log line reading "All three were carried over byte-identical; everything else in the entry was deleted and replaced." Round-2 review finding 3, verified by printing both revisions: the `news_scope()` anchor bullet was reflowed — "now" deleted, a colon turned into a period, an em dash into a comma — which is why it measures 797 bytes against the merge base's 808. What is verbatim is the four pinned TEMPLATE CLAUSES, which is what the guards check; the three regions around them are not byte-identical. Read the superseded line that way.
+- 2026-08-27: SUPERSEDES this session's earlier work-log line reading "15 bullets" for the post-rewrite re-measurement. At that commit the ruler and `grep -c '^\* '` both returned 14; the file reaches 15 bullets only after the round-2 gate fixes below split the engine bullet. Round-2 review finding 5.
+- 2026-08-27: round-2 gate fix round, at the user's explicit selection ("Fix factual defects, then merge"). NEWS.md: the lme4 install claim rewritten from README.md:48-61's own wording (finding 1); `summary()` moved out of the both-classes list, with `ggplot2`'s `Suggests` placement restored (findings 2, 11); the *Multilevel designs* entry given the vignette's actual title (finding 9); the per-method universal narrowed to "Where a method does not apply to the design, the call aborts with a classed error" (finding 10). `cairn/DESIGN.md:112` names `NEWS.md` in its prose-style pointer (finding 6). The `m142-bullet-lines.awk` header's a-fortiori claim is corrected to state the marker widening SPLITS rather than only widens, with the counterexample and the checked fact that neither revision uses `-`/`+` (finding 4). Findings 8, 13, 14 and 15 filed as one ROADMAP candidate row; 7, 12, 16-19 rejected at triage.
+- 2026-08-27: the finding-1 rewrite made the engine bullet 573 bytes, over AC1's 500-byte cap and not the exempt anchor; it is split into two bullets, taking the file to 15 bullets with the exempt anchor again the only one over 500. Caught by re-running the ruler, not by reading.
+
 ## Decisions
 
 ## Review
+
+Round 2, reviewed 2026-08-27, after the defect return and the repair round. PR
+https://github.com/jmgirard/intraclass/pull/153. Merge base `deee860`;
+`git fetch` shows `origin/main` still at `deee860`, unmoved since the branch was
+cut, so no merge was needed. Round 1's evidence and findings are superseded by
+this section and live in git at `63ad231`/`d689d74`. Every figure below was
+produced by running the named command in this session. Every figure was
+RE-TAKEN after the gate fix round (below), so the numbers here describe the
+final tree, not the `f6a1277` tree the fan-out reviewed.
+
+### Acceptance-criterion evidence
+
+- **AC1 — PASS.** `grep -c '^# ' NEWS.md` returns 1. `wc -c NEWS.md` is 5,262
+  bytes against the 18,100 ceiling (merge base 36,201, reproduced by `wc -c` over
+  a `git show deee860:NEWS.md` copy). `LC_ALL=C awk -f
+  data-raw/m142-bullet-lines.awk NEWS.md` reports 15 bullets, exactly one over
+  500 bytes; that one is the named `news_scope()` anchor exemption opening ``The
+  `ci_method = "mpl"` documentation``, at 797 bytes. The same program over the
+  merge-base copy reports 47 bullets, 25 over 500 bytes and the same 25 over six
+  lines, with the anchor at 808 — so the exemption's ceiling holds (797 <= 808)
+  and every merge-base figure AC1 recites reproduces.
+- **AC2 — PASS.** `python3 data-raw/prose-profile.py NEWS.md`: 46 sentences,
+  1 over 35 words, **0** in the `dash` column, 1 long parenthetical, 2
+  semicolons, longest 74. The four template word counts were DERIVED, not
+  hand-listed (GP8): the constructors in `tests/testthat/test-doc-skew-caveat.R`
+  were evaluated against their committed fixtures, giving `residual` 58 words,
+  `flat` 32, `parity` 17, `subjects` 11, all four present verbatim in the branch
+  `NEWS.md` by `grepl(fixed = TRUE)`. The single over-35 sentence, extracted with
+  the ruler's own `paragraphs()`/`sentences()`/`words()`, is the 74-word carrier
+  of `residual_template()`'s clause, and `grepl(fixed = TRUE)` confirms it
+  contains that 58-word clause — so the one long sentence carries a pinned clause
+  whose own count exceeds 35, and the three short templates force no long
+  carrier. `cairn/doctrine/prose-style.md:8` names `NEWS.md` in its scope
+  sentence.
+- **AC3 — PASS.** `python3 data-raw/check-mpl-doc-claims.py` exits 0 ("60 claim
+  candidates, 12 settled against data-raw/m92-interp-sweep.rds, 0 failure(s)");
+  `--self-test` exits 0. `news_scope()` called on the branch `NEWS.md` returns a
+  795-byte scope opening at the anchor bullet, so it is still locatable. Of the
+  four `NEWS.md` ledger rows, the `absent` refusal row, `f00273a96e77` and
+  `c6eb48429ddb` are unchanged, and `87f0dfc36b75` is re-keyed to `0be2190a0d90`
+  in `56a282b` — the same commit as the NEWS text change that required it
+  (`git log --name-only deee860..HEAD -- NEWS.md data-raw/mpl-doc-claims.tsv`
+  shows both files in that one commit). The repair commit `2b9e6e7` changed
+  `NEWS.md` without touching the ledger, and the checker's clean exit establishes
+  that no row needed re-keying there. `Rscript -e 'devtools::test(filter =
+  "doc-skew-caveat")'` reports FAIL 0 / WARN 0 / SKIP 2 / PASS 2293.
+- **AC4 — PASS.** `git diff deee860..HEAD --name-only` lists `NEWS.md`,
+  `cairn/DESIGN.md`, `cairn/ROADMAP.md`, `cairn/doctrine/prose-style.md`,
+  `cairn/milestones/M142-news-release-notes.md`,
+  `data-raw/m142-bullet-lines.awk` and `data-raw/mpl-doc-claims.tsv` — a subset
+  of the permitted set. `tests/testthat/test-doc-skew-caveat.R` has no hunk at
+  all, so the pin-re-key restriction on it is satisfied vacuously.
+- **AC5 — PASS.** `Rscript -e 'devtools::test()'` on the branch: FAIL 0 / WARN 3
+  / SKIP 2 / PASS 9085. The merge-base comparison run was made in this same
+  session, in a temporary worktree at `deee860` (removed afterwards): FAIL 0 /
+  WARN 3 / SKIP 2 / PASS 9091. The three rendered warning message texts are
+  identical across the two runs — "The lavaan engine reported a fitting
+  warning.", "The glmmTMB engine reported a fitting warning.", and "Modeling
+  raters as fixed restricts inference to exactly these raters; you cannot
+  generalize to other raters." — so no branch warning text is absent from the
+  merge-base set. (The 6 fewer passes are `test-doc-skew-caveat.R` assertions
+  that iterate over NEWS sentences, of which there are now fewer.)
+  `Rscript -e 'devtools::check(document = FALSE)'` reports `Status: OK` — 0
+  errors, 0 warnings, 0 notes, so no NOTE needs justifying.
+  `Rscript -e 'pkgdown::build_news()'` renders the changelog without error.
+
+### Consistency gate
+
+- `cairn_validate.py` exits 0; all 16 checks PASS, 4 advisories OK. The `release
+  window` advisory did NOT fire. One advisory did: `work-log format (115)`,
+  every hit a wrapped multi-line work-log entry in this milestone's own log,
+  written from round 1 onward. Advisory, not a gate failure; recorded, not fixed,
+  since the file is replaced by a 25-line archive summary at hygiene.
+- `cairn_impact.py` skipped: the diff changes no `DESIGN.md` principle.
+- Toolchain checks (r-package profile `consistency-gate` slot):
+  `Rscript -e 'devtools::document()'` leaves a clean tree; `README.Rmd` and
+  `README.md` are untouched by this diff and last written by the same commit
+  (`5c274fc`), so they are in sync; `pkgdown::check_pkgdown()` reports "No
+  problems found."; `NEWS.md` is itself this milestone's deliverable and names no
+  milestone numbers; the one new file, `data-raw/m142-bullet-lines.awk`, is not
+  top-level and sits under the existing `^data-raw$` `.Rbuildignore` entry;
+  `devtools::check()` is `Status: OK`. `air format .` is a no-op.
+
+### Independent fresh-context review — round 2
+
+Declared surface tier is **user-facing**, so the full three-lens fan-out ran
+again on the repaired diff, each reviewer fresh-context, none having authored the
+implementation, each on a distinct evidence base. 22 findings. The [O] lens's
+factual assertions were re-verified here by command before disposal; each
+verification is named with the finding.
+
+Findings as reported, most severe first, with the disposition of each.
+
+1. **[O] `NEWS.md:36-40` — false install claim: "`engine = "lme4"` (by way of
+   **merDeriv**), `engine = "lavaan"` and `engine = "brms"` live in `Suggests`,
+   so a plain install fetches none of them."** False for `lme4`. VERIFIED here:
+   `packageDescription("glmmTMB")$Imports` lists `lme4 (>= 1.1-18.9000)`, so a
+   plain install does fetch it; `README.md:53` says so on a shipped surface
+   ("`glmmTMB` lists `lme4` in its own `Imports:`, so the `lme4` package is …"),
+   and the merge base said the same. New prose contradicting a shipped surface —
+   the same class of dropped bound that returned this milestone in round 1.
+   DISPOSITION: FIXED at the gate — the bullet now carries README.md:48-61's
+   own wording: `lme4` is on the library path after a plain install because
+   `glmmTMB` imports it, the lme4 engine additionally needs `merDeriv`, and
+   `merDeriv`/`lavaan`/`brms` sit in `Suggests` where a plain install fetches
+   none of the three.
+2. **[O] `NEWS.md:25-27` — asserts a method that does not exist: "`print()`,
+   `format()`, `summary()`, `plot()` and `ggplot2::autoplot()` methods are
+   provided for both classes."** VERIFIED here: `NAMESPACE` registers
+   `S3method(summary,icc)` and no `summary` method for `icc_dstudy`;
+   `print`/`format`/`plot` are registered for both. `summary()` on a `d_study()`
+   result falls through to `summary.default`. DISPOSITION: FIXED at the gate —
+   `print()`, `format()`, `plot()` and `autoplot()` are stated for both classes
+   and `summary()` for an `icc()` fit.
+3. **[O] work log — "All three were carried over byte-identical" is false.**
+   VERIFIED here by printing both revisions of the anchor bullet: the branch
+   deletes "now", turns a colon into a period and an em dash into a comma, and
+   reflows — which is why it measures 797 against the merge base's 808, a figure
+   the same work log records. Only the four pinned template clauses are verbatim,
+   which is what the guards actually check. A record defect, not a deliverable
+   defect: it would tell a later reader not to re-read those regions.
+   DISPOSITION: FIXED at the gate — a superseding work-log line states what is
+   verbatim (the four pinned template clauses) and what is not.
+4. **[O] `data-raw/m142-bullet-lines.awk` header — the a-fortiori claim is false
+   as written.** The header says both widenings "can only raise a measured size
+   or add a measured bullet, never lower or remove one". VERIFIED here by
+   counterexample: on `* alpha bravo` / `- charlie delta` the program reports two
+   bullets of 13 and 15 bytes where AC1's stated rule makes one 28-byte bullet —
+   treating `-` as a bullet start SPLITS a continuation line out of the bullet it
+   belongs to. No effect on either revision of `NEWS.md` (neither uses a `-`
+   marker, checked), so AC1's measurement stands; the justification recited in
+   AC1 and the header does not. DISPOSITION: FIXED at the gate in the
+   instrument's header, which now states the split, carries the counterexample,
+   and records that neither revision uses a `-`/`+` marker so the a-fortiori
+   reading holds on this file and not in general. AC1's recital is left as
+   written: amending it would be a criterion amendment for a recital the gate
+   does not turn on.
+5. **[O] the Review section's recorded AC evidence no longer describes HEAD** —
+   round 1's 14,050 bytes / 44 bullets / 106 sentences against HEAD's 4,937 / 14
+   / 43, and round-1 line citations into a file that is now 77 lines. Also: the
+   repair-round work-log line says "15 bullets"; `awk -f
+   data-raw/m142-bullet-lines.awk NEWS.md | wc -l` and `grep -c '^\* ' NEWS.md`
+   both return 14. VERIFIED here. Resolved by this section, which replaces round
+   1's. DISPOSITION: FIXED at the gate — this section replaces round 1's, and a
+   superseding work-log line records that the ruler returned 14 at that commit.
+6. **[O] `cairn/DESIGN.md:112-114` was not updated with the scope widening.** It
+   still describes `prose-style.md` as the standard "for the vignettes, roxygen,
+   and `README.Rmd`" while `cairn/doctrine/prose-style.md:8` now names `NEWS.md`
+   too. VERIFIED here against both files. AC4 permits paths under `cairn/`, so
+   nothing blocked the pointer update. DISPOSITION: FIXED at the gate —
+   `cairn/DESIGN.md:112` now names `NEWS.md`.
+7. **[O] `NEWS.md:51-54` — negative claim widened.** Branch: the default
+   under-covers "when the subject effects are strongly skewed or heavy-tailed …
+   `"burch"` is no remedy there (worst 0.6655)". VERIFIED here against
+   `deee860:NEWS.md:136-138`, which states "One thing `"burch"` is **not**: a
+   remedy for heavy tails", and attaches the 0.6655 figure to skewed effects.
+   The heavy-tailed reach of "no remedy" IS merge-base supported; only the
+   figure's attachment is loosened. DISPOSITION: reject — the claim the finding
+   calls unsupported is stated at the merge base in as many words.
+8. **[O] `NEWS.md:55-59` — the surviving simulation bullets have no
+   antecedents.** The entry says "both grids", "the smaller grid", "the larger
+   grid", "the three grids" and "the two closed forms" without ever introducing a
+   grid or naming which methods are closed forms; the bullets that defined them
+   were deleted, and "classical" was dropped from "the two classical closed
+   forms". VERIFIED here by reading the branch file end to end. A first-time
+   reader cannot resolve any of these references. DISPOSITION: follow-up —
+   filed as (a) of the ROADMAP candidate row "What the 0.1.0 NEWS entry no
+   longer says"; the bullets sit against the `test-doc-skew-caveat.R` pins, so
+   the repair is an orienting sentence around them, not inside them.
+9. **[O] and [S] prior-review lens, converging — `NEWS.md:30-32` lists
+   "*Multilevel designs*" but the vignette's title is "Multilevel designs:
+   subject and cluster level".** VERIFIED here by `grep '^title:'` over all eight
+   `vignettes/*.Rmd`: the other seven match exactly. The work log states the
+   eight titles were taken from the `title:` field, so the log's derivation claim
+   is overstated for this one. DISPOSITION: FIXED at the gate — the entry now
+   reads *Multilevel designs: subject and cluster level*.
+10. **[O] `NEWS.md:46-47` — unbounded universal.** "Each method states the
+    designs it applies to and aborts with a classed error elsewhere", asserted
+    over all seven `ci_method` values including `"montecarlo"`, which has no
+    design restriction to abort outside of. No merge-base sentence makes this
+    claim about the set. DISPOSITION: FIXED at the gate — the sentence now reads
+    "Where a method does not apply to the design, the call aborts with a classed
+    error", which quantifies over the refusals rather than over the methods.
+11. **[O] `NEWS.md:26-27` — `ggplot2::autoplot()` offered with no install
+    fact.** `R/zzz.R` registers the methods lazily and `ggplot2` is `Suggests`;
+    the merge base carried "`ggplot2` is a `Suggests` dependency", dropped here.
+    DISPOSITION: FIXED at the gate — that sentence is restored.
+12. **[O] and [S] prior-review lens — `NEWS.md` cites
+    `data-raw/check-mpl-doc-claims.py`, which `.Rbuildignore`'s `^data-raw$`
+    excludes from the tarball.** Pre-existing at the merge base, inside the
+    byte-carried anchor bullet, knowingly retained so the ledger rows stay keyed.
+    Both lenses flag it as a residual rather than a regression. DISPOSITION:
+    reject at triage as a pre-existing issue the diff did not introduce; editing
+    the bullet is an AC3 re-key.
+13. **[O] and [S] blame-history, converging — "What ships" omits the
+    capabilities `DESCRIPTION` headlines.** Multilevel and nested designs,
+    cluster-level coefficients, incomplete and unbalanced data, and within-cell
+    replicates appear nowhere in the entry's body text; the only trace is the
+    article title "*Multilevel designs*". VERIFIED here: `grep -in
+    'cluster\|multilevel\|level ='` over the branch `NEWS.md` matches only that
+    article title, while `DESCRIPTION:12-14` sells those capabilities. The [S]
+    lens rates this its finding 2 and traces the capability to roughly thirty
+    milestones (M5/ADR-011 `level`, M8/ADR-016 nested, M9/ADR-018 incomplete
+    crossed, M37/M46 cluster-level). It is an omission, not an over-claim, and it
+    is the direct consequence of the maintainer's own "delete rather than
+    restore" repair direction — but it bears on whether the Goal ("what the
+    package does for someone meeting it") is met. DISPOSITION: follow-up — filed as (b) of the
+    ROADMAP candidate row "What the 0.1.0 NEWS entry no longer says".
+14. **[S] blame-history — D-019's own text says its NEWS documentation exists.**
+    VERIFIED here at `cairn/DECISIONS.md:678`: "Perfect/near-perfect-agreement
+    data now errors where it got [0, 1] (documented in NEWS)." The MPL
+    boundary-vs-root-finding-failure distinction that parenthetical names is gone
+    from `NEWS.md` with no replacement. The lens rates this its severest finding,
+    distinguishing it from the other deleted caveats because the decision record
+    names NEWS by name. DISPOSITION: follow-up — filed as (c) of the ROADMAP
+    candidate row "What the 0.1.0 NEWS entry no longer says".
+15. **[S] blame-history — the `brms` engine's documented guarantees vanished
+    wholesale**: the sourced half-*t*(4, 0, 1) prior, the
+    `intraclass_custom_prior` warning, and the posterior-mode/percentile
+    description; only "`"posterior"` under **brms**" survives. Same shape as 13.
+    DISPOSITION: follow-up — filed as (d) of the ROADMAP candidate row "What the
+    0.1.0 NEWS entry no longer says".
+16. **[S] blame-history — D-022's NA-row/balance consequence still absent**
+    (round-1 finding 13). The lens re-verified the absence and notes that, unlike
+    D-019, D-022's own text does not name NEWS. DISPOSITION: reject — an
+    intentional change the maintainer's repair direction called for, already
+    dispositioned at the round-1 return.
+17. **[S] blame-history — the parametric-bootstrap zero-variance boundary caveat
+    still absent** (round-1 finding 14), reported for completeness. DISPOSITION:
+    reject, same reason as 16.
+18. **[S] blame-history — the ragged-Design-3 occasion-averaging scope limit
+    still absent** (round-1 finding 16), reported for completeness. DISPOSITION:
+    reject, same reason as 16.
+19. **[S] blame-history — the `choose_icc()` breaking-change sentence stays
+    deleted**; the lens itself judges this not a defect for a first release.
+    DISPOSITION: reject, agreed on the lens's own reasoning.
+20. **[S] prior-review lens — no regression of any prior lesson.** The lens
+    checked the diff against round 1's own 23 findings and the archived reviews of
+    M130, M136 and M137: round-1 findings 1-5 and 9 are absent from HEAD rather
+    than reworded, the M130 same-commit ledger re-key rule is complied with, the
+    M114/M121/M122 terminal-row rule is not engaged (the ROADMAP edit only flips
+    this milestone's own status), and the M92/D-022/M105/M117/M118 struck framings
+    do not reappear. `gh api repos/jmgirard/intraclass/pulls/comments?per_page=1`
+    returned `[]`, so no PR-thread walk was owed. No finding.
+
+### Verification of the gate outcome
+
+Every acceptance criterion passes on fresh evidence and the consistency gate is
+clean; `cairn_validate` returns exit 0 with the `release window` advisory not
+fired. The criteria gate size, bullet shape, sentence length and dashes; the
+mechanical check against an invented or widened claim was descoped at the user's
+decision, so findings 1, 2 and 9 — false or overstated statements in a shipping
+file — are not criterion failures. They reach the gate under the return floor's
+second clause, as the maintainer's judgment on whether they are load-bearing
+defects in the deliverable. Defect-return count for M142 standing at this gate:
+1. Amendment returns: 0.
+
+At the gate the maintainer selected "Fix factual defects, then merge". Findings
+1-6 and 9-11 were fixed on the branch and the branch re-pushed before the
+approval marker; 8, 13, 14 and 15 were filed as one ROADMAP candidate row; 7,
+12 and 16-19 were rejected at triage. The fix round is verified on the final
+tree by the same commands: `devtools::test()` FAIL 0 / WARN 3 / SKIP 2 / PASS
+9085 with the same three warning texts, `devtools::check(document = FALSE)`
+`Status: OK`, `devtools::test(filter = "doc-skew-caveat")` FAIL 0 / PASS 2293,
+`check-mpl-doc-claims.py` and `--self-test` exit 0 with `news_scope()` still
+795 bytes, `pkgdown::build_news()` clean, and the AC1/AC2/AC4 figures above
+re-taken. No criterion changed and none was reinterpreted; the milestone did
+not return.

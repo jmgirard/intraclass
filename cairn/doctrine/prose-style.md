@@ -5,8 +5,9 @@
      here rather than let the module grow. -->
 
 This page owns the writing standard for every surface a user reads: the
-vignettes, the roxygen blocks that become `man/`, and `README.Rmd`. It states
-six rules, R1–R6: two measured by a committed ruler, four judgment at a read-through.
+vignettes, the roxygen blocks that become `man/`, `README.Rmd`, and `NEWS.md`.
+It states six rules, R1–R6: two measured by a committed ruler, four judgment
+at a read-through.
 
 It does not own status, task lists, or the record of which pass applied it —
 those live in `cairn/ROADMAP.md` and the milestone files. It does not reach
