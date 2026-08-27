@@ -122,10 +122,11 @@
 #'   fitted `icc` reports both error
 #'   definitions (the default), `d_study()` projects **one reliability curve per
 #'   definition**, distinguished by the `type` column. A single-type fit projects
-#'   a single curve. A multilevel projection fills the `level` column (one curve
-#'   per level), and a replicate projection the `occasions` column. Read the
-#'   projection with `tidy()`: the object's own layout is internal, and only the
-#'   tidied columns are a stable contract.
+#'   a single curve. A multilevel projection gains a `level` column (one curve
+#'   per level) and a replicate projection an `occasions` column, each where it
+#'   applies; `tidy()` carries both columns on every projection, `NA` where the
+#'   fit does not define them. Read the projection with `tidy()`: the object's
+#'   own layout is internal, and only the tidied columns are a stable contract.
 #'
 #'   The methods documented on this page return:
 #'   * `tidy.icc_dstudy()`: a tibble with one row per projected point, columns

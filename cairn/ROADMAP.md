@@ -9,7 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M140 | Release-remainder documentation corrections, and the recorded pre-submission check | planned | M138, M139 | high | milestones/M140-release-remainder-docs.md |
+| M140 | Release-remainder documentation corrections, and the recorded pre-submission check | review | M138, M139 | high | milestones/M140-release-remainder-docs.md |
 | M136 | Roxygen and README prose pass | done | M134 | normal | milestones/archive/M136-roxygen-readme-prose.md |
 | M137 | R6 claim audit over the M134-M136 prose diffs | done | — | high | milestones/archive/M137-r6-claim-audit.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | done | M49-M55, M61, M68, M129-M137 | high | milestones/archive/M48-release-v010.md |

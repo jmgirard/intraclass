@@ -4,8 +4,9 @@ This is the first submission of intraclass (0.1.0), a new package.
 
 ## R CMD check results
 
-Local `R CMD check --as-cran` on 2026-08-25 (R 4.6.1, aarch64-apple-darwin23,
-`NOT_CRAN=false`, `manual = TRUE`) returned:
+Local `R CMD check --as-cran` on 2026-08-27 (the run's own clock, UTC), under
+R 4.6.1 (2026-06-24) on platform `aarch64-apple-darwin23`, running under
+macOS Tahoe 26.6.2, with `NOT_CRAN=false` and `manual = TRUE`, returned:
 
     0 errors | 0 warnings | 0 notes
 
@@ -17,7 +18,8 @@ ten Hove, Jorgensen, and van der Ark, and the `doi:` token in the reference.
 
 Checked so far:
 
-- Local: macOS 15 (aarch64), R 4.6.1 — the `--as-cran` run reported above.
+- Local: macOS Tahoe 26.6.2 on `aarch64-apple-darwin23`, R 4.6.1 — the
+  `--as-cran` run reported above.
 - GitHub Actions, on the release pull request: ubuntu-latest R-release,
   windows-latest R-release, and ubuntu-latest R 4.5.0 (the declared floor).
 

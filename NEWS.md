@@ -364,15 +364,19 @@ alternate engines, and seeded simulations.
   replicate fit no longer changes what `var_residual` means without saying so: the
   interaction term is named, and `n_o` gives the occasion count it was split at.
   `var_subject_rater` is `NA` without within-cell replicates, and `n_o` is `NA` there
-  too and on ragged replicates, where cells hold different numbers of ratings and no
-  single count applies. Two design columns say how to read the variance columns beside
-  them: `raters` gives the rater treatment the fit used, so `var_rater` can be told
+  too. `n_o` is reported only where the fitted design defines one occasion count per
+  cell — the same number of ratings in every cell, and every cell the design defines
+  present. On a design failing either condition, `n_o` is reported as `NA` or the fit
+  refused with an error, depending on the design: a random-rater single-level design
+  with ragged counts or a missing cell reports `NA`.
+  Two design columns say how to read the variance columns beside them: `raters` gives the rater treatment the fit used, so `var_rater` can be told
   apart as a random-rater variance or a fixed-rater finite-population term, and is `NA`
   on a one-way fit, whose interchangeable raters have no facet and whose rater variance
   is folded into `var_residual`; `replicates` says whether the fitted design splits
   within-cell replicates — `FALSE` on a one-way fit, which has no rater facet and so no
-  cells to split — which `n_o` alone cannot say, being `NA` on a ragged replicate design
-  as well as on one with no replicates at all.
+  cells to split — which `n_o` alone cannot say, being `NA` on a random-rater
+  single-level replicated design with ragged counts or a missing cell, as well as on
+  one with no replicates at all.
   `glance()` also reports the sampler diagnostics `rhat` and `ess_bulk`, `NA` for the
   engines that do not sample. Every column is present on every fit, so two glanced fits
   row-bind exactly as two tidied ones do.
@@ -383,10 +387,12 @@ alternate engines, and seeded simulations.
   values included — aborts with a classed error instead of quietly using the first. This
   covers `raters`, `posterior_summary`, `model`, `engine`, `ci_method`, `autoplot()`'s
   `what`, and every question `choose_icc()` asks (`model`, `unit`, `type`, `raters`,
-  `level`), the chooser taking one answer per question. In `icc()` and `d_study()` the
-  arguments that genuinely take several values are unaffected: `type`, `unit` and `level`,
-  which default to reporting every value, and `occasions`, which defaults to one but still
-  accepts both. Note the same names mean different things in the chooser, where they are
+  `level`), the chooser taking one answer per question. Arguments that genuinely take
+  several values are unaffected, and which arguments those are depends on the function: in
+  `icc()` they are `type`, `unit` and `level`, which default to reporting every value, and
+  `occasions`, which defaults to one but still accepts both; in `d_study()` they are the
+  two projection axes `m` and `n_o`, each a numeric vector, supplied one per call — asking
+  for both aborts. Note the same names mean different things in the chooser, where they are
   answers rather than axes: `choose_icc(type = c("agreement", "consistency"))` now aborts
   where it used to recommend a single coefficient for agreement.
 
