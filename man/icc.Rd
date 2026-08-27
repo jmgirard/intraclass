@@ -492,9 +492,11 @@ facet and so no cells to split -- the effective rater counts, the
 variance components, the occasion count \code{n_o} (\code{NA} unless the design
 has within-cell replicates \emph{and} defines one occasion count per cell --
 the same number of ratings in every cell, and every cell the design
-defines present; ragged replicates and a replicated design with a
-missing cell both leave it \code{NA}), the engine and interval settings, and
-the sampler diagnostics \code{rhat} and \code{ess_bulk} (\code{NA} for the
+defines present, which is the full subject-by-rater grid when crossed
+and the block-diagonal one when raters are nested in clusters; a
+single-level design failing either leaves it \code{NA}, while a multilevel
+one aborts instead of reporting \code{NA}), the engine and interval
+settings, and the sampler diagnostics \code{rhat} and \code{ess_bulk} (\code{NA} for the
 non-Bayesian engines, which do not sample). Every column is present on
 every fit, so two glanced fits row-bind just as two tidied ones do.
 \item \code{format.icc()}: a character vector holding the printed report, one line per

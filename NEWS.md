@@ -364,17 +364,18 @@ alternate engines, and seeded simulations.
   replicate fit no longer changes what `var_residual` means without saying so: the
   interaction term is named, and `n_o` gives the occasion count it was split at.
   `var_subject_rater` is `NA` without within-cell replicates, and `n_o` is `NA` there
-  too, on ragged replicates, where cells hold different numbers of ratings, and on a
-  replicated design with a missing cell, since no single per-cell count describes
-  either. Two design columns say how to read the variance columns beside
-  them: `raters` gives the rater treatment the fit used, so `var_rater` can be told
+  too, and on a single-level replicated design that defines no single per-cell count:
+  ragged replicates, where cells hold different numbers of ratings, or a missing cell
+  in the subject-by-rater grid. A multilevel replicated design in either shape aborts
+  instead of reporting `NA`. Two design columns say how to read the variance columns
+  beside them: `raters` gives the rater treatment the fit used, so `var_rater` can be told
   apart as a random-rater variance or a fixed-rater finite-population term, and is `NA`
   on a one-way fit, whose interchangeable raters have no facet and whose rater variance
   is folded into `var_residual`; `replicates` says whether the fitted design splits
   within-cell replicates — `FALSE` on a one-way fit, which has no rater facet and so no
-  cells to split — which `n_o` alone cannot say, being `NA` on a ragged replicate design
-  and on a replicated design with a missing cell, as well as on one with no replicates
-  at all.
+  cells to split — which `n_o` alone cannot say, being `NA` on a single-level
+  replicated design with ragged counts or a missing cell, as well as on one with no
+  replicates at all.
   `glance()` also reports the sampler diagnostics `rhat` and `ess_bulk`, `NA` for the
   engines that do not sample. Every column is present on every fit, so two glanced fits
   row-bind exactly as two tidied ones do.

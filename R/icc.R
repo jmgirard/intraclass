@@ -687,9 +687,11 @@
 #'     variance components, the occasion count `n_o` (`NA` unless the design
 #'     has within-cell replicates *and* defines one occasion count per cell --
 #'     the same number of ratings in every cell, and every cell the design
-#'     defines present; ragged replicates and a replicated design with a
-#'     missing cell both leave it `NA`), the engine and interval settings, and
-#'     the sampler diagnostics `rhat` and `ess_bulk` (`NA` for the
+#'     defines present, which is the full subject-by-rater grid when crossed
+#'     and the block-diagonal one when raters are nested in clusters; a
+#'     single-level design failing either leaves it `NA`, while a multilevel
+#'     one aborts instead of reporting `NA`), the engine and interval
+#'     settings, and the sampler diagnostics `rhat` and `ess_bulk` (`NA` for the
 #'     non-Bayesian engines, which do not sample). Every column is present on
 #'     every fit, so two glanced fits row-bind just as two tidied ones do.
 #'   * `format.icc()`: a character vector holding the printed report, one line per
@@ -2617,9 +2619,12 @@ require_supported <- function(
 # error (PRINCIPLES.md #8) rather than rlang::arg_match's un-classed one. A choice
 # argument takes exactly one value: passing several -- including the full choice
 # list -- aborts rather than quietly selecting the first (D-035; a vector default in
-# this signature means "report every value"). The report-all arguments are
-# `type`, `unit`, `level` and `occasions` -- the last carries a scalar default
-# but still accepts both of its values, so it is not routed through here.
+# this signature means "report every value"). The report-all arguments are per
+# function, not shared across the callers of this helper (D-040): in `icc()` they
+# are `type`, `unit`, `level` and `occasions` -- the last carries a scalar default
+# but still accepts both of its values, so it is not routed through here; `d_study()`
+# has none of the four and never calls this helper, its vector-valued arguments being
+# the projection axes `m` and `n_o`.
 validate_choice <- function(value, choices, arg, call = rlang::caller_env()) {
   if (!is.character(value) || length(value) != 1L || !value %in% choices) {
     abort_intraclass(
