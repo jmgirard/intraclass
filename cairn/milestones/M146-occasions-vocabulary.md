@@ -115,7 +115,7 @@ Repair tasks (the 2026-08-28 defect return; see the Review section's findings):
       axis (finding 7).
 - [x] T11. Correct the rater-axis bullet's pure-error divisor (finding 4),
       keeping AC5's "the fitted occasion count" where it is accurate.
-- [ ] T12. Qualify the glossary's *Occasion* entry, whose `print()` claim is
+- [x] T12. Qualify the glossary's *Occasion* entry, whose `print()` claim is
       false on a multilevel replicate fit (finding 1), and add `n_o`'s `NA`
       case to the `occasions` vs. `n_o` entry (finding 6, glossary half).
 - [ ] T13. Take the `d-studies-and-replicates.Rmd` dash count back to zero
@@ -219,6 +219,15 @@ Repair tasks (the 2026-08-28 defect return; see the Review section's findings):
   `occasions` 1 curve and 0.9216645 on the `occasions` 3 curve, matching the
   fitted `ICC(A,k)` at each setting. `prose-profile.py R/d-study.R`: over-35
   sentences 4 -> 3, dash 0.
+- 2026-08-28: T12 done. The glossary's *Occasion* entry now names `glance()$n_o`
+  as the per-cell count and the printed design line as the same count wherever
+  that line carries one, with the multilevel case named: verified on a crossed
+  8x4x3x3 fit and a raters-nested-in-clusters fit, both of which print
+  `Subjects: 32 in 8 clusters | Raters: N (random) | Observations: 288
+  (complete)` and no per-cell count, at `n_o` 3. The *`occasions` vs. `n_o`*
+  entry gains `n_o`'s `NA` case and the ragged fit that separates the columns.
+  `prose-profile.py vignettes/glossary.Rmd` unchanged against `origin/main`
+  (over-35 1, dash 0).
 
 ## Decisions
 

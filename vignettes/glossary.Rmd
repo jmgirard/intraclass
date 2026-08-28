@@ -221,10 +221,11 @@ under-covers*](interval-methods.html#when-the-default-under-covers). See also
 
 One of several ratings the *same* rater gives the *same* subject. A design with
 occasions lets `icc()` separate the [subject-by-rater
-interaction](#variance-component) from pure error. The per-cell count is
-reported under two names for the same quantity: the printed report's design
-line spells it as `N cells x N replicates`, and `glance()` reports that same
-per-cell count in its `n_o` column. See [*D-studies and within-cell
+interaction](#variance-component) from pure error. `glance()` reports the
+per-cell count in its `n_o` column. The printed report spells that same count
+on its design line, as `N cells x N replicates`, wherever the design line
+carries one. A multilevel fit's design line reports subjects and clusters
+instead, and shows no per-cell count anywhere, so read `n_o` for it there. See [*D-studies and within-cell
 replicates*](d-studies-and-replicates.html).
 
 ## `occasions` vs. `n_o`
@@ -236,6 +237,9 @@ one, and `NA` when the design has no within-cell replicates. `glance()`'s `n_o`
 counts the **occasions observed per cell** in the design that was fitted. So on
 a design with three ratings per cell, a fit reporting both settings shows
 `occasions` 1 and 3 down its rows, while `n_o` is 3 for the fit as a whole.
+`n_o` is `NA` on a design that defines no single per-cell count. A ragged
+replicate fit is the case that separates the two most sharply: `n_o` reads
+`NA` there while `occasions` still reads 1.
 
 ## One-way vs. two-way
 
