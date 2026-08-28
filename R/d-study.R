@@ -74,12 +74,12 @@
 #'   the rater and interaction terms divide by `m`, pure error by `m` times the
 #'   curve's own occasion setting. The returned object gains an `occasions`
 #'   column, one reliability curve per distinct value that column holds on the
-#'   fit: a single-occasion setting divides pure error by `m` alone, an
+#'   fit. A single-occasion setting divides pure error by `m` alone, an
 #'   occasion-averaged one by `m` times the fitted occasion count. At `m` = the
 #'   observed rater count each curve matches the fitted `ICC(*,k)` for its own
 #'   level and occasion setting, where the fit reports one. A multilevel fit's
-#'   `occasions` column also carries the cluster level's placeholder 1 (that
-#'   error set has no pure error to average), so a fit made with
+#'   `occasions` column also carries the cluster level's placeholder 1, since
+#'   that error set has no pure error to average. So a fit made with
 #'   `occasions = "average"` alone still projects a subject curve at 1, which
 #'   the fit itself does not report.
 #'   `tidy()` carries that column on every projection, `NA` where the fit has no

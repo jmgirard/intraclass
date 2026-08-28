@@ -171,12 +171,12 @@ where the residual splits into the subject-by-rater interaction and pure error),
 the rater and interaction terms divide by \code{m}, pure error by \code{m} times the
 curve's own occasion setting. The returned object gains an \code{occasions}
 column, one reliability curve per distinct value that column holds on the
-fit: a single-occasion setting divides pure error by \code{m} alone, an
+fit. A single-occasion setting divides pure error by \code{m} alone, an
 occasion-averaged one by \code{m} times the fitted occasion count. At \code{m} = the
 observed rater count each curve matches the fitted \verb{ICC(*,k)} for its own
 level and occasion setting, where the fit reports one. A multilevel fit's
-\code{occasions} column also carries the cluster level's placeholder 1 (that
-error set has no pure error to average), so a fit made with
+\code{occasions} column also carries the cluster level's placeholder 1, since
+that error set has no pure error to average. So a fit made with
 \code{occasions = "average"} alone still projects a subject curve at 1, which
 the fit itself does not report.
 \code{tidy()} carries that column on every projection, \code{NA} where the fit has no

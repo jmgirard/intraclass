@@ -82,13 +82,13 @@ test_that("?icc says occasions is the per-rater occasion divisor, not a ratings 
     pages,
     paste0(
       "On a fit that splits within-cell replicates it reads 1 wherever the ",
-      "row averages no occasions, which covers every single-occasion row and ",
+      "row averages no occasions. That covers every single-occasion row, and ",
       "every row whose error set carries no pure-error term to average"
     )
   )
   expect_says(
     pages,
-    "it reads the fitted per-cell occasion count where the row does average"
+    "It reads the fitted per-cell occasion count where the row does average"
   )
   expect_says(pages, "On a fit that splits none it is NA")
 
@@ -109,9 +109,9 @@ test_that("?icc says occasions is the per-rater occasion divisor, not a ratings 
     pages,
     paste0(
       "glance() reports a different quantity as n_o, the observed per-cell ",
-      "occasion count of the fitted design, itself NA under the condition ",
-      "the glance.icc() bullet below states, which a ragged replicate design ",
-      "meets while occasions still reads 1"
+      "occasion count of the fitted design. n_o is itself NA under the ",
+      "condition the glance.icc() bullet below states, which a ragged ",
+      "replicate design meets while occasions still reads 1"
     )
   )
 

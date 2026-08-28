@@ -679,17 +679,17 @@
 #'     column is present on every fit. `occasions` reports the per-rater
 #'     occasion divisor that row's coefficient applies to pure error. On a fit
 #'     that splits within-cell replicates it reads 1 wherever the row averages
-#'     no occasions, which covers every single-occasion row and every row whose
+#'     no occasions. That covers every single-occasion row, and every row whose
 #'     error set carries no pure-error term to average, such as the cluster
-#'     rows of a multilevel fit; it reads the fitted per-cell occasion count
+#'     rows of a multilevel fit. It reads the fitted per-cell occasion count
 #'     where the row does average. On a fit that splits none it is `NA`. It is
 #'     not in general the number of ratings the coefficient averages, because
 #'     it counts occasions per rater: an occasion-averaged `ICC(*,k)` row
 #'     averages `k` raters at that occasion count each. `glance()` reports a
 #'     different quantity as `n_o`, the observed per-cell occasion count of the
-#'     fitted design, itself `NA` under the condition the `glance.icc()` bullet
-#'     below states, which a ragged replicate design meets while `occasions`
-#'     still reads 1.
+#'     fitted design. `n_o` is itself `NA` under the condition the
+#'     `glance.icc()` bullet below states, which a ragged replicate design
+#'     meets while `occasions` still reads 1.
 #'   * `glance.icc()`: a one-row tibble of model-level summaries:
 #'     the sample sizes, the design flags -- among them the rater treatment
 #'     `raters` (`NA` where the design estimates no separable rater main effect:

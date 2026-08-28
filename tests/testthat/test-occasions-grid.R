@@ -43,7 +43,9 @@
 #   "ragged"        every defined cell present, ONE cell rated a 4th time
 #   "missing_cell"  one defined cell absent, every present cell rated 3 times
 
-occ_seed <- function(...) 20260828L + sum(utf8ToInt(paste(c(...), collapse = "/")))
+occ_seed <- function(...) {
+  20260828L + sum(utf8ToInt(paste(c(...), collapse = "/")))
+}
 
 occ_reps <- 3L
 
@@ -53,7 +55,10 @@ occ_shape_rows <- function(d, shape) {
     shape,
     none = d[first, , drop = FALSE],
     uniform = d,
-    ragged = rbind(d, transform(d[1L, , drop = FALSE], replicate = occ_reps + 1L)),
+    ragged = rbind(
+      d,
+      transform(d[1L, , drop = FALSE], replicate = occ_reps + 1L)
+    ),
     missing_cell = d[!(d$cell == d$cell[1L]), , drop = FALSE]
   )
 }
