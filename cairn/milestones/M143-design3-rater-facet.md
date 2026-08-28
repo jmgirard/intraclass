@@ -5,7 +5,7 @@
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP2
-- **Branch/PR:** `m143-design3-rater-facet`
+- **Branch/PR:** `m143-design3-rater-facet` / https://github.com/jmgirard/intraclass/pull/154
 
 ## Goal
 
@@ -36,29 +36,29 @@ capability gap → M144.
 
 ## Acceptance criteria
 
-- [ ] AC1. On a fit whose `design$ml_design` is `"nested_in_subjects"`, and on a
+- [x] AC1. On a fit whose `design$ml_design` is `"nested_in_subjects"`, and on a
       `d_study()` projection of such a fit, `glance()$raters` is `NA_character_`.
       `tests/testthat/test-exported-contract.R:513`, which pins `"random"` for a
       Design 3 projection today, is re-pinned in the same commit.
-- [ ] AC2. For a Design 3 fit, the header `format.icc()` renders — captured with
+- [x] AC2. For a Design 3 fit, the header `format.icc()` renders — captured with
       `cli::cli_fmt()` (M129) — contains `sprintf("Raters: %d", x$n$raters)` and
       contains neither `"(random)"` nor `"(fixed)"`. A Design 1 (multilevel
       crossed) and a Design 2 (`nested_in_clusters`) fit, which render through the
       same multilevel branch, each still contain their treatment word.
-- [ ] AC3. `summary()` on a Design 3 fit does not contain the
+- [x] AC3. `summary()` on a Design 3 fit does not contain the
       `type_line("agreement")` sentence at `R/icc-methods.R:315-319`, and does
       contain a sentence stating that raters nested in subjects leave no separable
       rater main effect. A crossed two-way agreement fit still contains the
       `type_line("agreement")` sentence.
-- [ ] AC4. The sentence at `R/icc.R:683` documenting `glance()`'s `raters` column,
+- [x] AC4. The sentence at `R/icc.R:683` documenting `glance()`'s `raters` column,
       as rendered into `man/icc.Rd`, states the `nested_in_subjects` condition
       beside the `model = "oneway"` one.
-- [ ] AC5. On a Design 3 fit, none of the five renderers of the `icc` object's
+- [x] AC5. On a Design 3 fit, none of the five renderers of the `icc` object's
       public surface (D-035 clause 2) — `tidy()`, `glance()`, `print()`,
       `format()`, `summary()` — yields `"random"` or `"fixed"` as a rater
       treatment. `$fit` and `$call`, that enumeration's other two members, are
       excluded by name: the engine's own object and the user's literal call.
-- [ ] AC6. `devtools::test()` and `R CMD check --as-cran` are clean, and the six
+- [x] AC6. `devtools::test()` and `R CMD check --as-cran` are clean, and the six
       `data-raw/` checkers pass.
 
 ## Coverage
@@ -115,3 +115,186 @@ capability gap → M144.
 - 2026-08-27: measured on the `design3_frame()` fixture (seed 7): `tidy()$type` is `NA` on both rows, `glance()$raters` is `"random"`, `design$type` is `"agreement"`, `design$model` is `"twoway"`. This is the measurement D-042 cites.
 
 ## Review
+
+Reviewed 2026-08-27 on `m143-design3-rater-facet` @ 366b563, PR #154.
+Evidence run fresh in this phase against a `devtools::load_all()` of the branch;
+fixture functions loaded from the two test files without executing their
+`test_that()` blocks, so each figure is a new fit, not a test's own report.
+
+### Acceptance criteria
+
+- **AC1 — PASS.** `glance()$raters` measured on five Design 3 fits and on a
+  `d_study(m = 1:3)` projection of each: the `design3_frame()` fixture and the
+  four geometries `test-icc-nested-multilevel.R` fits (oracle 30x8x6,
+  reduction 50x20x6 at zero cluster variance, detection 20x6x4, and the ragged
+  25%-dropped one). All ten cells read `NA` and all five fits report
+  `design$ml_design == "nested_in_subjects"`. The `test-exported-contract.R`
+  Design 3 projection pin was re-pinned from `"random"` to `NA_character_` in
+  commit 4243a65, the same commit that changed both producers.
+- **AC2 — PASS.** Header captured with `cli::cli_fmt(print(x))`. Design 3
+  (`Raters: 480`) contains `sprintf("Raters: %d", x$n$raters)` and neither
+  `"(random)"` nor `"(fixed)"`. The two controls through the same multilevel
+  branch keep their treatment word: Design 1 (`crossed`) renders
+  `Raters: 3 (random)`, Design 2 (`nested_in_clusters`) renders
+  `Raters: 15 (random)`.
+- **AC3 — PASS.** `summary()` on the Design 3 fit contains no
+  `"Absolute agreement counts the rater main effect"` sentence and does contain
+  "Raters nested in subjects: each subject is rated by its own set of raters, so
+  systematic rater differences cannot be separated and are absorbed into the
+  residual (a conservative ICC)." The control, a crossed two-way agreement fit,
+  still carries the agreement sentence and not the nesting one.
+- **AC4 — PASS.** `man/icc.Rd:487-492` (rendered from `R/icc.R:683-687`) states
+  both conditions in the user-facing argument spellings: `NA` where the design
+  estimates no separable rater main effect -- a `model = "oneway"` fit and a
+  `design = "nested_in_subjects"` fit. `devtools::document()` on the branch
+  leaves no diff.
+- **AC5 — PASS.** Match counts for the pattern `random|fixed` over a Design 3
+  fit: `tidy()` 0 of 10 character cells, `glance()` 0 of 4, `print()` 0 of 9
+  lines, `format()` 0 of 9, `summary()` 0 of 13. The same sweep over a crossed
+  random-rater fit, where the treatment is defined, hits on four of the five --
+  `glance()` 1, `print()` 2, `format()` 2, `summary()` 2, `tidy()` 0 -- so the
+  sweep is shown able to red rather than passing on an empty domain. `$fit` and
+  `$call` excluded by name per the criterion.
+- **AC6 — PASS.** `R CMD check --as-cran`: Status OK, 0 errors / 0 warnings /
+  0 notes (13m 52.9s, R 4.6.1, aarch64-apple-darwin23). `devtools::test()`:
+  FAIL 0 / WARN 3 / SKIP 2 / PASS 9107. The three warnings are the three the
+  ROADMAP candidate row already names on the default branch, re-identified here
+  by site and message: a lavaan negative-latent-variance warning past an
+  `expect_error()` (`test-icc-lavaan-multilevel.R:402`), a glmmTMB
+  non-positive-definite-Hessian warning past an `expect_message()`
+  (`test-icc-type-vector.R:286`), and the fixed-rater advisory from an unwrapped
+  `icc()` call (`test-icc-brms.R:2425`). All six `data-raw/` checkers pass.
+
+### Consistency gate
+
+Universal cairn-file checks: `cairn_validate.py` exit 0, all checks passed
+(`coverage complete` and `scaffold present` among them); the `release window`
+advisory did not fire. No `DESIGN.md` principle changed on this branch, so
+`cairn_impact.py` does not apply -- GP2 is *touched*, not amended.
+
+Toolchain checks, from the `r-package` profile's `consistency-gate` slot:
+`devtools::document()` leaves no diff; `NAMESPACE`, `man/` and `data/*.rda` are
+generated and the no-diff `document()` run covers them; `README.Rmd` and
+`README.md` share a last-touching commit (5c274fc), so they are in sync;
+`pkgdown::check_pkgdown()` reports no problems; no top-level file is added, so
+no `.Rbuildignore` entry is owed, and the `--as-cran` run reports 0 notes;
+`devtools::check()` clean, recorded under AC6. `air format --check` is clean on
+every file this branch touches (its two hits are pre-existing files under
+`tests/testthat/_problems/`, untouched here).
+
+**NEWS.md.** The slot asks for an entry covering this milestone's user-visible
+changes. None is owed and none was added: v0.1.0 is unreleased, so its notes
+describe the shipping behavior rather than a change from a prior release, and
+the `glance()` bullet (`NEWS.md:25-28`) describes no column values. Nothing in
+NEWS is made false by this branch. Checked against `NEWS.md` on this branch.
+
+### Independent fresh-context review
+
+The diff touches `R/` and `tests/`, so the full three-lens fan-out ran, each
+lens on its own evidence base and none having seen the implementation.
+
+- **[S] blame-history:** no conflicting finding. D-038 clause 1 is superseded
+  through D-042 rather than silently overridden; `design$type`/`design$model`/
+  `n_raters` are left untouched, matching the Out scope and D-035 clause 2; the
+  M8 §3b citation in the new comment checks out against the estimand spec. It
+  raised the `icc_design_phrase()` legacy fallback (F9 below) and one
+  terminology nit (F6).
+- **[S] prior-review record:** no regression finding. It read the archived
+  `## Review` sections touching these files and `LESSONS.md`, and probed
+  `gh api repos/jmgirard/intraclass/pulls/comments?per_page=1`, which returned
+  `[]` -- so the GitHub thread surface was skipped, as the M91 measurement
+  predicts. It records that M138's duplicated-predicate root cause is what
+  `design_has_rater_facet()` fixes, that M140's "measure the whole grid first"
+  lesson is honoured by the four-geometry test, and that M129's cli-capture
+  lesson is honoured by the `cli::cli_fmt()` captures. It raised F9
+  independently.
+- **[O] diff-bug:** nine findings, ranked. All nine are logged and triaged
+  below; five were re-measured here against the implementation rather than
+  accepted on the reviewer's account.
+
+### Findings and disposition
+
+Ranked as the [O] lens ranked them; F-numbers are this section's. No finding
+demonstrates an acceptance criterion failing: all six were measured passing
+above.
+
+- **F1. `R/d-study.R:139-145` and `man/d_study.Rd:80-86` still document the old
+  rule.** `?d_study` describes `glance.icc_dstudy()`'s rater treatment as "`NA`
+  on a projection of a one-way fit, whose interchangeable raters carry no
+  facet". AC1 made that column `NA` on Design 3 projections too, and T6 updated
+  only `?icc`. Verified on disk: the sentence is unchanged at
+  `R/d-study.R:141-142`. A user consulting `?d_study` after reading `NA` there
+  concludes the fit was one-way -- the same inaccuracy AC4 removed from `?icc`,
+  left standing on the sibling table.
+- **F2. D-042's stated reason is incomplete about the surface it governs.**
+  D-042 argues the `type`/`raters` pair D-038 declined to split "does not
+  exist". Measured here on a Design 3 projection: `glance(d_study(d3))$type` is
+  `"agreement"` and `$raters` is `NA`; `tidy(d_study(d3))$type` is `"agreement"`
+  as well. `glance.icc_dstudy()` carries both columns (`R/d-study.R:742-752`),
+  so the pair does exist on the projection row, and it now reads split. The
+  outcome is defensible -- absolute agreement IS defined for Design 3, and the
+  package says so in its own dropped-`"consistency"` message, while the rater
+  treatment is not -- but the recorded rationale asserts more than holds.
+- **F3. `summary()` on Design 3 also loses the cell note.** On `origin/main` a
+  Design 3 fit printed the agreement note plus "A single rating per cell
+  confounds the subject-by-rater interaction with residual error." The branch
+  returns the nesting sentence alone, so both are gone. Verified by reading
+  `origin/main:R/icc-methods.R:295-340` against the branch's rendered output.
+  AC3 authorized removing the `type_line("agreement")` sentence only. Dropping
+  the cell note parallels what the one-way branch already does and is right on
+  the merits (Design 3 has no separable subject-by-rater interaction), but it is
+  an unrecorded change to a public renderer.
+- **F4. The five-renderer sweep discriminates for four renderers, not five.**
+  Verified by planting: with `summary.icc()`'s new branch disabled and every
+  other edit intact, the dedicated T5 test reds (2 failures, at
+  `test-exported-contract.R:656` and `:665`) but the sweep stays green. On the
+  crossed control the `summary = TRUE` cell is satisfied by the
+  `Raters: N (random)` line `summary()` inherits from `format()`, and on the
+  Design 3 side the pre-T5 agreement note contains neither word. Coverage is not
+  lost; the sweep's own claim is weaker for `summary()` than its comment reads.
+  The work log records the `tidy()` half of this, not the `summary()` half.
+- **F5. D-035 clause 2 is cited as a five-member enumeration.** Read at
+  `cairn/DECISIONS.md:1530-1532`: clause 2 names `tidy()`, `glance()`,
+  `summary()` and `print()`, plus `$fit` and `$call` -- four methods, not five;
+  `format()` is not in it. The test comment at
+  `test-exported-contract.R:632-636` and AC5's parenthetical both attribute the
+  five-member list to it. Substantively harmless (`print()` delegates to
+  `format()`, and AC5 enumerates its own five by name, all five measured), but
+  it attributes to a change-controlled decision an enumeration it does not
+  contain.
+- **F6. `?icc` states the condition in argument spelling.** "a
+  `design = "nested_in_subjects"` fit" names an `icc()` argument value the user
+  need not pass -- every Design 3 fixture on this branch is auto-detected --
+  while the observable sibling in the same `glance()` row is `ml_design`. AC4 is
+  met as written; this is precision, not accuracy.
+- **F7. The retained `R/d-study.R:541-543` comment is false.** "The local
+  `raters` still carries the fitted value into `make_estimand()` above": for a
+  Design 3 fit `ml_oneway` is TRUE (`R/d-study.R:205`) and that branch
+  (`:377-378`) never reads `raters`; the `oneway` branch (`:392-393`) does not
+  either. Verified by reading both branches. The clause was already inaccurate
+  on `origin/main`; this branch reworded the comment around it and carried it
+  forward.
+- **F8. The `summary()` branch is keyed more broadly than its prose.**
+  `!design_has_rater_facet()` is also TRUE for a one-way fit; only the preceding
+  branch's ordering keeps a one-way fit from being told "Raters nested in
+  subjects". Correct today; a reordering or a third no-facet design would emit
+  prose naming the wrong reason.
+- **F9. `icc_design_phrase()`'s `is.na(raters)` maps to the literal
+  `"one-way random"` (`R/estimand.R:229`).** Raised independently by all three
+  lenses. Design 3 projections now carry `icc_raters = NA`, so a legacy
+  `icc_dstudy` object with no `icc_design_label` attribute would render
+  "one-way random" through the fallbacks at `R/d-study.R:620-623` and
+  `R/autoplot.R:38-43`. Unreachable for anything this version builds: every
+  `d_study()` output sets that attribute, and the current header measures as
+  `# D-study projection: multilevel (raters nested in subjects) absolute
+  agreement`. On `origin/main` the same legacy object rendered "two-way random,
+  absolute agreement", also wrong for Design 3.
+
+Recommended disposition, put to the maintainer at the merge gate: fix F1, F5
+and F7 on the branch now (one doc sentence plus `document()`, one test comment,
+one stale code comment); amend D-042's rationale for F2 before the squash, the
+entry never having reached the default branch; record F3 and F4 here and in the
+work log with no code change, both being correct as implemented; absorb F9 into
+the standing Design 3 remainder candidate row; reject F6 and F8 -- F6 as
+precision on a criterion met as written, F8 as correct under the branch ordering
+it has.
