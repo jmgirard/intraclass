@@ -1,6 +1,6 @@
 # M146: The occasion vocabulary says which quantity each surface reports
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -247,6 +247,25 @@ Repair tasks (the 2026-08-28 defect return; see the Review section's findings):
 - 2026-08-28: repair complete; status returns to review. AC1's `tidy.icc_dstudy()`
   half now states a sentence true on the projection rows the review falsified it
   on; findings 1, 3, 4, 5, 6 and 7 are fixed. No criterion or scope text changed.
+- 2026-08-28: second review round returned M146 to `in-progress`. AC1 fails on
+  three row classes the round-1 repair did not reach: `occasions` is not the
+  ratings-averaged count on any `ICC(*,k)` row (12 ratings at `occasions` 3 on
+  the 15x4x3 fit); `?icc`'s trichotomy misreads the multilevel cluster
+  placeholder `occasions` 1; and `?d_study`'s "the setting held fixed on a
+  rater projection" is false on those same cluster rows, which read 1 at every
+  `m`. AC2-AC6 verified with fresh evidence. Findings 4, 7, 8 and 10 triaged
+  fix-now, 6 to a candidate row, 9 rejected. Defect returns: 2.
+- 2026-08-28: amendment return: AC1 -- "reports the number of ratings averaged
+  into that row's coefficient -- 1 for a single-rating coefficient, the fitted
+  per-cell replicate count for an occasion-averaged one" -- false on every
+  `ICC(*,k)` row, so no repair satisfies the criterion as written; the house
+  term for that family is *single-occasion*, not *single-rating*. Amendment
+  returns naming AC1: 1.
+- 2026-08-28: the thrash rule's same-criterion trigger fired -- AC1 failed
+  twice, each time by a doc sentence composed per design family and falsified
+  by an unenumerated family, the shape `LESSONS.md:47` already names. The plan
+  gate recorded no alternative to that approach, so the escalation offer is the
+  remaining remedy; disposition put to the maintainer.
 
 ## Decisions
 
@@ -283,6 +302,8 @@ false red; under `R CMD check`, where `../../man` does not exist, only the
 installed surface is read, which is what the doctrine asks for.
 
 ## Review
+
+### Round 1 (2026-08-28)
 
 Reviewed 2026-08-28 on `m146-occasions-vocabulary` at PR #157, branch level with
 `origin/main` (no merge needed). Diff: 12 files, +447/-46.
@@ -412,3 +433,166 @@ search-first sweep and the records-hygiene disposition rule apply; the nearest
 existing home is the `glance()$n_o` remainder row, which already carries the
 absorbed `occasions`/`n_o` family. The finding is recorded above in the
 meantime.
+### Round 2 (2026-08-28, after the T9-T14 repair)
+
+Re-reviewed on `m146-occasions-vocabulary` at PR #157 (draft), branch level with
+`origin/main` (0 behind, nothing to merge). Diff: 12 files, +760/-53.
+
+#### Acceptance-criterion evidence
+
+- **AC1 -- FAILED again, by a new mechanism.** The `tidy.icc_dstudy()` half the
+  round-1 return falsified is repaired for the case it named: on an 8x4x3x3
+  multilevel replicate fit, `tidy(d_study(fit, n_o = 1:4))` cluster rows read
+  `occasions` 1..4 at an unchanged estimate (0.9307878 agreement, 1.0000000
+  consistency), which the carve-out T9 added now covers. But the sentence AC1
+  mandates for `tidy.icc()` is false on two further row classes. (a) On the
+  balanced 15x4x3 fit, `ICC(A,k)` at `occasions` 3 (0.9555260) is the
+  reliability of a mean of 4 raters x 3 occasions = 12 ratings, so `occasions`
+  is not "the number of ratings averaged into that row's coefficient" on any
+  `ICC(*,k)` row -- half the rows of every replicate fit (finding 2). (b) On a
+  multilevel fit made with `occasions = "average"` alone, `tidy(fit)` cluster
+  rows read `occasions` 1 while subject rows read 3; AC1's "1 for a
+  single-rating coefficient" reads those as single-occasion coefficients when
+  `oc = 1` there is the no-op `R/d-study.R:393` documents (finding 1). AC1's
+  d-study half also still fails on the rater axis: cluster rows read
+  `occasions` 1 at every `m` on that same fit, not "the setting held fixed"
+  (finding 3).
+- [x] **AC2 -- verified.** `test-autoplot.R` green (20 tests, 79 passes, 0 fail,
+  0 skip). Independently rebuilt all eight enumerated cells and read the legend
+  scales: no `n_o` in any legend title or key; keys read `Absolute agreement,
+  occasions: 1` / `occasions: 3` on the four rater-axis cells; x-axis labels
+  `Number of raters (m)` and `Number of occasions (n_o)` unchanged.
+- [x] **AC3 -- verified.** Independent whitespace-collapsed sweep of
+  `vignettes/*.Rmd`, `README.Rmd`, `NEWS.md` and roxygen-only lines of `R/*.R`
+  for `occasions =` followed by a digit in any spacing or quoting: 0 hits. The
+  two `d-studies-and-replicates.Rmd` paragraphs name the `occasions` column.
+  `test-vignette-claims.R` green under `NOT_CRAN=true` (422 passes).
+- [x] **AC4 -- verified.** `vignettes/glossary.Rmd` carries both entries. The
+  *Occasion* entry's `print()` claim now holds where checked: the balanced
+  replicate fit prints `60 cells x 3 replicates` at `n_o` 3, and the multilevel
+  fit prints `Subjects: 32 in 8 clusters | Raters: 3 (random) | Observations:
+  288 (complete)` with no per-cell count, which the entry names.
+- [x] **AC5 -- verified.** `R/d-study.R:78` calls the held count "the fitted
+  occasion count"; every `n_o` in lines 73-86 names the swept argument.
+- [x] **AC6 -- verified.** `R CMD check` raw Status line `Status: OK`, no
+  ERROR/WARNING/NOTE anywhere in the log; `air format --check .` exit 0;
+  `lintr::lint_package()` 0 lints.
+
+#### Consistency gate
+
+`cairn_validate.py` exit 0, all 17 checks PASS (`coverage complete` among them),
+101 advisory warnings (100 `work-log format`, the repo's wrapped-line
+convention; 1 `sizing`). `release window` advisory did not fire.
+`cairn_impact.py` not run -- no `DESIGN.md` principle change in this diff.
+Toolchain slot: `devtools::document()` leaves no diff in `man/`, `NAMESPACE` or
+`data/`; `pkgdown::check_pkgdown()` no problems; README untouched by the branch;
+no new top-level files; no NEWS entry, justified in the work log. All six
+`data-raw/` checkers pass self-test and check mode (MPL doc-claims 60/12/0;
+record claims 7 re-derived; oracle registry 0 gaps; observations 0 falsified;
+abort-remedy 52 cells, 24 accepted, 0 broken promises).
+
+Prose ruler against `origin/main`: `d-studies-and-replicates.Rmd` dash 0 (was 4
+on the branch at round 1, the M135 regression finding 3 named); `R/d-study.R`
+over-35 sentences 4 -> 3; `glossary.Rmd` and `R/icc.R` unchanged.
+
+#### Findings and disposition
+
+Three fresh-context lenses ran in parallel. Ranked, most severe first; every
+[O] finding below re-verified here against live fits, not against the lens's
+account of them.
+
+1. **[O] `occasions` does not count the ratings averaged into an `ICC(*,k)`
+   row's coefficient** (`R/icc.R:679-680`, `R/d-study.R:141-142`,
+   `vignettes/glossary.Rmd:233-234`, all three pinned verbatim in
+   `test-occasions-vocabulary.R`). On the 15x4x3 fit `ICC(A,k)` at `occasions`
+   3 averages 4 raters x 3 occasions = 12 ratings; the column reads 3, the
+   per-rater occasion divisor D-044 itself calls "the averaging divisor". The
+   sentence is false on half the rows of every replicate fit. *Amendment
+   return* -- AC1 mandates this wording verbatim, so no repair satisfies the
+   criterion as written.
+2. **[O] `?icc`'s trichotomy is unqualified where `?d_study`'s was carved out**
+   (`R/icc.R:679-687`). On a multilevel fit made with `occasions = "average"`
+   alone, `tidy(fit)` cluster rows read `occasions` 1 and subject rows 3; "1
+   for a single-rating coefficient" misreads the cluster placeholder
+   (`R/d-study.R:393`: "projected single-occasion (oc = 1, a no-op there)").
+   *Return floor* -- AC1's `tidy.icc()` half failing inside its domain.
+3. **[O] "the setting held fixed on a rater projection" is false on multilevel
+   cluster rows** (`R/d-study.R:139-141`). The cluster level is projected at
+   `min(proj_occ)` (`R/d-study.R:430-432`): on that same fit,
+   `tidy(d_study(fit, m = 1:3))` cluster rows read `occasions` 1 at every `m`,
+   not the held setting 3. T9's carve-out covers only the ratings-averaged
+   clause, and its justification ("flat across the column") describes the
+   occasion axis, not this one. *Return floor* -- AC1's `tidy.icc_dstudy()`
+   half failing inside its domain, by a mechanism the round-1 repair did not
+   reach.
+4. **[O] "one reliability curve per occasion setting on the fit" is false on a
+   multilevel replicate fit** (`R/d-study.R:76-79`, rewritten by T11).
+   `proj_occ` is `sort(unique(x$estimates$occasions))` (`R/d-study.R:422`), so
+   it picks up the cluster placeholder: a fit made with `occasions = "average"`
+   only yields subject curves at `occasions` 1 *and* 3, the `occasions` 1 curve
+   reporting `ICC(A,1)` = 0.6974904 at `m` = 1, a coefficient the fit never
+   reports. *Fix now* -- a defect inside an intentional change.
+5. **[O] `single-rating` is a third term for a family the package already names
+   twice** (`R/icc.R:680`, `vignettes/glossary.Rmd:235`). The house term for
+   the `occasions = 1` family is *single-occasion* (`R/d-study.R:99,393`,
+   `R/icc.R:143,156`, `d-studies-and-replicates.Rmd:176`), while
+   *single-rating* elsewhere in the same file means one rating per cell
+   (`R/icc.R:139,581`, `R/estimand.R:12`, `NEWS.md:26`). A vocabulary milestone
+   imports a collision and pins it. *Fold into the amendment* -- AC1 mandates
+   the phrase.
+6. **[O] The legend on a multilevel rater projection labels the cluster
+   facet's only curve `occasions: 1`** (`R/autoplot.R:64`). Verified by
+   building the plot: scale labels are `Absolute agreement, occasions: 1` and
+   `..., occasions: 3`, the cluster facet carrying only the first. AC2 asks
+   only for the `n_o` absence, so the criterion holds, but the new label
+   commits to an averaging reading where the old `n_o = 1` was ambiguous.
+   *Follow-up* -- outside AC2's promise; candidate row at hygiene.
+7. **[O] "`"average"`, which divides it at the fitted occasion count" restates
+   the divisor loosely** (`R/d-study.R:77-78`); the true divisor is `m` times
+   that count, which the preceding clause states correctly. *Fix now.*
+8. **[O] The `R/autoplot.R:50-51` comment says the rater-axis settings "are the
+   fit's own"**, which finding 4's evidence falsifies on a multilevel fit.
+   Internal comment, no user surface. *Fix now.*
+9. **[O] `vignettes/glossary.Rmd:228` is 106 characters**, the only line over
+   90 in a file whose next longest is 90. *Rejected* -- pure style, and the
+   out-of-scope taxonomy covers formatting a tool would own.
+10. **[O] "wherever the design line carries one" is imprecise**
+    (`vignettes/glossary.Rmd:225-227`): a ragged replicate fit prints `60 cells
+    x NA replicates`, so the line always carries the slot and it is the count
+    that is absent. Verified. *Fix now.*
+11. **[S prior-review] The cluster carve-out is a per-design-family prediction
+    of the shape `LESSONS.md:47` (M140, trimmed M141, extended M143) names** --
+    "a doc claim about WHEN a field is `NA` must state the condition the code
+    GUARANTEES, never predict what each design family does -- M140's per-family
+    prediction failed review twice, each time falsified by an unenumerated
+    family." The lens rated it a near-miss because the cluster-flat behaviour
+    is a code-guaranteed invariant. Findings 1-3 make it a hit: this
+    milestone's claims were composed per family and fell to unenumerated ones
+    twice. *Accepted, and it is the diagnosis behind the disposition below.*
+12. **[S blame-history] No findings.** Every hunk traces to D-044; the
+    `autoplot()` strings replaced entered incidentally at M61
+    (`1e5c729c0`); no repair contradicts a recorded decision, and `man/*.Rd`
+    is in lockstep with the roxygen it renders.
+
+#### Outcome
+
+AC1 fails on three independent row classes. Findings 2 and 3 demonstrate it
+failing inside its domain -- a defect return. Finding 1 shows AC1's own
+mandated wording ("the number of ratings averaged into that row's coefficient",
+"1 for a single-rating coefficient") cannot be made true, since it is false on
+every `ICC(*,k)` row: that is evidence about the promise, so it routes to the
+gated criterion-amendment protocol. Finding 5 folds into the same amendment.
+
+Status returns to `in-progress`. Defect returns on this milestone: 2.
+Amendment returns naming AC1: 1.
+
+The thrash rule's same-criterion trigger fires: AC1 has now failed twice, each
+time by a new mechanism of the same shape -- a documentation sentence composed
+per design family and falsified by a family nobody enumerated. `LESSONS.md:47`
+already named that shape before this milestone was planned. The plan gate
+recorded three alternatives (the printed header fork, the legend key form,
+rename/removal), none of them an alternative to composing these claims from
+recall, so the recorded-alternative remedy has nothing to spend and the
+escalation offer is what remains. Disposition goes to the maintainer.
+
+Finding 6's candidate row is held for whichever pass next reaches hygiene.
