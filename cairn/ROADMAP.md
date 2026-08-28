@@ -9,7 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M145 | The v0.1.0 release-round documentation remainder | planned | — | high | milestones/M145-release-round-doc-remainder.md |
+| M145 | The v0.1.0 release-round documentation remainder | review | — | high | milestones/M145-release-round-doc-remainder.md |
 | M144 | NEWS's *What ships* names the designs the package actually supports | done | — | normal | milestones/archive/M144-news-what-ships-designs.md |
 | M143 | Design 3 stops reporting a rater treatment for a facet it does not have | done | — | high | milestones/archive/M143-design3-rater-facet.md |
 | M142 | NEWS.md's 0.1.0 entry reads as first-release notes, not a development log | done | — | high | milestones/archive/M142-news-release-notes.md |
