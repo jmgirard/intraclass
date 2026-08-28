@@ -82,7 +82,7 @@ removing either column → refused, D-044.
       `tidy.icc()` column list (`R/icc.R:675-680`); mirror the meaning sentence
       alone into `tidy.icc_dstudy()`'s list, stating the projection's own
       `NA` rule (outside a replicate projection, `R/d-study.R:136`). Document.
-- [ ] T2. Pin the AC1 sentences on the installed surface per
+- [x] T2. Pin the AC1 sentences on the installed surface per
       `cairn/doctrine/doc-claim-pins.md`: read via `tools::Rd_db()`, search
       whitespace-collapsed text, pin a backtick-free spelling, and
       mutation-verify each pin red.
@@ -131,6 +131,12 @@ removing either column → refused, D-044.
   `tidy.icc_dstudy()` states the meaning alone. Values derived from a live 15x4x3
   replicated fit. `devtools::test()`: FAIL 0, WARN 3 (the pre-existing
   default-branch count), SKIP 2, PASS 9122.
+- 2026-08-28: T2 done. `tests/testthat/test-occasions-vocabulary.R` pins the AC1
+  sentences over whitespace-collapsed, backtick-free `Rd_db()` text (source
+  `man/*.Rd` fallback under `load_all`, no skip branch). Mutation matrix: seven
+  planted defects (meaning verb, contrast naming the wrong column, each of the
+  three divisor/`NA` clauses, the d-study meaning, the contrast copied onto
+  `d_study.Rd`) each red at FAIL 1; a mid-phrase rewrap control stayed green.
 
 ## Decisions
 
