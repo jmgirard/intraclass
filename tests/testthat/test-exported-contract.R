@@ -404,13 +404,23 @@ test_that("glance.icc carries `raters` and `replicates`, one name set per design
       cluster = cluster,
       seed = 1
     ),
-    replicate = icc(replicate_frame(), score, subject, rater, seed = 1)
+    replicate = icc(replicate_frame(), score, subject, rater, seed = 1),
+    design3 = icc(
+      design3_frame(),
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      seed = 1
+    )
   )
   gls <- lapply(fits, glance)
 
-  # A one-way design has no rater facet, so the treatment does not apply there;
-  # every other design reports the treatment it was fitted under.
+  # A one-way design has no rater facet, and neither does Design 3, whose raters
+  # are nested in subjects: the treatment does not apply on either, so both read
+  # NA (D-042). Every other design reports the treatment it was fitted under.
   expect_identical(gls$oneway$raters, NA_character_)
+  expect_identical(gls$design3$raters, NA_character_)
   expect_identical(gls$random$raters, "random")
   expect_identical(gls$fixed$raters, "fixed")
   expect_identical(gls$multilevel$raters, "random")
@@ -424,7 +434,8 @@ test_that("glance.icc carries `raters` and `replicates`, one name set per design
       random = FALSE,
       fixed = FALSE,
       multilevel = FALSE,
-      replicate = TRUE
+      replicate = TRUE,
+      design3 = FALSE
     )
   )
 
@@ -506,11 +517,12 @@ test_that("glance() on a projection reads `raters` as glance() on the fit does",
     seed = 1
   ))
   expect_identical(glance(d_study(fx, m = 1:3))$raters, "fixed")
-  # Design 3 has no rater component either, and stays nominal on purpose: the
-  # sibling `type` column reports "agreement" on that same row, where the
-  # agreement/consistency distinction is likewise undefined.
+  # Design 3 has no rater component either -- its raters are nested in subjects,
+  # so no rater main effect is separable -- and reads NA on the projection just
+  # as it does on the fit (D-042, superseding D-038 clause 1's Design 3
+  # sentence).
   d3 <- icc(design3_frame(), score, subject, rater, cluster = cluster, seed = 1)
-  expect_identical(glance(d_study(d3, m = 1:3))$raters, "random")
+  expect_identical(glance(d_study(d3, m = 1:3))$raters, NA_character_)
   # The occasion axis is the only one a fixed-rater agreement fit projects on,
   # so it is the only route by which that design reaches this column.
   fxa <- suppressWarnings(icc(
@@ -523,4 +535,220 @@ test_that("glance() on a projection reads `raters` as glance() on the fit does",
     seed = 1
   ))
   expect_identical(glance(d_study(fxa, n_o = 1:3))$raters, "fixed")
+})
+
+test_that("the multilevel header names a rater treatment only where one exists", {
+  skip_if_not_installed("glmmTMB")
+  # All three multilevel designs render through the same `format.icc()` branch.
+  # Design 3's raters are nested in subjects, so no rater main effect is
+  # separable: its header states the rater count without a treatment word
+  # (D-042). Designs 1 and 2 each keep theirs -- the controls that show the edit
+  # is keyed on the design, not on the branch.
+  fits <- list(
+    design1 = icc(
+      multilevel_replicate_frame(),
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      seed = 1
+    ),
+    design2 = icc(
+      nested_replicate_frame(),
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      design = "nested_in_clusters",
+      seed = 1
+    ),
+    design3 = icc(
+      design3_frame(),
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      seed = 1
+    )
+  )
+  expect_identical(
+    vapply(fits, function(x) x$design$ml_design, character(1)),
+    c(
+      design1 = "crossed",
+      design2 = "nested_in_clusters",
+      design3 = "nested_in_subjects"
+    )
+  )
+
+  # The rater line, captured through cli's own sink: `print.icc()` writes via
+  # cli, so `capture.output()` returns character(0) for it (M129).
+  rater_line <- vapply(
+    fits,
+    function(x) {
+      line <- grep(
+        "Raters: ",
+        cli::cli_fmt(print(x)),
+        fixed = TRUE,
+        value = TRUE
+      )
+      expect_length(line, 1L)
+      line
+    },
+    character(1)
+  )
+
+  # Every design states its rater count, ...
+  expect_identical(
+    vapply(
+      names(fits),
+      function(nm) {
+        grepl(
+          sprintf("Raters: %d", fits[[nm]]$n$raters),
+          rater_line[[nm]],
+          fixed = TRUE
+        )
+      },
+      logical(1)
+    ),
+    c(design1 = TRUE, design2 = TRUE, design3 = TRUE)
+  )
+  # ... and only the two with a separable rater main effect qualify it.
+  expect_identical(
+    vapply(
+      rater_line,
+      function(l) {
+        if (grepl("(random)", l, fixed = TRUE)) {
+          "random"
+        } else if (grepl("(fixed)", l, fixed = TRUE)) {
+          "fixed"
+        } else {
+          NA_character_
+        }
+      },
+      character(1)
+    ),
+    c(design1 = "random", design2 = "random", design3 = NA_character_)
+  )
+})
+
+test_that("summary() explains Design 3's nesting instead of a rater main effect", {
+  skip_if_not_installed("glmmTMB")
+  # The absolute-agreement note attributes error to a rater main effect. Design 3
+  # cannot separate one -- its raters are nested in subjects -- so that note is
+  # replaced there by what the nesting does (D-042). The crossed two-way
+  # agreement fit is the control: it keeps the note.
+  d3 <- icc(design3_frame(), score, subject, rater, cluster = cluster, seed = 1)
+  crossed <- icc(ratings, score, subject, rater, type = "agreement", seed = 1)
+  agreement_note <- "Absolute agreement counts the rater main effect"
+  nesting_note <- "Raters nested in subjects"
+
+  got <- vapply(
+    list(design3 = d3, crossed = crossed),
+    function(x) {
+      out <- paste(cli::cli_fmt(summary(x)), collapse = "\n")
+      c(
+        agreement = grepl(agreement_note, out, fixed = TRUE),
+        nesting = grepl(nesting_note, out, fixed = TRUE)
+      )
+    },
+    logical(2)
+  )
+  expect_identical(
+    got,
+    matrix(
+      c(FALSE, TRUE, TRUE, FALSE),
+      nrow = 2L,
+      dimnames = list(c("agreement", "nesting"), c("design3", "crossed"))
+    )
+  )
+  # The replacement says what the nesting costs, not merely that it happened.
+  expect_match(
+    paste(cli::cli_fmt(summary(d3)), collapse = " "),
+    "cannot be separated and are absorbed into the residual"
+  )
+})
+
+test_that("no renderer of the public surface calls Design 3's raters random or fixed", {
+  skip_if_not_installed("glmmTMB")
+  # D-035 clause 2 makes the icc object's public surface what tidy(), glance(),
+  # summary() and print() return, plus $fit and $call -- the engine's own object
+  # and the user's literal call, excluded here by name because neither is this
+  # package's prose. format() is swept alongside those four: clause 2 does not
+  # name it, but print() delegates to it, so a treatment word reaching print()
+  # reaches it through format(). A Design 3 fit estimates no rater main effect,
+  # so no renderer may hand a user a rater treatment for it (D-042). This sweeps
+  # all five at once: the per-renderer tests above say WHERE the word must not
+  # appear, this one says it appears nowhere.
+  x <- icc(design3_frame(), score, subject, rater, cluster = cluster, seed = 1)
+  # No word boundaries: an over-eager pattern is the safe direction for a
+  # must-not-appear check, and `\\b` is not portable across R's regex engines.
+  treatment <- "random|fixed"
+
+  # Tables: any character cell holding a treatment word, whatever the column.
+  cells <- function(tbl) {
+    chr <- Filter(is.character, as.list(tbl))
+    unlist(chr, use.names = FALSE)
+  }
+  table_hits <- vapply(
+    list(tidy = tidy(x), glance = glance(x)),
+    function(tbl) {
+      v <- cells(tbl)
+      # Anti-vacuity: a table with no character column would pass for free.
+      expect_gt(length(v), 0L)
+      sum(grepl(treatment, v))
+    },
+    integer(1)
+  )
+
+  # Rendered text: print() and summary() emit through cli, so they are captured
+  # with cli_fmt(); format() returns its lines directly (M129).
+  text_hits <- vapply(
+    list(
+      print = cli::cli_fmt(print(x)),
+      format = format(x),
+      summary = cli::cli_fmt(summary(x))
+    ),
+    function(lines) {
+      expect_gt(length(lines), 0L)
+      sum(grepl(treatment, lines))
+    },
+    integer(1)
+  )
+
+  expect_identical(
+    c(table_hits, text_hits),
+    c(tidy = 0L, glance = 0L, print = 0L, format = 0L, summary = 0L)
+  )
+
+  # The sweep can red: the same five renderers over a crossed random-rater fit,
+  # whose treatment IS defined. Four hit the word; `tidy()` never carries a rater
+  # treatment at all -- the treatment lives on `glance()` and D-038 refuses
+  # `tidy()`'s per-row `type` a `glance()` sibling -- so a `tidy()` cell is not
+  # what this sweep can red on, and saying so keeps the control honest.
+  crossed <- icc(ratings, score, subject, rater, seed = 1)
+  expect_identical(
+    c(
+      vapply(
+        list(tidy = tidy(crossed), glance = glance(crossed)),
+        function(tbl) any(grepl(treatment, cells(tbl))),
+        logical(1)
+      ),
+      vapply(
+        list(
+          print = cli::cli_fmt(print(crossed)),
+          format = format(crossed),
+          summary = cli::cli_fmt(summary(crossed))
+        ),
+        function(lines) any(grepl(treatment, lines)),
+        logical(1)
+      )
+    ),
+    c(
+      tidy = FALSE,
+      glance = TRUE,
+      print = TRUE,
+      format = TRUE,
+      summary = TRUE
+    )
+  )
 })

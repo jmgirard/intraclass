@@ -1748,3 +1748,45 @@ generated grid in `tests/testthat/test-n-o-disposition-grid.R`, which is where
 a future change to the condition has to go to stay green. The case set, the
 measurement behind it, and the planted defects that show the grid able to fail
 are in `cairn/milestones/M141-n-o-disposition-grid.md`.
+
+### D-042 (2026-08-27): Design 3's `glance()$raters` is `NA_character_` — superseding D-038 clause 1's Design 3 sentence
+
+**Context.** D-038 clause 1 gave `glance()` a `raters` column, `NA` on a
+one-way fit, and kept the nominal `"random"` on a multilevel Design 3 fit
+(raters nested in subjects), which has no separable rater main effect either.
+Its stated reason was symmetry with a sibling `type` cell reporting
+`"agreement"` on that same row: giving `raters` alone the `NA` treatment would
+split one column's convention from the other's. The remainder was left as a
+ROADMAP candidate row, promoted on a user reading either cell as a facet that
+exists.
+
+**Decision.** `glance()$raters` is `NA_character_` on a fit whose
+`design$ml_design` is `"nested_in_subjects"`, and on a `d_study()` projection
+of such a fit. D-038 clause 1's Design 3 sentence is superseded; the rest of
+D-038 stands.
+
+**Why the deferral no longer holds.** On the FIT, the pair D-038 balanced does
+not exist: D-038 itself refuses a `type` column on `glance()`, and `tidy()$type`
+already reports `NA` on a Design 3 fit, so the split D-038 feared is the shipped
+state there and `raters` is severable from a sibling that is not present. On the
+`d_study()` PROJECTION the pair does exist -- `glance.icc_dstudy()` carries both
+columns, and after this decision that row reads `type = "agreement"` beside
+`raters = NA`. That split is deliberate, not an oversight in the reasoning
+above: absolute agreement IS defined for Design 3, which is why `icc()` drops
+`"consistency"` there rather than both, while the rater treatment is not defined
+at all. The two cells therefore differ in what they can report, and a shared
+convention across them would have to make one of them false. The trigger is
+GP2's one-way door closing at submission, in place of the candidate row's unmet
+promotion condition: after v0.1.0 this cell costs a deprecation cycle to
+change, while the row's condition can only be met once a user has already been
+misled. The measurement behind the `tidy()$type` claim is in
+`cairn/milestones/M143-design3-rater-facet.md`.
+
+**Consequences.** One changed `glance()` cell on Design 3 fits and on their
+`d_study()` projections, inside the v0.1.0 window, so not a deprecation-cycle
+item; `tests/testthat/test-exported-contract.R` re-pins the projection cell.
+The same milestone drops the treatment word from the Design 3 header
+`format()` renders and replaces the absolute-agreement note `summary()` prints
+there. Design 3's internal `design$type` and `design$model`, and its
+`n_raters` count, are untouched and stay a candidate row: internal under D-035
+clause 2, so changeable without a deprecation cycle.

@@ -45,12 +45,19 @@ format.icc <- function(x, ...) {
   meta1 <- if (ml) {
     # Completeness is meaningful for the crossed (Design 1) design, where cells can
     # be missing; nested designs are always balanced/complete (guarded, M8).
+    # Design 3's raters are nested in subjects, so no rater main effect is
+    # separable: state the count without a treatment word for a facet the fit
+    # does not estimate (D-042). Designs 1 and 2 keep theirs.
+    rater_part <- if (design_has_rater_facet(x$design)) {
+      sprintf("Raters: %d (%s)", x$n$raters, x$design$raters)
+    } else {
+      sprintf("Raters: %d", x$n$raters)
+    }
     sprintf(
-      "Subjects: %d in %d clusters | Raters: %d (%s) | Observations: %d (%s)",
+      "Subjects: %d in %d clusters | %s | Observations: %d (%s)",
       x$n$subjects,
       x$n$clusters,
-      x$n$raters,
-      x$design$raters,
+      rater_part,
       x$n$obs,
       completeness
     )
@@ -306,6 +313,17 @@ summary.icc <- function(object, ...) {
       "interchangeable raters, so systematic rater differences cannot be",
       "separated and are absorbed into the residual (a conservative ICC)."
     )
+  } else if (!design_has_rater_facet(object$design)) {
+    # Design 3 (raters nested in subjects) is the multilevel one-way: the rater
+    # main effect is confounded into the residual (estimand-spec M8 §3b), so the
+    # absolute-agreement note below would attribute error to an effect this
+    # design cannot separate. Say what the nesting does instead (D-042), in the
+    # shape the one-way note above uses.
+    c(
+      "Raters nested in subjects: each subject is rated by its own set of",
+      "raters, so systematic rater differences cannot be separated and are",
+      "absorbed into the residual (a conservative ICC)."
+    )
   } else {
     # One interpretive note per error definition present (both, for the default
     # four-formulation report; ADR-054). The two-line split per type is preserved so a
@@ -387,17 +405,18 @@ glance.icc <- function(x, ...) {
     balanced = x$design$balanced,
     # How the raters were treated, and whether the fitted design splits
     # within-cell replicates -- FALSE on a one-way fit, which has no rater facet
-    # and so no cells to split. `raters` is NA on a one-way fit, whose
-    # raters are interchangeable and carry no facet; `replicates` is reported in
+    # and so no cells to split. `raters` is NA on the designs with no separable
+    # rater main effect -- a one-way fit, whose raters are interchangeable, and
+    # Design 3, whose raters are nested in subjects (D-042); `replicates` is reported in
     # its own right because `n_o` beside it can be NA on a replicated design
     # too -- a random-rater single-level design with ragged counts or a
     # missing cell reports NA, `replicates_uniform` demanding equal counts and
     # the full grid (R/design.R:48-51) -- so replicate status is not
     # recoverable from that column (M138).
-    raters = if (identical(x$design$model, "oneway")) {
-      NA_character_
-    } else {
+    raters = if (design_has_rater_facet(x$design)) {
       x$design$raters
+    } else {
+      NA_character_
     },
     replicates = isTRUE(x$design$replicates),
     multilevel = isTRUE(x$design$multilevel),
