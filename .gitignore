@@ -16,3 +16,4 @@ cairn/.merge-approved.pending
 __pycache__/
 data-raw/m111-fallback-checkpoints/
 Rplots.pdf
+tests/spelling.Rout.save
