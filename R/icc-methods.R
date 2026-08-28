@@ -387,17 +387,18 @@ glance.icc <- function(x, ...) {
     balanced = x$design$balanced,
     # How the raters were treated, and whether the fitted design splits
     # within-cell replicates -- FALSE on a one-way fit, which has no rater facet
-    # and so no cells to split. `raters` is NA on a one-way fit, whose
-    # raters are interchangeable and carry no facet; `replicates` is reported in
+    # and so no cells to split. `raters` is NA on the designs with no separable
+    # rater main effect -- a one-way fit, whose raters are interchangeable, and
+    # Design 3, whose raters are nested in subjects (D-042); `replicates` is reported in
     # its own right because `n_o` beside it can be NA on a replicated design
     # too -- a random-rater single-level design with ragged counts or a
     # missing cell reports NA, `replicates_uniform` demanding equal counts and
     # the full grid (R/design.R:48-51) -- so replicate status is not
     # recoverable from that column (M138).
-    raters = if (identical(x$design$model, "oneway")) {
-      NA_character_
-    } else {
+    raters = if (design_has_rater_facet(x$design)) {
       x$design$raters
+    } else {
+      NA_character_
     },
     replicates = isTRUE(x$design$replicates),
     multilevel = isTRUE(x$design$multilevel),

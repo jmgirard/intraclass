@@ -81,7 +81,7 @@ capability gap → M144.
 - [x] T2. Failing test first: `glance()$raters` on the `design3_frame()` fixture
       (`tests/testthat/test-exported-contract.R:372`) and on the three
       `sim_design3()` fixtures (`test-icc-nested-multilevel.R:173, :194, :207`).
-- [ ] T3. `glance.icc()` (`R/icc-methods.R:397-402`) and `icc_raters`
+- [x] T3. `glance.icc()` (`R/icc-methods.R:397-402`) and `icc_raters`
       (`R/d-study.R:546`); re-pin `test-exported-contract.R:513`.
 - [ ] T4. Failing test, then edit, for the multilevel-branch header
       (`R/icc-methods.R:46-57`), with the Design 1 and Design 2 controls.
@@ -96,6 +96,7 @@ capability gap → M144.
 
 - 2026-08-27: created by /milestone-plan.
 - 2026-08-27: implement gate chose the one-way-parallel nesting sentence for `summary()` and one shared internal predicate over per-site conditions, the duplication having been why D-038's one-way rule reached `glance.icc()` and not `icc_raters`.
+- 2026-08-27: T3 — added `design_has_rater_facet()` (`R/design.R`), the one predicate both producers now read (implement gate choice); `glance.icc()` and `d-study.R`'s `icc_raters` wired to it; `test-exported-contract.R`'s Design 3 projection pin re-pinned to `NA_character_`. Full suite FAIL 0 / WARN 3 / SKIP 2 / PASS 9092 -- the same three warnings the default branch reports (candidate row).
 - 2026-08-27: T2 — failing tests first: one new block in `test-icc-nested-multilevel.R` over four Design 3 geometries (the three `sim_design3()` fits plus the ragged one), fit and `d_study()` projection each; `design3` added to `test-exported-contract.R`'s per-design `glance()` block. Red before any source edit: 9 failures, all of them the `raters` cell reading `"random"` where the design has no rater facet (8 in the new matrix, 1 in the exported-contract block); the rest of both files green.
 - 2026-08-27: T1 — appended D-042, superseding D-038 clause 1's Design 3 sentence.
 - 2026-08-27: /milestone-implement started; branch `m143-design3-rater-facet` cut from `main` at 2fac62d.

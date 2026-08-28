@@ -171,6 +171,19 @@ detect_multilevel_design <- function(df, call = rlang::caller_env()) {
   )
 }
 
+# Does the fitted design estimate a separable rater main effect? Two designs do
+# not: a one-way fit, whose raters are interchangeable and carry no facet, and
+# Design 3 (raters nested in subjects), whose rater effect is confounded into the
+# residual (estimand-spec M8 §3b). Neither reports a rater treatment on the
+# exported surfaces (D-042). Kept in one place because the two producers of
+# `glance()$raters` -- `glance.icc()` and `d_study()`'s `icc_raters` -- each
+# tested `model == "oneway"` on their own, which is how the one-way rule reached
+# one of them and not the other.
+design_has_rater_facet <- function(design) {
+  !identical(design$model, "oneway") &&
+    !identical(design$ml_design, "nested_in_subjects")
+}
+
 # Is a nested multilevel design (Design 2/3) balanced and complete? M8 shipped
 # balanced/complete nested designs; M19 Slice 1 (ADR-029) lifted the balance guard,
 # so this no longer gates an abort -- it REPORTS balance for print/glance, and the
