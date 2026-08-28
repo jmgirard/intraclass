@@ -99,7 +99,7 @@ is internal, so the milestone is classified by the wider of the two.
       `tests/testthat/fixtures/classical-width-by-cell.tsv`, and read the
       residual-draw description from `width-reversal-by-cell.tsv`'s header
       comment. Record the two counts and the command in the work log.
-- [ ] T2 Add the orienting text to `NEWS.md` as its own bullet ABOVE the
+- [x] T2 Add the orienting text to `NEWS.md` as its own bullet ABOVE the
       "Which of the two closed forms" bullet — never inside the three width
       bullets, which are byte-adjacent to the `test-doc-skew-caveat.R` pins.
       Phrase the counts as `the smaller grid's 16 cells` /
@@ -132,6 +132,7 @@ is internal, so the milestone is classified by the wider of the two.
 - 2026-08-28: plan gate included the `tests/spelling.R` flip despite its D-021-adjacent framing in the candidate row, because the row's own promotion condition ("or on the next release round") is met by the window the maintainer declared today, and D-029 puts shipped user-facing prose outside D-021's subject; falsified by the flip reddening CI on prose no user reads.
 - 2026-08-28: measured on `main` before planning — `spelling::spell_check_package(".")` reports no spelling errors; `awk -f data-raw/m142-bullet-lines.awk NEWS.md` reports 17 bullets, one over 500 bytes (797, the mpl anchor); `R CMD check` on a `--no-build-vignettes` tarball reports 2 WARNINGs, both artifacts of that build flag (`inst/doc` absent), so a vignette-building check is expected clean.
 - 2026-08-28: T1 — `awk -F'\t' 'NR>1{c[$1]++} END{for (g in c) print g, c[g]}' tests/testthat/fixtures/classical-width-by-cell.tsv` gives m76 = 16 rows, m113 = 64 rows. `width-reversal-by-cell.tsv`'s header says both the subject effect A_i and the residual e_ij are drawn from `dist`, located and scaled per burch2011 sec 3 — the third grid's residual-draw description.
+- 2026-08-28: T2 — orienting bullet added above the "Which of the two closed forms" bullet (`NEWS.md:74-77`, 300 bytes). The `test-doc-skew-caveat.R` surface set already carries `NEWS.md` on both legs, so no extension was needed; its `grid_size` and `n_grids` shapes consume the new figures. Discrimination checked: `16` -> `15` in the new bullet reds that file; restored. The residual-draw sentence is a separate sentence carrying no "grid", so it does not seed the residual walk, which requires its own verbatim clause.
 
 ## Decisions
 

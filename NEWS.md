@@ -71,6 +71,10 @@ newer.
   skewed or heavy-tailed, worst 0.6725 at chi-square(1) subject effects with a
   true ICC of 0.6, 50 subjects and 5 raters. `"burch"` is no remedy there
   (worst 0.6655).
+* `"searle"` and `"burch"` are the two classical closed forms, and the three grids
+  below measure their widths: the smaller grid's 16 cells and the larger grid's
+  64 cells draw only the subject effects from the non-normal family. The third
+  draws the residual from the same family as the subject effect.
 * Which of the two closed forms gives the **narrower** interval is conditional.
   On both grids that vary only the subject effect, `"burch"` is the narrower of
   the two in 16 of 16 cells of the smaller grid and 59 of 64 cells of the larger grid.
