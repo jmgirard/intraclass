@@ -70,11 +70,13 @@
 #' where the residual splits into the subject-by-rater interaction and pure error),
 #' `d_study()` can project **either** axis (one per call):
 #'
-#' * the **rater count `m`** (the default), holding the fitted occasion count
-#'   fixed: the rater and interaction terms divide by `m`, pure error by `m`
-#'   times that count. The returned object gains an `occasions` column, one reliability
-#'   curve per occasion setting on the fit (`"single"` and/or `"average"`), so at
-#'   `m` = the observed rater count each curve matches the fitted `ICC(*,k)`;
+#' * the **rater count `m`** (the default), holding the occasion count fixed:
+#'   the rater and interaction terms divide by `m`, pure error by `m` times the
+#'   curve's own occasion setting. The returned object gains an `occasions`
+#'   column, one reliability curve per occasion setting on the fit: `"single"`,
+#'   which divides pure error by `m` alone, and/or `"average"`, which divides it
+#'   at the fitted occasion count. So at `m` = the observed rater count each
+#'   curve matches the fitted `ICC(*,k)`;
 #'   `tidy()` carries that column on every projection, `NA` where the fit has no
 #'   replicates.
 #' * the **swept occasion count `n_o`** (supply the `n_o` argument), holding raters

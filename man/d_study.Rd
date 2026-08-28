@@ -165,11 +165,13 @@ For a within-cell replicate fit (more than one rating per subject-by-rater cell,
 where the residual splits into the subject-by-rater interaction and pure error),
 \code{d_study()} can project \strong{either} axis (one per call):
 \itemize{
-\item the \strong{rater count \code{m}} (the default), holding the fitted occasion count
-fixed: the rater and interaction terms divide by \code{m}, pure error by \code{m}
-times that count. The returned object gains an \code{occasions} column, one reliability
-curve per occasion setting on the fit (\code{"single"} and/or \code{"average"}), so at
-\code{m} = the observed rater count each curve matches the fitted \verb{ICC(*,k)};
+\item the \strong{rater count \code{m}} (the default), holding the occasion count fixed:
+the rater and interaction terms divide by \code{m}, pure error by \code{m} times the
+curve's own occasion setting. The returned object gains an \code{occasions}
+column, one reliability curve per occasion setting on the fit: \code{"single"},
+which divides pure error by \code{m} alone, and/or \code{"average"}, which divides it
+at the fitted occasion count. So at \code{m} = the observed rater count each
+curve matches the fitted \verb{ICC(*,k)};
 \code{tidy()} carries that column on every projection, \code{NA} where the fit has no
 replicates.
 \item the \strong{swept occasion count \code{n_o}} (supply the \code{n_o} argument), holding raters

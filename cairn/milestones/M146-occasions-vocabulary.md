@@ -113,7 +113,7 @@ Repair tasks (the 2026-08-28 defect return; see the Review section's findings):
       validate a stale installed copy (finding 5), and correct the
       `R/autoplot.R` curve-identity comment, which is false of the occasion
       axis (finding 7).
-- [ ] T11. Correct the rater-axis bullet's pure-error divisor (finding 4),
+- [x] T11. Correct the rater-axis bullet's pure-error divisor (finding 4),
       keeping AC5's "the fitted occasion count" where it is accurate.
 - [ ] T12. Qualify the glossary's *Occasion* entry, whose `print()` claim is
       false on a multilevel replicate fit (finding 1), and add `n_o`'s `NA`
@@ -210,6 +210,15 @@ Repair tasks (the 2026-08-28 defect return; see the Review section's findings):
   `R/autoplot.R`'s curve-identity comment now says the `occasions` column is
   the averaging divisor on the rater axis and the swept `n_o` on the occasion
   axis, instead of denying the second. `test-autoplot.R`: FAIL 0, PASS 79.
+- 2026-08-28: T11 done. The rater-axis bullet now divides pure error by `m`
+  times the curve's own occasion setting, naming `"single"` as `m` alone and
+  `"average"` as the fitted occasion count, so the divisor clause matches the
+  one-curve-per-setting clause that follows it. AC5's "the fitted occasion
+  count" is retained there and at the swept-axis bullet. Verified on a 15x4x3
+  replicate fit: at `m` = 4 the rater projection reads 0.8844439 on the
+  `occasions` 1 curve and 0.9216645 on the `occasions` 3 curve, matching the
+  fitted `ICC(A,k)` at each setting. `prose-profile.py R/d-study.R`: over-35
+  sentences 4 -> 3, dash 0.
 
 ## Decisions
 
