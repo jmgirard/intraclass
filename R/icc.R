@@ -682,7 +682,9 @@
 #'     occasion-averaged one, and `NA` when the design has no within-cell
 #'     replicates. That is a different quantity from the one `glance()`
 #'     reports as `n_o`, which is the observed per-cell occasion count of the
-#'     fitted design.
+#'     fitted design. `n_o` is itself `NA` on a design that defines no single
+#'     such count, a ragged replicate design among them, where `occasions`
+#'     still reads 1.
 #'   * `glance.icc()`: a one-row tibble of model-level summaries:
 #'     the sample sizes, the design flags -- among them the rater treatment
 #'     `raters` (`NA` where the design estimates no separable rater main effect:

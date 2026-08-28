@@ -487,7 +487,9 @@ coefficient, the fitted per-cell replicate count for an
 occasion-averaged one, and \code{NA} when the design has no within-cell
 replicates. That is a different quantity from the one \code{glance()}
 reports as \code{n_o}, which is the observed per-cell occasion count of the
-fitted design.
+fitted design. \code{n_o} is itself \code{NA} on a design that defines no single
+such count, a ragged replicate design among them, where \code{occasions}
+still reads 1.
 \item \code{glance.icc()}: a one-row tibble of model-level summaries:
 the sample sizes, the design flags -- among them the rater treatment
 \code{raters} (\code{NA} where the design estimates no separable rater main effect:

@@ -134,10 +134,15 @@
 #'     in this order: `m`, `occasions`, `level`, `term` (the projected ICC
 #'     index, named for the broom glossary), `type`, `estimate`, `std.error`,
 #'     `conf.low`, `conf.high`, `conf.level`, `method`. Every column is present
-#'     on every projection. `occasions` reports the number of ratings averaged
-#'     into that row's coefficient, and is `NA` outside a replicate projection;
-#'     `level` is `NA` outside a multilevel one, and `type` where the design
-#'     defines no error definition.
+#'     on every projection. `occasions` reports the per-cell occasion count that
+#'     row is projected at: the setting held fixed on a rater projection, the
+#'     swept count on an occasion projection. That is the number of ratings
+#'     averaged into the row's coefficient wherever occasion averaging applies.
+#'     It does not apply to the cluster rows of a multilevel projection: that
+#'     error set has no pure-error term, so the cluster curve is flat across the
+#'     column. `occasions` is `NA` outside a replicate projection; `level` is
+#'     `NA` outside a multilevel one, and `type` where the design defines no
+#'     error definition.
 #'   * `glance.icc_dstudy()`: a one-row tibble of projection-level summaries. It
 #'     carries the distinct projected rater counts `m` and their range, the
 #'     error definition(s), the rater treatment (`NA` on a projection of a fit

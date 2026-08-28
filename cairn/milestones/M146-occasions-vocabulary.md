@@ -103,6 +103,25 @@ removing either column → refused, D-044.
       doc-claims ledger (M130) — then the gate: `air format .`,
       `lintr::lint_package()`, `R CMD check` raw Status line.
 
+Repair tasks (the 2026-08-28 defect return; see the Review section's findings):
+
+- [x] T9. Make `tidy.icc_dstudy()`'s `occasions` sentence true on every
+      projection it covers (finding 2), and state `n_o`'s own `NA` case in the
+      `tidy.icc()` contrast (finding 6, roxygen half). Re-pin both in
+      `test-occasions-vocabulary.R` and mutation-verify. Document.
+- [ ] T10. Repair the pin's surface selection so a source-tree run cannot
+      validate a stale installed copy (finding 5), and correct the
+      `R/autoplot.R` curve-identity comment, which is false of the occasion
+      axis (finding 7).
+- [ ] T11. Correct the rater-axis bullet's pure-error divisor (finding 4),
+      keeping AC5's "the fitted occasion count" where it is accurate.
+- [ ] T12. Qualify the glossary's *Occasion* entry, whose `print()` claim is
+      false on a multilevel replicate fit (finding 1), and add `n_o`'s `NA`
+      case to the `occasions` vs. `n_o` entry (finding 6, glossary half).
+- [ ] T13. Take the `d-studies-and-replicates.Rmd` dash count back to zero
+      (finding 3).
+- [ ] T14. Re-run the T8 gate.
+
 ## Work log
 
 - 2026-08-28: created by /milestone-plan.
@@ -168,6 +187,21 @@ removing either column → refused, D-044.
   there is no released behavior these changes alter.
 
 - 2026-08-28: review returned M146 to in-progress. AC1 fails: the sentence T1 added to `tidy.icc_dstudy()` -- "`occasions` reports the number of ratings averaged into that row's coefficient" -- is false on the cluster rows of a multilevel replicate occasion-axis projection, which read `occasions` 1..4 at one unchanged estimate. AC2-AC6 verified with fresh evidence; six further findings triaged fix-now, seven rejected, in the Review section. Defect returns: 1. PR #157 open as a draft.
+- 2026-08-28: repair tasks T9-T14 added to the plan (minor amendment), one per
+  fix-now finding of the return. No criterion or scope text changes: every
+  finding is a false or imprecise sentence under a criterion as written.
+- 2026-08-28: T9 done. `tidy.icc_dstudy()`'s `occasions` now reads as the
+  per-cell occasion count the row is projected at, the averaging divisor only
+  where occasion averaging applies, with the multilevel cluster rows named as
+  the case where it does not; `tidy.icc()`'s contrast adds that `n_o` is `NA`
+  on a design defining no single per-cell count, where `occasions` still reads
+  1. Both measured on live fits (an 8x4x3x3 multilevel replicate fit reads
+  `occasions` 1..4 at estimate 0.9774618 on every cluster row; a ragged
+  15x4 replicate fit reads `n_o` `NA` and `occasions` 1). Pins extended: six
+  plants red (the old d-study sentence at FAIL 5, the carve-out dropped at
+  FAIL 1, the contrast copied onto `d_study.Rd` at FAIL 2, the `n_o` `NA`
+  clause dropped in `man/icc.Rd` alone at FAIL 1), two rewrap controls green.
+  `devtools::test()`: FAIL 0, WARN 3, SKIP 2, PASS 9196.
 
 ## Decisions
 
