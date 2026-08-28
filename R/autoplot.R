@@ -48,9 +48,11 @@ autoplot.icc_dstudy <- function(object, ...) {
   # A projection can overlay several curves within a panel: one per error
   # definition (`type`: absolute agreement vs consistency) and, for a replicate
   # fit, one per occasion setting (`occasions`). On the rater axis those
-  # settings are the fit's own: 1 rating averaged, the fitted per-cell count.
-  # On the occasion axis the same column carries the swept `n_o` instead, so
-  # the column is the averaging divisor on one axis and the sweep on the other.
+  # settings are the distinct values the fit's own column holds, which on a
+  # multilevel fit include the cluster level's placeholder 1 and so need not be
+  # settings the fit was asked for. On the occasion axis the same column carries
+  # the swept `n_o` instead, so the column is the per-rater averaging divisor on
+  # one axis and the sweep on the other.
   # The multilevel projection additionally splits by level, which the facet
   # separates. Group + colour by every such curve-identity column *except* the one
   # on the x-axis, so the overlaid curves are drawn as distinct lines rather than

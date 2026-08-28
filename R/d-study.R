@@ -73,10 +73,15 @@
 #' * the **rater count `m`** (the default), holding the occasion count fixed:
 #'   the rater and interaction terms divide by `m`, pure error by `m` times the
 #'   curve's own occasion setting. The returned object gains an `occasions`
-#'   column, one reliability curve per occasion setting on the fit: `"single"`,
-#'   which divides pure error by `m` alone, and/or `"average"`, which divides it
-#'   at the fitted occasion count. So at `m` = the observed rater count each
-#'   curve matches the fitted `ICC(*,k)`;
+#'   column, one reliability curve per distinct value that column holds on the
+#'   fit: a single-occasion setting divides pure error by `m` alone, an
+#'   occasion-averaged one by `m` times the fitted occasion count. At `m` = the
+#'   observed rater count each curve matches the fitted `ICC(*,k)` for its own
+#'   level and occasion setting, where the fit reports one. A multilevel fit's
+#'   `occasions` column also carries the cluster level's placeholder 1 (that
+#'   error set has no pure error to average), so a fit made with
+#'   `occasions = "average"` alone still projects a subject curve at 1, which
+#'   the fit itself does not report.
 #'   `tidy()` carries that column on every projection, `NA` where the fit has no
 #'   replicates.
 #' * the **swept occasion count `n_o`** (supply the `n_o` argument), holding raters
@@ -136,13 +141,15 @@
 #'     in this order: `m`, `occasions`, `level`, `term` (the projected ICC
 #'     index, named for the broom glossary), `type`, `estimate`, `std.error`,
 #'     `conf.low`, `conf.high`, `conf.level`, `method`. Every column is present
-#'     on every projection. `occasions` reports the per-cell occasion count that
-#'     row is projected at: the setting held fixed on a rater projection, the
-#'     swept count on an occasion projection. That is the number of ratings
-#'     averaged into the row's coefficient wherever occasion averaging applies.
-#'     It does not apply to the cluster rows of a multilevel projection: that
-#'     error set has no pure-error term, so the cluster curve is flat across the
-#'     column. `occasions` is `NA` outside a replicate projection; `level` is
+#'     on every projection. `occasions` reports the per-cell occasion count the
+#'     row is projected at, which may be non-integer, and which divides pure
+#'     error, so a row whose error set carries no pure-error term does not move
+#'     with it. On a rater projection the column takes every distinct occasion
+#'     value the fit's own `tidy()$occasions` column carries, and the cluster
+#'     rows of a multilevel projection take the smallest of those. On an
+#'     occasion projection every row takes the swept `n_o`, cluster rows
+#'     included, whose curve is flat across it.
+#'     `occasions` is `NA` outside a replicate projection; `level` is
 #'     `NA` outside a multilevel one, and `type` where the design defines no
 #'     error definition.
 #'   * `glance.icc_dstudy()`: a one-row tibble of projection-level summaries. It

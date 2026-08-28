@@ -481,14 +481,19 @@ The methods documented on this page return:
 in this order: \code{term} (the coefficient's ICC index, named for the broom
 glossary), \code{occasions}, \code{type}, \code{level}, \code{sf_index}, \code{estimate},
 \code{std.error}, \code{conf.low}, \code{conf.high}, \code{conf.level}, \code{method}. Every
-column is present on every fit. \code{occasions} reports the number of
-ratings averaged into that row's coefficient: 1 for a single-rating
-coefficient, the fitted per-cell replicate count for an
-occasion-averaged one, and \code{NA} when the design has no within-cell
-replicates. That is a different quantity from the one \code{glance()}
-reports as \code{n_o}, which is the observed per-cell occasion count of the
-fitted design. \code{n_o} is itself \code{NA} on a design that defines no single
-such count, a ragged replicate design among them, where \code{occasions}
+column is present on every fit. \code{occasions} reports the per-rater
+occasion divisor that row's coefficient applies to pure error. On a fit
+that splits within-cell replicates it reads 1 wherever the row averages
+no occasions, which covers every single-occasion row and every row whose
+error set carries no pure-error term to average, such as the cluster
+rows of a multilevel fit; it reads the fitted per-cell occasion count
+where the row does average. On a fit that splits none it is \code{NA}. It is
+not in general the number of ratings the coefficient averages, because
+it counts occasions per rater: an occasion-averaged \verb{ICC(*,k)} row
+averages \code{k} raters at that occasion count each. \code{glance()} reports a
+different quantity as \code{n_o}, the observed per-cell occasion count of the
+fitted design, itself \code{NA} under the condition the \code{glance.icc()} bullet
+below states, which a ragged replicate design meets while \code{occasions}
 still reads 1.
 \item \code{glance.icc()}: a one-row tibble of model-level summaries:
 the sample sizes, the design flags -- among them the rater treatment

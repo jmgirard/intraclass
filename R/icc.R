@@ -676,14 +676,19 @@
 #'     in this order: `term` (the coefficient's ICC index, named for the broom
 #'     glossary), `occasions`, `type`, `level`, `sf_index`, `estimate`,
 #'     `std.error`, `conf.low`, `conf.high`, `conf.level`, `method`. Every
-#'     column is present on every fit. `occasions` reports the number of
-#'     ratings averaged into that row's coefficient: 1 for a single-rating
-#'     coefficient, the fitted per-cell replicate count for an
-#'     occasion-averaged one, and `NA` when the design has no within-cell
-#'     replicates. That is a different quantity from the one `glance()`
-#'     reports as `n_o`, which is the observed per-cell occasion count of the
-#'     fitted design. `n_o` is itself `NA` on a design that defines no single
-#'     such count, a ragged replicate design among them, where `occasions`
+#'     column is present on every fit. `occasions` reports the per-rater
+#'     occasion divisor that row's coefficient applies to pure error. On a fit
+#'     that splits within-cell replicates it reads 1 wherever the row averages
+#'     no occasions, which covers every single-occasion row and every row whose
+#'     error set carries no pure-error term to average, such as the cluster
+#'     rows of a multilevel fit; it reads the fitted per-cell occasion count
+#'     where the row does average. On a fit that splits none it is `NA`. It is
+#'     not in general the number of ratings the coefficient averages, because
+#'     it counts occasions per rater: an occasion-averaged `ICC(*,k)` row
+#'     averages `k` raters at that occasion count each. `glance()` reports a
+#'     different quantity as `n_o`, the observed per-cell occasion count of the
+#'     fitted design, itself `NA` under the condition the `glance.icc()` bullet
+#'     below states, which a ragged replicate design meets while `occasions`
 #'     still reads 1.
 #'   * `glance.icc()`: a one-row tibble of model-level summaries:
 #'     the sample sizes, the design flags -- among them the rater treatment
