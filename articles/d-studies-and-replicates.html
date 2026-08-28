@@ -109,14 +109,14 @@ refitting.</p>
 <span><span class="co">#&gt; # D-study projection: two-way random, absolute agreement</span></span>
 <span><span class="co">#&gt; Observed raters: 4 | CI: 95% montecarlo (10000 draws)</span></span>
 <span><span class="co">#&gt;   m  estimate          95% CI</span></span>
-<span><span class="co">#&gt;   1     0.290  [0.050, 0.712]</span></span>
-<span><span class="co">#&gt;   2     0.449  [0.095, 0.831]</span></span>
-<span><span class="co">#&gt;   3     0.550  [0.136, 0.881]</span></span>
-<span><span class="co">#&gt;   4     0.620  [0.173, 0.908]</span></span>
-<span><span class="co">#&gt;   5     0.671  [0.207, 0.925]</span></span>
-<span><span class="co">#&gt;   6     0.710  [0.239, 0.937]</span></span>
-<span><span class="co">#&gt;   7     0.741  [0.268, 0.945]</span></span>
-<span><span class="co">#&gt;   8     0.765  [0.295, 0.952]</span></span></code></pre></div>
+<span><span class="co">#&gt;   1     0.290  [0.050, 0.706]</span></span>
+<span><span class="co">#&gt;   2     0.449  [0.096, 0.828]</span></span>
+<span><span class="co">#&gt;   3     0.550  [0.137, 0.878]</span></span>
+<span><span class="co">#&gt;   4     0.620  [0.175, 0.906]</span></span>
+<span><span class="co">#&gt;   5     0.671  [0.210, 0.923]</span></span>
+<span><span class="co">#&gt;   6     0.710  [0.241, 0.935]</span></span>
+<span><span class="co">#&gt;   7     0.741  [0.271, 0.944]</span></span>
+<span><span class="co">#&gt;   8     0.765  [0.298, 0.950]</span></span></code></pre></div>
 <p>Reliability climbs with more raters, but with diminishing returns.
 The projection is anchored to what you observed: at <code>m = 4</code>,
 the number of raters in <code>ratings</code>, <code>Φ(m)</code> is
@@ -138,14 +138,14 @@ whole:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 8 × 11</span></span></span>
 <span><span class="co">#&gt;       m occasions level term     type      estimate std.error conf.low conf.high</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1        <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>    ICC(A,1) agreement    0.290     0.181   0.049<span style="text-decoration: underline;">7</span>     0.712</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2        <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>    ICC(A,2) agreement    0.449     0.204   0.094<span style="text-decoration: underline;">7</span>     0.831</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     3        <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>    ICC(A,3) agreement    0.550     0.206   0.136      0.881</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>     4        <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>    ICC(A,4) agreement    0.620     0.202   0.173      0.908</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>     5        <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>    ICC(A,5) agreement    0.671     0.196   0.207      0.925</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>     6        <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>    ICC(A,6) agreement    0.710     0.190   0.239      0.937</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span>     7        <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>    ICC(A,7) agreement    0.741     0.183   0.268      0.945</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span>     8        <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>    ICC(A,8) agreement    0.765     0.177   0.295      0.952</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1        <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>    ICC(A,1) agreement    0.290     0.180   0.050<span style="text-decoration: underline;">3</span>     0.706</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2        <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>    ICC(A,2) agreement    0.449     0.203   0.095<span style="text-decoration: underline;">9</span>     0.828</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     3        <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>    ICC(A,3) agreement    0.550     0.205   0.137      0.878</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>     4        <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>    ICC(A,4) agreement    0.620     0.202   0.175      0.906</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>     5        <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>    ICC(A,5) agreement    0.671     0.196   0.210      0.923</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>     6        <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>    ICC(A,6) agreement    0.710     0.189   0.241      0.935</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span>     7        <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>    ICC(A,7) agreement    0.741     0.182   0.271      0.944</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span>     8        <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>    ICC(A,8) agreement    0.765     0.176   0.298      0.950</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: conf.level &lt;dbl&gt;, method &lt;chr&gt;</span></span></span>
 <span></span>
 <span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">proj</span><span class="op">)</span></span>
@@ -199,9 +199,9 @@ Alongside them it also takes any number <code>m &gt;= 1</code>:</p>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">  index     estimate   95% CI</span></span></span>
-<span><span class="co">#&gt;   ICC(A,1)  <span style="font-weight: bold;">   0.290</span>   <span style="font-weight: 100;">[0.050, 0.712]</span></span></span>
-<span><span class="co">#&gt;   ICC(A,k)  <span style="font-weight: bold;">   0.620</span>   <span style="font-weight: 100;">[0.173, 0.908]</span></span></span>
-<span><span class="co">#&gt;   ICC(A,6)  <span style="font-weight: bold;">   0.710</span>   <span style="font-weight: 100;">[0.239, 0.937]</span></span></span>
+<span><span class="co">#&gt;   ICC(A,1)  <span style="font-weight: bold;">   0.290</span>   <span style="font-weight: 100;">[0.050, 0.706]</span></span></span>
+<span><span class="co">#&gt;   ICC(A,k)  <span style="font-weight: bold;">   0.620</span>   <span style="font-weight: 100;">[0.175, 0.906]</span></span></span>
+<span><span class="co">#&gt;   ICC(A,6)  <span style="font-weight: bold;">   0.710</span>   <span style="font-weight: 100;">[0.241, 0.935]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Variance components: subject 2.556, rater 5.244, residual 1.019</span></span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)</span></span></span></code></pre></div>
@@ -286,10 +286,10 @@ and fits the interaction model automatically:</p>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">  index     occasions estimate   95% CI</span></span></span>
-<span><span class="co">#&gt;   ICC(A,1)          1 <span style="font-weight: bold;">   0.263</span>   <span style="font-weight: 100;">[0.082, 0.490]</span></span></span>
-<span><span class="co">#&gt;   ICC(A,1)          3 <span style="font-weight: bold;">   0.300</span>   <span style="font-weight: 100;">[0.087, 0.564]</span></span></span>
-<span><span class="co">#&gt;   ICC(A,k)          1 <span style="font-weight: bold;">   0.588</span>   <span style="font-weight: 100;">[0.263, 0.794]</span></span></span>
-<span><span class="co">#&gt;   ICC(A,k)          3 <span style="font-weight: bold;">   0.631</span>   <span style="font-weight: 100;">[0.277, 0.838]</span></span></span>
+<span><span class="co">#&gt;   ICC(A,1)          1 <span style="font-weight: bold;">   0.263</span>   <span style="font-weight: 100;">[0.083, 0.489]</span></span></span>
+<span><span class="co">#&gt;   ICC(A,1)          3 <span style="font-weight: bold;">   0.300</span>   <span style="font-weight: 100;">[0.088, 0.562]</span></span></span>
+<span><span class="co">#&gt;   ICC(A,k)          1 <span style="font-weight: bold;">   0.588</span>   <span style="font-weight: 100;">[0.265, 0.793]</span></span></span>
+<span><span class="co">#&gt;   ICC(A,k)          3 <span style="font-weight: bold;">   0.631</span>   <span style="font-weight: 100;">[0.279, 0.837]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Variance components: subject 0.631, rater 0.901, subject:rater 0.428, residual 0.443</span></span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)</span></span></span></code></pre></div>
@@ -328,12 +328,12 @@ be?”. Supply exactly one axis per call (<code>m</code>
 <span><span class="co">#&gt; # D-study projection: two-way random, absolute agreement</span></span>
 <span><span class="co">#&gt; Held raters: 4 (average) | projecting occasions | CI: 95% montecarlo (10000 draws)</span></span>
 <span><span class="co">#&gt;   n_o  m  estimate          95% CI</span></span>
-<span><span class="co">#&gt;     1  4     0.588  [0.274, 0.790]</span></span>
-<span><span class="co">#&gt;     2  4     0.620  [0.285, 0.822]</span></span>
-<span><span class="co">#&gt;     3  4     0.631  [0.288, 0.834]</span></span>
-<span><span class="co">#&gt;     4  4     0.637  [0.290, 0.840]</span></span>
-<span><span class="co">#&gt;     5  4     0.641  [0.292, 0.844]</span></span>
-<span><span class="co">#&gt;     6  4     0.643  [0.293, 0.846]</span></span></code></pre></div>
+<span><span class="co">#&gt;     1  4     0.588  [0.265, 0.791]</span></span>
+<span><span class="co">#&gt;     2  4     0.620  [0.277, 0.824]</span></span>
+<span><span class="co">#&gt;     3  4     0.631  [0.280, 0.835]</span></span>
+<span><span class="co">#&gt;     4  4     0.637  [0.282, 0.841]</span></span>
+<span><span class="co">#&gt;     5  4     0.641  [0.283, 0.845]</span></span>
+<span><span class="co">#&gt;     6  4     0.643  [0.284, 0.847]</span></span></code></pre></div>
 <p>Notice the curve <strong>flattens</strong>. Averaging more occasions
 only cancels <em>pure error</em> (<code>residual</code>). It never
 touches the rater or <code>subject:rater</code> variance. So the

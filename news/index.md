@@ -19,6 +19,24 @@ requires R 4.5.0 or newer.
   or fixed raters (`raters`), one-way or two-way (`model`). See *Getting
   started* and
   [`?icc`](https://jmgirard.github.io/intraclass/reference/icc.md).
+- Data need not form a complete, balanced grid. There is support for
+  imbalanced, incomplete, and multilevel (nested) designs: unequal
+  ratings per subject, missing ratings, and subjects nested in a
+  higher-level unit such as a classroom or clinic. A `cluster` column on
+  a two-way design switches on the multilevel ICC, adding a cluster
+  level when the same raters span every cluster. See *Multilevel
+  designs: subject and cluster level* and
+  [`?icc`](https://jmgirard.github.io/intraclass/reference/icc.md) for
+  the layouts and where it refuses.
+- Rating a subject-by-rater cell more than once gives a within-cell
+  replicate design. On a two-way random design
+  [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
+  splits the single-rating residual into a subject-by-rater interaction
+  and pure error, and `occasions` reports the reliability of one rating
+  or, on balanced replicates, of the mean. See *D-studies and
+  within-cell replicates* and
+  [`?icc`](https://jmgirard.github.io/intraclass/reference/icc.md) for
+  the designs replicates support and where they refuse.
 - [`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)
   projects a fitted reliability to other numbers of raters (`m`) or
   occasions (`n_o`), with a
