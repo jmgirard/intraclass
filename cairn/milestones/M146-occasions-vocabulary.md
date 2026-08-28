@@ -69,11 +69,16 @@ removing either column → refused, D-044.
       that sweeps those paths. The paragraphs describing the single-occasion
       and occasion-averaged rows in `vignettes/d-studies-and-replicates.Rmd`
       name the `occasions` column rather than a call.
-- [x] AC4. `vignettes/glossary.Rmd` carries an entry for occasion / within-cell
+- [ ] AC4. `vignettes/glossary.Rmd` carries an entry for occasion / within-cell
       replicate stating that the per-cell count `print()` reports on the design
       line as `N cells x N replicates` is the same quantity as `glance()$n_o`,
-      and an entry stating that `tidy()$occasions` counts ratings averaged into
-      a coefficient while `glance()$n_o` counts occasions observed per cell.
+      and an entry stating that `tidy.icc()`'s `occasions` is the per-rater
+      occasion divisor a row's coefficient applies to pure error — 1 on every
+      row that averages no occasions, which includes every row whose error set
+      carries no pure-error term, and `NA` on a fit that splits no replicates —
+      while `glance()$n_o` counts the occasions observed per cell of the fitted
+      design, `NA` under the condition `glance()`'s own documentation states.
+      The entry names a case that separates the two.
 - [x] AC5. The `d_study()` roxygen at `R/d-study.R:73-86` calls the held count
       "the fitted occasion count" and uses `n_o` only for the swept argument.
 - [x] AC6. `R CMD check`'s raw Status line reports no ERROR, WARNING or NOTE;
@@ -84,7 +89,7 @@ removing either column → refused, D-044.
 - AC1 → T1, T2, T15, T16, T17
 - AC2 → T3, T4
 - AC3 → T5
-- AC4 → T6
+- AC4 → T6, T19
 - AC5 → T7
 - AC6 → T8
 
@@ -152,9 +157,11 @@ Repair tasks (the second 2026-08-28 defect return, and the AC1 amendment):
       `occasions` values and whose pure-error divisor is `m` times the curve's
       setting, and the `R/autoplot.R:50-51` comment finding 4 falsifies.
       Document.
-- [ ] T19. Round-2 finding 10: the glossary's "wherever the design line carries
-      one" is imprecise — a ragged replicate fit prints `60 cells x NA
-      replicates`, so the slot is always there and it is the count that is not.
+- [x] T19. Rewrite the glossary's `occasions` vs. `n_o` entry to the amended
+      AC4, and repair round-2 finding 10 in the *Occasion* entry: "wherever the
+      design line carries one" is imprecise, since a ragged replicate fit prints
+      `60 cells x NA replicates`, so the slot is always there and it is the
+      count that is not.
 - [ ] T20. Re-run the T8 gate.
 
 ## Work log
@@ -345,6 +352,51 @@ Repair tasks (the second 2026-08-28 defect return, and the AC1 amendment):
   grid truth into AC1) was offered non-recommended under D-118's
   return-adjacent direction rule and not taken; the escalation offer standing
   from the thrash rule was declined in favour of the audited rewrite.
+
+- 2026-08-28: T16 and T18 done. Both column lists now state the rule the code
+  guarantees. `?icc`: the per-rater occasion divisor applied to pure error, 1
+  wherever the row averages no occasions (single-occasion rows, and rows whose
+  error set carries no pure-error term, the multilevel cluster rows among them),
+  the fitted per-cell count where it does, `NA` on a fit that splits none, with
+  the ratings denial and the `glance()$n_o` contrast whose `NA` case defers to
+  the `glance.icc()` bullet that states D-041's condition. `?d_study`: the count
+  the row is projected at, possibly non-integer, dividing pure error, with the
+  value named per axis and per cluster row. T18 also corrected the rater-axis
+  bullet, whose curve set is the fit's own distinct `occasions` values (round-2
+  finding 4: a fit made `occasions = "average"` alone still projects a subject
+  curve at the cluster placeholder 1, which the fit does not report), its
+  divisor restatement (finding 7), and the `R/autoplot.R` comment finding 4
+  falsifies (finding 8).
+- 2026-08-28: T17 pins re-keyed to the amended sentences. Mutation matrix, ten
+  planted defects each red and two rewrap controls green against a baseline of
+  FAIL 0 / PASS 22: the head sentence's divisor made per-cell, the 1-case clause
+  dropped, the `NA` case reworded to the old gloss, the `ICC(*,k)` denial
+  dropped, the contrast naming `k_eff`, the falsified sentence restored (FAIL 2,
+  both blocks), the d-study non-integer clause dropped, its rater-axis clause
+  reverted to "the setting held fixed", its occasion-axis clause dropped, and
+  the `?icc` contrast copied onto `d_study.Rd`. Counts are failing `test_that`
+  blocks, not expectations.
+- 2026-08-28: AC4 amendment gate. A fresh-context [O] FULL-mode audit of the
+  drafted wording returned four findings, all folded in before the gate: the
+  head clause re-mandated on the glossary the unqualified form AC1's own audit
+  had rejected (false on rows whose error set carries no pure-error term), it
+  omitted the `NA` case, its `n_o` half described a count `n_o` does not report
+  on a design D-041 covers, and bare `tidy()` spanned two methods with different
+  meanings. Adopted at the mini gate: the criteria set holds (same criterion,
+  same two entries, none added) and the promise is corrected rather than
+  extended. The alternative of dropping the entry was offered non-recommended;
+  it would reopen the documentary gap D-044 left.
+- 2026-08-28: T19 done. The glossary's `occasions` vs. `n_o` entry now carries
+  the amended AC4's wording, adds that the column is not a ratings count (an
+  occasion-averaged `ICC(A,k)` over four raters at `occasions` 3 is the
+  reliability of a mean of twelve ratings), and keeps the ragged fit as the
+  separating case. The *Occasion* entry's design-line claim is now measured
+  rather than hedged: a ragged 8x4 replicate fit prints `32 cells x NA
+  replicates (incomplete)` at `n_o` `NA` and `occasions` 1, so the slot is
+  always present and it is the count that is absent (round-2 finding 10).
+  `prose-profile.py vignettes/glossary.Rmd`: over-35 1, dash 0, matching
+  `origin/main`. `test-vignette-claims.R` under `NOT_CRAN=true`: FAIL 0,
+  PASS 422.
 
 ## Decisions
 

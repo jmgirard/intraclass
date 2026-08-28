@@ -223,23 +223,28 @@ One of several ratings the *same* rater gives the *same* subject. A design with
 occasions lets `icc()` separate the [subject-by-rater
 interaction](#variance-component) from pure error. `glance()` reports the
 per-cell count in its `n_o` column. The printed report spells that same count
-on its design line, as `N cells x N replicates`, wherever the design line
-carries one. A multilevel fit's design line reports subjects and clusters
-instead, and shows no per-cell count anywhere, so read `n_o` for it there. See [*D-studies and within-cell
+on its design line, as `N cells x N replicates`; where `n_o` is `NA` the design
+line reads `NA` in that slot too. A multilevel fit's design line reports
+subjects and clusters instead, and shows no per-cell count anywhere, so read
+`n_o` for it there. See [*D-studies and within-cell
 replicates*](d-studies-and-replicates.html).
 
 ## `occasions` vs. `n_o`
 
 Two near-identical names for different quantities. `tidy()`'s `occasions`
-column counts the **ratings averaged into that row's coefficient**: 1 for a
-single-rating coefficient, the fitted per-cell count for an occasion-averaged
-one, and `NA` when the design has no within-cell replicates. `glance()`'s `n_o`
-counts the **occasions observed per cell** in the design that was fitted. So on
-a design with three ratings per cell, a fit reporting both settings shows
-`occasions` 1 and 3 down its rows, while `n_o` is 3 for the fit as a whole.
-`n_o` is `NA` on a design that defines no single per-cell count. A ragged
-replicate fit is the case that separates the two most sharply: `n_o` reads
-`NA` there while `occasions` still reads 1.
+column is the **per-rater occasion divisor** that row's coefficient applies to
+pure error. It reads 1 on every row that averages no occasions, which includes
+every row whose error set carries no pure-error term to average. It reads the
+fitted per-cell count where the row does average, and `NA` on a fit that splits
+no within-cell replicates. `glance()`'s `n_o` counts the **occasions observed per cell** in
+the design that was fitted, and is `NA` under the condition `?icc` states for
+it. So on a design with three ratings per cell, a fit reporting both settings
+shows `occasions` 1 and 3 down its rows, while `n_o` is 3 for the fit as a
+whole. Note that `occasions` is not a count of the ratings a coefficient
+averages: an occasion-averaged `ICC(A,k)` over four raters at `occasions` 3 is
+the reliability of a mean of twelve ratings. A ragged replicate fit is the case
+that separates the two columns most sharply: `n_o` reads `NA` there while
+`occasions` still reads 1.
 
 ## One-way vs. two-way
 
