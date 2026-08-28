@@ -141,7 +141,7 @@ Repair tasks (the second 2026-08-28 defect return, and the AC1 amendment):
       design line carries one" is imprecise, since a ragged replicate fit prints
       `60 cells x NA replicates`, so the slot is always there and it is the
       count that is not.
-- [ ] T20. Re-run the T8 gate.
+- [x] T20. Re-run the T8 gate.
 
 ## Work log
 
@@ -395,6 +395,24 @@ Repair tasks (the second 2026-08-28 defect return, and the AC1 amendment):
   on `x$design$replicates` (`R/icc-methods.R:378`) and overwrites the estimand
   field, which is the same clause the second plant reds at the site that fills
   it.
+- 2026-08-28: T20 gate. The prose ruler caught four sentences the rewrite had
+  taken over R2's 35-word limit, two in each roxygen block; splitting them
+  leaves `R/d-study.R` at over-35 3 against `origin/main`'s 4 and `R/icc.R` at
+  4 against 4, dash 0 and 5 unchanged, semicolons 6 against 7. The two `?icc`
+  pins the split moved were re-keyed and the full mutation matrix re-run
+  against the split text: the same ten plants red, both rewrap controls green,
+  baseline FAIL 0 / PASS 22. All six `data-raw/` checkers self-test OK and pass
+  in check mode (MPL doc-claims, oracle registry, record claims, reference
+  observations, abort-remedy 52 cells / 24 accepted / 0 broken promises,
+  checkpoint sites 5 declared). `devtools::test()`: FAIL 0, WARN 3 (the
+  standing default-branch count), SKIP 2, PASS 9436. `air format --check .`
+  exit 0; `lintr::lint_package()` 0 lints; `devtools::document()` leaves no
+  diff.
+- 2026-08-28: the plan-owned body hit 166 lines against the < 150 cap after the
+  two amendments, so the heaviest plan-owned section was compressed in one
+  pass: T1-T8 and T9-T14, all done, fold into two prose paragraphs naming what
+  each did. Their full text is in git and their outcomes in this log.
+  `cairn_validate.py` weight caps PASS.
 
 ## Decisions
 
