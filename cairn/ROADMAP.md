@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-28 (M145 planned at the maintainer's declared v0.1.0 release window. Two candidate rows absorbed whole into it and removed: "What the 0.1.0 NEWS entry no longer says" (items a, c, d — b shipped as M144) and "The spelling guard cannot red". That absorption alone brought the file to 56 lines / 23,901 bytes, under its 24,000-byte budget for the first time since M138; the graduate-or-prune decision on the remaining candidate rows is folded into M145's post-merge hygiene at the maintainer's direction. `cairn_validate`'s release-window advisory fires on M145 and is answered: the window was declared 2026-08-28. `record-claims.tsv` unchanged — no terminal row rotated.)_
+_Last hygiene check: 2026-08-28 (M145 merged and archived; M140 rotated out of the terminal rows and `record-claims.tsv`'s `roadmap-terminal-rows` expectation rotated with it, in this commit. ROADMAP 55 lines / 23,014 bytes and LESSONS 49 / 19,938, both under budget; LESSONS sat at 19,999 bytes before this pass, so correcting the M127 spelling lesson in place (the `.Rout.save` does land in-tree on a hand-run from `tests/`) required compressing that same line, and its detached-worktree measurement clause was dropped to fit — git holds it. `prose-style.md` is at 119 lines against its own < 120 budget; the other three doctrine modules still state none (existing candidate row). Nothing retired or graduated: M145's installed-surface pin lesson is already owned by `doctrine/doc-claim-pins.md`. The graduate-or-prune decision on the candidate rows folded here at the maintainer's direction is NOT settled — no cap is biting, so nothing forces a prune, and the choice is the maintainer's.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,13 +9,12 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M145 | The v0.1.0 release-round documentation remainder | review | — | high | milestones/M145-release-round-doc-remainder.md |
+| M145 | The v0.1.0 release-round documentation remainder | done | — | high | milestones/archive/M145-release-round-doc-remainder.md |
 | M144 | NEWS's *What ships* names the designs the package actually supports | done | — | normal | milestones/archive/M144-news-what-ships-designs.md |
 | M143 | Design 3 stops reporting a rater treatment for a facet it does not have | done | — | high | milestones/archive/M143-design3-rater-facet.md |
 | M142 | NEWS.md's 0.1.0 entry reads as first-release notes, not a development log | done | — | high | milestones/archive/M142-news-release-notes.md |
 | M141 | The `n_o` disposition grid is pinned, and the fixed-rater replicate abort names the right condition | done | — | high | milestones/archive/M141-n-o-disposition-grid.md |
-| M140 | Release-remainder documentation corrections, and the recorded pre-submission check | done | M138, M139 | high | milestones/archive/M140-release-remainder-docs.md |
-<!-- terminal-row retention: M144 done (2026-08-28) → M139 rotated out (oldest terminal by merge order; its archive file still resolves there). Kept: M144, M143, M142, M141, M140 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
+<!-- terminal-row retention: M145 done (2026-08-28) → M140 rotated out (oldest terminal by merge order; its archive file still resolves there). Kept: M145, M144, M143, M142, M141 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
