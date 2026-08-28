@@ -49,14 +49,14 @@ restoration was the maintainer's explicit M142 repair direction. Any change to
       residual clause. Whole-file figures, since neither instrument scopes to a
       diff. The 500-byte cap is M142's AC1 and the awk header, not a
       `prose-style.md` rule; `dash: 0` is R1, whose four exemptions are unaffected.
-- [ ] AC3. The three pinned `NEWS.md` regions still bind: `devtools::test()` passes
+- [x] AC3. The three pinned `NEWS.md` regions still bind: `devtools::test()` passes
       `tests/testthat/test-doc-skew-caveat.R`, whose `width_templates()` (`:976`)
       and `residual_template()` (`:2306`) read the installed `NEWS.md`; and
       `python3 data-raw/check-mpl-doc-claims.py` passes with its three
       `mpl-doc-claims.tsv` NEWS rows still quoting the `news_scope()` anchor
       bullet. All three normalize whitespace, so this claims what they bind, not
       byte identity.
-- [ ] AC4. `R CMD check --as-cran` is clean and the six `data-raw/` checkers pass.
+- [x] AC4. `R CMD check --as-cran` is clean and the six `data-raw/` checkers pass.
 
 ## Coverage
 
@@ -100,6 +100,14 @@ restoration was the maintainer's explicit M142 repair direction. Any change to
 
 - AC1 — PASS. `DESCRIPTION` lines 13-14 read "boundary-aware Monte-Carlo confidence intervals, support for imbalanced, / incomplete, and multilevel (nested) designs, decision-study projection to". `NEWS.md`'s *What ships* now carries the phrase "support for imbalanced, incomplete, and multilevel (nested) designs" — matched against the DESCRIPTION field with whitespace normalized, since both surfaces hard-wrap the sentence at different columns (raw `grep` for the flat string finds it in neither file). The same bullet names cluster-level reporting ("reports reliability at the cluster level as well as the subject level") and cites *Multilevel designs: subject and cluster level*; the following bullet names within-cell replicates ("gives a within-cell replicate design", "the mean of the replicates") and cites *D-studies and within-cell replicates*. Both cited article titles appear verbatim in the section's own eight-article bullet.
 - AC2 — PASS. `LC_ALL=C awk -f data-raw/m142-bullet-lines.awk NEWS.md | sort -rn`: exactly one bullet over 500 bytes, the 797-byte bullet opening "The `ci_method = \"mpl\"` documentation states the interpolati", which is the anchor `news_scope()` (`data-raw/check-mpl-doc-claims.py:280-294`) matches on. The two added bullets measure 437 and 327 bytes. `python3 data-raw/prose-profile.py NEWS.md`: `sent 53, >35 = 1, dash 0, paren 1, semi 2, max 74` — `dash: 0` and exactly one over-35-word sentence, at 74 words the pinned residual clause.
+- AC3 — PASS. `devtools::install(quick = TRUE)` from this tree, then `devtools::test()`: `test-doc-skew-caveat.R` FAIL 0, with its two pre-existing vignette-leg skips (`:585:3`, `:704:3`, both "vignettes not installed"). The run read the installed copy — `system.file("NEWS.md", package = "intraclass")` resolved to `~/Library/R/arm64/4.6/library/intraclass/NEWS.md`, i.e. the new bullets. Whole suite: FAIL 0, SKIP 2, WARN 3 — the same three warnings the candidate row records (lavaan Heywood, glmmTMB non-PD Hessian, the fixed-rater advisory), unchanged by this branch. `python3 data-raw/check-mpl-doc-claims.py`: OK, 60 claim candidates, 12 settled, 0 failures — its three `NEWS.md` quote rows still resolve inside the `news_scope()` anchor.
+- AC4 — PASS. `devtools::check(args = "--as-cran")`: Status OK, 0 errors / 0 warnings / 0 notes. All six `data-raw/` checkers pass: `check-oracle-registry.py` (0 gaps), `check-reference-observations.py` (0 unmarked, 0 falsified), `check-mpl-doc-claims.py` (0 failures), `check-record-claims.py` (7 claims re-derived, 0 failures), `check-abort-remedy-verdicts.R` (52 cells, 0 broken promises), `check-checkpoint-sites.R` (5 declared sites route through the guard).
+
+### Consistency gate
+
+- Universal: `cairn_validate.py` exit 0 — all 16 PASS checks pass, including `coverage complete` and `binding criteria`; the seven advisories are all OK, `release window` among them (it did not fire). No `DESIGN.md` principle changed, so `cairn_impact.py` was not run.
+- Toolchain (`r-package` profile): `devtools::document()` leaves the tree clean (no diff). No generated file hand-edited. `README.Rmd`/`README.md` untouched by this diff, so no re-knit. `pkgdown::check_pkgdown()`: "No problems found." `NEWS.md` carries this milestone's user-visible change and names no milestone number. No new top-level file, so no `.Rbuildignore` entry needed; `--as-cran` reports 0 notes. Full check clean, above.
+- GitHub CI on PR #155 head `958999e`: all 11 checks green (`ubuntu-latest` release and 4.5.0, `windows-latest`, `check-references`, `checkpoint-guard`, `lint`, `format-check`, `pkgdown`, `test-coverage`, both Codecov).
 
 
 ### Independent fresh-context review — three-lens fan-out (2026-08-28)
