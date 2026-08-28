@@ -52,6 +52,12 @@ newer.
   dependency. `engine = "lme4"`, `engine = "lavaan"` and `engine = "brms"` are
   selectable. Which designs each engine covers, and where it refuses, is
   documented in *Estimation engines* and `?icc`.
+* The **brms** engine fits the random-rater model under a sourced
+  half-*t*(4, 0, 1) prior on every random-effect standard deviation. Its point
+  estimate is the posterior mode and its interval a percentile **credible**
+  interval, so `ci_method = "posterior"` is forced. Supplying a custom `prior`
+  is a deliberate deviation: `icc()` warns, and the coverage results this
+  package reports no longer apply.
 * The `lme4` package itself is already on your library path after a plain
   install, because `glmmTMB` lists it in its own `Imports`, but the lme4 engine
   also needs **merDeriv**, which does not arrive. `merDeriv`, `lavaan` and

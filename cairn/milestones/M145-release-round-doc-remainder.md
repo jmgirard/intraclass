@@ -107,7 +107,7 @@ is internal, so the milestone is classified by the wider of the two.
       (`tests/testthat/test-doc-skew-caveat.R:1391`) derives them from the
       fixture; confirm that walk's surface set includes `NEWS.md` and extend
       it if not. Then `grep -n` the five AC2 strings and check the ordering.
-- [ ] T3 Add the brms guarantees to `NEWS.md`'s *Engines* section, reading
+- [x] T3 Add the brms guarantees to `NEWS.md`'s *Engines* section, reading
       `R/icc.R:322-323` and `R/icc.R:552-561` in this session and writing from
       what they say. Add a pin in `tests/testthat/` that reds when any of the
       three facts is removed from the installed `NEWS.md` — every documented
@@ -133,6 +133,7 @@ is internal, so the milestone is classified by the wider of the two.
 - 2026-08-28: measured on `main` before planning — `spelling::spell_check_package(".")` reports no spelling errors; `awk -f data-raw/m142-bullet-lines.awk NEWS.md` reports 17 bullets, one over 500 bytes (797, the mpl anchor); `R CMD check` on a `--no-build-vignettes` tarball reports 2 WARNINGs, both artifacts of that build flag (`inst/doc` absent), so a vignette-building check is expected clean.
 - 2026-08-28: T1 — `awk -F'\t' 'NR>1{c[$1]++} END{for (g in c) print g, c[g]}' tests/testthat/fixtures/classical-width-by-cell.tsv` gives m76 = 16 rows, m113 = 64 rows. `width-reversal-by-cell.tsv`'s header says both the subject effect A_i and the residual e_ij are drawn from `dist`, located and scaled per burch2011 sec 3 — the third grid's residual-draw description.
 - 2026-08-28: T2 — orienting bullet added above the "Which of the two closed forms" bullet (`NEWS.md:74-77`, 300 bytes). The `test-doc-skew-caveat.R` surface set already carries `NEWS.md` on both legs, so no extension was needed; its `grid_size` and `n_grids` shapes consume the new figures. Discrimination checked: `16` -> `15` in the new bullet reds that file; restored. The residual-draw sentence is a separate sentence carrying no "grid", so it does not seed the residual walk, which requires its own verbatim clause.
+- 2026-08-28: T3 — brms bullet added to NEWS *Engines* (own bullet, chosen at the implement gate over folding into the existing engine bullet), written from `R/icc.R:320-323` and `R/icc.R:554-561` read this session. Pinned by the new `tests/testthat/test-news-brms-claims.R`, which slices the *Engines* section out of the installed `NEWS.md` and requires a tolerant pattern per fact (phrase patterns chosen at the implement gate over verbatim sentences). Discrimination: each of the three facts deleted in turn reds exactly that expectation; the anti-vacuity control (section found, non-empty, carrying the glmmTMB sentence) is stated independently of all three. `devtools::test()`: FAIL 0, WARN 3 (the three the candidate row records), SKIP 2, PASS 9121.
 
 ## Decisions
 
