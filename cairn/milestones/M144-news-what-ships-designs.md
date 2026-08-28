@@ -1,11 +1,11 @@
 # M144: NEWS's *What ships* names the designs the package actually supports
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
-- **Branch/PR:** —
+- **Branch/PR:** `m144-news-what-ships-designs`
 
 ## Goal
 
@@ -67,13 +67,13 @@ restoration was the maintainer's explicit M142 repair direction. Any change to
 
 ## Tasks
 
-- [ ] T1. Read `DESCRIPTION:7-17` and the current *What ships* bullets; list what
+- [x] T1. Read `DESCRIPTION:7-17` and the current *What ships* bullets; list what
       each names, and confirm the five capabilities against the shipped surface
       (`?icc`, `?d_study`, the two article titles) rather than against older prose
       — the M142 lesson.
-- [ ] T2. Write the added text into *What ships*, under the byte and sentence caps
+- [x] T2. Write the added text into *What ships*, under the byte and sentence caps
       by construction, touching no pinned region.
-- [ ] T3. Run both rulers and both NEWS-reading checkers; re-measure after any
+- [x] T3. Run both rulers and both NEWS-reading checkers; re-measure after any
       later edit, including one made at the merge gate (M142 lesson).
 - [ ] T4. Gate: `devtools::test()`, `--as-cran`, the six `data-raw/` checkers,
       `cairn_validate`.
@@ -84,6 +84,10 @@ restoration was the maintainer's explicit M142 repair direction. Any change to
 - 2026-08-27: criteria audit ran in FULL mode (user-facing tier). Returned a finding on all three drafted criteria: AC1 citing a line range that does not delimit its three noun phrases, resting its universal on a hand-quoted list, and silently narrowing the lineage row's four items to three; AC2 attributing a 500-byte cap and a "zero dashes" rule to `prose-style.md`, which states neither, and scoping to added-or-edited bullets that neither ruler can enumerate; AC3 naming `check-record-claims.py`, whose `SCOPE` (`:156-161`) excludes `NEWS.md` entirely, for two regions that are testthat functions, and claiming byte identity that all three instruments normalize away — the exact word M142's own review returned. All fixed at the gate; none became a question.
 - 2026-08-27: plan gate chose deriving AC1's domain from `DESCRIPTION`'s own clause over honouring the candidate row's four-item list because the row's "sells all four" is false against `DESCRIPTION:7-17`; the two items outside it are named on a separately stated basis. Falsified by a capability `DESCRIPTION` sells that this criterion's clause does not reach.
 - 2026-08-27: plan gate chose whole-file ruler figures over diff-scoped ones because neither `m142-bullet-lines.awk` nor `prose-profile.py` enumerates added-or-edited bullets, and M142's a-fortiori superset argument is unavailable here — the whole-file figures are non-zero. Falsified by a widened bullet that keeps the whole-file counts at their exemptions.
+- 2026-08-27: T1 done. Confirmed all five capabilities against the shipped surface: imbalanced (`man/icc.Rd:292,733`, "unequal ratings per subject"), incomplete (`:68`), multilevel/nested (`cluster` arg `:71-74`; `design` values `:142-143`), cluster-level reporting (`level` arg `:127-129`), within-cell replicates (`occasions` arg `:119-124`; `man/d_study.Rd:156`). `DESCRIPTION:7-17` reads "imbalanced" where `?icc` reads "unbalanced"; AC1 fixes the NEWS wording to `DESCRIPTION`'s.
+- 2026-08-27: T2 done. Two bullets added to *What ships* after the `icc()` bullet: one for the imbalanced/incomplete/multilevel design support and cluster-level reporting, one for within-cell replicates and `occasions`. Bullet bytes 437 and 393, both under M142's 500 cap; no pinned region touched.
+- 2026-08-27: T3 partial. Both rulers and both NEWS-reading checkers green on the edited file: exactly one bullet over 500 bytes (the 797-byte `news_scope()` anchor), `dash: 0`, one sentence over 35 words (the 74-word pinned residual), `check-mpl-doc-claims.py` OK, and `test-doc-skew-caveat.R` FAIL 0 / PASS 2293 against a fresh install carrying the new bullets. Its two vignette-leg skips are pre-existing: an identical 2293/2-skip run on a stashed clean tree. All six `data-raw/` checkers and `cairn_validate` pass. Not ticked: the full `devtools::test()` verify run is still in flight, and `--as-cran` (T4) has not run.
+- 2026-08-27: T3 ticked. The verify slot returned clean: `devtools::test()` FAIL 0 / WARN 3 / SKIP 2 / PASS 9107, exit 0. T4's `--as-cran` leg is still outstanding.
 
 ## Decisions
 

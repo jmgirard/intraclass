@@ -15,6 +15,17 @@ newer.
   absolute agreement or consistency (`type`), single or average (`unit`),
   random or fixed raters (`raters`), one-way or two-way (`model`). See
   *Getting started* and `?icc`.
+* Data need not form a complete, balanced grid. There is support for
+  imbalanced, incomplete, and multilevel (nested) designs: unequal ratings per
+  subject, missing ratings, and subjects nested in a higher-level unit such as
+  a classroom or clinic. A `cluster` column switches on the multilevel ICC,
+  which reports reliability at the cluster level as well as the subject level.
+  See `?icc` and *Multilevel designs: subject and cluster level*.
+* Rating a subject-by-rater cell more than once gives a within-cell replicate
+  design. `icc()` then splits the single-rating residual into a
+  subject-by-rater interaction and pure error, and `occasions` reports the
+  reliability of one rating or of the mean of the replicates. See `?icc` and
+  *D-studies and within-cell replicates*.
 * `d_study()` projects a fitted reliability to other numbers of raters (`m`)
   or occasions (`n_o`), with a `plot()` and `ggplot2::autoplot()` curve.
   *D-studies and within-cell replicates* gives the designs each projection
