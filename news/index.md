@@ -74,6 +74,13 @@ requires R 4.5.0 or newer.
   `engine = "brms"` are selectable. Which designs each engine covers,
   and where it refuses, is documented in *Estimation engines* and
   [`?icc`](https://jmgirard.github.io/intraclass/reference/icc.md).
+- The **brms** engine fits both random- and fixed-rater models under a
+  sourced half-*t*(4, 0, 1) prior on every random-effect standard
+  deviation. Its point estimate is the posterior mode and its interval a
+  percentile **credible** interval, so `ci_method = "posterior"` is
+  forced. Supplying a custom `prior` is a deliberate deviation:
+  [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
+  warns, and the coverage results this package reports no longer apply.
 - The `lme4` package itself is already on your library path after a
   plain install, because `glmmTMB` lists it in its own `Imports`, but
   the lme4 engine also needs **merDeriv**, which does not arrive.
@@ -95,6 +102,11 @@ requires R 4.5.0 or newer.
   are strongly skewed or heavy-tailed, worst 0.6725 at chi-square(1)
   subject effects with a true ICC of 0.6, 50 subjects and 5 raters.
   `"burch"` is no remedy there (worst 0.6655).
+- `"searle"` and `"burch"` are the two classical closed forms, and the
+  three grids below measure their widths: the smaller grid’s 16 cells
+  and the larger grid’s 64 cells draw only the subject effects from the
+  non-normal family. The third draws the residual from the same family
+  as the subject effect.
 - Which of the two closed forms gives the **narrower** interval is
   conditional. On both grids that vary only the subject effect,
   `"burch"` is the narrower of the two in 16 of 16 cells of the smaller
