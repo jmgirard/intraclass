@@ -1,6 +1,6 @@
 # M146: The occasion vocabulary says which quantity each surface reports
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -120,7 +120,7 @@ Repair tasks (the 2026-08-28 defect return; see the Review section's findings):
       case to the `occasions` vs. `n_o` entry (finding 6, glossary half).
 - [x] T13. Take the `d-studies-and-replicates.Rmd` dash count back to zero
       (finding 3).
-- [ ] T14. Re-run the T8 gate.
+- [x] T14. Re-run the T8 gate.
 
 ## Work log
 
@@ -234,6 +234,19 @@ Repair tasks (the 2026-08-28 defect return; see the Review section's findings):
   figure the T5 rewrite had taken to 4. Meaning unchanged: the paragraphs still
   name the `occasions` column and no call. `test-vignette-claims.R` under
   `NOT_CRAN=true`: FAIL 0, PASS 422.
+- 2026-08-28: T14 done. All six `data-raw/` checkers self-test OK and pass in
+  check mode (MPL doc-claims 60 candidates / 12 settled / 0 failures; record
+  claims 7 re-derived; generalizing claims 367 in sync; observations 0
+  falsified; oracle registry 0 gaps). `air format --check .` exit 0;
+  `lintr::lint_package()` no lints; `R CMD check` raw Status line `Status: OK`.
+  Installed-surface leg re-run for the changed pin: the test file alone in a
+  directory with no `man/`, `test_dir(load_package = "installed")` after
+  installing the branch, FAIL 0 / PASS 18 / SKIP 0 with `Rd_db()` resolving 7
+  pages. The same leg against the pre-branch library copy was red at the
+  `d_study.Rd` claim, which is the stale-copy case finding 5 named.
+- 2026-08-28: repair complete; status returns to review. AC1's `tidy.icc_dstudy()`
+  half now states a sentence true on the projection rows the review falsified it
+  on; findings 1, 3, 4, 5, 6 and 7 are fixed. No criterion or scope text changed.
 
 ## Decisions
 
@@ -251,6 +264,23 @@ absence"), so the criterion holds and T4 asserts the absence on all eight
 cells. T3 corrected the branch's wording regardless, so it is right if it ever
 becomes reachable. Removing it would be a code change with no user-facing
 effect, outside this milestone's user-facing surface tier.
+
+### The Rd pin asserts on every surface present, not the first one found (2026-08-28, T10)
+
+`man_pages()` used to prefer `tools::Rd_db("intraclass")` and fall back to the
+source `man/*.Rd`. `Rd_db()` reads whatever copy `find.package()` resolves, so
+from a source tree it can return a library copy older than the branch, and a
+regression in `R/icc.R` plus `man/icc.Rd` would pass green (review finding 5).
+
+Inverting the preference would have traded one blind spot for another: under
+`test_dir(load_package = "installed")` the source `man/` is present, so an
+installed page that does not carry the branch's docs would never be read. So
+the helper collects both surfaces where both exist, requires at least one, and
+asserts every claim on each, naming the surface in the failure. Under
+`devtools::load_all()` `Rd_db()` returns zero pages here, so a dev with an
+unrelated older `intraclass` installed sees only the `man/` surface and no
+false red; under `R CMD check`, where `../../man` does not exist, only the
+installed surface is read, which is what the doctrine asks for.
 
 ## Review
 
