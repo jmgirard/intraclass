@@ -1,11 +1,11 @@
 # M146: The occasion vocabulary says which quantity each surface reports
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP2
-- **Branch/PR:** —
+- **Branch/PR:** `m146-occasions-vocabulary`
 
 ## Goal
 
@@ -78,7 +78,7 @@ removing either column → refused, D-044.
 
 ## Tasks
 
-- [ ] T1. Write the meaning sentence and the `glance()$n_o` contrast into the
+- [x] T1. Write the meaning sentence and the `glance()$n_o` contrast into the
       `tidy.icc()` column list (`R/icc.R:675-680`); mirror the meaning sentence
       alone into `tidy.icc_dstudy()`'s list, stating the projection's own
       `NA` rule (outside a replicate projection, `R/d-study.R:136`). Document.
@@ -126,6 +126,11 @@ removing either column → refused, D-044.
   rather than widen it, so they were not re-audited.
 - 2026-08-28: rename and removal were settled before planning by RR05/D-044,
   not weighed at this gate.
+- 2026-08-28: T1 done. `tidy.icc()`'s column list now states the ratings-averaged
+  meaning (1 / fitted per-cell count / `NA`) and contrasts it with `glance()$n_o`;
+  `tidy.icc_dstudy()` states the meaning alone. Values derived from a live 15x4x3
+  replicated fit. `devtools::test()`: FAIL 0, WARN 3 (the pre-existing
+  default-branch count), SKIP 2, PASS 9122.
 
 ## Decisions
 

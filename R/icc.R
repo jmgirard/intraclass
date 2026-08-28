@@ -676,8 +676,13 @@
 #'     in this order: `term` (the coefficient's ICC index, named for the broom
 #'     glossary), `occasions`, `type`, `level`, `sf_index`, `estimate`,
 #'     `std.error`, `conf.low`, `conf.high`, `conf.level`, `method`. Every
-#'     column is present on every fit; `occasions` is `NA` unless the design
-#'     has within-cell replicates.
+#'     column is present on every fit. `occasions` reports the number of
+#'     ratings averaged into that row's coefficient: 1 for a single-rating
+#'     coefficient, the fitted per-cell replicate count for an
+#'     occasion-averaged one, and `NA` when the design has no within-cell
+#'     replicates. That is a different quantity from the one `glance()`
+#'     reports as `n_o`, which is the observed per-cell occasion count of the
+#'     fitted design.
 #'   * `glance.icc()`: a one-row tibble of model-level summaries:
 #'     the sample sizes, the design flags -- among them the rater treatment
 #'     `raters` (`NA` where the design estimates no separable rater main effect:

@@ -481,8 +481,13 @@ The methods documented on this page return:
 in this order: \code{term} (the coefficient's ICC index, named for the broom
 glossary), \code{occasions}, \code{type}, \code{level}, \code{sf_index}, \code{estimate},
 \code{std.error}, \code{conf.low}, \code{conf.high}, \code{conf.level}, \code{method}. Every
-column is present on every fit; \code{occasions} is \code{NA} unless the design
-has within-cell replicates.
+column is present on every fit. \code{occasions} reports the number of
+ratings averaged into that row's coefficient: 1 for a single-rating
+coefficient, the fitted per-cell replicate count for an
+occasion-averaged one, and \code{NA} when the design has no within-cell
+replicates. That is a different quantity from the one \code{glance()}
+reports as \code{n_o}, which is the observed per-cell occasion count of the
+fitted design.
 \item \code{glance.icc()}: a one-row tibble of model-level summaries:
 the sample sizes, the design flags -- among them the rater treatment
 \code{raters} (\code{NA} where the design estimates no separable rater main effect:
