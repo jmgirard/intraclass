@@ -680,8 +680,10 @@
 #'     has within-cell replicates.
 #'   * `glance.icc()`: a one-row tibble of model-level summaries:
 #'     the sample sizes, the design flags -- among them the rater treatment
-#'     `raters` (`NA` on a one-way fit, whose raters are interchangeable and
-#'     carry no facet) and `replicates`, whether the fitted design splits
+#'     `raters` (`NA` where the design estimates no separable rater main effect:
+#'     a `model = "oneway"` fit, whose raters are interchangeable and carry no
+#'     facet, and a `design = "nested_in_subjects"` fit, whose rater effect is
+#'     confounded into the residual) and `replicates`, whether the fitted design splits
 #'     within-cell replicates -- `FALSE` on a one-way fit, which has no rater
 #'     facet and so no cells to split -- the effective rater counts, the
 #'     variance components, the occasion count `n_o` (`NA` unless the fitted

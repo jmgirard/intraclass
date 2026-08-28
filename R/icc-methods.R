@@ -313,6 +313,17 @@ summary.icc <- function(object, ...) {
       "interchangeable raters, so systematic rater differences cannot be",
       "separated and are absorbed into the residual (a conservative ICC)."
     )
+  } else if (!design_has_rater_facet(object$design)) {
+    # Design 3 (raters nested in subjects) is the multilevel one-way: the rater
+    # main effect is confounded into the residual (estimand-spec M8 §3b), so the
+    # absolute-agreement note below would attribute error to an effect this
+    # design cannot separate. Say what the nesting does instead (D-042), in the
+    # shape the one-way note above uses.
+    c(
+      "Raters nested in subjects: each subject is rated by its own set of",
+      "raters, so systematic rater differences cannot be separated and are",
+      "absorbed into the residual (a conservative ICC)."
+    )
   } else {
     # One interpretive note per error definition present (both, for the default
     # four-formulation report; ADR-054). The two-line split per type is preserved so a

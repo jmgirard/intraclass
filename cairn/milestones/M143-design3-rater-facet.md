@@ -85,7 +85,7 @@ capability gap → M144.
       (`R/d-study.R:546`); re-pin `test-exported-contract.R:513`.
 - [x] T4. Failing test, then edit, for the multilevel-branch header
       (`R/icc-methods.R:46-57`), with the Design 1 and Design 2 controls.
-- [ ] T5. Failing test, then edit, for the `summary()` interpretation sentence
+- [x] T5. Failing test, then edit, for the `summary()` interpretation sentence
       (`R/icc-methods.R:315-319`), with the crossed-agreement control.
 - [ ] T6. `R/icc.R:683`; `devtools::document()`.
 - [ ] T7. The five-renderer sweep test.
@@ -96,6 +96,7 @@ capability gap → M144.
 
 - 2026-08-27: created by /milestone-plan.
 - 2026-08-27: implement gate chose the one-way-parallel nesting sentence for `summary()` and one shared internal predicate over per-site conditions, the duplication having been why D-038's one-way rule reached `glance.icc()` and not `icc_raters`.
+- 2026-08-27: T5 — failing test then edit for `summary()`. Red on the Design 3 column alone (agreement note present, nesting note absent); the crossed-agreement control was already correct before the edit. `summary.icc()` gains a third top-level branch, keyed on the shared predicate, returning the nesting note in the shape the one-way note uses. Full suite FAIL 0 / WARN 3 / SKIP 2 / PASS 9100.
 - 2026-08-27: T4 — failing test then edit for the multilevel header. Red on the treatment word alone (`"random" "random" "random"` against `"random" "random" NA`), the rater-count and Design 1/2 control assertions green before the edit; `format.icc()`'s multilevel branch now builds the rater segment through the shared predicate. No snapshot or vignette transcript pins a Design 3 header. Full suite FAIL 0 / WARN 3 / SKIP 2 / PASS 9098.
 - 2026-08-27: T3 — added `design_has_rater_facet()` (`R/design.R`), the one predicate both producers now read (implement gate choice); `glance.icc()` and `d-study.R`'s `icc_raters` wired to it; `test-exported-contract.R`'s Design 3 projection pin re-pinned to `NA_character_`. Full suite FAIL 0 / WARN 3 / SKIP 2 / PASS 9092 -- the same three warnings the default branch reports (candidate row).
 - 2026-08-27: T2 — failing tests first: one new block in `test-icc-nested-multilevel.R` over four Design 3 geometries (the three `sim_design3()` fits plus the ragged one), fit and `d_study()` projection each; `design3` added to `test-exported-contract.R`'s per-design `glance()` block. Red before any source edit: 9 failures, all of them the `raters` cell reading `"random"` where the design has no rater facet (8 in the new matrix, 1 in the exported-contract block); the rest of both files green.

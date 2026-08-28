@@ -630,3 +630,40 @@ test_that("the multilevel header names a rater treatment only where one exists",
     c(design1 = "random", design2 = "random", design3 = NA_character_)
   )
 })
+
+test_that("summary() explains Design 3's nesting instead of a rater main effect", {
+  skip_if_not_installed("glmmTMB")
+  # The absolute-agreement note attributes error to a rater main effect. Design 3
+  # cannot separate one -- its raters are nested in subjects -- so that note is
+  # replaced there by what the nesting does (D-042). The crossed two-way
+  # agreement fit is the control: it keeps the note.
+  d3 <- icc(design3_frame(), score, subject, rater, cluster = cluster, seed = 1)
+  crossed <- icc(ratings, score, subject, rater, type = "agreement", seed = 1)
+  agreement_note <- "Absolute agreement counts the rater main effect"
+  nesting_note <- "Raters nested in subjects"
+
+  got <- vapply(
+    list(design3 = d3, crossed = crossed),
+    function(x) {
+      out <- paste(cli::cli_fmt(summary(x)), collapse = "\n")
+      c(
+        agreement = grepl(agreement_note, out, fixed = TRUE),
+        nesting = grepl(nesting_note, out, fixed = TRUE)
+      )
+    },
+    logical(2)
+  )
+  expect_identical(
+    got,
+    matrix(
+      c(FALSE, TRUE, TRUE, FALSE),
+      nrow = 2L,
+      dimnames = list(c("agreement", "nesting"), c("design3", "crossed"))
+    )
+  )
+  # The replacement says what the nesting costs, not merely that it happened.
+  expect_match(
+    paste(cli::cli_fmt(summary(d3)), collapse = " "),
+    "cannot be separated and are absorbed into the residual"
+  )
+})
