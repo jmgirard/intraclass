@@ -138,9 +138,11 @@
 #'     error definition.
 #'   * `glance.icc_dstudy()`: a one-row tibble of projection-level summaries. It
 #'     carries the distinct projected rater counts `m` and their range, the
-#'     error definition(s), the rater treatment (`NA` on a projection of a
-#'     one-way fit, whose interchangeable raters carry no facet), the
-#'     observed rater count, and
+#'     error definition(s), the rater treatment (`NA` on a projection of a fit
+#'     that estimates no separable rater main effect: a `model = "oneway"` fit,
+#'     whose raters are interchangeable and carry no facet, and a
+#'     `design = "nested_in_subjects"` fit, whose rater effect is confounded
+#'     into the residual), the observed rater count, and
 #'     the interval settings. The count and range are held at the observed rater
 #'     count when the sweep is over occasions, so they are not a row count.
 #'   * `format.icc_dstudy()`: a character vector holding the printed projection
@@ -540,8 +542,9 @@ d_study <- function(
     icc_type = type,
     # NA where the design has no rater facet, so `glance()` on a projection reads
     # the same as `glance()` on the fit it came from -- both read the shared
-    # predicate, which covers the one-way fit and Design 3 alike (D-042). The
-    # local `raters` still carries the fitted value into `make_estimand()` above.
+    # predicate, which covers the one-way fit and Design 3 alike (D-042). Neither
+    # no-facet case reaches a `make_estimand()` branch that reads `raters`: the
+    # `ml_oneway` and `oneway` branches above (:377, :392) both omit it.
     icc_raters = if (design_has_rater_facet(x$design)) {
       raters
     } else {

@@ -671,12 +671,14 @@ test_that("summary() explains Design 3's nesting instead of a rater main effect"
 test_that("no renderer of the public surface calls Design 3's raters random or fixed", {
   skip_if_not_installed("glmmTMB")
   # D-035 clause 2 makes the icc object's public surface what tidy(), glance(),
-  # print(), format() and summary() return, plus $fit and $call -- the engine's
-  # own object and the user's literal call, excluded here by name because
-  # neither is this package's prose. A Design 3 fit estimates no rater main
-  # effect, so no renderer of that surface may hand a user a rater treatment for
-  # it (D-042). This sweeps all five at once: the per-renderer tests above say
-  # WHERE the word must not appear, this one says it appears nowhere.
+  # summary() and print() return, plus $fit and $call -- the engine's own object
+  # and the user's literal call, excluded here by name because neither is this
+  # package's prose. format() is swept alongside those four: clause 2 does not
+  # name it, but print() delegates to it, so a treatment word reaching print()
+  # reaches it through format(). A Design 3 fit estimates no rater main effect,
+  # so no renderer may hand a user a rater treatment for it (D-042). This sweeps
+  # all five at once: the per-renderer tests above say WHERE the word must not
+  # appear, this one says it appears nowhere.
   x <- icc(design3_frame(), score, subject, rater, cluster = cluster, seed = 1)
   # No word boundaries: an over-eager pattern is the safe direction for a
   # must-not-appear check, and `\\b` is not portable across R's regex engines.

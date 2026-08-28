@@ -94,6 +94,7 @@ capability gap → M144.
 
 ## Work log
 
+- 2026-08-27: merge gate — maintainer approved fixing four findings before the merge. F1 (`?d_study` still documented the one-way-only rule), F2 (D-042's rationale overclaimed about the projection row), F5 (D-035 clause 2 mis-cited as five renderers) and F7 (a false clause in a retained `R/d-study.R` comment) fixed on the branch; F3 and F4 recorded without a code change; F9 filed as a follow-up; F6 and F8 rejected.
 - 2026-08-27: created by /milestone-plan.
 - 2026-08-27: implement gate chose the one-way-parallel nesting sentence for `summary()` and one shared internal predicate over per-site conditions, the duplication having been why D-038's one-way rule reached `glance.icc()` and not `icc_raters`.
 - 2026-08-27: T8 gate — `R CMD check --as-cran` 0 errors / 0 warnings / 0 notes (13m 31s, R 4.6.1, aarch64-apple-darwin23); `devtools::test()` FAIL 0 / WARN 3 / SKIP 2 / PASS 9107, the three warnings the default branch also reports (candidate row); all six `data-raw/` checkers pass; `cairn_validate` all checks passed.
@@ -298,3 +299,27 @@ work log with no code change, both being correct as implemented; absorb F9 into
 the standing Design 3 remainder candidate row; reject F6 and F8 -- F6 as
 precision on a criterion met as written, F8 as correct under the branch ordering
 it has.
+
+**Disposition applied at the merge gate (2026-08-27), maintainer-approved.**
+F1 fixed: the `glance.icc_dstudy()` sentence in `R/d-study.R` now names both
+no-rater-facet conditions in the user-facing argument spellings, matching the
+`?icc` sentence AC4 covers; `man/d_study.Rd` regenerated, its only diff that
+paragraph. F2 fixed: D-042's "Why the deferral no longer holds" paragraph now
+separates the fit from the `d_study()` projection, states that the projection
+row does carry both columns and now reads `type = "agreement"` beside
+`raters = NA`, and gives the reason that split is deliberate -- absolute
+agreement is defined for Design 3 and the rater treatment is not, so no shared
+convention across the two cells can leave both true. The entry had not reached
+the default branch, so it is corrected in place rather than superseded. F5
+fixed: the test comment now names clause 2's four methods and says why
+`format()` is swept alongside them. F7 fixed: the stale clause is replaced by
+what is actually true -- neither no-facet case reaches a `make_estimand()`
+branch that reads `raters`. F3 and F4 recorded above with no code change, both
+being correct as implemented. F9 filed as a follow-up, absorbed into the
+standing Design 3 remainder candidate row at the post-merge hygiene pass. F6
+and F8 rejected: F6 is precision on a criterion met as written, F8 is correct
+under the branch ordering it has.
+
+Re-verified after the fixes: `devtools::document()` leaves no diff beyond the
+regenerated `man/d_study.Rd` paragraph, `air format --check` is clean on every
+touched file, and `test-exported-contract.R` passes with no failures.

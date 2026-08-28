@@ -79,9 +79,11 @@ on every projection; \code{occasions} is \code{NA} outside a replicate projectio
 error definition.
 \item \code{glance.icc_dstudy()}: a one-row tibble of projection-level summaries. It
 carries the distinct projected rater counts \code{m} and their range, the
-error definition(s), the rater treatment (\code{NA} on a projection of a
-one-way fit, whose interchangeable raters carry no facet), the
-observed rater count, and
+error definition(s), the rater treatment (\code{NA} on a projection of a fit
+that estimates no separable rater main effect: a \code{model = "oneway"} fit,
+whose raters are interchangeable and carry no facet, and a
+\code{design = "nested_in_subjects"} fit, whose rater effect is confounded
+into the residual), the observed rater count, and
 the interval settings. The count and range are held at the observed rater
 count when the sweep is over occasions, so they are not a row count.
 \item \code{format.icc_dstudy()}: a character vector holding the printed projection

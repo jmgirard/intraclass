@@ -1765,10 +1765,17 @@ exists.
 of such a fit. D-038 clause 1's Design 3 sentence is superseded; the rest of
 D-038 stands.
 
-**Why the deferral no longer holds.** The pair D-038 balanced does not exist.
-D-038 itself refuses a `type` column on `glance()`, and `tidy()$type` already
-reports `NA` on a Design 3 fit, so the split D-038 feared is the shipped state
-and `raters` is severable from a sibling that is not there. The trigger is
+**Why the deferral no longer holds.** On the FIT, the pair D-038 balanced does
+not exist: D-038 itself refuses a `type` column on `glance()`, and `tidy()$type`
+already reports `NA` on a Design 3 fit, so the split D-038 feared is the shipped
+state there and `raters` is severable from a sibling that is not present. On the
+`d_study()` PROJECTION the pair does exist -- `glance.icc_dstudy()` carries both
+columns, and after this decision that row reads `type = "agreement"` beside
+`raters = NA`. That split is deliberate, not an oversight in the reasoning
+above: absolute agreement IS defined for Design 3, which is why `icc()` drops
+`"consistency"` there rather than both, while the rater treatment is not defined
+at all. The two cells therefore differ in what they can report, and a shared
+convention across them would have to make one of them false. The trigger is
 GP2's one-way door closing at submission, in place of the candidate row's unmet
 promotion condition: after v0.1.0 this cell costs a deprecation cycle to
 change, while the row's condition can only be met once a user has already been
