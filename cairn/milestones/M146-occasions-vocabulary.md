@@ -1,6 +1,6 @@
 # M146: The occasion vocabulary says which quantity each surface reports
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -33,7 +33,7 @@ removing either column → refused, D-044.
 
 ## Acceptance criteria
 
-- [ ] AC1. The `tidy.icc()` column list in `R/icc.R`'s roxygen (rendered into
+- [x] AC1. The `tidy.icc()` column list in `R/icc.R`'s roxygen (rendered into
       `man/icc.Rd`) states that `occasions` reports the per-rater occasion
       divisor the row's coefficient applies to pure error: on a fit that splits
       within-cell replicates, 1 wherever the row averages no occasions — every
@@ -69,7 +69,7 @@ removing either column → refused, D-044.
       that sweeps those paths. The paragraphs describing the single-occasion
       and occasion-averaged rows in `vignettes/d-studies-and-replicates.Rmd`
       name the `occasions` column rather than a call.
-- [ ] AC4. `vignettes/glossary.Rmd` carries an entry for occasion / within-cell
+- [x] AC4. `vignettes/glossary.Rmd` carries an entry for occasion / within-cell
       replicate stating that the per-cell count `print()` reports on the design
       line as `N cells x N replicates` is the same quantity as `glance()$n_o`,
       and an entry stating that `tidy.icc()`'s `occasions` is the per-rater
@@ -407,7 +407,9 @@ Repair tasks (the second 2026-08-28 defect return, and the AC1 amendment):
   checkpoint sites 5 declared). `devtools::test()`: FAIL 0, WARN 3 (the
   standing default-branch count), SKIP 2, PASS 9436. `air format --check .`
   exit 0; `lintr::lint_package()` 0 lints; `devtools::document()` leaves no
-  diff.
+  diff; `R CMD check` raw Status line `Status: OK`, with no ERROR, WARNING or
+  NOTE anywhere in the log and the `spelling.Rout.save` comparison OK, so the
+  new vocabulary needs no WORDLIST entry.
 - 2026-08-28: the plan-owned body hit 166 lines against the < 150 cap after the
   two amendments, so the heaviest plan-owned section was compressed in one
   pass: T1-T8 and T9-T14, all done, fold into two prose paragraphs naming what
@@ -743,3 +745,10 @@ recall, so the recorded-alternative remedy has nothing to spend and the
 escalation offer is what remains. Disposition goes to the maintainer.
 
 Finding 6's candidate row is held for whichever pass next reaches hygiene.
+- 2026-08-28: repair and amendment complete; status returns to `review`. AC1
+  and AC4 now promise the rule the code guarantees rather than a per-design
+  family list, both amended through the gated protocol after four
+  fresh-context [O] criteria audits between them; round-2 findings 4, 7, 8 and
+  10 are fixed; finding 6 goes to a candidate row at hygiene and finding 9 was
+  rejected at review. The grid in `test-occasions-grid.R` is the standing
+  instrument against a third recurrence of the shape `LESSONS.md:47` names.
