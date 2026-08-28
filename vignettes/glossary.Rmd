@@ -217,6 +217,26 @@ under-covers when the subject effects are strongly skewed or heavy-tailed. See
 under-covers*](interval-methods.html#when-the-default-under-covers). See also
 [*Confidence-interval methods*](interval-methods.html).
 
+## Occasion (within-cell replicate)
+
+One of several ratings the *same* rater gives the *same* subject. A design with
+occasions lets `icc()` separate the [subject-by-rater
+interaction](#variance-component) from pure error. The per-cell count is
+reported under two names for the same quantity: the printed report's design
+line spells it as `N cells x N replicates`, and `glance()` reports that same
+per-cell count in its `n_o` column. See [*D-studies and within-cell
+replicates*](d-studies-and-replicates.html).
+
+## `occasions` vs. `n_o`
+
+Two near-identical names for different quantities. `tidy()`'s `occasions`
+column counts the **ratings averaged into that row's coefficient**: 1 for a
+single-rating coefficient, the fitted per-cell count for an occasion-averaged
+one, and `NA` when the design has no within-cell replicates. `glance()`'s `n_o`
+counts the **occasions observed per cell** in the design that was fitted. So on
+a design with three ratings per cell, a fit reporting both settings shows
+`occasions` 1 and 3 down its rows, while `n_o` is 3 for the fit as a whole.
+
 ## One-way vs. two-way
 
 The `model` argument. A **two-way** design has every subject rated by the *same*

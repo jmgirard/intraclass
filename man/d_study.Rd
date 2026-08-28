@@ -160,20 +160,21 @@ For a within-cell replicate fit (more than one rating per subject-by-rater cell,
 where the residual splits into the subject-by-rater interaction and pure error),
 \code{d_study()} can project \strong{either} axis (one per call):
 \itemize{
-\item the \strong{rater count \code{m}} (the default), holding the number of occasions \code{n_o} at
-the fitted value: the rater and interaction terms divide by \code{m}, pure error by
-\code{m * n_o}. The returned object gains an \code{occasions} column, one reliability
+\item the \strong{rater count \code{m}} (the default), holding the fitted occasion count
+fixed: the rater and interaction terms divide by \code{m}, pure error by \code{m}
+times that count. The returned object gains an \code{occasions} column, one reliability
 curve per occasion setting on the fit (\code{"single"} and/or \code{"average"}), so at
 \code{m} = the observed rater count each curve matches the fitted \verb{ICC(*,k)};
 \code{tidy()} carries that column on every projection, \code{NA} where the fit has no
 replicates.
-\item the \strong{occasion count \code{n_o}} (supply the \code{n_o} argument), holding raters at the
-observed count: pure error divides by \code{m * n_o} while the rater and interaction
-terms are unchanged. Because occasion averaging rescales \strong{only pure
+\item the \strong{swept occasion count \code{n_o}} (supply the \code{n_o} argument), holding raters
+at the observed count: pure error divides by \code{m * n_o} while the rater and
+interaction terms are unchanged. Because occasion averaging rescales \strong{only pure
 error}, this curve is well-posed for random \strong{and} fixed raters. That
 includes fixed absolute agreement, which the rater projection refuses,
-since occasions are a random facet however the raters are treated. At
-\code{n_o} = the fitted occasion count it matches the fitted \verb{ICC(*,k)}.
+since occasions are a random facet however the raters are treated. Where
+the swept \code{n_o} equals the fitted occasion count it matches the fitted
+\verb{ICC(*,k)}.
 }
 
 \strong{The occasion curve has a finite ceiling.} As \code{n_o} grows it approaches

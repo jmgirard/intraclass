@@ -96,8 +96,8 @@ removing either column → refused, D-044.
       `vignettes/d-studies-and-replicates.Rmd:177,179`; add the AC3 sweep to
       `tests/testthat/test-vignette-claims.R`, skipping on `dir.exists()` as
       that file already does for source-tree paths (M129).
-- [ ] T6. Add the two `vignettes/glossary.Rmd` entries.
-- [ ] T7. Wording pass on `R/d-study.R:73-86`. Document.
+- [x] T6. Add the two `vignettes/glossary.Rmd` entries.
+- [x] T7. Wording pass on `R/d-study.R:73-86`. Document.
 - [ ] T8. Run every `data-raw/` checker with `--self-test` before pushing — a
       roxygen edit inside the `ci_method` doc scope re-keys the MPL
       doc-claims ledger (M130) — then the gate: `air format .`,
@@ -151,6 +151,12 @@ removing either column → refused, D-044.
   with anti-vacuity floors on each group. Five plants tested: the original prose,
   a line-wrapped form, NEWS, roxygen -- all red; a non-roxygen `R/` comment
   stayed green. `devtools::test()`: FAIL 0, WARN 3, SKIP 2, PASS 9191.
+- 2026-08-28: T6 and T7 done. `glossary.Rmd` gains *Occasion (within-cell
+  replicate)*, naming the printed design line and `glance()$n_o` as one
+  quantity, and *`occasions` vs. `n_o`*, separating the averaging divisor from
+  the observed per-cell count. `d_study()`'s roxygen now calls the held count
+  the fitted occasion count; every remaining `n_o` in that block is the swept
+  argument. `devtools::test()`: FAIL 0, WARN 3, SKIP 2, PASS 9191.
 
 ## Decisions
 
