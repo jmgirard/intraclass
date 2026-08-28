@@ -1,6 +1,6 @@
 # M144: NEWS's *What ships* names the designs the package actually supports
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -75,7 +75,7 @@ restoration was the maintainer's explicit M142 repair direction. Any change to
       by construction, touching no pinned region.
 - [x] T3. Run both rulers and both NEWS-reading checkers; re-measure after any
       later edit, including one made at the merge gate (M142 lesson).
-- [ ] T4. Gate: `devtools::test()`, `--as-cran`, the six `data-raw/` checkers,
+- [x] T4. Gate: `devtools::test()`, `--as-cran`, the six `data-raw/` checkers,
       `cairn_validate`.
 
 ## Work log
@@ -88,6 +88,7 @@ restoration was the maintainer's explicit M142 repair direction. Any change to
 - 2026-08-27: T2 done. Two bullets added to *What ships* after the `icc()` bullet: one for the imbalanced/incomplete/multilevel design support and cluster-level reporting, one for within-cell replicates and `occasions`. Bullet bytes 437 and 393, both under M142's 500 cap; no pinned region touched.
 - 2026-08-27: T3 partial. Both rulers and both NEWS-reading checkers green on the edited file: exactly one bullet over 500 bytes (the 797-byte `news_scope()` anchor), `dash: 0`, one sentence over 35 words (the 74-word pinned residual), `check-mpl-doc-claims.py` OK, and `test-doc-skew-caveat.R` FAIL 0 / PASS 2293 against a fresh install carrying the new bullets. Its two vignette-leg skips are pre-existing: an identical 2293/2-skip run on a stashed clean tree. All six `data-raw/` checkers and `cairn_validate` pass. Not ticked: the full `devtools::test()` verify run is still in flight, and `--as-cran` (T4) has not run.
 - 2026-08-27: T3 ticked. The verify slot returned clean: `devtools::test()` FAIL 0 / WARN 3 / SKIP 2 / PASS 9107, exit 0. T4's `--as-cran` leg is still outstanding.
+- 2026-08-28: T4 done. `devtools::check(args = "--as-cran")` Status: OK, 0 errors / 0 warnings / 0 notes, 13m57s, its own `testthat.R` leg OK. The six `data-raw/` checkers and `cairn_validate` pass. All tasks checked; status to review. No plan amendment was needed and no milestone-local decision arose.
 
 ## Decisions
 
