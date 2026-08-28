@@ -5,7 +5,7 @@
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
-- **Branch/PR:** `m144-news-what-ships-designs`
+- **Branch/PR:** `m144-news-what-ships-designs` / https://github.com/jmgirard/intraclass/pull/155
 
 ## Goal
 
@@ -32,7 +32,7 @@ restoration was the maintainer's explicit M142 repair direction. Any change to
 
 ## Acceptance criteria
 
-- [ ] AC1. `NEWS.md`'s *What ships* section names the three design capabilities the
+- [x] AC1. `NEWS.md`'s *What ships* section names the three design capabilities the
       `Description` field of `DESCRIPTION` sells and *What ships* does not name
       today, quoting `DESCRIPTION:13-14` verbatim: "support for imbalanced,
       incomplete, and multilevel (nested) designs". It additionally names
@@ -41,7 +41,7 @@ restoration was the maintainer's explicit M142 repair direction. Any change to
       wrong, measured 2026-08-27 — so they are named here on the strength of the
       *Multilevel designs: subject and cluster level* and *D-studies and within-cell
       replicates* articles the same section already lists.
-- [ ] AC2. After this milestone,
+- [x] AC2. After this milestone,
       `LC_ALL=C awk -f data-raw/m142-bullet-lines.awk NEWS.md | sort -rn` reports
       exactly one bullet over 500 bytes and it is the 797-byte `news_scope()`
       anchor, M142's named exemption; and `python3 data-raw/prose-profile.py
@@ -93,3 +93,11 @@ restoration was the maintainer's explicit M142 repair direction. Any change to
 ## Decisions
 
 ## Review
+
+- 2026-08-28: PR #155 opened as draft. `main` in sync with `origin/main`; branch 2 ahead / 0 behind, so no merge-forward was needed.
+
+### Acceptance-criterion evidence
+
+- AC1 — PASS. `DESCRIPTION` lines 13-14 read "boundary-aware Monte-Carlo confidence intervals, support for imbalanced, / incomplete, and multilevel (nested) designs, decision-study projection to". `NEWS.md`'s *What ships* now carries the phrase "support for imbalanced, incomplete, and multilevel (nested) designs" — matched against the DESCRIPTION field with whitespace normalized, since both surfaces hard-wrap the sentence at different columns (raw `grep` for the flat string finds it in neither file). The same bullet names cluster-level reporting ("reports reliability at the cluster level as well as the subject level") and cites *Multilevel designs: subject and cluster level*; the following bullet names within-cell replicates ("gives a within-cell replicate design", "the mean of the replicates") and cites *D-studies and within-cell replicates*. Both cited article titles appear verbatim in the section's own eight-article bullet.
+- AC2 — PASS. `LC_ALL=C awk -f data-raw/m142-bullet-lines.awk NEWS.md | sort -rn`: exactly one bullet over 500 bytes, the 797-byte bullet opening "The `ci_method = \"mpl\"` documentation states the interpolati", which is the anchor `news_scope()` (`data-raw/check-mpl-doc-claims.py:280-294`) matches on. The two added bullets measure 437 and 327 bytes. `python3 data-raw/prose-profile.py NEWS.md`: `sent 53, >35 = 1, dash 0, paren 1, semi 2, max 74` — `dash: 0` and exactly one over-35-word sentence, at 74 words the pinned residual clause.
+
