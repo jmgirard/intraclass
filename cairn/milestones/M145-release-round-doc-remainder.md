@@ -139,6 +139,8 @@ is internal, so the milestone is classified by the wider of the two.
 - 2026-08-28: T6 — gate on the branch head: `devtools::test()` FAIL 0, WARN 3 (the three the candidate row records), SKIP 2, PASS 9121; `devtools::check()` with vignettes built reports `Status: OK` on its raw Status line (0 errors, 0 warnings, 0 notes, 12m 45s); all six `data-raw/` checkers pass, five of them under `--self-test` (`check-abort-remedy-verdicts.R` offers none and passes plain); `air format --check .` clean; `awk -f data-raw/m142-bullet-lines.awk NEWS.md` reports one bullet over 500 bytes, the 797-byte mpl anchor, the two new bullets at 300 and 355. D-019 verified byte-identical to its text at `2076e1f` (3,600 bytes).
 - 2026-08-28: T5 correction — running `spelling.R` locally wrote `tests/spelling.Rout.save`, which the T4-T5 commit swept in; `R CMD check` then compared the test's output against it. Removed and gitignored: it is not what makes the gate red (`error = TRUE` is, shown by the planted misspelling) and a committed output transcript is a cross-platform check hazard. The gate was re-run on the corrected head.
 - 2026-08-28: gate re-run on the corrected head (`b1ee51f`): `devtools::check()` with vignettes built reports `Status: OK`, 0 errors / 0 warnings / 0 notes. `spelling::spell_check_test()` writes `spelling.Rout.save` into whatever test directory it runs in, so `R CMD check` still reports the comparison and still passes it; the file being gitignored changes nothing in the check, only what the repo carries.
+- 2026-08-28: review correction, superseding the T6 line's bullet sizes — the two new bullets measure 300 and 398 bytes, not 300 and 355; `NEWS.md` had not changed since T3 (`f791045`), so 355 was wrong when written. AC6's predicate is unaffected.
+- 2026-08-28: fixed at the merge gate — `NEWS.md`'s brms bullet said the engine "fits the random-rater model" while `R/icc.R:327-335` documents it covering three fixed-rater designs as well; widened to "both random- and fixed-rater models" and pinned as a fourth claim in `tests/testthat/test-news-brms-claims.R`.
 
 ## Decisions
 
@@ -305,4 +307,31 @@ then the GitHub thread surface.
 **Return floor.** None of 1-7 demonstrates an acceptance criterion failing, so
 none returns the milestone. Finding 1 is the only one touching what the
 shipped docs tell a user; it goes to the maintainer at the gate.
+
+### Fixed at the merge gate
+
+Findings 1 and 2 were actioned at the maintainer's direction; 3, 4 and 5 were
+rejected (3 and 4 are unreached branches in a pin verified to discriminate,
+5 is what AC1 asked for), and 6 and 7 reported no regression.
+
+Finding 1: `NEWS.md:56` now reads "fits both random- and fixed-rater models",
+derived from `R/icc.R:325-337`, which documents brms covering the two-way
+fixed-rater single-level (Case-3A), crossed Design 1 multilevel fixed-rater
+and nested Design 2 fixed-rater designs alongside the random ones. The claim
+is pinned as a fourth pattern in `tests/testthat/test-news-brms-claims.R`,
+verified against a real install: 7 expectations, 0 failed, skipped FALSE; with
+"both random- and fixed-rater models" reverted to "the random-rater model" in
+the installed copy exactly one expectation reds, and the restored control is
+clean.
+
+Finding 2: corrected by a superseding work-log line, since work logs are
+append-only.
+
+Re-verification after the fix: `spelling::spell_check_package(".")` reports no
+spelling errors; `awk -f data-raw/m142-bullet-lines.awk NEWS.md` reports
+19 bullets, one over 500 bytes and it is the 797-byte mpl anchor (the brms
+bullet grew 398 -> 411); `air format --check .` exits 0; all six `data-raw/`
+checkers exit 0; `cairn_validate.py` exits 0. AC1-AC6 are unaffected: the
+edit touches only the *Engines* section's first clause, and AC3's three facts
+are unchanged and still pinned.
 

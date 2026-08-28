@@ -1,4 +1,4 @@
-# The release notes' *Engines* section states three facts about the brms
+# The release notes' *Engines* section states four facts about the brms
 # engine, and each is a claim about engine behaviour rather than a description
 # of one. So each gets a pin: deleting the fact reds, rewording it in the same
 # terms does not.
@@ -37,13 +37,16 @@ news_brms_claims <- c(
   ),
   custom_prior_voids = paste0(
     "custom .?prior.?.*warns.*coverage results.*no longer apply"
-  )
+  ),
+  # The engine covers fixed-rater designs too (`R/icc.R` `@details`), so the
+  # notes must not read as random-rater only.
+  both_rater_treatments = "random- and fixed-rater"
 )
 
-test_that("the release notes state the three brms engine facts", {
+test_that("the release notes state the four brms engine facts", {
   txt <- news_engines_text()
 
-  # Anti-vacuity, stated independently of the three claims: the section was
+  # Anti-vacuity, stated independently of the four claims: the section was
   # found, is non-empty, and carries the engine sentence that is not one of
   # them. Without this a section slice that silently emptied would pass every
   # `expect_false` below and fail every `expect_true` for the wrong reason.
