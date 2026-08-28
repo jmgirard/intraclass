@@ -47,7 +47,8 @@ autoplot.icc_dstudy <- function(object, ...) {
 
   # A projection can overlay several curves within a panel: one per error
   # definition (`type`: absolute agreement vs consistency) and, for a replicate
-  # fit, one per occasion setting (`occasions`: n_o = 1, the averaged n_o, ...).
+  # fit, one per occasion setting (`occasions`: 1 rating averaged, the fitted
+  # per-cell count, ...) -- the averaging divisor, not the design's `n_o`.
   # The multilevel projection additionally splits by level, which the facet
   # separates. Group + colour by every such curve-identity column *except* the one
   # on the x-axis, so the overlaid curves are drawn as distinct lines rather than
@@ -55,7 +56,11 @@ autoplot.icc_dstudy <- function(object, ...) {
   nice <- c(agreement = "Absolute agreement", consistency = "Consistency")
   id_cols <- setdiff(intersect(c("type", "occasions"), names(df)), x_col)
   parts <- lapply(id_cols, function(col) {
-    if (col == "type") unname(nice[df$type]) else paste0("n_o = ", df$occasions)
+    if (col == "type") {
+      unname(nice[df$type])
+    } else {
+      paste0("occasions: ", df$occasions)
+    }
   })
   keys <- if (length(parts) > 0) {
     do.call(paste, c(parts, list(sep = ", ")))
@@ -67,7 +72,7 @@ autoplot.icc_dstudy <- function(object, ...) {
   legend_title <- if (identical(id_cols, "type")) {
     "Coefficient"
   } else if (identical(id_cols, "occasions")) {
-    "Averaging (n_o)"
+    "Occasions averaged"
   } else {
     "Curve"
   }

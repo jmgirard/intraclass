@@ -86,9 +86,9 @@ removing either column → refused, D-044.
       `cairn/doctrine/doc-claim-pins.md`: read via `tools::Rd_db()`, search
       whitespace-collapsed text, pin a backtick-free spelling, and
       mutation-verify each pin red.
-- [ ] T3. `R/autoplot.R:58` keys → `occasions: <value>`; `:69-70` title →
+- [x] T3. `R/autoplot.R:58` keys → `occasions: <value>`; `:69-70` title →
       `Occasions averaged`; leave `:30`.
-- [ ] T4. Extend `tests/testthat/test-autoplot.R` over AC2's cells, using that
+- [x] T4. Extend `tests/testthat/test-autoplot.R` over AC2's cells, using that
       file's existing build-based idiom (`built_layer()`), asserting legend
       title and key text; include the suppressed-legend and `"Curve"`-branch
       cells as cases that assert only the `n_o` absence.
@@ -137,7 +137,29 @@ removing either column → refused, D-044.
   planted defects (meaning verb, contrast naming the wrong column, each of the
   three divisor/`NA` clauses, the d-study meaning, the contrast copied onto
   `d_study.Rd`) each red at FAIL 1; a mid-phrase rewrap control stayed green.
+- 2026-08-28: T3 and T4 done. Legend keys read `occasions: <value>`; the title
+  branch reads `Occasions averaged`. `test-autoplot.R` walks AC2's eight cells
+  asserting the `n_o` absence on every one, the `occasions: <count>` key form on
+  the four rater-axis cells, and both x-axis labels. Four planted defects red
+  (FAIL 12 / 5 / 4 / 2) against a green baseline of 79.
+- 2026-08-28: T4 found the `Occasions averaged` title branch unreachable; the
+  milestone-local decision below records it. AC2 is satisfied as written.
 
 ## Decisions
+
+### The `Occasions averaged` legend title is unreachable (2026-08-28, T4)
+
+`autoplot.icc_dstudy()` selects that title only when `identical(id_cols,
+"occasions")`, where `id_cols` is `setdiff(intersect(c("type", "occasions"),
+names(df)), x_col)`. `type` is an unconditional column of every `icc_dstudy`
+object (`R/d-study.R:517`) and is never the x column, so it is always in
+`id_cols`; the branch is dead on every object this version builds. None of
+AC2's eight cells reached it at T4.
+
+AC2 anticipates the case ("where it is not, the criterion asserts only the
+absence"), so the criterion holds and T4 asserts the absence on all eight
+cells. T3 corrected the branch's wording regardless, so it is right if it ever
+becomes reachable. Removing it would be a code change with no user-facing
+effect, outside this milestone's user-facing surface tier.
 
 ## Review

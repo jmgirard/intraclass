@@ -407,3 +407,123 @@ test_that("ggplot2 stays a Suggests dependency (light-install, ADR-010)", {
   imports <- if ("Imports" %in% colnames(desc)) desc[, "Imports"] else ""
   expect_false(grepl("ggplot2", imports))
 })
+
+# --- M146: the legend names the averaging divisor, not the design count -------
+# `occasions` is the number of ratings averaged into a curve's coefficient;
+# `n_o` is the observed per-cell count of the fitted design (D-044). The legend
+# used to spell the former with the latter's symbol. AC2's cell set is the
+# crossing of the fit's `type` set, its `occasions` set, and the two projection
+# axes -- eight plots, all drawn from a replicated fit.
+#
+# No enumerated cell reaches the `identical(id_cols, "occasions")` branch of
+# `autoplot.icc_dstudy()`: `type` is an unconditional column of every
+# `icc_dstudy` (`R/d-study.R`), so `occasions` is never the only curve-identity
+# column and the "Occasions averaged" title is unreachable. AC2 asserts only
+# the absence in that case, which is what the loop below does -- plus the
+# positive key form wherever a legend carries the occasion setting at all.
+
+m146_replicate_fixture <- function() {
+  set.seed(42)
+  ns <- 20
+  k <- 4
+  reps <- 3
+  d <- expand.grid(subject = seq_len(ns), rater = seq_len(k), r = seq_len(reps))
+  d$subject <- factor(d$subject)
+  d$rater <- factor(d$rater)
+  sv <- stats::rnorm(ns, 0, 1.2)
+  rv <- stats::rnorm(k, 0, 0.8)
+  d$score <- 10 + sv[d$subject] + rv[d$rater] + stats::rnorm(nrow(d), 0, 0.6)
+  d
+}
+
+# The legend as a reader sees it: its title (absent where `icc_theme()`'s
+# suppression stands) and the key text, which is the `curve` factor's levels.
+legend_text <- function(p) {
+  built <- ggplot2::ggplot_build(p)
+  keys <- if ("curve" %in% names(built$plot$data)) {
+    levels(built$plot$data$curve)
+  } else {
+    character()
+  }
+  list(
+    title = unique(c(p$labels$colour, p$labels$fill)),
+    keys = keys
+  )
+}
+
+test_that("no D-study legend spells the averaging divisor as n_o", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("ggplot2")
+
+  d <- m146_replicate_fixture()
+  cells <- expand.grid(
+    n_type = 1:2,
+    n_occ = 1:2,
+    axis = c("m", "n_o"),
+    stringsAsFactors = FALSE
+  )
+  # Anti-vacuity: an empty or short cell set would satisfy every assertion in
+  # the loop for free.
+  expect_identical(nrow(cells), 8L)
+
+  saw_occasion_key <- FALSE
+  for (i in seq_len(nrow(cells))) {
+    cell <- cells[i, ]
+    ty <- if (cell$n_type == 2L) {
+      c("agreement", "consistency")
+    } else {
+      "consistency"
+    }
+    oc <- if (cell$n_occ == 2L) c("single", "average") else "average"
+    fit <- icc(
+      d,
+      score,
+      subject,
+      rater,
+      occasions = oc,
+      type = ty,
+      seed = 1
+    )
+    ds <- if (cell$axis == "m") {
+      d_study(fit, m = 1:3, seed = 1)
+    } else {
+      d_study(fit, n_o = 1:3, seed = 1)
+    }
+    # The fixture is replicated, so every projection carries the column the
+    # legend is about.
+    expect_true("occasions" %in% names(ds))
+
+    p <- ggplot2::autoplot(ds)
+    leg <- legend_text(p)
+
+    # AC2's floor, asserted on every cell: neither the title nor any key text
+    # names the design count's symbol.
+    expect_false(any(grepl("n_o", leg$title, fixed = TRUE)))
+    expect_false(any(grepl("n_o", leg$keys, fixed = TRUE)))
+
+    if (cell$axis == "m") {
+      # On the rater axis `occasions` is a curve-identity column, so every key
+      # carries the occasion setting -- in the corrected spelling.
+      expect_true(all(grepl("occasions: ", leg$keys, fixed = TRUE)))
+      expect_true(all(grepl(
+        "occasions: [0-9]",
+        leg$keys
+      )))
+      saw_occasion_key <- TRUE
+    }
+
+    # The x-axis label is deliberately untouched: on the occasion axis the
+    # swept quantity IS the design's `n_o`.
+    expect_identical(
+      p$labels$x,
+      if (cell$axis == "m") {
+        "Number of raters (m)"
+      } else {
+        "Number of occasions (n_o)"
+      }
+    )
+  }
+
+  # The positive leg above must have run on a non-empty key set.
+  expect_true(saw_occasion_key)
+})
