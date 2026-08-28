@@ -266,6 +266,11 @@ Repair tasks (the 2026-08-28 defect return; see the Review section's findings):
   by an unenumerated family, the shape `LESSONS.md:47` already names. The plan
   gate recorded no alternative to that approach, so the escalation offer is the
   remaining remedy; disposition put to the maintainer.
+- 2026-08-28: maintainer chose the criterion rewrite over the offered
+  escalation: amend AC1's wording through the gated protocol and derive its
+  replacement sentence by measuring what `occasions` reads across every design
+  class, pinned by a test over that grid, rather than describing families from
+  recall (`LESSONS.md:47`; M141's `n_o` grid is the precedent instrument).
 
 ## Decisions
 
