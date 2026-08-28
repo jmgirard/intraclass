@@ -1809,3 +1809,40 @@ and a per-abort inventory is the reference manual's job.
 **Consequences.** A reader chasing D-019's documentation claim is pointed at
 the three live surfaces. No package behaviour changes, and no doc surface is
 edited by this entry.
+
+### D-044 (2026-08-28): the `occasions` / `n_o` naming pair ships unchanged — the gap is documentary, and the plotted labels carry the one real defect (RB05/RR05)
+
+**Context.** `tidy()$occasions` holds the averaging divisor (1 or the fitted
+per-cell count, `R/icc-methods.R:378-379`) while `glance()$n_o` holds the
+observed design count (`R/icc-methods.R:441`) — different quantities under
+near-identical names, with neither column's docs saying which it holds. GP2
+makes a column rename free before the CRAN submission and a deprecation-cycle
+item afterwards, so the naming question had to be settled now or accept the
+later cost. RB04 had already reasoned about the overload once, keeping `n_o`
+with "the docs carrying the load"; because that made this the second review of
+the same mechanism, RB05 put removal of the `tidy()` column on the table too.
+
+**Decision.** No rename and no removal. `tidy()$occasions`, `glance()$n_o`, and
+both the `icc(occasions=)` and `d_study(n_o=)` argument names ship at v0.1.0 as
+they stand. Three fixes are documentary or label-level rather than contract
+changes: the `tidy()$occasions` roxygen states the quantity it holds and
+contrasts it with `glance()$n_o`; the `autoplot()` legend stops labelling the
+divisor with the design-count symbol (`R/autoplot.R:58,69-70`); and the
+vignette prose at `d-studies-and-replicates.Rmd:177,179` stops mimicking a call
+syntax `validate_occasions()` rejects.
+
+**Consequences.** The ROADMAP row's own "doc gap, not a computation error"
+diagnosis stands, now twice reviewed, and its "never on the naming alone"
+promotion condition is affirmed rather than overridden — D-042's one-way-door
+override does not transfer, because the fixes this yields are not the kind the
+door makes expensive. Nothing in D-038 or D-041 is superseded or edited. Three
+findings against the record itself: `glance()$n_o` is NOT parallel to
+`glance.icc_dstudy()$n_m`, which counts swept grid points (`R/d-study.R:742`) —
+the premise is withdrawn and must not be relied on in a future naming argument;
+the design count has two public names, `print.icc`'s "replicates" and
+`glance()`'s `n_o`, an equivalence a glossary entry should state; and
+`icc_estimand()`'s numeric `occasions` (`R/estimand.R:56`) is internal latitude
+`icc()` itself refuses, not public. Removal was rejected on a ground the brief
+had missed: `occasions` is the sole disambiguator between same-`term` rows when
+a fit carries both occasion settings, since the averaged coefficient has no
+literature label (`R/estimand.R:138`).
