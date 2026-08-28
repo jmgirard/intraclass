@@ -132,3 +132,15 @@ User-facing tier, so the full fan-out ran. All findings reported below, ranked a
 - [O] 8. The two added bullets read "See `?icc` and *Article*" where the section's other bullets read "See *Article* and `?icc*`". Cosmetic ordering.
 
 **Verified clean by [O]:** the `DESCRIPTION:13-14` quote is verbatim; both cited article titles match `vignettes/multilevel-designs.Rmd:2` and `vignettes/d-studies-and-replicates.Rmd:2`; the awk and prose-profile rulers reproduce; `check-mpl-doc-claims.py` passes; the "unequal ratings per subject / missing ratings" gloss and the component names match `R/icc.R:135-152` and `:196-207` for the designs where they apply.
+
+### Triage and dispositions (merge gate, 2026-08-28)
+
+Maintainer's decision at the gate: fix the overclaims, then merge.
+
+- [O] 1, 2, 3, 5 — **fixed at the gate.** Both added bullets were rewritten to carry their conditions. The design bullet now reads "A `cluster` column on a two-way design switches on the multilevel ICC, adding a cluster level when the same raters span every cluster", which is the condition `vignettes/multilevel-designs.Rmd:120-123` states and excludes Designs 2 and 3, and names the two-way restriction `R/icc.R:215-216` sets. The replicate bullet now reads "On a two-way random design `icc()` splits …" and "`occasions` reports the reliability of one rating or, on balanced replicates, of the mean", which excludes the one-way, Design 3, fixed-rater and ragged cases `R/icc.R:1400-1442` and `:1917-1921` abort.
+- [O] 4 — **fixed at the gate**, folded into the same rewrite: both bullets now end with the `d_study()` bullet's house pointer, "where it refuses" / "where they refuse", so neither claims edgeless support.
+- [O] 8 — **fixed at the gate**, folded in: both bullets now read "See *Article* and `?icc`", the section's existing order.
+- [O] 6 / [S] 1 — **fixed at the gate.** The T2 work-log line read "437 and 393"; no measurement of the committed text yields 393. Corrected to 437 and 327, with the merge-gate figures (481 and 413) recorded beside it.
+- [O] 7 — **no change needed.** Mid-review state: AC fencing ticks each box as its evidence line lands, and the lens read the tree before AC3/AC4 evidence existed. All four are ticked above against recorded evidence.
+
+**Re-measurement after the gate fix (the M142 lesson, T3's standing instruction).** `m142-bullet-lines.awk`: the two bullets move to 481 and 413 bytes, exactly one bullet still over 500 and it is the same 797-byte `news_scope()` anchor. `prose-profile.py NEWS.md`: `sent 53, >35 = 1, dash 0, max 74`, unchanged. AC1's `DESCRIPTION:13-14` phrase still present verbatim under whitespace normalization. `check-mpl-doc-claims.py` OK (60 candidates, 0 failures); `check-record-claims.py` OK (7 claims, 0 failures); `cairn_validate.py` all checks pass. Re-installed from the corrected tree and re-ran `test-doc-skew-caveat.R`: FAIL 0, the same two pre-existing vignette-leg skips. The gate fix is `NEWS.md` prose only and touched no pinned region; the pre-fix `--as-cran` run stands for AC4's structural legs, and GitHub CI re-runs `R CMD check` on the corrected head across all three platforms before the merge.
