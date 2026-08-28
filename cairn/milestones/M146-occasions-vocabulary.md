@@ -1,6 +1,6 @@
 # M146: The occasion vocabulary says which quantity each surface reports
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -98,7 +98,7 @@ removing either column → refused, D-044.
       that file already does for source-tree paths (M129).
 - [x] T6. Add the two `vignettes/glossary.Rmd` entries.
 - [x] T7. Wording pass on `R/d-study.R:73-86`. Document.
-- [ ] T8. Run every `data-raw/` checker with `--self-test` before pushing — a
+- [x] T8. Run every `data-raw/` checker with `--self-test` before pushing — a
       roxygen edit inside the `ci_method` doc scope re-keys the MPL
       doc-claims ledger (M130) — then the gate: `air format .`,
       `lintr::lint_package()`, `R CMD check` raw Status line.
@@ -157,6 +157,15 @@ removing either column → refused, D-044.
   the observed per-cell count. `d_study()`'s roxygen now calls the held count
   the fitted occasion count; every remaining `n_o` in that block is the swept
   argument. `devtools::test()`: FAIL 0, WARN 3, SKIP 2, PASS 9191.
+- 2026-08-28: T8 done. All six `data-raw/` checkers self-test OK and pass in
+  check mode, the MPL doc-claims ledger included (60 candidates, 12 settled, 0
+  failures). `air format --check .` clean; `lintr::lint_package()` 0 lints;
+  `R CMD check` raw Status line `Status: OK`. The T2 pin was additionally run
+  against an installed copy (`test_dir(load_package = "installed")`): FAIL 0,
+  PASS 11, SKIP 0, with `Rd_db()` resolving 7 pages -- so the installed branch
+  is exercised, not silently skipped (M116).
+- 2026-08-28: no NEWS entry: `NEWS.md` holds first-release notes for 0.1.0, so
+  there is no released behavior these changes alter.
 
 ## Decisions
 
