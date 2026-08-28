@@ -33,15 +33,27 @@ removing either column → refused, D-044.
 
 ## Acceptance criteria
 
-- [ ] AC1. The roxygen at `R/icc.R:675-680` (rendered `man/icc.Rd:482-485`)
-      states that `tidy.icc()`'s `occasions` reports the number of ratings
-      averaged into that row's coefficient — 1 for a single-rating
-      coefficient, the fitted per-cell replicate count for an occasion-averaged
-      one, `NA` when the design has no within-cell replicates — and states that
-      `glance()`'s `n_o` reports the observed per-cell count instead. The
-      `tidy.icc_dstudy()` column list states what its own `occasions` column
-      reports on a projection, without the `glance()` contrast, which has no
-      referent there (`glance.icc_dstudy()` carries no `n_o`).
+- [ ] AC1. The `tidy.icc()` column list in `R/icc.R`'s roxygen (rendered into
+      `man/icc.Rd`) states that `occasions` reports the per-rater occasion
+      divisor the row's coefficient applies to pure error: on a fit that splits
+      within-cell replicates, 1 wherever the row averages no occasions — every
+      single-occasion row, and every row whose error set carries no pure-error
+      term to average — and the fitted per-cell occasion count where it does
+      average; `NA` on a fit that splits none. It states that this is not in
+      general the number of ratings the coefficient averages, since it counts
+      occasions per rater: an occasion-averaged `ICC(*,k)` row averages `k`
+      raters at that occasion count each. It states that `glance()$n_o` reports
+      the observed per-cell occasion count of the fitted design instead — `NA`
+      under the condition the `glance.icc()` bullet on the same page states,
+      which a ragged replicate fit meets while `occasions` still reads 1. The
+      `tidy.icc_dstudy()` column list states that its own `occasions` is the
+      occasion count the row is projected at, which may be non-integer, and
+      that it divides pure error, so a row whose error set carries no
+      pure-error term does not move with it; it names the value the column
+      takes on each projection axis — on the rater axis every distinct value
+      the fit's own `occasions` column carries, on the occasion axis the swept
+      `n_o` — and what the cluster rows of a multilevel projection take on
+      each. It carries no `glance()` contrast, which has no referent there.
 - [x] AC2. Over the plots `autoplot()` draws from a replicated fit — the cells
       enumerated by crossing the fit's `type` set (one or both definitions),
       its `occasions` set (one or both settings), and the two `icc_dstudy`
@@ -69,7 +81,7 @@ removing either column → refused, D-044.
 
 ## Coverage
 
-- AC1 → T1, T2
+- AC1 → T1, T2, T15, T16, T17
 - AC2 → T3, T4
 - AC3 → T5
 - AC4 → T6
@@ -121,6 +133,29 @@ Repair tasks (the 2026-08-28 defect return; see the Review section's findings):
 - [x] T13. Take the `d-studies-and-replicates.Rmd` dash count back to zero
       (finding 3).
 - [x] T14. Re-run the T8 gate.
+
+Repair tasks (the second 2026-08-28 defect return, and the AC1 amendment):
+
+- [x] T15. Measure what `occasions` reads across every design class and both
+      projection axes, and record the grid in the work log. Every clause of the
+      amended AC1 is derived from it, none from recall.
+- [ ] T16. Rewrite both roxygen column lists to the amended AC1 (`R/icc.R`'s
+      `tidy.icc()` list, `R/d-study.R`'s `tidy.icc_dstudy()` list). Document.
+- [ ] T17. Re-pin the amended sentences in `test-occasions-vocabulary.R` and
+      mutation-verify each pin red; add a GENERATED design-axis grid
+      (`model`, `cluster`, `design`, replicate shape, `occasions` request,
+      projection axis) asserting the documented rule on every row of every
+      case, in the `test-n-o-disposition-grid.R` idiom (case set generated,
+      joined to expectations by axis values, both directions asserted).
+- [ ] T18. Round-2 findings 4, 7 and 8: correct `d_study()`'s occasion-curve
+      bullet (`R/d-study.R:76-79`), whose curve set is the fit's own distinct
+      `occasions` values and whose pure-error divisor is `m` times the curve's
+      setting, and the `R/autoplot.R:50-51` comment finding 4 falsifies.
+      Document.
+- [ ] T19. Round-2 finding 10: the glossary's "wherever the design line carries
+      one" is imprecise — a ragged replicate fit prints `60 cells x NA
+      replicates`, so the slot is always there and it is the count that is not.
+- [ ] T20. Re-run the T8 gate.
 
 ## Work log
 
@@ -271,6 +306,45 @@ Repair tasks (the 2026-08-28 defect return; see the Review section's findings):
   replacement sentence by measuring what `occasions` reads across every design
   class, pinned by a test over that grid, rather than describing families from
   recall (`LESSONS.md:47`; M141's `n_o` grid is the precedent instrument).
+
+- 2026-08-28: T15 done. `occasions` MEASURED across every design class on this
+  branch, both tidy surfaces. `tidy.icc()`: `NA` exactly where
+  `glance()$replicates` is `FALSE` (`R/icc-methods.R:378`), a one-way fit OF
+  replicated data included; 1 on every `occasions = "single"` row, on every row
+  of a ragged replicate fit (where `n_o` is `NA`), and on every cluster row of a
+  multilevel replicate fit at either setting, the placeholder `R/d-study.R:393`
+  calls a no-op; the fitted per-cell count on occasion-averaged subject rows
+  (crossed and nested-in-clusters, random and fixed raters, numeric `unit`).
+  `occasions = "average"` is refused on ragged and on missing-cell data, and
+  every multilevel ragged/incomplete replicate fit is refused, so no averaged
+  row can read `NA`. `tidy.icc_dstudy()`: `NA` outside a replicate projection;
+  on the rater axis every distinct value the fit's own column carries
+  (`proj_occ`, `R/d-study.R:422`), cluster rows the smallest of them; on the
+  occasion axis the swept `n_o` on every row, non-integer sweeps carried
+  verbatim (M138), cluster rows flat across it.
+- 2026-08-28: AC1 amendment gate. Three fresh-context [O] criteria audits ran in
+  FULL mode over successive drafts before any byte was written, each verifying
+  every clause by running R rather than by reading: round 1 returned four
+  findings (the d-study half inheriting a meaning false on occasion-axis cluster
+  rows and on non-integer sweeps; a per-axis claim whose free axes are axis x
+  level; the head clause and the `ICC(*,k)` clause disagreeing on the counted
+  unit; an `n_o` `NA` gloss weaker than D-041's uniform-and-complete condition),
+  round 2 three (the `ICC(*,k)` clause false on cluster rows, the head clause
+  likewise, the rater-axis curve set), round 3 three (a cluster-placeholder
+  appositive false on every subject-level-only multilevel fit; the trichotomy's
+  `wherever` colliding with its own `NA` case; the ratings denial false on every
+  `ICC(*,1)` row, where column and ratings count coincide). All ten repaired
+  before the gate.
+- 2026-08-28: amendment adopted at the mini gate — AC1's wording replaced, the
+  criteria set held (same criterion, same two roxygen surfaces, no criterion
+  added), the promise narrowed from "the number of ratings averaged into that
+  row's coefficient" to the per-rater occasion divisor the code guarantees, and
+  the per-family trichotomy replaced by the invariant. The maintainer's grid pin
+  lands as T17, a task, not a criterion clause: D-118's instrument question
+  keeps a test property out of the promise. The widening alternative (binding
+  grid truth into AC1) was offered non-recommended under D-118's
+  return-adjacent direction rule and not taken; the escalation offer standing
+  from the thrash rule was declined in favour of the audited rewrite.
 
 ## Decisions
 
