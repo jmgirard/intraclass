@@ -109,7 +109,7 @@ Repair tasks (the 2026-08-28 defect return; see the Review section's findings):
       projection it covers (finding 2), and state `n_o`'s own `NA` case in the
       `tidy.icc()` contrast (finding 6, roxygen half). Re-pin both in
       `test-occasions-vocabulary.R` and mutation-verify. Document.
-- [ ] T10. Repair the pin's surface selection so a source-tree run cannot
+- [x] T10. Repair the pin's surface selection so a source-tree run cannot
       validate a stale installed copy (finding 5), and correct the
       `R/autoplot.R` curve-identity comment, which is false of the occasion
       axis (finding 7).
@@ -202,6 +202,14 @@ Repair tasks (the 2026-08-28 defect return; see the Review section's findings):
   FAIL 1, the contrast copied onto `d_study.Rd` at FAIL 2, the `n_o` `NA`
   clause dropped in `man/icc.Rd` alone at FAIL 1), two rewrap controls green.
   `devtools::test()`: FAIL 0, WARN 3, SKIP 2, PASS 9196.
+- 2026-08-28: T10 done. `man_pages()` now collects every surface that is
+  present, the source `man/*.Rd` and `tools::Rd_db()` both, and asserts each
+  claim on all of them, so a source-tree run reads the branch's own page rather
+  than whatever copy `find.package()` resolves; that half landed with T9's
+  commit and its discrimination is the `man/icc.Rd`-only plant recorded there.
+  `R/autoplot.R`'s curve-identity comment now says the `occasions` column is
+  the averaging divisor on the rater axis and the swept `n_o` on the occasion
+  axis, instead of denying the second. `test-autoplot.R`: FAIL 0, PASS 79.
 
 ## Decisions
 
