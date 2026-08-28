@@ -667,3 +667,86 @@ test_that("summary() explains Design 3's nesting instead of a rater main effect"
     "cannot be separated and are absorbed into the residual"
   )
 })
+
+test_that("no renderer of the public surface calls Design 3's raters random or fixed", {
+  skip_if_not_installed("glmmTMB")
+  # D-035 clause 2 makes the icc object's public surface what tidy(), glance(),
+  # print(), format() and summary() return, plus $fit and $call -- the engine's
+  # own object and the user's literal call, excluded here by name because
+  # neither is this package's prose. A Design 3 fit estimates no rater main
+  # effect, so no renderer of that surface may hand a user a rater treatment for
+  # it (D-042). This sweeps all five at once: the per-renderer tests above say
+  # WHERE the word must not appear, this one says it appears nowhere.
+  x <- icc(design3_frame(), score, subject, rater, cluster = cluster, seed = 1)
+  # No word boundaries: an over-eager pattern is the safe direction for a
+  # must-not-appear check, and `\\b` is not portable across R's regex engines.
+  treatment <- "random|fixed"
+
+  # Tables: any character cell holding a treatment word, whatever the column.
+  cells <- function(tbl) {
+    chr <- Filter(is.character, as.list(tbl))
+    unlist(chr, use.names = FALSE)
+  }
+  table_hits <- vapply(
+    list(tidy = tidy(x), glance = glance(x)),
+    function(tbl) {
+      v <- cells(tbl)
+      # Anti-vacuity: a table with no character column would pass for free.
+      expect_gt(length(v), 0L)
+      sum(grepl(treatment, v))
+    },
+    integer(1)
+  )
+
+  # Rendered text: print() and summary() emit through cli, so they are captured
+  # with cli_fmt(); format() returns its lines directly (M129).
+  text_hits <- vapply(
+    list(
+      print = cli::cli_fmt(print(x)),
+      format = format(x),
+      summary = cli::cli_fmt(summary(x))
+    ),
+    function(lines) {
+      expect_gt(length(lines), 0L)
+      sum(grepl(treatment, lines))
+    },
+    integer(1)
+  )
+
+  expect_identical(
+    c(table_hits, text_hits),
+    c(tidy = 0L, glance = 0L, print = 0L, format = 0L, summary = 0L)
+  )
+
+  # The sweep can red: the same five renderers over a crossed random-rater fit,
+  # whose treatment IS defined. Four hit the word; `tidy()` never carries a rater
+  # treatment at all -- the treatment lives on `glance()` and D-038 refuses
+  # `tidy()`'s per-row `type` a `glance()` sibling -- so a `tidy()` cell is not
+  # what this sweep can red on, and saying so keeps the control honest.
+  crossed <- icc(ratings, score, subject, rater, seed = 1)
+  expect_identical(
+    c(
+      vapply(
+        list(tidy = tidy(crossed), glance = glance(crossed)),
+        function(tbl) any(grepl(treatment, cells(tbl))),
+        logical(1)
+      ),
+      vapply(
+        list(
+          print = cli::cli_fmt(print(crossed)),
+          format = format(crossed),
+          summary = cli::cli_fmt(summary(crossed))
+        ),
+        function(lines) any(grepl(treatment, lines)),
+        logical(1)
+      )
+    ),
+    c(
+      tidy = FALSE,
+      glance = TRUE,
+      print = TRUE,
+      format = TRUE,
+      summary = TRUE
+    )
+  )
+})

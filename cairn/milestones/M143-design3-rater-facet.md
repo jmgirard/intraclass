@@ -88,7 +88,7 @@ capability gap → M144.
 - [x] T5. Failing test, then edit, for the `summary()` interpretation sentence
       (`R/icc-methods.R:315-319`), with the crossed-agreement control.
 - [x] T6. `R/icc.R:683`; `devtools::document()`.
-- [ ] T7. The five-renderer sweep test.
+- [x] T7. The five-renderer sweep test.
 - [ ] T8. Gate: full suite, `--as-cran`, the six `data-raw/` checkers,
       `cairn_validate`.
 
@@ -96,6 +96,7 @@ capability gap → M144.
 
 - 2026-08-27: created by /milestone-plan.
 - 2026-08-27: implement gate chose the one-way-parallel nesting sentence for `summary()` and one shared internal predicate over per-site conditions, the duplication having been why D-038's one-way rule reached `glance.icc()` and not `icc_raters`.
+- 2026-08-27: T7 — the five-renderer sweep. Its first pattern, `\\b(random|fixed)\\b`, matched nothing under either regex engine, so the Design 3 side passed vacuously; the discriminating control caught it, and the pattern is now the plain alternation. The control asserts the measured set rather than all five: `glance()`, `print()`, `format()` and `summary()` carry the word on a crossed random fit, `tidy()` carries no rater treatment at all. Planting `design_has_rater_facet() == TRUE` reds 8 assertions in the file, the sweep among them. Full suite FAIL 0 / WARN 3 / SKIP 2 / PASS 9107.
 - 2026-08-27: T6 — the `glance()$raters` sentence in `R/icc.R` now names both conditions, `model = "oneway"` and `design = "nested_in_subjects"`, in the user-facing argument spellings. The roxygen edit itself rode into T5's commit; this one carries the regenerated `man/icc.Rd`, whose only diff is that paragraph.
 - 2026-08-27: T5 — failing test then edit for `summary()`. Red on the Design 3 column alone (agreement note present, nesting note absent); the crossed-agreement control was already correct before the edit. `summary.icc()` gains a third top-level branch, keyed on the shared predicate, returning the nesting note in the shape the one-way note uses. Full suite FAIL 0 / WARN 3 / SKIP 2 / PASS 9100.
 - 2026-08-27: T4 — failing test then edit for the multilevel header. Red on the treatment word alone (`"random" "random" "random"` against `"random" "random" NA`), the rater-count and Design 1/2 control assertions green before the edit; `format.icc()`'s multilevel branch now builds the rater segment through the shared predicate. No snapshot or vignette transcript pins a Design 3 header. Full suite FAIL 0 / WARN 3 / SKIP 2 / PASS 9098.
