@@ -2,12 +2,12 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M145: The v0.1.0 release-round documentation remainder
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP1, GP8
-- **Branch/PR:** —
+- **Branch/PR:** `m145-release-round-doc-remainder`
 
 ## Goal
 
@@ -94,7 +94,7 @@ is internal, so the milestone is classified by the wider of the two.
 
 ## Tasks
 
-- [ ] T1 Derive the grid facts before writing them (GP8): count
+- [x] T1 Derive the grid facts before writing them (GP8): count
       `grid == "m76"` and `grid == "m113"` rows in
       `tests/testthat/fixtures/classical-width-by-cell.tsv`, and read the
       residual-draw description from `width-reversal-by-cell.tsv`'s header
@@ -131,6 +131,7 @@ is internal, so the milestone is classified by the wider of the two.
 - 2026-08-28: plan gate chose stating the two grid cell counts in NEWS over an unpinned qualitative phrasing, because the existing `grid_size` walk pattern derives both from the committed fixture, so the counts are procedural rather than hand-pinned (GP8); falsified by the walk turning out not to cover `NEWS.md` and not being cheaply extendable, in which case the qualitative phrasing is the fallback.
 - 2026-08-28: plan gate included the `tests/spelling.R` flip despite its D-021-adjacent framing in the candidate row, because the row's own promotion condition ("or on the next release round") is met by the window the maintainer declared today, and D-029 puts shipped user-facing prose outside D-021's subject; falsified by the flip reddening CI on prose no user reads.
 - 2026-08-28: measured on `main` before planning — `spelling::spell_check_package(".")` reports no spelling errors; `awk -f data-raw/m142-bullet-lines.awk NEWS.md` reports 17 bullets, one over 500 bytes (797, the mpl anchor); `R CMD check` on a `--no-build-vignettes` tarball reports 2 WARNINGs, both artifacts of that build flag (`inst/doc` absent), so a vignette-building check is expected clean.
+- 2026-08-28: T1 — `awk -F'\t' 'NR>1{c[$1]++} END{for (g in c) print g, c[g]}' tests/testthat/fixtures/classical-width-by-cell.tsv` gives m76 = 16 rows, m113 = 64 rows. `width-reversal-by-cell.tsv`'s header says both the subject effect A_i and the residual e_ij are drawn from `dist`, located and scaled per burch2011 sec 3 — the third grid's residual-draw description.
 
 ## Decisions
 
