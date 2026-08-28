@@ -118,7 +118,7 @@ Repair tasks (the 2026-08-28 defect return; see the Review section's findings):
 - [x] T12. Qualify the glossary's *Occasion* entry, whose `print()` claim is
       false on a multilevel replicate fit (finding 1), and add `n_o`'s `NA`
       case to the `occasions` vs. `n_o` entry (finding 6, glossary half).
-- [ ] T13. Take the `d-studies-and-replicates.Rmd` dash count back to zero
+- [x] T13. Take the `d-studies-and-replicates.Rmd` dash count back to zero
       (finding 3).
 - [ ] T14. Re-run the T8 gate.
 
@@ -228,6 +228,12 @@ Repair tasks (the 2026-08-28 defect return; see the Review section's findings):
   entry gains `n_o`'s `NA` case and the ragged fit that separates the columns.
   `prose-profile.py vignettes/glossary.Rmd` unchanged against `origin/main`
   (over-35 1, dash 0).
+- 2026-08-28: T13 done. The two rewritten `d-studies-and-replicates.Rmd`
+  paragraphs carry their appositives as commas rather than dashes, so
+  `prose-profile.py` on that file reports dash 0, back to the `origin/main`
+  figure the T5 rewrite had taken to 4. Meaning unchanged: the paragraphs still
+  name the `occasions` column and no call. `test-vignette-claims.R` under
+  `NOT_CRAN=true`: FAIL 0, PASS 422.
 
 ## Decisions
 
