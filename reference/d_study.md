@@ -114,10 +114,12 @@ The methods documented on this page return:
 - `glance.icc_dstudy()`: a one-row tibble of projection-level summaries.
   It carries the distinct projected rater counts `m` and their range,
   the error definition(s), the rater treatment (`NA` on a projection of
-  a one-way fit, whose interchangeable raters carry no facet), the
-  observed rater count, and the interval settings. The count and range
-  are held at the observed rater count when the sweep is over occasions,
-  so they are not a row count.
+  a fit that estimates no separable rater main effect: a
+  `model = "oneway"` fit, whose raters are interchangeable and carry no
+  facet, and a `design = "nested_in_subjects"` fit, whose rater effect
+  is confounded into the residual), the observed rater count, and the
+  interval settings. The count and range are held at the observed rater
+  count when the sweep is over occasions, so they are not a row count.
 
 - `format.icc_dstudy()`: a character vector holding the printed
   projection table, one line per element.

@@ -566,21 +566,23 @@ The methods documented on this page return:
 
 - `glance.icc()`: a one-row tibble of model-level summaries: the sample
   sizes, the design flags – among them the rater treatment `raters`
-  (`NA` on a one-way fit, whose raters are interchangeable and carry no
-  facet) and `replicates`, whether the fitted design splits within-cell
-  replicates – `FALSE` on a one-way fit, which has no rater facet and so
-  no cells to split – the effective rater counts, the variance
-  components, the occasion count `n_o` (`NA` unless the fitted design
-  splits within-cell replicates *and* defines one occasion count per
-  cell – the same number of ratings in every cell, and every cell the
-  design defines present, which is the full subject-by-rater grid when
-  crossed and the block-diagonal one when raters are nested in clusters;
-  on a design failing either condition, `n_o` is reported as `NA` or the
-  fit refused with an error, depending on the design), the engine and
-  interval settings, and the sampler diagnostics `rhat` and `ess_bulk`
-  (`NA` for the non-Bayesian engines, which do not sample). Every column
-  is present on every fit, so two glanced fits row-bind just as two
-  tidied ones do.
+  (`NA` where the design estimates no separable rater main effect: a
+  `model = "oneway"` fit, whose raters are interchangeable and carry no
+  facet, and a `design = "nested_in_subjects"` fit, whose rater effect
+  is confounded into the residual) and `replicates`, whether the fitted
+  design splits within-cell replicates – `FALSE` on a one-way fit, which
+  has no rater facet and so no cells to split – the effective rater
+  counts, the variance components, the occasion count `n_o` (`NA` unless
+  the fitted design splits within-cell replicates *and* defines one
+  occasion count per cell – the same number of ratings in every cell,
+  and every cell the design defines present, which is the full
+  subject-by-rater grid when crossed and the block-diagonal one when
+  raters are nested in clusters; on a design failing either condition,
+  `n_o` is reported as `NA` or the fit refused with an error, depending
+  on the design), the engine and interval settings, and the sampler
+  diagnostics `rhat` and `ess_bulk` (`NA` for the non-Bayesian engines,
+  which do not sample). Every column is present on every fit, so two
+  glanced fits row-bind just as two tidied ones do.
 
 - `format.icc()`: a character vector holding the printed report, one
   line per element.

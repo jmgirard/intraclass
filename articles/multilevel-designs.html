@@ -259,7 +259,7 @@ raters, the design is a multilevel one-way (Design 3):</p>
 <span><span class="va">school_d3</span><span class="op">$</span><span class="va">rater</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">school_d3</span><span class="op">$</span><span class="va">pupil</span>, <span class="va">school_d3</span><span class="op">$</span><span class="va">rater</span>, sep <span class="op">=</span> <span class="st">"_"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">school_d3</span>, <span class="va">score</span>, subject <span class="op">=</span> <span class="va">pupil</span>, rater <span class="op">=</span> <span class="va">rater</span>, cluster <span class="op">=</span> <span class="va">classroom</span>, type <span class="op">=</span> <span class="st">"agreement"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Intraclass correlation: multilevel (raters nested in subjects) absolute agree</span></span></span>
-<span><span class="co">#&gt; <span style="font-weight: 100;">Subjects: 80 in 16 clusters | Raters: 320 (random) | Observations: 320 (complete)</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Subjects: 80 in 16 clusters | Raters: 320 | Observations: 320 (complete)</span></span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">  level      index     estimate   95% CI</span></span></span>
@@ -311,7 +311,7 @@ from one, the same table is Design 3:</p>
 <span>  type <span class="op">=</span> <span class="st">"agreement"</span>, design <span class="op">=</span> <span class="st">"nested_in_subjects"</span>, seed <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Intraclass correlation: multilevel (raters nested in subjects) absolute agree</span></span></span>
-<span><span class="co">#&gt; <span style="font-weight: 100;">Subjects: 80 in 16 clusters | Raters: 4 (random) | Observations: 320 (complete)</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Subjects: 80 in 16 clusters | Raters: 4 | Observations: 320 (complete)</span></span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">  level      index     estimate   95% CI</span></span></span>

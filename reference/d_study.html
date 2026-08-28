@@ -169,9 +169,11 @@ on every projection; <code>occasions</code> is <code>NA</code> outside a replica
 error definition.</p></li>
 <li><p><code>glance.icc_dstudy()</code>: a one-row tibble of projection-level summaries. It
 carries the distinct projected rater counts <code>m</code> and their range, the
-error definition(s), the rater treatment (<code>NA</code> on a projection of a
-one-way fit, whose interchangeable raters carry no facet), the
-observed rater count, and
+error definition(s), the rater treatment (<code>NA</code> on a projection of a fit
+that estimates no separable rater main effect: a <code>model = "oneway"</code> fit,
+whose raters are interchangeable and carry no facet, and a
+<code>design = "nested_in_subjects"</code> fit, whose rater effect is confounded
+into the residual), the observed rater count, and
 the interval settings. The count and range are held at the observed rater
 count when the sweep is over occasions, so they are not a row count.</p></li>
 <li><p><code>format.icc_dstudy()</code>: a character vector holding the printed projection

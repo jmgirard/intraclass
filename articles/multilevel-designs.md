@@ -198,7 +198,7 @@ school_d3 <- school
 school_d3$rater <- factor(paste(school_d3$pupil, school_d3$rater, sep = "_"))
 icc(school_d3, score, subject = pupil, rater = rater, cluster = classroom, type = "agreement", seed = 1)
 #> ── Intraclass correlation: multilevel (raters nested in subjects) absolute agree
-#> Subjects: 80 in 16 clusters | Raters: 320 (random) | Observations: 320 (complete)
+#> Subjects: 80 in 16 clusters | Raters: 320 | Observations: 320 (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   level      index     estimate   95% CI
@@ -256,7 +256,7 @@ icc(school, score,
   type = "agreement", design = "nested_in_subjects", seed = 1
 )
 #> ── Intraclass correlation: multilevel (raters nested in subjects) absolute agree
-#> Subjects: 80 in 16 clusters | Raters: 4 (random) | Observations: 320 (complete)
+#> Subjects: 80 in 16 clusters | Raters: 4 | Observations: 320 (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   level      index     estimate   95% CI
