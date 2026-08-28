@@ -1,11 +1,11 @@
 # M146: The occasion vocabulary says which quantity each surface reports
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP2
-- **Branch/PR:** `m146-occasions-vocabulary`
+- **Branch/PR:** `m146-occasions-vocabulary` / https://github.com/jmgirard/intraclass/pull/157
 
 ## Goal
 
@@ -42,7 +42,7 @@ removing either column → refused, D-044.
       `tidy.icc_dstudy()` column list states what its own `occasions` column
       reports on a projection, without the `glance()` contrast, which has no
       referent there (`glance.icc_dstudy()` carries no `n_o`).
-- [ ] AC2. Over the plots `autoplot()` draws from a replicated fit — the cells
+- [x] AC2. Over the plots `autoplot()` draws from a replicated fit — the cells
       enumerated by crossing the fit's `type` set (one or both definitions),
       its `occasions` set (one or both settings), and the two `icc_dstudy`
       projection axes — no legend title and no legend key text contains the
@@ -51,20 +51,20 @@ removing either column → refused, D-044.
       `occasions: <value>`; where it is not, the criterion asserts only the
       absence above. The occasion-axis x-axis label (`R/autoplot.R:30`) is
       unchanged.
-- [ ] AC3. No prose in `vignettes/`, `README.Rmd`, `NEWS.md` or the roxygen
+- [x] AC3. No prose in `vignettes/`, `README.Rmd`, `NEWS.md` or the roxygen
       under `R/` writes the `occasions` argument with a numeric value, in any
       spacing or quoting, measured over whitespace-collapsed text by a test
       that sweeps those paths. The paragraphs describing the single-occasion
       and occasion-averaged rows in `vignettes/d-studies-and-replicates.Rmd`
       name the `occasions` column rather than a call.
-- [ ] AC4. `vignettes/glossary.Rmd` carries an entry for occasion / within-cell
+- [x] AC4. `vignettes/glossary.Rmd` carries an entry for occasion / within-cell
       replicate stating that the per-cell count `print()` reports on the design
       line as `N cells x N replicates` is the same quantity as `glance()$n_o`,
       and an entry stating that `tidy()$occasions` counts ratings averaged into
       a coefficient while `glance()$n_o` counts occasions observed per cell.
-- [ ] AC5. The `d_study()` roxygen at `R/d-study.R:73-86` calls the held count
+- [x] AC5. The `d_study()` roxygen at `R/d-study.R:73-86` calls the held count
       "the fitted occasion count" and uses `n_o` only for the swept argument.
-- [ ] AC6. `R CMD check`'s raw Status line reports no ERROR, WARNING or NOTE;
+- [x] AC6. `R CMD check`'s raw Status line reports no ERROR, WARNING or NOTE;
       `air format --check .` clean; `lintr::lint_package()` clean.
 
 ## Coverage
@@ -167,6 +167,8 @@ removing either column → refused, D-044.
 - 2026-08-28: no NEWS entry: `NEWS.md` holds first-release notes for 0.1.0, so
   there is no released behavior these changes alter.
 
+- 2026-08-28: review returned M146 to in-progress. AC1 fails: the sentence T1 added to `tidy.icc_dstudy()` -- "`occasions` reports the number of ratings averaged into that row's coefficient" -- is false on the cluster rows of a multilevel replicate occasion-axis projection, which read `occasions` 1..4 at one unchanged estimate. AC2-AC6 verified with fresh evidence; six further findings triaged fix-now, seven rejected, in the Review section. Defect returns: 1. PR #157 open as a draft.
+
 ## Decisions
 
 ### The `Occasions averaged` legend title is unreachable (2026-08-28, T4)
@@ -185,3 +187,132 @@ becomes reachable. Removing it would be a code change with no user-facing
 effect, outside this milestone's user-facing surface tier.
 
 ## Review
+
+Reviewed 2026-08-28 on `m146-occasions-vocabulary` at PR #157, branch level with
+`origin/main` (no merge needed). Diff: 12 files, +447/-46.
+
+### Acceptance-criterion evidence
+
+- **AC1 — FAILED.** The `tidy.icc()` half holds: `man/icc.Rd` states the
+  ratings-averaged meaning with all three clauses and the `glance()$n_o`
+  contrast, and `test-occasions-vocabulary.R` pins both pages green (2 tests,
+  13 passes, 0 fail, 0 skip). The `tidy.icc_dstudy()` half does not: the
+  sentence it adds ("`occasions` reports the number of ratings averaged into
+  that row's coefficient", `R/d-study.R:137-138`) is false on the cluster rows
+  of a multilevel replicate occasion-axis projection. Measured on an 8-cluster
+  x 4-subject x 3-rater x 3-replicate fit: `tidy(d_study(fit, n_o = 1:4))`
+  cluster rows read `occasions` 1, 2, 3, 4 with an identical estimate
+  (0.9468553 at every setting) -- nothing is averaged, so the column is not
+  counting ratings averaged into that row's coefficient. See finding 2.
+- **AC2 — verified.** `test-autoplot.R` green (20 tests, 79 passes, 0 fail, 0
+  skip), including the added `no D-study legend spells the averaging divisor as
+  n_o`, which walks the eight enumerated cells asserting the `n_o` absence on
+  every one, the `occasions: <count>` key form on the four rater-axis cells,
+  and both x-axis labels unchanged.
+- **AC3 — verified.** `test-vignette-claims.R` green under `NOT_CRAN=true`; the
+  two added tests report 0 fail / 5 passes and 0 fail / 9 passes, the second
+  asserting the pattern against five caught spellings and four passed ones. The
+  two `d-studies-and-replicates.Rmd` paragraphs name the `occasions` column
+  (reads 1 / `occasions` 3 here) rather than a call.
+- **AC4 — verified.** `vignettes/glossary.Rmd` carries *Occasion (within-cell
+  replicate)*, naming the printed design line `N cells x N replicates` and
+  `glance()$n_o` as one quantity, and *`occasions` vs. `n_o`*, separating the
+  averaging divisor from the observed per-cell count. The criterion as written
+  is met; the first entry's claim is false on one design class -- finding 1.
+- **AC5 — verified.** `R/d-study.R:73` and `:86` call the held count "the
+  fitted occasion count"; all four `n_o` occurrences in lines 73-86 name the
+  swept argument (`the swept occasion count n_o`, `the n_o argument`,
+  `m * n_o`, `the swept n_o`).
+- **AC6 — verified.** `R CMD check` raw Status line `Status: OK` (no ERROR,
+  WARNING or NOTE); `air format --check .` exit 0; `lintr::lint_package()` 0
+  lints.
+
+### Consistency gate
+
+`cairn_validate.py` exit 0, all checks passed, 48 advisory `work-log format`
+warnings (wrapped continuation lines, the repo's standing convention).
+`cairn_impact.py` not run -- `DESIGN.md` carries no principle change in this
+diff. Toolchain slot: `devtools::document()` leaves no diff; `NAMESPACE`,
+`man/` and `data/` regenerate clean; `pkgdown::check_pkgdown()` reports no
+problems; README.Rmd/README.md untouched by the branch; no new top-level
+files. No NEWS entry, justified in the work log: `NEWS.md` holds first-release
+0.1.0 notes and no released behavior changes here.
+
+### Findings and disposition
+
+Three fresh-context lenses ran in parallel (diff-bug [O]; blame-history [S];
+prior-review [S]). Ranked, most severe first.
+
+1. **[O] The glossary's *Occasion* entry states a `print()` claim that is false
+   on multilevel replicate fits** (`vignettes/glossary.Rmd:220-228`).
+   `format.icc()` tests the multilevel branch before the replicate branch, so a
+   crossed multilevel design with 3 ratings per cell prints `Subjects: 32 in 8
+   clusters | Raters: 3 (random) | Observations: 288 (complete)` and no
+   per-cell count anywhere, while `glance()$n_o` is 3. Verified by running the
+   fit. *Fix now* -- a qualifier keeps AC4 met.
+2. **[O] `tidy.icc_dstudy()`'s new meaning sentence is false on cluster rows**
+   (`R/d-study.R:137-138`, rendered `man/d_study.Rd`). Evidence under AC1 above.
+   *Return floor* -- demonstrates AC1 failing inside its own domain.
+3. **[S prior-review] The vignette rewrite reintroduces the dash-as-punctuation
+   shape M135 drove to zero in this same file.**
+   `data-raw/prose-profile.py vignettes/d-studies-and-replicates.Rmd` reports
+   `dash = 4` on the branch against `dash = 0` on `main` (both measured
+   2026-08-28); `prose-style.md` R1 bars a standalone `--` as a sentence-level
+   break. Not a deliberate exemption -- the milestone never names the ruler.
+   *Fix now.*
+4. **[O] The rater-axis bullet is inconsistent after the AC5 rewording**
+   (`R/d-study.R:73-79`). "holding the fitted occasion count fixed: ... pure
+   error by `m` times that count" is followed by "one reliability curve per
+   occasion setting on the fit"; on the single-occasion curve pure error
+   divides by `m * 1`, not by `m` times the fitted count. *Fix now* -- AC5's
+   phrase is retained where it is accurate.
+5. **[O] The Rd pin can validate a stale installed package**
+   (`test-occasions-vocabulary.R:27-33`). `man_page()` prefers
+   `tools::Rd_db("intraclass")`, which succeeds under `devtools::load_all()`
+   whenever any `intraclass` is installed, so a source-tree run reads the
+   installed page rather than the branch's `man/*.Rd` and a regression in
+   `R/icc.R` + `man/icc.Rd` would pass green. *Fix now.*
+6. **[O] The new sentences describe `glance()$n_o` without its `NA` case**
+   (`R/icc.R:683-685`, `vignettes/glossary.Rmd:235-236`). On a ragged replicate
+   fit `n_o` is `NA` while `tidy()$occasions` reads 1 -- the case the entry
+   exists to resolve. The caveat lives one bullet later, so this is imprecision,
+   not contradiction. *Fix now.*
+7. **[O] The reworded comment at `R/autoplot.R:51` is false of the occasion
+   axis** -- "the averaging divisor, not the design's `n_o`" is wrong there,
+   where the `occasions` column carries the swept `n_o`. *Fix now.*
+8. **[O] The AC3 sweep does not run under `R CMD check`, and its regex matches
+   identifiers ending in `occasions`.** *Rejected* -- the source-tree skip is
+   the M129 tier T5 planned and AC3 measures by test, not by CI; the
+   false-positive shape has no current hit.
+9. **[O] AC2's positive legend-title half is unreachable and so unpinned.**
+   *Rejected* -- recorded as a milestone-local decision at T4, and AC2
+   anticipates the case in its own text.
+10. **[O] The new autoplot test refits duplicate models and leaves cli notes
+    unsuppressed.** *Rejected* -- a linter/style class item, no defect.
+11. **[O] D-044 cites `R/autoplot.R:58,69-70`, stale after the edit.**
+    *Rejected* -- `DECISIONS.md` is append-only (IP4); hygiene only.
+12. **[O] `format.icc()` prints two multilevel replicate rows that differ only
+    in occasion setting as indistinguishable** (same `level`, same `index`, no
+    occasion column). Verified on the fit above. *Rejected as out of scope* --
+    pre-existing, on `print()` surface this milestone does not touch; proposed
+    as a candidate row instead.
+13. **[S prior-review] The `occasions` vs. `n_o` glossary heading contains a
+    period, which pkgdown renders as `vs--` in the anchor (M130's bug).**
+    *Rejected* -- nothing links to that anchor, so M130's actual defect (a dead
+    link) is not reproduced.
+14. **[S blame-history] No findings.** Every hunk traces to D-044, which
+    authorizes exactly these replacements; the `autoplot()` legend strings it
+    replaces entered incidentally at M61 and were never a considered naming
+    choice.
+
+### Outcome
+
+Finding 2 demonstrates AC1 failing inside its domain, so the return floor
+fires: status returns to `in-progress` for repair and re-review. Defect returns
+on this milestone: 1.
+
+Finding 12's candidate row is held for the post-merge hygiene pass, where the
+search-first sweep and the records-hygiene disposition rule apply; the nearest
+existing home is the `glance()$n_o` remainder row, which already carries the
+absorbed `occasions`/`n_o` family. The finding is recorded above in the
+meantime.
