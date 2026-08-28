@@ -45,12 +45,19 @@ format.icc <- function(x, ...) {
   meta1 <- if (ml) {
     # Completeness is meaningful for the crossed (Design 1) design, where cells can
     # be missing; nested designs are always balanced/complete (guarded, M8).
+    # Design 3's raters are nested in subjects, so no rater main effect is
+    # separable: state the count without a treatment word for a facet the fit
+    # does not estimate (D-042). Designs 1 and 2 keep theirs.
+    rater_part <- if (design_has_rater_facet(x$design)) {
+      sprintf("Raters: %d (%s)", x$n$raters, x$design$raters)
+    } else {
+      sprintf("Raters: %d", x$n$raters)
+    }
     sprintf(
-      "Subjects: %d in %d clusters | Raters: %d (%s) | Observations: %d (%s)",
+      "Subjects: %d in %d clusters | %s | Observations: %d (%s)",
       x$n$subjects,
       x$n$clusters,
-      x$n$raters,
-      x$design$raters,
+      rater_part,
       x$n$obs,
       completeness
     )

@@ -536,3 +536,97 @@ test_that("glance() on a projection reads `raters` as glance() on the fit does",
   ))
   expect_identical(glance(d_study(fxa, n_o = 1:3))$raters, "fixed")
 })
+
+test_that("the multilevel header names a rater treatment only where one exists", {
+  skip_if_not_installed("glmmTMB")
+  # All three multilevel designs render through the same `format.icc()` branch.
+  # Design 3's raters are nested in subjects, so no rater main effect is
+  # separable: its header states the rater count without a treatment word
+  # (D-042). Designs 1 and 2 each keep theirs -- the controls that show the edit
+  # is keyed on the design, not on the branch.
+  fits <- list(
+    design1 = icc(
+      multilevel_replicate_frame(),
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      seed = 1
+    ),
+    design2 = icc(
+      nested_replicate_frame(),
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      design = "nested_in_clusters",
+      seed = 1
+    ),
+    design3 = icc(
+      design3_frame(),
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      seed = 1
+    )
+  )
+  expect_identical(
+    vapply(fits, function(x) x$design$ml_design, character(1)),
+    c(
+      design1 = "crossed",
+      design2 = "nested_in_clusters",
+      design3 = "nested_in_subjects"
+    )
+  )
+
+  # The rater line, captured through cli's own sink: `print.icc()` writes via
+  # cli, so `capture.output()` returns character(0) for it (M129).
+  rater_line <- vapply(
+    fits,
+    function(x) {
+      line <- grep(
+        "Raters: ",
+        cli::cli_fmt(print(x)),
+        fixed = TRUE,
+        value = TRUE
+      )
+      expect_length(line, 1L)
+      line
+    },
+    character(1)
+  )
+
+  # Every design states its rater count, ...
+  expect_identical(
+    vapply(
+      names(fits),
+      function(nm) {
+        grepl(
+          sprintf("Raters: %d", fits[[nm]]$n$raters),
+          rater_line[[nm]],
+          fixed = TRUE
+        )
+      },
+      logical(1)
+    ),
+    c(design1 = TRUE, design2 = TRUE, design3 = TRUE)
+  )
+  # ... and only the two with a separable rater main effect qualify it.
+  expect_identical(
+    vapply(
+      rater_line,
+      function(l) {
+        if (grepl("(random)", l, fixed = TRUE)) {
+          "random"
+        } else if (grepl("(fixed)", l, fixed = TRUE)) {
+          "fixed"
+        } else {
+          NA_character_
+        }
+      },
+      character(1)
+    ),
+    c(design1 = "random", design2 = "random", design3 = NA_character_)
+  )
+})
