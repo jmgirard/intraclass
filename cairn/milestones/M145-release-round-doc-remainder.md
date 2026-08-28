@@ -335,3 +335,11 @@ checkers exit 0; `cairn_validate.py` exits 0. AC1-AC6 are unaffected: the
 edit touches only the *Engines* section's first clause, and AC3's three facts
 are unchanged and still pinned.
 
+Full suite re-run after the fix: `devtools::test()` reports
+`FAIL 0 | WARN 3 | SKIP 2 | PASS 9122` — one PASS more than the pre-fix 9121,
+which is the new fourth pin expectation, and the same three recorded WARNs.
+CI on PR #156 at `3ef57b1`: all nine GitHub Actions checks pass, including
+`R CMD check` on ubuntu-release (23m2s), ubuntu-4.5.0 (20m30s) and
+windows-release (18m48s). `codecov/patch` remained pending; coverage is
+diagnostic in this repo's profile and never gates a merge.
+
