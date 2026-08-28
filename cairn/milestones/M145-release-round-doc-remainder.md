@@ -2,7 +2,7 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M145: The v0.1.0 release-round documentation remainder
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -117,7 +117,7 @@ is internal, so the milestone is classified by the wider of the two.
 - [x] T5 Flip `tests/spelling.R` to `error = TRUE`; run
       `spelling::spell_check_package(".")` and `devtools::test()` and confirm
       both green. Do not pad `inst/WORDLIST`.
-- [ ] T6 Run the gate: `devtools::test()`, `devtools::check()` (vignettes
+- [x] T6 Run the gate: `devtools::test()`, `devtools::check()` (vignettes
       built, raw Status line), the six `data-raw/` checkers with
       `--self-test`, `air format .`, and the bullet-size awk. Re-measure the
       awk after any prose fix made at the gate, not only after the last
@@ -136,6 +136,7 @@ is internal, so the milestone is classified by the wider of the two.
 - 2026-08-28: T3 — brms bullet added to NEWS *Engines* (own bullet, chosen at the implement gate over folding into the existing engine bullet), written from `R/icc.R:320-323` and `R/icc.R:554-561` read this session. Pinned by the new `tests/testthat/test-news-brms-claims.R`, which slices the *Engines* section out of the installed `NEWS.md` and requires a tolerant pattern per fact (phrase patterns chosen at the implement gate over verbatim sentences). Discrimination: each of the three facts deleted in turn reds exactly that expectation; the anti-vacuity control (section found, non-empty, carrying the glmmTMB sentence) is stated independently of all three. `devtools::test()`: FAIL 0, WARN 3 (the three the candidate row records), SKIP 2, PASS 9121.
 - 2026-08-28: T4 — D-043 appended to `cairn/DECISIONS.md`. All three surfaces it names were read this session (`R/icc.R:482`, `man/icc.Rd:360`, `R/ci-mpl.R:204`); D-019 untouched.
 - 2026-08-28: T5 — `tests/spelling.R` flipped to `error = TRUE`. `spelling::spell_check_package(".")` reports no spelling errors, so `inst/WORDLIST` gained nothing. Discrimination: `Rscript spelling.R` from `tests/` exits 0 clean and exits 1 naming the word on a planted misspelling in `NEWS.md`; the plant was reverted.
+- 2026-08-28: T6 — gate on the branch head: `devtools::test()` FAIL 0, WARN 3 (the three the candidate row records), SKIP 2, PASS 9121; `devtools::check()` with vignettes built reports `Status: OK` on its raw Status line (0 errors, 0 warnings, 0 notes, 12m 45s); all six `data-raw/` checkers pass, five of them under `--self-test` (`check-abort-remedy-verdicts.R` offers none and passes plain); `air format --check .` clean; `awk -f data-raw/m142-bullet-lines.awk NEWS.md` reports one bullet over 500 bytes, the 797-byte mpl anchor, the two new bullets at 300 and 355. D-019 verified byte-identical to its text at `2076e1f` (3,600 bytes).
 
 ## Decisions
 
