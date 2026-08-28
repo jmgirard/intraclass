@@ -95,49 +95,28 @@ removing either column → refused, D-044.
 
 ## Tasks
 
-- [x] T1. Write the meaning sentence and the `glance()$n_o` contrast into the
-      `tidy.icc()` column list (`R/icc.R:675-680`); mirror the meaning sentence
-      alone into `tidy.icc_dstudy()`'s list, stating the projection's own
-      `NA` rule (outside a replicate projection, `R/d-study.R:136`). Document.
-- [x] T2. Pin the AC1 sentences on the installed surface per
-      `cairn/doctrine/doc-claim-pins.md`: read via `tools::Rd_db()`, search
-      whitespace-collapsed text, pin a backtick-free spelling, and
-      mutation-verify each pin red.
-- [x] T3. `R/autoplot.R:58` keys → `occasions: <value>`; `:69-70` title →
-      `Occasions averaged`; leave `:30`.
-- [x] T4. Extend `tests/testthat/test-autoplot.R` over AC2's cells, using that
-      file's existing build-based idiom (`built_layer()`), asserting legend
-      title and key text; include the suppressed-legend and `"Curve"`-branch
-      cells as cases that assert only the `n_o` absence.
-- [x] T5. Rephrase the two paragraphs at
-      `vignettes/d-studies-and-replicates.Rmd:177,179`; add the AC3 sweep to
-      `tests/testthat/test-vignette-claims.R`, skipping on `dir.exists()` as
-      that file already does for source-tree paths (M129).
-- [x] T6. Add the two `vignettes/glossary.Rmd` entries.
-- [x] T7. Wording pass on `R/d-study.R:73-86`. Document.
-- [x] T8. Run every `data-raw/` checker with `--self-test` before pushing — a
-      roxygen edit inside the `ci_method` doc scope re-keys the MPL
-      doc-claims ledger (M130) — then the gate: `air format .`,
-      `lintr::lint_package()`, `R CMD check` raw Status line.
+The original eight tasks, all done, compressed at the 2026-08-28 amendment to
+hold the plan-owned body under its cap (full text in git, outcomes in the work
+log): **T1** wrote the meaning sentence and the `glance()$n_o` contrast into
+both column lists and documented; **T2** pinned the AC1 sentences on the
+installed Rd surface per `cairn/doctrine/doc-claim-pins.md` and
+mutation-verified; **T3** and **T4** re-keyed the `autoplot()` legend and
+walked AC2's eight cells in `test-autoplot.R`; **T5** rephrased the two
+`d-studies-and-replicates.Rmd` paragraphs and added AC3's sweep to
+`test-vignette-claims.R`; **T6** added the two glossary entries; **T7** did the
+`d_study()` roxygen wording pass; **T8** ran every `data-raw/` checker with
+`--self-test` and then the gate (`air format`, `lintr::lint_package()`,
+`R CMD check`).
 
 Repair tasks (the 2026-08-28 defect return; see the Review section's findings):
 
-- [x] T9. Make `tidy.icc_dstudy()`'s `occasions` sentence true on every
-      projection it covers (finding 2), and state `n_o`'s own `NA` case in the
-      `tidy.icc()` contrast (finding 6, roxygen half). Re-pin both in
-      `test-occasions-vocabulary.R` and mutation-verify. Document.
-- [x] T10. Repair the pin's surface selection so a source-tree run cannot
-      validate a stale installed copy (finding 5), and correct the
-      `R/autoplot.R` curve-identity comment, which is false of the occasion
-      axis (finding 7).
-- [x] T11. Correct the rater-axis bullet's pure-error divisor (finding 4),
-      keeping AC5's "the fitted occasion count" where it is accurate.
-- [x] T12. Qualify the glossary's *Occasion* entry, whose `print()` claim is
-      false on a multilevel replicate fit (finding 1), and add `n_o`'s `NA`
-      case to the `occasions` vs. `n_o` entry (finding 6, glossary half).
-- [x] T13. Take the `d-studies-and-replicates.Rmd` dash count back to zero
-      (finding 3).
-- [x] T14. Re-run the T8 gate.
+The six round-1 repair tasks, all done, compressed with the eight above:
+**T9** made `tidy.icc_dstudy()`'s sentence true on every projection it covered
+and stated `n_o`'s `NA` case in the contrast; **T10** repaired the pin's
+surface selection and the `R/autoplot.R` comment; **T11** corrected the
+rater-axis pure-error divisor; **T12** qualified the glossary's *Occasion*
+entry and added `n_o`'s `NA` case; **T13** took the vignette's dash count back
+to zero; **T14** re-ran the T8 gate.
 
 Repair tasks (the second 2026-08-28 defect return, and the AC1 amendment):
 
@@ -146,13 +125,13 @@ Repair tasks (the second 2026-08-28 defect return, and the AC1 amendment):
       amended AC1 is derived from it, none from recall.
 - [ ] T16. Rewrite both roxygen column lists to the amended AC1 (`R/icc.R`'s
       `tidy.icc()` list, `R/d-study.R`'s `tidy.icc_dstudy()` list). Document.
-- [ ] T17. Re-pin the amended sentences in `test-occasions-vocabulary.R` and
+- [x] T17. Re-pin the amended sentences in `test-occasions-vocabulary.R` and
       mutation-verify each pin red; add a GENERATED design-axis grid
       (`model`, `cluster`, `design`, replicate shape, `occasions` request,
       projection axis) asserting the documented rule on every row of every
       case, in the `test-n-o-disposition-grid.R` idiom (case set generated,
       joined to expectations by axis values, both directions asserted).
-- [ ] T18. Round-2 findings 4, 7 and 8: correct `d_study()`'s occasion-curve
+- [x] T18. Round-2 findings 4, 7 and 8: correct `d_study()`'s occasion-curve
       bullet (`R/d-study.R:76-79`), whose curve set is the fit's own distinct
       `occasions` values and whose pure-error divisor is `m` times the curve's
       setting, and the `R/autoplot.R:50-51` comment finding 4 falsifies.
@@ -397,6 +376,25 @@ Repair tasks (the second 2026-08-28 defect return, and the AC1 amendment):
   `prose-profile.py vignettes/glossary.Rmd`: over-35 1, dash 0, matching
   `origin/main`. `test-vignette-claims.R` under `NOT_CRAN=true`: FAIL 0,
   PASS 422.
+- 2026-08-28: T17's grid done. `tests/testthat/test-occasions-grid.R` generates
+  60 cases over three axes (`design` in {oneway, twoway, ml_crossed,
+  ml_nested_clusters, ml_nested_subjects}, `shape` in {none, uniform, ragged,
+  missing_cell}, `request` in {single, average, both}), joins each to its
+  declared disposition by key, asserts the two sets equal in both directions,
+  and holds every case to the DOCUMENTED rule rather than to a recorded value:
+  the expected `occasions` set is derived from the case's own axes and the rule,
+  never read off the column. Both projection axes are walked too, the occasion
+  axis at a non-integer sweep `c(1, 2.5, 4)`. FAIL 0 / PASS 236 / SKIP 0 in
+  3.8 s, so it runs under `R CMD check` rather than skipping. Mutation matrix,
+  five plants in `R/`: the rater-axis cluster level taking `max(proj_occ)`
+  instead of `min` (FAIL 2), `tidy()` filling 1 where the fit splits no
+  replicates (FAIL 9), the estimand ignoring the `occasions` request (FAIL 15),
+  and the occasion axis rounding the swept count (FAIL 12) all red. The fifth,
+  making `icc_estimand()` return 1 rather than `NA` off a replicate fit, stayed
+  green and is UNREACHABLE through this surface: `tidy.icc()` gates the column
+  on `x$design$replicates` (`R/icc-methods.R:378`) and overwrites the estimand
+  field, which is the same clause the second plant reds at the site that fills
+  it.
 
 ## Decisions
 
