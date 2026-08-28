@@ -1790,3 +1790,22 @@ The same milestone drops the treatment word from the Design 3 header
 there. Design 3's internal `design$type` and `design$model`, and its
 `n_raters` count, are untouched and stay a candidate row: internal under D-035
 clause 2, so changeable without a deprecation cycle.
+
+### D-043 (2026-08-28): the MPL degenerate-fit abort is documented in the reference manual, not in NEWS — superseding D-019's "documented in NEWS" clause
+
+**Context.** D-019's Consequences said that perfect or near-perfect-agreement
+data now errors where it used to get `[0, 1]`, "documented in NEWS". The
+v0.1.0 release round rewrote `NEWS.md` into release notes rather than a
+development log, and the sentence carrying that claim did not survive. The
+abort is unchanged; the record went stale, not the package.
+
+**Decision.** D-019's "documented in NEWS" clause no longer holds. The surfaces
+that document the abort are the `ci_method` roxygen at `R/icc.R:482`, its
+rendering at `man/icc.Rd:360`, and the abort message built at `R/ci-mpl.R:204`.
+D-019 is not edited (IP4) and the rest of it stands. NEWS is not re-expanded to
+carry the sentence back: the release notes say what the released package does,
+and a per-abort inventory is the reference manual's job.
+
+**Consequences.** A reader chasing D-019's documentation claim is pointed at
+the three live surfaces. No package behaviour changes, and no doc surface is
+edited by this entry.

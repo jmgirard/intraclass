@@ -112,9 +112,9 @@ is internal, so the milestone is classified by the wider of the two.
       what they say. Add a pin in `tests/testthat/` that reds when any of the
       three facts is removed from the installed `NEWS.md` — every documented
       claim gets a test, and these three are claims about engine behavior.
-- [ ] T4 Append the superseding D-entry to `cairn/DECISIONS.md`. Decision and
+- [x] T4 Append the superseding D-entry to `cairn/DECISIONS.md`. Decision and
       rationale only; no derived measurements in the entry.
-- [ ] T5 Flip `tests/spelling.R` to `error = TRUE`; run
+- [x] T5 Flip `tests/spelling.R` to `error = TRUE`; run
       `spelling::spell_check_package(".")` and `devtools::test()` and confirm
       both green. Do not pad `inst/WORDLIST`.
 - [ ] T6 Run the gate: `devtools::test()`, `devtools::check()` (vignettes
@@ -134,6 +134,8 @@ is internal, so the milestone is classified by the wider of the two.
 - 2026-08-28: T1 — `awk -F'\t' 'NR>1{c[$1]++} END{for (g in c) print g, c[g]}' tests/testthat/fixtures/classical-width-by-cell.tsv` gives m76 = 16 rows, m113 = 64 rows. `width-reversal-by-cell.tsv`'s header says both the subject effect A_i and the residual e_ij are drawn from `dist`, located and scaled per burch2011 sec 3 — the third grid's residual-draw description.
 - 2026-08-28: T2 — orienting bullet added above the "Which of the two closed forms" bullet (`NEWS.md:74-77`, 300 bytes). The `test-doc-skew-caveat.R` surface set already carries `NEWS.md` on both legs, so no extension was needed; its `grid_size` and `n_grids` shapes consume the new figures. Discrimination checked: `16` -> `15` in the new bullet reds that file; restored. The residual-draw sentence is a separate sentence carrying no "grid", so it does not seed the residual walk, which requires its own verbatim clause.
 - 2026-08-28: T3 — brms bullet added to NEWS *Engines* (own bullet, chosen at the implement gate over folding into the existing engine bullet), written from `R/icc.R:320-323` and `R/icc.R:554-561` read this session. Pinned by the new `tests/testthat/test-news-brms-claims.R`, which slices the *Engines* section out of the installed `NEWS.md` and requires a tolerant pattern per fact (phrase patterns chosen at the implement gate over verbatim sentences). Discrimination: each of the three facts deleted in turn reds exactly that expectation; the anti-vacuity control (section found, non-empty, carrying the glmmTMB sentence) is stated independently of all three. `devtools::test()`: FAIL 0, WARN 3 (the three the candidate row records), SKIP 2, PASS 9121.
+- 2026-08-28: T4 — D-043 appended to `cairn/DECISIONS.md`. All three surfaces it names were read this session (`R/icc.R:482`, `man/icc.Rd:360`, `R/ci-mpl.R:204`); D-019 untouched.
+- 2026-08-28: T5 — `tests/spelling.R` flipped to `error = TRUE`. `spelling::spell_check_package(".")` reports no spelling errors, so `inst/WORDLIST` gained nothing. Discrimination: `Rscript spelling.R` from `tests/` exits 0 clean and exits 1 naming the word on a planted misspelling in `NEWS.md`; the plant was reverted.
 
 ## Decisions
 
