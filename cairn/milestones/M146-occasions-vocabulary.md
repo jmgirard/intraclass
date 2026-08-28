@@ -92,7 +92,7 @@ removing either column → refused, D-044.
       file's existing build-based idiom (`built_layer()`), asserting legend
       title and key text; include the suppressed-legend and `"Curve"`-branch
       cells as cases that assert only the `n_o` absence.
-- [ ] T5. Rephrase the two paragraphs at
+- [x] T5. Rephrase the two paragraphs at
       `vignettes/d-studies-and-replicates.Rmd:177,179`; add the AC3 sweep to
       `tests/testthat/test-vignette-claims.R`, skipping on `dir.exists()` as
       that file already does for source-tree paths (M129).
@@ -144,6 +144,13 @@ removing either column → refused, D-044.
   (FAIL 12 / 5 / 4 / 2) against a green baseline of 79.
 - 2026-08-28: T4 found the `Occasions averaged` title branch unreachable; the
   milestone-local decision below records it. AC2 is satisfied as written.
+- 2026-08-28: T5 done. The two `d-studies-and-replicates.Rmd` paragraphs name the
+  `occasions` column (reads 1 / 3 here) instead of `occasions = 1` / `= 3`. The
+  AC3 sweep in `test-vignette-claims.R` collapses whitespace over
+  `vignettes/*.Rmd`, `README.Rmd`, `NEWS.md` and roxygen-only lines of `R/*.R`,
+  with anti-vacuity floors on each group. Five plants tested: the original prose,
+  a line-wrapped form, NEWS, roxygen -- all red; a non-roxygen `R/` comment
+  stayed green. `devtools::test()`: FAIL 0, WARN 3, SKIP 2, PASS 9191.
 
 ## Decisions
 
