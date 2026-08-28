@@ -485,8 +485,10 @@ column is present on every fit; \code{occasions} is \code{NA} unless the design
 has within-cell replicates.
 \item \code{glance.icc()}: a one-row tibble of model-level summaries:
 the sample sizes, the design flags -- among them the rater treatment
-\code{raters} (\code{NA} on a one-way fit, whose raters are interchangeable and
-carry no facet) and \code{replicates}, whether the fitted design splits
+\code{raters} (\code{NA} where the design estimates no separable rater main effect:
+a \code{model = "oneway"} fit, whose raters are interchangeable and carry no
+facet, and a \code{design = "nested_in_subjects"} fit, whose rater effect is
+confounded into the residual) and \code{replicates}, whether the fitted design splits
 within-cell replicates -- \code{FALSE} on a one-way fit, which has no rater
 facet and so no cells to split -- the effective rater counts, the
 variance components, the occasion count \code{n_o} (\code{NA} unless the fitted
