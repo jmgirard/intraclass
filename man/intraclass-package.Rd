@@ -20,11 +20,11 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Jeffrey Girard \email{jeffgirard@gmail.com} (\href{https://orcid.org/0000-0002-7359-3746}{ORCID})
+\strong{Maintainer}: Jeffrey Girard \email{me@jmgirard.com} (\href{https://orcid.org/0000-0002-7359-3746}{ORCID})
 
 Authors:
 \itemize{
-  \item Jeffrey Girard \email{jeffgirard@gmail.com} (\href{https://orcid.org/0000-0002-7359-3746}{ORCID})
+  \item Jeffrey Girard \email{me@jmgirard.com} (\href{https://orcid.org/0000-0002-7359-3746}{ORCID})
 }
 
 }
