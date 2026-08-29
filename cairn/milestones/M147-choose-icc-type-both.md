@@ -5,7 +5,7 @@
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP1, GP2
-- **Branch/PR:** `m147-choose-icc-type-both`
+- **Branch/PR:** `m147-choose-icc-type-both` / https://github.com/jmgirard/intraclass/pull/158
 
 ## Goal
 
