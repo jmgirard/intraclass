@@ -55,7 +55,7 @@ run_emitted_call <- function(rec, data) {
 
 test_that("emitted two-way call reproduces the recommended coefficient rows", {
   grid <- expand.grid(
-    type = c("agreement", "consistency"),
+    type = c("agreement", "consistency", "both"),
     unit = c("single", "average", "both"),
     raters = c("random", "fixed"),
     stringsAsFactors = FALSE
@@ -132,6 +132,62 @@ test_that("the recommended labels match the vignette crosswalk verbatim", {
   expect_equal(ow$sf_index, c("ICC(1,1)", "ICC(1,k)"))
 })
 
+# --- type = "both": the agreement/consistency pair (M147) ----------------------
+
+test_that("type = \"both\" recommends the agreement and consistency pair", {
+  # AC1's named case: two-way, random raters, single unit, non-multilevel.
+  rows <- choose_icc(type = "both", unit = "single", raters = "random")$rows
+  expect_equal(rows$index, c("ICC(A,1)", "ICC(C,1)"))
+  expect_equal(rows$sf_index, c("ICC(2,1)", "ICC(3,1)"))
+  expect_equal(rows$level, c("subject", "subject"))
+
+  # Crossed with unit = "both": four rows, type outermost (icc()'s own order).
+  four <- choose_icc(type = "both", unit = "both", raters = "random")$rows
+  expect_equal(
+    four$index,
+    c("ICC(A,1)", "ICC(A,k)", "ICC(C,1)", "ICC(C,k)")
+  )
+
+  # Crossed with level = "both": eight rows, type outer, then level, then unit.
+  eight <- choose_icc(
+    type = "both",
+    unit = "both",
+    raters = "random",
+    multilevel = TRUE,
+    level = "both"
+  )$rows
+  expect_equal(nrow(eight), 8L)
+  expect_equal(eight$level, rep(rep(c("subject", "cluster"), each = 2L), 2L))
+})
+
+test_that("the type = \"both\" call omits type and round-trips on ratings", {
+  rec <- choose_icc(type = "both", unit = "single", raters = "random")
+  # AC2: `type =` is absent -- icc() reports both error definitions by default.
+  expect_equal(rec$call, 'icc(data, score, subject, rater, unit = "single")')
+  expect_false(grepl("type", rec$call, fixed = TRUE))
+
+  fit <- run_emitted_call(rec, ratings)
+  expect_setequal(rec$rows$index, fit$estimates$index)
+  ord_rec <- rec$rows[order(rec$rows$index), ]
+  ord_est <- fit$estimates[order(fit$estimates$index), ]
+  expect_equal(ord_rec$sf_index, ord_est$sf_index)
+})
+
+test_that("a both-type recommendation says why the call omits type", {
+  rec <- choose_icc(type = "both", unit = "single", raters = "random")
+  expect_true(any(grepl(
+    "both error definitions",
+    c(rec$rationale, rec$notes),
+    fixed = TRUE
+  )))
+  # The printed design header names both error definitions, as icc()'s does.
+  expect_true(any(grepl(
+    "absolute agreement & consistency",
+    format(rec),
+    fixed = TRUE
+  )))
+})
+
 # --- emitted call strings are the minimal, copy-pasteable forms ---------------
 
 test_that("emitted calls pin type and omit other default arguments", {
@@ -167,6 +223,11 @@ test_that("emitted calls pin type and omit other default arguments", {
 test_that("axes that do not apply to the chosen design are rejected", {
   expect_error(
     choose_icc(model = "oneway", unit = "single", type = "agreement"),
+    class = "intraclass_inapplicable"
+  )
+  # A one-way design has no type axis; "both" is not an exception (M147).
+  expect_error(
+    choose_icc(model = "oneway", unit = "single", type = "both"),
     class = "intraclass_inapplicable"
   )
   expect_error(
@@ -293,6 +354,36 @@ test_that("the shell walks the outstanding axes and resolves them", {
     rec$call,
     "icc(data, score, subject, rater, type = \"agreement\", unit = \"single\")"
   )
+})
+
+test_that("the shell offers both as a type answer", {
+  seen <- new.env()
+  ask <- function(arg, question, choices, labels = NULL) {
+    if (identical(arg, "type")) {
+      seen$choices <- choices
+    }
+    list(
+      model = "twoway",
+      type = "both",
+      unit = "single",
+      raters = "random",
+      multilevel = FALSE
+    )[[arg]]
+  }
+  answers <- collect_answers_interactively(
+    list(
+      model = NULL,
+      type = NULL,
+      unit = NULL,
+      raters = NULL,
+      multilevel = NULL,
+      level = NULL
+    ),
+    ask = ask
+  )
+  expect_equal(seen$choices, c("agreement", "consistency", "both"))
+  rec <- resolve_icc_recommendation(answers)
+  expect_equal(rec$rows$index, c("ICC(A,1)", "ICC(C,1)"))
 })
 
 test_that("the shell asks only the unanswered, applicable axes", {
