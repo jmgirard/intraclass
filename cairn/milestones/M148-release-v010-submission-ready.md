@@ -1,11 +1,11 @@
 # M148: v0.1.0 is submission-ready, and the upload is handed off
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** M147
 - **Driving RR:** —
 - **Principles touched:** GP2, GP3
-- **Branch/PR:** —
+- **Branch/PR:** `m148-release-v010-submission-ready`
 
 ## Goal
 
@@ -87,7 +87,7 @@ version bump or NEWS consolidation, both already done (`DESCRIPTION:4`,
 - [ ] T4. Rewrite `cran-comments.md`: AC1's run header and result, AC2's
       matrix reading with its SHA, and the *Test environments* section with no
       unrun environment left in it.
-- [ ] T5. Write `cairn/RELEASE-HANDOFF.md` from `cairn/PROFILE.md:76-81`'s
+- [x] T5. Write `cairn/RELEASE-HANDOFF.md` from `cairn/PROFILE.md:76-81`'s
       release-walk handoff list plus ADR-022's deferred round-trips.
 - [ ] T6. Gate: `air format .`, `devtools::document()` no-diff, the `data-raw/`
       checkers with `--self-test`, `devtools::test()`. Open the PR and read its
@@ -100,6 +100,7 @@ version bump or NEWS consolidation, both already done (`DESCRIPTION:4`,
 - 2026-08-28: plan-gate criteria audit ran in FULL mode (user-facing tier), in-session rather than in a fresh-context [O] subagent — agent delegation is not authorized this session, the same departure M145 and M146 recorded. Two findings, both fixed at the gate. (a) A draft AC promised the six-config matrix green on the release PR; unreachable as written, since `check-standard.yaml:38` runs six configurations only on `push` to the default branch and three on `pull_request`, so no state during the milestone satisfies it — the M114 class the audit exists to catch. Repaired into AC2's pinned-SHA reading plus the tarball-manifest identity clause. (b) A draft AC bound "each command's output transcribed into the milestone's evidence", an instrument-and-recording property rather than a deliverable property (D-118, D-120); the transcription moved into T2 and T3.
 - 2026-08-28: collision check found M48 (`release-v010`) done and archived, its descoped AC3 already landed as M140; no `planned` or `blocked` release row, and no candidate row or live D-entry rejecting a release. ADR-022's deferral of the win-builder/R-hub round-trips and `submit_cran()` is a scope fence, honoured by AC4 rather than superseded.
 - 2026-08-28: plan gate chose pinning M147's merge SHA plus a tarball-manifest identity check over re-running the six-config matrix on this milestone's own merge commit, because the six-config matrix runs only post-merge and a criterion resting on it could not be verified at the review gate; falsified by this milestone's PR needing to touch a path that enters the built tarball, which would break the identity clause.
+- 2026-08-29: T5 — wrote `cairn/RELEASE-HANDOFF.md`: seven numbered steps (win-builder devel, win-builder release, R-hub, `submit_cran()`, the CRAN confirmation email, `use_github_release()`, `use_dev_version()`), each with its command, plus a send-back route. `rhub` is absent locally (measured 2026-08-29), so step 3 carries the install and the rhub 2.x `rhub_setup()`/`rhub_doctor()` sequence. No R source touched, so the verify slot's `devtools::test()` has nothing to discriminate here; it runs at T6.
 
 ## Decisions
 
