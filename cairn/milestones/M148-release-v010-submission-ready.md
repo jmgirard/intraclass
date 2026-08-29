@@ -35,7 +35,7 @@ version bump or NEWS consolidation, both already done (`DESCRIPTION:4`,
 
 ## Acceptance criteria
 
-- [ ] AC1. `R CMD check --as-cran` on the tarball `R CMD build` produces from
+- [x] AC1. `R CMD check --as-cran` on the tarball `R CMD build` produces from
       the release head reports 0 errors and 0 warnings on the check output's
       own `Status:` line, and any NOTE it reports is the CRAN
       incoming-feasibility "New submission" NOTE — both read off the check
@@ -44,7 +44,7 @@ version bump or NEWS consolidation, both already done (`DESCRIPTION:4`,
       `cran-comments.md` reports that run's R version, platform, OS and date,
       taken from the run's own header, and its `Status:` result including any
       NOTE.
-- [ ] AC2. `cran-comments.md`'s *Test environments* section reports, at a
+- [x] AC2. `cran-comments.md`'s *Test environments* section reports, at a
       pinned commit SHA, that every configuration in
       `.github/workflows/check-standard.yaml:38`'s push-event matrix — six of
       them — is `completed` with conclusion `success` in
@@ -52,16 +52,16 @@ version bump or NEWS consolidation, both already done (`DESCRIPTION:4`,
       path listed by `git diff --name-only <SHA>..<release head>` is absent
       from `tar tzf` on the AC1 tarball, so the matrix tested the package
       content being submitted.
-- [ ] AC3. Every environment named in `cran-comments.md`'s *Test environments*
+- [x] AC3. Every environment named in `cran-comments.md`'s *Test environments*
       section is followed, in that same section, by a reported result for
       version 0.1.0; the "Scheduled before submission, not yet run against this
       version" block is gone.
-- [ ] AC4. `cairn/RELEASE-HANDOFF.md` exists and lists, in execution order,
+- [x] AC4. `cairn/RELEASE-HANDOFF.md` exists and lists, in execution order,
       each act ADR-022 reserves to the maintainer, with the exact command to
       run: the win-builder R-devel and R-release round-trips, R-hub,
       `devtools::submit_cran()`, confirming the CRAN email,
       `usethis::use_github_release()`, `usethis::use_dev_version()`.
-- [ ] AC5. `urlchecker::url_check()` reports no broken URL across the package
+- [x] AC5. `urlchecker::url_check()` reports no broken URL across the package
       sources.
 
 ## Coverage
@@ -116,8 +116,35 @@ version bump or NEWS consolidation, both already done (`DESCRIPTION:4`,
 - 2026-08-29: T6 gate — `air format .` no diff; `devtools::document()` no diff; all six `data-raw/` checkers pass `--self-test` (each plants its own defect class and sees it red) and pass in normal mode; `devtools::test()` FAIL 0 | WARN 3 | SKIP 2 | PASS 9465, the three WARNs being the standing candidate-row set re-measured at the M143 review, none a new site. T3's identity check re-run at the final head: the diff from the pinned SHA is eight paths, `cran-comments.md` now joining the seven, and all eight are absent from the tarball manifest.
 
 - 2026-08-29: PR #159 opened; all 9 checks on its head pass — the three-configuration pull-request matrix (ubuntu-latest release, ubuntu-latest 4.5.0, windows-latest release) plus check-references, checkpoint-guard, format-check, lint, pkgdown, test-coverage. Status set to review.
+- 2026-08-29: review — all five criteria verified with fresh evidence at head `f280612`; consistency gate clean (`cairn_validate` exit 0, toolchain slot checks pass); three lenses run in-session (delegation not authorized this session), one finding, put to the maintainer at the gate.
 
 ## Decisions
 
 ## Review
+
 - 2026-08-28: the maintainer re-declared the v0.1.0 release window open at the M147 review close, in answer to `cairn_validate`'s `release window` advisory (D-050). M148 stays `planned` and is the next action; nothing on it started here.
+
+### Acceptance-criteria evidence (2026-08-29, fresh at head `f280612`)
+
+- AC1 — verified. Fresh `R CMD build` + `R CMD check --as-cran` on `intraclass_0.1.0.tar.gz`, run 2026-08-29 05:08:56 UTC: header reads R 4.6.1 (2026-06-24), platform `aarch64-apple-darwin23`, running under macOS Tahoe 26.6.2; `Status: 1 NOTE`, that NOTE being `checking CRAN incoming feasibility ... NOTE` with body `Maintainer:` plus `New submission`, and no other NOTE, WARNING or ERROR line in the log. `cran-comments.md` reports the same R version, platform, OS and date (2026-08-29) from the run's own header, and its `Status: 1 NOTE` result with the NOTE quoted.
+- AC2 — verified. `gh api repos/jmgirard/intraclass/commits/0d651437c5e01ed76551c729be9e5ee456caa999/check-runs` returns 12 runs, the six push-event matrix configurations among them (macos-latest release, windows-latest release, ubuntu-latest devel / release / oldrel-1 / 4.5.0) each `completed` / `success`, matching `.github/workflows/check-standard.yaml:38`'s push branch exactly. `git diff --name-only <SHA>..HEAD` lists eight paths; each is absent from the 197-entry `tar tzf` manifest of the AC1 tarball, which holds no `cairn/` or `data-raw/` entry at all, while `DESCRIPTION`, `NAMESPACE` and `R/icc.R` are present as passing controls.
+- AC3 — verified. `cran-comments.md`'s *Test environments* section names two environments — the local `--as-cran` run and the six-configuration matrix, tabulated per configuration — each followed by its result for 0.1.0. `win-builder`, `R-hub`, "not yet run" and "Scheduled before" match 0 times in the file; the scheduled-but-unrun block is gone.
+- AC4 — verified. `cairn/RELEASE-HANDOFF.md` lists seven numbered steps in execution order, each with its command: win-builder R-devel (`check_win_devel()`), win-builder R-release (`check_win_release()`), R-hub (`rhub_setup()`/`rhub_doctor()`/`rhub_check()`), `devtools::submit_cran()`, confirming the CRAN email, `usethis::use_github_release()`, `usethis::use_dev_version()`. ADR-022 reserves the win-builder/R-hub round-trips and `submit_cran()`; the remaining three come from the profile's release-walk handoff list.
+- AC5 — verified. `urlchecker::url_check(".")` fetched 15 URLs and returned 0 rows: "All URLs are correct!".
+
+### Consistency gate
+
+- Universal: `cairn_validate.py` exits 0 — 16 PASS, 7 advisories OK, the `release window` advisory not fired. No `DESIGN.md` principle changed in this diff, so `cairn_impact.py` does not apply.
+- Toolchain (`r-package` `consistency-gate` slot): `devtools::document()` leaves a clean tree; `NAMESPACE`, `man/` and `data/` are unchanged by the diff, so no generated-file drift; README.Rmd/README.md untouched and no `R/` source changed, so no knit drift; `pkgdown::check_pkgdown()` reports no problems; `NEWS.md` carries the `0.1.0` release section and this milestone adds no user-visible package behaviour; the one new top-level-adjacent file is `cairn/RELEASE-HANDOFF.md`, covered by the existing `^cairn$` `.Rbuildignore` entry, and `cran-comments.md` by `^cran-comments\.md$`; the full check is AC1's run above.
+
+### Independent review
+
+Declared surface tier is user-facing, so the full three-lens fan-out applies. Agent delegation is not authorized this session, so the three lenses ran in-session rather than in fresh-context subagents — the same departure M145, M146, M147 and this milestone's two criteria audits recorded.
+
+- [S] prior-review lens: `gh api repos/jmgirard/intraclass/pulls/comments?per_page=1` returns 0, so the repo has no inline PR-thread surface. Archived `## Review` sections touching `cran-comments.md`: M48, M139, M140. One regression found (finding 1 below): M48's AC3 failed twice on "a hand-authored release-artifact fact no check the milestone runs can catch", and M139's review actioned a stale matrix description in this same file.
+- [S] blame-history lens: zero findings. The removed *Checked so far* / *Scheduled before submission* structure is what AC3 requires gone; M140's run-header addition and M139's per-event matrix statement are both carried forward rather than undone; nothing a recorded D-entry settles is contradicted.
+- [O] diff-bug lens: one finding, ranked below.
+
+**Finding 1 (ranked first; the only finding).** `cran-comments.md`'s *Test environments* section says of the paths changed between the pinned SHA and the submitted source: "they are all under `cairn/` and `data-raw/`". Eight paths changed, and `cran-comments.md` itself is one of them; it is under neither directory. The sentence's conclusion still holds — that path is excluded from the tarball by its own `.Rbuildignore` entry, verified above — but the parenthetical justifying it is false, on the surface a CRAN reviewer reads. The milestone's own T6 work-log line already records `cran-comments.md` joining the seven; the prose was not updated with it. Same class as M48's twice-failing AC3 and M139's stale matrix description in this file.
+
+Disposition: put to the maintainer at the merge gate; recommended fix-now — replace the false parenthetical with the accurate one (all eight are `.Rbuildignore`d, seven under `cairn/`/`data-raw/` plus `cran-comments.md` by its own entry).
