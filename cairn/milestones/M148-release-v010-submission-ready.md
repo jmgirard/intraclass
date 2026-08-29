@@ -104,3 +104,4 @@ version bump or NEWS consolidation, both already done (`DESCRIPTION:4`,
 ## Decisions
 
 ## Review
+- 2026-08-28: the maintainer re-declared the v0.1.0 release window open at the M147 review close, in answer to `cairn_validate`'s `release window` advisory (D-050). M148 stays `planned` and is the next action; nothing on it started here.
