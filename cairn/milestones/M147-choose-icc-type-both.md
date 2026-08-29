@@ -210,4 +210,9 @@ not fresh; that is the known cost of the departure.
   than a silent guess"; `NEWS.md` has no such neighbour. Does not demonstrate
   any acceptance criterion failing (AC4 asks that no surface state the `type`
   vocabulary *without* `"both"`, which this states), so it does not meet the
-  return floor. Disposition: at the gate.
+  return floor. **Disposition: rejected at the approval gate** -- the
+  maintainer's reason: the article already warns about inapplicable answers
+  beside the same sentence, and every such call fails classed rather than
+  returning a wrong number.
+
+**Approved 2026-08-28** at the merge gate: merge PR #158 as-is, F1 rejected.
