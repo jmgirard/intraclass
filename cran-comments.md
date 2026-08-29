@@ -51,8 +51,9 @@ reported with it.
   | ubuntu-latest, R 4.5.0 (the declared floor) | success |
 
   Every path changed between that commit and the submitted source is excluded
-  from the built tarball by `.Rbuildignore` (they are all under `cairn/` and
-  `data-raw/`), so the matrix ran against the package content submitted here.
+  from the built tarball by `.Rbuildignore` — seven under `cairn/` or
+  `data-raw/`, plus this file, which has its own entry — so the matrix ran
+  against the package content submitted here.
 
 ## Downstream dependencies
 

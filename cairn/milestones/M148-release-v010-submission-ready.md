@@ -117,6 +117,7 @@ version bump or NEWS consolidation, both already done (`DESCRIPTION:4`,
 
 - 2026-08-29: PR #159 opened; all 9 checks on its head pass — the three-configuration pull-request matrix (ubuntu-latest release, ubuntu-latest 4.5.0, windows-latest release) plus check-references, checkpoint-guard, format-check, lint, pkgdown, test-coverage. Status set to review.
 - 2026-08-29: review — all five criteria verified with fresh evidence at head `f280612`; consistency gate clean (`cairn_validate` exit 0, toolchain slot checks pass); three lenses run in-session (delegation not authorized this session), one finding, put to the maintainer at the gate.
+- 2026-08-29: merge gate — maintainer selected fix-then-merge; finding 1's clause corrected in `cran-comments.md` on the branch before the approval marker.
 
 ## Decisions
 
@@ -147,4 +148,4 @@ Declared surface tier is user-facing, so the full three-lens fan-out applies. Ag
 
 **Finding 1 (ranked first; the only finding).** `cran-comments.md`'s *Test environments* section says of the paths changed between the pinned SHA and the submitted source: "they are all under `cairn/` and `data-raw/`". Eight paths changed, and `cran-comments.md` itself is one of them; it is under neither directory. The sentence's conclusion still holds — that path is excluded from the tarball by its own `.Rbuildignore` entry, verified above — but the parenthetical justifying it is false, on the surface a CRAN reviewer reads. The milestone's own T6 work-log line already records `cran-comments.md` joining the seven; the prose was not updated with it. Same class as M48's twice-failing AC3 and M139's stale matrix description in this file.
 
-Disposition: put to the maintainer at the merge gate; recommended fix-now — replace the false parenthetical with the accurate one (all eight are `.Rbuildignore`d, seven under `cairn/`/`data-raw/` plus `cran-comments.md` by its own entry).
+Disposition: **fixed at the gate** (maintainer selection, 2026-08-29). The clause now reads "excluded from the built tarball by `.Rbuildignore` — seven under `cairn/` or `data-raw/`, plus this file, which has its own entry"; AC2's tarball-absence evidence above is unchanged by it.
