@@ -72,23 +72,13 @@ random two-way design. Unlike lme4, this is not just a different backend for the
 *same* estimator: it matters which coefficient you ask for.
 
 ```{r lavaan, eval = requireNamespace("lavaan", quietly = TRUE)}
-axes <- expand.grid(
-  type = c("agreement", "consistency"),
-  unit = c("single", "average"),
-  stringsAsFactors = FALSE
+glmmtmb <- tidy(icc(ratings, score, subject, rater, engine = "glmmTMB", seed = 1))
+lavaan <- tidy(icc(ratings, score, subject, rater, engine = "lavaan", seed = 1))
+data.frame(
+  term = glmmtmb$term,
+  glmmTMB = round(glmmtmb$estimate, 4),
+  lavaan = round(lavaan$estimate, 4)
 )
-compare <- do.call(rbind, Map(function(type, unit) {
-  g <- icc(ratings, score, subject, rater, type = type, unit = unit,
-           engine = "glmmTMB", seed = 1)
-  l <- icc(ratings, score, subject, rater, type = type, unit = unit,
-           engine = "lavaan", seed = 1)
-  data.frame(
-    term = tidy(g)$term,
-    glmmTMB = round(tidy(g)$estimate, 4),
-    lavaan = round(tidy(l)$estimate, 4)
-  )
-}, axes$type, axes$unit))
-compare[!duplicated(compare$term), ]
 ```
 
 **Consistency** coefficients are a ratio of the subject and residual variances, so
