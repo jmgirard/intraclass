@@ -3,6 +3,8 @@
 _The only authority on milestone status. Grouped by status, not ID._
 _Last hygiene check: 2026-08-29 (M148 merged and archived; M143 rotated out of the terminal rows and `record-claims.tsv`'s `roadmap-terminal-rows` expectation rotated with it, in this commit. ROADMAP 55 lines / 23,468 bytes, LESSONS 49 / 19,998, both under. `prose-style.md` 119 lines / 6,952 bytes against its own < 120 / < 8,000; the other three doctrine modules still state no budget (existing candidate row). Nothing retired or graduated: M148 shipped no guard and moved no content. No LESSONS line added — its one finding is an instance of the derived-claims rule tracking-rules already binds, and the archive summary names the class.)_
 
+_Amended 2026-08-29 during the v0.1.0 submission walk: that last judgment is superseded. The class recurred in `cran-comments.md` at the win-builder step — a predicted misspelled-words list the first real run falsified — so a LESSONS line was added after all, and the file was compressed to fit its cap: LESSONS now 46 lines / 19,998 bytes (M126's dependency-claim line absorbed into M142's, the header and eight lines tightened; no lesson dropped). Also this walk: hotfix PR #160 corrected the scaffold-default maintainer address in `DESCRIPTION`, and `cran-comments.md` was rewritten against the post-hotfix runs. ROADMAP figures unchanged; no milestone rows moved._
+
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 ## Milestones
