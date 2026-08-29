@@ -39,8 +39,9 @@
 #'   `"twoway"`. Under `"oneway"` the `type` and `raters` choices do not exist
 #'   (there is no rater term), and supplying them is an error.
 #' @param type `"agreement"` (the value itself must match, so systematic rater
-#'   offsets count as error) or `"consistency"` (only rank order matters, so a
-#'   constant per-rater offset is forgiven). Required for a two-way design.
+#'   offsets count as error), `"consistency"` (only rank order matters, so a
+#'   constant per-rater offset is forgiven), or `"both"`. Required for a two-way
+#'   design.
 #' @param unit `"single"` (you will act on one rater's score), `"average"` (the
 #'   mean of your raters), or `"both"`. Required.
 #' @param raters `"random"` (a sample you generalize beyond, and the recommended
@@ -72,6 +73,10 @@
 #'
 #' # Consistency of the average of fixed raters -- McGraw & Wong ICC(C,k):
 #' choose_icc(type = "consistency", unit = "average", raters = "fixed")
+#'
+#' # Both error definitions side by side: the emitted call leaves `type` out,
+#' # because icc() reports agreement and consistency by default.
+#' choose_icc(type = "both", unit = "single", raters = "random")
 #'
 #' # A one-way design (interchangeable raters): type/raters do not apply.
 #' choose_icc(model = "oneway", unit = "single")
@@ -152,11 +157,12 @@ collect_answers_interactively <- function(answers, ask = ask_choice) {
   if (!oneway && is.null(answers$type)) {
     answers$type <- step(
       "type",
-      "Does the actual value need to match, or only the rank order?",
-      c("agreement", "consistency"),
+      "Does the actual value need to match, only the rank order, or both?",
+      c("agreement", "consistency", "both"),
       c(
         "Absolute agreement -- the value itself must match",
-        "Consistency -- only the rank order must match"
+        "Consistency -- only the rank order must match",
+        "Both"
       )
     )
   }
@@ -312,7 +318,7 @@ resolve_icc_recommendation <- function(answers, call = rlang::caller_env()) {
     type <- require_answer(answers$type, "type", call)
     type <- validate_choice(
       type,
-      c("agreement", "consistency"),
+      c("agreement", "consistency", "both"),
       "type",
       call
     )
@@ -344,7 +350,7 @@ resolve_icc_recommendation <- function(answers, call = rlang::caller_env()) {
     multilevel,
     oneway
   )
-  notes <- recommendation_notes(raters, multilevel, oneway)
+  notes <- recommendation_notes(type, raters, multilevel, oneway)
 
   new_icc_recommendation(
     model = model,
@@ -397,7 +403,10 @@ reject_inapplicable <- function(answers, args, design_phrase, call) {
 # The recommended coefficient rows. Reuses `icc_estimand()` -- the same label
 # source a fitted `icc` object uses -- so the recommended McGraw-Wong and
 # Shrout-Fleiss labels cannot drift from what `icc()` prints. One row per
-# requested (level x unit); `k_eff` is irrelevant to the label.
+# requested (type x level x unit); `k_eff` is irrelevant to the label. Type is
+# the outermost loop, the order `icc()` itself builds its estimate table in
+# (ADR-054 print grouping), so a both-type recommendation lists its rows in the
+# order the emitted call's own output prints them.
 recommendation_rows <- function(type, unit, raters, level, multilevel, oneway) {
   units <- switch(unit, both = c("single", "average"), unit)
   levels <- if (multilevel) {
@@ -405,23 +414,29 @@ recommendation_rows <- function(type, unit, raters, level, multilevel, oneway) {
   } else {
     "subject"
   }
-  type_arg <- if (oneway) "agreement" else type
+  types <- if (oneway) {
+    "agreement"
+  } else {
+    switch(type, both = c("agreement", "consistency"), type)
+  }
   rows <- list()
-  for (lv in levels) {
-    for (u in units) {
-      est <- icc_estimand(
-        type = type_arg,
-        unit = u,
-        raters = raters,
-        level = lv,
-        multilevel = multilevel,
-        oneway = oneway
-      )
-      rows[[length(rows) + 1L]] <- list(
-        level = lv,
-        index = est$label,
-        sf_index = est$sf_label
-      )
+  for (ty in types) {
+    for (lv in levels) {
+      for (u in units) {
+        est <- icc_estimand(
+          type = ty,
+          unit = u,
+          raters = raters,
+          level = lv,
+          multilevel = multilevel,
+          oneway = oneway
+        )
+        rows[[length(rows) + 1L]] <- list(
+          level = lv,
+          index = est$label,
+          sf_index = est$sf_label
+        )
+      }
     }
   }
   data.frame(
@@ -444,11 +459,11 @@ build_icc_call <- function(type, raters, unit, level, multilevel, oneway) {
   if (oneway) {
     opt <- c(opt, 'model = "oneway"')
   }
-  # Always pin `type` explicitly (both agreement and consistency): icc() now defaults
-  # to reporting BOTH error definitions (ADR-054), so an unpinned call would compute
-  # all four formulations instead of the single recommended coefficient. choose_icc()
-  # resolves to ONE coefficient (ADR-021), so its emitted call must name the type.
-  if (!oneway) {
+  # `type` is pinned when ONE error definition is wanted: icc() defaults to
+  # reporting BOTH (ADR-054), so an unpinned call would compute the other one too.
+  # When both ARE wanted the argument is dropped and icc()'s default carries it --
+  # the same shape `unit` and `level` already use for their own "both" (M147).
+  if (!oneway && !identical(type, "both")) {
     opt <- c(opt, sprintf('type = "%s"', type))
   }
   if (!oneway && identical(raters, "fixed")) {
@@ -486,7 +501,8 @@ recommendation_rationale <- function(
       type = switch(
         type,
         agreement = "Absolute agreement: the value itself must match; a systematic difference between raters counts as error.",
-        consistency = "Consistency: only the rank order must match; a constant per-rater offset is forgiven."
+        consistency = "Consistency: only the rank order must match; a constant per-rater offset is forgiven.",
+        both = "Both error definitions: absolute agreement (the value itself must match) and consistency (a constant per-rater offset is forgiven) side by side."
       )
     )
   }
@@ -524,8 +540,16 @@ recommendation_rationale <- function(
 }
 
 # Caveats and automatic behaviours worth surfacing (from the vignette).
-recommendation_notes <- function(raters, multilevel, oneway) {
+recommendation_notes <- function(type, raters, multilevel, oneway) {
   notes <- character()
+  # The emitted call names `type` for every other answer, so say why this one
+  # does not: icc() reports both error definitions when `type` is unset (M147).
+  if (!oneway && identical(type, "both")) {
+    notes <- c(
+      notes,
+      "The emitted call omits type on purpose: icc() reports both error definitions by default, so leaving the argument out is what asks for the pair."
+    )
+  }
   if (identical(raters, "fixed")) {
     notes <- c(
       notes,
@@ -585,7 +609,12 @@ format.icc_recommendation <- function(x, ...) {
   design <- if (x$oneway) {
     "one-way random"
   } else {
-    icc_design_phrase(x$type, x$raters)
+    # `icc_design_phrase()` takes the type(s) as a vector and names each one, so
+    # "both" expands here rather than reaching it as an unrecognised string --
+    # giving the same "two-way random, absolute agreement & consistency" header
+    # a fit reporting both error definitions prints (M147).
+    types <- switch(x$type, both = c("agreement", "consistency"), x$type)
+    icc_design_phrase(types, x$raters)
   }
   if (isTRUE(x$multilevel)) {
     design <- paste0("multilevel, ", design)
