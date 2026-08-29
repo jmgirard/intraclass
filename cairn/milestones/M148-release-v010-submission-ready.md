@@ -36,11 +36,14 @@ version bump or NEWS consolidation, both already done (`DESCRIPTION:4`,
 ## Acceptance criteria
 
 - [ ] AC1. `R CMD check --as-cran` on the tarball `R CMD build` produces from
-      the release head reports `Status: OK` — 0 errors, 0 warnings, 0 notes —
-      read off the check output's own `Status:` line, never `devtools::check()`'s
-      0/0/0 summary, which hides the `spelling.Rout.save` NOTE (M127, corrected
-      M128 and M145). `cran-comments.md` reports that run's R version,
-      platform, OS and date, taken from the run's own header.
+      the release head reports 0 errors and 0 warnings on the check output's
+      own `Status:` line, and any NOTE it reports is the CRAN
+      incoming-feasibility "New submission" NOTE — both read off the check
+      output itself, never `devtools::check()`'s 0/0/0 summary, which hides
+      the `spelling.Rout.save` NOTE (M127, corrected M128 and M145).
+      `cran-comments.md` reports that run's R version, platform, OS and date,
+      taken from the run's own header, and its `Status:` result including any
+      NOTE.
 - [ ] AC2. `cran-comments.md`'s *Test environments* section reports, at a
       pinned commit SHA, that every configuration in
       `.github/workflows/check-standard.yaml:38`'s push-event matrix — six of
@@ -77,10 +80,10 @@ version bump or NEWS consolidation, both already done (`DESCRIPTION:4`,
       Pin the head with `gh pr view --json headRefOid`; `gh` 2.98 rejects a
       bare SHA as a `gh pr checks` argument, and app-posted statuses land
       minutes late, so read the API rather than an early `gh pr checks` (M48).
-- [ ] T2. Branch. `R CMD build`, then `R CMD check --as-cran` on the resulting
+- [x] T2. Branch. `R CMD build`, then `R CMD check --as-cran` on the resulting
       tarball; transcribe the raw `Status:` line and the run's own header.
       `urlchecker::url_check()`.
-- [ ] T3. `tar tzf intraclass_0.1.0.tar.gz` against
+- [x] T3. `tar tzf intraclass_0.1.0.tar.gz` against
       `git diff --name-only <pinned SHA>..HEAD`; confirm the diff touches only
       `.Rbuildignore`d paths (`cran-comments.md` and `cairn/` both are), and
       record both lists.
@@ -101,6 +104,11 @@ version bump or NEWS consolidation, both already done (`DESCRIPTION:4`,
 - 2026-08-28: collision check found M48 (`release-v010`) done and archived, its descoped AC3 already landed as M140; no `planned` or `blocked` release row, and no candidate row or live D-entry rejecting a release. ADR-022's deferral of the win-builder/R-hub round-trips and `submit_cran()` is a scope fence, honoured by AC4 rather than superseded.
 - 2026-08-28: plan gate chose pinning M147's merge SHA plus a tarball-manifest identity check over re-running the six-config matrix on this milestone's own merge commit, because the six-config matrix runs only post-merge and a criterion resting on it could not be verified at the review gate; falsified by this milestone's PR needing to touch a path that enters the built tarball, which would break the identity clause.
 - 2026-08-29: T5 — wrote `cairn/RELEASE-HANDOFF.md`: seven numbered steps (win-builder devel, win-builder release, R-hub, `submit_cran()`, the CRAN confirmation email, `use_github_release()`, `use_dev_version()`), each with its command, plus a send-back route. `rhub` is absent locally (measured 2026-08-29), so step 3 carries the install and the rhub 2.x `rhub_setup()`/`rhub_doctor()` sequence. No R source touched, so the verify slot's `devtools::test()` has nothing to discriminate here; it runs at T6.
+
+- 2026-08-29: T2 — `R CMD build` then `R CMD check --as-cran` on `intraclass_0.1.0.tar.gz`, run 2026-08-29 03:25:39 UTC under R 4.6.1 (2026-06-24) on `aarch64-apple-darwin23`, macOS Tahoe 26.6.2: `Status: 1 NOTE`, the NOTE being the CRAN incoming-feasibility "New submission" NOTE (body: the `Maintainer:` line and `New submission`). A re-run with `_R_CHECK_CRAN_INCOMING_=FALSE` returned `Status: OK`, pinning that NOTE's identity. `urlchecker::url_check(".")` fetched 15 URLs and returned 0 rows (AC5).
+- 2026-08-29: substantive amendment, adopted at a mini gate. AC1 demanded `Status: OK` with 0 notes; unreachable on a networked `--as-cran` run for a package not yet on CRAN, since the incoming-feasibility check reports "New submission" for every first submission. AC1 now binds 0 errors, 0 warnings, and any reported NOTE being that one. It narrows nothing else and adds no criterion. Amended text in the Acceptance criteria section above.
+- 2026-08-29: the amendment's criteria audit ran in FULL mode (user-facing tier) on the amended AC1 wording before it was written, in-session rather than in a fresh-context [O] subagent — agent delegation is not authorized this session, the same departure M145, M146 and M147 recorded. One finding, fixed before the text landed: a draft bound the new-submission NOTE as "its only NOTE", which a run reporting zero NOTEs could not satisfy; narrowed to "any NOTE it reports is". The satisfiability, reachability, bounded-promise, instrument and proportionality questions returned nothing else; the probe question does not apply, AC1 citing no mutation or planted-defect verification.
+- 2026-08-29: T3 — the pinned SHA is `0d65143` (the M147 squash merge, the only recent default-branch commit carrying the six-config matrix; the two later tracking commits ran only the lighter workflows). `git diff --name-only 0d65143..HEAD` lists seven paths, all under `cairn/` or `data-raw/`: `cairn/LESSONS.md`, `cairn/RELEASE-HANDOFF.md`, `cairn/ROADMAP.md`, `cairn/milestones/M147-choose-icc-type-both.md`, `cairn/milestones/M148-release-v010-submission-ready.md`, `cairn/milestones/archive/M147-choose-icc-type-both.md`, `data-raw/record-claims.tsv`. None appears in the 197-entry `tar tzf` manifest of the AC1 tarball, which holds no `cairn/` or `data-raw/` entry at all; `DESCRIPTION`, `NAMESPACE` and `R/icc.R` were looked up the same way as passing controls. Re-run at T6 against the final head.
 
 ## Decisions
 
