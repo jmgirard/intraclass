@@ -5,7 +5,7 @@ This is the first submission of intraclass (0.1.0), a new package.
 ## R CMD check results
 
 Local `R CMD check --as-cran` on the built `intraclass_0.1.0.tar.gz`, run
-2026-08-29 16:12:37 UTC (the run's own clock) under R 4.6.1 (2026-06-24) on
+2026-08-29 23:08:32 UTC (the run's own clock) under R 4.6.1 (2026-06-24) on
 platform `aarch64-apple-darwin23`, running under macOS Tahoe 26.6.2, with
 `NOT_CRAN=false`, returned:
 
@@ -50,15 +50,15 @@ reported with it.
 
 - win-builder, R-devel: Windows Server 2022 x64 (build 20348) on
   `x86_64-w64-mingw32`, R Under development (unstable) (2026-08-27 r90452
-  ucrt), run 2026-08-29 17:02:55 UTC. **`Status: 1 NOTE`** -- 0 errors, 0
+  ucrt), run 2026-08-29 23:19:20 UTC. **`Status: 1 NOTE`** -- 0 errors, 0
   warnings, the incoming-feasibility NOTE above.
 
 - win-builder, R-release: the same platform, R 4.6.1 (2026-06-24 ucrt), run
-  2026-08-29 16:25:10 UTC. **`Status: 1 NOTE`** -- 0 errors, 0 warnings, the
+  2026-08-29 23:10:14 UTC. **`Status: 1 NOTE`** -- 0 errors, 0 warnings, the
   same NOTE.
 
 - GitHub Actions `R CMD check`, at commit
-  `0ebc8fa11bf3806f0cd7acfddda896e92e15ec09` on the default branch -- the full
+  `84abf5d78ebedcc97d4ce4cd09a7bc58cf476367` on the default branch -- the full
   six-configuration push matrix. All six **completed with conclusion
   `success`** on 2026-08-29:
 
@@ -71,15 +71,11 @@ reported with it.
   | ubuntu-latest, R oldrel-1 | success |
   | ubuntu-latest, R 4.5.0 (the declared floor) | success |
 
-  The matrix ran on the package content submitted here, not on an ancestor of
-  it. Nine paths on the default branch have changed since that commit -- this
-  file, `.github/workflows/pkgdown.yaml`, four under `data-raw/` and three
-  under `cairn/` -- and every one of them is excluded from the build by
-  `.Rbuildignore`. That exclusion is measured rather than assumed: rebuilding
-  the tarball at the current head yields the same 198-entry manifest and
-  byte-identical contents, differing only in the `Packaged:` timestamp that
-  `R CMD build` stamps into `DESCRIPTION`, and none of the nine paths appears
-  in the manifest.
+  The tarball checked above was built from that same commit with a clean
+  working tree, so the matrix, both win-builder runs and the local check all
+  describe one package content. The only path changed on the default branch
+  after that commit is this file, which `.Rbuildignore` excludes and which
+  appears nowhere in the tarball's 198-entry manifest.
 
 ## Downstream dependencies
 
