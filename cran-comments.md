@@ -71,11 +71,15 @@ reported with it.
   | ubuntu-latest, R oldrel-1 | success |
   | ubuntu-latest, R 4.5.0 (the declared floor) | success |
 
-  The submitted tarball was built from that same commit with a clean working
-  tree, so the matrix ran on the source submitted here rather than on an
-  ancestor of it. The only file changed since is this one, which carries its
-  own `.Rbuildignore` entry and appears nowhere in the tarball's 198-entry
-  manifest.
+  The matrix ran on the package content submitted here, not on an ancestor of
+  it. Nine paths on the default branch have changed since that commit -- this
+  file, `.github/workflows/pkgdown.yaml`, four under `data-raw/` and three
+  under `cairn/` -- and every one of them is excluded from the build by
+  `.Rbuildignore`. That exclusion is measured rather than assumed: rebuilding
+  the tarball at the current head yields the same 198-entry manifest and
+  byte-identical contents, differing only in the `Packaged:` timestamp that
+  `R CMD build` stamps into `DESCRIPTION`, and none of the nine paths appears
+  in the manifest.
 
 ## Downstream dependencies
 
