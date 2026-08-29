@@ -336,8 +336,8 @@ autoplot(icc(school, score, subject = pupil, rater = rater, cluster = classroom,
 
 The multilevel *fifth choice*, subject level against cluster level, is part of the
 `choose_icc()` decision helper too. The [*Choosing an ICC*](choosing-an-icc.html)
-guide walks the other four axes. Pass the design and it hands back the coefficient to
-report and the exact `icc()` call, without fitting anything:
+guide walks the other four axes. Pass the design and it hands back the coefficient
+or coefficients to report and the exact `icc()` call, without fitting anything:
 
 ```{r choose-ml}
 choose_icc(model = "twoway", multilevel = TRUE, level = "cluster",

@@ -32,9 +32,10 @@ newer.
   or occasions (`n_o`), with a `plot()` and `ggplot2::autoplot()` curve.
   *D-studies and within-cell replicates* gives the designs each projection
   supports and where it refuses.
-* `choose_icc()` recommends which coefficient to report, explains the
-  reasoning, and prints the `icc()` call to run. It gives advice only. See
-  *Choosing an ICC*.
+* `choose_icc()` recommends which coefficient or coefficients to report,
+  explains the reasoning, and prints the `icc()` call to run. Its `type`, `unit`
+  and `level` questions each take `"both"`, which asks for the pair rather than
+  making you choose one. It gives advice only. See *Choosing an ICC*.
 * `tidy()` and `glance()` return tidy summaries of a fit or a projection.
   `print()`, `format()`, `plot()` and `ggplot2::autoplot()` methods are
   provided for both classes, and `summary()` for an `icc()` fit. `ggplot2` is

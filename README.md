@@ -106,8 +106,8 @@ consistency, single vs. average, fixed vs. random raters, complete vs.
 incomplete. Each of those is an argument to `icc()`. Not sure which to
 report? `choose_icc()` walks the [*Choosing an
 ICC*](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.html)
-decision tree and hands back the coefficient, the reasoning, and the
-exact call to run. No data or fitting is required:
+decision tree and hands back the coefficient or coefficients, the
+reasoning, and the exact call to run. No data or fitting is required:
 
 ``` r
 choose_icc(model = "twoway", type = "consistency", unit = "average", raters = "random")

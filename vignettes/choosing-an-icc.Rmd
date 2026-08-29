@@ -252,8 +252,8 @@ well-defined estimands that `icc()` computes.
 ## Or let the package choose
 
 If you would rather answer the questions than remember which argument each maps
-to, `choose_icc()` walks the same tree and hands back the coefficient to report
-together with the exact `icc()` call that computes it. It does **not** fit
+to, `choose_icc()` walks the same tree and hands back the coefficient or
+coefficients to report together with the exact `icc()` call that computes them. It does **not** fit
 anything, and it takes no `data` argument. So it is a quick way to settle the
 choice before you run the model.
 
@@ -263,6 +263,8 @@ choose_icc(type = "agreement", unit = "single", raters = "random")
 
 Pass the decisions as arguments, as above. Or, in an interactive session, call
 `choose_icc()` with them omitted to be asked each outstanding question in turn.
+The `type`, `unit` and `level` questions each also take `"both"`, which asks for
+the pair rather than making you choose one.
 Answering a choice that does not apply to your design (for example `type` under a
 one-way model) is a clear error rather than a silent guess.
 

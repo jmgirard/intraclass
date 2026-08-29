@@ -26,8 +26,9 @@ choose_icc(
 (there is no rater term), and supplying them is an error.}
 
 \item{type}{\code{"agreement"} (the value itself must match, so systematic rater
-offsets count as error) or \code{"consistency"} (only rank order matters, so a
-constant per-rater offset is forgiven). Required for a two-way design.}
+offsets count as error), \code{"consistency"} (only rank order matters, so a
+constant per-rater offset is forgiven), or \code{"both"}. Required for a two-way
+design.}
 
 \item{unit}{\code{"single"} (you will act on one rater's score), \code{"average"} (the
 mean of your raters), or \code{"both"}. Required.}
@@ -87,6 +88,10 @@ choose_icc(type = "agreement", unit = "single", raters = "random")
 
 # Consistency of the average of fixed raters -- McGraw & Wong ICC(C,k):
 choose_icc(type = "consistency", unit = "average", raters = "fixed")
+
+# Both error definitions side by side: the emitted call leaves `type` out,
+# because icc() reports agreement and consistency by default.
+choose_icc(type = "both", unit = "single", raters = "random")
 
 # A one-way design (interchangeable raters): type/raters do not apply.
 choose_icc(model = "oneway", unit = "single")
