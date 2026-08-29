@@ -295,14 +295,17 @@ and fits the interaction model automatically:</p>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)</span></span></span></code></pre></div>
 <p>The variance-components line now shows <code>subject:rater</code>
 (the interaction) and <code>residual</code> (pure error) as separate
-terms. The <strong>single-occasion</strong> rows
-(<code>occasions = 1</code>) are the ordinary ICCs, since a single
-rating’s error still includes the interaction. But they are now fit
-correctly, rather than folding the interaction into the residual. The
-<strong>occasion-averaged</strong> rows (<code>occasions = 3</code>
-here) give the reliability of a rater’s <em>mean of three ratings</em>.
-Averaging cuts pure error but not the interaction, so those coefficients
-are higher.</p>
+terms. The <strong>single-occasion</strong> rows, whose
+<code>occasions</code> column reads 1, are the ordinary ICCs, since a
+single rating’s error still includes the interaction. But they are now
+fit correctly, rather than folding the interaction into the residual.
+The <strong>occasion-averaged</strong> rows, whose
+<code>occasions</code> column reads 3 here, divide pure error by three
+occasions per rater. <code>ICC(A,1)</code> is then the reliability of
+one rater’s <em>mean of three ratings</em>. <code>ICC(A,k)</code> is the
+reliability of a mean over all four raters, each at that same three.
+That 3 is the fitted per-cell replicate count. Averaging cuts pure error
+but not the interaction, so those coefficients are higher.</p>
 <p>Within-cell replicates extend beyond this balanced two-way random
 example: <strong>fixed</strong> raters (balanced),
 <strong>multilevel</strong> designs (crossed Design 1 and nested Design

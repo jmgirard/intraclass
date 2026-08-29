@@ -107,9 +107,17 @@ The methods documented on this page return:
   columns in this order: `m`, `occasions`, `level`, `term` (the
   projected ICC index, named for the broom glossary), `type`,
   `estimate`, `std.error`, `conf.low`, `conf.high`, `conf.level`,
-  `method`. Every column is present on every projection; `occasions` is
-  `NA` outside a replicate projection, `level` outside a multilevel one,
-  and `type` where the design defines no error definition.
+  `method`. Every column is present on every projection. `occasions`
+  reports the per-cell occasion count the row is projected at, which may
+  be non-integer, and which divides pure error, so a row whose error set
+  carries no pure-error term does not move with it. On a rater
+  projection the column takes every distinct occasion value the fit's
+  own `tidy()$occasions` column carries, and the cluster rows of a
+  multilevel projection take the smallest of those. On an occasion
+  projection every row takes the swept `n_o`, cluster rows included,
+  whose curve is flat across it. `occasions` is `NA` outside a replicate
+  projection; `level` is `NA` outside a multilevel one, and `type` where
+  the design defines no error definition.
 
 - `glance.icc_dstudy()`: a one-row tibble of projection-level summaries.
   It carries the distinct projected rater counts `m` and their range,
@@ -185,23 +193,30 @@ subject-by-rater cell, where the residual splits into the
 subject-by-rater interaction and pure error), `d_study()` can project
 **either** axis (one per call):
 
-- the **rater count `m`** (the default), holding the number of occasions
-  `n_o` at the fitted value: the rater and interaction terms divide by
-  `m`, pure error by `m * n_o`. The returned object gains an `occasions`
-  column, one reliability curve per occasion setting on the fit
-  (`"single"` and/or `"average"`), so at `m` = the observed rater count
-  each curve matches the fitted `ICC(*,k)`;
+- the **rater count `m`** (the default), holding the occasion count
+  fixed: the rater and interaction terms divide by `m`, pure error by
+  `m` times the curve's own occasion setting. The returned object gains
+  an `occasions` column, one reliability curve per distinct value that
+  column holds on the fit. A single-occasion setting divides pure error
+  by `m` alone, an occasion-averaged one by `m` times the fitted
+  occasion count. At `m` = the observed rater count each curve matches
+  the fitted `ICC(*,k)` for its own level and occasion setting, where
+  the fit reports one. Where the fit reports a cluster level, its
+  `occasions` column also carries that level's placeholder 1, since that
+  error set has no pure error to average. So such a fit made with
+  `occasions = "average"` alone still projects a subject curve at 1,
+  which the fit itself does not report.
   [`tidy()`](https://generics.r-lib.org/reference/tidy.html) carries
   that column on every projection, `NA` where the fit has no replicates.
 
-- the **occasion count `n_o`** (supply the `n_o` argument), holding
-  raters at the observed count: pure error divides by `m * n_o` while
-  the rater and interaction terms are unchanged. Because occasion
+- the **swept occasion count `n_o`** (supply the `n_o` argument),
+  holding raters at the observed count: pure error divides by `m * n_o`
+  while the rater and interaction terms are unchanged. Because occasion
   averaging rescales **only pure error**, this curve is well-posed for
   random **and** fixed raters. That includes fixed absolute agreement,
   which the rater projection refuses, since occasions are a random facet
-  however the raters are treated. At `n_o` = the fitted occasion count
-  it matches the fitted `ICC(*,k)`.
+  however the raters are treated. Where the swept `n_o` equals the
+  fitted occasion count it matches the fitted `ICC(*,k)`.
 
 **The occasion curve has a finite ceiling.** As `n_o` grows it
 approaches `sigma^2_s / (sigma^2_s + (sigma^2_r + sigma^2_sr) / m)`,

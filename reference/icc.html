@@ -584,8 +584,20 @@ rule above, whether or not a table happens to report it.</p>
 in this order: <code>term</code> (the coefficient's ICC index, named for the broom
 glossary), <code>occasions</code>, <code>type</code>, <code>level</code>, <code>sf_index</code>, <code>estimate</code>,
 <code>std.error</code>, <code>conf.low</code>, <code>conf.high</code>, <code>conf.level</code>, <code>method</code>. Every
-column is present on every fit; <code>occasions</code> is <code>NA</code> unless the design
-has within-cell replicates.</p></li>
+column is present on every fit. <code>occasions</code> reports the per-rater
+occasion divisor that row's coefficient applies to pure error. On a fit
+that splits within-cell replicates it reads 1 wherever the row averages
+no occasions. That covers every single-occasion row, and every row whose
+error set carries no pure-error term to average, such as the cluster
+rows of a multilevel fit. It reads the fitted per-cell occasion count
+where the row does average. On a fit that splits none it is <code>NA</code>. It is
+not in general the number of ratings the coefficient averages, because
+it counts occasions per rater: an occasion-averaged <code>ICC(*,k)</code> row
+averages <code>k</code> raters at that occasion count each. <code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code> reports a
+different quantity as <code>n_o</code>, the observed per-cell occasion count of the
+fitted design. <code>n_o</code> is itself <code>NA</code> under the condition the
+<code>glance.icc()</code> bullet below states, which a ragged replicate design
+meets while <code>occasions</code> still reads 1.</p></li>
 <li><p><code>glance.icc()</code>: a one-row tibble of model-level summaries:
 the sample sizes, the design flags – among them the rater treatment
 <code>raters</code> (<code>NA</code> where the design estimates no separable rater main effect:

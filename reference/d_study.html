@@ -164,8 +164,16 @@ own layout is internal, and only the tidied columns are a stable contract.</p>
 in this order: <code>m</code>, <code>occasions</code>, <code>level</code>, <code>term</code> (the projected ICC
 index, named for the broom glossary), <code>type</code>, <code>estimate</code>, <code>std.error</code>,
 <code>conf.low</code>, <code>conf.high</code>, <code>conf.level</code>, <code>method</code>. Every column is present
-on every projection; <code>occasions</code> is <code>NA</code> outside a replicate projection,
-<code>level</code> outside a multilevel one, and <code>type</code> where the design defines no
+on every projection. <code>occasions</code> reports the per-cell occasion count the
+row is projected at, which may be non-integer, and which divides pure
+error, so a row whose error set carries no pure-error term does not move
+with it. On a rater projection the column takes every distinct occasion
+value the fit's own <code>tidy()$occasions</code> column carries, and the cluster
+rows of a multilevel projection take the smallest of those. On an
+occasion projection every row takes the swept <code>n_o</code>, cluster rows
+included, whose curve is flat across it.
+<code>occasions</code> is <code>NA</code> outside a replicate projection; <code>level</code> is
+<code>NA</code> outside a multilevel one, and <code>type</code> where the design defines no
 error definition.</p></li>
 <li><p><code>glance.icc_dstudy()</code>: a one-row tibble of projection-level summaries. It
 carries the distinct projected rater counts <code>m</code> and their range, the
@@ -234,20 +242,28 @@ averaged <code>ICC(c,k)</code> case, whose ragged divisor is an open modeling qu
 
 <p>For a within-cell replicate fit (more than one rating per subject-by-rater cell,
 where the residual splits into the subject-by-rater interaction and pure error),
-<code>d_study()</code> can project <strong>either</strong> axis (one per call):</p><ul><li><p>the <strong>rater count <code>m</code></strong> (the default), holding the number of occasions <code>n_o</code> at
-the fitted value: the rater and interaction terms divide by <code>m</code>, pure error by
-<code>m * n_o</code>. The returned object gains an <code>occasions</code> column, one reliability
-curve per occasion setting on the fit (<code>"single"</code> and/or <code>"average"</code>), so at
-<code>m</code> = the observed rater count each curve matches the fitted <code>ICC(*,k)</code>;
+<code>d_study()</code> can project <strong>either</strong> axis (one per call):</p><ul><li><p>the <strong>rater count <code>m</code></strong> (the default), holding the occasion count fixed:
+the rater and interaction terms divide by <code>m</code>, pure error by <code>m</code> times the
+curve's own occasion setting. The returned object gains an <code>occasions</code>
+column, one reliability curve per distinct value that column holds on the
+fit. A single-occasion setting divides pure error by <code>m</code> alone, an
+occasion-averaged one by <code>m</code> times the fitted occasion count. At <code>m</code> = the
+observed rater count each curve matches the fitted <code>ICC(*,k)</code> for its own
+level and occasion setting, where the fit reports one. Where the fit
+reports a cluster level, its <code>occasions</code> column also carries that level's
+placeholder 1, since that error set has no pure error to average. So such a
+fit made with <code>occasions = "average"</code> alone still projects a subject curve
+at 1, which the fit itself does not report.
 <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code> carries that column on every projection, <code>NA</code> where the fit has no
 replicates.</p></li>
-<li><p>the <strong>occasion count <code>n_o</code></strong> (supply the <code>n_o</code> argument), holding raters at the
-observed count: pure error divides by <code>m * n_o</code> while the rater and interaction
-terms are unchanged. Because occasion averaging rescales <strong>only pure
+<li><p>the <strong>swept occasion count <code>n_o</code></strong> (supply the <code>n_o</code> argument), holding raters
+at the observed count: pure error divides by <code>m * n_o</code> while the rater and
+interaction terms are unchanged. Because occasion averaging rescales <strong>only pure
 error</strong>, this curve is well-posed for random <strong>and</strong> fixed raters. That
 includes fixed absolute agreement, which the rater projection refuses,
-since occasions are a random facet however the raters are treated. At
-<code>n_o</code> = the fitted occasion count it matches the fitted <code>ICC(*,k)</code>.</p></li>
+since occasions are a random facet however the raters are treated. Where
+the swept <code>n_o</code> equals the fitted occasion count it matches the fitted
+<code>ICC(*,k)</code>.</p></li>
 </ul><p><strong>The occasion curve has a finite ceiling.</strong> As <code>n_o</code> grows it approaches
 <code>sigma^2_s / (sigma^2_s + (sigma^2_r + sigma^2_sr) / m)</code>, <strong>not</strong> 1.
 Averaging more occasions washes out only pure measurement error, never the

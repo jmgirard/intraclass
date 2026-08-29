@@ -332,6 +332,50 @@ default under-covers</em></a>. See also <a href="interval-methods.html"><em>Conf
 methods</em></a>.</p>
 </div>
 <div class="section level2">
+<h2 id="occasion-within-cell-replicate">Occasion (within-cell replicate)<a class="anchor" aria-label="anchor" href="#occasion-within-cell-replicate"></a>
+</h2>
+<p>One of several ratings the <em>same</em> rater gives the
+<em>same</em> subject. A design with occasions lets <code><a href="../reference/icc.html">icc()</a></code>
+separate the <a href="#variance-component">subject-by-rater
+interaction</a> from pure error. <code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code> reports the
+per-cell count in its <code>n_o</code> column. The printed report spells
+that same count on its design line, as
+<code>N cells x N replicates</code>. Where <code>n_o</code> is
+<code>NA</code> because the cells hold unequal counts, that slot reads
+<code>NA</code> too. Only a fit that splits replicates carries the slot
+at all. A multilevel fit’s design line reports subjects and clusters
+instead, and a fit that splits none reports observations or ratings, so
+read <code>n_o</code> for those. See <a href="d-studies-and-replicates.html"><em>D-studies and within-cell
+replicates</em></a>.</p>
+</div>
+<div class="section level2">
+<h2 id="occasions-vs--n_o">
+<code>occasions</code> vs. <code>n_o</code><a class="anchor" aria-label="anchor" href="#occasions-vs--n_o"></a>
+</h2>
+<p>Two near-identical names for different quantities. On an
+<code><a href="../reference/icc.html">icc()</a></code> fit, <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code>’s <code>occasions</code>
+column is the <strong>per-rater occasion divisor</strong> that row’s
+coefficient applies to pure error. It reads 1 on every row that averages
+no occasions, which includes every row whose error set carries no
+pure-error term to average. It reads the fitted per-cell count where the
+row does average, and <code>NA</code> on a fit that splits no
+within-cell replicates. On a <code><a href="../reference/d_study.html">d_study()</a></code> projection the same
+column reports the count each row is <em>projected</em> at instead,
+which <code><a href="../reference/d_study.html">?d_study</a></code> states. <code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code>’s
+<code>n_o</code> counts the <strong>occasions observed per cell</strong>
+in the design that was fitted, and is <code>NA</code> under the
+condition <code><a href="../reference/icc.html">?icc</a></code> states for it. So on a design with three
+ratings per cell, a fit reporting both settings shows
+<code>occasions</code> 1 and 3 down its rows, while <code>n_o</code> is
+3 for the fit as a whole. Note that <code>occasions</code> is not a
+count of the ratings a coefficient averages: an occasion-averaged
+<code>ICC(A,k)</code> over four raters at <code>occasions</code> 3 is
+the reliability of a mean of twelve ratings. A ragged replicate fit is
+the case that separates the two columns most sharply: <code>n_o</code>
+reads <code>NA</code> there while <code>occasions</code> still reads
+1.</p>
+</div>
+<div class="section level2">
 <h2 id="one-way-vs--two-way">One-way vs. two-way<a class="anchor" aria-label="anchor" href="#one-way-vs--two-way"></a>
 </h2>
 <p>The <code>model</code> argument. A <strong>two-way</strong> design

@@ -232,6 +232,50 @@ under-covers*](https://jmgirard.github.io/intraclass/articles/interval-methods.h
 See also [*Confidence-interval
 methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.md).
 
+## Occasion (within-cell replicate)
+
+One of several ratings the *same* rater gives the *same* subject. A
+design with occasions lets
+[`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
+separate the [subject-by-rater interaction](#variance-component) from
+pure error.
+[`glance()`](https://generics.r-lib.org/reference/glance.html) reports
+the per-cell count in its `n_o` column. The printed report spells that
+same count on its design line, as `N cells x N replicates`. Where `n_o`
+is `NA` because the cells hold unequal counts, that slot reads `NA` too.
+Only a fit that splits replicates carries the slot at all. A multilevel
+fit’s design line reports subjects and clusters instead, and a fit that
+splits none reports observations or ratings, so read `n_o` for those.
+See [*D-studies and within-cell
+replicates*](https://jmgirard.github.io/intraclass/articles/d-studies-and-replicates.md).
+
+## `occasions` vs. `n_o`
+
+Two near-identical names for different quantities. On an
+[`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) fit,
+[`tidy()`](https://generics.r-lib.org/reference/tidy.html)’s `occasions`
+column is the **per-rater occasion divisor** that row’s coefficient
+applies to pure error. It reads 1 on every row that averages no
+occasions, which includes every row whose error set carries no
+pure-error term to average. It reads the fitted per-cell count where the
+row does average, and `NA` on a fit that splits no within-cell
+replicates. On a
+[`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)
+projection the same column reports the count each row is *projected* at
+instead, which
+[`?d_study`](https://jmgirard.github.io/intraclass/reference/d_study.md)
+states. [`glance()`](https://generics.r-lib.org/reference/glance.html)’s
+`n_o` counts the **occasions observed per cell** in the design that was
+fitted, and is `NA` under the condition
+[`?icc`](https://jmgirard.github.io/intraclass/reference/icc.md) states
+for it. So on a design with three ratings per cell, a fit reporting both
+settings shows `occasions` 1 and 3 down its rows, while `n_o` is 3 for
+the fit as a whole. Note that `occasions` is not a count of the ratings
+a coefficient averages: an occasion-averaged `ICC(A,k)` over four raters
+at `occasions` 3 is the reliability of a mean of twelve ratings. A
+ragged replicate fit is the case that separates the two columns most
+sharply: `n_o` reads `NA` there while `occasions` still reads 1.
+
 ## One-way vs. two-way
 
 The `model` argument. A **two-way** design has every subject rated by
