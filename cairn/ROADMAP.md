@@ -9,7 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M146 | The occasion vocabulary says which quantity each surface reports | planned | — | high | milestones/M146-occasions-vocabulary.md |
+| M146 | The occasion vocabulary says which quantity each surface reports | review | — | high | milestones/M146-occasions-vocabulary.md |
 | M145 | The v0.1.0 release-round documentation remainder | done | — | high | milestones/archive/M145-release-round-doc-remainder.md |
 | M144 | NEWS's *What ships* names the designs the package actually supports | done | — | normal | milestones/archive/M144-news-what-ships-designs.md |
 | M143 | Design 3 stops reporting a rater treatment for a facet it does not have | done | — | high | milestones/archive/M143-design3-rater-facet.md |

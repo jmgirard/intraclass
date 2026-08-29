@@ -173,12 +173,15 @@ icc(reps, score, subject, rater, type = "agreement", occasions = c("single", "av
 ```
 
 The variance-components line now shows `subject:rater` (the interaction) and
-`residual` (pure error) as separate terms. The **single-occasion** rows
-(`occasions = 1`) are the ordinary ICCs, since a single rating's error still
-includes the interaction. But they are now fit correctly, rather than folding the
-interaction into the residual. The **occasion-averaged** rows (`occasions = 3` here)
-give the reliability of a rater's *mean of three ratings*. Averaging cuts pure error
-but not the interaction, so those coefficients are higher.
+`residual` (pure error) as separate terms. The **single-occasion** rows, whose
+`occasions` column reads 1, are the ordinary ICCs, since a single rating's
+error still includes the interaction. But they are now fit correctly, rather
+than folding the interaction into the residual. The **occasion-averaged** rows,
+whose `occasions` column reads 3 here, divide pure error by three occasions per
+rater. `ICC(A,1)` is then the reliability of one rater's *mean of three
+ratings*. `ICC(A,k)` is the reliability of a mean over all four raters, each at
+that same three. That 3 is the fitted per-cell replicate count. Averaging
+cuts pure error but not the interaction, so those coefficients are higher.
 
 Within-cell replicates extend beyond this balanced two-way random example: **fixed**
 raters (balanced), **multilevel** designs (crossed Design 1 and nested Design 2,

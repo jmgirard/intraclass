@@ -2461,3 +2461,97 @@ test_that("icc(): the second supported call runs, the ci_methods that admit one"
   # refusal in the refused block above, the unset upgrade in `test-icc-brms.R`
   # ("engine = \"brms\" forces ci_method = \"posterior\" by default").
 })
+
+# --- M146: no doc surface writes `occasions` as a numeric argument -------------
+# `occasions` takes the keywords `"single"` and `"average"`; `validate_occasions()`
+# rejects a number. Prose that writes `occasions = 3` therefore mimics a call the
+# package refuses, and reads as if the argument were the design's per-cell count
+# (which is `glance()$n_o`, a different quantity -- D-044). Sweep the doc
+# surfaces for that shape.
+#
+# The sweep runs over whitespace-COLLAPSED text, so a form wrapped across lines
+# is caught too (`cairn/doctrine/doc-claim-pins.md`). All four path groups live
+# in the source tree only, so the block skips under `R CMD check` -- the tier
+# `test-vignette-transcripts.R` already uses for `vignettes/`.
+
+occasions_numeric_re <- "occasions[[:space:]]*=[[:space:]]*[\"']?[0-9]"
+
+test_that("no vignette, README, NEWS or roxygen prose writes occasions = <number>", {
+  root <- testthat::test_path("..", "..")
+  vig_dir <- file.path(root, "vignettes")
+  r_dir <- file.path(root, "R")
+  skip_if_not(
+    dir.exists(vig_dir) && dir.exists(r_dir),
+    "source tree not present (running against the built package)"
+  )
+
+  squash_file <- function(lines) {
+    gsub("[[:space:]]+", " ", paste(lines, collapse = " "))
+  }
+
+  swept <- list()
+  for (f in list.files(vig_dir, pattern = "\\.Rmd$", full.names = TRUE)) {
+    swept[[paste0("vignettes/", basename(f))]] <-
+      squash_file(readLines(f, warn = FALSE))
+  }
+  for (f in c("README.Rmd", "NEWS.md")) {
+    p <- file.path(root, f)
+    if (file.exists(p)) {
+      swept[[f]] <- squash_file(readLines(p, warn = FALSE))
+    }
+  }
+  # `R/`: the roxygen only. An internal comment is not a doc surface a user
+  # reads, and code legitimately names the argument.
+  for (f in list.files(r_dir, pattern = "\\.R$", full.names = TRUE)) {
+    lines <- readLines(f, warn = FALSE)
+    rox <- sub(
+      "^[[:space:]]*#'[[:space:]]?",
+      "",
+      lines[grepl("^[[:space:]]*#'", lines)]
+    )
+    if (length(rox) > 0) {
+      swept[[paste0("R/", basename(f))]] <- squash_file(rox)
+    }
+  }
+
+  # Anti-vacuity: an empty sweep, or one whose globs matched nothing, would
+  # satisfy the absence check for free. Both groups must be non-empty, and the
+  # swept text must actually contain the word the pattern is about.
+  expect_gt(sum(grepl("^vignettes/", names(swept))), 3L)
+  expect_gt(sum(grepl("^R/", names(swept))), 3L)
+  expect_true("NEWS.md" %in% names(swept))
+  expect_true(any(grepl("occasions", unlist(swept), fixed = TRUE)))
+
+  hits <- names(swept)[vapply(
+    swept,
+    function(txt) grepl(occasions_numeric_re, txt),
+    logical(1)
+  )]
+  expect_identical(hits, character())
+})
+
+test_that("the occasions = <number> sweep sees the shapes it claims to", {
+  # Discrimination: the pattern is asserted against each spelling directly, so
+  # the sweep above is known to be more than a search for one literal string.
+  squash <- function(x) gsub("[[:space:]]+", " ", paste(x, collapse = " "))
+  caught <- c(
+    "the rows (`occasions = 3` here) give",
+    "the rows (`occasions=3` here) give",
+    "the rows (`occasions =  3` here) give",
+    "pass `occasions = \"3\"` to the call",
+    squash(c("the rows (`occasions =", "3` here) give")) # wrapped across lines
+  )
+  for (s in caught) {
+    expect_true(grepl(occasions_numeric_re, s))
+  }
+  # And is silent on the forms the vignettes legitimately use.
+  passed <- c(
+    "the rows whose `occasions` column reads 1",
+    "`occasions` 3 here, the fitted per-cell replicate count",
+    "occasions = c(\"single\", \"average\")",
+    "the occasion count `n_o` at 3"
+  )
+  for (s in passed) {
+    expect_false(grepl(occasions_numeric_re, s))
+  }
+})
