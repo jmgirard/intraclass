@@ -9,7 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M148 | v0.1.0 is submission-ready, and the upload is handed off | in-progress | M147 | high | milestones/M148-release-v010-submission-ready.md |
+| M148 | v0.1.0 is submission-ready, and the upload is handed off | review | M147 | high | milestones/M148-release-v010-submission-ready.md |
 | M147 | `choose_icc()` answers the type question with "both" | done | — | high | milestones/archive/M147-choose-icc-type-both.md |
 | M146 | The occasion vocabulary says which quantity each surface reports | done | — | high | milestones/archive/M146-occasions-vocabulary.md |
 | M145 | The v0.1.0 release-round documentation remainder | done | — | high | milestones/archive/M145-release-round-doc-remainder.md |

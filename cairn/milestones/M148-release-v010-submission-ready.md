@@ -1,6 +1,6 @@
 # M148: v0.1.0 is submission-ready, and the upload is handed off
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** M147
 - **Driving RR:** —
@@ -114,6 +114,8 @@ version bump or NEWS consolidation, both already done (`DESCRIPTION:4`,
 - 2026-08-29: T4 — rewrote `cran-comments.md`. *R CMD check results* now carries the 2026-08-29 03:25:39 UTC run's own header and `Status: 1 NOTE`, quotes the NOTE, and reports the `_R_CHECK_CRAN_INCOMING_=FALSE` re-run that pins it as the only one. *Test environments* names two environments — the local run and the six-config matrix at the pinned SHA, tabulated per configuration — each with its result, plus the tarball-manifest identity sentence; the "Scheduled before submission, not yet run against this version" block is gone, and win-builder and R-hub are named nowhere in the file (0 matches). `cairn/RELEASE-HANDOFF.md` step 4 accordingly tells the maintainer to add those results to *Test environments* before submitting.
 
 - 2026-08-29: T6 gate — `air format .` no diff; `devtools::document()` no diff; all six `data-raw/` checkers pass `--self-test` (each plants its own defect class and sees it red) and pass in normal mode; `devtools::test()` FAIL 0 | WARN 3 | SKIP 2 | PASS 9465, the three WARNs being the standing candidate-row set re-measured at the M143 review, none a new site. T3's identity check re-run at the final head: the diff from the pinned SHA is eight paths, `cran-comments.md` now joining the seven, and all eight are absent from the tarball manifest.
+
+- 2026-08-29: PR #159 opened; all 9 checks on its head pass — the three-configuration pull-request matrix (ubuntu-latest release, ubuntu-latest 4.5.0, windows-latest release) plus check-references, checkpoint-guard, format-check, lint, pkgdown, test-coverage. Status set to review.
 
 ## Decisions
 
