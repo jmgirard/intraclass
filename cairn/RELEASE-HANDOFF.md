@@ -15,7 +15,7 @@ devtools::check_win_devel()
 ```
 
 Sends the built tarball to win-builder. The result arrives by email at the
-`Maintainer:` address in `DESCRIPTION` (jeffgirard@gmail.com), typically within
+`Maintainer:` address in `DESCRIPTION` (me@jmgirard.com), typically within
 30 minutes. Read the emailed `00check.log`; 0 errors / 0 warnings is the bar,
 and a new-submission NOTE is expected.
 
