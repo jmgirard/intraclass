@@ -5,7 +5,7 @@
 - **Depends on:** M147
 - **Driving RR:** —
 - **Principles touched:** GP2, GP3
-- **Branch/PR:** `m148-release-v010-submission-ready`
+- **Branch/PR:** `m148-release-v010-submission-ready` / https://github.com/jmgirard/intraclass/pull/159
 
 ## Goal
 
