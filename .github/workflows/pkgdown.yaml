@@ -34,9 +34,61 @@ jobs:
           extra-packages: any::pkgdown, local::.
           needs: website
 
+      # The runner installs binary packages from RSPM, so glmmTMB's binary can
+      # be built against an older TMB than the TMB that gets installed beside
+      # it. glmmTMB then warns from .onLoad, and because intraclass imports
+      # glmmTMB that warning renders into every vignette that loads the
+      # package. Rebuilding glmmTMB from source against the installed TMB
+      # removes the skew at its source rather than muting the message.
+      - name: Check glmmTMB against the installed TMB
+        id: tmb-skew
+        run: |
+          matched <- TRUE
+          withCallingHandlers(
+            loadNamespace("glmmTMB"),
+            warning = function(w) {
+              if (grepl("package version mismatch", conditionMessage(w), fixed = TRUE)) {
+                matched <<- FALSE
+              }
+              invokeRestart("muffleWarning")
+            }
+          )
+          cat(sprintf("glmmTMB %s / TMB %s: matched=%s\n",
+                      packageVersion("glmmTMB"), packageVersion("TMB"), matched))
+          cat(sprintf("matched=%s\n", tolower(as.character(matched))),
+              file = Sys.getenv("GITHUB_OUTPUT"), append = TRUE)
+        shell: Rscript {0}
+
+      - name: Rebuild glmmTMB from source against the installed TMB
+        if: steps.tmb-skew.outputs.matched != 'true'
+        run: |
+          install.packages("glmmTMB", type = "source", repos = "https://cloud.r-project.org")
+          matched <- TRUE
+          withCallingHandlers(
+            loadNamespace("glmmTMB"),
+            warning = function(w) {
+              if (grepl("package version mismatch", conditionMessage(w), fixed = TRUE)) {
+                matched <<- FALSE
+              }
+              invokeRestart("muffleWarning")
+            }
+          )
+          if (!matched) {
+            stop("glmmTMB is still built against a different TMB after the source rebuild")
+          }
+        shell: Rscript {0}
+
       - name: Build site
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
         shell: Rscript {0}
+
+      # Guards the prevention above: reds if any built page still shows a
+      # load-time version-skew warning, before anything is published.
+      - name: Check the built pages for load-time version-skew warnings
+        run: |
+          python3 data-raw/check-vignette-render-warnings.py --self-test
+          python3 data-raw/check-vignette-render-warnings.py docs
+        shell: bash
 
       - name: Deploy to GitHub pages 🚀
         if: github.event_name != 'pull_request'

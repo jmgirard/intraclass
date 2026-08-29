@@ -19,7 +19,7 @@ WHAT THIS TEST IS, AND WHAT IT IS NOT
 It is a source-text test: a checker is credited with a self-test when its own
 source contains the literal `--self-test`, which is the flag it would have to
 name in order to branch on it. That discriminates every checker here today --
-the five that self-test all name the flag, the one that does not names nothing.
+the six that self-test all name the flag, the one that does not names nothing.
 
 It is NOT a test that the self-test works, or that it plants anything. A file
 could name the flag and do nothing with it, and this script would credit it.
