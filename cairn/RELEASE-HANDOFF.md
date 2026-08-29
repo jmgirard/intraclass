@@ -45,7 +45,13 @@ If `rhub_setup()` adds a workflow file, give it an `.Rbuildignore` entry only if
 `^\.github$` does not already cover it (it does today), and let the workflow run
 green before step 4.
 
-## 4. Submit to CRAN
+## 4. Add the step 1-3 results to `cran-comments.md`, then submit
+
+`cran-comments.md` names only environments already run, each with its result
+(M148 AC3), so win-builder and R-hub are absent from it today. Add them to the
+*Test environments* section with their outcomes before submitting, and commit
+that edit — it is a `.Rbuildignore`d file, so a docs-only commit to the default
+branch is the right home.
 
 ```r
 devtools::submit_cran()

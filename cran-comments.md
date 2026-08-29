@@ -4,32 +4,55 @@ This is the first submission of intraclass (0.1.0), a new package.
 
 ## R CMD check results
 
-Local `R CMD check --as-cran` on 2026-08-27 (the run's own clock, UTC), under
-R 4.6.1 (2026-06-24) on platform `aarch64-apple-darwin23`, running under
-macOS Tahoe 26.6.2, with `NOT_CRAN=false` and `manual = TRUE`, returned:
+Local `R CMD check --as-cran` on the built `intraclass_0.1.0.tar.gz`, run
+2026-08-29 03:25:39 UTC (the run's own clock) under R 4.6.1 (2026-06-24) on
+platform `aarch64-apple-darwin23`, running under macOS Tahoe 26.6.2, with
+`NOT_CRAN=false`, returned:
 
-    0 errors | 0 warnings | 0 notes
+    Status: 1 NOTE
 
-CRAN's incoming checks will additionally flag this as a new submission. Any
-"possibly misspelled words in DESCRIPTION" it reports are correct: the surnames
-ten Hove, Jorgensen, and van der Ark, and the `doi:` token in the reference.
+    0 errors | 0 warnings | 1 note
+
+The one NOTE is the incoming-feasibility NOTE every first submission gets:
+
+    * checking CRAN incoming feasibility ... NOTE
+    Maintainer: 'Jeffrey Girard <jeffgirard@gmail.com>'
+
+    New submission
+
+Re-running the same check with `_R_CHECK_CRAN_INCOMING_=FALSE` returns
+`Status: OK`, so that NOTE is the only one the package produces.
+
+If CRAN's incoming checks report "possibly misspelled words in DESCRIPTION",
+the words are correct: the surnames ten Hove, Jorgensen, and van der Ark, and
+the `doi:` token in the reference.
 
 ## Test environments
 
-Checked so far:
+Every environment below has been run against version 0.1.0, and its result is
+reported with it.
 
 - Local: macOS Tahoe 26.6.2 on `aarch64-apple-darwin23`, R 4.6.1 — the
-  `--as-cran` run reported above.
-- GitHub Actions, on the release pull request: ubuntu-latest R-release,
-  windows-latest R-release, and ubuntu-latest R 4.5.0 (the declared floor).
+  `--as-cran` run reported above. **0 errors, 0 warnings, 1 note** (the new
+  submission NOTE).
 
-Scheduled before submission, not yet run against this version:
+- GitHub Actions `R CMD check`, at commit
+  `0d651437c5e01ed76551c729be9e5ee456caa999` on the default branch — the full
+  six-configuration push matrix. All six **completed with conclusion
+  `success`** on 2026-08-29:
 
-- GitHub Actions, on the merge commit: the full workflow matrix — ubuntu-latest
-  R-devel / R-release / R-oldrel-1 / R 4.5.0, windows-latest R-release,
-  macos-latest R-release. (The six-config matrix runs on push to the default
-  branch; a pull request runs the three configurations listed above.)
-- win-builder (R-devel and R-release) and R-hub.
+  | Configuration | Result |
+  |---|---|
+  | macos-latest, R release | success |
+  | windows-latest, R release | success |
+  | ubuntu-latest, R devel | success |
+  | ubuntu-latest, R release | success |
+  | ubuntu-latest, R oldrel-1 | success |
+  | ubuntu-latest, R 4.5.0 (the declared floor) | success |
+
+  Every path changed between that commit and the submitted source is excluded
+  from the built tarball by `.Rbuildignore` (they are all under `cairn/` and
+  `data-raw/`), so the matrix ran against the package content submitted here.
 
 ## Downstream dependencies
 

@@ -74,7 +74,7 @@ version bump or NEWS consolidation, both already done (`DESCRIPTION:4`,
 
 ## Tasks
 
-- [ ] T1. After M147 merges, read
+- [x] T1. After M147 merges, read
       `gh api repos/jmgirard/intraclass/commits/<M147 merge SHA>/check-runs`
       and confirm all six push-event configurations completed successfully.
       Pin the head with `gh pr view --json headRefOid`; `gh` 2.98 rejects a
@@ -87,7 +87,7 @@ version bump or NEWS consolidation, both already done (`DESCRIPTION:4`,
       `git diff --name-only <pinned SHA>..HEAD`; confirm the diff touches only
       `.Rbuildignore`d paths (`cran-comments.md` and `cairn/` both are), and
       record both lists.
-- [ ] T4. Rewrite `cran-comments.md`: AC1's run header and result, AC2's
+- [x] T4. Rewrite `cran-comments.md`: AC1's run header and result, AC2's
       matrix reading with its SHA, and the *Test environments* section with no
       unrun environment left in it.
 - [x] T5. Write `cairn/RELEASE-HANDOFF.md` from `cairn/PROFILE.md:76-81`'s
@@ -109,6 +109,9 @@ version bump or NEWS consolidation, both already done (`DESCRIPTION:4`,
 - 2026-08-29: substantive amendment, adopted at a mini gate. AC1 demanded `Status: OK` with 0 notes; unreachable on a networked `--as-cran` run for a package not yet on CRAN, since the incoming-feasibility check reports "New submission" for every first submission. AC1 now binds 0 errors, 0 warnings, and any reported NOTE being that one. It narrows nothing else and adds no criterion. Amended text in the Acceptance criteria section above.
 - 2026-08-29: the amendment's criteria audit ran in FULL mode (user-facing tier) on the amended AC1 wording before it was written, in-session rather than in a fresh-context [O] subagent — agent delegation is not authorized this session, the same departure M145, M146 and M147 recorded. One finding, fixed before the text landed: a draft bound the new-submission NOTE as "its only NOTE", which a run reporting zero NOTEs could not satisfy; narrowed to "any NOTE it reports is". The satisfiability, reachability, bounded-promise, instrument and proportionality questions returned nothing else; the probe question does not apply, AC1 citing no mutation or planted-defect verification.
 - 2026-08-29: T3 — the pinned SHA is `0d65143` (the M147 squash merge, the only recent default-branch commit carrying the six-config matrix; the two later tracking commits ran only the lighter workflows). `git diff --name-only 0d65143..HEAD` lists seven paths, all under `cairn/` or `data-raw/`: `cairn/LESSONS.md`, `cairn/RELEASE-HANDOFF.md`, `cairn/ROADMAP.md`, `cairn/milestones/M147-choose-icc-type-both.md`, `cairn/milestones/M148-release-v010-submission-ready.md`, `cairn/milestones/archive/M147-choose-icc-type-both.md`, `data-raw/record-claims.tsv`. None appears in the 197-entry `tar tzf` manifest of the AC1 tarball, which holds no `cairn/` or `data-raw/` entry at all; `DESCRIPTION`, `NAMESPACE` and `R/icc.R` were looked up the same way as passing controls. Re-run at T6 against the final head.
+
+- 2026-08-29: T1 — all six push-event configurations at the pinned SHA `0d651437c5e01ed76551c729be9e5ee456caa999` read `completed` / `success` from `gh api repos/jmgirard/intraclass/commits/<SHA>/check-runs`, completing between 03:27:52Z and 03:46:14Z: macos-latest release, windows-latest release, ubuntu-latest devel / release / oldrel-1 / 4.5.0. The two later default-branch commits are tracking-only and ran no `R CMD check` job, so this merge commit is the newest default-branch head the six-config matrix covers.
+- 2026-08-29: T4 — rewrote `cran-comments.md`. *R CMD check results* now carries the 2026-08-29 03:25:39 UTC run's own header and `Status: 1 NOTE`, quotes the NOTE, and reports the `_R_CHECK_CRAN_INCOMING_=FALSE` re-run that pins it as the only one. *Test environments* names two environments — the local run and the six-config matrix at the pinned SHA, tabulated per configuration — each with its result, plus the tarball-manifest identity sentence; the "Scheduled before submission, not yet run against this version" block is gone, and win-builder and R-hub are named nowhere in the file (0 matches). `cairn/RELEASE-HANDOFF.md` step 4 accordingly tells the maintainer to add those results to *Test environments* before submitting.
 
 ## Decisions
 
