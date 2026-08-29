@@ -68,12 +68,12 @@ fit
 
 ```{r values, include = FALSE}
 td <- tidy(fit)
-a1 <- td$estimate[1] # ICC(A,1), single rater
-ak <- td$estimate[2] # ICC(A,k), mean of the 4 raters
-ak_lo <- td$conf.low[2]
-ak_hi <- td$conf.high[2]
-cons1 <- tidy(icc(ratings, score, subject, rater,
-  type = "consistency", seed = 2024))$estimate[1]
+a1 <- td$estimate[td$term == "ICC(A,1)"] # single rater
+ak <- td$estimate[td$term == "ICC(A,k)"] # mean of the 4 raters
+ak_lo <- td$conf.low[td$term == "ICC(A,k)"]
+ak_hi <- td$conf.high[td$term == "ICC(A,k)"]
+cons1 <- with(tidy(icc(ratings, score, subject, rater,
+  type = "consistency", seed = 2024)), estimate[term == "ICC(C,1)"])
 fmt <- function(x) sprintf("%.2f", x)
 ```
 
