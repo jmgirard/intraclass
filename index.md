@@ -105,8 +105,8 @@ sure which to report?
 [`choose_icc()`](https://jmgirard.github.io/intraclass/reference/choose_icc.md)
 walks the [*Choosing an
 ICC*](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.html)
-decision tree and hands back the coefficient, the reasoning, and the
-exact call to run. No data or fitting is required:
+decision tree and hands back the coefficient or coefficients, the
+reasoning, and the exact call to run. No data or fitting is required:
 
 ``` r
 

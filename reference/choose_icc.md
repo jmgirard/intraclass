@@ -38,9 +38,9 @@ print(x, ...)
 - type:
 
   `"agreement"` (the value itself must match, so systematic rater
-  offsets count as error) or `"consistency"` (only rank order matters,
-  so a constant per-rater offset is forgiven). Required for a two-way
-  design.
+  offsets count as error), `"consistency"` (only rank order matters, so
+  a constant per-rater offset is forgiven), or `"both"`. Required for a
+  two-way design.
 
 - unit:
 
@@ -153,6 +153,28 @@ choose_icc(type = "consistency", unit = "average", raters = "fixed")
 #> 
 #> Notes:
 #>   - Random raters is the recommended default for interrater reliability; use fixed only when these are the entire population of raters you will ever use.
+#>   - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.
+
+# Both error definitions side by side: the emitted call leaves `type` out,
+# because icc() reports agreement and consistency by default.
+choose_icc(type = "both", unit = "single", raters = "random")
+#> ── Recommended ICC ─────────────────────────────────────────────────────────────
+#> Design: two-way random, absolute agreement & consistency
+#> 
+#> Recommendation: ICC(A,1), ICC(C,1)
+#> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1)
+#> 
+#> Why:
+#>   - Crossed (two-way): the same raters judge every subject.
+#>   - Both error definitions: absolute agreement (the value itself must match) and consistency (a constant per-rater offset is forgiven) side by side.
+#>   - Single rater: you will act on one rater's score.
+#>   - Random raters: a sample you generalize beyond, to the rater universe they were drawn from.
+#> 
+#> Run this on your data:
+#>   icc(data, score, subject, rater, unit = "single")
+#> 
+#> Notes:
+#>   - The emitted call omits type on purpose: icc() reports both error definitions by default, so leaving the argument out is what asks for the pair.
 #>   - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.
 
 # A one-way design (interchangeable raters): type/raters do not apply.

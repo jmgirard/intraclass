@@ -89,8 +89,9 @@ exact <code><a href="icc.html">icc()</a></code> call that computes them. It does
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
 <dd><p><code>"agreement"</code> (the value itself must match, so systematic rater
-offsets count as error) or <code>"consistency"</code> (only rank order matters, so a
-constant per-rater offset is forgiven). Required for a two-way design.</p></dd>
+offsets count as error), <code>"consistency"</code> (only rank order matters, so a
+constant per-rater offset is forgiven), or <code>"both"</code>. Required for a two-way
+design.</p></dd>
 
 
 <dt id="arg-unit">unit<a class="anchor" aria-label="anchor" href="#arg-unit"></a></dt>
@@ -194,6 +195,28 @@ naming the unanswered decision, rather than quietly picking one for you.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Notes:</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">  - Random raters is the recommended default for interrater reliability; use fixed only when these are the entire population of raters you will ever use.</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">  - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Both error definitions side by side: the emitted call leaves `type` out,</span></span></span>
+<span class="r-in"><span><span class="co"># because icc() reports agreement and consistency by default.</span></span></span>
+<span class="r-in"><span><span class="fu">choose_icc</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"both"</span>, unit <span class="op">=</span> <span class="st">"single"</span>, raters <span class="op">=</span> <span class="st">"random"</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Recommended ICC</span> ─────────────────────────────────────────────────────────────</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">Design: two-way random, absolute agreement &amp; consistency</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Recommendation: ICC(A,1), ICC(C,1)</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1)</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Why:</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">  - Crossed (two-way): the same raters judge every subject.</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">  - Both error definitions: absolute agreement (the value itself must match) and consistency (a constant per-rater offset is forgiven) side by side.</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">  - Single rater: you will act on one rater's score.</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">  - Random raters: a sample you generalize beyond, to the rater universe they were drawn from.</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Run this on your data:</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   icc(data, score, subject, rater, unit = "single")</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Notes:</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">  - The emitted call omits type on purpose: icc() reports both error definitions by default, so leaving the argument out is what asks for the pair.</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">  - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># A one-way design (interchangeable raters): type/raters do not apply.</span></span></span>

@@ -436,8 +436,8 @@ well-defined estimands that <code><a href="../reference/icc.html">icc()</a></cod
 </h2>
 <p>If you would rather answer the questions than remember which argument
 each maps to, <code><a href="../reference/choose_icc.html">choose_icc()</a></code> walks the same tree and hands
-back the coefficient to report together with the exact
-<code><a href="../reference/icc.html">icc()</a></code> call that computes it. It does <strong>not</strong>
+back the coefficient or coefficients to report together with the exact
+<code><a href="../reference/icc.html">icc()</a></code> call that computes them. It does <strong>not</strong>
 fit anything, and it takes no <code>data</code> argument. So it is a
 quick way to settle the choice before you run the model.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
@@ -461,9 +461,12 @@ quick way to settle the choice before you run the model.</p>
 <span><span class="co">#&gt; <span style="font-weight: 100;">  - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.</span></span></span></code></pre></div>
 <p>Pass the decisions as arguments, as above. Or, in an interactive
 session, call <code><a href="../reference/choose_icc.html">choose_icc()</a></code> with them omitted to be asked
-each outstanding question in turn. Answering a choice that does not
-apply to your design (for example <code>type</code> under a one-way
-model) is a clear error rather than a silent guess.</p>
+each outstanding question in turn. The <code>type</code>,
+<code>unit</code> and <code>level</code> questions each also take
+<code>"both"</code>, which asks for the pair rather than making you
+choose one. Answering a choice that does not apply to your design (for
+example <code>type</code> under a one-way model) is a clear error rather
+than a silent guess.</p>
 </div>
 <div class="section level2">
 <h2 id="in-short">In short<a class="anchor" aria-label="anchor" href="#in-short"></a>

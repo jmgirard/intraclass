@@ -45,10 +45,12 @@ requires R 4.5.0 or newer.
   curve. *D-studies and within-cell replicates* gives the designs each
   projection supports and where it refuses.
 - [`choose_icc()`](https://jmgirard.github.io/intraclass/reference/choose_icc.md)
-  recommends which coefficient to report, explains the reasoning, and
-  prints the
+  recommends which coefficient or coefficients to report, explains the
+  reasoning, and prints the
   [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) call
-  to run. It gives advice only. See *Choosing an ICC*.
+  to run. Its `type`, `unit` and `level` questions each take `"both"`,
+  which asks for the pair rather than making you choose one. It gives
+  advice only. See *Choosing an ICC*.
 - [`tidy()`](https://generics.r-lib.org/reference/tidy.html) and
   [`glance()`](https://generics.r-lib.org/reference/glance.html) return
   tidy summaries of a fit or a projection.

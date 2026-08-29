@@ -539,8 +539,8 @@ higher of the two:</p>
 level, is part of the <code><a href="../reference/choose_icc.html">choose_icc()</a></code> decision helper too. The
 <a href="choosing-an-icc.html"><em>Choosing an ICC</em></a> guide walks
 the other four axes. Pass the design and it hands back the coefficient
-to report and the exact <code><a href="../reference/icc.html">icc()</a></code> call, without fitting
-anything:</p>
+or coefficients to report and the exact <code><a href="../reference/icc.html">icc()</a></code> call, without
+fitting anything:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/choose_icc.html">choose_icc</a></span><span class="op">(</span>model <span class="op">=</span> <span class="st">"twoway"</span>, multilevel <span class="op">=</span> <span class="cn">TRUE</span>, level <span class="op">=</span> <span class="st">"cluster"</span>,</span>
 <span>  type <span class="op">=</span> <span class="st">"consistency"</span>, unit <span class="op">=</span> <span class="st">"single"</span>, raters <span class="op">=</span> <span class="st">"random"</span><span class="op">)</span></span>

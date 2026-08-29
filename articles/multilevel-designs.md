@@ -517,7 +517,7 @@ part of the
 decision helper too. The [*Choosing an
 ICC*](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.md)
 guide walks the other four axes. Pass the design and it hands back the
-coefficient to report and the exact
+coefficient or coefficients to report and the exact
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) call,
 without fitting anything:
 

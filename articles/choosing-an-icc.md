@@ -341,10 +341,10 @@ computes.
 If you would rather answer the questions than remember which argument
 each maps to,
 [`choose_icc()`](https://jmgirard.github.io/intraclass/reference/choose_icc.md)
-walks the same tree and hands back the coefficient to report together
-with the exact
+walks the same tree and hands back the coefficient or coefficients to
+report together with the exact
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) call
-that computes it. It does **not** fit anything, and it takes no `data`
+that computes them. It does **not** fit anything, and it takes no `data`
 argument. So it is a quick way to settle the choice before you run the
 model.
 
@@ -373,10 +373,11 @@ choose_icc(type = "agreement", unit = "single", raters = "random")
 Pass the decisions as arguments, as above. Or, in an interactive
 session, call
 [`choose_icc()`](https://jmgirard.github.io/intraclass/reference/choose_icc.md)
-with them omitted to be asked each outstanding question in turn.
-Answering a choice that does not apply to your design (for example
-`type` under a one-way model) is a clear error rather than a silent
-guess.
+with them omitted to be asked each outstanding question in turn. The
+`type`, `unit` and `level` questions each also take `"both"`, which asks
+for the pair rather than making you choose one. Answering a choice that
+does not apply to your design (for example `type` under a one-way model)
+is a clear error rather than a silent guess.
 
 ## In short
 
