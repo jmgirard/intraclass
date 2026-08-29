@@ -409,8 +409,10 @@ test_that("ggplot2 stays a Suggests dependency (light-install, ADR-010)", {
 })
 
 # --- M146: the legend names the averaging divisor, not the design count -------
-# `occasions` is the number of ratings averaged into a curve's coefficient;
-# `n_o` is the observed per-cell count of the fitted design (D-044). The legend
+# `occasions` is the per-rater occasion divisor a curve's coefficient applies to
+# pure error; `n_o` is the observed per-cell count of the fitted design (D-044).
+# It is not a ratings count: an occasion-averaged `ICC(A,k)` over four raters at
+# `occasions` 3 averages twelve ratings. The legend
 # used to spell the former with the latter's symbol. AC2's cell set is the
 # crossing of the fit's `type` set, its `occasions` set, and the two projection
 # axes -- eight plots, all drawn from a replicated fit.

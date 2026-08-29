@@ -302,10 +302,12 @@ occ_expected_fit_values <- function(exp, request) {
 }
 
 # The values the rule predicts across the WHOLE column of a fit -- the subject
-# side plus the cluster level's placeholder 1. A rater projection takes exactly
-# this set, so on a crossed multilevel fit asked for `occasions = "average"`
-# alone it still projects a subject curve at 1, which the fit does not report
-# (`?d_study` says so).
+# side plus, where the fit reports a cluster level, that level's placeholder 1.
+# A rater projection takes exactly this set, so on a crossed multilevel fit
+# asked for `occasions = "average"` alone it still projects a subject curve at
+# 1, which the fit does not report (`?d_study` says so). A multilevel fit
+# reporting no cluster level carries no placeholder, which is why the expected
+# set below adds it only when the case declares a cluster level.
 occ_expected_all_values <- function(exp, request) {
   vals <- occ_expected_fit_values(exp, request)
   if (exp$replicates && "cluster" %in% exp$levels) {

@@ -6,8 +6,10 @@
 # quantities (D-044), so the reference manual has to say which is which. Every
 # sentence pinned below was DERIVED from the measured grid in M146 T15, never
 # composed per design family: that shape falsified this criterion twice
-# (`LESSONS.md:47`). These tests read the INSTALLED help database, not `R/*.R`,
-# so the pin runs under `R CMD check`, where the sources are absent.
+# (`LESSONS.md:47`). These tests read the RENDERED help pages, not `R/*.R`, so
+# the pin runs under `R CMD check`, where the sources are absent; `man_pages()`
+# below collects every rendered surface that is present, so a source-tree run
+# cannot pass on a stale installed copy.
 #
 # Every pattern below is matched over whitespace-collapsed text and spelled
 # WITHOUT backticks: `rd_flat()` is `rapply(as.character)` over the parsed Rd

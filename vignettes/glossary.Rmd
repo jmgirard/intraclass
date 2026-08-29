@@ -223,20 +223,23 @@ One of several ratings the *same* rater gives the *same* subject. A design with
 occasions lets `icc()` separate the [subject-by-rater
 interaction](#variance-component) from pure error. `glance()` reports the
 per-cell count in its `n_o` column. The printed report spells that same count
-on its design line, as `N cells x N replicates`; where `n_o` is `NA` the design
-line reads `NA` in that slot too. A multilevel fit's design line reports
-subjects and clusters instead, and shows no per-cell count anywhere, so read
-`n_o` for it there. See [*D-studies and within-cell
+on its design line, as `N cells x N replicates`. Where `n_o` is `NA` because the
+cells hold unequal counts, that slot reads `NA` too. Only a fit that splits
+replicates carries the slot at all. A multilevel fit's design line reports
+subjects and clusters instead, and a fit that splits none reports observations
+or ratings, so read `n_o` for those. See [*D-studies and within-cell
 replicates*](d-studies-and-replicates.html).
 
 ## `occasions` vs. `n_o`
 
-Two near-identical names for different quantities. `tidy()`'s `occasions`
-column is the **per-rater occasion divisor** that row's coefficient applies to
-pure error. It reads 1 on every row that averages no occasions, which includes
-every row whose error set carries no pure-error term to average. It reads the
-fitted per-cell count where the row does average, and `NA` on a fit that splits
-no within-cell replicates. `glance()`'s `n_o` counts the **occasions observed per cell** in
+Two near-identical names for different quantities. On an `icc()` fit, `tidy()`'s
+`occasions` column is the **per-rater occasion divisor** that row's coefficient
+applies to pure error. It reads 1 on every row that averages no occasions, which
+includes every row whose error set carries no pure-error term to average. It
+reads the fitted per-cell count where the row does average, and `NA` on a fit
+that splits no within-cell replicates. On a `d_study()` projection the same
+column reports the count each row is *projected* at instead, which `?d_study`
+states. `glance()`'s `n_o` counts the **occasions observed per cell** in
 the design that was fitted, and is `NA` under the condition `?icc` states for
 it. So on a design with three ratings per cell, a fit reporting both settings
 shows `occasions` 1 and 3 down its rows, while `n_o` is 3 for the fit as a

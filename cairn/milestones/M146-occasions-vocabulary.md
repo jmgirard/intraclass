@@ -123,7 +123,7 @@ Repair tasks (the second 2026-08-28 defect return, and the AC1 amendment):
 - [x] T15. Measure what `occasions` reads across every design class and both
       projection axes, and record the grid in the work log. Every clause of the
       amended AC1 is derived from it, none from recall.
-- [ ] T16. Rewrite both roxygen column lists to the amended AC1 (`R/icc.R`'s
+- [x] T16. Rewrite both roxygen column lists to the amended AC1 (`R/icc.R`'s
       `tidy.icc()` list, `R/d-study.R`'s `tidy.icc_dstudy()` list). Document.
 - [x] T17. Re-pin the amended sentences in `test-occasions-vocabulary.R` and
       mutation-verify each pin red; add a GENERATED design-axis grid
@@ -913,3 +913,47 @@ approval marker.
   2026-08-28 AC4 amendment-gate log line above: the audit finding that bare
   `tidy()` spans two methods is NOT folded in -- `vignettes/glossary.Rmd` has
   said `tidy()` in all three of its branch commits (round-3 finding 3).
+
+#### Fix-now pass at the gate (2026-08-28)
+
+The maintainer chose "fix the seven, then merge" at the merge-approval chip.
+Findings 1-7 are repaired on the branch:
+
+1. `?d_study` and the `R/autoplot.R` comment now qualify the placeholder as
+   "where the fit reports a cluster level"; the `test-occasions-grid.R` comment
+   naming the same set gains the multilevel-without-cluster-level case, which
+   its expectation code already gated on.
+2. The *Occasion* entry now says the `NA` slot appears where the cells hold
+   unequal counts, that only a fit which splits replicates carries the slot at
+   all, and that a multilevel fit or a fit that splits none reports something
+   else. Read off `format.icc()`'s branch order (`R/icc-methods.R:70-95`) and
+   the three fits measured under AC4 above.
+3. The `occasions` vs. `n_o` entry now scopes its rule to an `icc()` fit and
+   names what the same column reports on a `d_study()` projection.
+4. The replicate vignette now says the occasion-averaged rows divide pure error
+   by three occasions per rater, with `ICC(A,1)` and `ICC(A,k)` read separately.
+5, 7. The two stale comments rewritten.
+6. T16's checkbox ticked.
+
+Re-run gate: `devtools::test()` FAIL 0, WARN 3 (the standing default-branch
+count), SKIP 2, PASS 9436 -- unchanged by the fixes. `air format --check .`
+exit 0; `lintr::lint_package()` 0 lints; `devtools::document()` regenerated
+`man/d_study.Rd` and leaves no further diff; `pkgdown::check_pkgdown()` no
+problems; `cairn_validate.py` exit 0; all six `data-raw/` checkers pass.
+
+The first fix pass FAILED `R CMD check` with 1 ERROR: the word "unreplicated",
+introduced in the glossary by fix 2, is absent from the wordlist and
+`tests/spelling.R` errors on it. Reworded to "a fit that splits none", the
+phrase the reference manual already uses; `spelling::spell_check_package()`
+reports no errors and the second run's raw Status line is `Status: OK` with the
+`spelling.Rout.save` comparison OK.
+
+Prose ruler after the fixes, against `origin/main`: `R/d-study.R` over-35 3
+(was 4), semicolons 4 (5); `R/icc.R` 4 (4), dash 5 (5), semicolons 6 (7);
+`R/autoplot.R` unchanged; `glossary.Rmd` over-35 1 (1), dash 0 (0), semicolons
+4 (4); `d-studies-and-replicates.Rmd` all counters 0, unchanged. Every touched
+file is at or better than its baseline on all four counters.
+- 2026-08-28: fix-now pass at the gate. Findings 1-7 repaired on the branch and
+  the full gate re-run green; the first pass errored `R CMD check` on a
+  wordlist-absent word, reworded. Merge approval stands: the fixes are wording
+  only, no criterion text or scope changed.
