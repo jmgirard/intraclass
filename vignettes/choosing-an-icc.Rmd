@@ -66,7 +66,7 @@ oneway
 A one-way model cannot separate systematic rater differences from error, so it
 folds them into the residual and reports a single `ICC(1)` / `ICC(k)`. That makes
 it the **most conservative** coefficient: on this data `ICC(1)` is
-`r sprintf("%.2f", tidy(oneway)$estimate[1])`, below the two-way `ICC(A,1)` and
+`r sprintf("%.2f", with(tidy(oneway), estimate[term == "ICC(1)"]))`, below the two-way `ICC(A,1)` and
 `ICC(C,1)` you will see next, precisely because those separate the rater effect
 that one-way absorbs. The agreement/consistency and fixed/random choices below do
 not apply to one-way, where there is no rater term to reason about. Answer this
@@ -88,8 +88,8 @@ consistency
 ```
 
 ```{r type-values, echo = FALSE}
-a1 <- tidy(agreement)$estimate[1]
-c1 <- tidy(consistency)$estimate[1]
+a1 <- with(tidy(agreement), estimate[term == "ICC(A,1)"])
+c1 <- with(tidy(consistency), estimate[term == "ICC(C,1)"])
 ```
 
 Here `ICC(A,1)` is `r sprintf("%.2f", a1)` but `ICC(C,1)` is
@@ -108,7 +108,7 @@ independent error, so `ICC(*,k)` is always the larger number (the
 Spearman--Brown relationship).
 
 ```{r unit-values, echo = FALSE}
-ak <- tidy(agreement)$estimate[2]
+ak <- with(tidy(agreement), estimate[term == "ICC(A,k)"])
 ```
 
 For absolute agreement above, the single-rater `r sprintf("%.2f", a1)` rises to
