@@ -83,28 +83,18 @@ coefficient you ask for.
 
 ``` r
 
-axes <- expand.grid(
-  type = c("agreement", "consistency"),
-  unit = c("single", "average"),
-  stringsAsFactors = FALSE
+glmmtmb <- tidy(icc(ratings, score, subject, rater, engine = "glmmTMB", seed = 1))
+lavaan <- tidy(icc(ratings, score, subject, rater, engine = "lavaan", seed = 1))
+data.frame(
+  term = glmmtmb$term,
+  glmmTMB = round(glmmtmb$estimate, 4),
+  lavaan = round(lavaan$estimate, 4)
 )
-compare <- do.call(rbind, Map(function(type, unit) {
-  g <- icc(ratings, score, subject, rater, type = type, unit = unit,
-           engine = "glmmTMB", seed = 1)
-  l <- icc(ratings, score, subject, rater, type = type, unit = unit,
-           engine = "lavaan", seed = 1)
-  data.frame(
-    term = tidy(g)$term,
-    glmmTMB = round(tidy(g)$estimate, 4),
-    lavaan = round(tidy(l)$estimate, 4)
-  )
-}, axes$type, axes$unit))
-compare[!duplicated(compare$term), ]
-#>                  term glmmTMB lavaan
-#> agreement    ICC(A,1)  0.2898 0.2843
-#> consistency  ICC(C,1)  0.7148 0.7148
-#> agreement1   ICC(A,k)  0.6201 0.6137
-#> consistency1 ICC(C,k)  0.9093 0.9093
+#>       term glmmTMB lavaan
+#> 1 ICC(A,1)  0.2898 0.2843
+#> 2 ICC(A,k)  0.6201 0.6137
+#> 3 ICC(C,1)  0.7148 0.7148
+#> 4 ICC(C,k)  0.9093 0.9093
 ```
 
 **Consistency** coefficients are a ratio of the subject and residual
