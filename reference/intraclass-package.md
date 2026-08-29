@@ -25,10 +25,10 @@ Useful links:
 
 ## Author
 
-**Maintainer**: Jeffrey Girard <jeffgirard@gmail.com>
+**Maintainer**: Jeffrey Girard <me@jmgirard.com>
 ([ORCID](https://orcid.org/0000-0002-7359-3746))
 
 Authors:
 
-- Jeffrey Girard <jeffgirard@gmail.com>
+- Jeffrey Girard <me@jmgirard.com>
   ([ORCID](https://orcid.org/0000-0002-7359-3746))
