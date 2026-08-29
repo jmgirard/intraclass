@@ -31,7 +31,7 @@ still deferred by ADR-021; the v0.1.0 submission itself → M148.
 
 ## Acceptance criteria
 
-- [ ] AC1. `choose_icc(type = "both", ...)` returns an `icc_recommendation`
+- [x] AC1. `choose_icc(type = "both", ...)` returns an `icc_recommendation`
       whose `$rows` holds one row per (type x unit x level) combination the
       other answers select, each row's `index` and `sf_index` read from
       `icc_estimand()` as the single-type rows already are
@@ -40,18 +40,18 @@ still deferred by ADR-021; the v0.1.0 submission itself → M148.
       Shrout & Fleiss equivalent is `ICC(2,1)`, and `ICC(C,1)`, for which the
       crosswalk names no Shrout & Fleiss equivalent (`sf_index` is `NA`) --
       `ICC(3,1)` is the *fixed*-rater consistency label, not this one.
-- [ ] AC2. `choose_icc(type = "both", ...)$call` omits `type =` from the
+- [x] AC2. `choose_icc(type = "both", ...)$call` omits `type =` from the
       emitted `icc()` call, and evaluating that call on the shipped `ratings`
       data returns exactly the coefficients AC1's rows name — ADR-021's
       round-trip oracle, extended to the new value. Established over every
       valid axis combination the existing round-trip grid at
       `tests/testthat/test-choose-icc.R:55-95` enumerates, with `"both"` added
       to its `type` vector.
-- [ ] AC3. `choose_icc(model = "oneway", type = "both", ...)` aborts with the
+- [x] AC3. `choose_icc(model = "oneway", type = "both", ...)` aborts with the
       same classed inapplicable condition `type = "agreement"` raises on a
       one-way design today (`R/choose-icc.R:291`) — the one-way design has no
       type axis, and `"both"` does not become an exception to that.
-- [ ] AC4. `grep -rn 'choose_icc' R/ man/ vignettes/ README.Rmd NEWS.md`
+- [x] AC4. `grep -rn 'choose_icc' R/ man/ vignettes/ README.Rmd NEWS.md`
       returns no hit that states the `type` axis's accepted values without
       `"both"`, and no hit claiming the chooser resolves to a single
       coefficient — the claim `R/choose-icc.R:447-450` makes today, already
@@ -105,7 +105,109 @@ still deferred by ADR-021; the v0.1.0 submission itself → M148.
 - 2026-08-28: AC1 amended at a mini gate (substantive). Its named case claimed `ICC(C,1)` pairs with Shrout & Fleiss `ICC(3,1)` under random raters; the crosswalk names no Shrout & Fleiss equivalent there, and `ICC(3,1)` is the fixed-rater consistency label -- `test-choose-icc.R:122` has asserted the `NA` since M12. Unsatisfiable as written. The maintainer chose correcting the labels over switching the example to fixed raters; the row-set promise is unchanged and no criterion was added or widened.
 - 2026-08-28: the amended AC1 wording went through the full criteria audit (user-facing tier) before it was written. It ran in-session rather than in a fresh-context [O] subagent -- agent delegation is not authorized this session, the same departure the plan gate and M145/M146 recorded. No findings: the named case is reachable (run against the branch), no IP or D-entry blocks it, "one row per (type x unit x level) combination the other answers select" quantifies over the domain `recommendation_rows()`'s own three expanded vectors enumerate, the promise binds `choose_icc()`'s returned object rather than any test or recording instrument, its domain is the exported function's return value at the declared user-facing tier, and the criterion cites no mutation or planted-defect probe. The `R/choose-icc.R:401-434` cite predates this branch's edits and was left rather than re-churned.
 - 2026-08-28: plan gate chose the string `"both"` over `icc()`'s vector vocabulary `c("agreement", "consistency")` because D-037 classifies arguments per (function, argument) pair and `choose_icc()`'s own `unit` and `level` axes already spell the pair `"both"`; falsified by evidence that a user reads the two functions' `type` vocabularies as one contract.
+- 2026-08-28: review ran. All four criteria verified fresh and ticked against their evidence lines; the consistency gate is clean (`cairn_validate` exit 0, `devtools::check()` `Status: OK`, suite FAIL 0 | PASS 9465). Three review lenses ran in-session rather than in fresh-context subagents -- agent delegation is not authorized this session, the third such departure this milestone records. One low-rank finding (F1, a NEWS bullet that does not say `type` and `level` only exist on the designs that have them); it does not meet the return floor. No defect return.
 
 ## Decisions
 
 ## Review
+
+Reviewed 2026-08-28 on branch `m147-choose-icc-type-both` (7 commits ahead of
+`main`, which is level with `origin/main` and a strict ancestor -- no merge
+needed). PR #158, already open and pushed.
+
+**AC1 -- verified.** `choose_icc(type = "both", unit = "single", raters =
+"random")$rows` returns exactly two rows, both `level = "subject"`:
+`ICC(A,1)`/`sf_index = "ICC(2,1)"` and `ICC(C,1)`/`sf_index = NA`. Read at
+`R/choose-icc.R:410-446`, `recommendation_rows()` calls `icc_estimand()` once
+per (type x level x unit) and takes `index`/`sf_index` from its `label`/
+`sf_label` -- the same single source the single-type rows use. The quantifier
+holds off the named case too: `type = "both"`, `unit = "both"`, `multilevel`
+with `level = "both"` returns all 8 combinations, type outermost.
+
+**AC2 -- verified.** `$call` for the named case is
+`icc(data, score, subject, rater, unit = "single")` -- no `type =`. Evaluated on
+the shipped `ratings`, it returns exactly `ICC(A,1)` (0.2898) and `ICC(C,1)`
+(0.7148), the two coefficients AC1's rows name and no others. The round-trip
+grid at `tests/testthat/test-choose-icc.R:56-77` now carries `"both"` in its
+`type` vector, so all 18 two-way axis combinations round-trip.
+
+**AC3 -- verified.** `choose_icc(model = "oneway", type = "both", unit =
+"single")` aborts `intraclass_inapplicable/intraclass_error` with ``"`type`
+does not apply to a one-way design."`` -- identical class and message to the
+`type = "agreement"` one-way case run as a control. The failure is
+discriminating: an invalid value (`type = "bogus"`) raises `intraclass_error`
+*without* the `intraclass_inapplicable` subclass, so the asserted class cannot
+be satisfied by a rejected value.
+
+**AC4 -- verified.** `grep -rn 'choose_icc' R/ man/ vignettes/ README.Rmd
+NEWS.md` returns 39 hits (up from T4's 36; the branch's own added example and
+`@rdname` lines account for the difference). Every hit read: none states the
+`type` axis's accepted values without `"both"` -- the two that state the
+vocabulary at all (`R/choose-icc.R:41-43`, `man/choose_icc.Rd:28-31`) both name
+it -- and none claims a single coefficient; the five that used to
+(`vignettes/choosing-an-icc.Rmd:255`, `vignettes/multilevel-designs.Rmd:338`,
+`README.Rmd:98`, `NEWS.md:35`, `R/choose-icc.R`'s `build_icc_call()` comment)
+now read "the coefficient or coefficients". The remaining 34 are the name in
+code, `@rdname`/`\name`/`\alias`/usage lines, and example calls making no such
+claim.
+
+**Consistency gate -- clean.** `cairn_validate.py` exit 0: 16 PASS, 7 advisories
+all OK (the `release window` advisory did not fire). No `DESIGN.md` principle
+changed on this branch, so `cairn_impact.py` was skipped. Toolchain slot
+(`r-package`): `devtools::check()` `Status: OK` -- 0 errors, 0 warnings,
+0 notes, 13m 9s on intraclass 0.1.0; `devtools::test()`
+`[ FAIL 0 | WARN 3 | SKIP 2 | PASS 9465 ]`, the same WARN 3 the default branch
+carries (two fitting diagnostics plus the fixed-rater advisory from an
+unwrapped `icc()` call at `test-icc-brms.R:2425`); `devtools::document()` and
+`devtools::build_readme()` both produced no diff; `air format --check .` clean;
+`pkgdown::check_pkgdown()` "No problems found"; `NEWS.md` carries the
+user-visible bullet under *What ships*; no new top-level file, and `check()`
+reports no `.Rbuildignore` NOTE. No criterion or gate check failed, so no
+return; the defect-return count for this milestone stands at 0.
+
+**Independent review -- three lenses, run in-session.** Agent delegation is not
+authorized this session, so the fan-out ran in-session rather than in
+fresh-context subagents -- the same departure the plan gate and the AC1
+amendment audit recorded, and M145/M146 before them. The reader is therefore
+not fresh; that is the known cost of the departure.
+
+- *[O] diff-bug, `git diff main..HEAD`:* one finding (F1 below). The row-order
+  and call-shape claims the diff's new comments make were each checked against
+  an execution rather than read: `format()`'s "same header a fit reporting both
+  prints" claim matches `format(icc(ratings, ...))[1]` verbatim
+  ("two-way random, absolute agreement & consistency"); the emitted call's
+  round trip is AC2. `recommendation_notes()` gained a `type` argument and its
+  only caller passes it; the `!oneway` guard means a one-way `NA_character_`
+  type never reaches the new branch.
+- *[S] blame-history:* no findings. The comment the diff rewrites at
+  `build_icc_call()` was authored by M44 (`7aff8b3`, 2026-07-12) to stop an
+  unpinned call computing formulations the user did not ask for. The change
+  narrows the pin to single-type answers only, which serves that intent rather
+  than undoing it -- under `type = "both"` the extra formulation *is* what was
+  asked for. Its stale second clause ("resolves to ONE coefficient") was
+  already false for `unit = "both"`, as the work log's collision check records.
+- *[S] prior-review:* no findings. The GitHub inline-comment probe
+  (`gh api repos/jmgirard/intraclass/pulls/comments?per_page=1`) returned `[]`,
+  so no thread surface was walked. Archived `## Review` sections touching
+  `R/choose-icc.R`: M136 (a colon re-attaching a list in a `choose_icc()`
+  roxygen block), M131 (`@return` naming every alias on the page), M48
+  (`validate_choice()` must abort classed on a multi-valued choice argument).
+  None is reintroduced: the rewritten `@param type` is a flat three-item list,
+  the `@return` block is untouched, and `choose_icc(type =
+  c("agreement", "consistency"))` still aborts `intraclass_error` with
+  ``` `type` must be one of "agreement", "consistency", and "both". ``` --
+  re-run on the branch.
+
+**Findings and disposition.**
+
+- **F1 (low).** `NEWS.md:36-38` says the `type`, `unit` and `level` questions
+  "each take `"both"`" without noting that `type` exists only on a two-way
+  design and `level` only on a multilevel one, so a reader could take
+  `choose_icc(model = "oneway", type = "both")` for supported; it aborts
+  classed. The *Choosing an ICC* article states the same sentence but is
+  followed immediately by "Answering a choice that does not apply to your
+  design (for example `type` under a one-way model) is a clear error rather
+  than a silent guess"; `NEWS.md` has no such neighbour. Does not demonstrate
+  any acceptance criterion failing (AC4 asks that no surface state the `type`
+  vocabulary *without* `"both"`, which this states), so it does not meet the
+  return floor. Disposition: at the gate.
