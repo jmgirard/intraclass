@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-28 (M146 merged and archived; M141 rotated out of the terminal rows and `record-claims.tsv`'s `roadmap-terminal-rows` expectation rotated with it, in this commit. M146's deferred-display candidate row took ROADMAP past its byte budget, so this stamp is short and that row was compressed: 56 lines / 23,988 bytes, LESSONS 49 / 19,999, both just under. `prose-style.md` is at 119 lines against its own < 120 budget; the other three doctrine modules still state none (existing candidate row). Nothing retired or graduated: M146's `occasions` grid pins one field's rule and does not enforce the general per-family lesson at `LESSONS.md:47`, so that line still earns its place and was compressed in place to take M146 as its third instance.)_
+_Last hygiene check: 2026-08-28 (M147 merged and archived; M142 rotated out of the terminal rows and `record-claims.tsv`'s `roadmap-terminal-rows` expectation rotated with it, in this commit. ROADMAP 56 lines / 23,606 bytes, LESSONS 49 / 19,998, both under. `prose-style.md` is at 119 lines / 6,952 bytes against its own < 120 / < 8,000; the other three doctrine modules still state no budget (existing candidate row). Nothing retired or graduated: M147 shipped no guard and moved no content, so its lesson extended the M114 criteria-audit line in place as a second instance, paid for by compressing five lines to hold the byte cap.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -10,13 +10,12 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
 | M148 | v0.1.0 is submission-ready, and the upload is handed off | planned | M147 | high | milestones/M148-release-v010-submission-ready.md |
-| M147 | `choose_icc()` answers the type question with "both" | review | — | high | milestones/M147-choose-icc-type-both.md |
+| M147 | `choose_icc()` answers the type question with "both" | done | — | high | milestones/archive/M147-choose-icc-type-both.md |
 | M146 | The occasion vocabulary says which quantity each surface reports | done | — | high | milestones/archive/M146-occasions-vocabulary.md |
 | M145 | The v0.1.0 release-round documentation remainder | done | — | high | milestones/archive/M145-release-round-doc-remainder.md |
 | M144 | NEWS's *What ships* names the designs the package actually supports | done | — | normal | milestones/archive/M144-news-what-ships-designs.md |
 | M143 | Design 3 stops reporting a rater treatment for a facet it does not have | done | — | high | milestones/archive/M143-design3-rater-facet.md |
-| M142 | NEWS.md's 0.1.0 entry reads as first-release notes, not a development log | done | — | high | milestones/archive/M142-news-release-notes.md |
-<!-- terminal-row retention: M146 done (2026-08-28) → M141 rotated out (oldest terminal by merge order; its archive file still resolves there). Kept: M146, M145, M144, M143, M142 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
+<!-- terminal-row retention: M147 done (2026-08-28) → M142 rotated out (oldest terminal by merge order; its archive file still resolves there). Kept: M147, M146, M145, M144, M143 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
