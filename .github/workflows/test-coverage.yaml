@@ -4,16 +4,14 @@ on:
   push:
     branches: [main, master]
     paths-ignore:
+      # Only paths that cannot enter the built package. `cairn/` is
+      # `.Rbuildignore`d (`^cairn$`) and contributes 0 of the tarball's 198
+      # entries. `man/` (16 entries), `vignettes/*.Rmd` (10) and `README.md`
+      # (1) all ship, so a change to any of them must be checked.
       - 'cairn/**'
-      - 'man/**'
-      - 'README.md'
-      - '**/*.Rmd'
   pull_request:
     paths-ignore:
       - 'cairn/**'
-      - 'man/**'
-      - 'README.md'
-      - '**/*.Rmd'
 
 name: test-coverage.yaml
 
