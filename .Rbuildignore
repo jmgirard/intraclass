@@ -17,3 +17,4 @@
 ^tests/testthat/_problems$
 testthat-problems[.]rds$
 ^Rplots\.pdf$
+^CRAN-SUBMISSION$
