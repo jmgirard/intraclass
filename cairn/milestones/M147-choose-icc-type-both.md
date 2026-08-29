@@ -36,8 +36,10 @@ still deferred by ADR-021; the v0.1.0 submission itself → M148.
       other answers select, each row's `index` and `sf_index` read from
       `icc_estimand()` as the single-type rows already are
       (`R/choose-icc.R:401-434`). On a two-way, random-rater, single-unit,
-      non-multilevel design that is exactly two rows: `ICC(A,1)` / `ICC(2,1)`
-      and `ICC(C,1)` / `ICC(3,1)`.
+      non-multilevel design that is exactly two rows: `ICC(A,1)`, whose
+      Shrout & Fleiss equivalent is `ICC(2,1)`, and `ICC(C,1)`, for which the
+      crosswalk names no Shrout & Fleiss equivalent (`sf_index` is `NA`) --
+      `ICC(3,1)` is the *fixed*-rater consistency label, not this one.
 - [ ] AC2. `choose_icc(type = "both", ...)$call` omits `type =` from the
       emitted `icc()` call, and evaluating that call on the shipped `ratings`
       data returns exactly the coefficients AC1's rows name — ADR-021's
@@ -69,7 +71,7 @@ still deferred by ADR-021; the v0.1.0 submission itself → M148.
       expectation (AC1's named two-row case), the emitted-call omission, and
       the one-way inapplicability case beside the existing `type = "agreement"`
       one.
-- [ ] T2. `resolve_*` validates `type` against
+- [x] T2. `resolve_*` validates `type` against
       `c("agreement", "consistency", "both")` (`R/choose-icc.R:312-320`);
       `recommendation_rows()` gains a `types` loop mirroring its `units` and
       `levels` switches (`R/choose-icc.R:401-412`).
@@ -95,6 +97,9 @@ still deferred by ADR-021; the v0.1.0 submission itself → M148.
 - 2026-08-28: absorbs the ROADMAP candidate row "`choose_icc()` accepts `type = \"both\"`" (lineage: RR04 rec. 8 -> M48 ingest 2026-08-25), removed from Candidates in this commit. The row triaged it out of M48 as "additive after release"; the maintainer chose at this plan's question gate to land it before the CRAN door closes instead.
 - 2026-08-28: T1 tests written, run red: 6 failures at `test-choose-icc.R:64,139,164,177,384,385`, every one the `validate_choice()` abort ``` `type` must be one of "agreement" and "consistency". ``` reached from `R/choose-icc.R:313`. AC3's one-way case (`test-choose-icc.R:208`) passes already and is discriminating: `choose_icc(model = "oneway", unit = "single", type = "both")` raises `intraclass_inapplicable/intraclass_error` from `reject_inapplicable()`, while the invalid-value path raises `intraclass_error` without that subclass, so the asserted class cannot be satisfied by a rejected value.
 - 2026-08-28: implement question gate, both answered as recommended: the interactive `type` question gains a third choice `"both"` (its `unit` and `level` siblings already offer one), and a both-type recommendation carries a note saying the emitted call omits `type =` because `icc()` reports both error definitions by default. Row order was settled in-session without a gate: `recommendation_rows()` loops type outermost, matching the order `icc()` itself builds its estimate table in (`R/icc.R:2243`, `R/icc.R:2330`).
+- 2026-08-28: T2 done. `validate_choice()` accepts `"both"` for `type`; `recommendation_rows()` loops type outermost, then level, then unit, matching the order `icc()` builds its estimate table in. The interactive walkthrough's type question gained its third choice. AC1's row expectations now pass; the remaining 6 failures are all the emitted-call and display work T3 owns.
+- 2026-08-28: AC1 amended at a mini gate (substantive). Its named case claimed `ICC(C,1)` pairs with Shrout & Fleiss `ICC(3,1)` under random raters; the crosswalk names no Shrout & Fleiss equivalent there, and `ICC(3,1)` is the fixed-rater consistency label -- `test-choose-icc.R:122` has asserted the `NA` since M12. Unsatisfiable as written. The maintainer chose correcting the labels over switching the example to fixed raters; the row-set promise is unchanged and no criterion was added or widened.
+- 2026-08-28: the amended AC1 wording went through the full criteria audit (user-facing tier) before it was written. It ran in-session rather than in a fresh-context [O] subagent -- agent delegation is not authorized this session, the same departure the plan gate and M145/M146 recorded. No findings: the named case is reachable (run against the branch), no IP or D-entry blocks it, "one row per (type x unit x level) combination the other answers select" quantifies over the domain `recommendation_rows()`'s own three expanded vectors enumerate, the promise binds `choose_icc()`'s returned object rather than any test or recording instrument, its domain is the exported function's return value at the declared user-facing tier, and the criterion cites no mutation or planted-defect probe. The `R/choose-icc.R:401-434` cite predates this branch's edits and was left rather than re-churned.
 - 2026-08-28: plan gate chose the string `"both"` over `icc()`'s vector vocabulary `c("agreement", "consistency")` because D-037 classifies arguments per (function, argument) pair and `choose_icc()`'s own `unit` and `level` axes already spell the pair `"both"`; falsified by evidence that a user reads the two functions' `type` vocabularies as one contract.
 
 ## Decisions

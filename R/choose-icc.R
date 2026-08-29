@@ -152,11 +152,12 @@ collect_answers_interactively <- function(answers, ask = ask_choice) {
   if (!oneway && is.null(answers$type)) {
     answers$type <- step(
       "type",
-      "Does the actual value need to match, or only the rank order?",
-      c("agreement", "consistency"),
+      "Does the actual value need to match, only the rank order, or both?",
+      c("agreement", "consistency", "both"),
       c(
         "Absolute agreement -- the value itself must match",
-        "Consistency -- only the rank order must match"
+        "Consistency -- only the rank order must match",
+        "Both"
       )
     )
   }
@@ -312,7 +313,7 @@ resolve_icc_recommendation <- function(answers, call = rlang::caller_env()) {
     type <- require_answer(answers$type, "type", call)
     type <- validate_choice(
       type,
-      c("agreement", "consistency"),
+      c("agreement", "consistency", "both"),
       "type",
       call
     )
@@ -397,7 +398,10 @@ reject_inapplicable <- function(answers, args, design_phrase, call) {
 # The recommended coefficient rows. Reuses `icc_estimand()` -- the same label
 # source a fitted `icc` object uses -- so the recommended McGraw-Wong and
 # Shrout-Fleiss labels cannot drift from what `icc()` prints. One row per
-# requested (level x unit); `k_eff` is irrelevant to the label.
+# requested (type x level x unit); `k_eff` is irrelevant to the label. Type is
+# the outermost loop, the order `icc()` itself builds its estimate table in
+# (ADR-054 print grouping), so a both-type recommendation lists its rows in the
+# order the emitted call's own output prints them.
 recommendation_rows <- function(type, unit, raters, level, multilevel, oneway) {
   units <- switch(unit, both = c("single", "average"), unit)
   levels <- if (multilevel) {
@@ -405,23 +409,29 @@ recommendation_rows <- function(type, unit, raters, level, multilevel, oneway) {
   } else {
     "subject"
   }
-  type_arg <- if (oneway) "agreement" else type
+  types <- if (oneway) {
+    "agreement"
+  } else {
+    switch(type, both = c("agreement", "consistency"), type)
+  }
   rows <- list()
-  for (lv in levels) {
-    for (u in units) {
-      est <- icc_estimand(
-        type = type_arg,
-        unit = u,
-        raters = raters,
-        level = lv,
-        multilevel = multilevel,
-        oneway = oneway
-      )
-      rows[[length(rows) + 1L]] <- list(
-        level = lv,
-        index = est$label,
-        sf_index = est$sf_label
-      )
+  for (ty in types) {
+    for (lv in levels) {
+      for (u in units) {
+        est <- icc_estimand(
+          type = ty,
+          unit = u,
+          raters = raters,
+          level = lv,
+          multilevel = multilevel,
+          oneway = oneway
+        )
+        rows[[length(rows) + 1L]] <- list(
+          level = lv,
+          index = est$label,
+          sf_index = est$sf_label
+        )
+      }
     }
   }
   data.frame(

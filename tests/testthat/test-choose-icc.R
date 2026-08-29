@@ -138,8 +138,15 @@ test_that("type = \"both\" recommends the agreement and consistency pair", {
   # AC1's named case: two-way, random raters, single unit, non-multilevel.
   rows <- choose_icc(type = "both", unit = "single", raters = "random")$rows
   expect_equal(rows$index, c("ICC(A,1)", "ICC(C,1)"))
-  expect_equal(rows$sf_index, c("ICC(2,1)", "ICC(3,1)"))
+  # ICC(C,1) under RANDOM raters is McGraw-Wong-only: the crosswalk names no
+  # Shrout & Fleiss equivalent (ICC(3,1) is the fixed-rater consistency label).
+  expect_equal(rows$sf_index, c("ICC(2,1)", NA_character_))
   expect_equal(rows$level, c("subject", "subject"))
+
+  # The fixed-rater pair, where the crosswalk does name both.
+  fixed <- choose_icc(type = "both", unit = "single", raters = "fixed")$rows
+  expect_equal(fixed$index, c("ICC(A,1)", "ICC(C,1)"))
+  expect_equal(fixed$sf_index, c(NA_character_, "ICC(3,1)"))
 
   # Crossed with unit = "both": four rows, type outermost (icc()'s own order).
   four <- choose_icc(type = "both", unit = "both", raters = "random")$rows
