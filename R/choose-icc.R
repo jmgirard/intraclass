@@ -345,7 +345,7 @@ resolve_icc_recommendation <- function(answers, call = rlang::caller_env()) {
     multilevel,
     oneway
   )
-  notes <- recommendation_notes(raters, multilevel, oneway)
+  notes <- recommendation_notes(type, raters, multilevel, oneway)
 
   new_icc_recommendation(
     model = model,
@@ -454,11 +454,11 @@ build_icc_call <- function(type, raters, unit, level, multilevel, oneway) {
   if (oneway) {
     opt <- c(opt, 'model = "oneway"')
   }
-  # Always pin `type` explicitly (both agreement and consistency): icc() now defaults
-  # to reporting BOTH error definitions (ADR-054), so an unpinned call would compute
-  # all four formulations instead of the single recommended coefficient. choose_icc()
-  # resolves to ONE coefficient (ADR-021), so its emitted call must name the type.
-  if (!oneway) {
+  # `type` is pinned when ONE error definition is wanted: icc() defaults to
+  # reporting BOTH (ADR-054), so an unpinned call would compute the other one too.
+  # When both ARE wanted the argument is dropped and icc()'s default carries it --
+  # the same shape `unit` and `level` already use for their own "both" (M147).
+  if (!oneway && !identical(type, "both")) {
     opt <- c(opt, sprintf('type = "%s"', type))
   }
   if (!oneway && identical(raters, "fixed")) {
@@ -496,7 +496,8 @@ recommendation_rationale <- function(
       type = switch(
         type,
         agreement = "Absolute agreement: the value itself must match; a systematic difference between raters counts as error.",
-        consistency = "Consistency: only the rank order must match; a constant per-rater offset is forgiven."
+        consistency = "Consistency: only the rank order must match; a constant per-rater offset is forgiven.",
+        both = "Both error definitions: absolute agreement (the value itself must match) and consistency (a constant per-rater offset is forgiven) side by side."
       )
     )
   }
@@ -534,8 +535,16 @@ recommendation_rationale <- function(
 }
 
 # Caveats and automatic behaviours worth surfacing (from the vignette).
-recommendation_notes <- function(raters, multilevel, oneway) {
+recommendation_notes <- function(type, raters, multilevel, oneway) {
   notes <- character()
+  # The emitted call names `type` for every other answer, so say why this one
+  # does not: icc() reports both error definitions when `type` is unset (M147).
+  if (!oneway && identical(type, "both")) {
+    notes <- c(
+      notes,
+      "The emitted call omits type on purpose: icc() reports both error definitions by default, so leaving the argument out is what asks for the pair."
+    )
+  }
   if (identical(raters, "fixed")) {
     notes <- c(
       notes,
@@ -595,7 +604,12 @@ format.icc_recommendation <- function(x, ...) {
   design <- if (x$oneway) {
     "one-way random"
   } else {
-    icc_design_phrase(x$type, x$raters)
+    # `icc_design_phrase()` takes the type(s) as a vector and names each one, so
+    # "both" expands here rather than reaching it as an unrecognised string --
+    # giving the same "two-way random, absolute agreement & consistency" header
+    # a fit reporting both error definitions prints (M147).
+    types <- switch(x$type, both = c("agreement", "consistency"), x$type)
+    icc_design_phrase(types, x$raters)
   }
   if (isTRUE(x$multilevel)) {
     design <- paste0("multilevel, ", design)

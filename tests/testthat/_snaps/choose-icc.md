@@ -9,9 +9,10 @@
       1. Crossed -- the same raters judge every subject (two-way)
       2. Interchangeable -- a different set per subject (one-way)
       So far: Model = twoway
-      > Does the actual value need to match, or only the rank order?
+      > Does the actual value need to match, only the rank order, or both?
       1. Absolute agreement -- the value itself must match
       2. Consistency -- only the rank order must match
+      3. Both
       So far: Model = twoway > Type = agreement
       > Will you act on one rater's score, the mean of several, or both?
       1. A single rater's score
