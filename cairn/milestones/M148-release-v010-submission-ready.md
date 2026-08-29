@@ -92,7 +92,7 @@ version bump or NEWS consolidation, both already done (`DESCRIPTION:4`,
       unrun environment left in it.
 - [x] T5. Write `cairn/RELEASE-HANDOFF.md` from `cairn/PROFILE.md:76-81`'s
       release-walk handoff list plus ADR-022's deferred round-trips.
-- [ ] T6. Gate: `air format .`, `devtools::document()` no-diff, the `data-raw/`
+- [x] T6. Gate: `air format .`, `devtools::document()` no-diff, the `data-raw/`
       checkers with `--self-test`, `devtools::test()`. Open the PR and read its
       check-runs against the pinned head SHA.
 
@@ -112,6 +112,8 @@ version bump or NEWS consolidation, both already done (`DESCRIPTION:4`,
 
 - 2026-08-29: T1 — all six push-event configurations at the pinned SHA `0d651437c5e01ed76551c729be9e5ee456caa999` read `completed` / `success` from `gh api repos/jmgirard/intraclass/commits/<SHA>/check-runs`, completing between 03:27:52Z and 03:46:14Z: macos-latest release, windows-latest release, ubuntu-latest devel / release / oldrel-1 / 4.5.0. The two later default-branch commits are tracking-only and ran no `R CMD check` job, so this merge commit is the newest default-branch head the six-config matrix covers.
 - 2026-08-29: T4 — rewrote `cran-comments.md`. *R CMD check results* now carries the 2026-08-29 03:25:39 UTC run's own header and `Status: 1 NOTE`, quotes the NOTE, and reports the `_R_CHECK_CRAN_INCOMING_=FALSE` re-run that pins it as the only one. *Test environments* names two environments — the local run and the six-config matrix at the pinned SHA, tabulated per configuration — each with its result, plus the tarball-manifest identity sentence; the "Scheduled before submission, not yet run against this version" block is gone, and win-builder and R-hub are named nowhere in the file (0 matches). `cairn/RELEASE-HANDOFF.md` step 4 accordingly tells the maintainer to add those results to *Test environments* before submitting.
+
+- 2026-08-29: T6 gate — `air format .` no diff; `devtools::document()` no diff; all six `data-raw/` checkers pass `--self-test` (each plants its own defect class and sees it red) and pass in normal mode; `devtools::test()` FAIL 0 | WARN 3 | SKIP 2 | PASS 9465, the three WARNs being the standing candidate-row set re-measured at the M143 review, none a new site. T3's identity check re-run at the final head: the diff from the pinned SHA is eight paths, `cran-comments.md` now joining the seven, and all eight are absent from the tarball manifest.
 
 ## Decisions
 
