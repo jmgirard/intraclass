@@ -563,6 +563,9 @@ test_that("O-IDS: ragged subject curve projects, is monotone in [0, 1], cluster 
 })
 
 test_that("O-IDS/lme4: ragged subject projection matches an independent lme4 fit", {
+  # Cross-engine projection over a ragged 30x10x6 fixture; CI covers it on all
+  # six configurations. Skipped on CRAN for the 10-minute checktime limit.
+  skip_on_cran()
   skip_if_not_installed("glmmTMB")
   skip_if_not_installed("lme4")
   d <- ragged_ds(
