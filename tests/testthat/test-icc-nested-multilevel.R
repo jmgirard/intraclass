@@ -301,6 +301,7 @@ drop_cells <- function(d, frac, seed) {
 }
 
 test_that("O-NML/incomplete: ragged Design 2 matches lme4 cross-engine (<1e-4)", {
+  skip_on_cran() # cross-engine glmmTMB/lme4 fit, 4.0s; same class as the M-multilevel skips
   skip_if_not_installed("glmmTMB")
   skip_if_not_installed("lme4")
   skip_if_not_installed("merDeriv")

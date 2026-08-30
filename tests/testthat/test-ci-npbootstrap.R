@@ -174,6 +174,7 @@ test_that("npbootstrap ICC(k) is the exact Spearman-Brown image of ICC(1) (BC2 i
 })
 
 test_that("npbootstrap aborts on a degenerate (zero between-variance) design (AC5, #5/#8)", {
+  skip_on_cran() # degenerate-design bootstrap, 3.4s; CI runs it on six configs
   skip_if_not_installed("glmmTMB")
 
   # Every subject shares the same mean (SSA = 0 -> log F = -Inf): the transform and
