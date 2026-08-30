@@ -656,6 +656,10 @@ test_that("O-conflated/incomplete Eq14: ragged conflated = closed-form Eq. 14 on
 })
 
 test_that("O-conflated/incomplete lme4: ragged conflated agrees cross-engine", {
+  # Two engines over a ragged 30x10x6 multilevel fixture: the suite's single
+  # most expensive test. CI runs it on all six configurations; skipping it on
+  # CRAN keeps the overall checktime under CRAN's 10-minute limit.
+  skip_on_cran()
   skip_if_not_installed("glmmTMB")
   skip_if_not_installed("lme4")
   d <- ragged_ml(
@@ -747,6 +751,7 @@ test_that("O-conflated/incomplete: tracks the flat two-way ICC, stays biased vs 
 # only (its error is residual, needing no bridging).
 
 test_that("O-cc/incomplete: ragged consistency-conflated = drop-sigma^2_r, cross-engine, tracks flat", {
+  skip_on_cran() # same ragged 30x10x6 cross-engine fixture; see above
   skip_if_not_installed("glmmTMB")
   skip_if_not_installed("lme4")
   d <- ragged_ml(

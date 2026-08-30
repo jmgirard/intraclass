@@ -8,6 +8,12 @@
 # parameterization (engine-lme4.R). Tolerances reflect genuine numerical
 # agreement, not tuning to pass (PRINCIPLES.md #1).
 
+# Skipped on CRAN in full: every test here is an lme4-vs-glmmTMB parity
+# check, so it re-fits each model twice, and CRAN re-running it adds
+# nothing CI does not already cover on all six configurations. Dropped
+# to keep the overall checktime under CRAN's 10-minute limit.
+skip_on_cran()
+
 lme4_axes <- list(
   c(type = "agreement", unit = "single"),
   c(type = "agreement", unit = "average"),
