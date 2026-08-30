@@ -88,6 +88,7 @@ abort_message <- function(expr) {
 }
 
 test_that("the npbootstrap observed-data abort names no method montecarlo cannot serve (AC1)", {
+  skip_on_cran() # sweeps every observed-data cell, 7.4s; CI runs it on six configs
   skip_if_not_installed("glmmTMB")
 
   # Sweep verdict, gen_ssa0 at the npbootstrap observed-degeneracy guard:

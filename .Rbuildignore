@@ -18,3 +18,4 @@
 testthat-problems[.]rds$
 ^Rplots\.pdf$
 ^CRAN-SUBMISSION$
+^figure$

@@ -956,6 +956,7 @@ bh_msg_any <- function(d, ...) {
 }
 
 test_that("silence on degenerate data agrees with the interval, case by case (AC2/AC3)", {
+  skip_on_cran() # case-by-case degeneracy sweep, 4.9s; CI runs it on six configs
   # The degeneracy FLAG is gone. A row now falls silent because running its methods
   # returned nothing usable, not because a predicate said so -- which means the
   # property the old flag-vs-guard test protected is now checkable in its sharpest

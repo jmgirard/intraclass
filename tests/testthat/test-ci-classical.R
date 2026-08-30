@@ -278,6 +278,7 @@ test_that("a pole-crossing numeric `unit` aborts instead of returning a > 1 inte
 })
 
 test_that("no classical numeric-`unit` cell returns an out-of-support interval", {
+  skip_on_cran() # exhaustive numeric-unit sweep, 8.8s; CI runs it on six configs
   skip_if_not_installed("glmmTMB")
 
   # Property sweep over the geometry that reaches the pole (few ratings per
