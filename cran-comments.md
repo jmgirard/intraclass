@@ -20,9 +20,9 @@ floor -- and locally, where `NOT_CRAN` is set. Only CRAN's own re-running of
 them is given up, on platforms that CI already covers.
 
 Measured on win-builder R-devel, the flavor that reported the NOTE:
-`checking tests` fell from **427s to 245s**. Locally, under
-`R CMD check --as-cran` with `NOT_CRAN=false`, it fell from **243s/124s to
-81s/42s**.
+`checking tests` fell from **427s to 245s**. On win-builder R-release it
+fell from **435s to 241s**. Locally, under `R CMD check --as-cran` with
+`NOT_CRAN=false`, it fell from **243s/124s to 81s/42s**.
 
 No exported behaviour, documentation or dependency changed in this
 resubmission.
@@ -81,6 +81,10 @@ reported with it.
   warnings, the incoming-feasibility NOTE above. `checking tests` 245s;
   `re-building of vignette outputs` 115s.
 
+- win-builder, R-release: the same platform, R 4.6.1 (2026-06-24 ucrt), run
+  2026-08-30 22:55:40 UTC. **`Status: 1 NOTE`** -- 0 errors, 0 warnings, the
+  same NOTE. `checking tests` 241s; `re-building of vignette outputs` 111s.
+
 - GitHub Actions `R CMD check`, at commit
   `6500715` on the default branch -- the full six-configuration push matrix.
   All six **completed with conclusion `success`** on 2026-08-30:
@@ -98,7 +102,7 @@ reported with it.
   every test skipped on CRAN.
 
   The tarball checked above was built from that same commit with a clean
-  working tree, so the matrix, the win-builder run and the local check all
+  working tree, so the matrix, both win-builder runs and the local check all
   describe one package content. The only path changed on the default branch
   after that commit is this file, which `.Rbuildignore` excludes and which
   appears nowhere in the tarball's 198-entry manifest.
