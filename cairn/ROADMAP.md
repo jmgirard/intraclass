@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-30 (v0.1.0 submission round 2; supersedes the 2026-08-29 stamp). **0.1.0 was submitted 2026-08-29 from `493a883`, returned by CRAN for "Overall checktime 11 min > 10 min" on r-devel-windows, and resubmitted 2026-08-30 from `00f9f0b`** -- awaiting the confirmation link and CRAN's verdict; keep the default branch at 0.1.0 until it lands. Checktime work: #165 and #166 skip eight long tests plus one engine-parity file on CRAN (win-builder `checking tests` 427s->245s devel, 435s->241s release; local `--as-cran` 243s/124s->81s/42s), all still running in CI and locally; #166 also closed the M132 `figure/` trap via `.Rbuildignore`. Round-1 hotfixes: #160 maintainer address, #161 the stranded pkgdown TMB fix, #162 the lavaan chunk, #163 CI paths-ignore, #164 vignette row indexing. `CLAUDE_CODE_KICKOFF.md` retired (text in git; seven live citations updated, `cairn/legacy/` and D-007 left entombed). `cran-comments.md` rewritten three times against re-runs, then trimmed to 38 lines. Terminal rows unmoved: M148, M147, M146, M145, M144._
+_Last hygiene check: 2026-08-30 (health audit; supersedes the earlier same-day submission stamp, whose narrative is in git). Nothing in flight: all 16 mechanical checks green, no open issues or PRs, working tree clean. **v0.1.0 was resubmitted 2026-08-30 from `00f9f0b`** after CRAN returned round 1 for "Overall checktime 11 min > 10 min" on r-devel-windows -- awaiting CRAN's verdict; keep the default branch at 0.1.0 until it lands. Terminal rows unmoved: M148, M147, M146, M145, M144._
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
