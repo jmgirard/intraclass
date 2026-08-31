@@ -1,8 +1,7 @@
 # Invariant principles (the constitution)
 
 > Reproduced from the founding brief (retired 2026-08-30; text in git history)
-> and
-> formalized into cairn's strength taxonomy on 2026-07-12 (`/design-interview`;
+> and formalized into cairn's strength taxonomy on 2026-07-12 (`/design-interview`;
 > D-001): each principle carries **[IP]** (inviolable — never violated in
 > implementation; changing one requires an explicit user decision recorded in
 > `DECISIONS.md`) or **[GP]** (guiding — a default stance tradeable with stated
