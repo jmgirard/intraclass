@@ -1,6 +1,7 @@
 # Invariant principles (the constitution)
 
-> Reproduced from the founding brief (`CLAUDE_CODE_KICKOFF.md`, §2) and
+> Reproduced from the founding brief (retired 2026-08-30; text in git history)
+> and
 > formalized into cairn's strength taxonomy on 2026-07-12 (`/design-interview`;
 > D-001): each principle carries **[IP]** (inviolable — never violated in
 > implementation; changing one requires an explicit user decision recorded in
@@ -93,7 +94,7 @@
 slices (#15), tracking currency (#16), and scope discipline (#17) are absorbed
 into the cairn tracking rulebook (the plugin's `tracking-rules.md` plus the
 `cairn/` files), which now owns and enforces process. The numbers stay retired
-and are never reused. (Original text: `CLAUDE_CODE_KICKOFF.md` §2.)
+and are never reused. (Original text: the founding brief §2, in git history.)
 
 ## Agent conduct
 

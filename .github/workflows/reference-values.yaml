@@ -1,4 +1,4 @@
-# Scheduled oracle / reference-value drift check (CLAUDE_CODE_KICKOFF.md §3).
+# Scheduled oracle / reference-value drift check (founding brief §3, in git history).
 # Reruns the oracle and simulation tests and fails if any estimator drifts from
 # its committed reference values (project/REFERENCES.md). Meaningful once M1's
 # estimators exist; until then the guarded oracle tests skip and this passes.

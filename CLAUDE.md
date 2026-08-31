@@ -22,7 +22,6 @@ This file is deliberately lean — it is paid for on every turn. Detail lives in
 - **`cairn/estimand-specs/`** — the precise population definition per estimator.
 - **Status & the task board:** `cairn/ROADMAP.md` + the active `cairn/milestones/`
   file — cairn owns status now (see the Project tracking section below).
-- Founding brief: `CLAUDE_CODE_KICKOFF.md`.
 
 ## Non-negotiable rules (see PRINCIPLES.md for the full text)
 - **Oracle-first (#1):** correctness is *established* by numerical agreement with

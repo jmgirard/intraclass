@@ -24,8 +24,8 @@ and milestones; never restate a value here.
   sources include ten Hove, Jorgensen & van der Ark (2022)
   <doi:10.1037/met0000391>, Brennan (2001), and Shrout & Fleiss (1979).
 - [REFERENCES.md](REFERENCES.md) — 6-line pointer stub only; the pre-migration
-  single page, kept so links from the entombed `cairn/legacy/`,
-  `CLAUDE_CODE_KICKOFF.md`, and `data-raw/reviews/` documents still resolve.
+  single page, kept so links from the entombed `cairn/legacy/` and
+  `data-raw/reviews/` documents still resolve.
 
 ## Source notes (`<citekey>.md`)
 
