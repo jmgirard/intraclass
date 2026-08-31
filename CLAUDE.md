@@ -28,7 +28,6 @@ lives in `cairn/`, loaded on demand.
 - **Status & the task board:** `cairn/ROADMAP.md` + the active
   `cairn/milestones/` file — cairn owns status now (see the Project
   tracking section below).
-- Founding brief: `CLAUDE_CODE_KICKOFF.md`.
 
 ## Non-negotiable rules (see PRINCIPLES.md for the full text)
 
