@@ -268,38 +268,13 @@ paths (`theta2r_moment_draws()` / `brms_theta2r_moment_draws()`); ADR-038
   so a tracking-only commit on a branch that also touched package files still
   re-runs the matrix.
 
-- ~~The declared R floor is not tested by CI~~ — RESOLVED by M139 (D-039):
-  the floor was measured across R 4.0.0–4.5.1 rather than inferred, and
-  `DESCRIPTION` now declares `R (>= 4.5.0)` with a CI job pinned to that
-  literal version on both the `push` and `pull_request` events. The premise
-  the M48 gate reasoned from — that a lower floor would still run the package
-  — was false: the Imports chain does not install below 4.5.0.
-
-- ~~No cairn-canonical oracle-registry home yet~~ — RESOLVED by M63 (D-007): the
-  registry is [`references/ORACLES.md`](references/ORACLES.md), declared in the
-  Conventions section above per the validation doctrine's registry-pointer rule.
-  This settles the repo side only; whether *cairn itself* mandates an `ORACLES.md`
-  shape remains the upstream open question (cairn D-024, assessed by cairn M42) —
-  the repo's choice here is compatible with either outcome.
-- ~~**brms/Stan verification is structurally weaker**~~ — RESOLVED by M52
-  (mitigate + document; the constraint itself is inherent and stands: no Stan
-  toolchain on CI, MCMC flake, ~2-hour sweeps). The offline committed-fixture
-  strategy is now documented in `data-raw/README.md` (constraints, test tiers,
-  fixture lifecycle, regeneration protocol) and the script↔fixture map is
-  mechanically guarded by `tests/testthat/test-brms-oracle-map.R` (GP7).
-  (Wart confirmed 2026-07-12.)
-- ~~**Cross-engine parity has no standing matrix**~~ — RESOLVED by M49: the
-  standing `tests/testthat/test-engine-parity-matrix.R` now enumerates the grid
-  and breaks on a silent gap (see Architecture). (Wart confirmed 2026-07-12.)
-- ~~**Boundary-fit convergence handling is accumulated case law**~~ — RESOLVED by
-  M50: one documented policy in § Boundary-fit policy (three behaviors mapped per
-  engine + per CI method, each cell citing its ADR; recorded as D-004) with guard
-  tests in `tests/testthat/test-boundary-policy.R`. (Wart confirmed 2026-07-12.)
-- ~~**Statistical corners are held by ADR memory**~~ — RESOLVED by M51: the
-  audit (inventory in the M51 work log) enumerated the load-bearing corners and
-  pinned the unguarded ones in `tests/testthat/test-corner-guards.R` (the
-  fixed-rater 2b moment family — 2b-not-1b + average- not per-group floor,
-  ADR-037/038 — and the ragged `n_rep ≥ 240` fixture pin, GP5), each with an
-  in-place source comment naming its ADR (GP7); the already-guarded corners are
-  cross-referenced there. (Wart confirmed 2026-07-12; boundary corner → M50.)
-
+- **brms/Stan verification is structurally weaker than the other engines'.**
+  There is no Stan toolchain on CI, MCMC results flake across runs, and a full
+  sweep costs ~2 hours, so the Bayesian oracle is verified offline against
+  committed fixtures rather than re-run in the matrix. Accepted at the M52 gate
+  as inherent: the constraint stands, and M52 shipped the mitigation around it
+  — the fixture strategy (constraints, test tiers, fixture lifecycle,
+  regeneration protocol) is documented in `data-raw/README.md`, and the
+  script-to-fixture map is guarded by `tests/testthat/test-brms-oracle-map.R`
+  (GP7). (Constraint confirmed 2026-07-12; rewritten from its resolved form
+  at the 2026-09-04 triage pass.)
