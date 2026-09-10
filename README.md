@@ -24,21 +24,28 @@ incomplete, and multilevel designs, and to help you decide **which ICC
 to choose, and why**. The docs and website are a place to learn ICC best
 practice, not just call functions.
 
-> \[!NOTE\] This package is approaching its first release. The full
-> interrater-reliability ICC family is implemented. That covers two-way
-> designs (absolute agreement vs. consistency, single vs. average,
-> random vs. fixed raters) and one-way designs. It covers imbalanced and
-> incomplete (missing-cell) data. It also covers multilevel designs, at
-> the subject or cluster level, with raters crossed with or nested in
-> clusters or subjects. Everything just listed comes with boundary-aware
-> Monte-Carlo intervals. Fits run on `glmmTMB` (the default) or `lme4`.
-> Bayesian fits run on `brms`, and SEM fits on `lavaan`. The [engines
+> \[!NOTE\] intraclass is on CRAN. The full interrater-reliability ICC
+> family is implemented. That covers two-way designs (absolute agreement
+> vs. consistency, single vs. average, random vs. fixed raters) and
+> one-way designs. It covers imbalanced and incomplete (missing-cell)
+> data. It also covers multilevel designs, at the subject or cluster
+> level, with raters crossed with or nested in clusters or subjects.
+> Everything just listed comes with boundary-aware Monte-Carlo
+> intervals. Fits run on `glmmTMB` (the default) or `lme4`. Bayesian
+> fits run on `brms`, and SEM fits on `lavaan`. The [engines
 > article](https://jmgirard.github.io/intraclass/articles/engines.html)
 > says which designs each one supports.
 
 ## Installation
 
-You can install the development version from
+Install the released version from
+[CRAN](https://CRAN.R-project.org/package=intraclass) with:
+
+``` r
+install.packages("intraclass")
+```
+
+Or install the development version from
 [GitHub](https://github.com/jmgirard/intraclass) with:
 
 ``` r
@@ -210,6 +217,40 @@ autoplot(d_study(fit, m = 1:10))
   how the numbers line up.
 - [*Glossary*](https://jmgirard.github.io/intraclass/articles/glossary.html):
   the vocabulary in one place.
+
+## Citation
+
+``` r
+citation("intraclass")
+#> To cite intraclass in publications use:
+#> 
+#>   Girard J (2026). _intraclass: Modern Intraclass Correlation
+#>   Coefficients_. R package version 0.1.0.9000,
+#>   <https://CRAN.R-project.org/package=intraclass>.
+#> 
+#> A BibTeX entry for LaTeX users is
+#> 
+#>   @Manual{,
+#>     title = {{intraclass}: Modern Intraclass Correlation Coefficients},
+#>     author = {Jeffrey Girard},
+#>     year = {2026},
+#>     note = {R package version 0.1.0.9000},
+#>     url = {https://CRAN.R-project.org/package=intraclass},
+#>   }
+#> 
+#> A companion software paper is in preparation at
+#> https://github.com/jmgirard/intraclass-paper.
+```
+
+The companion software paper is being drafted at
+[jmgirard/intraclass-paper](https://github.com/jmgirard/intraclass-paper).
+
+## Contributing and support
+
+Bug reports and questions are welcome on the [issue
+tracker](https://github.com/jmgirard/intraclass/issues);
+[CONTRIBUTING.md](CONTRIBUTING.md) says what to include, and why code
+contributions are not solicited.
 
 ## Related work
 
