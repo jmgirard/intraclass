@@ -112,6 +112,7 @@ planned (D-045 chose JOSS).
 - 2026-09-10: gate questions answered: CRAN badge added, CITATION gains ORCID and key, README-version finding rejected; README re-knitted; AC5 check re-run on this head.
 - 2026-09-10: check on `2cbc8bd` failed on one spelling flag (`md`, the README link text `CONTRIBUTING.md` on its own line); link text reworded to "the contributing guide", README re-knitted, `spell_check_package()` clean, no WORDLIST change; check re-run on this head.
 - 2026-09-10: check on `bd24a98` clean (0/0/0); AC5 ticked; PR-conversation read empty; pre-gate checkpoint.
+- 2026-09-10: step-7 approval: PR #167 approved for merge.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
