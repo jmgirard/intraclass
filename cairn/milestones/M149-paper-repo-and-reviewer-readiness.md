@@ -147,3 +147,11 @@ planned (D-045 chose JOSS).
   11. `CONTRIBUTING.md:13-20` reads as self-contradicting — rejected: the stance is stated in the opening paragraph and again before the exceptions, which open "If you want to change something anyway".
   12. `inst/CITATION` line over 80 columns — fixed now with 9 (year block and footer wrapped).
 - Gate answers (2026-09-10): finding 7 → CRAN-version badge added beside the existing badges, lifecycle badge unchanged; finding 8 → author carries the ORCID from `DESCRIPTION` and the entry has `key = "intraclass"` (BibTeX renders `@Manual{intraclass,`); finding 6 → rejected for the reason recorded above. README re-knitted after both edits.
+
+### Evidence after fix-now work (2026-09-10, branch head `bd24a98`)
+
+- AC3 re-verified on the final `inst/CITATION` (ORCID, key, explicit year lookup): `R CMD INSTALL` of the working tree into a scratch library, `citation("intraclass")`: one entry, bibtype `Manual`, year `2026`, url `https://CRAN.R-project.org/package=intraclass`, key `intraclass`. PASS.
+- AC4 re-verified: README re-knitted after each README.Rmd edit; the committed README.md is the knit of the committed README.Rmd (the two-run md5 evidence above; the final knit passed `spell_check_package()` with no flags). PASS.
+- AC5 — `NEWS.md` development-version section carries one bullet for the citation entry and contributing guide (no milestone numbers). `devtools::check()` on `bd24a98`: `0 errors ✔ | 0 warnings ✔ | 0 notes ✔` (Duration: 14m 26.1s). Two earlier runs on this branch were stopped or superseded by fix-now edits; one run on `2cbc8bd` failed on the `md` spelling flag recorded in the work log. PASS.
+- Consistency gate: `cairn_validate.py` all checks passed; `devtools::document()` no diff (scratch-copy comparison of `man/` and `NAMESPACE`); README knit in sync; `pkgdown::check_pkgdown()` no problems; NEWS entry present; `.Rbuildignore` covers `CONTRIBUTING.md`; no DESIGN.md principle changed (impact report skipped).
+- PR-conversation read (PR #167): no reviews, no conversation comments, no unresolved review threads.
