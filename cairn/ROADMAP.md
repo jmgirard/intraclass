@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-10 (whole-list triage; supersedes the same-day health-audit stamp, narrative in git). Dropped one Known issue as already shipped: CI's path filter no longer skips `man/**`, `README.md` or `**/*.Rmd` (PR #163, `90d099e`, 2026-08-29), leaving only `.Rbuildignore`d `cairn/**`. Promoted the companion software/methods paper -- CRAN accepted v0.1.0 and the `v0.1.0` release published 2026-09-10, firing its trigger; the row stays until that milestone's post-merge hygiene. Re-rated seven dormant rows normal -> low: on-the-fly kappa_m calibration, the statistical-extension parking lot, the fixed-rater subject-level lavaan sibling, the M61 plotting deferrals, the lavaan bootstrap cells, lavaan with within-cell replicates, d_study() width planning. Nothing merged, split, routed or compressed; no decision entry (no drop on principle, no merge). Release-handoff steps 6 and 7 are done, not owed: tag `v0.1.0` and the 0.1.0.9000 bump (`8797be9`). validate green._
+_Last hygiene check: 2026-09-10 (M149 done pass). M149 archived; M146 rotated out (retention 3) and the `record-claims.tsv` terminal-rows row rotated with it; one LESSONS line added and the M79 line pruned for the byte budget; no D-entry, no Known issue, no RB/RR pair; the three doctrine modules still state no budget (candidate row stands); `git branch --no-merged` shows only `backup/m136-pre-rewrite`, expected noise. validate green._
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,11 +9,10 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M149 | `intraclass` is citable and reviewer-ready, with its companion paper repo open | review | — | normal | milestones/M149-paper-repo-and-reviewer-readiness.md |
+| M149 | `intraclass` is citable and reviewer-ready, with its companion paper repo open | done | — | normal | milestones/archive/M149-paper-repo-and-reviewer-readiness.md |
 | M148 | v0.1.0 is submission-ready, and the upload is handed off | done | M147 | high | milestones/archive/M148-release-v010-submission-ready.md |
 | M147 | `choose_icc()` answers the type question with "both" | done | — | high | milestones/archive/M147-choose-icc-type-both.md |
-| M146 | The occasion vocabulary says which quantity each surface reports | done | — | high | milestones/archive/M146-occasions-vocabulary.md |
-<!-- terminal-row retention: retention is 3 (tracking-rules Weight caps); M145 and M144 rotated out 2026-09-10 as the oldest terminal rows by merge order, their archive files still resolving there. Kept: M148, M147, M146 [claim:roadmap-terminal-rows]. -->
+<!-- terminal-row retention: retention is 3 (tracking-rules Weight caps); M146 rotated out 2026-09-10 at the M149 done pass as the oldest terminal row by merge order, its archive file still resolving there. Kept: M149, M148, M147 [claim:roadmap-terminal-rows]. -->
 <!-- rows grouped by status; keep only the 3 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
