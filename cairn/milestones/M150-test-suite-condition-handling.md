@@ -56,13 +56,13 @@ work. A fourth standing warning, should one appear — a new candidate row.
       `test-n-o-disposition-grid.R` makes through `render_condition()` passes
       against the changed renderer, `devtools::test(filter =
       "n-o-disposition-grid")` being the run that enumerates them.
-- [ ] AC3: `devtools::test()` on the milestone branch reports `WARN 0`, and
+- [x] AC3: `devtools::test()` on the milestone branch reports `WARN 0`, and
       each of the three warnings it reports on the default branch at the plan
       commit — the lavaan fitting-warning re-signal in
       `test-icc-lavaan-multilevel.R`, the glmmTMB fitting-warning re-signal in
       `test-icc-type-vector.R`, and the `intraclass_fixed_raters` advisory in
       `test-icc-brms.R` — is asserted, not suppressed, at its own site.
-- [ ] AC4: `devtools::test()` reports `FAIL 0`, and `lintr::lint_package()`
+- [x] AC4: `devtools::test()` reports `FAIL 0`, and `lintr::lint_package()`
       reports no lint in `test-n-o-disposition-grid.R`,
       `test-icc-lavaan-multilevel.R`, `test-icc-type-vector.R`, or
       `test-icc-brms.R`.
@@ -121,3 +121,5 @@ work. A fourth standing warning, should one appear — a new candidate row.
 - 2026-09-10: the planning-time suite run on main at 972e635 finished after the plan commit: FAIL 0 / WARN 3 / SKIP 2 / PASS 9467; the third warning is the `intraclass_fixed_raters` advisory at `test-icc-brms.R:2425`, so all three sites are now measured, not taken from the M143 review.
 - 2026-09-10 AC1: `devtools::test(filter = "n-o-disposition-grid")` on the branch at 5d3e466 green, the file's "render_condition() keeps a literal brace in a condition's message" test (`test-n-o-disposition-grid.R:341`) among its passing expectations; the diff shows the renderer now strips ANSI and collapses whitespace over `conditionMessage()` alone, with no `cli::format_message()` call — verified.
 - 2026-09-10 AC2: the same filtered run reports no failure across the file, so every abort-substring and bullet expectation routed through `render_condition()` (`run_n_o_case` at lines 385–440 and the shared-message checks at 535–564) passes against the changed renderer — verified.
+- 2026-09-10 AC3: `devtools::test(reporter = "summary")` on the branch at b08927c over all 54 files: no Warnings section (WARN 0) and `icc-brms` ran unskipped; the diff shows each of the three sites asserting its warning — `test-icc-lavaan-multilevel.R:402` and `test-icc-type-vector.R:286` by the engine's frame sentence with `fixed = TRUE`, `test-icc-brms.R:2431` by class `intraclass_fixed_raters` — with no `suppressWarnings()` added; the [O] reviewer independently confirmed each site emits exactly one warning — verified.
+- 2026-09-10 AC4: the same run has no Failed section (FAIL 0; 2 skips are the vignette guards, unchanged from main); `lintr::lint_package()` filtered to the four edited files reports 0 lints — verified.
