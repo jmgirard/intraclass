@@ -82,7 +82,7 @@ planned (D-045 chose JOSS).
 - [x] T2: Write `CONTRIBUTING.md` (contribute / report / support; DESIGN.md's
       "issues welcome, code contributions not solicited" stance stated
       plainly), add the `.Rbuildignore` entry, link it from `README.Rmd`.
-- [ ] T3: Write `inst/CITATION` with `bibentry()` reading `meta$Version` and
+- [x] T3: Write `inst/CITATION` with `bibentry()` reading `meta$Version` and
       the current year; verify with `citation()` after `R CMD INSTALL`.
 - [ ] T4: Add the paper-repo URL to `DESCRIPTION`, the `## Citation` chunk and
       the CRAN sentence to `README.Rmd`, run `devtools::build_readme()` twice.
@@ -101,6 +101,7 @@ planned (D-045 chose JOSS).
 - 2026-09-10: implement gate chose creating the public repo now, scaffolding cairn from this session (greenfield defaults: tagged public release; paper numbers script-produced against a named package version), issues plus the DESCRIPTION email as the support channel, and adding the CRAN install command beside the GitHub one (minor amendment to T4, not to a criterion).
 - 2026-09-10: T1 done — `jmgirard/intraclass-paper` created public at `64c1c5c`/`d0e7bee` (README, CC BY 4.0 LICENSE.md, generic-profile cairn scaffold with three candidate rows: skeleton, text, submission); `cairn_validate` there all checks passed.
 - 2026-09-10: T2 done — `CONTRIBUTING.md` (contribute / report / support; solo-maintained stance stated; CI formatting claim read against `.github/workflows/format.yaml:27`), `.Rbuildignore` entry, README.Rmd `## Contributing and support` section linking it (README.md re-knits at T4).
+- 2026-09-10: T3 done — `inst/CITATION` (`bibentry` Manual; version from `meta$Version`, year from `meta$Date` else the current year); `R CMD INSTALL` of the working tree into a scratch library then `citation('intraclass')`: one Manual entry, year 2026, the CRAN URL, note `R package version 0.1.0.9000`.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->

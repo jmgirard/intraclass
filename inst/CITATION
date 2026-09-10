@@ -1,0 +1,12 @@
+year <- if (!is.null(meta$Date)) sub("-.*", "", meta$Date) else format(Sys.Date(), "%Y")
+
+bibentry(
+  bibtype = "Manual",
+  title = "{intraclass}: Modern Intraclass Correlation Coefficients",
+  author = person("Jeffrey", "Girard"),
+  year = year,
+  note = paste("R package version", meta$Version),
+  url = "https://CRAN.R-project.org/package=intraclass",
+  header = "To cite intraclass in publications use:",
+  footer = "A companion software paper is in preparation at https://github.com/jmgirard/intraclass-paper."
+)
