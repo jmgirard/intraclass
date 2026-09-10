@@ -4,14 +4,14 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M150: The test suite's condition handling is exact
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Resolves:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Surface tier:** internal — edits to the test suite's own condition handling; nothing the package computes or reports changes   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m150-test-suite-condition-handling`   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -78,7 +78,7 @@ work. A fourth standing warning, should one appear — a new candidate row.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: In `test-n-o-disposition-grid.R`, add a test that raises a condition
+- [x] T1: In `test-n-o-disposition-grid.R`, add a test that raises a condition
       whose message holds a literal `{x}` and passes it through
       `render_condition()`; run it red against the shipped renderer and record
       the error text in the work log. Then change the renderer to
@@ -106,6 +106,7 @@ work. A fourth standing warning, should one appear — a new candidate row.
 - 2026-09-10: criteria audit ran in REDUCED mode (internal tier), fresh [O] reader. Two findings, both fixed at the gate: AC3 had bound the assertion form (class-or-frame, no `suppressWarnings()`), an instrument property — narrowed to the outcome, the form moved to T2–T4; AC4 quantified over "the three test files this milestone edits" where four are edited — the four now named.
 - 2026-09-10: plan gate chose asserting each warning by identity over `suppressWarnings()` at the three sites because each warning is the package's own condition and the fixture's reaching it is the premise the test rests on; falsified by an assertion going red on an engine upgrade while the fixture still reaches the boundary.
 - 2026-09-10: plan gate chose one milestone over two (renderer / warnings) because both change only test files and fit one session; falsified by either half needing its own review round.
+- 2026-09-10: T1 — braced-message test run red against the shipped renderer: `Error in lapply(text, glue_cmd, .envir = .envir): Could not evaluate cli {} expression: x / object 'x' not found` at `test-n-o-disposition-grid.R:344`; renderer now `cli::ansi_strip()` + whitespace collapse over `conditionMessage()` alone; `devtools::test(filter = "n-o-disposition-grid")` green.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local. -->

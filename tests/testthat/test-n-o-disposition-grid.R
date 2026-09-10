@@ -331,11 +331,19 @@ n_o_grid_expectations <- function() {
 # ---- running one case ---------------------------------------------------------
 
 render_condition <- function(cnd) {
-  txt <- cli::ansi_strip(
-    paste(cli::format_message(conditionMessage(cnd)), collapse = " ")
-  )
+  # `conditionMessage()` is already cli-rendered text: strip ANSI and collapse
+  # whitespace only; never pass it back through cli, which would interpolate
+  # any literal brace it holds.
+  txt <- cli::ansi_strip(paste(conditionMessage(cnd), collapse = " "))
   gsub("[[:space:]]+", " ", txt)
 }
+
+test_that("render_condition() keeps a literal brace in a condition's message", {
+  # A message cli has already rendered may hold a literal `{`; a renderer that
+  # re-interpolates it errors the whole file instead of failing one case.
+  cnd <- rlang::catch_cnd(rlang::abort("count {x} is out of range"))
+  expect_identical(render_condition(cnd), "count {x} is out of range")
+})
 
 run_n_o_case <- function(case) {
   d <- case_data(case)

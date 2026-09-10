@@ -9,7 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M150 | The test suite's condition handling is exact | planned | — | normal | milestones/M150-test-suite-condition-handling.md |
+| M150 | The test suite's condition handling is exact | in-progress | — | normal | milestones/M150-test-suite-condition-handling.md |
 | M149 | `intraclass` is citable and reviewer-ready, with its companion paper repo open | done | — | normal | milestones/archive/M149-paper-repo-and-reviewer-readiness.md |
 | M148 | v0.1.0 is submission-ready, and the upload is handed off | done | M147 | high | milestones/archive/M148-release-v010-submission-ready.md |
 | M147 | `choose_icc()` answers the type question with "both" | done | — | high | milestones/archive/M147-choose-icc-type-both.md |
