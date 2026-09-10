@@ -11,6 +11,8 @@
 
 ## intraclass 0.1.0
 
+CRAN release: 2026-09-10
+
 First public release.
 
 **intraclass** estimates interrater-reliability intraclass correlation
