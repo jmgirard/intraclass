@@ -113,3 +113,4 @@ work. A fourth standing warning, should one appear — a new candidate row.
 ## Review
 <!-- owner: review · exclusive; evidence per criterion, consistency-gate
      results, review findings + triage. -->
+- 2026-09-10: the planning-time suite run on main at 972e635 finished after the plan commit: FAIL 0 / WARN 3 / SKIP 2 / PASS 9467; the third warning is the `intraclass_fixed_raters` advisory at `test-icc-brms.R:2425`, so all three sites are now measured, not taken from the M143 review.
