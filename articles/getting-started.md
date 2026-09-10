@@ -76,11 +76,11 @@ fit
 #> 
 #>   index     estimate   95% CI
 #>   Absolute agreement
-#>   ICC(A,1)     0.290   [0.050, 0.711]
-#>   ICC(A,k)     0.620   [0.173, 0.908]
+#>   ICC(A,1)     0.290   [0.050, 0.713]
+#>   ICC(A,k)     0.620   [0.173, 0.909]
 #>   Consistency
-#>   ICC(C,1)     0.715   [0.340, 0.926]
-#>   ICC(C,k)     0.909   [0.673, 0.980]
+#>   ICC(C,1)     0.715   [0.343, 0.924]
+#>   ICC(C,k)     0.909   [0.676, 0.980]
 #> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
@@ -99,10 +99,10 @@ tidy(fit)
 #> # A tibble: 4 × 11
 #>   term     occasions type   level sf_index estimate std.error conf.low conf.high
 #>   <chr>        <dbl> <chr>  <chr> <chr>       <dbl>     <dbl>    <dbl>     <dbl>
-#> 1 ICC(A,1)        NA agree… NA    ICC(2,1)    0.290    0.180    0.0498     0.711
-#> 2 ICC(A,k)        NA agree… NA    ICC(2,k)    0.620    0.201    0.173      0.908
-#> 3 ICC(C,1)        NA consi… NA    NA          0.715    0.155    0.340      0.926
-#> 4 ICC(C,k)        NA consi… NA    NA          0.909    0.0809   0.673      0.980
+#> 1 ICC(A,1)        NA agree… NA    ICC(2,1)    0.290    0.180    0.0498     0.713
+#> 2 ICC(A,k)        NA agree… NA    ICC(2,k)    0.620    0.201    0.173      0.909
+#> 3 ICC(C,1)        NA consi… NA    NA          0.715    0.155    0.343      0.924
+#> 4 ICC(C,k)        NA consi… NA    NA          0.909    0.0810   0.676      0.980
 #> # ℹ 2 more variables: conf.level <dbl>, method <chr>
 
 glance(fit)
@@ -132,11 +132,11 @@ summary(fit)
 #> 
 #>   index     estimate   95% CI
 #>   Absolute agreement
-#>   ICC(A,1)     0.290   [0.050, 0.711]
-#>   ICC(A,k)     0.620   [0.173, 0.908]
+#>   ICC(A,1)     0.290   [0.050, 0.713]
+#>   ICC(A,k)     0.620   [0.173, 0.909]
 #>   Consistency
-#>   ICC(C,1)     0.715   [0.340, 0.926]
-#>   ICC(C,k)     0.909   [0.673, 0.980]
+#>   ICC(C,1)     0.715   [0.343, 0.924]
+#>   ICC(C,k)     0.909   [0.676, 0.980]
 #> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
@@ -232,8 +232,8 @@ icc(ratings, score, subject, rater, type = "consistency", seed = 2024)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   index     estimate   95% CI
-#>   ICC(C,1)     0.715   [0.340, 0.926]
-#>   ICC(C,k)     0.909   [0.673, 0.980]
+#>   ICC(C,1)     0.715   [0.343, 0.924]
+#>   ICC(C,k)     0.909   [0.676, 0.980]
 #> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 ```

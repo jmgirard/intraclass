@@ -8,16 +8,16 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/jmgirard/intraclass/blob/v0.1.0/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/jmgirard/intraclass/blob/main/DESCRIPTION)
 
 Girard J (2026). *intraclass: Modern Intraclass Correlation
-Coefficients*. R package version 0.1.0,
+Coefficients*. R package version 0.1.0.9000,
 <https://github.com/jmgirard/intraclass>.
 
     @Manual{,
       title = {intraclass: Modern Intraclass Correlation Coefficients},
       author = {Jeffrey Girard},
       year = {2026},
-      note = {R package version 0.1.0},
+      note = {R package version 0.1.0.9000},
       url = {https://github.com/jmgirard/intraclass},
     }
