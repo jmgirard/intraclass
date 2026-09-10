@@ -257,17 +257,6 @@ paths (`theta2r_moment_draws()` / `brms_theta2r_moment_draws()`); ADR-038
 
 ## Known issues
 
-- **CI's path filter qualifies GP3.** `check-standard.yaml`'s `paths-ignore`
-  skips the whole matrix for a diff confined to `cairn/**`, `man/**`,
-  `README.md` or `**/*.Rmd`, on both events, so "support commitments are
-  exactly what CI verifies" holds for every diff that reaches the package and
-  not for those. Surfaced at the M139 review and accepted there (2026-08-26):
-  GP3 keeps its wording rather than carrying a filter clause, since a
-  docs-only diff changes nothing a platform commitment is about. On a
-  `pull_request` the filter reads the whole PR diff, not the pushing commit,
-  so a tracking-only commit on a branch that also touched package files still
-  re-runs the matrix.
-
 - **brms/Stan verification is structurally weaker than the other engines'.**
   There is no Stan toolchain on CI, MCMC results flake across runs, and a full
   sweep costs ~2 hours, so the Bayesian oracle is verified offline against
