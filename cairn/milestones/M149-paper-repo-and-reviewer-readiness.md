@@ -57,7 +57,7 @@ planned (D-045 chose JOSS).
       "approaching its first release" note is replaced by a sentence stating
       the package is on CRAN; `devtools::build_readme()` run twice leaves
       `README.md` unchanged on the second run.
-- [ ] AC5: `NEWS.md`'s development-version section carries one bullet for the
+- [x] AC5: `NEWS.md`'s development-version section carries one bullet for the
       new contributing guidelines and citation entry; `devtools::check()`
       reports 0 errors, 0 warnings, 0 notes, the Status line quoted in the
       Review section (M148 lesson: quote the run, never predict it).
@@ -111,6 +111,7 @@ planned (D-045 chose JOSS).
 - 2026-09-10: review fan-out: [S] history 0 findings, [S] prior-review 0, [O] 12 — five fixed now (README link, NEWS wording, CITATION footer and year, CONTRIBUTING oracle-bar wording; README re-knitted), one procedural (AC5 re-check on the final head), three posed at the gate, one rejected; every disposition in the Review section.
 - 2026-09-10: gate questions answered: CRAN badge added, CITATION gains ORCID and key, README-version finding rejected; README re-knitted; AC5 check re-run on this head.
 - 2026-09-10: check on `2cbc8bd` failed on one spelling flag (`md`, the README link text `CONTRIBUTING.md` on its own line); link text reworded to "the contributing guide", README re-knitted, `spell_check_package()` clean, no WORDLIST change; check re-run on this head.
+- 2026-09-10: check on `bd24a98` clean (0/0/0); AC5 ticked; PR-conversation read empty; pre-gate checkpoint.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
