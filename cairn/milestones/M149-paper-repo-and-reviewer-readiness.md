@@ -79,7 +79,7 @@ planned (D-045 chose JOSS).
       `LICENSE.md` (CC BY 4.0), run `/cairn-init` there on the `generic`
       profile from a session cwd inside that checkout, commit and push. Creating
       the public repo is outward-facing: confirm at the pre-implementation gate.
-- [ ] T2: Write `CONTRIBUTING.md` (contribute / report / support; DESIGN.md's
+- [x] T2: Write `CONTRIBUTING.md` (contribute / report / support; DESIGN.md's
       "issues welcome, code contributions not solicited" stance stated
       plainly), add the `.Rbuildignore` entry, link it from `README.Rmd`.
 - [ ] T3: Write `inst/CITATION` with `bibentry()` reading `meta$Version` and
@@ -100,6 +100,7 @@ planned (D-045 chose JOSS).
 - 2026-09-10: /milestone-implement started; branch `m149-paper-repo-and-reviewer-readiness` cut from the pushed default branch.
 - 2026-09-10: implement gate chose creating the public repo now, scaffolding cairn from this session (greenfield defaults: tagged public release; paper numbers script-produced against a named package version), issues plus the DESCRIPTION email as the support channel, and adding the CRAN install command beside the GitHub one (minor amendment to T4, not to a criterion).
 - 2026-09-10: T1 done — `jmgirard/intraclass-paper` created public at `64c1c5c`/`d0e7bee` (README, CC BY 4.0 LICENSE.md, generic-profile cairn scaffold with three candidate rows: skeleton, text, submission); `cairn_validate` there all checks passed.
+- 2026-09-10: T2 done — `CONTRIBUTING.md` (contribute / report / support; solo-maintained stance stated; CI formatting claim read against `.github/workflows/format.yaml:27`), `.Rbuildignore` entry, README.Rmd `## Contributing and support` section linking it (README.md re-knits at T4).
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->

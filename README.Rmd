@@ -143,6 +143,13 @@ autoplot(d_study(fit, m = 1:10))
 - [*Comparison with other packages*](https://jmgirard.github.io/intraclass/articles/comparison-with-other-packages.html): how the numbers line up.
 - [*Glossary*](https://jmgirard.github.io/intraclass/articles/glossary.html): the vocabulary in one place.
 
+## Contributing and support
+
+Bug reports and questions are welcome on the
+[issue tracker](https://github.com/jmgirard/intraclass/issues);
+[CONTRIBUTING.md](CONTRIBUTING.md) says what to include, and why code
+contributions are not solicited.
+
 ## Related work
 
 | Approach | Packages | What you get |
