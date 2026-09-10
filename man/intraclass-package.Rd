@@ -15,6 +15,7 @@ Useful links:
 \itemize{
   \item \url{https://github.com/jmgirard/intraclass}
   \item \url{https://jmgirard.github.io/intraclass/}
+  \item \url{https://github.com/jmgirard/intraclass-paper}
   \item Report bugs at \url{https://github.com/jmgirard/intraclass/issues}
 }
 

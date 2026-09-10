@@ -48,7 +48,9 @@ Config/testthat/parallel: true
 Config/testthat/start-first: icc-lavaan-multilevel, ci-bootstrap, d-study, icc-multilevel
 VignetteBuilder: knitr
 Language: en-US
-URL: https://github.com/jmgirard/intraclass, https://jmgirard.github.io/intraclass/
+URL: https://github.com/jmgirard/intraclass,
+    https://jmgirard.github.io/intraclass/,
+    https://github.com/jmgirard/intraclass-paper
 BugReports: https://github.com/jmgirard/intraclass/issues
 Depends: 
     R (>= 4.5.0)

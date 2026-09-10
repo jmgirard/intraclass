@@ -1,0 +1,26 @@
+# CRAN adds Date/Publication at release; a GitHub install has neither field.
+year <- if (!is.null(meta[["Date/Publication"]])) {
+  substr(meta[["Date/Publication"]], 1, 4)
+} else if (!is.null(meta[["Date"]])) {
+  substr(meta[["Date"]], 1, 4)
+} else {
+  format(Sys.Date(), "%Y")
+}
+
+bibentry(
+  bibtype = "Manual",
+  key = "intraclass",
+  title = "{intraclass}: Modern Intraclass Correlation Coefficients",
+  author = person(
+    "Jeffrey", "Girard",
+    comment = c(ORCID = "0000-0002-7359-3746")
+  ),
+  year = year,
+  note = paste("R package version", meta$Version),
+  url = "https://CRAN.R-project.org/package=intraclass",
+  header = "To cite intraclass in publications use:",
+  footer = paste(
+    "A companion software paper will be drafted at",
+    "https://github.com/jmgirard/intraclass-paper."
+  )
+)
