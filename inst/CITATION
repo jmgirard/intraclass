@@ -9,8 +9,12 @@ year <- if (!is.null(meta[["Date/Publication"]])) {
 
 bibentry(
   bibtype = "Manual",
+  key = "intraclass",
   title = "{intraclass}: Modern Intraclass Correlation Coefficients",
-  author = person("Jeffrey", "Girard"),
+  author = person(
+    "Jeffrey", "Girard",
+    comment = c(ORCID = "0000-0002-7359-3746")
+  ),
   year = year,
   note = paste("R package version", meta$Version),
   url = "https://CRAN.R-project.org/package=intraclass",

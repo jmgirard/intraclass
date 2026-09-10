@@ -109,6 +109,7 @@ planned (D-045 chose JOSS).
 - 2026-09-10: /milestone-review started; default branch unmoved since the cut; PR #167 opened as draft; AC1–AC4 verified and ticked (Review section).
 - 2026-09-10: CI red at PR open on two failures already red on `main` since `d40cdcd` (record-claims ledger row not rotated; devtools undeclared for checkpoint-guard) — both fixed on this branch, diagnosis in the Review section.
 - 2026-09-10: review fan-out: [S] history 0 findings, [S] prior-review 0, [O] 12 — five fixed now (README link, NEWS wording, CITATION footer and year, CONTRIBUTING oracle-bar wording; README re-knitted), one procedural (AC5 re-check on the final head), three posed at the gate, one rejected; every disposition in the Review section.
+- 2026-09-10: gate questions answered: CRAN badge added, CITATION gains ORCID and key, README-version finding rejected; README re-knitted; AC5 check re-run on this head.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
@@ -144,3 +145,4 @@ planned (D-045 chose JOSS).
   10. NEWS "links to both" imprecise — fixed now, folded into 2.
   11. `CONTRIBUTING.md:13-20` reads as self-contradicting — rejected: the stance is stated in the opening paragraph and again before the exceptions, which open "If you want to change something anyway".
   12. `inst/CITATION` line over 80 columns — fixed now with 9 (year block and footer wrapped).
+- Gate answers (2026-09-10): finding 7 → CRAN-version badge added beside the existing badges, lifecycle badge unchanged; finding 8 → author carries the ORCID from `DESCRIPTION` and the entry has `key = "intraclass"` (BibTeX renders `@Manual{intraclass,`); finding 6 → rejected for the reason recorded above. README re-knitted after both edits.

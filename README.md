@@ -7,6 +7,8 @@
 
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/intraclass)](https://CRAN.R-project.org/package=intraclass)
 [![R-CMD-check](https://github.com/jmgirard/intraclass/actions/workflows/check-standard.yaml/badge.svg)](https://github.com/jmgirard/intraclass/actions/workflows/check-standard.yaml)
 [![Codecov test
 coverage](https://codecov.io/gh/jmgirard/intraclass/graph/badge.svg)](https://app.codecov.io/gh/jmgirard/intraclass)
@@ -230,7 +232,7 @@ citation("intraclass")
 #> 
 #> A BibTeX entry for LaTeX users is
 #> 
-#>   @Manual{,
+#>   @Manual{intraclass,
 #>     title = {{intraclass}: Modern Intraclass Correlation Coefficients},
 #>     author = {Jeffrey Girard},
 #>     year = {2026},
