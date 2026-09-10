@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/jmgirard/intraclass/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/jmgirard/intraclass/blob/v0.1.0/DESCRIPTION)
 
 Girard J (2026). *intraclass: Modern Intraclass Correlation
 Coefficients*. R package version 0.1.0,
