@@ -115,6 +115,8 @@ planned (D-045 chose JOSS).
 - 2026-09-10: step-7 approval: PR #167 approved for merge.
 - 2026-09-10: CI watch on PR #167 reached the harness ceiling before the check matrix finished; watcher stopped, session stopped at step 8 before the merge; resume with /milestone-review M149 (approval and marker stand).
 - 2026-09-10: resume: PR #167 OPEN, CI green on `5fad13d`, default branch unmoved; PR-conversation re-read (one bot comment, noted); step-7 chip re-posed.
+- 2026-09-10: second approval at the re-posed chip; CI re-triggered by the docs-only resume push and the watch reached the ceiling again; watcher stopped; this line committed locally and not pushed (a push restarts the check matrix) — carried to the default branch after the merge; resume with /milestone-review M149.
+- 2026-09-10: resume: PR #167 OPEN, CI green on remote head `351dc5d`, conversation re-read unchanged (one bot comment, noted); step-7 chip re-posed; this file's two unpushed log lines land on the default branch by docs-only commit after the merge.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
