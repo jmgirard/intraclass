@@ -250,8 +250,9 @@ repository](https://github.com/jmgirard/intraclass-paper).
 ## Contributing and support
 
 Bug reports and questions are welcome on the [issue
-tracker](https://github.com/jmgirard/intraclass/issues);
-[CONTRIBUTING.md](https://github.com/jmgirard/intraclass/blob/main/CONTRIBUTING.md)
+tracker](https://github.com/jmgirard/intraclass/issues); [the
+contributing
+guide](https://github.com/jmgirard/intraclass/blob/main/CONTRIBUTING.md)
 says what to include, and why code contributions are not solicited.
 
 ## Related work

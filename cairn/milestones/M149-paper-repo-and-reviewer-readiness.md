@@ -110,6 +110,7 @@ planned (D-045 chose JOSS).
 - 2026-09-10: CI red at PR open on two failures already red on `main` since `d40cdcd` (record-claims ledger row not rotated; devtools undeclared for checkpoint-guard) — both fixed on this branch, diagnosis in the Review section.
 - 2026-09-10: review fan-out: [S] history 0 findings, [S] prior-review 0, [O] 12 — five fixed now (README link, NEWS wording, CITATION footer and year, CONTRIBUTING oracle-bar wording; README re-knitted), one procedural (AC5 re-check on the final head), three posed at the gate, one rejected; every disposition in the Review section.
 - 2026-09-10: gate questions answered: CRAN badge added, CITATION gains ORCID and key, README-version finding rejected; README re-knitted; AC5 check re-run on this head.
+- 2026-09-10: check on `2cbc8bd` failed on one spelling flag (`md`, the README link text `CONTRIBUTING.md` on its own line); link text reworded to "the contributing guide", README re-knitted, `spell_check_package()` clean, no WORDLIST change; check re-run on this head.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
