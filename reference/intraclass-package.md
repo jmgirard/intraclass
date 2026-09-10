@@ -21,6 +21,8 @@ Useful links:
 
 - <https://jmgirard.github.io/intraclass/>
 
+- <https://github.com/jmgirard/intraclass-paper>
+
 - Report bugs at <https://github.com/jmgirard/intraclass/issues>
 
 ## Author
