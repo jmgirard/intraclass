@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-04 (triage over all 39 backlog items; supersedes the 2026-08-30 health-audit stamp, narrative in git). Dropped five resolved `DESIGN.md` Known issues as already shipped (M63, M139, M49, M50, M51); rewrote the brms/Stan entry into the standing constraint it is. Compressed four candidate rows -- replicate display surfaces, test-suite defects, Design 3 internals, prose-apparatus deferrals -- triggers and lineage kept verbatim; the checkpoint-guard row was accepted for compression and left unchanged, no clause sheddable. No merges, splits, routes, promotions or decision entry. ROADMAP 23,314 -> 22,768 bytes; validate green. **v0.1.0 remains submitted 2026-08-30 from `00f9f0b`**, awaiting CRAN's verdict; keep the default branch at 0.1.0 until it lands. Terminal rows unmoved: M148, M147, M146, M145, M144._
+_Last hygiene check: 2026-09-10 (health audit; supersedes the 2026-09-04 triage stamp, narrative in git). Pruned the terminal-row overflow the validator flagged: M145 and M144 rotated out, kept M148, M147, M146 (retention 3); both retention comments said 5 and now say 3, the rulebook figure. Inboxes empty -- 0 open issues, 0 open PRs; no merges by anyone but the operator since the last stamp; no archive summary carries a `closes` clause, so no orphaned issues. **v0.1.0's CRAN verdict is unreconciled**: the maintainer reported CRAN mail 2026-09-10; observed the same day, the package is absent from CRAN's package index and from every incoming queue. Default branch stays at 0.1.0 until the verdict is read._
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -12,10 +12,8 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | M148 | v0.1.0 is submission-ready, and the upload is handed off | done | M147 | high | milestones/archive/M148-release-v010-submission-ready.md |
 | M147 | `choose_icc()` answers the type question with "both" | done | — | high | milestones/archive/M147-choose-icc-type-both.md |
 | M146 | The occasion vocabulary says which quantity each surface reports | done | — | high | milestones/archive/M146-occasions-vocabulary.md |
-| M145 | The v0.1.0 release-round documentation remainder | done | — | high | milestones/archive/M145-release-round-doc-remainder.md |
-| M144 | NEWS's *What ships* names the designs the package actually supports | done | — | normal | milestones/archive/M144-news-what-ships-designs.md |
-<!-- terminal-row retention: M148 done (2026-08-29) → M143 rotated out (oldest terminal by merge order; its archive file still resolves there). Kept: M148, M147, M146, M145, M144 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
-<!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
+<!-- terminal-row retention: retention is 3 (tracking-rules Weight caps); M145 and M144 rotated out 2026-09-10 as the oldest terminal rows by merge order, their archive files still resolving there. Kept: M148, M147, M146 [claim:roadmap-terminal-rows]. -->
+<!-- rows grouped by status; keep only the 3 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
 
