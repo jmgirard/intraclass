@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-10 (health audit; supersedes the 2026-09-04 triage stamp, narrative in git). Pruned the terminal-row overflow the validator flagged: M145 and M144 rotated out, kept M148, M147, M146 (retention 3); both retention comments said 5 and now say 3, the rulebook figure. Inboxes empty -- 0 open issues, 0 open PRs; no merges by anyone but the operator since the last stamp; no archive summary carries a `closes` clause, so no orphaned issues. **v0.1.0's CRAN verdict is unreconciled**: the maintainer reported CRAN mail 2026-09-10; observed the same day, the package is absent from CRAN's package index and from every incoming queue. Default branch stays at 0.1.0 until the verdict is read._
+_Last hygiene check: 2026-09-10 (health audit; supersedes the 2026-09-04 triage stamp, narrative in git). Pruned the terminal-row overflow the validator flagged: M145 and M144 rotated out, kept M148, M147, M146 (retention 3); both retention comments said 5 and now say 3, the rulebook figure. Inboxes empty -- 0 open issues, 0 open PRs; no merges by anyone but the operator since the last stamp; no archive summary carries a `closes` clause, so no orphaned issues. **v0.1.0 was accepted by CRAN**: a CRAN reviewer replied "on its way to CRAN" to the 2026-08-31 resubmission, read by the maintainer 2026-09-10; observed the same day, the package is not yet on CRAN's package index, which follows publication. Handoff steps 6 and 7 -- the GitHub release tag and the development-version bump -- are owed and unrun (`cairn/RELEASE-HANDOFF.md`)._
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
