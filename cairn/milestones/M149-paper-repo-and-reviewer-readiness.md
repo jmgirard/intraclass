@@ -2,14 +2,14 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M149: `intraclass` is citable and reviewer-ready, with its companion paper repo open
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan -->
 - **Depends on:** —   <!-- owner: plan -->
 - **Driving RR:** —   <!-- owner: plan -->
 - **Principles touched:** GP2   <!-- owner: plan; the paper is the citation target GP2 protects -->
 - **Resolves:** —   <!-- owner: plan -->
 - **Surface tier:** user-facing — `CONTRIBUTING.md`, `inst/CITATION`, `README.md` and `DESCRIPTION` are read by users and journal reviewers, and the companion repo is public   <!-- owner: plan -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) -->
+- **Branch/PR:** `m149-paper-repo-and-reviewer-readiness`   <!-- owner: implement (branch) / review (PR URL) -->
 
 ## Goal
 <!-- owner: plan · create -->
@@ -97,6 +97,7 @@ planned (D-045 chose JOSS).
 - 2026-09-10: plan gate chose JOSS with drafting in `intraclass-paper` and a never-merged `joss-paper` mirror branch here at submission, over JOSS-in-this-repo (`paper/` dir) and over a full-length methods venue with a standalone repo, because the user wants the paper outside this repo and JOSS's 750–1750-word software-paper shape fits a v0.1.0 package; falsified by JOSS refusing the mirror-branch form at submission, or by the research-impact requirement proving unmeetable for the package at submission time (D-045).
 - 2026-09-10: plan gate chose cairn adoption in the companion repo (generic profile) over a plain repo, because the paper's drafting and submission then get their own planned milestones and gates; falsified by the tracking overhead exceeding the paper's own size.
 - 2026-09-10: plan gate chose the reviewer-readiness bundle (CONTRIBUTING, CITATION, README citation, stale first-release note) over link-only, because JOSS's checklist asks for each item and none exists today; falsified by JOSS's pre-review rejecting the package on a ground the bundle does not touch.
+- 2026-09-10: /milestone-implement started; branch `m149-paper-repo-and-reviewer-readiness` cut from the pushed default branch.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
