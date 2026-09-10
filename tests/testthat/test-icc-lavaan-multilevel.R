@@ -399,9 +399,15 @@ test_that("a between-level Heywood fit aborts toward glmmTMB (boundary reached)"
   # this seed is one where the between-level ML draw IS negative (boundary
   # REACHED, not just near -- most seeds at this population are).
   db <- sim_ml(50, 8, 4, 0, 1, 0.2, 0, 0.6, seed = 20260718)
-  expect_error(
-    icc(db, score, subject, rater, cluster = cluster, engine = "lavaan"),
-    class = "intraclass_singular_fit"
+  # The boundary diagnostic lavaan raises is re-signalled by the package and is
+  # the reason the abort fires; assert it rather than let it escape the test.
+  expect_warning(
+    expect_error(
+      icc(db, score, subject, rater, cluster = cluster, engine = "lavaan"),
+      class = "intraclass_singular_fit"
+    ),
+    "The lavaan engine reported a fitting warning.",
+    fixed = TRUE
   )
   # The fixture genuinely sits at the boundary: the boundary-robust reference
   # engine estimates (essentially) zero cluster variance on the same data.
