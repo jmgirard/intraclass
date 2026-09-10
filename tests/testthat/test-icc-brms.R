@@ -2427,16 +2427,22 @@ test_that("brms fits the crossed multilevel FIXED cluster-level ICC (O-Bayes-FCL
   # (b) Containment: the glmmTMB M37 fixed cluster-level point sits inside the brms fixed
   # credible interval for every cluster row (the M27/M34 containment posture -- the engines
   # differ only by the prior, #18).
-  g_fixed <- cl(tidy(icc(
-    d,
-    score,
-    rater,
-    subject = subject,
-    cluster = cluster,
-    raters = "fixed",
-    type = "agreement",
-    engine = "glmmTMB"
-  )))
+  # The glmmTMB fixed-rater fit signals the package's fixed-raters advisory;
+  # assert it by class rather than let it escape the test.
+  expect_warning(
+    g_fixed_fit <- icc(
+      d,
+      score,
+      rater,
+      subject = subject,
+      cluster = cluster,
+      raters = "fixed",
+      type = "agreement",
+      engine = "glmmTMB"
+    ),
+    class = "intraclass_fixed_raters"
+  )
+  g_fixed <- cl(tidy(g_fixed_fit))
   tf <- cl(td)
   g_fixed <- g_fixed[order(key(g_fixed)), ]
   tf <- tf[order(key(tf)), ]

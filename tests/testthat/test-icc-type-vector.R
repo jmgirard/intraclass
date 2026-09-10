@@ -283,18 +283,24 @@ test_that("connectedness: non-bridging raters drop agreement, keep consistency (
   d$cluster <- factor(d$cluster)
   d$score <- stats::rnorm(nrow(d))
   withr::local_options(rlib_message_verbosity = "verbose")
-  expect_message(
-    x <- icc(
-      d,
-      score,
-      subject,
-      rater,
-      cluster = cluster,
-      design = "crossed",
-      level = "subject",
-      seed = 1
+  # The non-bridging design also draws a glmmTMB fitting warning, which the
+  # package re-signals; assert it rather than let it escape the test.
+  expect_warning(
+    expect_message(
+      x <- icc(
+        d,
+        score,
+        subject,
+        rater,
+        cluster = cluster,
+        design = "crossed",
+        level = "subject",
+        seed = 1
+      ),
+      "Dropping .*agreement.*bridge clusters"
     ),
-    "Dropping .*agreement.*bridge clusters"
+    "The glmmTMB engine reported a fitting warning.",
+    fixed = TRUE
   )
   expect_setequal(unique(x$estimates$type), "consistency")
   # Explicit agreement on the same design still aborts loudly.

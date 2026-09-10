@@ -84,14 +84,14 @@ work. A fourth standing warning, should one appear — a new candidate row.
       the error text in the work log. Then change the renderer to
       `cli::ansi_strip()` and whitespace-normalize `conditionMessage(cnd)`
       without `cli::format_message()`; re-run the file green (AC1, AC2).
-- [ ] T2: `test-icc-lavaan-multilevel.R`, the "between-level Heywood fit"
+- [x] T2: `test-icc-lavaan-multilevel.R`, the "between-level Heywood fit"
       test: wrap the `expect_error()` in an `expect_warning()` matching "The
       lavaan engine reported a fitting warning." (`fixed = TRUE`), so the
       boundary diagnostic is asserted as the reason the abort fires (AC3).
-- [ ] T3: `test-icc-type-vector.R`, the "connectedness: non-bridging raters"
+- [x] T3: `test-icc-type-vector.R`, the "connectedness: non-bridging raters"
       test: wrap the `expect_message()` in an `expect_warning()` matching "The
       glmmTMB engine reported a fitting warning." (`fixed = TRUE`) (AC3).
-- [ ] T4: `test-icc-brms.R`, the glmmTMB `raters = "fixed"` containment fit:
+- [x] T4: `test-icc-brms.R`, the glmmTMB `raters = "fixed"` containment fit:
       wrap it in `expect_warning(class = "intraclass_fixed_raters")` (AC3).
 - [ ] T5: Verify: `devtools::test()` `FAIL 0 / WARN 0`; `lintr::lint_package()`
       over the four edited files (LESSONS 2026-08-27, M141: CI lints `tests/`);
@@ -107,6 +107,7 @@ work. A fourth standing warning, should one appear — a new candidate row.
 - 2026-09-10: plan gate chose asserting each warning by identity over `suppressWarnings()` at the three sites because each warning is the package's own condition and the fixture's reaching it is the premise the test rests on; falsified by an assertion going red on an engine upgrade while the fixture still reaches the boundary.
 - 2026-09-10: plan gate chose one milestone over two (renderer / warnings) because both change only test files and fit one session; falsified by either half needing its own review round.
 - 2026-09-10: T1 — braced-message test run red against the shipped renderer: `Error in lapply(text, glue_cmd, .envir = .envir): Could not evaluate cli {} expression: x / object 'x' not found` at `test-n-o-disposition-grid.R:344`; renderer now `cli::ansi_strip()` + whitespace collapse over `conditionMessage()` alone; `devtools::test(filter = "n-o-disposition-grid")` green.
+- 2026-09-10: T2–T4 — the three sites now assert their warning (lavaan and glmmTMB re-signals by frame sentence with `fixed = TRUE`, the brms-file glmmTMB fixed-rater fit by class `intraclass_fixed_raters`); `devtools::test(reporter = "summary")` over the whole suite: 54 files, no Warnings or Failed section, `icc-brms` ran unskipped; `lintr::lint_package()` reports 0 lints in the four edited files.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local. -->
