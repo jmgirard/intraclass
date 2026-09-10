@@ -74,7 +74,7 @@ planned (D-045 chose JOSS).
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Create `jmgirard/intraclass-paper` (`gh repo create --public`), add
+- [x] T1: Create `jmgirard/intraclass-paper` (`gh repo create --public`), add
       `README.md` (package, venue, the co-location rule D-045 records) and
       `LICENSE.md` (CC BY 4.0), run `/cairn-init` there on the `generic`
       profile from a session cwd inside that checkout, commit and push. Creating
@@ -98,6 +98,8 @@ planned (D-045 chose JOSS).
 - 2026-09-10: plan gate chose cairn adoption in the companion repo (generic profile) over a plain repo, because the paper's drafting and submission then get their own planned milestones and gates; falsified by the tracking overhead exceeding the paper's own size.
 - 2026-09-10: plan gate chose the reviewer-readiness bundle (CONTRIBUTING, CITATION, README citation, stale first-release note) over link-only, because JOSS's checklist asks for each item and none exists today; falsified by JOSS's pre-review rejecting the package on a ground the bundle does not touch.
 - 2026-09-10: /milestone-implement started; branch `m149-paper-repo-and-reviewer-readiness` cut from the pushed default branch.
+- 2026-09-10: implement gate chose creating the public repo now, scaffolding cairn from this session (greenfield defaults: tagged public release; paper numbers script-produced against a named package version), issues plus the DESCRIPTION email as the support channel, and adding the CRAN install command beside the GitHub one (minor amendment to T4, not to a criterion).
+- 2026-09-10: T1 done — `jmgirard/intraclass-paper` created public at `64c1c5c`/`d0e7bee` (README, CC BY 4.0 LICENSE.md, generic-profile cairn scaffold with three candidate rows: skeleton, text, submission); `cairn_validate` there all checks passed.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
