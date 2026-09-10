@@ -114,6 +114,7 @@ planned (D-045 chose JOSS).
 - 2026-09-10: check on `bd24a98` clean (0/0/0); AC5 ticked; PR-conversation read empty; pre-gate checkpoint.
 - 2026-09-10: step-7 approval: PR #167 approved for merge.
 - 2026-09-10: CI watch on PR #167 reached the harness ceiling before the check matrix finished; watcher stopped, session stopped at step 8 before the merge; resume with /milestone-review M149 (approval and marker stand).
+- 2026-09-10: resume: PR #167 OPEN, CI green on `5fad13d`, default branch unmoved; PR-conversation re-read (one bot comment, noted); step-7 chip re-posed.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
@@ -158,3 +159,4 @@ planned (D-045 chose JOSS).
 - AC5 — `NEWS.md` development-version section carries one bullet for the citation entry and contributing guide (no milestone numbers). `devtools::check()` on `bd24a98`: `0 errors ✔ | 0 warnings ✔ | 0 notes ✔` (Duration: 14m 26.1s). Two earlier runs on this branch were stopped or superseded by fix-now edits; one run on `2cbc8bd` failed on the `md` spelling flag recorded in the work log. PASS.
 - Consistency gate: `cairn_validate.py` all checks passed; `devtools::document()` no diff (scratch-copy comparison of `man/` and `NAMESPACE`); README knit in sync; `pkgdown::check_pkgdown()` no problems; NEWS entry present; `.Rbuildignore` covers `CONTRIBUTING.md`; no DESIGN.md principle changed (impact report skipped).
 - PR-conversation read (PR #167): no reviews, no conversation comments, no unresolved review threads.
+- conversation (resume read, 2026-09-10): codecov[bot] PR — noted; coverage unchanged at 87.74%, no coverable lines in the diff. No reviews, no unresolved threads.
