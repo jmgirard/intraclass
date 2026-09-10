@@ -1,5 +1,11 @@
 # Doctrine: pinning documentation claims
 
+<!-- Budgets: < 105 lines, < 6,500 bytes — set 2026-09-10 from the measured
+     89 lines / 5,138 bytes plus roughly one section of headroom (the
+     maturation exit's module-budget rule). Hand-checked with `wc -l -c` at the
+     repo's hygiene passes; over either figure, compress or retire content
+     here rather than let the module grow. -->
+
 This page owns the craft of **doc-claim pins** — tests that make a withdrawn or
 bounded documentation claim red if it returns to a shipped surface. It is a
 doctrine module graduated from `cairn/LESSONS.md` (the M115 family, extended at

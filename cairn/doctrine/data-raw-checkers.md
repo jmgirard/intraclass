@@ -1,5 +1,11 @@
 # Doctrine: the data-raw checker suite and the check-references CI job
 
+<!-- Budgets: < 85 lines, < 5,500 bytes — set 2026-09-10 from the measured
+     69 lines / 4,207 bytes plus roughly one section of headroom (the
+     maturation exit's module-budget rule). Hand-checked with `wc -l -c` at the
+     repo's hygiene passes; over either figure, compress or retire content
+     here rather than let the module grow. -->
+
 This page owns the operating knowledge for the repo's `data-raw/` record
 checkers and the `check-references` CI job that runs them — what each checker
 gates, what stales each ledger, and when to run them locally. It is a doctrine

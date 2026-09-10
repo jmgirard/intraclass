@@ -1,5 +1,11 @@
 # Doctrine: verifying extractions from PDF sources
 
+<!-- Budgets: < 55 lines, < 3,000 bytes — set 2026-09-10 from the measured
+     39 lines / 2,185 bytes plus roughly one section of headroom (the
+     maturation exit's module-budget rule). Hand-checked with `wc -l -c` at the
+     repo's hygiene passes; over either figure, compress or retire content
+     here rather than let the module grow. -->
+
 This page owns the craft of verifying what a source PDF actually says before a
 `cairn/references/` extraction is stamped `verified` — the text-layer trap and
 the quotation-sweep discipline. It is a doctrine module graduated from
