@@ -1846,3 +1846,33 @@ the design count has two public names, `print.icc`'s "replicates" and
 had missed: `occasions` is the sole disambiguator between same-`term` rows when
 a fit carries both occasion settings, since the averaged coefficient has no
 literature label (`R/estimand.R:138`).
+
+### D-045 (2026-09-10): the companion paper targets JOSS, drafts in `jmgirard/intraclass-paper`, and lands here on a never-merged branch at submission
+
+**Context.** DESIGN § Commitments names a companion software/methods paper
+as the package's citation target, venue and framing left to be decided
+against the released package; CRAN accepted v0.1.0 on 2026-09-10, firing the
+candidate row's trigger. The maintainer wants the paper outside this repo. JOSS
+requires the paper "hosted in a Git-based repository together with your
+software (although they may be in a short-lived branch which is never merged
+with the default)" (joss.readthedocs.io, Submitting), a 750–1750-word paper,
+and since 2025 a Research impact statement with evidence of impact.
+
+**Decision.** The venue is JOSS. The paper is drafted in a public companion
+repository, `jmgirard/intraclass-paper`, which adopts cairn on the `generic`
+profile and plans its own milestones; the paper text is CC BY 4.0. At
+submission the `paper/` directory is copied onto a `joss-paper` branch of this
+repo cut from the default branch and never merged, the form JOSS allows. Until
+the paper has a DOI, `inst/CITATION` cites the CRAN package. The M42
+comparison article is the paper's seed.
+
+**Consequences.** M149 opens the companion repo and ships this repo's
+reviewer-checklist items. The mirror branch and the DOI back-fill are a
+ROADMAP candidate row here, promoted when the companion repo's submission
+milestone reaches that step. Submission timing stays the maintainer's call
+(D-050 of the plugin, tracking-rules): the research-impact requirement means
+drafting can start now while submission waits on evidence. Rejected: JOSS
+with `paper/` in this repo (the maintainer wants the paper elsewhere), and a
+full-length methods venue with a standalone repo (a larger paper than a
+v0.1.0 package warrants); either is reopened by JOSS refusing the mirror-branch
+form or by the impact requirement proving unmeetable.
