@@ -135,3 +135,5 @@ work. A fourth standing warning, should one appear — a new candidate row.
 - 2026-09-10 conversation: PR #168 — empty read (no reviews, no comments, no unresolved threads).
 - 2026-09-10: step-7 approval: PR #168 approved for merge (triage "apply proposed triage"; merge "Merge PR #168 to main").
 - 2026-09-10: CI wait on PR #168 hit the harness ceiling at head 0ed8a8a; fresh `gh pr checks`: lint, format, pkgdown, references, checkpoint-guard pass; the three R CMD check jobs and test-coverage pending; watcher stopped, marker written; resume via `/milestone-review M150` (step 8 re-derives the state).
+- 2026-09-10 conversation: codecov[bot] PR #168 — noted (coverage report, all modified lines covered; requests nothing).
+- 2026-09-10: resume: PR #168 OPEN, CI green at 9bad479, approval re-confirmed at the re-posed chip; this push re-runs the pull-request workflows, so the merge waits for green once more — a further resume merges without another push.
