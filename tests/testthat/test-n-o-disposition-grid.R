@@ -332,8 +332,9 @@ n_o_grid_expectations <- function() {
 
 render_condition <- function(cnd) {
   # `conditionMessage()` is already cli-rendered text: strip ANSI and collapse
-  # whitespace only; never pass it back through cli, which would interpolate
-  # any literal brace it holds.
+  # whitespace only; never pass it back through cli's formatter
+  # (`cli::format_message()`), which would interpolate any literal brace it
+  # holds.
   txt <- cli::ansi_strip(paste(conditionMessage(cnd), collapse = " "))
   gsub("[[:space:]]+", " ", txt)
 }
@@ -341,7 +342,11 @@ render_condition <- function(cnd) {
 test_that("render_condition() keeps a literal brace in a condition's message", {
   # A message cli has already rendered may hold a literal `{`; a renderer that
   # re-interpolates it errors the whole file instead of failing one case.
-  cnd <- rlang::catch_cnd(rlang::abort("count {x} is out of range"))
+  # `use_cli_format = FALSE` keeps the message literal even if the package
+  # later opts into rlang's cli formatting, so the test fails rather than errors.
+  cnd <- rlang::catch_cnd(
+    rlang::abort("count {x} is out of range", use_cli_format = FALSE)
+  )
   expect_identical(render_condition(cnd), "count {x} is out of range")
 })
 
