@@ -11,7 +11,7 @@
 - **Principles touched:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Resolves:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Surface tier:** internal — edits to the test suite's own condition handling; nothing the package computes or reports changes   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** `m150-test-suite-condition-handling`   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m150-test-suite-condition-handling` · https://github.com/jmgirard/intraclass/pull/168   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -48,11 +48,11 @@ work. A fourth standing warning, should one appear — a new candidate row.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets. -->
 
-- [ ] AC1: `render_condition()` (`tests/testthat/test-n-o-disposition-grid.R`)
+- [x] AC1: `render_condition()` (`tests/testthat/test-n-o-disposition-grid.R`)
       returns the text of a condition whose message contains a literal `{` or
       `}` with those characters intact, pinned by a test in that file over a
       condition raised with a braced message.
-- [ ] AC2: Every abort-substring and bullet expectation that
+- [x] AC2: Every abort-substring and bullet expectation that
       `test-n-o-disposition-grid.R` makes through `render_condition()` passes
       against the changed renderer, `devtools::test(filter =
       "n-o-disposition-grid")` being the run that enumerates them.
@@ -119,3 +119,5 @@ work. A fourth standing warning, should one appear — a new candidate row.
 <!-- owner: review · exclusive; evidence per criterion, consistency-gate
      results, review findings + triage. -->
 - 2026-09-10: the planning-time suite run on main at 972e635 finished after the plan commit: FAIL 0 / WARN 3 / SKIP 2 / PASS 9467; the third warning is the `intraclass_fixed_raters` advisory at `test-icc-brms.R:2425`, so all three sites are now measured, not taken from the M143 review.
+- 2026-09-10 AC1: `devtools::test(filter = "n-o-disposition-grid")` on the branch at 5d3e466 green, the file's "render_condition() keeps a literal brace in a condition's message" test (`test-n-o-disposition-grid.R:341`) among its passing expectations; the diff shows the renderer now strips ANSI and collapses whitespace over `conditionMessage()` alone, with no `cli::format_message()` call — verified.
+- 2026-09-10 AC2: the same filtered run reports no failure across the file, so every abort-substring and bullet expectation routed through `render_condition()` (`run_n_o_case` at lines 385–440 and the shared-message checks at 535–564) passes against the changed renderer — verified.
