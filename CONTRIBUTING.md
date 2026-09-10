@@ -8,7 +8,7 @@ kind of message and what to expect.
 
 Every reference value in intraclass's tests traces to a cited source or a
 committed seeded script, and every exported estimator must agree numerically
-with at least two independent oracles (textbook values, an established
+with at least two independent kinds of oracle (textbook values, an established
 package, or simulation with known variance components) before it ships. That
 bar is hard to hold on unsolicited pull requests, so the package does not
 solicit code contributions.

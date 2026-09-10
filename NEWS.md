@@ -1,8 +1,9 @@
 # intraclass (development version)
 
-* The package now ships a citation entry (`citation("intraclass")`) and a
-  `CONTRIBUTING.md` that says how to report a problem, ask for help, and
-  propose a change; `README` links to both and to the companion software
+* The package now ships a citation entry (`citation("intraclass")`), and the
+  source repository gains a `CONTRIBUTING.md` that says how to report a
+  problem, ask for help, and propose a change. The README carries a Citation
+  section and links to the contributing guide and to the companion software
   paper's repository, <https://github.com/jmgirard/intraclass-paper>.
 
 # intraclass 0.1.0

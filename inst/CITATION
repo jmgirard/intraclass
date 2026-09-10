@@ -1,4 +1,11 @@
-year <- if (!is.null(meta$Date)) sub("-.*", "", meta$Date) else format(Sys.Date(), "%Y")
+# CRAN adds Date/Publication at release; a GitHub install has neither field.
+year <- if (!is.null(meta[["Date/Publication"]])) {
+  substr(meta[["Date/Publication"]], 1, 4)
+} else if (!is.null(meta[["Date"]])) {
+  substr(meta[["Date"]], 1, 4)
+} else {
+  format(Sys.Date(), "%Y")
+}
 
 bibentry(
   bibtype = "Manual",
@@ -8,5 +15,8 @@ bibentry(
   note = paste("R package version", meta$Version),
   url = "https://CRAN.R-project.org/package=intraclass",
   header = "To cite intraclass in publications use:",
-  footer = "A companion software paper is in preparation at https://github.com/jmgirard/intraclass-paper."
+  footer = paste(
+    "A companion software paper will be drafted at",
+    "https://github.com/jmgirard/intraclass-paper."
+  )
 )

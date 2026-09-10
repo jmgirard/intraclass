@@ -101,7 +101,12 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: local::.
+          # any::devtools: data-raw/m111-fallback-sweep.R (sourced by the demo
+          # below) calls devtools::load_all(); devtools is not a package
+          # dependency, so the job declares it itself.
+          extra-packages: |
+            local::.
+            any::devtools
           needs: check
 
       - name: Demonstrate the stale-checkpoint guard fires

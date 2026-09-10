@@ -238,7 +238,7 @@ citation("intraclass")
 #>     url = {https://CRAN.R-project.org/package=intraclass},
 #>   }
 #> 
-#> A companion software paper is in preparation at
+#> A companion software paper will be drafted at
 #> https://github.com/jmgirard/intraclass-paper.
 ```
 
@@ -249,8 +249,8 @@ repository](https://github.com/jmgirard/intraclass-paper).
 
 Bug reports and questions are welcome on the [issue
 tracker](https://github.com/jmgirard/intraclass/issues);
-[CONTRIBUTING.md](CONTRIBUTING.md) says what to include, and why code
-contributions are not solicited.
+[CONTRIBUTING.md](https://github.com/jmgirard/intraclass/blob/main/CONTRIBUTING.md)
+says what to include, and why code contributions are not solicited.
 
 ## Related work
 
