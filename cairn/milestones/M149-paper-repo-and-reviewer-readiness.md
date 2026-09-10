@@ -2,7 +2,7 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M149: `intraclass` is citable and reviewer-ready, with its companion paper repo open
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan -->
 - **Depends on:** —   <!-- owner: plan -->
 - **Driving RR:** —   <!-- owner: plan -->
@@ -86,7 +86,7 @@ planned (D-045 chose JOSS).
       the current year; verify with `citation()` after `R CMD INSTALL`.
 - [x] T4: Add the paper-repo URL to `DESCRIPTION`, the `## Citation` chunk and
       the CRAN sentence to `README.Rmd`, run `devtools::build_readme()` twice.
-- [ ] T5: NEWS bullet; `devtools::check()`; `inst/WORDLIST` only for words
+- [x] T5: NEWS bullet; `devtools::check()`; `inst/WORDLIST` only for words
       the check flags (never padded, M127 lesson).
 
 ## Work log
@@ -103,6 +103,9 @@ planned (D-045 chose JOSS).
 - 2026-09-10: T2 done — `CONTRIBUTING.md` (contribute / report / support; solo-maintained stance stated; CI formatting claim read against `.github/workflows/format.yaml:27`), `.Rbuildignore` entry, README.Rmd `## Contributing and support` section linking it (README.md re-knits at T4).
 - 2026-09-10: T3 done — `inst/CITATION` (`bibentry` Manual; version from `meta$Version`, year from `meta$Date` else the current year); `R CMD INSTALL` of the working tree into a scratch library then `citation('intraclass')`: one Manual entry, year 2026, the CRAN URL, note `R package version 0.1.0.9000`.
 - 2026-09-10: T4 done — paper-repo URL third in `DESCRIPTION` `URL:`; README.Rmd: first-release note now opens "intraclass is on CRAN", Installation shows `install.packages()` above the GitHub command (gate amendment), `## Citation` is a live `citation("intraclass")` chunk; `devtools::build_readme()` twice, the second run left README.md and both figure PNGs unchanged.
+- 2026-09-10: T5 done — NEWS development-version bullet; `devtools::document()` regenerated `man/intraclass-package.Rd` (the new URL); `devtools::check()`: `0 errors ✔ | 0 warnings ✔ | 0 notes ✔` (14m 34.8s); a first check run was stopped after README edits landed mid-run and re-run on the final tree; the two claim-audit prose corrections below landed after that tarball was built (CONTRIBUTING.md is build-ignored; README.md re-passed `spelling::spell_check_package()` with no errors). No `inst/WORDLIST` change: the one flagged word (`jmgirard` as README link text) was reworded instead.
+- 2026-09-10: claim audit: 30 claims read, 2 corrected — CONTRIBUTING.md (the oracle-bar sentence now states cited-source-or-seeded-script and two independent oracle types, per PRINCIPLES #1/#4), README.Rmd/README.md (the paper "will be" drafted; the companion repo holds no paper text yet). Re-read of the two corrections ran in a second fresh [O] reader, both CORRECT — deviation: the same-reader re-read was impossible because SendMessage is disabled in this session.
+- 2026-09-10: all tasks checked; status → review.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->

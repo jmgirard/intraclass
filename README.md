@@ -242,8 +242,8 @@ citation("intraclass")
 #> https://github.com/jmgirard/intraclass-paper.
 ```
 
-The companion software paper is being drafted at
-[jmgirard/intraclass-paper](https://github.com/jmgirard/intraclass-paper).
+The companion software paper will be drafted in [its own
+repository](https://github.com/jmgirard/intraclass-paper).
 
 ## Contributing and support
 

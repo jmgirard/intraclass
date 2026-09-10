@@ -6,9 +6,11 @@ kind of message and what to expect.
 
 ## Contributing changes
 
-Every estimator in intraclass must trace to a published source and agree
-numerically with at least two independent implementations before it ships.
-That bar is hard to hold on unsolicited pull requests, so the package does not
+Every reference value in intraclass's tests traces to a cited source or a
+committed seeded script, and every exported estimator must agree numerically
+with at least two independent oracles (textbook values, an established
+package, or simulation with known variance components) before it ships. That
+bar is hard to hold on unsolicited pull requests, so the package does not
 solicit code contributions.
 
 If you want to change something anyway, open an issue at
