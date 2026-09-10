@@ -4,7 +4,7 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M150: The test suite's condition handling is exact
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -93,7 +93,7 @@ work. A fourth standing warning, should one appear — a new candidate row.
       glmmTMB engine reported a fitting warning." (`fixed = TRUE`) (AC3).
 - [x] T4: `test-icc-brms.R`, the glmmTMB `raters = "fixed"` containment fit:
       wrap it in `expect_warning(class = "intraclass_fixed_raters")` (AC3).
-- [ ] T5: Verify: `devtools::test()` `FAIL 0 / WARN 0`; `lintr::lint_package()`
+- [x] T5: Verify: `devtools::test()` `FAIL 0 / WARN 0`; `lintr::lint_package()`
       over the four edited files (LESSONS 2026-08-27, M141: CI lints `tests/`);
       state in the work log that no NEWS entry is owed (AC3, AC4).
 
@@ -108,6 +108,9 @@ work. A fourth standing warning, should one appear — a new candidate row.
 - 2026-09-10: plan gate chose one milestone over two (renderer / warnings) because both change only test files and fit one session; falsified by either half needing its own review round.
 - 2026-09-10: T1 — braced-message test run red against the shipped renderer: `Error in lapply(text, glue_cmd, .envir = .envir): Could not evaluate cli {} expression: x / object 'x' not found` at `test-n-o-disposition-grid.R:344`; renderer now `cli::ansi_strip()` + whitespace collapse over `conditionMessage()` alone; `devtools::test(filter = "n-o-disposition-grid")` green.
 - 2026-09-10: T2–T4 — the three sites now assert their warning (lavaan and glmmTMB re-signals by frame sentence with `fixed = TRUE`, the brms-file glmmTMB fixed-rater fit by class `intraclass_fixed_raters`); `devtools::test(reporter = "summary")` over the whole suite: 54 files, no Warnings or Failed section, `icc-brms` ran unskipped; `lintr::lint_package()` reports 0 lints in the four edited files.
+- 2026-09-10: T5 — `devtools::test()` on the branch at b3989ef: `[ FAIL 0 | WARN 0 | SKIP 2 | PASS 9471 ]` (the two skips are the uninstalled-vignette guards, unchanged from main); lint over the four edited files: 0. No NEWS entry is owed: every change is under `tests/`, a surface users never see.
+- 2026-09-10: claim audit: not owed — internal tier.
+- 2026-09-10: all tasks checked; status → review; no deviation from plan.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local. -->
