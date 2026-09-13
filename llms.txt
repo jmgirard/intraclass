@@ -12,17 +12,16 @@ incomplete, and multilevel designs, and to help you decide **which ICC
 to choose, and why**. The docs and website are a place to learn ICC best
 practice, not just call functions.
 
-> \[!NOTE\] intraclass is on CRAN. The full interrater-reliability ICC
-> family is implemented. That covers two-way designs (absolute agreement
-> vs. consistency, single vs. average, random vs. fixed raters) and
-> one-way designs. It covers imbalanced and incomplete (missing-cell)
-> data. It also covers multilevel designs, at the subject or cluster
-> level, with raters crossed with or nested in clusters or subjects.
-> Everything just listed comes with boundary-aware Monte-Carlo
-> intervals. Fits run on `glmmTMB` (the default) or `lme4`. Bayesian
-> fits run on `brms`, and SEM fits on `lavaan`. The [engines
-> article](https://jmgirard.github.io/intraclass/articles/engines.html)
-> says which designs each one supports.
+The full interrater-reliability ICC family is implemented. That covers
+two-way designs (absolute agreement vs. consistency, single vs. average,
+random vs. fixed raters) and one-way designs. It covers imbalanced and
+incomplete (missing-cell) data. It also covers multilevel designs, at
+the subject or cluster level, with raters crossed with or nested in
+clusters or subjects. Everything just listed comes with boundary-aware
+Monte-Carlo intervals. Fits run on `glmmTMB` (the default) or `lme4`.
+Bayesian fits run on `brms`, and SEM fits on `lavaan`. The [engines
+article](https://jmgirard.github.io/intraclass/articles/engines.html)
+says which designs each one supports.
 
 ## Installation
 

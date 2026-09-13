@@ -76,9 +76,7 @@
 
 <p><strong>intraclass</strong> computes interrater-reliability <strong>intraclass correlation coefficients (ICCs)</strong> within the generalizability-theory framework, using <strong>modern variance-component estimation</strong> (linear mixed models) rather than the classical ANOVA / mean-squares approach.</p>
 <p>It aims to fit variance components with modern engines, and to compute the <em>correct</em> ICC for a stated design with proper boundary-aware Monte-Carlo interval estimation. It also aims to handle imbalanced, incomplete, and multilevel designs, and to help you decide <strong>which ICC to choose, and why</strong>. The docs and website are a place to learn ICC best practice, not just call functions.</p>
-<blockquote>
-<p>[!NOTE] intraclass is on CRAN. The full interrater-reliability ICC family is implemented. That covers two-way designs (absolute agreement vs. consistency, single vs. average, random vs. fixed raters) and one-way designs. It covers imbalanced and incomplete (missing-cell) data. It also covers multilevel designs, at the subject or cluster level, with raters crossed with or nested in clusters or subjects. Everything just listed comes with boundary-aware Monte-Carlo intervals. Fits run on <code>glmmTMB</code> (the default) or <code>lme4</code>. Bayesian fits run on <code>brms</code>, and SEM fits on <code>lavaan</code>. The <a href="https://jmgirard.github.io/intraclass/articles/engines.html">engines article</a> says which designs each one supports.</p>
-</blockquote>
+<p>The full interrater-reliability ICC family is implemented. That covers two-way designs (absolute agreement vs. consistency, single vs. average, random vs. fixed raters) and one-way designs. It covers imbalanced and incomplete (missing-cell) data. It also covers multilevel designs, at the subject or cluster level, with raters crossed with or nested in clusters or subjects. Everything just listed comes with boundary-aware Monte-Carlo intervals. Fits run on <code>glmmTMB</code> (the default) or <code>lme4</code>. Bayesian fits run on <code>brms</code>, and SEM fits on <code>lavaan</code>. The <a href="https://jmgirard.github.io/intraclass/articles/engines.html">engines article</a> says which designs each one supports.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -318,7 +316,7 @@
 <div class="dev-status">
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
-<li><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
+<li><a href="https://lifecycle.r-lib.org/articles/stages.html#stable" class="external-link"><img src="https://img.shields.io/badge/lifecycle-stable-brightgreen.svg" alt="Lifecycle: stable"></a></li>
 <li><a href="https://CRAN.R-project.org/package=intraclass" class="external-link"><img src="https://www.r-pkg.org/badges/version/intraclass" alt="CRAN status"></a></li>
 <li><a href="https://github.com/jmgirard/intraclass/actions/workflows/check-standard.yaml" class="external-link"><img src="https://github.com/jmgirard/intraclass/actions/workflows/check-standard.yaml/badge.svg" alt="R-CMD-check"></a></li>
 <li><a href="https://app.codecov.io/gh/jmgirard/intraclass" class="external-link"><img src="https://codecov.io/gh/jmgirard/intraclass/graph/badge.svg" alt="Codecov test coverage"></a></li>
