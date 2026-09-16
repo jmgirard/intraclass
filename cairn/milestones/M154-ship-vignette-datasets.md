@@ -22,7 +22,7 @@ Move every data simulation out of the articles and the README into one seeded `d
 ## Acceptance criteria
 
 - [ ] AC1: Running `Rscript data-raw/make-vignette-data.R` and then loading the four shipped objects from `data/` gives objects `identical()` to the ones the script built in that run, and `devtools::test()` is clean, so the vignette figures the suite pins are unchanged.
-- [ ] AC2: The four chunks named in Scope and `README.Rmd`'s `multilevel` chunk load a shipped dataset and build no data. As evidence, `grep -nE 'set\.seed\(|rnorm\(|sample\(' vignettes/*.Rmd README.Rmd` returns no line.
+- [x] AC2: The four chunks named in Scope and `README.Rmd`'s `multilevel` chunk load a shipped dataset and build no data. As evidence, `grep -nE 'set\.seed\(|rnorm\(|sample\(' vignettes/*.Rmd README.Rmd` returns no line.
 - [ ] AC3: Each of the four datasets has a roxygen page in `R/data.R` whose description says the data are simulated and names `data-raw/make-vignette-data.R` and the seed, with `@format` and an `@examples` call, and a row under `_pkgdown.yml`'s Datasets section. `pkgdown::check_pkgdown()` passes and `devtools::check()` reports 0 errors, 0 warnings and no undocumented-dataset NOTE.
 - [ ] AC4: Every `set.seed(2025)`, `set.seed(11)` and `set.seed(88)` site in `tests/testthat/test-vignette-claims.R` is gone (`grep -cE 'set\.seed\((2025|11|88)\)'` prints 0). The tests that held them read the shipped objects and pass.
 - [ ] AC5: After `pkgdown::build_site()`, the built HTML of the four edited articles and of `index.html` contains no unrendered inline code (`grep -l '`r ' docs/articles/*.html docs/index.html` returns no file), and no vignette, README or roxygen text names a milestone number.
@@ -61,3 +61,6 @@ Move every data simulation out of the articles and the README into one seeded `d
 ## Decisions
 
 ## Review
+
+- 2026-09-16 review start. The default branch did not move after the branch was cut (`git log HEAD..origin/main` is empty). No PR exists yet.
+- AC2 evidence: `grep -nE 'set\.seed\(|rnorm\(|sample\(' vignettes/*.Rmd README.Rmd` returns no line. In the diff, the five named chunks call `str()`, `nrow()` or `icc()` on the shipped objects and build no data. PASS.
