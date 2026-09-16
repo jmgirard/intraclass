@@ -9,7 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M154 | Ship the vignettes' simulated datasets from `data-raw/` | in-progress | — | normal | milestones/M154-ship-vignette-datasets.md |
+| M154 | Ship the vignettes' simulated datasets from `data-raw/` | review | — | normal | milestones/M154-ship-vignette-datasets.md |
 | M155 | Comparison tables as hidden `gt` chunks | planned | M154 | normal | milestones/M155-gt-comparison-tables.md |
 | M153 | Plain-English pass over the roxygen surface | done | M151 | normal | milestones/archive/M153-plain-english-roxygen.md |
 | M152 | Plain-English pass over the method articles | done | M151 | normal | milestones/archive/M152-plain-english-method-articles.md |

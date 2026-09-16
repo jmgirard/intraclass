@@ -1,6 +1,6 @@
 # M154: Ship the vignettes' simulated datasets from `data-raw/`
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -42,7 +42,7 @@ Move every data simulation out of the articles and the README into one seeded `d
 - [x] T3: Rewrite the four vignette chunks and their prose (`multilevel-designs.Rmd` lines 55-58, 232 and the inline `n_rater` at 244; `d-studies-and-replicates.Rmd` line 168; `interval-methods.Rmd` lines 355-356, all at `a400774`) to load the shipped data under the new names.
 - [x] T4: Replace the inline rebuilds in `test-vignette-claims.R` (`school` at five sites, `school_ragged`, `vc_mpl_sim()`) with the shipped objects. `devtools::test()` clean.
 - [x] T5: Switch `README.Rmd`'s `multilevel` chunk to `school`, `devtools::build_readme()`.
-- [ ] T6: `NEWS.md` entry under Documentation, `devtools::check()`, `pkgdown::check_pkgdown()`, `pkgdown::build_site()` and the AC5 grep.
+- [x] T6: `NEWS.md` entry under Documentation, `devtools::check()`, `pkgdown::check_pkgdown()`, `pkgdown::build_site()` and the AC5 grep.
 
 ## Work log
 
@@ -56,6 +56,7 @@ Move every data simulation out of the articles and the README into one seeded `d
 - 2026-09-16: T4 done: the five `school` rebuilds, the `school_ragged` pair and `vc_mpl_sim()` in `test-vignette-claims.R` now read the shipped objects; seed grep prints 0; full `devtools::test()` clean, one pre-existing skip (vignettes not installed).
 - 2026-09-16: T5 done: README `multilevel` chunk loads `school`, `build_readme()` run, regenerated figure PNGs reverted (unchanged content). The README's multilevel figures change (cluster ICC(C,1) now 1.000 with interval [0.000, 1.000], a boundary cell) since the README used a different simulation before.
 - 2026-09-16: claim audit: 23 claims read, 1 corrected — R/data.R, vignettes/multilevel-designs.Rmd, vignettes/d-studies-and-replicates.Rmd, vignettes/interval-methods.Rmd, README.md, tests/testthat/test-vignette-claims.R, NEWS.md (the NEWS bullet now says the README's multilevel figures change).
+- 2026-09-16: T6 done: first `devtools::check()` failed on the spelling test (`sd` in the new dataset prose), fixed by writing "standard deviation"; second `devtools::check()` 0 errors, 0 warnings, 0 notes; `pkgdown::check_pkgdown()` clean; `pkgdown::build_site()` rendered every article, no unrendered inline code, `check-vignette-render-warnings.py` OK; milestone-number grep empty. Status set to review.
 
 ## Decisions
 
