@@ -13,13 +13,27 @@ articles treat the **subject** as the object of measurement. But
 subjects are often nested in higher-level **clusters**, such as pupils
 in classrooms or patients in clinics. Then “reliability” splits in two:
 how well raters tell *subjects* apart, and how well they tell *clusters*
-apart. Those are different questions with different answers, and
-reporting one when you needed the other can be badly misleading. This
-article covers the multilevel ICC family (ten Hove, Jorgensen & van der
-Ark, 2022): crossed and nested layouts, complete and incomplete data,
-fixed raters, and the multilevel D-study. (Any unfamiliar term is
-defined in the
-[*Glossary*](https://jmgirard.github.io/intraclass/articles/glossary.md).)
+apart. The second is the
+[cluster-level](https://jmgirard.github.io/intraclass/articles/glossary.html#subject-level-vs--cluster-level)
+ICC: how reliably raters distinguish cluster means. Those are different
+questions with different answers. Reporting one when you needed the
+other can be badly misleading. Ignoring the nesting gives a [conflated
+ICC](https://jmgirard.github.io/intraclass/articles/glossary.html#conflated-icc),
+the single-level ICC that ignores clustering, which is biased for both
+questions.
+
+This article covers the multilevel ICC family of ten Hove, Jorgensen &
+van der Ark (2022). Its coefficients are ratios of [variance
+components](https://jmgirard.github.io/intraclass/articles/glossary.html#variance-component),
+each a share of the total variation traced to one source. The family
+spans crossed and nested layouts, complete and incomplete data, and
+[fixed](https://jmgirard.github.io/intraclass/articles/glossary.html#fixed-vs--random-raters)
+raters, where the observed raters are the whole population of interest.
+It ends with the multilevel
+[D-study](https://jmgirard.github.io/intraclass/articles/glossary.html#d-study-decision-study),
+which projects the fitted variance components to other rater counts. Any
+unfamiliar term is defined in the
+[*Glossary*](https://jmgirard.github.io/intraclass/articles/glossary.md).
 
 ## Subject level vs. cluster level
 
@@ -76,8 +90,8 @@ icc(school, score, subject = pupil, rater = rater, cluster = classroom, type = "
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   level      index     estimate   95% CI
-#>   subject    ICC(A,1)     0.431   [0.251, 0.561]
-#>   subject    ICC(A,k)     0.751   [0.573, 0.836]
+#>   subject    ICC(A,1)     0.431   [0.249, 0.561]
+#>   subject    ICC(A,k)     0.751   [0.571, 0.836]
 #>   cluster    ICC(A,1)     0.880   [0.000, 0.972]
 #>   cluster    ICC(A,k)     0.967   [0.000, 0.993]
 #> 
@@ -87,11 +101,11 @@ icc(school, score, subject = pupil, rater = rater, cluster = classroom, type = "
 ```
 
 Both levels come back in one call. Here the **cluster-level** ICC is the
-higher of the two: raters agree more about which *classrooms* score high
+higher of the two. Raters agree more about which *classrooms* score high
 than about which *pupils within a classroom* do. That is exactly the
 pattern you would expect when most of the true variation lives between
 classrooms. Which number you report depends on the decision you will
-make: a classroom-level intervention cares about the cluster-level
+make. A classroom-level intervention cares about the cluster-level
 reliability, a pupil-level one about the subject level. Request just one
 with `level = "subject"` or `level = "cluster"`.
 
@@ -102,10 +116,9 @@ an ordinary single-level ICC? That number is ten Hove et al.’s Equation
 14. It folds the between-classroom and within-classroom variation
 together into one “true score”, and is biased for **both** questions
 above. [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
-can compute this [conflated
-ICC](https://jmgirard.github.io/intraclass/articles/glossary.html#conflated-icc)
-as a **diagnostic contrast** with `level = "conflated"`, so you can see
-the distortion directly rather than take it on faith:
+can compute this conflated ICC as a **diagnostic contrast** with
+`level = "conflated"`. So you can see the distortion directly rather
+than take it on faith:
 
 ``` r
 
@@ -118,12 +131,12 @@ icc(school, score,
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   level      index     estimate   95% CI
-#>   subject    ICC(A,1)     0.431   [0.251, 0.561]
-#>   subject    ICC(A,k)     0.751   [0.573, 0.836]
+#>   subject    ICC(A,1)     0.431   [0.249, 0.561]
+#>   subject    ICC(A,k)     0.751   [0.571, 0.836]
 #>   cluster    ICC(A,1)     0.880   [0.000, 0.972]
 #>   cluster    ICC(A,k)     0.967   [0.000, 0.993]
-#>   conflated  ICC(A,1)     0.705   [0.000, 0.808]
-#>   conflated  ICC(A,k)     0.905   [0.000, 0.944]
+#>   conflated  ICC(A,1)     0.705   [0.000, 0.805]
+#>   conflated  ICC(A,k)     0.905   [0.000, 0.943]
 #> 
 #> Variance components: cluster 0.998, subject 0.461, rater 0.136, cluster:rater 0.000, residual 0.473
 #> Diagnostic contrast: the 'conflated' level ignores the cluster structure
@@ -135,8 +148,11 @@ The conflated value lands between the two correct levels and matches
 neither: it over- or under-states the reliability of any real decision.
 It is printed with a warning label and is **never** a coefficient to
 report. It exists only to quantify the cost of ignoring the structure.
-It is the flat two-way ICC read off the fit, so it comes in both an
-absolute-agreement and a consistency form, and a default
+It is the flat two-way ICC read off the fit, the design where the
+subjects share one set of raters. So it comes in two forms. One is
+absolute agreement, where raters give the same score. The other is
+[consistency](https://jmgirard.github.io/intraclass/articles/glossary.html#consistency),
+where raters agree apart from a constant offset per rater. A default
 `level = "conflated"` call reports both. It needs a crossed,
 random-rater design with raters that bridge the clusters, and works on
 complete or incomplete data.
@@ -144,14 +160,15 @@ complete or incomplete data.
 ## When raters are nested
 
 The classroom example above has every rater rate every pupil in every
-classroom, so raters are **crossed** with clusters (ten Hove et al.’s
-Design 1). Two other layouts are common, and
+classroom. So raters are **crossed** with clusters: ten Hove et al.’s
+Design 1, where one panel of raters spans every cluster. Two other
+layouts are common, and
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
-**infers which one you have** from the crossing pattern: which raters
-appear in which clusters, and which pupils each of them rates. The
-`design` argument overrides that inference, and there are two occasions
-to reach for it. The first is when the rater *labels* do not mean what
-the pattern implies ([*Declaring the
+**infers which one you have** from the crossing pattern. That pattern is
+which raters appear in which clusters, and which pupils each of them
+rates. The `design` argument overrides that inference, and there are two
+reasons to reach for it. The first is when the rater *labels* do not
+mean what the pattern implies ([*Declaring the
 design*](#declaring-the-design-when-the-labels-are-ambiguous) below).
 The second is when missing cells leave the pattern genuinely ambiguous
 ([*Incomplete (ragged) multilevel
@@ -160,13 +177,13 @@ layouts are:
 
 - **Raters nested in clusters** (Design 2): each classroom has its *own*
   panel of raters. Under Design 2 there is then no between-cluster
-  reliability to report: a cluster-level ICC needs the *same* raters
+  reliability to report. A cluster-level ICC needs the *same* raters
   spanning clusters, so
   [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
   returns the subject level only.
 - **Raters nested in subjects** (Design 3): each pupil is rated by their
   *own* raters. Now systematic rater differences cannot be separated
-  from residual error at all, so this is a multilevel *one-way* design:
+  from residual error at all. So this is a multilevel *one-way* design:
   it reports agreement-only `ICC(1)` / `ICC(k)`, the clustered analogue
   of `model = "oneway"`.
 
@@ -182,8 +199,8 @@ icc(school_d2, score, subject = pupil, rater = rater, cluster = classroom, type 
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   level      index     estimate   95% CI
-#>   subject    ICC(A,1)     0.429   [0.310, 0.549]
-#>   subject    ICC(A,k)     0.751   [0.642, 0.830]
+#>   subject    ICC(A,1)     0.429   [0.309, 0.549]
+#>   subject    ICC(A,k)     0.751   [0.641, 0.830]
 #> 
 #> Variance components: cluster 0.966, subject 0.458, rater:cluster 0.128, residual 0.481
 ```
@@ -202,8 +219,8 @@ icc(school_d3, score, subject = pupil, rater = rater, cluster = classroom, type 
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   level      index     estimate   95% CI
-#>   subject    ICC(1)       0.412   [0.290, 0.546]
-#>   subject    ICC(k)       0.737   [0.621, 0.828]
+#>   subject    ICC(1)       0.412   [0.291, 0.546]
+#>   subject    ICC(k)       0.737   [0.622, 0.828]
 #> 
 #> Variance components: cluster 0.998, subject 0.426, residual 0.609 (rater confounded)
 ```
@@ -211,16 +228,17 @@ icc(school_d3, score, subject = pupil, rater = rater, cluster = classroom, type 
 Here the coefficients are labeled `ICC(1)` / `ICC(k)` and `type` no
 longer applies. With each pupil’s raters unique, there is no rater main
 effect to keep in or drop from the error term. A layout that is neither
-cleanly crossed nor cleanly nested (some raters shared across clusters,
-some not) raises an informative error rather than guessing at a model.
+cleanly crossed nor cleanly nested raises an informative error rather
+than guessing at a model. One such layout has some raters shared across
+clusters and some not.
 
 ### Declaring the design when the labels are ambiguous
 
-Both relabellings above worked by rewriting the rater column, because
-inference reads that column and can only be as good as the labels in it.
-The `school` table as built numbers its raters 1–4 *inside every
-classroom*, and nothing in the data says whether “rater 1” in classroom
-3 is the same person as “rater 1” in classroom 7. Left to itself
+Both relabellings above worked by rewriting the rater column. Inference
+reads that column and can only be as good as the labels in it. The
+`school` table as built numbers its raters 1–4 *inside every classroom*.
+Nothing in the data says whether “rater 1” in classroom 3 is the same
+person as “rater 1” in classroom 7. Left to itself
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) reads
 the reused labels as one panel rating everywhere, which is Design 1, and
 says so rather than deciding quietly. If the numbering is instead
@@ -237,17 +255,17 @@ icc(school, score,
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   level      index     estimate   95% CI
-#>   subject    ICC(A,1)     0.429   [0.310, 0.549]
-#>   subject    ICC(A,k)     0.751   [0.642, 0.830]
+#>   subject    ICC(A,1)     0.429   [0.309, 0.549]
+#>   subject    ICC(A,k)     0.751   [0.641, 0.830]
 #> 
 #> Variance components: cluster 0.966, subject 0.458, rater:cluster 0.128, residual 0.481
 ```
 
-The header now reads *raters nested in clusters*, the cluster level is
-gone, and a single `rater:cluster` component replaces the two rater
-terms the crossed fit printed (`rater` and `cluster:rater`). If the
-numbering is *pupil*-relative, meaning each pupil’s own four raters
-numbered from one, the same table is Design 3:
+The header now reads *raters nested in clusters* and the cluster level
+is gone. A single `rater:cluster` component replaces the two rater terms
+the crossed fit printed (`rater` and `cluster:rater`). If the numbering
+is *pupil*-relative, meaning each pupil’s own four raters numbered from
+one, the same table is Design 3:
 
 ``` r
 
@@ -260,18 +278,18 @@ icc(school, score,
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   level      index     estimate   95% CI
-#>   subject    ICC(1)       0.412   [0.290, 0.546]
-#>   subject    ICC(k)       0.737   [0.621, 0.828]
+#>   subject    ICC(1)       0.412   [0.291, 0.546]
+#>   subject    ICC(k)       0.737   [0.622, 0.828]
 #> 
 #> Variance components: cluster 0.998, subject 0.426, residual 0.609 (rater confounded)
 ```
 
-Now there is no rater term at all: the components line reports the
-residual as `(rater confounded)`, and the coefficients are the
+Now there is no rater term at all. The components line reports the
+residual as `(rater confounded)`. The coefficients are the
 agreement-only `ICC(1)` / `ICC(k)` of the multilevel one-way design.
 
 One table, three readings, and the data cannot tell you which is right:
-only you know what the labels mean. That is why
+only you know what the labels mean. So
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
 announces the crossed reading in a message rather than assuming it
 quietly. The message prints once per session, so in this article it
@@ -288,19 +306,21 @@ definition. What a declaration *can* do unchecked is choose among the
 readings the data does admit, the choice made twice above. So declare a
 design only when you know the labelling. Where the labels are already
 unique per rater, as in the two relabelled tables earlier, inference has
-everything it needs and passing the matching `design` explicitly returns
-the very same fit.
+everything it needs. Passing the matching `design` explicitly then
+returns the very same fit.
 
 ## Incomplete (ragged) multilevel designs
 
-Just as in the single-level case (the [*Choosing an
+The [*Choosing an
 ICC*](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.md)
-article works a connected incomplete design), the **crossed** design
-(Design 1) does not need every pupil rated by every rater. The mixed
-model estimates the [variance
-components](https://jmgirard.github.io/intraclass/articles/glossary.html#variance-component)
-from whatever cells are present, so a ragged classroom design is handled
-directly. Drop a fifth of the ratings from the `school` data at random:
+article works a
+[connected](https://jmgirard.github.io/intraclass/articles/glossary.html#connectedness-identification)
+incomplete design, one where raters and subjects form one linked web.
+Just as in that single-level case, the **crossed** design (Design 1)
+does not need every pupil rated by every rater. The mixed model
+estimates the variance components from whatever cells are present, so a
+ragged classroom design is handled directly. Drop a fifth of the ratings
+from the `school` data at random:
 
 ``` r
 
@@ -308,11 +328,12 @@ set.seed(11)
 school_ragged <- school[-sample(nrow(school), round(0.2 * nrow(school))), ]
 ```
 
-At the **subject** level both agreement and consistency come back.
-Exactly as in the single-level incomplete case, `ICC(*,k)` averages over
-the [*effective* number of
+At the **subject** level both agreement and consistency come back. This
+matches the single-level incomplete case. `ICC(*,k)` averages over the
+[*effective* number of
 ratings](https://jmgirard.github.io/intraclass/articles/glossary.html#effective-number-of-ratings-k_eff)
-per pupil (`k_eff`, the harmonic mean), which is below the full panel
+(`k_eff`): the harmonic mean of the per-subject rating counts, an
+average that leans toward the smaller values. It is below the full panel
 size of 4:
 
 ``` r
@@ -334,12 +355,12 @@ icc(school_ragged, score, subject = pupil, rater = rater, cluster = classroom,
 The header now reads *incomplete*, and the report names the effective
 `k` so the divisor is never a black box.
 
-At the **cluster** level, both the single-rater `ICC(c,1)` and the
-**averaged** `ICC(c,k)` come back on ragged data. The averaged
-coefficient divides the cluster error by its own effective rater count,
-the raters behind each classroom’s observed mean. That count is reported
-as `k_c_eff` (the inverse-Simpson harmonic mean), and it is *not* the
-same as the per-pupil `k_eff`:
+At the **cluster** level, both `ICC(c,1)` and the **averaged**
+`ICC(c,k)` come back on ragged data. The averaged coefficient divides
+the cluster error by its own effective rater count, the raters behind
+each classroom’s observed mean. That count is reported as `k_c_eff` (the
+inverse-Simpson harmonic mean), and it is *not* the same as the
+per-pupil `k_eff`:
 
 ``` r
 
@@ -362,19 +383,21 @@ icc(school_ragged, score, subject = pupil, rater = rater, cluster = classroom,
 #> Variance components: cluster 1.026, subject 0.409, rater 0.125, cluster:rater 0.000, residual 0.457
 ```
 
-One subtlety worth knowing: on ragged data, systematic rater differences
-no longer cancel perfectly from a *comparison* of observed cluster means
-(they cancel only when every cluster has the same rater weighting). If
-you are ranking clusters by their observed means, prefer the
+One subtlety worth knowing. On ragged data, systematic rater differences
+no longer cancel perfectly from a *comparison* of observed cluster
+means. They cancel only when every cluster has the same rater weighting.
+If you are ranking clusters by their observed means, prefer the
 **agreement** `ICC(c,k)`, whose error term accounts for that. The
 consistency `ICC(c,k)` measures cluster×rater disagreement only. This
 averaged cluster coefficient on ragged data ships for every random-rater
-engine: `glmmTMB`, `lme4`, and the Bayesian `brms` engine, which applies
-the same `k_c_eff` divisor to its posterior draws.
+[engine](https://jmgirard.github.io/intraclass/articles/glossary.html#engine),
+the software that does the fitting: `glmmTMB`, `lme4`, and the Bayesian
+`brms` engine. The brms engine applies the same `k_c_eff` divisor to its
+posterior draws.
 
 One thing is still deliberately fenced off, with a clear error rather
 than a silently wrong number. Missing cells can make the crossing
-pattern **ambiguous**: some raters happen to appear in only one
+pattern **ambiguous**. Some raters happen to appear in only one
 classroom, so the design could be read as crossed *or* nested. There
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) does
 not guess. You resolve it by declaring `design = "crossed"`, which is
@@ -385,14 +408,15 @@ reading.
 
 The multilevel examples so far treat raters as a [**random**
 sample](https://jmgirard.github.io/intraclass/articles/glossary.html#fixed-vs--random-raters),
-the recommended default, which generalizes beyond the raters you
-happened to use. When the observed raters *are* the entire population of
-interest (a fixed panel of examiners, say), pass `raters = "fixed"`. As
-in the single-level case, the rater main effect is then the
-[finite-population
+the recommended default. A random sample generalizes beyond the raters
+you happened to use. When the observed raters *are* the entire
+population of interest (a fixed panel of examiners, say), pass
+`raters = "fixed"`. As in the single-level case, the rater main effect
+is then the [finite-population
 variance](https://jmgirard.github.io/intraclass/articles/glossary.html#finite-population-rater-variance-%CE%B8%C2%B2_r)
-of *these* raters (McGraw & Wong’s Case 3A) rather than a random-sample
-variance. On a balanced crossed design both levels come back:
+of *these* raters: the spread of just the observed raters. That is
+McGraw & Wong’s Case 3A, not a random-sample variance. On a balanced
+crossed design both levels come back:
 
 ``` r
 
@@ -409,10 +433,10 @@ icc(school, score, subject = pupil, rater = rater, cluster = classroom,
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   level      index     estimate   95% CI
-#>   subject    ICC(A,1)     0.431   [0.320, 0.555]
-#>   subject    ICC(A,k)     0.751   [0.653, 0.833]
-#>   cluster    ICC(A,1)     0.880   [0.000, 0.945]
-#>   cluster    ICC(A,k)     0.967   [0.000, 0.986]
+#>   subject    ICC(A,1)     0.431   [0.314, 0.550]
+#>   subject    ICC(A,k)     0.751   [0.647, 0.830]
+#>   cluster    ICC(A,1)     0.880   [0.000, 0.944]
+#>   cluster    ICC(A,k)     0.967   [0.000, 0.985]
 #> 
 #> Variance components: cluster 0.998, subject 0.461, rater 0.136, cluster:rater 0.000, residual 0.473
 ```
@@ -432,30 +456,30 @@ case above.
 
 Multilevel support now covers **random** raters on the crossed design
 (Design 1), complete or **incomplete**, at the subject level and the
-cluster level. That covers both the single-rater `ICC(c,1)` and the
-averaged `ICC(c,k)`, across all three engines (`glmmTMB`, `lme4`,
-`brms`). It also covers the nested designs (Designs 2 and 3, subject
-level), complete **or incomplete**. The structural-equation `lavaan`
-engine joins them on the crossed design for **complete, balanced** data
-with equal cluster sizes. A two-level SEM estimates the same
-five-component decomposition and reports both levels. See the [engines
+cluster level. That covers both `ICC(c,1)` and the averaged `ICC(c,k)`,
+across all three engines (`glmmTMB`, `lme4`, `brms`). It also covers the
+nested designs (Designs 2 and 3, subject level), complete **or
+incomplete**. The structural-equation `lavaan` engine joins them on the
+crossed design for **complete, balanced** data with equal cluster sizes.
+A two-level SEM estimates the same five-component decomposition and
+reports both levels. See the [engines
 vignette](https://jmgirard.github.io/intraclass/articles/engines.md) for
 how its estimator differs from the mixed-model one at small cluster
 counts. **Fixed** raters are supported at the subject level on the
-crossed design (complete **and** incomplete), at the **cluster** level
-on the crossed design (complete data), and, on complete data, the nested
-Design 2. What remains open is incomplete *fixed-rater cluster-level*
-estimation. Design 3 reports no fixed-rater or cluster-level coefficient
-by construction. With raters nested in subjects there is no separable
-rater effect to fix, and no crossed-cluster structure to support a
-cluster mean.
+crossed design (complete **and** incomplete). They are also supported at
+the **cluster** level on the crossed design (complete data), and, on
+complete data, the nested Design 2. What remains open is incomplete
+*fixed-rater cluster-level* estimation. Design 3 reports no fixed-rater
+or cluster-level coefficient by construction. With raters nested in
+subjects there is no separable rater effect to fix, and no
+crossed-cluster structure to support a cluster mean.
 
 ## How many raters? A multilevel D-study
 
 The
 [D-study](https://jmgirard.github.io/intraclass/articles/d-studies-and-replicates.md)
-works on a multilevel fit too: it projects the **number of raters** at
-each level, so you can ask “how many raters would make the
+works on a multilevel fit too. It projects the **number of raters** at
+each level. So you can ask “how many raters would make the
 *cluster*-level score reliable?” separately from the subject level. It
 returns one curve per level (note the `level` column), and
 [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
@@ -470,10 +494,10 @@ d_study(
 #> # D-study projection: multilevel two-way random, absolute agreement
 #> Observed raters: 4 | CI: 95% montecarlo (10000 draws)
 #>     level  m  estimate          95% CI
-#>   subject  1     0.431  [0.251, 0.561]
-#>   subject  2     0.602  [0.402, 0.719]
-#>   subject  4     0.751  [0.573, 0.836]
-#>   subject  8     0.858  [0.729, 0.911]
+#>   subject  1     0.431  [0.249, 0.561]
+#>   subject  2     0.602  [0.399, 0.719]
+#>   subject  4     0.751  [0.571, 0.836]
+#>   subject  8     0.858  [0.727, 0.911]
 #>   cluster  1     0.880  [0.000, 0.972]
 #>   cluster  2     0.936  [0.000, 0.986]
 #>   cluster  4     0.967  [0.000, 0.993]
@@ -482,20 +506,19 @@ d_study(
 
 Only the **rater** count is projected. The cluster-level coefficient
 does not average over subjects (ten Hove et al. 2022, Eq. 13). So “how
-many subjects per cluster?” is a *sample-size* question, about how
-precisely you estimate the variance components, and not a reliability
+many subjects per cluster?” is a *sample-size* question, about the
+precision of your variance-component estimates. It is not a reliability
 projection.
 
 ## Visualizing the levels
 
 The
 [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
-forest plot facets a **multilevel** fit by level, so the subject- and
-cluster-level coefficients line up for comparison. See [*D-studies and
-within-cell
-replicates*](https://jmgirard.github.io/intraclass/articles/d-studies-and-replicates.html#visualizing-a-fit)
-for the single-level version. Below is the same `school` fit from above,
-whose cluster level was the higher of the two:
+forest plot facets a **multilevel** fit by level, so the subject-level
+and cluster-level coefficients line up for comparison. See the
+[*D-studies*](https://jmgirard.github.io/intraclass/articles/d-studies-and-replicates.html#visualizing-a-fit)
+article for the single-level version. Below is the same `school` fit
+from above, whose cluster level was the higher of the two:
 
 ``` r
 
@@ -546,14 +569,17 @@ choose_icc(model = "twoway", multilevel = TRUE, level = "cluster",
 #>   - See vignette("multilevel-designs") for a worked multilevel example.
 ```
 
-Because the helper is generated from the **same estimand machinery** as
+The helper is generated from the **same
+[estimand](https://jmgirard.github.io/intraclass/articles/glossary.html#estimand)
+machinery** as
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md), the
+estimand being the true quantity you are trying to estimate. So the
 emitted call cannot drift from what
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
 actually computes. In an **interactive** session you can omit the
-deciding answers and
+deciding answers.
 [`choose_icc()`](https://jmgirard.github.io/intraclass/reference/choose_icc.md)
-will ask the outstanding questions one at a time, then resolve.
+will then ask the outstanding questions one at a time, then resolve.
 
 ## References
 

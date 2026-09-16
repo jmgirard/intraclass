@@ -6,36 +6,41 @@ library(intraclass)
 ```
 
 If you already use another R package for intraclass correlations, two
-questions matter before switching: **does `intraclass` agree with the
-tool I trust on the problems that tool handles?** and **what does it do
+questions matter before switching. **Does `intraclass` agree with the
+tool I trust on the problems that tool handles?** And **what does it do
 that my current tool cannot?** This article answers both, on the
-package’s own shipped datasets, with every number computed live as the
+package’s own shipped datasets. Every number is computed live as the
 page builds. Any unfamiliar term is defined in the
 [*Glossary*](https://jmgirard.github.io/intraclass/articles/glossary.md).
 
-The comparison packages are `psych` (Revelle’s
-[`psych::ICC`](https://rdrr.io/pkg/psych/man/ICC.html), the most widely
-used ANOVA ICC in R), `irr`
-([`irr::icc`](https://rdrr.io/pkg/irr/man/icc.html), a classical
-inter-rater-reliability toolkit), and `irrICC` (Gwet’s model-based
-ICCs). All three are optional: the code chunks below only run when the
-package is installed.
+The comparison packages are `psych`, `irr`, and `irrICC`. `psych` is a
+general package for psychological measurement, and its
+[`psych::ICC`](https://rdrr.io/pkg/psych/man/ICC.html) is the most
+widely used ANOVA ICC among R users. `irr` is a classical
+inter-rater-reliability toolkit, and its
+[`irr::icc`](https://rdrr.io/pkg/irr/man/icc.html) computes the same
+ANOVA family. `irrICC` implements Gwet’s model-based ICCs. All three are
+optional: the code chunks below only run when the package is installed.
 
 ## Does it agree? (validation)
 
-On a **balanced** design, one where every subject is rated by every
-rater, the whole ICC family is defined for all of these tools. So we can
-line them up coefficient by coefficient. The `ratings` dataset is six
-subjects each scored by the same four raters.
+On a **balanced** design, every subject is rated by every rater. There
+the whole ICC family is defined for all of these tools, so we can line
+them up coefficient by coefficient. The `ratings` dataset is six
+subjects each scored by the same four raters. That is a two-way design:
+the subjects share one set of raters.
 
 `intraclass` estimates the coefficients from [variance
-components](https://jmgirard.github.io/intraclass/articles/glossary.html#variance-component)
-fitted by
+components](https://jmgirard.github.io/intraclass/articles/glossary.html#variance-component),
+each a share of the total variation traced to one source. It fits them
+by
 [REML](https://jmgirard.github.io/intraclass/articles/glossary.html#reml)
-(a mixed model), whereas `psych` and `irr` derive them from classical
-**ANOVA mean squares**. Those are different computational routes to the
-same population quantity, and they are known to converge to each other.
-The table shows how close they land here:
+in a mixed model. REML, restricted maximum likelihood, is a way to
+estimate variances that corrects maximum likelihood’s downward bias.
+`psych` and `irr` instead derive the coefficients from classical **ANOVA
+mean squares**. Those are different computational routes to the same
+population quantity, and they are known to converge to each other. The
+table shows how close they land here:
 
 ``` r
 
@@ -89,14 +94,14 @@ Every coefficient matches to five decimal places. The largest
 disagreement anywhere in the table is 7.2e-06. That residual is not
 error in either tool. It is the small-sample gap between a REML fit and
 ANOVA mean squares, which vanishes as the sample grows. **On the designs
-classical tools handle, you lose nothing by using `intraclass`**, and
-the `psych` agreement is in fact checked on every test run of this
-package.
+classical tools handle, you lose nothing by using `intraclass`.** The
+match with `psych` is in fact checked on every test run of this package.
 
 A model-based tool from a different lineage agrees too. `irrICC`
 implements Gwet’s ICCs, estimated by a moment method rather than either
-REML or ANOVA. Its two-way random agreement coefficient (`icc2r`)
-reproduces `intraclass`’s `ICC(A,1)`:
+REML or ANOVA. Its two-way random absolute-agreement coefficient
+(`icc2r`), for which raters give the same score, reproduces
+`intraclass`’s `ICC(A,1)`:
 
 ``` r
 
@@ -167,10 +172,12 @@ c(observed_cells = nrow(ratings_incomplete),
 ```
 
 An ICC computed from two subjects is not usable, whatever its value.
-`intraclass` instead fits the mixed model to **every observed rating**
-and reports an [effective number of
+`intraclass` instead fits the mixed model to **every observed rating**.
+It reports an [effective number of
 ratings](https://jmgirard.github.io/intraclass/articles/glossary.html#effective-number-of-ratings-k_eff)
-(`k_eff`) that accounts for the imbalance:
+(`k_eff`): the harmonic mean of the per-subject rating counts, an
+average that leans toward the smaller values. That count accounts for
+the imbalance:
 
 ``` r
 
@@ -187,15 +194,22 @@ c(estimate = with(tidy(fit_inc), estimate[term == "ICC(A,k)"]),
 
 All six subjects and all twenty observed ratings contribute, and nothing
 is thrown away. `irrICC` can also fit incomplete data with its own
-model, as the capability matrix below shows, but the mean-squares tools
+model, as the capability matrix below shows. The mean-squares tools
 cannot.
 
 ### The bigger picture
 
 Agreement on balanced data and graceful handling of missing data are two
 entries in a wider gap. The table below summarizes what each package
-computes. It is a map of intent, not a scorecard: each tool is excellent
-at what it was designed for.
+computes. It is a guide to intent, not a scorecard: each tool is
+excellent at what it was designed for. Two terms in it need a gloss.
+Raters are
+[fixed](https://jmgirard.github.io/intraclass/articles/glossary.html#fixed-vs--random-raters)
+when the observed raters are the whole population of interest. An
+interval is
+[boundary-aware](https://jmgirard.github.io/intraclass/articles/glossary.html#zero-variance-boundary)
+when an estimate can land exactly at zero and the interval still
+behaves.
 
 | Capability | `psych` | `irr` | `irrICC` | `intraclass` |
 |----|:--:|:--:|:--:|:--:|
@@ -209,8 +223,9 @@ at what it was designed for.
 Two rows deserve a word. Model-based extractors such as
 `performance::icc` return **variance components** or a
 variance-partition coefficient. That is the raw material of an ICC, but
-not the inter-rater-reliability coefficient family itself, nor the
-error-variance framing that distinguishes agreement from consistency.
+not the inter-rater-reliability coefficient family itself. Nor is it the
+error-variance framing that distinguishes agreement from consistency,
+where raters agree apart from a constant offset per rater.
 `intraclass`’s own generalizability coefficients were validated against
 `gtheory`, agreeing to within 0.001. `gtheory` is a
 generalizability-theory package archived from CRAN in March 2025, and is
@@ -230,21 +245,25 @@ details of each, see the companion articles:
   the selection framework the last matrix row points to.
 - [*Multilevel
   designs*](https://jmgirard.github.io/intraclass/articles/multilevel-designs.md):
-  subject- and cluster-level reliability when raters are nested.
+  subject-level and cluster-level reliability when raters are nested,
+  the cluster level being how reliably raters distinguish cluster means.
 - [*Interval
   methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.md):
-  the boundary-aware Monte-Carlo and bootstrap intervals.
+  the Monte-Carlo interval, built by simulating from the fitted model,
+  and the bootstrap, which refits the model on simulated data many
+  times.
 - [*Estimation
   engines*](https://jmgirard.github.io/intraclass/articles/engines.md):
-  the mixed-model, SEM, and Bayesian backends behind these numbers.
+  the engine, the software that does the fitting, in its mixed-model,
+  SEM, and Bayesian forms.
 
 ## When to use which
 
 If your design is **balanced and complete** and you only need the
-classic McGraw–Wong coefficients, `psych` and `irr` are mature,
-familiar, and, as the table above shows, numerically identical to
-`intraclass`. Reach for `intraclass` when your data are **incomplete or
-unbalanced**, or when raters are **nested in clusters**. Reach for it
-too when you need an **interval you can trust near the boundary**, or
-when you want the package to help you **choose and justify** the
-coefficient in the first place.
+classic McGraw–Wong coefficients, `psych` and `irr` are mature and
+familiar. As the table above shows, they are numerically identical to
+`intraclass` there. Reach for `intraclass` when your data are
+**incomplete or unbalanced**, or when raters are **nested in clusters**.
+Reach for it too when you need an **interval you can trust near the
+boundary**. And reach for it when you want the package to help you
+**choose and justify** the coefficient in the first place.

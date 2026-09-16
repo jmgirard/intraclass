@@ -86,12 +86,19 @@ treat the <strong>subject</strong> as the object of measurement. But
 subjects are often nested in higher-level <strong>clusters</strong>,
 such as pupils in classrooms or patients in clinics. Then “reliability”
 splits in two: how well raters tell <em>subjects</em> apart, and how
-well they tell <em>clusters</em> apart. Those are different questions
-with different answers, and reporting one when you needed the other can
-be badly misleading. This article covers the multilevel ICC family (ten
-Hove, Jorgensen &amp; van der Ark, 2022): crossed and nested layouts,
-complete and incomplete data, fixed raters, and the multilevel D-study.
-(Any unfamiliar term is defined in the <a href="glossary.html"><em>Glossary</em></a>.)</p>
+well they tell <em>clusters</em> apart. The second is the <a href="glossary.html#subject-level-vs--cluster-level">cluster-level</a>
+ICC: how reliably raters distinguish cluster means. Those are different
+questions with different answers. Reporting one when you needed the
+other can be badly misleading. Ignoring the nesting gives a <a href="glossary.html#conflated-icc">conflated ICC</a>, the single-level
+ICC that ignores clustering, which is biased for both questions.</p>
+<p>This article covers the multilevel ICC family of ten Hove, Jorgensen
+&amp; van der Ark (2022). Its coefficients are ratios of <a href="glossary.html#variance-component">variance components</a>, each a
+share of the total variation traced to one source. The family spans
+crossed and nested layouts, complete and incomplete data, and <a href="glossary.html#fixed-vs--random-raters">fixed</a> raters, where the
+observed raters are the whole population of interest. It ends with the
+multilevel <a href="glossary.html#d-study-decision-study">D-study</a>,
+which projects the fitted variance components to other rater counts. Any
+unfamiliar term is defined in the <a href="glossary.html"><em>Glossary</em></a>.</p>
 <div class="section level2">
 <h2 id="subject-level-vs--cluster-level">Subject level vs. cluster level<a class="anchor" aria-label="anchor" href="#subject-level-vs--cluster-level"></a>
 </h2>
@@ -145,8 +152,8 @@ signal but modest within-classroom differences:</p>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">  level      index     estimate   95% CI</span></span></span>
-<span><span class="co">#&gt;   subject    ICC(A,1)  <span style="font-weight: bold;">   0.431</span>   <span style="font-weight: 100;">[0.251, 0.561]</span></span></span>
-<span><span class="co">#&gt;   subject    ICC(A,k)  <span style="font-weight: bold;">   0.751</span>   <span style="font-weight: 100;">[0.573, 0.836]</span></span></span>
+<span><span class="co">#&gt;   subject    ICC(A,1)  <span style="font-weight: bold;">   0.431</span>   <span style="font-weight: 100;">[0.249, 0.561]</span></span></span>
+<span><span class="co">#&gt;   subject    ICC(A,k)  <span style="font-weight: bold;">   0.751</span>   <span style="font-weight: 100;">[0.571, 0.836]</span></span></span>
 <span><span class="co">#&gt;   cluster    ICC(A,1)  <span style="font-weight: bold;">   0.880</span>   <span style="font-weight: 100;">[0.000, 0.972]</span></span></span>
 <span><span class="co">#&gt;   cluster    ICC(A,k)  <span style="font-weight: bold;">   0.967</span>   <span style="font-weight: 100;">[0.000, 0.993]</span></span></span>
 <span><span class="co">#&gt; </span></span>
@@ -154,11 +161,11 @@ signal but modest within-classroom differences:</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #555555;">This message is displayed once per session.</span></span></span></code></pre></div>
 <p>Both levels come back in one call. Here the
-<strong>cluster-level</strong> ICC is the higher of the two: raters
+<strong>cluster-level</strong> ICC is the higher of the two. Raters
 agree more about which <em>classrooms</em> score high than about which
 <em>pupils within a classroom</em> do. That is exactly the pattern you
 would expect when most of the true variation lives between classrooms.
-Which number you report depends on the decision you will make: a
+Which number you report depends on the decision you will make. A
 classroom-level intervention cares about the cluster-level reliability,
 a pupil-level one about the subject level. Request just one with
 <code>level = "subject"</code> or <code>level = "cluster"</code>.</p>
@@ -171,10 +178,9 @@ classrooms and run an ordinary single-level ICC? That number is ten Hove
 et al.’s Equation 14. It folds the between-classroom and
 within-classroom variation together into one “true score”, and is biased
 for <strong>both</strong> questions above. <code><a href="../reference/icc.html">icc()</a></code> can
-compute this <a href="glossary.html#conflated-icc">conflated ICC</a> as
-a <strong>diagnostic contrast</strong> with
-<code>level = "conflated"</code>, so you can see the distortion directly
-rather than take it on faith:</p>
+compute this conflated ICC as a <strong>diagnostic contrast</strong>
+with <code>level = "conflated"</code>. So you can see the distortion
+directly rather than take it on faith:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">school</span>, <span class="va">score</span>,</span>
 <span>  subject <span class="op">=</span> <span class="va">pupil</span>, rater <span class="op">=</span> <span class="va">rater</span>, cluster <span class="op">=</span> <span class="va">classroom</span>,</span>
@@ -185,12 +191,12 @@ rather than take it on faith:</p>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">  level      index     estimate   95% CI</span></span></span>
-<span><span class="co">#&gt;   subject    ICC(A,1)  <span style="font-weight: bold;">   0.431</span>   <span style="font-weight: 100;">[0.251, 0.561]</span></span></span>
-<span><span class="co">#&gt;   subject    ICC(A,k)  <span style="font-weight: bold;">   0.751</span>   <span style="font-weight: 100;">[0.573, 0.836]</span></span></span>
+<span><span class="co">#&gt;   subject    ICC(A,1)  <span style="font-weight: bold;">   0.431</span>   <span style="font-weight: 100;">[0.249, 0.561]</span></span></span>
+<span><span class="co">#&gt;   subject    ICC(A,k)  <span style="font-weight: bold;">   0.751</span>   <span style="font-weight: 100;">[0.571, 0.836]</span></span></span>
 <span><span class="co">#&gt;   cluster    ICC(A,1)  <span style="font-weight: bold;">   0.880</span>   <span style="font-weight: 100;">[0.000, 0.972]</span></span></span>
 <span><span class="co">#&gt;   cluster    ICC(A,k)  <span style="font-weight: bold;">   0.967</span>   <span style="font-weight: 100;">[0.000, 0.993]</span></span></span>
-<span><span class="co">#&gt;   conflated  ICC(A,1)  <span style="font-weight: bold;">   0.705</span>   <span style="font-weight: 100;">[0.000, 0.808]</span></span></span>
-<span><span class="co">#&gt;   conflated  ICC(A,k)  <span style="font-weight: bold;">   0.905</span>   <span style="font-weight: 100;">[0.000, 0.944]</span></span></span>
+<span><span class="co">#&gt;   conflated  ICC(A,1)  <span style="font-weight: bold;">   0.705</span>   <span style="font-weight: 100;">[0.000, 0.805]</span></span></span>
+<span><span class="co">#&gt;   conflated  ICC(A,k)  <span style="font-weight: bold;">   0.905</span>   <span style="font-weight: 100;">[0.000, 0.943]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Variance components: cluster 0.998, subject 0.461, rater 0.136, cluster:rater 0.000, residual 0.473</span></span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Diagnostic contrast: the 'conflated' level ignores the cluster structure</span></span></span>
@@ -200,8 +206,11 @@ rather than take it on faith:</p>
 neither: it over- or under-states the reliability of any real decision.
 It is printed with a warning label and is <strong>never</strong> a
 coefficient to report. It exists only to quantify the cost of ignoring
-the structure. It is the flat two-way ICC read off the fit, so it comes
-in both an absolute-agreement and a consistency form, and a default
+the structure. It is the flat two-way ICC read off the fit, the design
+where the subjects share one set of raters. So it comes in two forms.
+One is absolute agreement, where raters give the same score. The other
+is <a href="glossary.html#consistency">consistency</a>, where raters
+agree apart from a constant offset per rater. A default
 <code>level = "conflated"</code> call reports both. It needs a crossed,
 random-rater design with raters that bridge the clusters, and works on
 complete or incomplete data.</p>
@@ -210,14 +219,14 @@ complete or incomplete data.</p>
 <h2 id="when-raters-are-nested">When raters are nested<a class="anchor" aria-label="anchor" href="#when-raters-are-nested"></a>
 </h2>
 <p>The classroom example above has every rater rate every pupil in every
-classroom, so raters are <strong>crossed</strong> with clusters (ten
-Hove et al.’s Design 1). Two other layouts are common, and
-<code><a href="../reference/icc.html">icc()</a></code> <strong>infers which one you have</strong> from the
-crossing pattern: which raters appear in which clusters, and which
-pupils each of them rates. The <code>design</code> argument overrides
-that inference, and there are two occasions to reach for it. The first
-is when the rater <em>labels</em> do not mean what the pattern implies
-(<a href="#declaring-the-design-when-the-labels-are-ambiguous"><em>Declaring
+classroom. So raters are <strong>crossed</strong> with clusters: ten
+Hove et al.’s Design 1, where one panel of raters spans every cluster.
+Two other layouts are common, and <code><a href="../reference/icc.html">icc()</a></code> <strong>infers
+which one you have</strong> from the crossing pattern. That pattern is
+which raters appear in which clusters, and which pupils each of them
+rates. The <code>design</code> argument overrides that inference, and
+there are two reasons to reach for it. The first is when the rater
+<em>labels</em> do not mean what the pattern implies (<a href="#declaring-the-design-when-the-labels-are-ambiguous"><em>Declaring
 the design</em></a> below). The second is when missing cells leave the
 pattern genuinely ambiguous (<a href="#incomplete-ragged-multilevel-designs"><em>Incomplete (ragged)
 multilevel designs</em></a>). The two nested layouts are:</p>
@@ -225,13 +234,13 @@ multilevel designs</em></a>). The two nested layouts are:</p>
 <li>
 <strong>Raters nested in clusters</strong> (Design 2): each
 classroom has its <em>own</em> panel of raters. Under Design 2 there is
-then no between-cluster reliability to report: a cluster-level ICC needs
+then no between-cluster reliability to report. A cluster-level ICC needs
 the <em>same</em> raters spanning clusters, so <code><a href="../reference/icc.html">icc()</a></code>
 returns the subject level only.</li>
 <li>
 <strong>Raters nested in subjects</strong> (Design 3): each pupil is
 rated by their <em>own</em> raters. Now systematic rater differences
-cannot be separated from residual error at all, so this is a multilevel
+cannot be separated from residual error at all. So this is a multilevel
 <em>one-way</em> design: it reports agreement-only <code>ICC(1)</code> /
 <code>ICC(k)</code>, the clustered analogue of
 <code>model = "oneway"</code>.</li>
@@ -247,8 +256,8 @@ cannot be separated from residual error at all, so this is a multilevel
 <span><span class="co">#&gt; <span style="font-weight: 100;">Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">  level      index     estimate   95% CI</span></span></span>
-<span><span class="co">#&gt;   subject    ICC(A,1)  <span style="font-weight: bold;">   0.429</span>   <span style="font-weight: 100;">[0.310, 0.549]</span></span></span>
-<span><span class="co">#&gt;   subject    ICC(A,k)  <span style="font-weight: bold;">   0.751</span>   <span style="font-weight: 100;">[0.642, 0.830]</span></span></span>
+<span><span class="co">#&gt;   subject    ICC(A,1)  <span style="font-weight: bold;">   0.429</span>   <span style="font-weight: 100;">[0.309, 0.549]</span></span></span>
+<span><span class="co">#&gt;   subject    ICC(A,k)  <span style="font-weight: bold;">   0.751</span>   <span style="font-weight: 100;">[0.641, 0.830]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Variance components: cluster 0.966, subject 0.458, rater:cluster 0.128, residual 0.481</span></span></span></code></pre></div>
 <p>The header now reads <em>raters nested in clusters</em> and only the
@@ -263,23 +272,24 @@ raters, the design is a multilevel one-way (Design 3):</p>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">  level      index     estimate   95% CI</span></span></span>
-<span><span class="co">#&gt;   subject    ICC(1)    <span style="font-weight: bold;">   0.412</span>   <span style="font-weight: 100;">[0.290, 0.546]</span></span></span>
-<span><span class="co">#&gt;   subject    ICC(k)    <span style="font-weight: bold;">   0.737</span>   <span style="font-weight: 100;">[0.621, 0.828]</span></span></span>
+<span><span class="co">#&gt;   subject    ICC(1)    <span style="font-weight: bold;">   0.412</span>   <span style="font-weight: 100;">[0.291, 0.546]</span></span></span>
+<span><span class="co">#&gt;   subject    ICC(k)    <span style="font-weight: bold;">   0.737</span>   <span style="font-weight: 100;">[0.622, 0.828]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Variance components: cluster 0.998, subject 0.426, residual 0.609 (rater confounded)</span></span></span></code></pre></div>
 <p>Here the coefficients are labeled <code>ICC(1)</code> /
 <code>ICC(k)</code> and <code>type</code> no longer applies. With each
 pupil’s raters unique, there is no rater main effect to keep in or drop
 from the error term. A layout that is neither cleanly crossed nor
-cleanly nested (some raters shared across clusters, some not) raises an
-informative error rather than guessing at a model.</p>
+cleanly nested raises an informative error rather than guessing at a
+model. One such layout has some raters shared across clusters and some
+not.</p>
 <div class="section level3">
 <h3 id="declaring-the-design-when-the-labels-are-ambiguous">Declaring the design when the labels are ambiguous<a class="anchor" aria-label="anchor" href="#declaring-the-design-when-the-labels-are-ambiguous"></a>
 </h3>
-<p>Both relabellings above worked by rewriting the rater column, because
-inference reads that column and can only be as good as the labels in it.
+<p>Both relabellings above worked by rewriting the rater column.
+Inference reads that column and can only be as good as the labels in it.
 The <code>school</code> table as built numbers its raters 1–4 <em>inside
-every classroom</em>, and nothing in the data says whether “rater 1” in
+every classroom</em>. Nothing in the data says whether “rater 1” in
 classroom 3 is the same person as “rater 1” in classroom 7. Left to
 itself <code><a href="../reference/icc.html">icc()</a></code> reads the reused labels as one panel rating
 everywhere, which is Design 1, and says so rather than deciding quietly.
@@ -295,12 +305,12 @@ If the numbering is instead classroom-relative, say so with
 <span><span class="co">#&gt; <span style="font-weight: 100;">Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">  level      index     estimate   95% CI</span></span></span>
-<span><span class="co">#&gt;   subject    ICC(A,1)  <span style="font-weight: bold;">   0.429</span>   <span style="font-weight: 100;">[0.310, 0.549]</span></span></span>
-<span><span class="co">#&gt;   subject    ICC(A,k)  <span style="font-weight: bold;">   0.751</span>   <span style="font-weight: 100;">[0.642, 0.830]</span></span></span>
+<span><span class="co">#&gt;   subject    ICC(A,1)  <span style="font-weight: bold;">   0.429</span>   <span style="font-weight: 100;">[0.309, 0.549]</span></span></span>
+<span><span class="co">#&gt;   subject    ICC(A,k)  <span style="font-weight: bold;">   0.751</span>   <span style="font-weight: 100;">[0.641, 0.830]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Variance components: cluster 0.966, subject 0.458, rater:cluster 0.128, residual 0.481</span></span></span></code></pre></div>
-<p>The header now reads <em>raters nested in clusters</em>, the cluster
-level is gone, and a single <code>rater:cluster</code> component
+<p>The header now reads <em>raters nested in clusters</em> and the
+cluster level is gone. A single <code>rater:cluster</code> component
 replaces the two rater terms the crossed fit printed (<code>rater</code>
 and <code>cluster:rater</code>). If the numbering is
 <em>pupil</em>-relative, meaning each pupil’s own four raters numbered
@@ -315,21 +325,21 @@ from one, the same table is Design 3:</p>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">  level      index     estimate   95% CI</span></span></span>
-<span><span class="co">#&gt;   subject    ICC(1)    <span style="font-weight: bold;">   0.412</span>   <span style="font-weight: 100;">[0.290, 0.546]</span></span></span>
-<span><span class="co">#&gt;   subject    ICC(k)    <span style="font-weight: bold;">   0.737</span>   <span style="font-weight: 100;">[0.621, 0.828]</span></span></span>
+<span><span class="co">#&gt;   subject    ICC(1)    <span style="font-weight: bold;">   0.412</span>   <span style="font-weight: 100;">[0.291, 0.546]</span></span></span>
+<span><span class="co">#&gt;   subject    ICC(k)    <span style="font-weight: bold;">   0.737</span>   <span style="font-weight: 100;">[0.622, 0.828]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Variance components: cluster 0.998, subject 0.426, residual 0.609 (rater confounded)</span></span></span></code></pre></div>
-<p>Now there is no rater term at all: the components line reports the
-residual as <code>(rater confounded)</code>, and the coefficients are
-the agreement-only <code>ICC(1)</code> / <code>ICC(k)</code> of the
+<p>Now there is no rater term at all. The components line reports the
+residual as <code>(rater confounded)</code>. The coefficients are the
+agreement-only <code>ICC(1)</code> / <code>ICC(k)</code> of the
 multilevel one-way design.</p>
 <p>One table, three readings, and the data cannot tell you which is
-right: only you know what the labels mean. That is why
-<code><a href="../reference/icc.html">icc()</a></code> announces the crossed reading in a message rather
-than assuming it quietly. The message prints once per session, so in
-this article it appeared back at the first classroom fit. What separates
-the three readings is mostly structure rather than the subject-level
-number. Moving to Design 2 barely moves the subject coefficients
+right: only you know what the labels mean. So <code><a href="../reference/icc.html">icc()</a></code>
+announces the crossed reading in a message rather than assuming it
+quietly. The message prints once per session, so in this article it
+appeared back at the first classroom fit. What separates the three
+readings is mostly structure rather than the subject-level number.
+Moving to Design 2 barely moves the subject coefficients
 (<code>ICC(A,1)</code> 0.431 crossed against 0.429 here), but takes the
 cluster level away. Moving to Design 3 takes the rater term with it and
 renames the coefficients.</p>
@@ -339,28 +349,30 @@ refused, for either error definition. What a declaration <em>can</em> do
 unchecked is choose among the readings the data does admit, the choice
 made twice above. So declare a design only when you know the labelling.
 Where the labels are already unique per rater, as in the two relabelled
-tables earlier, inference has everything it needs and passing the
-matching <code>design</code> explicitly returns the very same fit.</p>
+tables earlier, inference has everything it needs. Passing the matching
+<code>design</code> explicitly then returns the very same fit.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="incomplete-ragged-multilevel-designs">Incomplete (ragged) multilevel designs<a class="anchor" aria-label="anchor" href="#incomplete-ragged-multilevel-designs"></a>
 </h2>
-<p>Just as in the single-level case (the <a href="choosing-an-icc.html"><em>Choosing an ICC</em></a> article works a
-connected incomplete design), the <strong>crossed</strong> design
+<p>The <a href="choosing-an-icc.html"><em>Choosing an ICC</em></a>
+article works a <a href="glossary.html#connectedness-identification">connected</a>
+incomplete design, one where raters and subjects form one linked web.
+Just as in that single-level case, the <strong>crossed</strong> design
 (Design 1) does not need every pupil rated by every rater. The mixed
-model estimates the <a href="glossary.html#variance-component">variance
-components</a> from whatever cells are present, so a ragged classroom
-design is handled directly. Drop a fifth of the ratings from the
-<code>school</code> data at random:</p>
+model estimates the variance components from whatever cells are present,
+so a ragged classroom design is handled directly. Drop a fifth of the
+ratings from the <code>school</code> data at random:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">11</span><span class="op">)</span></span>
 <span><span class="va">school_ragged</span> <span class="op">&lt;-</span> <span class="va">school</span><span class="op">[</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">school</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fl">0.2</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">school</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, <span class="op">]</span></span></code></pre></div>
 <p>At the <strong>subject</strong> level both agreement and consistency
-come back. Exactly as in the single-level incomplete case,
+come back. This matches the single-level incomplete case.
 <code>ICC(*,k)</code> averages over the <a href="glossary.html#effective-number-of-ratings-k_eff"><em>effective</em>
-number of ratings</a> per pupil (<code>k_eff</code>, the harmonic mean),
-which is below the full panel size of 4:</p>
+number of ratings</a> (<code>k_eff</code>): the harmonic mean of the
+per-subject rating counts, an average that leans toward the smaller
+values. It is below the full panel size of 4:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">school_ragged</span>, <span class="va">score</span>, subject <span class="op">=</span> <span class="va">pupil</span>, rater <span class="op">=</span> <span class="va">rater</span>, cluster <span class="op">=</span> <span class="va">classroom</span>,</span>
 <span>  type <span class="op">=</span> <span class="st">"agreement"</span>, level <span class="op">=</span> <span class="st">"subject"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
@@ -376,13 +388,13 @@ which is below the full panel size of 4:</p>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Variance components: cluster 1.026, subject 0.409, rater 0.125, cluster:rater 0.000, residual 0.457</span></span></span></code></pre></div>
 <p>The header now reads <em>incomplete</em>, and the report names the
 effective <code>k</code> so the divisor is never a black box.</p>
-<p>At the <strong>cluster</strong> level, both the single-rater
-<code>ICC(c,1)</code> and the <strong>averaged</strong>
-<code>ICC(c,k)</code> come back on ragged data. The averaged coefficient
-divides the cluster error by its own effective rater count, the raters
-behind each classroom’s observed mean. That count is reported as
-<code>k_c_eff</code> (the inverse-Simpson harmonic mean), and it is
-<em>not</em> the same as the per-pupil <code>k_eff</code>:</p>
+<p>At the <strong>cluster</strong> level, both <code>ICC(c,1)</code> and
+the <strong>averaged</strong> <code>ICC(c,k)</code> come back on ragged
+data. The averaged coefficient divides the cluster error by its own
+effective rater count, the raters behind each classroom’s observed mean.
+That count is reported as <code>k_c_eff</code> (the inverse-Simpson
+harmonic mean), and it is <em>not</em> the same as the per-pupil
+<code>k_eff</code>:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">school_ragged</span>, <span class="va">score</span>, subject <span class="op">=</span> <span class="va">pupil</span>, rater <span class="op">=</span> <span class="va">rater</span>, cluster <span class="op">=</span> <span class="va">classroom</span>,</span>
 <span>  level <span class="op">=</span> <span class="st">"cluster"</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"agreement"</span>, <span class="st">"consistency"</span><span class="op">)</span>,</span>
@@ -401,20 +413,20 @@ behind each classroom’s observed mean. That count is reported as
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Cluster ICC(c,k) averages over an effective 3.87 raters (inverse-Simpson k_c^eff).</span></span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Variance components: cluster 1.026, subject 0.409, rater 0.125, cluster:rater 0.000, residual 0.457</span></span></span></code></pre></div>
-<p>One subtlety worth knowing: on ragged data, systematic rater
+<p>One subtlety worth knowing. On ragged data, systematic rater
 differences no longer cancel perfectly from a <em>comparison</em> of
-observed cluster means (they cancel only when every cluster has the same
-rater weighting). If you are ranking clusters by their observed means,
+observed cluster means. They cancel only when every cluster has the same
+rater weighting. If you are ranking clusters by their observed means,
 prefer the <strong>agreement</strong> <code>ICC(c,k)</code>, whose error
 term accounts for that. The consistency <code>ICC(c,k)</code> measures
 cluster×rater disagreement only. This averaged cluster coefficient on
-ragged data ships for every random-rater engine: <code>glmmTMB</code>,
-<code>lme4</code>, and the Bayesian <code>brms</code> engine, which
-applies the same <code>k_c_eff</code> divisor to its posterior
-draws.</p>
+ragged data ships for every random-rater <a href="glossary.html#engine">engine</a>, the software that does the
+fitting: <code>glmmTMB</code>, <code>lme4</code>, and the Bayesian
+<code>brms</code> engine. The brms engine applies the same
+<code>k_c_eff</code> divisor to its posterior draws.</p>
 <p>One thing is still deliberately fenced off, with a clear error rather
 than a silently wrong number. Missing cells can make the crossing
-pattern <strong>ambiguous</strong>: some raters happen to appear in only
+pattern <strong>ambiguous</strong>. Some raters happen to appear in only
 one classroom, so the design could be read as crossed <em>or</em>
 nested. There <code><a href="../reference/icc.html">icc()</a></code> does not guess. You resolve it by
 declaring <code>design = "crossed"</code>, which is validated against
@@ -424,14 +436,14 @@ the data, or the abort points you at the nested reading.</p>
 <h2 id="fixed-raters-in-a-multilevel-design">Fixed raters in a multilevel design<a class="anchor" aria-label="anchor" href="#fixed-raters-in-a-multilevel-design"></a>
 </h2>
 <p>The multilevel examples so far treat raters as a <a href="glossary.html#fixed-vs--random-raters"><strong>random</strong>
-sample</a>, the recommended default, which generalizes beyond the raters
-you happened to use. When the observed raters <em>are</em> the entire
-population of interest (a fixed panel of examiners, say), pass
-<code>raters = "fixed"</code>. As in the single-level case, the rater
-main effect is then the <a href="glossary.html#finite-population-rater-variance-%CE%B8%C2%B2_r">finite-population
-variance</a> of <em>these</em> raters (McGraw &amp; Wong’s Case 3A)
-rather than a random-sample variance. On a balanced crossed design both
-levels come back:</p>
+sample</a>, the recommended default. A random sample generalizes beyond
+the raters you happened to use. When the observed raters <em>are</em>
+the entire population of interest (a fixed panel of examiners, say),
+pass <code>raters = "fixed"</code>. As in the single-level case, the
+rater main effect is then the <a href="glossary.html#finite-population-rater-variance-%CE%B8%C2%B2_r">finite-population
+variance</a> of <em>these</em> raters: the spread of just the observed
+raters. That is McGraw &amp; Wong’s Case 3A, not a random-sample
+variance. On a balanced crossed design both levels come back:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">school</span>, <span class="va">score</span>, subject <span class="op">=</span> <span class="va">pupil</span>, rater <span class="op">=</span> <span class="va">rater</span>, cluster <span class="op">=</span> <span class="va">classroom</span>,</span>
 <span>  type <span class="op">=</span> <span class="st">"agreement"</span>, raters <span class="op">=</span> <span class="st">"fixed"</span><span class="op">)</span></span>
@@ -446,10 +458,10 @@ levels come back:</p>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">  level      index     estimate   95% CI</span></span></span>
-<span><span class="co">#&gt;   subject    ICC(A,1)  <span style="font-weight: bold;">   0.431</span>   <span style="font-weight: 100;">[0.320, 0.555]</span></span></span>
-<span><span class="co">#&gt;   subject    ICC(A,k)  <span style="font-weight: bold;">   0.751</span>   <span style="font-weight: 100;">[0.653, 0.833]</span></span></span>
-<span><span class="co">#&gt;   cluster    ICC(A,1)  <span style="font-weight: bold;">   0.880</span>   <span style="font-weight: 100;">[0.000, 0.945]</span></span></span>
-<span><span class="co">#&gt;   cluster    ICC(A,k)  <span style="font-weight: bold;">   0.967</span>   <span style="font-weight: 100;">[0.000, 0.986]</span></span></span>
+<span><span class="co">#&gt;   subject    ICC(A,1)  <span style="font-weight: bold;">   0.431</span>   <span style="font-weight: 100;">[0.314, 0.550]</span></span></span>
+<span><span class="co">#&gt;   subject    ICC(A,k)  <span style="font-weight: bold;">   0.751</span>   <span style="font-weight: 100;">[0.647, 0.830]</span></span></span>
+<span><span class="co">#&gt;   cluster    ICC(A,1)  <span style="font-weight: bold;">   0.880</span>   <span style="font-weight: 100;">[0.000, 0.944]</span></span></span>
+<span><span class="co">#&gt;   cluster    ICC(A,k)  <span style="font-weight: bold;">   0.967</span>   <span style="font-weight: 100;">[0.000, 0.985]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Variance components: cluster 0.998, subject 0.461, rater 0.136, cluster:rater 0.000, residual 0.473</span></span></span></code></pre></div>
 <p>On this balanced design the fixed-rater coefficients match the
@@ -467,31 +479,32 @@ multilevel design is supported on ragged data too, at the subject level,
 exactly as the single-level incomplete case above.</p>
 <p>Multilevel support now covers <strong>random</strong> raters on the
 crossed design (Design 1), complete or <strong>incomplete</strong>, at
-the subject level and the cluster level. That covers both the
-single-rater <code>ICC(c,1)</code> and the averaged
-<code>ICC(c,k)</code>, across all three engines (<code>glmmTMB</code>,
-<code>lme4</code>, <code>brms</code>). It also covers the nested designs
-(Designs 2 and 3, subject level), complete <strong>or
-incomplete</strong>. The structural-equation <code>lavaan</code> engine
-joins them on the crossed design for <strong>complete, balanced</strong>
-data with equal cluster sizes. A two-level SEM estimates the same
-five-component decomposition and reports both levels. See the <a href="engines.html">engines vignette</a> for how its estimator differs
-from the mixed-model one at small cluster counts. <strong>Fixed</strong>
-raters are supported at the subject level on the crossed design
-(complete <strong>and</strong> incomplete), at the
-<strong>cluster</strong> level on the crossed design (complete data),
-and, on complete data, the nested Design 2. What remains open is
-incomplete <em>fixed-rater cluster-level</em> estimation. Design 3
-reports no fixed-rater or cluster-level coefficient by construction.
-With raters nested in subjects there is no separable rater effect to
-fix, and no crossed-cluster structure to support a cluster mean.</p>
+the subject level and the cluster level. That covers both
+<code>ICC(c,1)</code> and the averaged <code>ICC(c,k)</code>, across all
+three engines (<code>glmmTMB</code>, <code>lme4</code>,
+<code>brms</code>). It also covers the nested designs (Designs 2 and 3,
+subject level), complete <strong>or incomplete</strong>. The
+structural-equation <code>lavaan</code> engine joins them on the crossed
+design for <strong>complete, balanced</strong> data with equal cluster
+sizes. A two-level SEM estimates the same five-component decomposition
+and reports both levels. See the <a href="engines.html">engines
+vignette</a> for how its estimator differs from the mixed-model one at
+small cluster counts. <strong>Fixed</strong> raters are supported at the
+subject level on the crossed design (complete <strong>and</strong>
+incomplete). They are also supported at the <strong>cluster</strong>
+level on the crossed design (complete data), and, on complete data, the
+nested Design 2. What remains open is incomplete <em>fixed-rater
+cluster-level</em> estimation. Design 3 reports no fixed-rater or
+cluster-level coefficient by construction. With raters nested in
+subjects there is no separable rater effect to fix, and no
+crossed-cluster structure to support a cluster mean.</p>
 </div>
 <div class="section level2">
 <h2 id="how-many-raters-a-multilevel-d-study">How many raters? A multilevel D-study<a class="anchor" aria-label="anchor" href="#how-many-raters-a-multilevel-d-study"></a>
 </h2>
 <p>The <a href="d-studies-and-replicates.html">D-study</a> works on a
-multilevel fit too: it projects the <strong>number of raters</strong> at
-each level, so you can ask “how many raters would make the
+multilevel fit too. It projects the <strong>number of raters</strong> at
+each level. So you can ask “how many raters would make the
 <em>cluster</em>-level score reliable?” separately from the subject
 level. It returns one curve per level (note the <code>level</code>
 column), and <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> facets them:</p>
@@ -503,10 +516,10 @@ column), and <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.htm
 <span><span class="co">#&gt; # D-study projection: multilevel two-way random, absolute agreement</span></span>
 <span><span class="co">#&gt; Observed raters: 4 | CI: 95% montecarlo (10000 draws)</span></span>
 <span><span class="co">#&gt;     level  m  estimate          95% CI</span></span>
-<span><span class="co">#&gt;   subject  1     0.431  [0.251, 0.561]</span></span>
-<span><span class="co">#&gt;   subject  2     0.602  [0.402, 0.719]</span></span>
-<span><span class="co">#&gt;   subject  4     0.751  [0.573, 0.836]</span></span>
-<span><span class="co">#&gt;   subject  8     0.858  [0.729, 0.911]</span></span>
+<span><span class="co">#&gt;   subject  1     0.431  [0.249, 0.561]</span></span>
+<span><span class="co">#&gt;   subject  2     0.602  [0.399, 0.719]</span></span>
+<span><span class="co">#&gt;   subject  4     0.751  [0.571, 0.836]</span></span>
+<span><span class="co">#&gt;   subject  8     0.858  [0.727, 0.911]</span></span>
 <span><span class="co">#&gt;   cluster  1     0.880  [0.000, 0.972]</span></span>
 <span><span class="co">#&gt;   cluster  2     0.936  [0.000, 0.986]</span></span>
 <span><span class="co">#&gt;   cluster  4     0.967  [0.000, 0.993]</span></span>
@@ -514,18 +527,18 @@ column), and <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.htm
 <p>Only the <strong>rater</strong> count is projected. The cluster-level
 coefficient does not average over subjects (ten Hove et al. 2022, Eq.
 13). So “how many subjects per cluster?” is a <em>sample-size</em>
-question, about how precisely you estimate the variance components, and
-not a reliability projection.</p>
+question, about the precision of your variance-component estimates. It
+is not a reliability projection.</p>
 </div>
 <div class="section level2">
 <h2 id="visualizing-the-levels">Visualizing the levels<a class="anchor" aria-label="anchor" href="#visualizing-the-levels"></a>
 </h2>
 <p>The <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> forest plot facets a
-<strong>multilevel</strong> fit by level, so the subject- and
-cluster-level coefficients line up for comparison. See <a href="d-studies-and-replicates.html#visualizing-a-fit"><em>D-studies and
-within-cell replicates</em></a> for the single-level version. Below is
-the same <code>school</code> fit from above, whose cluster level was the
-higher of the two:</p>
+<strong>multilevel</strong> fit by level, so the subject-level and
+cluster-level coefficients line up for comparison. See the <a href="d-studies-and-replicates.html#visualizing-a-fit"><em>D-studies</em></a>
+article for the single-level version. Below is the same
+<code>school</code> fit from above, whose cluster level was the higher
+of the two:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">school</span>, <span class="va">score</span>, subject <span class="op">=</span> <span class="va">pupil</span>, rater <span class="op">=</span> <span class="va">rater</span>, cluster <span class="op">=</span> <span class="va">classroom</span>,</span>
@@ -563,12 +576,12 @@ fitting anything:</p>
 <span><span class="co">#&gt; <span style="font-weight: bold;">Notes:</span></span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">  - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.</span></span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">  - See vignette("multilevel-designs") for a worked multilevel example.</span></span></span></code></pre></div>
-<p>Because the helper is generated from the <strong>same estimand
-machinery</strong> as <code><a href="../reference/icc.html">icc()</a></code>, the emitted call cannot drift
-from what <code><a href="../reference/icc.html">icc()</a></code> actually computes. In an
-<strong>interactive</strong> session you can omit the deciding answers
-and <code><a href="../reference/choose_icc.html">choose_icc()</a></code> will ask the outstanding questions one at
-a time, then resolve.</p>
+<p>The helper is generated from the <strong>same <a href="glossary.html#estimand">estimand</a> machinery</strong> as
+<code><a href="../reference/icc.html">icc()</a></code>, the estimand being the true quantity you are trying
+to estimate. So the emitted call cannot drift from what
+<code><a href="../reference/icc.html">icc()</a></code> actually computes. In an <strong>interactive</strong>
+session you can omit the deciding answers. <code><a href="../reference/choose_icc.html">choose_icc()</a></code>
+will then ask the outstanding questions one at a time, then resolve.</p>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

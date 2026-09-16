@@ -5,28 +5,33 @@
 library(intraclass)
 ```
 
-Two things you can do once you have a fitted
-[`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md). The
-first is to project its reliability to a different number of raters, a
-[**decision
-study**](https://jmgirard.github.io/intraclass/articles/glossary.html#d-study-decision-study).
-The second, available when each cell holds more than one rating, is to
-separate the subject-by-rater interaction from pure error (**within-cell
-replicates**). This article also shows the
+A fitted
+[`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
+carries its [variance
+components](https://jmgirard.github.io/intraclass/articles/glossary.html#variance-component),
+each a share of the total variation traced to one source. Two things you
+can do with that fit. The first is a [**decision
+study**](https://jmgirard.github.io/intraclass/articles/glossary.html#d-study-decision-study),
+which projects the fitted variance components to other rater counts. The
+second is to separate the subject-by-rater interaction from pure error.
+That needs **within-cell replicates**, each one of several ratings by
+the same rater of the same subject. This article also shows the
 [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
-methods that visualize a fit. (Unfamiliar terms are defined in the
-[*Glossary*](https://jmgirard.github.io/intraclass/articles/glossary.md).)
+methods that visualize a fit. Unfamiliar terms are defined in the
+[*Glossary*](https://jmgirard.github.io/intraclass/articles/glossary.md).
 
 ## How many raters do I need? A D-study
 
-`ICC(*,1)` is the reliability of a *single* rater and `ICC(*,k)` the
-reliability of the mean of the `k` raters you actually used. A
-**decision (D-) study** asks a forward-looking question: *how reliable
-would the mean of some other number of raters `m` be?* In
-generalizability theory the absolute-agreement ICC is the [dependability
+`ICC(*,1)` is the reliability of a *single* rater: the reliability of
+one rater’s score. `ICC(*,k)` is the reliability of the mean of the `k`
+raters you actually used. A **decision (D-) study** asks a
+forward-looking question: *how reliable would the mean of some other
+number of raters `m` be?* In generalizability theory the
+absolute-agreement ICC (raters give the same score) has its own name. It
+is the [dependability
 coefficient](https://jmgirard.github.io/intraclass/articles/glossary.html#dependability-coefficient),
-and projecting it to `m` raters is just a change of the averaging
-divisor,
+the generalizability-theory name for the agreement ICC. Projecting it to
+`m` raters is just a change of the averaging divisor,
 
 ``` math
 \Phi(m) = \frac{\sigma^2_s}{\sigma^2_s + (\sigma^2_r + \sigma^2_{res}) / m},
@@ -44,29 +49,32 @@ proj
 #> # D-study projection: two-way random, absolute agreement
 #> Observed raters: 4 | CI: 95% montecarlo (10000 draws)
 #>   m  estimate          95% CI
-#>   1     0.290  [0.050, 0.706]
-#>   2     0.449  [0.096, 0.828]
-#>   3     0.550  [0.137, 0.878]
-#>   4     0.620  [0.175, 0.906]
-#>   5     0.671  [0.210, 0.923]
-#>   6     0.710  [0.241, 0.935]
-#>   7     0.741  [0.271, 0.944]
-#>   8     0.765  [0.298, 0.950]
+#>   1     0.290  [0.050, 0.712]
+#>   2     0.449  [0.095, 0.831]
+#>   3     0.550  [0.136, 0.881]
+#>   4     0.620  [0.173, 0.908]
+#>   5     0.671  [0.207, 0.925]
+#>   6     0.710  [0.239, 0.937]
+#>   7     0.741  [0.268, 0.945]
+#>   8     0.765  [0.295, 0.952]
 ```
 
 Reliability climbs with more raters, but with diminishing returns. The
-projection is anchored to what you observed: at `m = 4`, the number of
+projection is anchored to what you observed. At `m = 4`, the number of
 raters in `ratings`, `Φ(m)` is exactly the `ICC(A,k)` you would get from
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
 directly.
 
 The projection has its own interval settings: `conf_level`, `mc_samples`
 and `seed`. Each defaults to the fit’s own whenever the fit carries
-them, which a default Monte-Carlo fit does. Pass any of them to
+them. A default
+[Monte-Carlo](https://jmgirard.github.io/intraclass/articles/glossary.html#monte-carlo-interval)
+fit, whose interval is built by simulating from the fitted model, does
+carry them. Pass any of them to
 [`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)
 to override it for this call alone. The `seed = 1` above is the fit’s
-own seed passed explicitly. That is why the `m = 4` row reproduces the
-fit’s `ICC(A,k)` *interval* exactly, and not merely its estimate.
+own seed passed explicitly. So the `m = 4` row reproduces the fit’s
+`ICC(A,k)` *interval* exactly, and not merely its estimate.
 
 [`tidy()`](https://generics.r-lib.org/reference/tidy.html) turns the
 projection into one row per projected point, and
@@ -79,14 +87,14 @@ tidy(proj)
 #> # A tibble: 8 × 11
 #>       m occasions level term     type      estimate std.error conf.low conf.high
 #>   <int>     <dbl> <chr> <chr>    <chr>        <dbl>     <dbl>    <dbl>     <dbl>
-#> 1     1        NA NA    ICC(A,1) agreement    0.290     0.180   0.0503     0.706
-#> 2     2        NA NA    ICC(A,2) agreement    0.449     0.203   0.0959     0.828
-#> 3     3        NA NA    ICC(A,3) agreement    0.550     0.205   0.137      0.878
-#> 4     4        NA NA    ICC(A,4) agreement    0.620     0.202   0.175      0.906
-#> 5     5        NA NA    ICC(A,5) agreement    0.671     0.196   0.210      0.923
-#> 6     6        NA NA    ICC(A,6) agreement    0.710     0.189   0.241      0.935
-#> 7     7        NA NA    ICC(A,7) agreement    0.741     0.182   0.271      0.944
-#> 8     8        NA NA    ICC(A,8) agreement    0.765     0.176   0.298      0.950
+#> 1     1        NA NA    ICC(A,1) agreement    0.290     0.181   0.0497     0.712
+#> 2     2        NA NA    ICC(A,2) agreement    0.449     0.204   0.0947     0.831
+#> 3     3        NA NA    ICC(A,3) agreement    0.550     0.206   0.136      0.881
+#> 4     4        NA NA    ICC(A,4) agreement    0.620     0.202   0.173      0.908
+#> 5     5        NA NA    ICC(A,5) agreement    0.671     0.196   0.207      0.925
+#> 6     6        NA NA    ICC(A,6) agreement    0.710     0.190   0.239      0.937
+#> 7     7        NA NA    ICC(A,7) agreement    0.741     0.183   0.268      0.945
+#> 8     8        NA NA    ICC(A,8) agreement    0.765     0.177   0.295      0.952
 #> # ℹ 2 more variables: conf.level <dbl>, method <chr>
 
 glance(proj)
@@ -102,13 +110,15 @@ does not also give you is **`m`**, the rater-count column. That column
 is the whole point of a D-study: the same coefficient, indexed by the
 rater count it is projected to.
 [`glance()`](https://generics.r-lib.org/reference/glance.html) describes
-the projection rather than the model, reporting the swept range (`n_m`,
+the projection rather than the model. It reports the swept range (`n_m`,
 `m_min`, `m_max`) alongside the design and the interval settings.
 
 We fit with `type = "agreement"` here because the dependability
 coefficient above *is* the absolute-agreement projection. A default
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
-reports both agreement and consistency, and
+reports both agreement and
+[consistency](https://jmgirard.github.io/intraclass/articles/glossary.html#consistency),
+where raters agree apart from a constant offset per rater.
 [`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)
 then projects **one curve per error definition**, told apart by the
 `type` column. That is handy when you want both, but for this
@@ -135,8 +145,8 @@ method, for the console habit of drawing a picture as a side effect.
 prints the very same ggplot that
 [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
 builds from it, then returns the projection invisibly. We show the call
-rather than run it, since running it would render another reliability
-curve just like the one above:
+rather than run it. Running it would render another reliability curve
+just like the one above:
 
 ``` r
 
@@ -161,9 +171,9 @@ icc(ratings, score, subject, rater,
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   index     estimate   95% CI
-#>   ICC(A,1)     0.290   [0.050, 0.706]
-#>   ICC(A,k)     0.620   [0.175, 0.906]
-#>   ICC(A,6)     0.710   [0.241, 0.935]
+#>   ICC(A,1)     0.290   [0.050, 0.712]
+#>   ICC(A,k)     0.620   [0.173, 0.908]
+#>   ICC(A,6)     0.710   [0.239, 0.937]
 #> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
@@ -176,14 +186,15 @@ projects: the `m = 6` row of `proj` above carries the same estimate. The
 `seed`. The interval is Monte-Carlo, so two unseeded runs of the same
 projection agree on the estimate and differ in the last digits of the
 endpoints. Which one you reach for is a matter of shape, not of
-arithmetic: `unit` adds a row to a coefficient table, while
+arithmetic. `unit` adds a row to a coefficient table.
 [`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)
 returns a projection object you can
 [`tidy()`](https://generics.r-lib.org/reference/tidy.html),
 [`glance()`](https://generics.r-lib.org/reference/glance.html) and plot.
 
-**Fixed raters cannot be projected to absolute agreement.** The rater
-term for [*fixed*
+**Fixed raters, where the observed raters are the whole population of
+interest, cannot be projected to absolute agreement.** The rater term
+for [*fixed*
 raters](https://jmgirard.github.io/intraclass/articles/glossary.html#fixed-vs--random-raters)
 is the variance of exactly the raters you observed. There is no wider
 pool for a hypothetical sixth rater to be drawn from, so
@@ -207,13 +218,13 @@ icc(ratings, score, subject, rater,
 ```
 
 Consistency has no such problem, because the rater term drops out of it.
-That is why the two remedies the message names are to project with
+So the two remedies the message names are to project with
 `raters = "random"`, or to ask for a fixed-rater `type = "consistency"`
 projection instead. The refusal is raised only when absolute agreement
 is *all* you asked for. A default
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) call
-reports both error definitions, and there the consistency projection is
-kept and you are told the agreement one was dropped.
+reports both error definitions. There the consistency projection is kept
+and you are told the agreement one was dropped.
 
 **Projection is extrapolation.** The rater variance $`\sigma^2_r`$ is
 estimated from only as many raters as you observed, so projecting far
@@ -229,10 +240,10 @@ projecting the rater count at each level.
 ## Within-cell replicates: interaction vs. pure error
 
 So far every subject-by-rater cell holds a single rating. When each
-rater rates each subject **more than once**, a design with *within-cell
-replicates*, you can separate two things that a single rating confounds.
-The first is the **subject-by-rater interaction**: does a rater
-systematically score a particular subject high or low, a *stable*
+rater rates each subject **more than once**, the design has *within-cell
+replicates*. Then you can separate two things that a single rating
+confounds. The first is the **subject-by-rater interaction**: does a
+rater systematically score a particular subject high or low, a *stable*
 disagreement? The second is **pure error**, meaning how much a rater’s
 repeat ratings of the same subject wobble.
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
@@ -260,10 +271,10 @@ icc(reps, score, subject, rater, type = "agreement", occasions = c("single", "av
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   index     occasions estimate   95% CI
-#>   ICC(A,1)          1    0.263   [0.083, 0.489]
-#>   ICC(A,1)          3    0.300   [0.088, 0.562]
-#>   ICC(A,k)          1    0.588   [0.265, 0.793]
-#>   ICC(A,k)          3    0.631   [0.279, 0.837]
+#>   ICC(A,1)          1    0.263   [0.082, 0.490]
+#>   ICC(A,1)          3    0.300   [0.087, 0.564]
+#>   ICC(A,k)          1    0.588   [0.263, 0.794]
+#>   ICC(A,k)          3    0.631   [0.277, 0.838]
 #> 
 #> Variance components: subject 0.631, rater 0.901, subject:rater 0.428, residual 0.443
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
@@ -282,13 +293,13 @@ That 3 is the fitted per-cell replicate count. Averaging cuts pure error
 but not the interaction, so those coefficients are higher.
 
 Within-cell replicates extend beyond this balanced two-way random
-example: **fixed** raters (balanced), **multilevel** designs (crossed
-Design 1 and nested Design 2, balanced), and **ragged** replicates at a
-single occasion are all supported. What remains open is the
-occasion-*averaged* coefficient on ragged replicates, where unequal
-per-cell counts leave no single effective-occasion divisor with a
-validated oracle. The compound fixed-by-ragged and multilevel-by-ragged
-corners are open too.
+example, where the subjects share one set of raters. **Fixed** raters
+(balanced) are supported. So are **multilevel** designs (crossed Design
+1 and nested Design 2, balanced), and **ragged** replicates at a single
+occasion. What remains open is the occasion-*averaged* coefficient on
+ragged replicates. There unequal per-cell counts leave no single
+effective-occasion divisor with a validated oracle. The compound
+fixed-by-ragged and multilevel-by-ragged corners are open too.
 
 ## How many occasions do I need? A D-study on the occasion facet
 
@@ -305,12 +316,12 @@ d_study(fit_rep, n_o = 1:6)
 #> # D-study projection: two-way random, absolute agreement
 #> Held raters: 4 (average) | projecting occasions | CI: 95% montecarlo (10000 draws)
 #>   n_o  m  estimate          95% CI
-#>     1  4     0.588  [0.265, 0.791]
-#>     2  4     0.620  [0.277, 0.824]
-#>     3  4     0.631  [0.280, 0.835]
-#>     4  4     0.637  [0.282, 0.841]
-#>     5  4     0.641  [0.283, 0.845]
-#>     6  4     0.643  [0.284, 0.847]
+#>     1  4     0.588  [0.274, 0.790]
+#>     2  4     0.620  [0.285, 0.822]
+#>     3  4     0.631  [0.288, 0.834]
+#>     4  4     0.637  [0.290, 0.840]
+#>     5  4     0.641  [0.292, 0.844]
+#>     6  4     0.643  [0.293, 0.846]
 ```
 
 Notice the curve **flattens**. Averaging more occasions only cancels
@@ -322,13 +333,15 @@ same raters. Read it as “how much does re-rating help?”, which
 saturates.
 
 Because occasions are a **random** facet however the raters are treated,
-the occasion projection is defined even where a rater projection is not:
-**fixed-rater absolute agreement projects on the occasion axis**. It is
-only the *rater* axis that is undefined for fixed absolute agreement,
-having no “freshly sampled rater” to add. On a **multilevel** replicate
-fit the subject-level curve rises with `n_o` while the cluster-level
-curve is **flat**. The cluster-level error set has no pure-error term,
-so occasions cannot change it, and
+the occasion projection is defined even where a rater projection is not.
+In particular, **fixed-rater absolute agreement projects on the occasion
+axis**. It is only the *rater* axis that is undefined for fixed absolute
+agreement, having no “freshly sampled rater” to add. On a **multilevel**
+replicate fit the subject-level curve rises with `n_o`, while the
+[cluster-level](https://jmgirard.github.io/intraclass/articles/glossary.html#subject-level-vs--cluster-level)
+curve, how reliably raters distinguish cluster means, is **flat**. The
+cluster-level error set has no pure-error term, so occasions cannot
+change it, and
 [`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)
 says so with a note.
 
@@ -337,8 +350,8 @@ says so with a note.
 Every [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
 fit carries an
 [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
-method (with a [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
-wrapper), so you can *see* the coefficients and the variance components
+method, with a [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
+wrapper. So you can *see* the coefficients and the variance components
 behind them without building a plot by hand. Both read straight off the
 fitted object, so the picture can never disagree with the printed table.
 They need **ggplot2**, an optional dependency.

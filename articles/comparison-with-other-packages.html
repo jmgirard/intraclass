@@ -81,32 +81,37 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jmgirard/intraclass" class="external-link">intraclass</a></span><span class="op">)</span></span></code></pre></div>
 <p>If you already use another R package for intraclass correlations, two
-questions matter before switching: <strong>does <code>intraclass</code>
+questions matter before switching. <strong>Does <code>intraclass</code>
 agree with the tool I trust on the problems that tool handles?</strong>
-and <strong>what does it do that my current tool cannot?</strong> This
-article answers both, on the package’s own shipped datasets, with every
-number computed live as the page builds. Any unfamiliar term is defined
-in the <a href="glossary.html"><em>Glossary</em></a>.</p>
-<p>The comparison packages are <code>psych</code> (Revelle’s
-<code><a href="https://rdrr.io/pkg/psych/man/ICC.html" class="external-link">psych::ICC</a></code>, the most widely used ANOVA ICC in R),
-<code>irr</code> (<code><a href="https://rdrr.io/pkg/irr/man/icc.html" class="external-link">irr::icc</a></code>, a classical
-inter-rater-reliability toolkit), and <code>irrICC</code> (Gwet’s
-model-based ICCs). All three are optional: the code chunks below only
-run when the package is installed.</p>
+And <strong>what does it do that my current tool cannot?</strong> This
+article answers both, on the package’s own shipped datasets. Every
+number is computed live as the page builds. Any unfamiliar term is
+defined in the <a href="glossary.html"><em>Glossary</em></a>.</p>
+<p>The comparison packages are <code>psych</code>, <code>irr</code>, and
+<code>irrICC</code>. <code>psych</code> is a general package for
+psychological measurement, and its <code><a href="https://rdrr.io/pkg/psych/man/ICC.html" class="external-link">psych::ICC</a></code> is the most
+widely used ANOVA ICC among R users. <code>irr</code> is a classical
+inter-rater-reliability toolkit, and its <code><a href="https://rdrr.io/pkg/irr/man/icc.html" class="external-link">irr::icc</a></code> computes
+the same ANOVA family. <code>irrICC</code> implements Gwet’s model-based
+ICCs. All three are optional: the code chunks below only run when the
+package is installed.</p>
 <div class="section level2">
 <h2 id="does-it-agree-validation">Does it agree? (validation)<a class="anchor" aria-label="anchor" href="#does-it-agree-validation"></a>
 </h2>
-<p>On a <strong>balanced</strong> design, one where every subject is
-rated by every rater, the whole ICC family is defined for all of these
-tools. So we can line them up coefficient by coefficient. The
+<p>On a <strong>balanced</strong> design, every subject is rated by
+every rater. There the whole ICC family is defined for all of these
+tools, so we can line them up coefficient by coefficient. The
 <code>ratings</code> dataset is six subjects each scored by the same
-four raters.</p>
-<p><code>intraclass</code> estimates the coefficients from <a href="glossary.html#variance-component">variance components</a> fitted
-by <a href="glossary.html#reml">REML</a> (a mixed model), whereas
-<code>psych</code> and <code>irr</code> derive them from classical
-<strong>ANOVA mean squares</strong>. Those are different computational
-routes to the same population quantity, and they are known to converge
-to each other. The table shows how close they land here:</p>
+four raters. That is a two-way design: the subjects share one set of
+raters.</p>
+<p><code>intraclass</code> estimates the coefficients from <a href="glossary.html#variance-component">variance components</a>, each a
+share of the total variation traced to one source. It fits them by <a href="glossary.html#reml">REML</a> in a mixed model. REML, restricted
+maximum likelihood, is a way to estimate variances that corrects maximum
+likelihood’s downward bias. <code>psych</code> and <code>irr</code>
+instead derive the coefficients from classical <strong>ANOVA mean
+squares</strong>. Those are different computational routes to the same
+population quantity, and they are known to converge to each other. The
+table shows how close they land here:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">wm</span> <span class="op">&lt;-</span> <span class="fu">to_wide</span><span class="op">(</span><span class="va">ratings</span><span class="op">)</span></span>
 <span><span class="co"># Scalar `type` and `unit` make this a one-row fit, so `[1]` is that row --</span></span>
@@ -191,13 +196,13 @@ disagreement anywhere in the table is 7.2e-06. That residual is not
 error in either tool. It is the small-sample gap between a REML fit and
 ANOVA mean squares, which vanishes as the sample grows. <strong>On the
 designs classical tools handle, you lose nothing by using
-<code>intraclass</code></strong>, and the <code>psych</code> agreement
-is in fact checked on every test run of this package.</p>
+<code>intraclass</code>.</strong> The match with <code>psych</code> is
+in fact checked on every test run of this package.</p>
 <p>A model-based tool from a different lineage agrees too.
 <code>irrICC</code> implements Gwet’s ICCs, estimated by a moment method
-rather than either REML or ANOVA. Its two-way random agreement
-coefficient (<code>icc2r</code>) reproduces <code>intraclass</code>’s
-<code>ICC(A,1)</code>:</p>
+rather than either REML or ANOVA. Its two-way random absolute-agreement
+coefficient (<code>icc2r</code>), for which raters give the same score,
+reproduces <code>intraclass</code>’s <code>ICC(A,1)</code>:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/reshape.html" class="external-link">reshape</a></span><span class="op">(</span><span class="va">ratings</span>, idvar <span class="op">=</span> <span class="st">"subject"</span>, timevar <span class="op">=</span> <span class="st">"rater"</span>, direction <span class="op">=</span> <span class="st">"wide"</span><span class="op">)</span></span>
 <span><span class="va">w</span> <span class="op">&lt;-</span> <span class="va">w</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">w</span><span class="op">$</span><span class="va">subject</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, <span class="op">]</span></span>
@@ -305,8 +310,10 @@ rater 2 skipped, leaving only two:</p>
 <span><span class="co">#&gt;                                2</span></span></code></pre></div>
 <p>An ICC computed from two subjects is not usable, whatever its value.
 <code>intraclass</code> instead fits the mixed model to <strong>every
-observed rating</strong> and reports an <a href="glossary.html#effective-number-of-ratings-k_eff">effective number
-of ratings</a> (<code>k_eff</code>) that accounts for the imbalance:</p>
+observed rating</strong>. It reports an <a href="glossary.html#effective-number-of-ratings-k_eff">effective number
+of ratings</a> (<code>k_eff</code>): the harmonic mean of the
+per-subject rating counts, an average that leans toward the smaller
+values. That count accounts for the imbalance:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_inc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings_incomplete</span>, subject <span class="op">=</span> <span class="va">subject</span>, rater <span class="op">=</span> <span class="va">rater</span>, score <span class="op">=</span> <span class="va">score</span>,</span>
 <span>               model <span class="op">=</span> <span class="st">"twoway"</span>, type <span class="op">=</span> <span class="st">"agreement"</span>, unit <span class="op">=</span> <span class="st">"average"</span><span class="op">)</span></span>
@@ -319,7 +326,7 @@ of ratings</a> (<code>k_eff</code>) that accounts for the imbalance:</p>
 <span><span class="co">#&gt;     0.5205561     6.0000000    20.0000000     3.2727273</span></span></code></pre></div>
 <p>All six subjects and all twenty observed ratings contribute, and
 nothing is thrown away. <code>irrICC</code> can also fit incomplete data
-with its own model, as the capability matrix below shows, but the
+with its own model, as the capability matrix below shows. The
 mean-squares tools cannot.</p>
 </div>
 <div class="section level3">
@@ -327,8 +334,12 @@ mean-squares tools cannot.</p>
 </h3>
 <p>Agreement on balanced data and graceful handling of missing data are
 two entries in a wider gap. The table below summarizes what each package
-computes. It is a map of intent, not a scorecard: each tool is excellent
-at what it was designed for.</p>
+computes. It is a guide to intent, not a scorecard: each tool is
+excellent at what it was designed for. Two terms in it need a gloss.
+Raters are <a href="glossary.html#fixed-vs--random-raters">fixed</a>
+when the observed raters are the whole population of interest. An
+interval is <a href="glossary.html#zero-variance-boundary">boundary-aware</a> when an
+estimate can land exactly at zero and the interval still behaves.</p>
 <table class="table">
 <colgroup>
 <col width="15%">
@@ -395,13 +406,14 @@ rater framing</td>
 <code>performance::icc</code> return <strong>variance
 components</strong> or a variance-partition coefficient. That is the raw
 material of an ICC, but not the inter-rater-reliability coefficient
-family itself, nor the error-variance framing that distinguishes
-agreement from consistency. <code>intraclass</code>’s own
-generalizability coefficients were validated against
-<code>gtheory</code>, agreeing to within 0.001. <code>gtheory</code> is
-a generalizability-theory package archived from CRAN in March 2025, and
-is not a dependency here. Those committed reference values live in the
-package’s reference notes. And an <strong>interval</strong> that is <a href="glossary.html#monte-carlo-interval">boundary-aware</a> is
+family itself. Nor is it the error-variance framing that distinguishes
+agreement from consistency, where raters agree apart from a constant
+offset per rater. <code>intraclass</code>’s own generalizability
+coefficients were validated against <code>gtheory</code>, agreeing to
+within 0.001. <code>gtheory</code> is a generalizability-theory package
+archived from CRAN in March 2025, and is not a dependency here. Those
+committed reference values live in the package’s reference notes. And an
+<strong>interval</strong> that is <a href="glossary.html#monte-carlo-interval">boundary-aware</a> is
 something none of the classical tools provide. Such an interval behaves
 correctly when a variance component is estimated at its <a href="glossary.html#zero-variance-boundary">zero boundary</a>, where a
 normal-approximation interval silently misbehaves.</p>
@@ -413,13 +425,16 @@ cases. For the details of each, see the companion articles:</p>
 selection framework the last matrix row points to.</li>
 <li>
 <a href="multilevel-designs.html"><em>Multilevel designs</em></a>:
-subject- and cluster-level reliability when raters are nested.</li>
+subject-level and cluster-level reliability when raters are nested, the
+cluster level being how reliably raters distinguish cluster means.</li>
 <li>
 <a href="interval-methods.html"><em>Interval methods</em></a>: the
-boundary-aware Monte-Carlo and bootstrap intervals.</li>
+Monte-Carlo interval, built by simulating from the fitted model, and the
+bootstrap, which refits the model on simulated data many times.</li>
 <li>
-<a href="engines.html"><em>Estimation engines</em></a>: the
-mixed-model, SEM, and Bayesian backends behind these numbers.</li>
+<a href="engines.html"><em>Estimation engines</em></a>: the engine,
+the software that does the fitting, in its mixed-model, SEM, and
+Bayesian forms.</li>
 </ul>
 </div>
 </div>
@@ -428,14 +443,14 @@ mixed-model, SEM, and Bayesian backends behind these numbers.</li>
 </h2>
 <p>If your design is <strong>balanced and complete</strong> and you only
 need the classic McGraw–Wong coefficients, <code>psych</code> and
-<code>irr</code> are mature, familiar, and, as the table above shows,
-numerically identical to <code>intraclass</code>. Reach for
+<code>irr</code> are mature and familiar. As the table above shows, they
+are numerically identical to <code>intraclass</code> there. Reach for
 <code>intraclass</code> when your data are <strong>incomplete or
 unbalanced</strong>, or when raters are <strong>nested in
 clusters</strong>. Reach for it too when you need an <strong>interval
-you can trust near the boundary</strong>, or when you want the package
-to help you <strong>choose and justify</strong> the coefficient in the
-first place.</p>
+you can trust near the boundary</strong>. And reach for it when you want
+the package to help you <strong>choose and justify</strong> the
+coefficient in the first place.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
