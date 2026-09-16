@@ -1,0 +1,59 @@
+# M151: The plain-English standard, and the reader path
+
+- **Status:** planned
+- **Priority:** normal
+- **Depends on:** —
+- **Driving RR:** —
+- **Principles touched:** GP1
+- **Resolves:** —
+- **Surface tier:** user-facing — the vignettes and README that users read.
+- **Branch/PR:** —
+
+## Goal
+
+Extend the house prose standard to plain vocabulary, one idea per sentence and no mannered construction, and apply it to `getting-started.Rmd`, `choosing-an-icc.Rmd`, `glossary.Rmd` and `README.Rmd`.
+
+## Scope
+
+**In:** `cairn/doctrine/prose-style.md` gains R7 (plain vocabulary) and R8 (no mannered construction) and R2 tightens to 25 words. `data-raw/prose-profile.py` gains a `--limit N` flag and skips `@noRd` roxygen blocks, both before the pass baseline, then stays frozen through M153. A committed term table `data-raw/glossary-terms.tsv` maps each glossary entry to a grep pattern and a short plain gloss. The four files are rewritten under R1 to R8. `README.md` is re-rendered. One NEWS Documentation bullet.
+
+**Out:** the five method articles → M152; the roxygen surface → M153; `NEWS.md` under R7/R8 → candidate row; `cli` abort and hint strings → existing candidate row; any CI-wired prose checker → barred by D-021, the ruler and the term table stay hand-run; a mechanical no-widening certificate → "Three prose-apparatus deferrals" candidate row (R6 stays a read-through task here).
+
+## Acceptance criteria
+
+- [ ] AC1: `cairn/doctrine/prose-style.md` states R7 and R8. R7 says that each term in `data-raw/glossary-terms.tsv` is glossed or linked at its first prose occurrence in each file. R8 lists the lexical markers its hand-run grep sweeps and says that the list is the sweep's extent, not a claim about mannered prose in general. R2 reads 25 words. The file measures at most 120 lines and 8,000 bytes by `wc -l -c`, with the budget figures in its header unchanged from the branch base.
+- [ ] AC2: `python3 data-raw/prose-profile.py --limit 25` over `vignettes/getting-started.Rmd`, `vignettes/choosing-an-icc.Rmd`, `vignettes/glossary.Rmd` and `README.Rmd` reports 0 dash-as-punctuation in each file, and every sentence it reports over 25 words contains verbatim the clause `residual_template()` in `tests/testthat/test-doc-skew-caveat.R` returns.
+- [ ] AC3: `data-raw/glossary-terms.tsv` has one row per `## ` heading of `vignettes/glossary.Rmd` (columns `heading`, `pattern`, `gloss`, `disposition` in `term|exempt`), and for each `term` row a grep of `pattern` over the prose of `vignettes/getting-started.Rmd`, `vignettes/choosing-an-icc.Rmd` and `README.Rmd` (prose as `prose-profile.py` defines it) finds, per file, no occurrence or a first occurrence whose sentence contains the row's `gloss` text verbatim or a link to that heading's anchor.
+- [ ] AC4: `grep -E` for the R8 lexical markers `cairn/doctrine/prose-style.md` lists, and for `\bM[0-9]{1,4}\b`, `\bD-[0-9]{3,4}\b`, `\bADR-[0-9]{3}\b`, `\bR[BR][0-9]{2}\b`, over the four files' prose returns no match.
+- [ ] AC5: `Rscript -e 'devtools::test()'` reports FAIL 0; each `data-raw/` script `grep -l -- '--self-test' data-raw/*` lists exits 0 under `--self-test`; `README.md` at the branch head is byte-identical to a fresh `devtools::build_readme()` render.
+
+## Coverage
+
+- AC1 → T1
+- AC2 → T1, T3, T4, T5, T6
+- AC3 → T2, T3, T4, T5, T6
+- AC4 → T1, T3, T4, T5, T6
+- AC5 → T7
+
+## Tasks
+
+- [ ] T1: Doctrine and ruler. Add `--limit N` to `data-raw/prose-profile.py` and skip `@noRd` blocks in `.R` mode; record the new baseline over all three corpora in the work log. Write R7 and R8 into `cairn/doctrine/prose-style.md`, compressing the six-blind-spot paragraph into a pointer at the script's header to stay under budget; set R2 to 25. R8's marker list starts from the survey shapes: `which is why`, `That is why`, `precisely`, `the whole rule`, `In short`, `half the job`, `not .* but`, a heading ending in `?`.
+- [ ] T2: Build `data-raw/glossary-terms.tsv` from the glossary headings by a short script run once; mark `References` and the compound `vs.` headings `exempt` or split them into one row per term; write each gloss under ten words.
+- [ ] T3: Rewrite `vignettes/getting-started.Rmd` under R1 to R8, splitting rather than deleting qualifiers (R6).
+- [ ] T4: Rewrite `vignettes/choosing-an-icc.Rmd` the same way; the `## In short` section becomes a plain summary heading.
+- [ ] T5: Rewrite `vignettes/glossary.Rmd` so each entry's first sentence defines the term in plain words and later sentences gloss any statistical term they use; the Burch, Conflated and MPL entries are the heavy ones.
+- [ ] T6: Rewrite `README.Rmd`, re-render `README.md`, then run the R6 hunk audit per `prose-style.md` step 5 over every hunk of T3 to T6 and repair widenings in place; re-key any `data-raw/mpl-doc-claims.tsv` row or `test-vignette-claims.R` pin the rewrite moved; add the NEWS bullet.
+- [ ] T7: Verify: `devtools::test()`, every `--self-test` checker, `tests/spelling.R` (new gloss words go in prose, never padded into `inst/WORDLIST`), the ruler at `--limit 25`, the AC3 and AC4 greps; check `git status` for `Rplots.pdf` and `figure/`.
+
+## Work log
+
+- 2026-09-16: created by /milestone-plan. Survey [S] found undefined jargon, stacked clauses and mannered constructions across every file, heaviest in `interval-methods.Rmd`, `R/icc.R` and the glossary; R1/R2 drift since M136: `R/icc.R` 5 dashes, 4 over-35; `choosing-an-icc.Rmd` 1 over-35.
+- 2026-09-16: criteria audit ran in full mode ([O] fresh-context reader) and returned six findings: an undefined pinned-clause domain, glossary-gloss universals re-creating M136 AC3's shape, a self-referential doctrine budget, a numeral-diff probe, instrument-bound gate criteria, and a `@noRd` domain mismatch; all six repaired in the wording above and in M152/M153, the length bar posed at the gate.
+- 2026-09-16: plan gate chose a 25-word limit over 30 and 35 because the plain-English standard sets 25 for explanatory text; falsified by a rewritten article that a reader reports as choppy or that loses a bounding qualifier to a split.
+- 2026-09-16: plan gate chose a committed term table with a verbatim-gloss-or-link test over a read-and-judge "plain gloss" criterion because the latter is the shape M136 AC3 returned three times on; falsified by a glossed term a newcomer still reports as unexplained.
+- 2026-09-16: plan gate chose extending the hand-run ruler (`--limit`, `@noRd`) over a new checker because D-021 bars standing prose apparatus and the ruler is the accepted precedent; falsified by the ruler change making before/after figures incomparable, which is why it lands before the baseline.
+- 2026-09-16: plan gate chose three milestones over two because the survey rates the rewrite heavy and M134 to M136 split the same corpus three ways under lighter rules; falsified by M151 closing in under one session.
+
+## Decisions
+
+## Review
