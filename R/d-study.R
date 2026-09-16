@@ -29,9 +29,9 @@
 #' band follows the fit's `ci_method`. A Monte-Carlo fit, whose interval is
 #' built by simulating from the fitted model, reprojects one draw from the
 #' parameter covariance across every `m`. A **bootstrap** fit, which refits the
-#' model on simulated data many times, reprojects its stored resamples. So at
-#' `m` = the observed rater count the band matches the fitted `ICC(*,k)`
-#' interval exactly.
+#' model on simulated data many times, reprojects its stored resamples. So on
+#' a bootstrap fit, at `m` = the observed rater count the band matches the
+#' fitted `ICC(*,k)` interval exactly.
 #'
 #' @section Projection is extrapolation:
 #' Projecting to an `m` you did not run is an **extrapolation**. Its
@@ -121,9 +121,8 @@
 #'
 #' @param x An `icc` object returned by [icc()].
 #' @param m Numeric vector of rater counts to project to (each \eqn{\ge 1}).
-#'   Defaults to `1:(2 * n_raters)`, a curve from a single rater (the
-#'   reliability of one rater's score) to twice the observed count. Mutually
-#'   exclusive with `n_o`.
+#'   Defaults to `1:(2 * n_raters)`, a curve from one rater to twice the
+#'   observed count. Mutually exclusive with `n_o`.
 #' @param n_o Numeric vector of occasion (within-cell replicate) counts to project to
 #'   (each \eqn{\ge 1}), holding raters at the observed count. This is a D-study
 #'   on the **occasion** facet of a within-cell replicate fit. Mutually

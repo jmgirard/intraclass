@@ -170,9 +170,9 @@ agreement rater term is the McGraw & Wong Case-3A bias-corrected
 finite-population variance, which equals the mixed-model estimate on
 balanced data. With either rater type, the two-way SEM estimates missing
 cells by full-information maximum likelihood, which uses every observed
-value rather than dropping incomplete cases. The parametric bootstrap,
-which refits the model on simulated data many times, is unavailable for
-incomplete SEM. It also covers the crossed (Design 1) \strong{multilevel} design
+value rather than dropping incomplete cases. In that two-way SEM the
+parametric bootstrap, which refits the model on simulated data many
+times, is unavailable on incomplete data. It also covers the crossed (Design 1) \strong{multilevel} design
 at both levels, plus the conflated diagnostic, via a two-level SEM. With
 \strong{random} raters the multilevel fit covers complete/balanced data. It also
 covers \strong{incomplete} data (missing cells estimated by two-level
@@ -257,9 +257,10 @@ exactly as it would otherwise read. It never names the method you asked
 for, which just failed. Data with no between-subject variance is the case
 this matters most on. There \code{"bootstrap"} is typically the only method that
 returns anything usable, and it is now named rather than left for you to
-find. Candidates are tried cheapest first. Two methods reduce the fitted
-model rather than your raw data: \code{"bootstrap"} and \code{"montecarlo"}. So they
-are reached only where no method fenced to your design serves the data.
+find. Candidates are tried cheapest first. Two methods, \code{"bootstrap"} and
+\code{"montecarlo"}, reduce the fitted model rather than your raw data. Under
+that order they are reached only where no method fenced to your design
+serves the data.
 The costliest of them is both screened at a small resample count and
 capped when run in full. So an error stays a few seconds rather than tens
 of them. Because of that cap, a bullet naming \code{"bootstrap"} also names a

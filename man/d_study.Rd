@@ -39,9 +39,8 @@ d_study(
 \item{x}{An \code{icc} object returned by \code{\link[=icc]{icc()}}.}
 
 \item{m}{Numeric vector of rater counts to project to (each \eqn{\ge 1}).
-Defaults to \code{1:(2 * n_raters)}, a curve from a single rater (the
-reliability of one rater's score) to twice the observed count. Mutually
-exclusive with \code{n_o}.}
+Defaults to \code{1:(2 * n_raters)}, a curve from one rater to twice the
+observed count. Mutually exclusive with \code{n_o}.}
 
 \item{n_o}{Numeric vector of occasion (within-cell replicate) counts to project to
 (each \eqn{\ge 1}), holding raters at the observed count. This is a D-study
@@ -123,9 +122,9 @@ interval is boundary-aware, since an estimate can land exactly at zero. The
 band follows the fit's \code{ci_method}. A Monte-Carlo fit, whose interval is
 built by simulating from the fitted model, reprojects one draw from the
 parameter covariance across every \code{m}. A \strong{bootstrap} fit, which refits the
-model on simulated data many times, reprojects its stored resamples. So at
-\code{m} = the observed rater count the band matches the fitted \verb{ICC(*,k)}
-interval exactly.
+model on simulated data many times, reprojects its stored resamples. So on
+a bootstrap fit, at \code{m} = the observed rater count the band matches the
+fitted \verb{ICC(*,k)} interval exactly.
 }
 \section{Projection is extrapolation}{
 

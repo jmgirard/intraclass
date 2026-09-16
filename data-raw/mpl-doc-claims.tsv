@@ -81,7 +81,7 @@ e50295b0ec05	R/icc.R	out	it is a remedy for neither heavy tails nor skew		M113 s
 93c55e4dfd65	R/icc.R	out	Any level in `(0, 1)` is accepted, except under `ci_method = "mpl"`, which is calibrated at 0.90, 0.95, and 0.99 only		pre-M94 conf_level fence (D-017), settled by the conf_level abort tests; split out of its host sentence by the M136 prose pass
 dfab28db69a9	R/icc.R	out	there is no need to work that out from this list		M103 boundary-hint guidance, not about the M92 cells; split out by the M136 prose pass and settled by the hint tests
 9fd82d807c78	R/icc.R	out	The two closed forms are asked separately, so one can be named where the other is not		M105 boundary-hint claim, not about the M92 cells: settled by the two-closed-form hint tests
-08c2711d7216	R/icc.R	out	are reached only where no method fenced to your design serves the data		M103 boundary-hint ordering claim, not about the M92 cells: settled by the hint candidate-order tests
+f89a095b70ee	R/icc.R	out	are reached only where no method fenced to your design serves the data		M103 boundary-hint ordering claim, not about the M92 cells: settled by the hint candidate-order tests
 1fbbfa5514fd	R/icc.R	out	The other methods do not apply to a Bayesian fit		pre-M94 posterior-method claim, settled by the brms dispatch tests; split out by the M136 prose pass
 d79afec7be82	R/icc.R	out	the margin depends on the design, so it is not a rule of thumb		M117 hedge on the width margin; no fixture settles a rule-of-thumb disclaimer. Split out by the M136 prose pass
 d010e0f961a6	R/icc.R	out	Treat neither as reliably the tighter interval		M117 guidance following from the width rows; no fixture settles a recommendation. Split out by the M136 prose pass
