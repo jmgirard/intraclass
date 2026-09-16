@@ -37,7 +37,7 @@ documented on this page.
   [`tidy(`*`<icc>`*`)`](https://jmgirard.github.io/intraclass/reference/icc.md)
   [`glance(`*`<icc>`*`)`](https://jmgirard.github.io/intraclass/reference/icc.md)
   [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) :
-  Intraclass correlation coefficient for a two-way design
+  Intraclass correlation coefficients for interrater reliability
 
 ## Decision (D-) studies
 
@@ -54,7 +54,6 @@ methods.
   [`tidy(`*`<icc_dstudy>`*`)`](https://jmgirard.github.io/intraclass/reference/d_study.md)
   [`glance(`*`<icc_dstudy>`*`)`](https://jmgirard.github.io/intraclass/reference/d_study.md)
   **\[experimental\]** : Project reliability to other numbers of raters
-  (a D-study)
 
 ## Tidy methods
 

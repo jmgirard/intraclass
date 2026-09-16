@@ -1,8 +1,8 @@
 # Rater reliability example with missing cells
 
 An incomplete variant of
-[ratings](https://jmgirard.github.io/intraclass/reference/ratings.md):
-rater 2 served as a pilot and scored only the first two subjects, so the
+[ratings](https://jmgirard.github.io/intraclass/reference/ratings.md).
+Rater 2 served as a pilot and scored only the first two subjects. So the
 four cells for subjects 3-6 by rater 2 are absent (20 rows rather than
 24). Missing cells are dropped rows, not `NA`s, matching the long format
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
@@ -39,9 +39,10 @@ not abort (see the connectedness requirement in
 [`vignette("choosing-an-icc")`](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.md)).
 
 Because the per-subject rating counts differ, the averaging divisor for
-`ICC(*,k)` is not an integer. It is the effective number of ratings
-`k_eff` = 1 / mean(1 / n_i) = 3.273, the harmonic mean of the counts 4,
-4, 3, 3, 3, 3. On the balanced
+`ICC(*,k)` is not an integer. It is the effective number of ratings, the
+harmonic mean of the per-subject rating counts, an average that leans
+toward the smaller values. Here `k_eff` = 1 / mean(1 / n_i) = 3.273 over
+the counts 4, 4, 3, 3, 3, 3. On the balanced
 [ratings](https://jmgirard.github.io/intraclass/reference/ratings.md),
 `raters = "fixed"` and `raters = "random"` give the same point estimate.
 Here the two genuinely differ. This dataset exists to demonstrate those

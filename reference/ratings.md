@@ -3,8 +3,9 @@
 The six-target, four-judge worked example from Shrout and Fleiss (1979),
 in the long, one-rating-per-row format that
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
-consumes. Every subject is rated by every rater (a complete, balanced
-two-way design), so it is the reference case on which
+consumes. Every subject is rated by every rater, a complete, balanced
+two-way design where the subjects share one set of raters. So it is the
+reference case on which
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
 returns the canonical coefficients `ICC(A,1)` = 0.290, `ICC(A,k)` =
 0.620, `ICC(C,1)` = 0.715, and `ICC(C,k)` = 0.909.
@@ -41,7 +42,8 @@ The example in their Table 2.
 ## See also
 
 [ratings_incomplete](https://jmgirard.github.io/intraclass/reference/ratings_incomplete.md)
-for a connected incomplete variant.
+for a connected incomplete variant, one where raters and subjects form
+one linked web.
 
 ## Examples
 
@@ -53,11 +55,11 @@ icc(ratings, score, subject, rater, seed = 2024)
 #> 
 #>   index     estimate   95% CI
 #>   Absolute agreement
-#>   ICC(A,1)     0.290   [0.050, 0.711]
-#>   ICC(A,k)     0.620   [0.173, 0.908]
+#>   ICC(A,1)     0.290   [0.050, 0.713]
+#>   ICC(A,k)     0.620   [0.173, 0.909]
 #>   Consistency
-#>   ICC(C,1)     0.715   [0.340, 0.926]
-#>   ICC(C,k)     0.909   [0.673, 0.980]
+#>   ICC(C,1)     0.715   [0.343, 0.924]
+#>   ICC(C,k)     0.909   [0.676, 0.980]
 #> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
