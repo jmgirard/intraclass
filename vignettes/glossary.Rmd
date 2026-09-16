@@ -50,7 +50,7 @@ the true ICC rises (on the larger grid; the smaller grid's margin does shrink
 across its levels). The `"burch"` width margin then collapses to near parity
 at a true ICC of 0.6, on the one grid reaching that value. It shrinks steadily
 as the subject count grows, measured at 5 raters. Every cell favouring the
-exact-F interval sits on that same grid.
+exact-F interval sits on the grid where the margin reaches parity.
 Burch reports the reverse for symmetric heavy-tailed data with non-normal
 errors, and a third grid now measures that case. What `"burch"` does against
 `"searle"` depends on what the residual is drawn from. The three grids now
