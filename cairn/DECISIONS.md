@@ -1876,3 +1876,24 @@ with `paper/` in this repo (the maintainer wants the paper elsewhere), and a
 full-length methods venue with a standalone repo (a larger paper than a
 v0.1.0 package warrants); either is reopened by JOSS refusing the mirror-branch
 form or by the impact requirement proving unmeetable.
+
+### D-046 (2026-09-16): `gt` joins `Suggests:` to render the vignette comparison tables
+
+**Context.** The articles build their comparison tables as printed data
+frames, named vectors and two `knitr::kable()` calls. The maintainer asked at
+the M154/M155 plan gate for those chunks to be hidden and their tables rendered
+with `gt`. A dependency change goes through a question gate and is recorded
+here (tracking-rules, Universal tracking rules).
+
+**Decision.** `gt` is added to `Suggests:` and nowhere else. Every vignette
+chunk that calls `gt::` carries `requireNamespace("gt", quietly = TRUE)` in its
+`eval` option, so an installation without `gt` skips the table rather than
+failing the build. There is no `kable` fallback: CRAN and the CI jobs install
+Suggests, so the shipped articles always render the tables, and a second
+rendering would drift from the first.
+
+**Consequences.** M155 ships the change. `gt` never enters `Imports:`, and no
+package code calls it. Rejected: a `kable` fallback branch in every table chunk,
+and leaving the tables as printed data frames. Reopened by a reader building
+the articles without `gt` and reporting a missing table, or by `gt` leaving
+CRAN.
