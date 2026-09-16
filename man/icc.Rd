@@ -243,27 +243,28 @@ data it can name \code{"npbootstrap"}. Because that method resamples, its trial
 run is evidence about one run rather than about the data. So the trial uses
 your call's own \code{boot_samples} and your own \code{seed} when you set one, in
 which case your retry reproduces it exactly. With no seed set it uses a
-fixed seed the message then names, and an unseeded retry draws fresh resamples
-and can fail where the verified run succeeded, especially on small designs.
-The trial run leaves the session's random-number stream untouched.
-The same holds in reverse, and on \code{"bootstrap"}, \code{"searle"}, \code{"burch"} and
-\code{"npbootstrap"} as well as on the default (\code{"mpl"} raises its own kind of
-error and is not covered). When a method you asked for aborts on degenerate
-data, its error names a method verified on that same data by the same trial
-runs and under the same rules. Where no method serves that data it names
-none, leaving the message exactly as it would otherwise read. It never names
-the method you asked for, which just failed. Data with no between-subject
-variance is the case this matters most on: there \code{"bootstrap"} is typically
-the only method that returns anything usable, and it is now named rather
-than left for you to find. Candidates are tried cheapest first. So the two
-methods that reduce the fitted model rather than your raw data, \code{"bootstrap"}
-and \code{"montecarlo"}, are reached only where no method fenced to your design
-serves the data. The costliest of them is both screened at a small resample
-count and capped when run in full, so an error stays a few seconds rather
-than tens of them. That cap is why a bullet naming \code{"bootstrap"} also names
-a \code{boot_samples} value. It is the count the trial actually ran at, and the
-call the message gives you is the one that was verified rather than a
-heavier one nobody tried.
+fixed seed the message then names. An unseeded retry then draws fresh
+resamples and can fail where the verified run succeeded, especially on
+small designs. The trial run leaves the session's random-number stream
+untouched. The same holds in reverse, and on \code{"bootstrap"}, \code{"searle"},
+\code{"burch"} and \code{"npbootstrap"} as well as on the default. \code{"mpl"} raises
+its own kind of error and is not covered. When a method you asked for
+aborts on degenerate data, its error names a method verified on that same
+data. That method was verified by the same trial runs and under the same
+rules. Where no method serves that data it names none, leaving the message
+exactly as it would otherwise read. It never names the method you asked
+for, which just failed. Data with no between-subject variance is the case
+this matters most on. There \code{"bootstrap"} is typically the only method that
+returns anything usable, and it is now named rather than left for you to
+find. Candidates are tried cheapest first. Two methods reduce the fitted
+model rather than your raw data: \code{"bootstrap"} and \code{"montecarlo"}. So they
+are reached only where no method fenced to your design serves the data.
+The costliest of them is both screened at a small resample count and
+capped when run in full. So an error stays a few seconds rather than tens
+of them. Because of that cap, a bullet naming \code{"bootstrap"} also names a
+\code{boot_samples} value. It is the count the trial actually ran at. The call
+the message gives you is the one that was verified, rather than a heavier
+one nobody tried.
 \code{"bootstrap"} is a parametric bootstrap: it simulates response vectors from the
 fitted model, refits, and takes percentile quantiles of the resampled
 coefficients. The bootstrap does not rely on the asymptotic-normal covariance
@@ -271,16 +272,15 @@ approximation but is far slower (a refit per resample). It is available for
 every design the \code{"glmmTMB"} and \code{"lme4"} engines fit, via \code{glmmTMB}'s
 \code{simulate()} + refit and \code{lme4::bootMer} respectively. It is also available
 on the \code{"lavaan"} engine, which simulates from the fitted SEM's implied
-moments and refits, for the random two-way design and the crossed
-(Design 1) random-rater multilevel design. As with the Monte-Carlo
-interval, the \code{"lme4"}
-engine defers a singular (boundary) fit to \code{"glmmTMB"} for either method.
-At the zero-between-subject-variance boundary the point estimate and the
-interval come from different computations. The point comes from the engine's
-REML fit, and the endpoints from quantiles of the refits, so the reported
-\code{conf.low} can sit slightly \emph{above} the reported point instead of below it.
-Both numbers are zero to any reading when that happens: over every cell of
-the sweep committed at
+moments and refits. There it serves the random two-way design and the
+crossed (Design 1) random-rater multilevel design. As with the Monte-Carlo
+interval, the \code{"lme4"} engine defers a singular (boundary) fit to
+\code{"glmmTMB"} for either method. At the zero-between-subject-variance
+boundary the point estimate and the interval come from different
+computations. The point comes from the engine's REML fit, and the endpoints
+from quantiles of the refits. So the reported \code{conf.low} can sit slightly
+\emph{above} the reported point instead of below it. Both numbers are zero to
+any reading when that happens. Over every cell of the sweep committed at
 \code{tests/testthat/fixtures/bootstrap-point-containment.tsv}, each such gap and
 each such point estimate is below \code{1e-8}. Nothing is clamped and no error is
 raised, and in that sweep's cells with real between-subject signal the
@@ -291,17 +291,18 @@ with, \code{engine = "brms"}, and \code{"brms"} requires it. The other methods d
 apply to a Bayesian fit, and \code{"posterior"} needs posterior draws no other
 engine produces.
 \code{"npbootstrap"} is the \strong{non-parametric} transformed bootstrap-\emph{t} of Ukoumunne
-et al. (2003), for the \strong{one-way random design} (\code{model = "oneway"}, and it
-aborts otherwise). It serves both \code{unit = "single"} (ICC(1)) and \code{unit = "average"}
+et al. (2003), which resamples whole subjects and studentizes. It serves
+the \strong{one-way random design} only (\code{model = "oneway"}, and it aborts
+otherwise). It serves both \code{unit = "single"} (ICC(1)) and \code{unit = "average"}
 (ICC(k)) on \strong{balanced and unbalanced} data (unequal ratings per subject)
 alike. On unbalanced data the effective group size becomes the ANOVA \code{n0} of
 Ohyama (2025). Only a numeric \code{unit} (a D-study projection to \code{m} raters) is
 restricted to balanced data. For a projection on unbalanced data, use
 \code{ci_method = "montecarlo"}.
-It resamples whole subjects
-with replacement (not from the fitted model), stabilizes the variance with the
-\verb{log F} transform, studentizes with an infinitesimal-jackknife SE, and
-back-transforms the endpoints. It is \strong{not} a percentile bootstrap. The
+It resamples whole subjects with replacement (not from the fitted model)
+and stabilizes the variance with the \verb{log F} transform. It then studentizes
+with an infinitesimal-jackknife SE and back-transforms the endpoints. It is
+\strong{not} a percentile bootstrap. The
 percentile and BCa variants were assessed and rejected, because they
 under-cover at small rater counts. Reach for it for its boundary robustness
 (an interval that exists where the Monte-Carlo default aborts) and
@@ -313,23 +314,25 @@ otherwise). Both return a finite interval at the near-zero-ICC boundary
 where the Monte-Carlo default aborts, with one asymmetry. On data with no
 between-subject variance at all, \code{"burch"} aborts (its kurtosis
 standardization divides by zero there) while \code{"searle"} still returns an
-interval. Read that interval carefully: the single-rater coefficient gets
+interval. Read that interval carefully. The single-rater coefficient gets
 the attained minimum, while the averaged projection carries that minimum
-through the Spearman-Brown pole to \code{-Inf}, which a default call prints
-beside it. Neither resamples, so \code{mc_samples}, \code{boot_samples}, and \code{seed}
-do not apply.
-\code{"searle"} is the exact-F pivot (Searle 1971, Table 9.14; McGraw & Wong
-1996, Table 7): \strong{exact under normality}, and best-calibrated when the data
-are approximately normal. \code{"burch"} is the REML-based, kurtosis-adjusted
-interval of Burch (2011), designed for robustness to non-normality. Its
-width tracks the data's tail weight rather than widening by construction.
+through the Spearman-Brown pole to \code{-Inf}. A default call prints that
+value beside it. Neither resamples, so \code{mc_samples}, \code{boot_samples}, and
+\code{seed} do not apply.
+\code{"searle"} is the exact-F pivot, a closed-form interval that assumes normal
+data (Searle 1971, Table 9.14, and McGraw & Wong 1996, Table 7). It is
+\strong{exact under normality}, and best-calibrated when the data are
+approximately normal. \code{"burch"} is the REML-based interval of Burch (2011),
+a closed-form interval with a kurtosis adjustment, designed for robustness
+to non-normality. Its width tracks the data's tail weight rather than
+widening by construction.
 On the two grids this package has measured that vary only the subject
 effect, \code{"burch"} is usually the \strong{narrower} of the two. But the margin
 depends on the design, so it is not a rule of thumb.
 \code{"burch"}'s width margin holds much the same up to a true ICC of 0.3 rather than shrinking as the true ICC rises
 (on the larger grid; the smaller grid's margin does shrink across its levels).
-The margin then collapses to near parity at a true ICC of 0.6, on the one grid reaching that value,
-which is also where every cell \code{"searle"} won sits.
+The margin then collapses to near parity at a true ICC of 0.6, on the one grid reaching that value.
+That is also where every cell \code{"searle"} won sits.
 And \code{"burch"}'s width margin
 shrinks steadily as the subject count grows, measured at 5 raters.
 What \code{"burch"} does against \code{"searle"} depends on what the residual is
@@ -343,9 +346,9 @@ the normal included. Treat neither as reliably the tighter interval. The
 per-level figures for the two grids that vary only the subject effect
 are tabulated in the interval-methods article.
 Burch's robustness has limits this package has measured. On strongly skewed
-subject effects \code{"burch"} under-covers about as badly as the default,
-worst 0.6655 at chi-square(1) subject effects with a true ICC of 0.6, 30
-subjects and 5 raters. Prefer \code{"searle"}: across every distribution family
+subject effects \code{"burch"} under-covers about as badly as the default. It
+was worst 0.6655 at chi-square(1) subject effects with a true ICC of 0.6,
+30 subjects and 5 raters. Prefer \code{"searle"}: across every distribution family
 in that study it landed closer to nominal coverage in most cells, including
 the heavy-tailed ones. \code{"burch"} dipped below the nominal level in fewer
 cells overall, which is the one respect in which it was steadier. But it is
@@ -353,6 +356,7 @@ a remedy for neither heavy tails nor skew (see the coverage caveat under
 Confidence intervals).
 \code{"mpl"} is the \strong{modified profile-likelihood} interval of Xiao & Liu (2013),
 \strong{only for the balanced-complete two-way random absolute-agreement ICC(A,1)}.
+It profiles the likelihood in the ICC with a small-sample correction.
 ICC(A,k) and any numeric-\code{unit} projection \code{ICC(A,m)} are its Spearman-Brown
 image, pole-safe for every \code{m >= 1}. It aborts on any other design, on
 consistency (ICC(C,.)) or fixed raters, and on unbalanced or incomplete data. It is a
@@ -379,8 +383,8 @@ on the package's own simulated coverage.
 
 The constant's subject-count dimension is tabulated, not continuous. It is
 calibrated at subject-count \strong{nodes} (10, 15, 20, 30, 50, and 100 subjects,
-per rater count and level) and \strong{linearly interpolated in the subject count}
-between them. At a node the tabulated value is used exactly. The nodes are
+per rater count and level). Between nodes it is \strong{linearly interpolated in
+the subject count}. At a node the tabulated value is used exactly. The nodes are
 individually calibrated. The interpolated path is validated, not
 calibrated, by coverage probes at a handful of off-node geometries at each
 supported level. At the default 0.95 the validated cells are three: 3
@@ -392,9 +396,9 @@ nominal-minus-2-percentage-point
 tolerance, not at-or-above-nominal coverage: one validated cell measured 0.944.
 No validated cell pinned an endpoint at 0 or 1. And the one-sidedness
 described below is not uniform across rater counts. In the 3- and 10-rater
-cells misses fall mostly below the interval (31/2 and 42/14 of 1000
-replicates), while the 2-rater cell missed only once, above. So an off-node
-subject count is safe to use at every supported level, but an asymmetry or
+cells misses fall mostly below the interval, not above (31/2 and 42/14 of
+1000 replicates). The 2-rater cell missed only once, above. So an off-node
+subject count is safe to use at every supported level. But an asymmetry or
 width figure observed at one geometry must not be carried to another.
 
 Two further characteristics are worth knowing before reporting an endpoint. The
@@ -406,7 +410,7 @@ half the complementary level.
 And at \code{conf_level = 0.99} with very few raters the interval can be
 \strong{near-vacuous}: median width 0.905 on the \verb{[0, 1]} scale at 2 raters and 40
 subjects. That is the honest cost of a deep tail at minimal rater information,
-not a defect (coverage there is 1.000), but such an interval excludes little.
+not a defect (coverage there is 1.000). But such an interval excludes little.
 It assumes approximately Gaussian data (untested for non-normality).}
 
 \item{mc_samples}{Number of Monte-Carlo draws for \code{ci_method = "montecarlo"}
@@ -468,56 +472,60 @@ variance components, design, engine, interval settings, sample sizes, the
 fitted model, and the call.
 
 \strong{What of that object is stable.} The supported way to read a fit is
-through the methods below, plus two elements of the list itself: \verb{$fit},
-the object the engine returned, and \verb{$call}, the matched call. Everything
-else in the list is internal: its names, nesting, and contents may change
-in any release without a deprecation cycle. That is the whole rule --
-\verb{$fit} and \verb{$call} are the list elements you may depend on, and reaching
-into any other one is reading an implementation detail. \code{tidy()} and
-\code{glance()} are the stable tables, not a re-export of the list: they report
-the estimated coefficients and the model-level summaries, column by column
-as documented below. Those two tables, plus \verb{$fit} and \verb{$call}, are the
-whole supported surface; everything else the list holds falls under the
-rule above, whether or not a table happens to report it.
+through the methods below, plus two elements of the list itself. Those are
+\verb{$fit}, the object the engine returned, and \verb{$call}, the matched call.
+Everything else in the list is internal: its names, nesting, and contents
+may change in any release without a deprecation cycle. \verb{$fit} and \verb{$call}
+are the list elements you may depend on. Reaching into any other one is
+reading an implementation detail. \code{tidy()} and \code{glance()} are the stable
+tables, not a re-export of the list. They report the estimated
+coefficients and the model-level summaries, column by column as documented
+below. Those two tables, plus \verb{$fit} and \verb{$call}, are the whole supported
+surface. Everything else the list holds falls under the rule above,
+whether or not a table happens to report it.
 
-The methods documented on this page return:
+The methods documented on this page return the objects below.
 \itemize{
-\item \code{tidy.icc()}: a tibble with one row per estimated coefficient, columns
-in this order: \code{term} (the coefficient's ICC index, named for the broom
-glossary), \code{occasions}, \code{type}, \code{level}, \code{sf_index}, \code{estimate},
-\code{std.error}, \code{conf.low}, \code{conf.high}, \code{conf.level}, \code{method}. Every
-column is present on every fit. \code{occasions} reports the per-rater
-occasion divisor that row's coefficient applies to pure error. On a fit
-that splits within-cell replicates it reads 1 wherever the row averages
-no occasions. That covers every single-occasion row, and every row whose
-error set carries no pure-error term to average, such as the cluster
-rows of a multilevel fit. It reads the fitted per-cell occasion count
-where the row does average. On a fit that splits none it is \code{NA}. It is
-not in general the number of ratings the coefficient averages, because
-it counts occasions per rater: an occasion-averaged \verb{ICC(*,k)} row
-averages \code{k} raters at that occasion count each. \code{glance()} reports a
-different quantity as \code{n_o}, the observed per-cell occasion count of the
-fitted design. \code{n_o} is itself \code{NA} under the condition the
-\code{glance.icc()} bullet below states, which a ragged replicate design
-meets while \code{occasions} still reads 1.
-\item \code{glance.icc()}: a one-row tibble of model-level summaries:
-the sample sizes, the design flags -- among them the rater treatment
-\code{raters} (\code{NA} where the design estimates no separable rater main effect:
-a \code{model = "oneway"} fit, whose raters are interchangeable and carry no
-facet, and a \code{design = "nested_in_subjects"} fit, whose rater effect is
-confounded into the residual) and \code{replicates}, whether the fitted design splits
-within-cell replicates -- \code{FALSE} on a one-way fit, which has no rater
-facet and so no cells to split -- the effective rater counts, the
-variance components, the occasion count \code{n_o} (\code{NA} unless the fitted
+\item \code{tidy.icc()}: a tibble with one row per estimated coefficient. Its
+columns, in this order, are \code{term}, \code{occasions}, \code{type}, \code{level},
+\code{sf_index}, \code{estimate}, \code{std.error}, \code{conf.low}, \code{conf.high},
+\code{conf.level}, \code{method}. \code{term} is the coefficient's ICC index, named for
+the broom glossary. Every column is present on every fit. \code{occasions}
+reports the per-rater occasion divisor that row's coefficient applies to
+pure error. On a fit that splits within-cell replicates it reads 1
+wherever the row averages no occasions. That covers every
+single-occasion row, and every row whose error set carries no pure-error
+term to average. The cluster rows of a multilevel fit are one such case.
+It reads the fitted per-cell occasion count where the row does average.
+On a fit that splits none it is \code{NA}. It is not in general the number of
+ratings the coefficient averages, because it counts occasions per rater:
+an occasion-averaged \verb{ICC(*,k)} row averages \code{k} raters at that occasion
+count each. \code{glance()} reports a different quantity as \code{n_o}, the
+observed per-cell occasion count of the fitted design. \code{n_o} is itself
+\code{NA} under the condition the \code{glance.icc()} bullet below states, which a
+ragged replicate design meets while \code{occasions} still reads 1.
+\item \code{glance.icc()}: a one-row tibble of model-level summaries. It carries
+the sample sizes, the design flags, the effective rater counts, and the
+variance components. It also carries the occasion count \code{n_o}, the
+engine and interval settings, and the sampler diagnostics \code{rhat} and
+\code{ess_bulk}. Among the design flags are the rater treatment \code{raters} and
+\code{replicates}. \code{raters} is \code{NA} where the design estimates no separable
+rater main effect. One such design is a \code{model = "oneway"} fit, whose
+raters are interchangeable and carry no facet. The other is a
+\code{design = "nested_in_subjects"} fit, whose rater effect is confounded
+into the residual. \code{replicates} says whether the fitted design splits
+within-cell replicates. It is \code{FALSE} on a one-way fit, which has no
+rater facet and so no cells to split. \code{n_o} is \code{NA} unless the fitted
 design splits within-cell replicates \emph{and} defines one occasion count
-per cell -- the same number of ratings in every cell, and every cell
-the design defines present, which is the full subject-by-rater grid
-when crossed and the block-diagonal one when raters are nested in
-clusters; on a design failing either condition, \code{n_o} is reported as
-\code{NA} or the fit refused with an error, depending on the design), the
-engine and interval settings, and the sampler diagnostics \code{rhat} and \code{ess_bulk} (\code{NA} for the
-non-Bayesian engines, which do not sample). Every column is present on
-every fit, so two glanced fits row-bind just as two tidied ones do.
+per cell. Defining one count per cell means the same number of ratings
+in every cell, and every cell the design defines present. The cells the
+design defines are the full subject-by-rater grid when crossed and the
+block-diagonal one when raters are nested in clusters. On a design
+failing either condition, \code{n_o} is reported as \code{NA} or the fit refused
+with an error, depending on the design. \code{rhat} and \code{ess_bulk} are \code{NA}
+for the non-Bayesian engines, which do not sample. Every column is
+present on every fit, so two glanced fits row-bind just as two tidied
+ones do.
 \item \code{format.icc()}: a character vector holding the printed report, one line per
 element.
 \item \code{print.icc()}: the \code{icc} object invisibly, having emitted that report.
