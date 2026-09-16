@@ -38,7 +38,7 @@ Move every data simulation out of the articles and the README into one seeded `d
 ## Tasks
 
 - [x] T1: Write `data-raw/make-vignette-data.R` with four seeded builders (seeds 2025, 11, 88 as the chunks use them), following `data-raw/make-ratings.R`. Before editing any vignette, run each source chunk's code at HEAD and assert `identical()` against the script's objects. Save with `usethis::use_data()` and commit the `.rda` files.
-- [ ] T2: Add four roxygen pages to `R/data.R` (simulated, generator, seed, design sizes, `@seealso` links), four `_pkgdown.yml` rows, `devtools::document()`.
+- [x] T2: Add four roxygen pages to `R/data.R` (simulated, generator, seed, design sizes, `@seealso` links), four `_pkgdown.yml` rows, `devtools::document()`.
 - [ ] T3: Rewrite the four vignette chunks and their prose (`multilevel-designs.Rmd` lines 55-58, 232 and the inline `n_rater` at 244; `d-studies-and-replicates.Rmd` line 168; `interval-methods.Rmd` lines 355-356, all at `a400774`) to load the shipped data under the new names.
 - [ ] T4: Replace the inline rebuilds in `test-vignette-claims.R` (`school` at five sites, `school_ragged`, `vc_mpl_sim()`) with the shipped objects. `devtools::test()` clean.
 - [ ] T5: Switch `README.Rmd`'s `multilevel` chunk to `school`, `devtools::build_readme()`.
@@ -51,6 +51,7 @@ Move every data simulation out of the articles and the README into one seeded `d
 - 2026-09-16: plan gate chose switching the README to the shipped `school` over leaving its own simulation because two `school` objects with different values would sit in the docs; falsified by a README reader missing the simulation code.
 
 - 2026-09-16: implement started on `m154-ship-vignette-datasets`; question gate skipped, the plan gate settled names, README and fallback. T1 done: `data-raw/make-vignette-data.R` written, the four chunks run at HEAD `identical()` to the script's objects (320, 256, 240, 80 rows), `.rda` files built with `usethis::use_data()`.
+- 2026-09-16: T2 done: four roxygen pages in `R/data.R`, four `_pkgdown.yml` rows, `document()` wrote the four `.Rd` files, `pkgdown::check_pkgdown()` clean; the `importFrom` layout drift in `NAMESPACE` reverted (local roxygen2 older than `Config/roxygen2/version`, LESSONS M151).
 
 ## Decisions
 

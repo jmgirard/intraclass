@@ -61,3 +61,108 @@
 #' @examples
 #' summary(icc(ratings_incomplete, score, subject, rater, seed = 2024))
 "ratings_incomplete"
+
+#' Simulated multilevel ratings: pupils nested in classrooms
+#'
+#' Simulated data, not a real study. Sixteen classrooms hold five pupils each,
+#' and the same four raters score every pupil. The classroom spread (sd 1.3)
+#' is larger than the pupil spread within a classroom (sd 0.6), so the
+#' cluster-level ICC comes out above the subject-level ICC. The "Multilevel
+#' designs" article and the README use it.
+#'
+#' @format A data frame with 320 rows and 4 columns:
+#'
+#' \describe{
+#'   \item{classroom}{Factor with 16 levels: the cluster.}
+#'   \item{pupil}{Factor with 80 levels: the subject, labeled
+#'     `classroom_pupil`.}
+#'   \item{rater}{Factor with 4 levels: the rater.}
+#'   \item{score}{Numeric rating.}
+#' }
+#'
+#' @source Simulated by `data-raw/make-vignette-data.R` with `set.seed(2025)`.
+#'   The score is 10 plus a classroom effect, a pupil effect, a rater effect,
+#'   and noise (sd 0.7), all normal draws.
+#'
+#' @seealso [school_incomplete] for the same design with a fifth of the
+#'   ratings removed.
+#' @examples
+#' str(school)
+#' \donttest{
+#' icc(school, score, subject = pupil, rater = rater, cluster = classroom,
+#'   type = "agreement", seed = 1)
+#' }
+"school"
+
+#' Simulated multilevel ratings with missing cells
+#'
+#' Simulated data, not a real study. [school] with a fifth of its rows removed
+#' at random, so 256 of the 320 ratings remain. Missing cells are dropped
+#' rows, not `NA`s. Every rater still scores pupils in every classroom, so
+#' both ICC levels stay identified. The "Multilevel designs" article uses it
+#' to show a ragged multilevel design.
+#'
+#' @format A data frame with 256 rows and 4 columns, as in [school]
+#'   (`classroom`, `pupil`, `rater`, `score`).
+#'
+#' @source Derived from [school] by `data-raw/make-vignette-data.R` with
+#'   `set.seed(11)`, which picks the 64 rows to drop.
+#'
+#' @seealso [school] for the complete design.
+#' @examples
+#' str(school_incomplete)
+"school_incomplete"
+
+#' Simulated ratings with three ratings per subject-rater cell
+#'
+#' Simulated data, not a real study. Twenty subjects are each scored by the
+#' same four raters, and each rater scores each subject three times. The
+#' repeated ratings let `icc()` separate the subject-by-rater interaction
+#' (sd 0.6) from pure error (sd 0.7). The "D-studies and replicates" article
+#' uses it.
+#'
+#' @format A data frame with 240 rows and 3 columns:
+#'
+#' \describe{
+#'   \item{subject}{Factor with 20 levels: the target being rated.}
+#'   \item{rater}{Factor with 4 levels: the rater.}
+#'   \item{score}{Numeric rating. Each subject-rater pair appears three
+#'     times.}
+#' }
+#'
+#' @source Simulated by `data-raw/make-vignette-data.R` with `set.seed(2025)`.
+#'   The score is 10 plus a subject effect (sd 1.1), a rater effect (sd 0.8),
+#'   a subject-by-rater effect (sd 0.6), and noise (sd 0.7).
+#'
+#' @seealso [ratings] for a design with one rating per cell.
+#' @examples
+#' str(ratings_replicates)
+#' \donttest{
+#' icc(ratings_replicates, score, subject, rater, type = "agreement",
+#'   occasions = c("single", "average"), seed = 1)
+#' }
+"ratings_replicates"
+
+#' Simulated balanced two-way ratings, twenty subjects by four raters
+#'
+#' Simulated data, not a real study. Twenty subjects are each scored once by
+#' the same four raters. The variance components are 0.6 (subject), 0.1
+#' (rater), and 0.2 (residual), so the population `ICC(A,1)` is 0.667. The
+#' design is large enough for `ci_method = "mpl"`, which the six-subject
+#' [ratings] data are not. The "Interval methods" article uses it.
+#'
+#' @format A data frame with 80 rows and 3 columns, as in [ratings]
+#'   (`subject`, `rater`, `score`).
+#'
+#' @source Simulated by `data-raw/make-vignette-data.R` with `set.seed(88)`.
+#'   The score is a subject effect plus a rater effect plus noise, all normal
+#'   draws with the variances above.
+#'
+#' @seealso [ratings] for the Shrout and Fleiss worked example.
+#' @examples
+#' str(ratings_twoway)
+#' \donttest{
+#' icc(ratings_twoway, score, subject, rater, type = "agreement",
+#'   ci_method = "mpl")
+#' }
+"ratings_twoway"
