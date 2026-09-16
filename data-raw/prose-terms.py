@@ -10,8 +10,9 @@ A file with no occurrence passes.
 
 Like `prose-profile.py`, this is a hand-run ruler, not a CI job (cairn D-021
 bars standing apparatus over the repo's own records).  Prose is what
-`prose-profile.py` defines: the same stripping, and a pattern is matched
-against the normalized sentence, where a code span is the one word `code`.
+`prose-profile.py` defines: the same stripping (`.Rmd` mode, or roxygen mode
+for an `.R` file), and a pattern is matched against the normalized sentence,
+where a code span is the one word `code`.
 
 Usage
 -----
@@ -94,9 +95,18 @@ def read_table(path: str = TABLE) -> list[dict[str, str]]:
 
 
 def raw_sentences(path: str) -> list[str]:
-    """Prose sentences with links still in place, so an anchor is visible."""
+    """Prose sentences with links still in place, so an anchor is visible.
+
+    An `.R` file is read in the ruler's roxygen mode (M153): its prose is the
+    `#'` lines outside `@examples` or `@examplesIf` blocks and outside `@noRd`
+    blocks, never its code.
+    """
     with open(path, encoding="utf-8") as handle:
-        prose = RULER.strip_rmd(handle.read())
+        raw = handle.read()
+    if path.endswith((".R", ".r")):
+        prose = RULER.strip_roxygen(raw)
+    else:
+        prose = RULER.strip_rmd(raw)
     out: list[str] = []
     for para in RULER.paragraphs(prose):
         out.extend(RULER.sentences(para))
@@ -204,6 +214,29 @@ def self_test() -> int:
             got = check([path], table, headings, quiet=True)
             assert got == want, f"{name}: expected exit {want}, got {got}"
             print(f"PASS {name}: exit {got}")
+        # An `.R` file is read as roxygen: the bare `estimand` in the code
+        # line and in the `@noRd` block below never count as a first use, so
+        # the glossed roxygen sentence is the first one seen.
+        r_path = os.path.join(tmp, "roxygen.R")
+        with open(r_path, "w", encoding="utf-8") as handle:
+            handle.write(
+                "\n".join(
+                    [
+                        "estimand <- function() NULL # the estimand, bare.",
+                        "#' The estimand is the bare internal note.",
+                        "#' @noRd",
+                        "g <- function() NULL",
+                        "#' An estimand is the true quantity you are trying"
+                        " to estimate.",
+                        "#' Later the estimand recurs unglossed.",
+                        "h <- function() NULL",
+                        "",
+                    ]
+                )
+            )
+        got = check([r_path], table, headings, quiet=True)
+        assert got == 0, f"roxygen: expected exit 0, got {got}"
+        print("PASS roxygen: exit 0")
         # A table whose headings drift from the glossary's reds by itself.
         path = os.path.join(tmp, "absent.Rmd")
         got = check([path], table, ["Estimand"], quiet=True)

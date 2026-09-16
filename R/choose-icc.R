@@ -17,7 +17,7 @@
 
 #' Recommend an ICC and the call that computes it
 #'
-#' `choose_icc()` walks the decision tree of the *Choosing an ICC* vignette and
+#' `choose_icc()` walks the decision tree of the *Choosing an ICC* vignette. It
 #' returns a recommendation object naming the coefficient(s) to report and the
 #' exact [icc()] call that computes them. It does **not** fit a model: there is no
 #' `data` argument. Copy the emitted call and run it on your data.
@@ -26,10 +26,11 @@
 #' interactive session, call `choose_icc()` with the relevant answers omitted to
 #' be asked the outstanding questions one at a time.
 #'
-#' The two structural facts about your design default to the common case, a crossed,
-#' non-multilevel two-way design, matching [icc()]. They are whether the raters
-#' are crossed (`model`) and whether subjects are nested in clusters
-#' (`multilevel`). The choices that actually select the coefficient are `type`,
+#' The two structural facts about your design default to the common case,
+#' matching [icc()]. They are whether the raters are crossed (`model`) and
+#' whether subjects are nested in clusters (`multilevel`). The common case is
+#' a crossed, non-multilevel two-way design, where the subjects share one set
+#' of raters. The choices that actually select the coefficient are `type`,
 #' `unit`, `raters`, and `level` when multilevel. None of them has a silent
 #' default. In a non-interactive session, leaving one unanswered is an error
 #' naming the unanswered decision, rather than quietly picking one for you.
@@ -38,12 +39,14 @@
 #'   `"oneway"` (raters are interchangeable across subjects). Defaults to
 #'   `"twoway"`. Under `"oneway"` the `type` and `raters` choices do not exist
 #'   (there is no rater term), and supplying them is an error.
-#' @param type `"agreement"` (the value itself must match, so systematic rater
-#'   offsets count as error), `"consistency"` (only rank order matters, so a
-#'   constant per-rater offset is forgiven), or `"both"`. Required for a two-way
-#'   design.
-#' @param unit `"single"` (you will act on one rater's score), `"average"` (the
-#'   mean of your raters), or `"both"`. Required.
+#' @param type `"agreement"`, `"consistency"`, or `"both"`. Under `"agreement"`
+#'   the value itself must match, so systematic rater offsets count as error.
+#'   Under `"consistency"` only rank order matters, so a constant per-rater
+#'   offset is forgiven. Required for a two-way design.
+#' @param unit `"single"`, `"average"`, or `"both"`. Under `"single"` you will
+#'   act on one rater's score. Under `"average"` you will act on the mean of
+#'   your raters, so the coefficient is the reliability of a mean of several
+#'   raters. Required.
 #' @param raters `"random"` (a sample you generalize beyond, and the recommended
 #'   default for interrater reliability) or `"fixed"` (exactly these judges, no
 #'   generalization). Required for a two-way design.
@@ -58,7 +61,7 @@
 #'   a string (`$call`), the per-decision rationale (`$rationale`), and any notes
 #'   (`$notes`).
 #'
-#'   The methods documented on this page return:
+#'   The methods documented on this page return the objects below.
 #'   * `format.icc_recommendation()`: a character vector holding the printed
 #'     recommendation, one line per element.
 #'   * `print.icc_recommendation()`: the `icc_recommendation` object invisibly,
@@ -603,7 +606,7 @@ new_icc_recommendation <- function(
 
 #' @rdname choose_icc
 #' @param x An `icc_recommendation` object.
-#' @param ... Unused, for method consistency.
+#' @param ... Unused. Present so the method signature matches the generic.
 #' @export
 format.icc_recommendation <- function(x, ...) {
   design <- if (x$oneway) {

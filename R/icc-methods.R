@@ -31,7 +31,7 @@ icc_type_heading <- function(type) {
 
 #' @rdname icc
 #' @param x,object An `icc` object.
-#' @param ... Unused, for method consistency.
+#' @param ... Unused. Present so the method signature matches the generic.
 #' @export
 format.icc <- function(x, ...) {
   ci_pct <- format(100 * x$ci$conf_level, trim = TRUE)

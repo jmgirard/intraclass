@@ -35,8 +35,8 @@ Link targets are dropped (`[text](url)` -> `text`), emphasis markers are
 dropped, and each inline code span collapses to a single word.
 
 `.R` mode reads only roxygen comment lines (`#'`), and only those outside an
-`@examples` block (an `@examples` tag suppresses lines until the next `#' @`
-tag).  A roxygen block (a contiguous run of `#'` lines) carrying an `@noRd`
+`@examples` or `@examplesIf` block (either tag suppresses lines until the
+next `#' @` tag).  A roxygen block (a contiguous run of `#'` lines) carrying an `@noRd`
 tag is dropped whole: it renders to no `man/` page, so no user reads it.
 The `#'` prefix and any leading `@tag` token are stripped; what is left is
 run through the same prose pipeline.
@@ -202,7 +202,7 @@ def roxygen_block_prose(block: list[str]) -> list[str]:
         body = RE_ROXYGEN.sub("", line)
         tag = RE_ROXYGEN_TAG.match(body)
         if tag is not None:
-            in_examples = tag.group(1) == "examples"
+            in_examples = tag.group(1) in ("examples", "examplesIf")
             if in_examples:
                 continue
             body = body[tag.end() :].lstrip()
@@ -386,9 +386,11 @@ def expand(patterns: list[str]) -> list[str]:
 def self_test() -> int:
     """Plant the defect classes the ruler claims to catch and require each red.
 
-    Three checks: a roxygen block carrying `@noRd` contributes no sentence; a
-    30-word sentence is reported at `--limit 25` and not at the default 35;
-    and `--limit` rejects a non-integer. Exits 0 when all three hold.
+    Four checks: a roxygen block carrying `@noRd` contributes no sentence; an
+    `@examplesIf` block contributes none either, while the prose after its
+    next tag does; a 30-word sentence is reported at `--limit 25` and not at
+    the default 35; and `--limit` rejects a non-integer. Exits 0 when all
+    four hold.
     """
     nord = "\n".join(
         ["#' A dropped sentence here.", "#' @noRd", "f <- function() NULL"]
@@ -396,6 +398,16 @@ def self_test() -> int:
     kept = "\n".join(["#' A kept sentence here.", "g <- function() NULL"])
     assert profile_text(strip_roxygen(nord), False, "nord", 35).sentences == 0
     assert profile_text(strip_roxygen(kept), False, "kept", 35).sentences == 1
+    examples_if = "\n".join(
+        [
+            "#' @examplesIf rlang::is_installed(\"ggplot2\")",
+            "#' fit <- icc(ratings, score, subject, rater, seed = 1)",
+            "#' ggplot2::autoplot(fit) # one comment sentence.",
+            "#' @param what One kept sentence.",
+            "h <- function(what) NULL",
+        ]
+    )
+    assert profile_text(strip_roxygen(examples_if), False, "ex", 35).sentences == 1
     thirty = " ".join(["word"] * 30) + "."
     assert profile_text(thirty, False, "thirty", 25).long_sentences == 1
     assert profile_text(thirty, False, "thirty", 35).long_sentences == 0

@@ -2,12 +2,13 @@
 #'
 #' The six-target, four-judge worked example from Shrout and Fleiss (1979), in
 #' the long, one-rating-per-row format that [icc()] consumes. Every subject is
-#' rated by every rater (a complete, balanced two-way design), so it is the
-#' reference case on which `icc()` returns the canonical coefficients
-#' `ICC(A,1)` = 0.290, `ICC(A,k)` = 0.620, `ICC(C,1)` = 0.715, and
-#' `ICC(C,k)` = 0.909.
+#' rated by every rater, a complete, balanced two-way design where the subjects
+#' share one set of raters. So it is the reference case on which `icc()`
+#' returns the canonical coefficients `ICC(A,1)` = 0.290, `ICC(A,k)` = 0.620,
+#' `ICC(C,1)` = 0.715, and `ICC(C,k)` = 0.909.
 #'
 #' @format A data frame with 24 rows and 3 columns:
+#'
 #' \describe{
 #'   \item{subject}{Factor with 6 levels: the target being rated (the object of
 #'     measurement).}
@@ -19,15 +20,16 @@
 #'   in assessing rater reliability. *Psychological Bulletin, 86*(2), 420-428.
 #'   The example in their Table 2.
 #'
-#' @seealso [ratings_incomplete] for a connected incomplete variant.
+#' @seealso [ratings_incomplete] for a connected incomplete variant, one where
+#'   raters and subjects form one linked web.
 #' @examples
 #' icc(ratings, score, subject, rater, seed = 2024)
 "ratings"
 
 #' Rater reliability example with missing cells
 #'
-#' An incomplete variant of [ratings]: rater 2 served as a pilot and scored only
-#' the first two subjects, so the four cells for subjects 3-6 by rater 2 are
+#' An incomplete variant of [ratings]. Rater 2 served as a pilot and scored only
+#' the first two subjects. So the four cells for subjects 3-6 by rater 2 are
 #' absent (20 rows rather than 24). Missing cells are dropped rows, not `NA`s,
 #' matching the long format [icc()] expects.
 #'
@@ -39,9 +41,10 @@
 #' (see the connectedness requirement in `vignette("choosing-an-icc")`).
 #'
 #' Because the per-subject rating counts differ, the averaging divisor for
-#' `ICC(*,k)` is not an integer. It is the effective number of ratings
-#' `k_eff` = 1 / mean(1 / n_i) = 3.273, the harmonic mean of the counts 4, 4, 3,
-#' 3, 3, 3. On the balanced [ratings], `raters = "fixed"` and
+#' `ICC(*,k)` is not an integer. It is the effective number of ratings, the
+#' harmonic mean of the per-subject rating counts, an average that leans toward
+#' the smaller values. Here `k_eff` = 1 / mean(1 / n_i) = 3.273 over the counts
+#' 4, 4, 3, 3, 3, 3. On the balanced [ratings], `raters = "fixed"` and
 #' `raters = "random"` give the same point estimate. Here the two genuinely
 #' differ. This dataset exists to demonstrate those incomplete-design behaviors
 #' in the "Choosing an ICC" article.

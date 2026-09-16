@@ -8,6 +8,15 @@
 
 ## Documentation
 
+* The reference manual pages for `icc()`, `d_study()`, `choose_icc()`,
+  `ratings` and `ratings_incomplete` are rewritten in plainer English. No
+  sentence runs past 25 words, except seven on the `icc()` and `d_study()`
+  pages that carry clauses the test suite pins verbatim. Glossary terms are
+  defined in plain words where the pages first use them. The `icc()` page is
+  now titled "Intraclass correlation coefficients for interrater
+  reliability" and the `d_study()` page "Project reliability to other
+  numbers of raters". Nothing computed changes.
+
 * The *Getting started*, *Choosing an ICC* and *Glossary* articles and the
   README are rewritten in plainer English. No sentence runs past 25 words,
   except two glossary sentences that carry clauses the test suite pins
