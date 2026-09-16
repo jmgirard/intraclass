@@ -16,8 +16,8 @@ times.}
 }
 \source{
 Simulated by \code{data-raw/make-vignette-data.R} with \code{set.seed(2025)}.
-The score is 10 plus a subject effect (sd 1.1), a rater effect (sd 0.8),
-a subject-by-rater effect (sd 0.6), and noise (sd 0.7).
+The score is 10 plus a subject effect, a rater effect, a subject-by-rater
+effect, and noise, with standard deviations 1.1, 0.8, 0.6, and 0.7.
 }
 \usage{
 ratings_replicates
@@ -26,7 +26,8 @@ ratings_replicates
 Simulated data, not a real study. Twenty subjects are each scored by the
 same four raters, and each rater scores each subject three times. The
 repeated ratings let \code{icc()} separate the subject-by-rater interaction
-(sd 0.6) from pure error (sd 0.7). The "D-studies and replicates" article
+(standard deviation 0.6) from pure error (0.7). The "D-studies and
+replicates" article
 uses it.
 }
 \examples{

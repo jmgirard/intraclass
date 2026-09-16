@@ -55,6 +55,7 @@ Move every data simulation out of the articles and the README into one seeded `d
 - 2026-09-16: T3 done: the four chunks now load `school`, `school_incomplete`, `ratings_replicates`, `ratings_twoway`; the inline rater count reads `nlevels(school$rater)`; the three articles knit into the scratchpad with no unrendered inline code; the ruler reports 0 sentences over 25 words added.
 - 2026-09-16: T4 done: the five `school` rebuilds, the `school_ragged` pair and `vc_mpl_sim()` in `test-vignette-claims.R` now read the shipped objects; seed grep prints 0; full `devtools::test()` clean, one pre-existing skip (vignettes not installed).
 - 2026-09-16: T5 done: README `multilevel` chunk loads `school`, `build_readme()` run, regenerated figure PNGs reverted (unchanged content). The README's multilevel figures change (cluster ICC(C,1) now 1.000 with interval [0.000, 1.000], a boundary cell) since the README used a different simulation before.
+- 2026-09-16: claim audit: 23 claims read, 1 corrected — R/data.R, vignettes/multilevel-designs.Rmd, vignettes/d-studies-and-replicates.Rmd, vignettes/interval-methods.Rmd, README.md, tests/testthat/test-vignette-claims.R, NEWS.md (the NEWS bullet now says the README's multilevel figures change).
 
 ## Decisions
 

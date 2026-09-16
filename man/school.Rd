@@ -18,15 +18,15 @@ A data frame with 320 rows and 4 columns:
 \source{
 Simulated by \code{data-raw/make-vignette-data.R} with \code{set.seed(2025)}.
 The score is 10 plus a classroom effect, a pupil effect, a rater effect,
-and noise (sd 0.7), all normal draws.
+and noise (standard deviation 0.7), all normal draws.
 }
 \usage{
 school
 }
 \description{
 Simulated data, not a real study. Sixteen classrooms hold five pupils each,
-and the same four raters score every pupil. The classroom spread (sd 1.3)
-is larger than the pupil spread within a classroom (sd 0.6), so the
+and the same four raters score every pupil. The classroom standard
+deviation (1.3) is larger than the pupil one within a classroom (0.6), so the
 cluster-level ICC comes out above the subject-level ICC. The "Multilevel
 designs" article and the README use it.
 }

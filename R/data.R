@@ -65,8 +65,8 @@
 #' Simulated multilevel ratings: pupils nested in classrooms
 #'
 #' Simulated data, not a real study. Sixteen classrooms hold five pupils each,
-#' and the same four raters score every pupil. The classroom spread (sd 1.3)
-#' is larger than the pupil spread within a classroom (sd 0.6), so the
+#' and the same four raters score every pupil. The classroom standard
+#' deviation (1.3) is larger than the pupil one within a classroom (0.6), so the
 #' cluster-level ICC comes out above the subject-level ICC. The "Multilevel
 #' designs" article and the README use it.
 #'
@@ -82,7 +82,7 @@
 #'
 #' @source Simulated by `data-raw/make-vignette-data.R` with `set.seed(2025)`.
 #'   The score is 10 plus a classroom effect, a pupil effect, a rater effect,
-#'   and noise (sd 0.7), all normal draws.
+#'   and noise (standard deviation 0.7), all normal draws.
 #'
 #' @seealso [school_incomplete] for the same design with a fifth of the
 #'   ratings removed.
@@ -118,7 +118,8 @@
 #' Simulated data, not a real study. Twenty subjects are each scored by the
 #' same four raters, and each rater scores each subject three times. The
 #' repeated ratings let `icc()` separate the subject-by-rater interaction
-#' (sd 0.6) from pure error (sd 0.7). The "D-studies and replicates" article
+#' (standard deviation 0.6) from pure error (0.7). The "D-studies and
+#' replicates" article
 #' uses it.
 #'
 #' @format A data frame with 240 rows and 3 columns:
@@ -131,8 +132,8 @@
 #' }
 #'
 #' @source Simulated by `data-raw/make-vignette-data.R` with `set.seed(2025)`.
-#'   The score is 10 plus a subject effect (sd 1.1), a rater effect (sd 0.8),
-#'   a subject-by-rater effect (sd 0.6), and noise (sd 0.7).
+#'   The score is 10 plus a subject effect, a rater effect, a subject-by-rater
+#'   effect, and noise, with standard deviations 1.1, 0.8, 0.6, and 0.7.
 #'
 #' @seealso [ratings] for a design with one rating per cell.
 #' @examples
