@@ -38,7 +38,7 @@ Apply R1 to R8 of `cairn/doctrine/prose-style.md` to `engines.Rmd`, `comparison-
 ## Tasks
 
 - [x] T1: Rewrite `vignettes/engines.Rmd` and `vignettes/comparison-with-other-packages.Rmd` under R1 to R8; in the comparison article, say in one plain sentence what each compared package is before the matrix.
-- [ ] T2: Rewrite `vignettes/d-studies-and-replicates.Rmd`.
+- [x] T2: Rewrite `vignettes/d-studies-and-replicates.Rmd`.
 - [ ] T3: Rewrite `vignettes/multilevel-designs.Rmd`; define "Design 1/2/3" in plain words where the labels first appear.
 - [ ] T4: Restructure and rewrite `vignettes/interval-methods.Rmd`: record the base heading list and the base prose-numeral multiset first, write each method section's plain opening paragraph, then rewrite the rest; re-check both sets against the head.
 - [ ] T5: R6 hunk audit per `prose-style.md` step 5 over every hunk of T1 to T4; repair widenings in place; re-key the moved guard surfaces (ledger rows, `width_templates()`/`residual_template()` anchors, `m117` anchors); run `check-mpl-doc-claims.py` and the ruler; add the NEWS bullet.
@@ -51,6 +51,7 @@ Apply R1 to R8 of `cairn/doctrine/prose-style.md` to `engines.Rmd`, `comparison-
 - 2026-09-16: re-audit: AC1 (full) — nothing (one observation: the pinned clause strings are fixture-derived and AC1 names no command that prints them).
 - 2026-09-16: note: `data-raw/prose-terms.py` slugs headings the pandoc way (`fixed-vs.-random-raters`) while the built site and every article link use pkgdown's `fixed-vs--random-raters`, so a link to such a heading is reported unlinked; the pass glosses those terms in the sentence instead. A tool note for the "Three prose-apparatus deferrals" row at hygiene.
 - 2026-09-16: T1 done. `engines.Rmd` 102 sentences, `comparison-with-other-packages.Rmd` 94, both 0 over 25 and 0 dashes; every first term use glossed; the R8 and identifier grep empty. The comparison article now says in one sentence what `psych`, `irr` and `irrICC` are; the prior is glossed in the brms intro so the "The prior" heading is not its first use; "map of intent" became "guide to intent" because the term check reads `MAP` case-blind; a sentence ending in "R." was reworded because the ruler holds back single-letter initials. Code chunks and the pasted `#>` blocks are byte-identical; `test-vignette-claims.R` and `test-vignette-transcripts.R` pass.
+- 2026-09-16: T2 done. `d-studies-and-replicates.Rmd` 114 sentences, 0 over 25, 0 dashes; every first term use glossed (the variance-component gloss now opens the article so the D-study gloss can name the components); the two `That is why` markers rewritten; the fixed-rater refusal keeps its bold sentence with the gloss inside it. Code chunks unchanged.
 
 ## Decisions
 
