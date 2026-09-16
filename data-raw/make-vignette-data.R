@@ -34,7 +34,10 @@ school <- data.frame(
   classroom = factor(grid$classroom),
   pupil = factor(paste(grid$classroom, grid$pupil, sep = "_")),
   rater = factor(grid$rater),
-  score = 10 + class_effect + pupil_effect + rater_effect +
+  score = 10 +
+    class_effect +
+    pupil_effect +
+    rater_effect +
     rnorm(nrow(grid), sd = 0.7)
 )
 
@@ -52,7 +55,11 @@ set.seed(2025)
 ns <- 20
 nr <- 4
 no <- 3
-grid <- expand.grid(subject = seq_len(ns), rater = seq_len(nr), occ = seq_len(no))
+grid <- expand.grid(
+  subject = seq_len(ns),
+  rater = seq_len(nr),
+  occ = seq_len(no)
+)
 subj <- rnorm(ns, sd = 1.1)[grid$subject]
 rater <- rnorm(nr, sd = 0.8)[grid$rater]
 sr <- rnorm(ns * nr, sd = 0.6)[(grid$rater - 1) * ns + grid$subject]
@@ -76,11 +83,17 @@ noise <- matrix(rnorm(n_s * n_r, sd = sqrt(0.2)), n_s, n_r)
 ratings_twoway <- data.frame(
   subject = factor(rep(seq_len(n_s), times = n_r)),
   rater = factor(rep(seq_len(n_r), each = n_s)),
-  score = as.numeric(outer(subj_eff, rep(1, n_r)) +
-    outer(rep(1, n_s), rater_eff) + noise)
+  score = as.numeric(
+    outer(subj_eff, rep(1, n_r)) +
+      outer(rep(1, n_s), rater_eff) +
+      noise
+  )
 )
 
 usethis::use_data(
-  school, school_incomplete, ratings_replicates, ratings_twoway,
+  school,
+  school_incomplete,
+  ratings_replicates,
+  ratings_twoway,
   overwrite = TRUE
 )
