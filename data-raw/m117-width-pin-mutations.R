@@ -469,7 +469,7 @@ prose_mutations <- list(
     sub_must(l, "59 of 64 cells", "61 of 64 cells")
   },
   r2_family_count = function(l) {
-    sub_must(l, "spanning four", "spanning six")
+    sub_must(l, "span four", "span six")
   },
   r3_pooled_before_table = function(l) {
     insert_after(l, "**Which is the tighter interval?**", pooled_sentence)
@@ -561,8 +561,8 @@ prose_mutations <- list(
   m119_residual_restored = function(l) {
     sub_must(
       l,
-      "drawn from, and the three grids now measure that:",
-      "drawn from, a reversal which neither grid tests:"
+      "Read together, the three grids measure that:",
+      "That is a reversal which neither grid tests:"
     )
   },
   m119_residual_paraphrased = function(l) {
