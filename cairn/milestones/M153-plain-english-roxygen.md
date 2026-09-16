@@ -1,13 +1,13 @@
 # M153: Plain-English pass over the roxygen surface
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** M151
 - **Driving RR:** —
 - **Principles touched:** GP1
 - **Resolves:** —
 - **Surface tier:** user-facing — the roxygen blocks that become `man/`.
-- **Branch/PR:** —
+- **Branch/PR:** m153-plain-english-roxygen
 
 ## Goal
 

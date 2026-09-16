@@ -9,7 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M153 | Plain-English pass over the roxygen surface | planned | M151 | normal | milestones/M153-plain-english-roxygen.md |
+| M153 | Plain-English pass over the roxygen surface | in-progress | M151 | normal | milestones/M153-plain-english-roxygen.md |
 | M152 | Plain-English pass over the method articles | done | M151 | normal | milestones/archive/M152-plain-english-method-articles.md |
 | M151 | The plain-English standard, and the reader path | done | — | normal | milestones/archive/M151-plain-english-standard-reader-path.md |
 | M150 | The test suite's condition handling is exact | done | — | normal | milestones/archive/M150-test-suite-condition-handling.md |
