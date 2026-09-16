@@ -25,13 +25,15 @@ choose_icc(
 \code{"twoway"}. Under \code{"oneway"} the \code{type} and \code{raters} choices do not exist
 (there is no rater term), and supplying them is an error.}
 
-\item{type}{\code{"agreement"} (the value itself must match, so systematic rater
-offsets count as error), \code{"consistency"} (only rank order matters, so a
-constant per-rater offset is forgiven), or \code{"both"}. Required for a two-way
-design.}
+\item{type}{\code{"agreement"}, \code{"consistency"}, or \code{"both"}. Under \code{"agreement"}
+the value itself must match, so systematic rater offsets count as error.
+Under \code{"consistency"} only rank order matters, so a constant per-rater
+offset is forgiven. Required for a two-way design.}
 
-\item{unit}{\code{"single"} (you will act on one rater's score), \code{"average"} (the
-mean of your raters), or \code{"both"}. Required.}
+\item{unit}{\code{"single"}, \code{"average"}, or \code{"both"}. Under \code{"single"} you will
+act on one rater's score. Under \code{"average"} you will act on the mean of
+your raters, so the coefficient is the reliability of a mean of several
+raters. Required.}
 
 \item{raters}{\code{"random"} (a sample you generalize beyond, and the recommended
 default for interrater reliability) or \code{"fixed"} (exactly these judges, no
@@ -46,7 +48,7 @@ generalization). Required for a two-way design.}
 
 \item{x}{An \code{icc_recommendation} object.}
 
-\item{...}{Unused, for method consistency.}
+\item{...}{Unused. Present so the method signature matches the generic.}
 }
 \value{
 \code{choose_icc()} returns an \code{icc_recommendation} object (a list). It
@@ -54,7 +56,7 @@ carries the recommended coefficient rows (\verb{$rows}), the exact \code{icc()} 
 a string (\verb{$call}), the per-decision rationale (\verb{$rationale}), and any notes
 (\verb{$notes}).
 
-The methods documented on this page return:
+The methods documented on this page return the objects below.
 \itemize{
 \item \code{format.icc_recommendation()}: a character vector holding the printed
 recommendation, one line per element.
@@ -63,7 +65,7 @@ having emitted that recommendation.
 }
 }
 \description{
-\code{choose_icc()} walks the decision tree of the \emph{Choosing an ICC} vignette and
+\code{choose_icc()} walks the decision tree of the \emph{Choosing an ICC} vignette. It
 returns a recommendation object naming the coefficient(s) to report and the
 exact \code{\link[=icc]{icc()}} call that computes them. It does \strong{not} fit a model: there is no
 \code{data} argument. Copy the emitted call and run it on your data.
@@ -73,8 +75,9 @@ Supply the decisions as arguments to get advice programmatically. In an
 interactive session, call \code{choose_icc()} with the relevant answers omitted to
 be asked the outstanding questions one at a time.
 
-The two structural facts about your design default to the common case, a crossed,
-non-multilevel two-way design, matching \code{\link[=icc]{icc()}}. They are whether the raters
+The two structural facts about your design default to the common case,
+matching \code{\link[=icc]{icc()}}. That is a crossed, non-multilevel two-way design, where
+the subjects share one set of raters. They are whether the raters
 are crossed (\code{model}) and whether subjects are nested in clusters
 (\code{multilevel}). The choices that actually select the coefficient are \code{type},
 \code{unit}, \code{raters}, and \code{level} when multilevel. None of them has a silent

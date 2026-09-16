@@ -50,11 +50,12 @@ icc(
 )
 }
 \arguments{
-\item{what}{Which plot to draw: \code{"coefficients"} (the default) for a forest
-plot of each ICC index with its Monte-Carlo confidence interval, or
-\code{"components"} for the variance-component decomposition.}
+\item{what}{Which plot to draw. \code{"coefficients"} (the default) draws a
+forest plot of each ICC index with its Monte-Carlo confidence interval,
+built by simulating from the fitted model. \code{"components"} draws the
+variance-component decomposition.}
 
-\item{...}{Unused, for method consistency.}
+\item{...}{Unused. Present so the method signature matches the generic.}
 
 \item{x, object}{An \code{icc} object.}
 

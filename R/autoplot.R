@@ -156,9 +156,10 @@ plot.icc_dstudy <- function(x, ...) {
 # and registered lazily in zzz.R (light-install path).
 
 #' @rdname icc
-#' @param what Which plot to draw: `"coefficients"` (the default) for a forest
-#'   plot of each ICC index with its Monte-Carlo confidence interval, or
-#'   `"components"` for the variance-component decomposition.
+#' @param what Which plot to draw. `"coefficients"` (the default) draws a
+#'   forest plot of each ICC index with its Monte-Carlo confidence interval,
+#'   built by simulating from the fitted model. `"components"` draws the
+#'   variance-component decomposition.
 #' @examplesIf rlang::is_installed(c("ggplot2", "glmmTMB"))
 #' fit <- icc(ratings, score, subject, rater, unit = c("single", "average"), seed = 1)
 #' ggplot2::autoplot(fit) # coefficient forest plot (the default)

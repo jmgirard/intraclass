@@ -18,8 +18,8 @@ Uses in assessing rater reliability. \emph{Psychological Bulletin, 86}(2),
 ratings_incomplete
 }
 \description{
-An incomplete variant of \link{ratings}: rater 2 served as a pilot and scored only
-the first two subjects, so the four cells for subjects 3-6 by rater 2 are
+An incomplete variant of \link{ratings}. Rater 2 served as a pilot and scored only
+the first two subjects. So the four cells for subjects 3-6 by rater 2 are
 absent (20 rows rather than 24). Missing cells are dropped rows, not \code{NA}s,
 matching the long format \code{\link[=icc]{icc()}} expects.
 }
@@ -31,9 +31,10 @@ every subject. So the two-way ICC stays identified and \code{icc()} does not abo
 (see the connectedness requirement in \code{vignette("choosing-an-icc")}).
 
 Because the per-subject rating counts differ, the averaging divisor for
-\verb{ICC(*,k)} is not an integer. It is the effective number of ratings
-\code{k_eff} = 1 / mean(1 / n_i) = 3.273, the harmonic mean of the counts 4, 4, 3,
-3, 3, 3. On the balanced \link{ratings}, \code{raters = "fixed"} and
+\verb{ICC(*,k)} is not an integer. It is the effective number of ratings, the
+harmonic mean of the per-subject rating counts, an average that leans toward
+the smaller values. Here \code{k_eff} = 1 / mean(1 / n_i) = 3.273 over the counts
+4, 4, 3, 3, 3, 3. On the balanced \link{ratings}, \code{raters = "fixed"} and
 \code{raters = "random"} give the same point estimate. Here the two genuinely
 differ. This dataset exists to demonstrate those incomplete-design behaviors
 in the "Choosing an ICC" article.
