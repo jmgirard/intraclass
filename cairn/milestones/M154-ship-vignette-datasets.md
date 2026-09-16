@@ -23,7 +23,7 @@ Move every data simulation out of the articles and the README into one seeded `d
 
 - [x] AC1: Running `Rscript data-raw/make-vignette-data.R` and then loading the four shipped objects from `data/` gives objects `identical()` to the ones the script built in that run, and `devtools::test()` is clean, so the vignette figures the suite pins are unchanged.
 - [x] AC2: The four chunks named in Scope and `README.Rmd`'s `multilevel` chunk load a shipped dataset and build no data. As evidence, `grep -nE 'set\.seed\(|rnorm\(|sample\(' vignettes/*.Rmd README.Rmd` returns no line.
-- [ ] AC3: Each of the four datasets has a roxygen page in `R/data.R` whose description says the data are simulated and names `data-raw/make-vignette-data.R` and the seed, with `@format` and an `@examples` call, and a row under `_pkgdown.yml`'s Datasets section. `pkgdown::check_pkgdown()` passes and `devtools::check()` reports 0 errors, 0 warnings and no undocumented-dataset NOTE.
+- [x] AC3: Each of the four datasets has a roxygen page in `R/data.R` whose description says the data are simulated and names `data-raw/make-vignette-data.R` and the seed, with `@format` and an `@examples` call, and a row under `_pkgdown.yml`'s Datasets section. `pkgdown::check_pkgdown()` passes and `devtools::check()` reports 0 errors, 0 warnings and no undocumented-dataset NOTE.
 - [x] AC4: Every `set.seed(2025)`, `set.seed(11)` and `set.seed(88)` site in `tests/testthat/test-vignette-claims.R` is gone (`grep -cE 'set\.seed\((2025|11|88)\)'` prints 0). The tests that held them read the shipped objects and pass.
 - [x] AC5: After `pkgdown::build_site()`, the built HTML of the four edited articles and of `index.html` contains no unrendered inline code (`grep -l '`r ' docs/articles/*.html docs/index.html` returns no file), and no vignette, README or roxygen text names a milestone number.
 
@@ -68,3 +68,18 @@ Move every data simulation out of the articles and the README into one seeded `d
 - Gate fix: `air format --check .` failed on `data-raw/make-vignette-data.R` ([O] finding 1). Formatted it and re-ran the identity check, all four objects still `identical()` to the shipped files. Committed on the branch.
 - AC1 evidence: `data-raw/make-vignette-data.R` sourced into a fresh environment, then each object loaded from `data/`. All four `identical()` TRUE (320, 256, 240, 80 rows), and `git status` shows `data/` unchanged after the run. Full `devtools::test()`: FAIL 0, WARN 0, SKIP 2, PASS 9620. PASS.
 - AC4 evidence: `grep -cE 'set\.seed\((2025|11|88)\)' tests/testthat/test-vignette-claims.R` prints 0. That file run alone under the summary reporter shows every test passing and no skip, so the two suite skips lie in other files. PASS.
+- AC3 evidence: `R/data.R` carries four pages, each opening "Simulated data, not a real study", each `@source` naming `data-raw/make-vignette-data.R` and its seed, each with `@format` and `@examples`. The four rows sit under Datasets in `_pkgdown.yml`. `pkgdown::check_pkgdown()`: no problems found. `devtools::check(document = FALSE)`: 0 errors, 0 warnings, 0 notes (18 min). PASS.
+- Consistency gate: `cairn_validate.py` all checks passed. No DESIGN principle changed, `cairn_impact` skipped. `devtools::document()` diffs only the `NAMESPACE` `importFrom` layout (local roxygen2 8.0.0 against 8.1.0, LESSONS M151), reverted. README.md and README.Rmd last changed in the same commit, and `README.md` has no unrendered inline code. NEWS entry present, no milestone number. `data-raw` and `docs` are in `.Rbuildignore`. `air format --check .` clean after the gate fix. Driving RR none, no projection to record.
+- Independent review, three lenses. [S] blame-history: no contradiction of a past milestone or D-entry, one flag (README boundary cell, same as [O] 3). [S] prior-review: no prior-review evidence of regression. The M132 [O]-11 candidate row this milestone absorbs is fixed by the diff, and the GitHub probe returned 0 inline review comments. [O] diff-bug, eleven findings, ranked:
+  - [O] 1 `data-raw/make-vignette-data.R` fails `air format --check`, CI red. Fixed at the gate (line above).
+  - [O] 2 No test checks that the script regenerates the shipped `.rda` files after the inline rebuilds left the suite.
+  - [O] 3 README multilevel example now shows cluster ICC(C,1) = 1.000 with interval [0.000, 1.000], a boundary cell (also the [S] flag).
+  - [O] 4 The three new `@examples` are wrapped in `\donttest{}` though each runs under 0.3 s, so `check()` never runs them.
+  - [O] 5 The NEWS bullet has one 40-word sentence and sits in the top block, not under Documentation as T6 named.
+  - [O] 6 `multilevel-designs.Rmd:231` reads `nlevels(school$rater)` in the paragraph about `school_incomplete`. Same number, wrong referent.
+  - [O] 7 "see `?school` for how it is built" points at a script that `.Rbuildignore` keeps out of the installed package.
+  - [O] 8 `school_incomplete` keeps gappy row names from the row drop.
+  - [O] 9 Two vignette code lines exceed 100 characters (`d-studies-and-replicates.Rmd:173`, `:205`).
+  - [O] 10 `intraclass::` prefixes on the datasets inside the package's own tests, unlike the rest of the suite.
+  - [O] 11 `vc_mpl_sim()` is a one-line accessor whose name still says "sim".
+- Triage at the gate: findings 1 to 11 presented 2026-09-16, dispositions recorded below the chip result.
