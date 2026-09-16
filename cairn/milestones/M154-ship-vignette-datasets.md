@@ -1,13 +1,13 @@
 # M154: Ship the vignettes' simulated datasets from `data-raw/`
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP8
 - **Resolves:** —
 - **Surface tier:** user-facing — four new exported datasets and edited articles.
-- **Branch/PR:** —
+- **Branch/PR:** m154-ship-vignette-datasets
 
 ## Goal
 
