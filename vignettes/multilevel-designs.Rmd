@@ -332,7 +332,7 @@ support a cluster mean.
 ## How many raters? A multilevel D-study
 
 The [D-study](d-studies-and-replicates.html) works on a multilevel fit too. It
-projects the **number of raters** at each level, so you can ask "how many
+projects the **number of raters** at each level. So you can ask "how many
 raters would make the *cluster*-level score reliable?" separately from the
 subject level. It returns one curve per level (note the `level` column), and
 `autoplot()` facets them:
