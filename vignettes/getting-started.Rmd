@@ -38,7 +38,7 @@ components](glossary.html#variance-component), each a share of the total
 variation traced to one source. The two approaches agree on clean, balanced
 data. The model-based one also handles missing ratings, multiple designs, and
 honest confidence intervals. The [*Engines*](engines.html) article covers the
-engine, the backend that fits the model. This article walks the whole pipeline
+engine, the software that does the fitting. This article walks the whole pipeline
 on a small example: fit, estimate, interpret. New to any of the terms as they
 come up? The [*Glossary*](glossary.html) defines each one in a sentence.
 
@@ -46,7 +46,7 @@ come up? The [*Glossary*](glossary.html) defines each one in a sentence.
 
 We use the classic Shrout & Fleiss (1979) example, shipped with the package as
 `ratings`. It has 6 subjects each rated by the same 4 raters, one rating per
-cell. The design is **two-way**, meaning every subject rated by the same raters.
+cell. The design is **two-way**: every subject is rated by the same raters.
 `intraclass` wants **long** format: one rating per row, with columns for the
 subject, the rater, and the score.
 

@@ -30,8 +30,8 @@ variance-component estimation** (linear mixed models) rather than the
 classical ANOVA / mean-squares approach.
 
 It aims to fit variance components, each a share of the total variation
-traced to one source, with modern software. The software that fits the model
-is the engine, the backend that fits the model. It aims to compute the *correct* ICC for a stated design, with a
+traced to one source. It uses modern engines, an engine being the software
+that does the fitting. It aims to compute the *correct* ICC for a stated design, with a
 proper Monte-Carlo interval, built by simulating from the fitted model. That
 interval is boundary-aware: an estimate can land exactly at zero, and the
 interval still behaves. It also aims to handle imbalanced, incomplete, and
@@ -40,15 +40,16 @@ The docs and website are a place to learn ICC best practice, not only to look
 up functions.
 
 The full interrater-reliability ICC family is implemented. That covers
-two-way designs, where every subject rated by the same raters, and one-way
+two-way designs, where every subject is rated by the same raters, and one-way
 designs. Within two-way, it covers absolute agreement, where raters give the
 same score, against consistency, where raters rank subjects the same way. It
 covers single-rater coefficients, the reliability of one rater's score, and
 average-rater ones, the reliability of a mean of several raters. It covers
 random raters against fixed raters, where the observed raters are the whole
 population of interest. It covers imbalanced and incomplete (missing-cell)
-data. It also covers multilevel designs, at the subject level or the cluster
-level, how reliably raters distinguish cluster means. There the raters may be
+data. It also covers multilevel designs, at the subject level or at the
+cluster level, which is how reliably raters distinguish cluster means. There
+the raters may be
 crossed with or nested in clusters or subjects. Everything just listed comes
 with boundary-aware Monte-Carlo intervals. Fits run on `glmmTMB` (the
 default) or `lme4`. Bayesian fits run on `brms`, and SEM fits on `lavaan`.

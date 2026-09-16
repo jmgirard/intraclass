@@ -10,7 +10,7 @@ Credible interval	(?!)	see the confidence-interval entry	exempt
 Dependability coefficient	\bdependability\b	the generalizability-theory name for the agreement ICC	term
 D-study (decision study)	\bD-stud(y|ies)\b|decision stud(y|ies)	projects a fitted reliability to other rater counts	term
 Effective number of ratings: `k_eff`	effective number of ratings|effective [0-9.]+ raters	the harmonic mean of the per-subject rating counts	term
-Engine	\bengines?\b	the backend that fits the model	term
+Engine	\bengines?\b	the software that does the fitting	term
 Estimand	\bestimands?\b	the true quantity you are trying to estimate	term
 Exact-F interval	\bexact-F\b	a closed-form interval that assumes normal data	term
 FIML	\bFIML\b|full-information maximum likelihood	uses every observed value rather than dropping incomplete cases	term
@@ -22,7 +22,7 @@ Modified profile likelihood	modified profile likelihood|\bMPL\b	profiles the lik
 Monte-Carlo interval	Monte[- ]Carlo	built by simulating from the fitted model	term
 Occasion (within-cell replicate)	\boccasions?\b|\breplicates?\b	several ratings by the same rater of the same subject	term
 `occasions` vs. `n_o`	(?!)	two column names, both code	exempt
-One-way vs. two-way	\b(one|two)-way\b	every subject rated by the same raters	term
+One-way vs. two-way	\b(one|two)-way\b	every subject is rated by the same raters	term
 Parametric bootstrap	\bbootstrap\b	refits the model on simulated data many times	term
 Posterior mode (MAP)	posterior mode|\bMAP\b	the peak of the posterior distribution	term
 Prior	\bpriors?\b(?! question)	the distribution placed on a parameter before seeing the data	term

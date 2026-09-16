@@ -323,7 +323,8 @@ An opt-in confidence-interval method for the one-way design, balanced or
 unbalanced (`ci_method = "npbootstrap"`; Ukoumunne et al. 2003). It
 resamples whole subjects with replacement. It stabilizes the variance with a
 log-F transform. It then studentizes, meaning it scales each resampled
-estimate by its own standard error, and back-transforms the endpoints. So it
+estimate, on the transformed scale, by its own standard error, and
+back-transforms the endpoints. So it
 takes a `seed` and `boot_samples`. Robust at the zero-variance boundary and to
 non-normal subject effects. See [*Confidence-interval
 methods*](interval-methods.html#the-opt-in-boundary-robust-methods).

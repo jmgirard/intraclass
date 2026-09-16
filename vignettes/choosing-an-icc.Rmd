@@ -42,8 +42,8 @@ knitr::include_graphics("choosing-icc-tree.svg")
 
 `ratings` is the six-subject, four-rater example of Shrout and Fleiss (1979),
 in the long, one-row-per-rating format `icc()` expects. Every subject is rated
-by every rater. So it is a complete, balanced **two-way** design, every
-subject rated by the same raters. That is the clean case in which the choices
+by every rater. So it is a complete, balanced **two-way** design: every
+subject is rated by the same raters. That is the clean case in which the choices
 below are easiest to see.
 
 ```{r data}
