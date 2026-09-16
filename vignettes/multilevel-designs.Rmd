@@ -53,31 +53,13 @@ van der Ark, 2022). Passing a `cluster` column to `icc()` fits the multilevel
 model and reports each level separately.
 
 Consider pupils nested in classrooms, each pupil rated by the same panel of
-raters. We simulate a design with substantial classroom-level signal but
-modest within-classroom differences:
+raters. The shipped `school` data are a simulated design of this kind:
+16 classrooms, 5 pupils in each, and the same 4 raters scoring every pupil.
+The simulation puts substantial signal at the classroom level and modest
+differences within a classroom (see `?school` for how it is built):
 
 ```{r ml-data}
-set.seed(2025)
-n_class <- 16
-n_pupil <- 5
-n_rater <- 4
-grid <- expand.grid(
-  pupil = seq_len(n_pupil),
-  classroom = seq_len(n_class),
-  rater = seq_len(n_rater)
-)
-class_effect <- rnorm(n_class, sd = 1.3)[grid$classroom]
-pupil_effect <- rnorm(n_class * n_pupil, sd = 0.6)[
-  (grid$classroom - 1) * n_pupil + grid$pupil
-]
-rater_effect <- rnorm(n_rater, sd = 0.4)[grid$rater]
-school <- data.frame(
-  classroom = factor(grid$classroom),
-  pupil = factor(paste(grid$classroom, grid$pupil, sep = "_")),
-  rater = factor(grid$rater),
-  score = 10 + class_effect + pupil_effect + rater_effect +
-    rnorm(nrow(grid), sd = 0.7)
-)
+str(school)
 ```
 
 ```{r ml-fit, eval = requireNamespace("glmmTMB", quietly = TRUE)}
@@ -229,11 +211,12 @@ one where raters and subjects form one linked web. Just as in that
 single-level case, the **crossed** design (Design 1) does not need every pupil
 rated by every rater. The mixed model estimates the variance components from
 whatever cells are present, so a ragged classroom design is handled directly.
-Drop a fifth of the ratings from the `school` data at random:
+The shipped `school_incomplete` data are the `school` data with a fifth of
+the ratings dropped at random:
 
 ```{r ml-incomplete-data}
-set.seed(11)
-school_ragged <- school[-sample(nrow(school), round(0.2 * nrow(school))), ]
+nrow(school)
+nrow(school_incomplete)
 ```
 
 At the **subject** level both agreement and consistency come back. This
@@ -241,10 +224,11 @@ matches the single-level incomplete case. `ICC(*,k)` averages over the
 [*effective* number of
 ratings](glossary.html#effective-number-of-ratings-k_eff) (`k_eff`): the
 harmonic mean of the per-subject rating counts, an average that leans toward
-the smaller values. It is below the full panel size of `r n_rater`:
+the smaller values. It is below the full panel size of
+`r nlevels(school$rater)`:
 
 ```{r ml-incomplete-subject, eval = requireNamespace("glmmTMB", quietly = TRUE)}
-icc(school_ragged, score, subject = pupil, rater = rater, cluster = classroom,
+icc(school_incomplete, score, subject = pupil, rater = rater, cluster = classroom,
   type = "agreement", level = "subject", seed = 1)
 ```
 
@@ -258,7 +242,7 @@ mean. That count is reported as `k_c_eff` (the inverse-Simpson harmonic
 mean), and it is *not* the same as the per-pupil `k_eff`:
 
 ```{r ml-incomplete-cluster, eval = requireNamespace("glmmTMB", quietly = TRUE)}
-icc(school_ragged, score, subject = pupil, rater = rater, cluster = classroom,
+icc(school_incomplete, score, subject = pupil, rater = rater, cluster = classroom,
   level = "cluster", type = c("agreement", "consistency"),
   unit = c("single", "average"), seed = 1)
 ```
