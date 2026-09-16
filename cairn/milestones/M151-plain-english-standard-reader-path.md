@@ -25,7 +25,7 @@ Extend the house prose standard to plain vocabulary, one idea per sentence and n
 - [x] AC2: `python3 data-raw/prose-profile.py --limit 25 --verbose` over `vignettes/getting-started.Rmd`, `vignettes/choosing-an-icc.Rmd`, `vignettes/glossary.Rmd` and `README.Rmd` reports a nonzero `sent` count and 0 dash-as-punctuation for each file, and every sentence its listing reports over 25 words contains verbatim one clause `tests/testthat/test-doc-skew-caveat.R` pins (the clause `residual_template()` returns, or one of the three clauses `width_templates()` returns) and has at most 10 words outside that clause, counted as the ruler counts words (whitespace tokens with an alphanumeric character, after its markdown normalization).
 - [x] AC3: `data-raw/glossary-terms.tsv` has one row per `## ` heading of `vignettes/glossary.Rmd` (columns `heading`, `pattern`, `gloss`, `disposition` in `term|exempt`), and for each `term` row a grep of `pattern` over the prose of `vignettes/getting-started.Rmd`, `vignettes/choosing-an-icc.Rmd` and `README.Rmd` (prose as `prose-profile.py` defines it) finds, per file, no occurrence or a first occurrence whose sentence contains the row's `gloss` text verbatim or a link to that heading's anchor.
 - [x] AC4: `grep -E` for the R8 lexical markers `cairn/doctrine/prose-style.md` lists, and for `\bM[0-9]{1,4}\b`, `\bD-[0-9]{3,4}\b`, `\bADR-[0-9]{3}\b`, `\bR[BR][0-9]{2}\b`, over the four files' prose returns no match.
-- [ ] AC5: `Rscript -e 'devtools::test()'` reports FAIL 0; each `data-raw/` script `grep -l -- '--self-test' data-raw/*` lists exits 0 under `--self-test`; `README.md` at the branch head is byte-identical to a fresh `devtools::build_readme()` render.
+- [x] AC5: `Rscript -e 'devtools::test()'` reports FAIL 0; each `data-raw/` script `grep -l -- '--self-test' data-raw/*` lists exits 0 under `--self-test`; `README.md` at the branch head is byte-identical to a fresh `devtools::build_readme()` render.
 
 ## Coverage
 
@@ -93,3 +93,6 @@ Extend the house prose standard to plain vocabulary, one idea per sentence and n
   - [O16] NEWS `## Documentation` subheading leaves the earlier bullet unheaded — rejected: pure structure nit, subheaded groups are the file's 0.1.0-era convention when a section grows.
   - [S-history 1–4] plainer wording for "asymptotic", the Burch numbers, the getting-started band caveat and the choosing-an-icc comparatives — all reported as preserved, no finding.
 - Return floor: no finding shows an acceptance criterion failing; the gloss corrections are defects inside intentional changes, fixed on the branch before the gate (commits f9ee86b, 07c66f7); AC2–AC4 re-run clean after them (ruler 0/0/2/0 over 25, `prose-terms.py` exit 0, AC4 grep no match, spelling clean).
+- AC5 — verified at the post-fix head (07c66f7 tree). `devtools::test()`: FAIL 0, 0 warnings, 2 installed-vignette skips; all 11 `data-raw/` scripts carrying `--self-test` exit 0; `README.md` byte-identical to a fresh `devtools::build_readme()`; `devtools::check()`: 0 errors, 0 warnings, 0 notes.
+- Step 6 checkpoint: all five criteria ticked against recorded evidence; gate green; ready for the approval gate.
+
