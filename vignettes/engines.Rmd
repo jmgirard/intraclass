@@ -148,8 +148,8 @@ methods*](interval-methods.html#bayesian-credible-intervals-ci_method-posterior)
 article covers it. Because it samples a Stan model, this engine is slower than
 the others. It also needs the `brms` package, an optional `Suggests`
 dependency. And it places a [prior](glossary.html#prior), the distribution
-placed on a parameter before seeing the data, on each variance term. The last
-section of this article covers that prior.
+placed on a parameter before seeing the data, on each random-effect standard
+deviation. The last section of this article covers that prior.
 
 The examples below are shown with pre-computed output. Fitting a Stan model
 needs a toolchain not available when this site is built, so these chunks are
@@ -213,7 +213,8 @@ icc(ratings, score, subject, rater, engine = "brms",
 Here the deliberately over-tight `normal(0, 0.1)` prior squeezes every
 standard deviation toward zero. The ICC collapses to nearly nothing. It is a
 vivid reminder that the prior is load-bearing, not a casual knob. Leave
-`prior` unset unless you intend to depart from the sourced default. The brms
+`prior` unset unless you specifically intend to depart from the sourced
+default. The brms
 engine covers the same design family as the mixed-model engines: two-way
 random and fixed, one-way, and the multilevel designs. It does so on balanced
 and incomplete data.

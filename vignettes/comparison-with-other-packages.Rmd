@@ -23,8 +23,8 @@ datasets. Every number is computed live as the page builds. Any unfamiliar
 term is defined in the [*Glossary*](glossary.html).
 
 The comparison packages are `psych`, `irr`, and `irrICC`. `psych` is a general
-psychometrics package, and its `psych::ICC` is the most widely used ANOVA ICC
-among R users. `irr` is a classical inter-rater-reliability toolkit, and its
+package for psychological measurement, and its `psych::ICC` is the most
+widely used ANOVA ICC among R users. `irr` is a classical inter-rater-reliability toolkit, and its
 `irr::icc` computes the same ANOVA family. `irrICC` implements Gwet's model-based ICCs.
 All three are optional: the code chunks below only run when the package is
 installed.

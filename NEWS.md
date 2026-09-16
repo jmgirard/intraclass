@@ -15,6 +15,15 @@
   *Getting started*, *Choosing an ICC* and the README. The glossary's entries
   each open with a one-sentence definition. Nothing computed changes.
 
+* The *Estimation engines*, *Comparison with other packages*, *D-studies and
+  within-cell replicates*, *Multilevel designs* and *Confidence-interval
+  methods* articles are rewritten in plainer English. No sentence runs past
+  25 words, except two in the interval-methods article that carry clauses
+  the test suite pins verbatim. Each glossary term is defined in plain words
+  at its first use in each article. In the interval-methods article every
+  `ci_method` section now opens with a paragraph on what the method is for
+  and when to choose it. Nothing computed changes.
+
 # intraclass 0.1.0
 
 First public release.

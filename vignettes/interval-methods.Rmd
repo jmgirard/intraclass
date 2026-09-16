@@ -91,8 +91,7 @@ reliably raters distinguish cluster means. The bootstrap is available for
 every design the `"glmmTMB"` and `"lme4"` engines fit. The `"lavaan"` engine
 bootstraps complete data, and a multilevel lavaan fit needs balanced clusters
 and random raters besides. Anywhere off those fences lavaan is Monte-Carlo
-only. The reasons are three. Resamples cannot reproduce a missingness
-pattern. The two-level factory reads the raw rater component and is
+only. Resamples cannot reproduce a missingness pattern. The two-level factory reads the raw rater component and is
 random-only. And the two-level bootstrap was validated on balanced clusters.
 Raise `boot_samples` (default `999`) for a smoother interval at
 proportionally more cost.
@@ -154,8 +153,8 @@ anywhere else.
 
 ### The transformed bootstrap-*t* (`ci_method = "npbootstrap"`)
 
-This is the method for a one-way design when the Monte-Carlo default aborts
-near the boundary. It also serves when you doubt that the subject effects are
+This is the method for a one-way random design when the Monte-Carlo default
+aborts near the boundary. It also serves when you doubt that the subject effects are
 normal. It is the one opt-in method that handles unbalanced one-way data. The cost is
 resampling time, and a seed to pin.
 
@@ -180,8 +179,8 @@ honest disclosure, not an error.
 
 ### The classical closed forms (`ci_method = "searle"` and `"burch"`)
 
-These two are for a balanced one-way design when the Monte-Carlo default
-aborts near a zero ICC. Prefer `"searle"`. It is exact under normality, and
+These two are for a balanced one-way random design when the Monte-Carlo
+default aborts near a zero ICC. Prefer `"searle"`. It is exact under normality, and
 in the skew study it landed closer to nominal coverage in most cells.
 `"burch"` adjusts for the tails of your data, but that adjustment is not a
 remedy for heavy tails. On strongly skewed subject effects both methods
@@ -234,7 +233,7 @@ ICC of 0.1, not at the bottom of the range. Cell by cell, though, `"burch"`'s
 width margin is the larger one at the bottom level in 11 of 16 paired cells.
 The advantage then
 collapses to near parity at a true ICC of 0.6, on the one grid reaching that
-value. Every cell favouring `"searle"` sits at that level.
+value. Every cell favouring `"searle"` sits at that level on that grid.
 The second pattern is along the subject count: there `"burch"`'s width margin
 shrinks steadily as the subject count grows, measured at 5 raters. That is
 the cut the second table takes. That cut is at 5 raters because 10 subjects
@@ -321,10 +320,11 @@ data actually show. That is the same direction the grids above measure.
 
 ### The modified profile likelihood (`ci_method = "mpl"`)
 
-This is the method for a balanced, complete two-way design when the
+This is the method for a balanced, complete two-way random design with
+absolute agreement, where raters give the same score. Reach for it when the
 Monte-Carlo default aborts near a zero ICC. It is conservative by design: it
-gives a wider interval than the default at ordinary interior cells. So reach
-for it when the default fails, and expect a cautious interval when you do.
+gives a wider interval than the default at ordinary interior cells. Expect a
+cautious interval when you use it.
 
 The [**modified profile-likelihood
 interval**](glossary.html#modified-profile-likelihood) of Xiao & Liu (2013)
