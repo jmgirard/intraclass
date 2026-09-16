@@ -96,3 +96,4 @@ Extend the house prose standard to plain vocabulary, one idea per sentence and n
 - AC5 — verified at the post-fix head (07c66f7 tree). `devtools::test()`: FAIL 0, 0 warnings, 2 installed-vignette skips; all 11 `data-raw/` scripts carrying `--self-test` exit 0; `README.md` byte-identical to a fresh `devtools::build_readme()`; `devtools::check()`: 0 errors, 0 warnings, 0 notes.
 - Step 6 checkpoint: all five criteria ticked against recorded evidence; gate green; ready for the approval gate.
 
+- 2026-09-16: step-7 approval: m151-plain-english-standard-reader-path approved for merge
