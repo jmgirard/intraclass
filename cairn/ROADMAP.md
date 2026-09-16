@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-16 (M151 done pass). M151 archived; M148 rotated out (retention 3) and the `record-claims.tsv` terminal-rows row rotated with it; the "Three prose-apparatus deferrals" row extended once more by the §7 chip with M151's five tool notes; one LESSONS line added, the M88 line pruned for the byte budget; no D-entry, no Known issue, no RB/RR pair; all four doctrine modules within their stated budgets; `git branch --no-merged` shows only `backup/m136-pre-rewrite`, expected noise. validate green._
+_Last hygiene check: 2026-09-16 (M152 done pass). M152 archived; M149 rotated out (retention 3); the M152 tool note pruned to its archive summary by the §7 chip, the "Three prose-apparatus deferrals" row not extended; one LESSONS line added, the M94 RDS-parser line pruned for the byte budget; no D-entry, no Known issue, no RB/RR pair; all four doctrine modules within their stated budgets; `git branch --no-merged` shows only `backup/m136-pre-rewrite`, expected noise. validate green._
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,12 +9,11 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M152 | Plain-English pass over the method articles | review | M151 | normal | milestones/M152-plain-english-method-articles.md |
 | M153 | Plain-English pass over the roxygen surface | planned | M151 | normal | milestones/M153-plain-english-roxygen.md |
+| M152 | Plain-English pass over the method articles | done | M151 | normal | milestones/archive/M152-plain-english-method-articles.md |
 | M151 | The plain-English standard, and the reader path | done | — | normal | milestones/archive/M151-plain-english-standard-reader-path.md |
 | M150 | The test suite's condition handling is exact | done | — | normal | milestones/archive/M150-test-suite-condition-handling.md |
-| M149 | `intraclass` is citable and reviewer-ready, with its companion paper repo open | done | — | normal | milestones/archive/M149-paper-repo-and-reviewer-readiness.md |
-<!-- terminal-row retention: retention is 3 (tracking-rules Weight caps); M148 rotated out 2026-09-16 at the M151 done pass as the oldest terminal row by merge order, its archive file still resolving there. Kept: M151, M150, M149 [claim:roadmap-terminal-rows]. -->
+<!-- terminal-row retention: retention is 3 (tracking-rules Weight caps); M149 rotated out 2026-09-16 at the M152 done pass as the oldest terminal row by merge order, its archive file still resolving there. Kept: M152, M151, M150 [claim:roadmap-terminal-rows]. -->
 <!-- rows grouped by status; keep only the 3 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
