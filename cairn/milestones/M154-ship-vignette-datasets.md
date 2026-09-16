@@ -41,7 +41,7 @@ Move every data simulation out of the articles and the README into one seeded `d
 - [x] T2: Add four roxygen pages to `R/data.R` (simulated, generator, seed, design sizes, `@seealso` links), four `_pkgdown.yml` rows, `devtools::document()`.
 - [x] T3: Rewrite the four vignette chunks and their prose (`multilevel-designs.Rmd` lines 55-58, 232 and the inline `n_rater` at 244; `d-studies-and-replicates.Rmd` line 168; `interval-methods.Rmd` lines 355-356, all at `a400774`) to load the shipped data under the new names.
 - [x] T4: Replace the inline rebuilds in `test-vignette-claims.R` (`school` at five sites, `school_ragged`, `vc_mpl_sim()`) with the shipped objects. `devtools::test()` clean.
-- [ ] T5: Switch `README.Rmd`'s `multilevel` chunk to `school`, `devtools::build_readme()`.
+- [x] T5: Switch `README.Rmd`'s `multilevel` chunk to `school`, `devtools::build_readme()`.
 - [ ] T6: `NEWS.md` entry under Documentation, `devtools::check()`, `pkgdown::check_pkgdown()`, `pkgdown::build_site()` and the AC5 grep.
 
 ## Work log
@@ -54,6 +54,7 @@ Move every data simulation out of the articles and the README into one seeded `d
 - 2026-09-16: T2 done: four roxygen pages in `R/data.R`, four `_pkgdown.yml` rows, `document()` wrote the four `.Rd` files, `pkgdown::check_pkgdown()` clean; the `importFrom` layout drift in `NAMESPACE` reverted (local roxygen2 older than `Config/roxygen2/version`, LESSONS M151).
 - 2026-09-16: T3 done: the four chunks now load `school`, `school_incomplete`, `ratings_replicates`, `ratings_twoway`; the inline rater count reads `nlevels(school$rater)`; the three articles knit into the scratchpad with no unrendered inline code; the ruler reports 0 sentences over 25 words added.
 - 2026-09-16: T4 done: the five `school` rebuilds, the `school_ragged` pair and `vc_mpl_sim()` in `test-vignette-claims.R` now read the shipped objects; seed grep prints 0; full `devtools::test()` clean, one pre-existing skip (vignettes not installed).
+- 2026-09-16: T5 done: README `multilevel` chunk loads `school`, `build_readme()` run, regenerated figure PNGs reverted (unchanged content). The README's multilevel figures change (cluster ICC(C,1) now 1.000 with interval [0.000, 1.000], a boundary cell) since the README used a different simulation before.
 
 ## Decisions
 
