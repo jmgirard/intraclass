@@ -1,6 +1,6 @@
 # M151: The plain-English standard, and the reader path
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -42,8 +42,8 @@ Extend the house prose standard to plain vocabulary, one idea per sentence and n
 - [x] T3: Rewrite `vignettes/getting-started.Rmd` under R1 to R8, splitting rather than deleting qualifiers (R6).
 - [x] T4: Rewrite `vignettes/choosing-an-icc.Rmd` the same way; the `## In short` section becomes a plain summary heading.
 - [x] T5: Rewrite `vignettes/glossary.Rmd` so each entry's first sentence defines the term in plain words and later sentences gloss any statistical term they use; the Burch, Conflated and MPL entries are the heavy ones.
-- [ ] T6: Rewrite `README.Rmd`, re-render `README.md`, then run the R6 hunk audit per `prose-style.md` step 5 over every hunk of T3 to T6 and repair widenings in place; re-key any `data-raw/mpl-doc-claims.tsv` row or `test-vignette-claims.R` pin the rewrite moved; add the NEWS bullet.
-- [ ] T7: Verify: `devtools::test()`, every `--self-test` checker, `tests/spelling.R` (new gloss words go in prose, never padded into `inst/WORDLIST`), the ruler at `--limit 25`, the AC3 and AC4 greps; check `git status` for `Rplots.pdf` and `figure/`.
+- [x] T6: Rewrite `README.Rmd`, re-render `README.md`, then run the R6 hunk audit per `prose-style.md` step 5 over every hunk of T3 to T6 and repair widenings in place; re-key any `data-raw/mpl-doc-claims.tsv` row or `test-vignette-claims.R` pin the rewrite moved; add the NEWS bullet.
+- [x] T7: Verify: `devtools::test()`, every `--self-test` checker, `tests/spelling.R` (new gloss words go in prose, never padded into `inst/WORDLIST`), the ruler at `--limit 25`, the AC3 and AC4 greps; check `git status` for `Rplots.pdf` and `figure/`.
 
 ## Work log
 
@@ -64,6 +64,8 @@ Extend the house prose standard to plain vocabulary, one idea per sentence and n
 - 2026-09-16: T5 done. `glossary.Rmd`: 259 sentences, 2 over 25, both pinned (the flat width clause, 32 of 35 words; the residual clause, 58 of 64), 0 dashes; every entry opens with a plain definition, and kurtosis, profiling, studentizing, the posterior and identification are glossed where used; the parity sentence dropped its trailing clause into its own sentence; the Burch margin and residual runs stay contiguous, and `test-doc-skew-caveat.R` passes on the source leg (2 installed-vignette skips).
 - 2026-09-16: T6: `README.Rmd` rewritten (82 sentences, 0 over 25, 0 dashes; the non-base `Imports:` sentence kept verbatim for the dependency-list pin); `README.md` re-rendered by `devtools::build_readme()`, the two regenerated plot images restored since their chunks did not change; R6 hunk audit over every hunk of T3 to T6 found four repairs (consistency "asks only", the per-subject qualifier on the `k_eff` gloss, the exact-F cell sentence's grid referent, the studentize gloss), all repaired in place; no `mpl-doc-claims.tsv` row and no `test-vignette-claims.R` pin names the four files, so nothing to re-key; NEWS gains a Documentation bullet; `spelling::spell_check_package(vignettes = TRUE)` clean with no WORDLIST change.
 - 2026-09-16: claim audit: 48 claims read, 5 corrected — NEWS.md, README.Rmd, README.md, vignettes/getting-started.Rmd, vignettes/choosing-an-icc.Rmd, vignettes/glossary.Rmd, data-raw/glossary-terms.tsv (the NEWS term-rule scope narrowed to the three reader-path files; the two-way gloss gains its verb; the README engine sentence de-circled and the cluster-level gloss attached to one level; the studentize gloss names the transformed scale); the reader's one re-read found all five holding. Noted, not a claim: the tsv's one-way/two-way row glosses two-way only, so a file whose first use is "one-way" would be asked for the two-way definition; no current file trips it.
+- 2026-09-16: T7 done. Full `devtools::test()` (summary reporter): no failures; one new warning at `test-doc-skew-caveat.R:1974` traced to the glossary sentence "on the one grid reaching a true ICC of 0.6", which the canonical-claim scanner read as a ratio claim; reworded to "on that same grid" and the file re-runs with no warning, as do `test-vignette-claims.R` and `test-vignette-transcripts.R`. All 11 `--self-test` scripts exit 0; spelling clean; README.md byte-identical to a fresh render; AC2 ruler 0/0/2/0 over 25 (the 2 pinned), 0 dashes, all four `sent` counts nonzero; `prose-terms.py` exit 0; AC4 grep no match; no `Rplots.pdf` or `figure/` left in the tree. Status set to review.
+- 2026-09-16: note: the simple-english lint hook flagged pre-existing dashes, semicolons and long sentences in `ROADMAP.md`, this file, `prose-style.md`, `data-raw/README.md` and `NEWS.md` on every edit; the tracking records are append-only history and were not rewritten.
 
 ## Decisions
 
