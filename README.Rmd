@@ -40,9 +40,10 @@ The docs and website are a place to learn ICC best practice, not only to look
 up functions.
 
 The full interrater-reliability ICC family is implemented. That covers
-two-way designs, where every subject is rated by the same raters, and one-way
+two-way designs, where the subjects share one set of raters, and one-way
 designs. Within two-way, it covers absolute agreement, where raters give the
-same score, against consistency, where raters rank subjects the same way. It
+same score, against consistency, where raters agree apart from a constant
+offset per rater. It
 covers single-rater coefficients, the reliability of one rater's score, and
 average-rater ones, the reliability of a mean of several raters. It covers
 random raters against fixed raters, where the observed raters are the whole
@@ -144,8 +145,8 @@ icc(school, score, subject = pupil, rater = rater, cluster = classroom, seed = 2
 
 ## How many raters do you need?
 
-`d_study()` runs a D-study, which projects a fitted reliability to other rater
-counts, carrying the interval with them. So you can ask what reliability two
+`d_study()` runs a D-study, which projects the fitted variance components to
+other rater counts, carrying the interval with them. So you can ask what reliability two
 raters would buy, or ten, without running the study again:
 
 ```{r plot-dstudy, fig.width = 9, fig.height = 5, fig.alt = "Projected reliability against the number of raters, from 1 to 10, as two rising curves with Monte-Carlo interval bands: consistency above, absolute agreement below, both climbing steeply from one to four raters and flattening after that."}
@@ -159,7 +160,7 @@ autoplot(d_study(fit, m = 1:10))
 - [*Multilevel designs*](https://jmgirard.github.io/intraclass/articles/multilevel-designs.html): incomplete and nested multilevel data.
 - [*Estimation engines*](https://jmgirard.github.io/intraclass/articles/engines.html): what each engine buys you.
 - [*Confidence-interval methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.html): the `ci_method` menu.
-- [*D-studies and replicates*](https://jmgirard.github.io/intraclass/articles/d-studies-and-replicates.html): projection, and replicates, several ratings by the same rater of the same subject.
+- [*D-studies and replicates*](https://jmgirard.github.io/intraclass/articles/d-studies-and-replicates.html): projection, and replicates, each one of several ratings by the same rater of the same subject.
 - [*Comparison with other packages*](https://jmgirard.github.io/intraclass/articles/comparison-with-other-packages.html): how the numbers line up.
 - [*Glossary*](https://jmgirard.github.io/intraclass/articles/glossary.html): the vocabulary in one place.
 

@@ -46,7 +46,7 @@ come up? The [*Glossary*](glossary.html) defines each one in a sentence.
 
 We use the classic Shrout & Fleiss (1979) example, shipped with the package as
 `ratings`. It has 6 subjects each rated by the same 4 raters, one rating per
-cell. The design is **two-way**: every subject is rated by the same raters.
+cell. The design is **two-way**: the subjects share one set of raters.
 `intraclass` wants **long** format: one rating per row, with columns for the
 subject, the rater, and the score.
 
@@ -59,8 +59,8 @@ head(ratings)
 Call `icc()` with the data and the three columns (unquoted). With the
 defaults, a single two-way random fit reports every defined formulation. It
 reports two kinds of coefficient. **Absolute agreement** asks whether raters
-give the same score. **Consistency** asks only whether raters rank subjects
-the same way. Each kind comes in a single-rater form, the reliability of one
+give the same score. **Consistency** asks only that raters agree apart from a
+constant offset per rater. Each kind comes in a single-rater form, the reliability of one
 rater's score, and an average-rater form, the reliability of a mean of several
 raters. Those four are `ICC(A,1)`, `ICC(A,k)`, `ICC(C,1)`, and `ICC(C,k)`. The
 next sections unpack the labels. They are grouped by error definition in the
@@ -163,7 +163,8 @@ resulting spread of ICCs. This keeps the interval well-behaved right at that
 boundary. The [*Interval methods*](interval-methods.html) article covers how it
 works and the alternatives. One alternative is a parametric bootstrap, which
 refits the model on simulated data many times. Another is a Bayesian credible
-interval, which holds 95% of the posterior probability.
+interval, which holds a chosen share, usually 95%, of the posterior
+probability.
 
 ## Consistency instead of agreement
 

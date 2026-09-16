@@ -42,9 +42,9 @@ knitr::include_graphics("choosing-icc-tree.svg")
 
 `ratings` is the six-subject, four-rater example of Shrout and Fleiss (1979),
 in the long, one-row-per-rating format `icc()` expects. Every subject is rated
-by every rater. So it is a complete, balanced **two-way** design: every
-subject is rated by the same raters. That is the clean case in which the choices
-below are easiest to see.
+by every rater. So it is a complete, balanced **two-way** design: the
+subjects share one set of raters, and every cell is filled. That is the clean
+case in which the choices below are easiest to see.
 
 ```{r data}
 str(ratings)
@@ -79,8 +79,8 @@ about. Answer this question first.
 **Does the actual value need to match, or only the rank order?** *Absolute
 agreement* means raters give the same score. It treats a systematic difference
 between raters, one judge scoring consistently higher than another, as error.
-*Consistency* asks only that raters rank subjects the same way. It forgives a
-constant per-rater offset.
+*Consistency* asks only that raters agree apart from a constant offset per
+rater.
 
 ```{r type}
 agreement <- icc(ratings, score, subject, rater, type = "agreement", seed = 2024)

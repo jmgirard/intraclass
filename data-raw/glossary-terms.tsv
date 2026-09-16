@@ -2,13 +2,13 @@ heading	pattern	gloss	disposition
 Absolute agreement	\bagreement\b	raters give the same score	term
 Average-unit ICC: `ICC(*,k)`	average-unit|average-rater|the mean of (several|all|the|your|k) raters	the reliability of a mean of several raters	term
 Burch interval	\bBurch\b	a closed-form interval with a kurtosis adjustment	term
-Confidence interval vs. credible interval	credible interval	holds 95% of the posterior probability	term
+Confidence interval vs. credible interval	credible interval	holds a chosen share, usually 95%, of the posterior probability	term
 Conflated ICC	\bconflated\b	the single-level ICC that ignores clustering	term
 Connectedness (identification)	\bconnected(ness)?\b|\bidentif(ied|ication|iable)\b	raters and subjects form one linked web	term
-Consistency	\bconsistency\b	raters rank subjects the same way	term
+Consistency	\bconsistency\b	raters agree apart from a constant offset per rater	term
 Credible interval	(?!)	see the confidence-interval entry	exempt
 Dependability coefficient	\bdependability\b	the generalizability-theory name for the agreement ICC	term
-D-study (decision study)	\bD-stud(y|ies)\b|decision stud(y|ies)	projects a fitted reliability to other rater counts	term
+D-study (decision study)	\bD-stud(y|ies)\b|decision stud(y|ies)	projects the fitted variance components to other rater counts	term
 Effective number of ratings: `k_eff`	effective number of ratings|effective [0-9.]+ raters	the harmonic mean of the per-subject rating counts	term
 Engine	\bengines?\b	the software that does the fitting	term
 Estimand	\bestimands?\b	the true quantity you are trying to estimate	term
@@ -18,15 +18,15 @@ Finite-population rater variance: `θ²_r`	finite-population	the spread of just 
 Fixed vs. random raters	\bfixed\b	the observed raters are the whole population of interest	term
 Harmonic mean	harmonic mean	an average that leans toward the smaller values	term
 Indicator-mean estimator	indicator[- ]mean	reads the rater variance from the estimated column means	term
-Modified profile likelihood	modified profile likelihood|\bMPL\b	profiles the likelihood in the ICC	term
+Modified profile likelihood	modified profile likelihood|\bMPL\b	profiles the likelihood in the ICC with a small-sample correction	term
 Monte-Carlo interval	Monte[- ]Carlo	built by simulating from the fitted model	term
-Occasion (within-cell replicate)	\boccasions?\b|\breplicates?\b	several ratings by the same rater of the same subject	term
+Occasion (within-cell replicate)	\boccasions?\b|\breplicates?\b	one of several ratings by the same rater of the same subject	term
 `occasions` vs. `n_o`	(?!)	two column names, both code	exempt
-One-way vs. two-way	\b(one|two)-way\b	every subject is rated by the same raters	term
+One-way vs. two-way	\b(one|two)-way\b	the subjects share one set of raters	term
 Parametric bootstrap	\bbootstrap\b	refits the model on simulated data many times	term
 Posterior mode (MAP)	posterior mode|\bMAP\b	the peak of the posterior distribution	term
 Prior	\bpriors?\b(?! question)	the distribution placed on a parameter before seeing the data	term
-REML	\bREML\b|restricted maximum likelihood	a way to estimate variances without downward bias	term
+REML	\bREML\b|restricted maximum likelihood	a way to estimate variances that corrects maximum likelihood's downward bias	term
 Single-unit ICC: `ICC(*,1)`	single-unit|single-rater|a single rater	the reliability of one rater's score	term
 Subject level vs. cluster level	\b(subject|cluster)[- ]level\b	how reliably raters distinguish cluster means	term
 Transformed bootstrap-*t*	bootstrap-t|Ukoumunne	resamples whole subjects and studentizes	term

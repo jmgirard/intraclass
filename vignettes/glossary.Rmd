@@ -98,9 +98,9 @@ rather than return a number that is not estimable.
 
 ## Consistency
 
-The other `type` of ICC: raters rank subjects the same way, forgiving a
-constant offset between raters. Two raters who agree on the ordering but
-differ by a fixed point still count as perfectly consistent. It leaves the
+The other `type` of ICC: raters agree apart from a constant offset per rater.
+Two raters who agree on the ordering but differ by a fixed point still count
+as perfectly consistent. It leaves the
 rater main effect out of the error term. Contrast **absolute agreement**.
 
 ## Credible interval
@@ -261,8 +261,8 @@ reads `NA` there while `occasions` still reads 1.
 
 ## One-way vs. two-way
 
-The `model` argument. A **two-way** design has every subject rated by the
-*same* raters. So a rater main effect can be estimated, and either counted as
+The `model` argument. In a **two-way** design the subjects share one
+set of raters. So a rater main effect can be estimated, and either counted as
 error (agreement) or set aside (consistency). A **one-way** design has each
 subject rated by possibly *different* raters. So rater identity is not
 modeled, and only an agreement-style `ICC(1)` / `ICC(k)` is defined.
@@ -296,8 +296,8 @@ Overriding it (`prior =`) voids those guarantees, so `icc()` warns. See
 
 ## REML
 
-**Restricted maximum likelihood**: a way to estimate variances without
-downward bias. It is the standard method the mixed-model engines (glmmTMB,
+**Restricted maximum likelihood**: a way to estimate variances that corrects
+maximum likelihood's downward bias. It is the standard method the mixed-model engines (glmmTMB,
 lme4) use to estimate variance components. Ordinary maximum likelihood
 underestimates variances, which matters for the small samples common in
 reliability studies. REML corrects that.

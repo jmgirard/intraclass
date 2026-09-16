@@ -9,10 +9,10 @@
 ## Documentation
 
 * The *Getting started*, *Choosing an ICC* and *Glossary* articles and the
-  README are rewritten in plainer English: no sentence runs past 25 words
-  except two the test suite pins verbatim, and each glossary term is defined
-  in plain words at its first use in those two articles and the README. The
-  glossary's entries
+  README are rewritten in plainer English. No sentence runs past 25 words,
+  except two glossary sentences that carry clauses the test suite pins
+  verbatim. Each glossary term is defined in plain words at its first use in
+  *Getting started*, *Choosing an ICC* and the README. The glossary's entries
   each open with a one-sentence definition. Nothing computed changes.
 
 # intraclass 0.1.0
