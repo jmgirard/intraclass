@@ -6,8 +6,8 @@
 
 This page owns the writing standard for every surface a user reads: the
 vignettes, the roxygen blocks that become `man/`, `README.Rmd`, and `NEWS.md`.
-It states six rules, R1–R6: two measured by a committed ruler, four judgment
-at a read-through.
+It states eight rules, R1–R8: two measured by a committed ruler, two swept by
+a committed term table and a hand-run grep, four judgment at a read-through.
 
 It does not own status, task lists, or the record of which pass applied it —
 those live in `cairn/ROADMAP.md` and the milestone files. It does not reach
@@ -24,7 +24,8 @@ rendered-message tests, and stays a ROADMAP candidate row.
   of speech: separating `Spearman--Brown` from `An ICC—Intraclass` would need a
   hand-kept proper-noun list, so a sentence-initial capital or an acronym in
   that position goes uncounted too. A spaced dash is counted whatever flanks it.
-- **R2 sentence length** — no prose sentence over 35 words.
+- **R2 sentence length** — no prose sentence over 25 words (35 before M151;
+  the ruler's `--limit` flag names the threshold a pass is measured at).
 - **R3 one idea per sentence** — at most one subordinate clause before the main
   verb.
 - **R4 parentheticals** — at most one per sentence, none over 15 words
@@ -33,13 +34,29 @@ rendered-message tests, and stays a ROADMAP candidate row.
   (judgment, not gated).
 - **R6 meaning is fixed** — a rewrite never widens or narrows a claim's scope
   (M72/M128).
+- **R7 plain vocabulary** — each term in `data-raw/glossary-terms.tsv` is
+  glossed or linked at its first prose occurrence in each file: the sentence
+  of that occurrence carries the row's `gloss` text verbatim, or a link to the
+  glossary heading's anchor. A row marked `exempt` is a heading no reader
+  meets as a term (the references list, a see-also entry). The table is built
+  from the glossary's `## ` headings and is checked by hand with
+  `data-raw/prose-terms.py`, never by CI.
+- **R8 no mannered construction** — a hand-run `grep -E` over the prose
+  sweeps these lexical markers, and a pass reports none: `which is why`,
+  `[Tt]hat is why`, `\bprecisely\b`, `the whole rule`, `\bIn short\b`,
+  `half the job`, `\bnot (just|only|merely|simply) [^.]*\bbut\b`. That list
+  is the sweep's extent, not a claim about mannered prose in general: a
+  reader who meets a rhetorical flourish the list does not name repairs it
+  under judgment and may add its marker in a later pass. Headings and
+  sentences may end in a question mark (M151 gate).
 
 R1 and R2 are gated: `data-raw/prose-profile.py` counts them, and a pass that
 claims to have applied them reports zero. The one exemption is a clause a test
 pins verbatim and that admits no sentence break: a pass carrying such a clause
 records it with the pass, with the clause's word count and the sentence's. R4
 and R5 are counted by the same ruler but carry no target: a zero on either has
-no non-arbitrary threshold and would fight readability. R3 and R6 are uncounted.
+no non-arbitrary threshold and would fight readability. R3 and R6 are uncounted;
+R7 and R8 are swept as stated above.
 
 R6 is the one that can silently break something. A dash spliced into two
 sentences, a clause hoisted out of a parenthesis, an "and" turned into a full
@@ -54,48 +71,28 @@ the repo's own records is records apparatus, which D-021 bars, and D-029's
 carve-out covers correcting what the package tells its users, not building
 machinery over it.
 
-In `.Rmd` mode it drops, in order: the YAML front matter, HTML comments, fenced
-code chunks, markdown table *rules* (a separator row of dashes, colons, pipes
-and spaces carrying at least one of each of `|` and `-`, with the leading and
-trailing pipes optional as pandoc allows), and list-marker and blockquote
-prefixes. Headings and table *cells* stay in — they are prose the reader reads,
-so a dash or an overlong clause in one counts. A heading becomes one fragment; a
-table row becomes one fragment per cell. Link targets are dropped
-(`[text](url)` becomes `text`), emphasis markers are dropped, and each inline
-code span collapses to a single word.
+The script's header states what it strips and what it keeps. Briefly: `.Rmd`
+mode drops front matter, HTML comments, code chunks, table separator rows and
+list markers, and keeps headings and table cells (one fragment each); `.R` mode
+reads roxygen lines outside `@examples`, dropping any `@noRd` block whole. Link
+targets and emphasis go, and a code span collapses to one word. A **word** is a
+whitespace token with an alphanumeric character; a **sentence** ends at `.`, `!`
+or `?` plus whitespace, abbreviations and initials held back. What the ruler
+does **not** see is part of the standard too, since a rule the instrument cannot
+reach is judgment, not a target: the header lists six known boundaries under
+"What the ruler does not see", and widening any is a ruler change priced by the
+frozen-ruler rule below.
 
-In `.R` mode it reads only roxygen comment lines (`#'`), and only those outside
-an `@examples` block: an `@examples` tag suppresses lines until the next `#' @`
-tag. The `#'` prefix and any leading `@tag` token are stripped, and what is left
-runs through the same pipeline.
+Run it over a glob; `--verbose` prints every over-limit sentence with its count,
+and `--limit N` sets the threshold (default 35; a pass under R2 runs at 25):
 
-What the ruler does **not** see is as much part of the standard as what it
-does, since a rule the instrument cannot reach is judgment, not a target. Six
-boundaries, none reached by any vignette in this repo today: a `---` alone on a
-line below the front matter is counted, as is a setext heading underline, which
-also merges with its heading into one fragment because the heading test is
-ATX-only; a pandoc simple-table or grid-table separator row is counted, since
-the row test above requires a `|` and neither shape carries one; a run of list
-items joins into one fragment rather than one per item, under-reporting both its
-fragment count and its sentence lengths; HTML comments are stripped before
-fences, so a chunk containing `<!--` swallows the prose to the next real
-comment; and a table row splits into cells only when it starts with `|`, so a
-leading-pipe-less table's cells measure as one fragment. Widening any of these
-is a ruler change, priced by the frozen-ruler rule below.
-
-A **word** is a whitespace-separated token carrying at least one alphanumeric
-character. A **sentence** is a span ending in `.`, `!`, or `?` followed by
-whitespace, with a held-back list of abbreviations (`e.g.`, `i.e.`, `cf.`, `al.`,
-`p.`, and the rest in the script) and single-letter initials that never end one.
-
-Run it over a glob; `--verbose` prints every over-35-word sentence with its count:
-
-    python3 data-raw/prose-profile.py 'vignettes/*.Rmd' --verbose
+    python3 data-raw/prose-profile.py --limit 25 'vignettes/*.Rmd' --verbose
     python3 data-raw/prose-profile.py 'R/*.R'
 
 ## Applying a pass
 
-1. Run the ruler with `--verbose` and work the reported sentences.
+1. Run the ruler with `--limit 25 --verbose` and work the reported sentences;
+   run the R8 grep and the R7 term check, and work those hits too.
 2. Split, don't compress. Where a sentence carries two ideas, the second
    becomes its own sentence; where a dash stands in for a colon, use the colon;
    where it stands in for a full stop, use the full stop.
