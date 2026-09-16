@@ -60,13 +60,18 @@ same seeded-provenance pattern and need no special handling; the
 `prose-profile.py` is not a record-claim checker and is wired into no CI job. It
 is a one-shot ruler for the documentation prose passes, run by hand over a glob
 of `.Rmd` or `.R` files: it reports, per file, the sentence count, how many
-sentences run past 35 words, how many dashes stand in for sentence-level
-punctuation, how many parentheticals run past 15 words, and how many semicolons
-appear. What it counts as prose, and the writing rules it measures, are defined
-in `cairn/doctrine/prose-style.md`.
+sentences run past the `--limit` (35 by default, 25 for a pass), how many
+dashes stand in for sentence-level punctuation, how many parentheticals run past
+15 words, and how many semicolons appear. What it counts as prose, and the
+writing rules it measures, are defined in `cairn/doctrine/prose-style.md`. Its
+`--self-test` plants a `@noRd` block and a 30-word sentence and requires the
+ruler to drop the one and report the other. `prose-terms.py` is its sibling for
+the glossary-term rule: it reads `glossary-terms.tsv` and reports each term
+whose first use in a file is neither glossed nor linked.
 
 ```
-python3 data-raw/prose-profile.py 'vignettes/*.Rmd' --verbose
+python3 data-raw/prose-profile.py --limit 25 'vignettes/*.Rmd' --verbose
+python3 data-raw/prose-terms.py
 ```
 
 ## Why the brms engine is verified offline
