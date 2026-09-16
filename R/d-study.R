@@ -50,7 +50,7 @@
 #' defined for fixed-rater **consistency**, fixed meaning the observed raters
 #' are the whole population of interest. In a two-way design the subjects
 #' share one set of raters. The **one-way** model, where they need not, is
-#' covered as a Spearman-Brown projection of `ICC(1)`. Projection is **not**
+#' defined too, as a Spearman-Brown projection of `ICC(1)`. Projection is **not**
 #' defined for fixed-rater absolute agreement. There the rater term is the
 #' finite-population variance, the spread of just the observed raters. So
 #' there is no "average of `m` freshly sampled raters" to project to.
@@ -90,9 +90,10 @@
 #'   observed rater count each curve matches the fitted `ICC(*,k)` for its own
 #'   level and occasion setting, where the fit reports one. Where the fit
 #'   reports a cluster level, its `occasions` column also carries that level's
-#'   placeholder 1. That error set has no pure error to average. So such a
-#'   fit made with `occasions = "average"` alone still projects a subject curve
-#'   at 1, which the fit itself does not report.
+#'   placeholder 1. The placeholder is there because that error set has no
+#'   pure error to average. So such a fit made with `occasions = "average"`
+#'   alone still projects a subject curve at 1, which the fit itself does not
+#'   report.
 #'   `tidy()` carries that column on every projection, `NA` where the fit has no
 #'   replicates.
 #' * the **swept occasion count `n_o`** (supply the `n_o` argument), holding
@@ -110,9 +111,9 @@
 #' rater or subject-by-rater variance. Read it as "how much does re-rating help?", which
 #' plateaus, unlike adding raters.
 #'
-#' Take a multilevel replicate fit (crossed Design 1 or nested Design 2). A
-#' **rater** projection moves the subject level across occasion settings and
-#' the cluster level single-occasion. An **occasion** projection moves the
+#' Take a multilevel replicate fit (crossed Design 1 or nested Design 2). On
+#' such a fit, a **rater** projection moves the subject level across occasion
+#' settings and the cluster level single-occasion. An **occasion** projection moves the
 #' subject level across `n_o` and returns the cluster level as a **flat**
 #' curve. The cluster-level error set (`{rater, cluster:rater}`) has no
 #' pure-error term, so averaging occasions cannot change it, and `d_study()`

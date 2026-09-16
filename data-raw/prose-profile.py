@@ -36,7 +36,7 @@ dropped, and each inline code span collapses to a single word.
 
 `.R` mode reads only roxygen comment lines (`#'`), and only those outside an
 `@examples` or `@examplesIf` block (either tag suppresses lines until the
-next `#' @` tag; M153 added `@examplesIf`, which the ruler had read as prose).  A roxygen block (a contiguous run of `#'` lines) carrying an `@noRd`
+next `#' @` tag).  A roxygen block (a contiguous run of `#'` lines) carrying an `@noRd`
 tag is dropped whole: it renders to no `man/` page, so no user reads it.
 The `#'` prefix and any leading `@tag` token are stripped; what is left is
 run through the same prose pipeline.

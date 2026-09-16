@@ -144,7 +144,7 @@ where raters agree apart from a constant offset per rater. It is also
 defined for fixed-rater \strong{consistency}, fixed meaning the observed raters
 are the whole population of interest. In a two-way design the subjects
 share one set of raters. The \strong{one-way} model, where they need not, is
-covered as a Spearman-Brown projection of \code{ICC(1)}. Projection is \strong{not}
+defined too, as a Spearman-Brown projection of \code{ICC(1)}. Projection is \strong{not}
 defined for fixed-rater absolute agreement. There the rater term is the
 finite-population variance, the spread of just the observed raters. So
 there is no "average of \code{m} freshly sampled raters" to project to.
@@ -188,9 +188,10 @@ occasion-averaged one by \code{m} times the fitted occasion count. At \code{m} =
 observed rater count each curve matches the fitted \verb{ICC(*,k)} for its own
 level and occasion setting, where the fit reports one. Where the fit
 reports a cluster level, its \code{occasions} column also carries that level's
-placeholder 1. That error set has no pure error to average. So such a
-fit made with \code{occasions = "average"} alone still projects a subject curve
-at 1, which the fit itself does not report.
+placeholder 1. The placeholder is there because that error set has no
+pure error to average. So such a fit made with \code{occasions = "average"}
+alone still projects a subject curve at 1, which the fit itself does not
+report.
 \code{tidy()} carries that column on every projection, \code{NA} where the fit has no
 replicates.
 \item the \strong{swept occasion count \code{n_o}} (supply the \code{n_o} argument), holding
@@ -209,9 +210,9 @@ Averaging more occasions washes out only pure measurement error, never the
 rater or subject-by-rater variance. Read it as "how much does re-rating help?", which
 plateaus, unlike adding raters.
 
-Take a multilevel replicate fit (crossed Design 1 or nested Design 2). A
-\strong{rater} projection moves the subject level across occasion settings and
-the cluster level single-occasion. An \strong{occasion} projection moves the
+Take a multilevel replicate fit (crossed Design 1 or nested Design 2). On
+such a fit, a \strong{rater} projection moves the subject level across occasion
+settings and the cluster level single-occasion. An \strong{occasion} projection moves the
 subject level across \code{n_o} and returns the cluster level as a \strong{flat}
 curve. The cluster-level error set (\verb{\{rater, cluster:rater\}}) has no
 pure-error term, so averaging occasions cannot change it, and \code{d_study()}

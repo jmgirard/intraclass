@@ -259,8 +259,8 @@ this matters most on. There \code{"bootstrap"} is typically the only method that
 returns anything usable, and it is now named rather than left for you to
 find. Candidates are tried cheapest first. Two methods, \code{"bootstrap"} and
 \code{"montecarlo"}, reduce the fitted model rather than your raw data. Under
-that order they are reached only where no method fenced to your design
-serves the data.
+that cheapest-first order they are reached only where no method fenced to
+your design serves the data.
 The costliest of them is both screened at a small resample count and
 capped when run in full. So an error stays a few seconds rather than tens
 of them. Because of that cap, a bullet naming \code{"bootstrap"} also names a
@@ -334,7 +334,7 @@ depends on the design, so it is not a rule of thumb.
 \code{"burch"}'s width margin holds much the same up to a true ICC of 0.3 rather than shrinking as the true ICC rises
 (on the larger grid; the smaller grid's margin does shrink across its levels).
 The margin then collapses to near parity at a true ICC of 0.6, on the one grid reaching that value.
-That is also where every cell \code{"searle"} won sits.
+That value is also where every cell \code{"searle"} won sits.
 And \code{"burch"}'s width margin
 shrinks steadily as the subject count grows, measured at 5 raters.
 What \code{"burch"} does against \code{"searle"} depends on what the residual is
@@ -582,7 +582,7 @@ Fixed-rater consistency is the classic Shrout & Fleiss \code{ICC(3,1)}.
 
 The estimand is the true quantity you are trying to estimate. With a single
 rating per subject-by-rater cell, the subject-by-rater interaction and pure
-error cannot be separately estimated. In that case only their sum, the
+error cannot be told apart by the design. In that case only their sum, the
 residual variance \eqn{\sigma^2_{res}}, is estimable. Absolute agreement
 counts the rater main effect \eqn{\sigma^2_r} as error. Consistency drops it.
 
