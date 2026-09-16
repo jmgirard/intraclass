@@ -38,7 +38,7 @@ Extend the house prose standard to plain vocabulary, one idea per sentence and n
 ## Tasks
 
 - [x] T1: Doctrine and ruler. Add `--limit N` to `data-raw/prose-profile.py` and skip `@noRd` blocks in `.R` mode; record the new baseline over all three corpora in the work log. Write R7 and R8 into `cairn/doctrine/prose-style.md`, compressing the six-blind-spot paragraph into a pointer at the script's header to stay under budget; set R2 to 25. R8's marker list starts from the survey shapes: `which is why`, `That is why`, `precisely`, `the whole rule`, `In short`, `half the job`, `not .* but`, a heading ending in `?`.
-- [ ] T2: Build `data-raw/glossary-terms.tsv` from the glossary headings by a short script run once; mark `References` and the compound `vs.` headings `exempt` or split them into one row per term; write each gloss under ten words.
+- [x] T2: Build `data-raw/glossary-terms.tsv` from the glossary headings by a short script run once; mark `References` and the compound `vs.` headings `exempt` or split them into one row per term; write each gloss under ten words.
 - [ ] T3: Rewrite `vignettes/getting-started.Rmd` under R1 to R8, splitting rather than deleting qualifiers (R6).
 - [ ] T4: Rewrite `vignettes/choosing-an-icc.Rmd` the same way; the `## In short` section becomes a plain summary heading.
 - [ ] T5: Rewrite `vignettes/glossary.Rmd` so each entry's first sentence defines the term in plain words and later sentences gloss any statistical term they use; the Burch, Conflated and MPL entries are the heavy ones.
@@ -58,6 +58,7 @@ Extend the house prose standard to plain vocabulary, one idea per sentence and n
 - 2026-09-16: re-audit: AC2 (full) — one defect: the outside-clause count names no counting rule; the reader also measured the bound as achievable (parity sentence must drop its trailing clause) and noted the ruler has no `--self-test`, so AC5's sweep does not cover its changes. Second line is the stop; the wording question goes to the user.
 - 2026-09-16: user adopted the counting clause into AC2; no further reader for AC2.
 - 2026-09-16: T1 done. Ruler gains `--limit N`, whole-sentence `--verbose` output, `@noRd` block skipping and a `--self-test` (discovered sub-task, so its changes are covered by AC5's sweep); the blind-spot paragraph moved to the script header. New baseline at the branch base content, limit 35 / limit 25: vignettes 969 sentences, 3 / 104 over, 0 dashes; `R/*.R` 571 sentences, 7 / 87 over, 5 dashes (was 615 sentences before the `@noRd` skip); `README.Rmd` 69 sentences, 0 / 1 over, 0 dashes. Doctrine at 116 lines, 6,944 bytes. The AC3 checker is named `data-raw/prose-terms.py`, not `check-*.py`, so the `record-claims.tsv` inventory rows over `check-*` stay true.
+- 2026-09-16: T2 done. `glossary-terms.tsv` has 34 rows, one per heading: 31 `term`, 3 `exempt` (the Credible-interval see-also, the `occasions`/`n_o` code-name pair, References); compound headings keep one row with an alternation pattern and one gloss. `prose-terms.py` checks the rule over prose as the ruler strips it, matches patterns on normalized sentences (a code span is `code`), reads anchors as pandoc slugs, fails on heading drift, and its `--self-test` plants glossed, linked, absent, bare and code-only cases plus a drifted table. At the branch base the three files carry 30 unglossed first uses.
 
 ## Decisions
 
