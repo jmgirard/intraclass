@@ -167,8 +167,7 @@ Here the coefficients are labeled `ICC(1)` / `ICC(k)` and `type` no longer
 applies. With each pupil's raters unique, there is no rater main effect to
 keep in or drop from the error term. A layout that is neither cleanly crossed
 nor cleanly nested raises an informative error rather than guessing at a
-model. That is the layout where some raters are shared across clusters and
-some are not.
+model. One such layout has some raters shared across clusters and some not.
 
 ### Declaring the design when the labels are ambiguous
 

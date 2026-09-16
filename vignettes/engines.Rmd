@@ -24,8 +24,8 @@ components](glossary.html#variance-component), each a share of the total
 variation traced to one source. Some engine choices are purely computational:
 the same estimator, a different solver. Others compute a different estimator of
 the same [estimand](glossary.html#estimand), the true quantity you are trying
-to estimate. Such an estimator converges to the same answer as the sample
-grows. A third kind of choice moves to a fully Bayesian fit. This article
+to estimate. Those estimators are asymptotically equivalent: each converges
+to the same answer as the sample grows. A third kind of choice moves to a fully Bayesian fit. This article
 covers the mixed-model engines (glmmTMB, lme4), the structural-equation engine
 (lavaan), and the Bayesian engine (brms). It also says when the distinction
 matters. Any unfamiliar term is defined in the [*Glossary*](glossary.html).

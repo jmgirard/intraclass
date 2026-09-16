@@ -35,7 +35,9 @@ interval with a kurtosis adjustment. The fourth is the [modified profile
 likelihood](glossary.html#modified-profile-likelihood) (`"mpl"`), which
 profiles the likelihood in the ICC with a small-sample correction. It is the
 two-way counterpart, for the design where the subjects share one set of
-raters. Last is the Bayesian [**credible**
+raters. It serves only that design's balanced, complete, random case with
+absolute [agreement](glossary.html#absolute-agreement), where raters give the
+same score. Last is the Bayesian [**credible**
 interval](glossary.html#credible-interval), which holds a chosen share,
 usually 95%, of the posterior probability. That interval comes with the brms
 [engine](glossary.html#engine), the software that does the fitting. Terms are
@@ -44,7 +46,8 @@ defined in the [*Glossary*](glossary.html).
 ## Monte-Carlo and the parametric bootstrap
 
 The Monte-Carlo interval is the default. Use it unless it aborts near the zero
-boundary, where the opt-in methods below serve. The parametric bootstrap is
+boundary. There, an opt-in method below serves on the design it is fenced
+to, and the abort message names one where it can. The parametric bootstrap is
 for when you distrust the normal approximation the default rests on and can
 afford a full refit per resample. The rest of this section says what each
 does and where the two diverge.
@@ -153,7 +156,7 @@ anywhere else.
 
 ### The transformed bootstrap-*t* (`ci_method = "npbootstrap"`)
 
-This is the method for a one-way random design when the Monte-Carlo default
+This is one method for a one-way random design when the Monte-Carlo default
 aborts near the boundary. It also serves when you doubt that the subject effects are
 normal. It is the one opt-in method that handles unbalanced one-way data. The cost is
 resampling time, and a seed to pin.
@@ -183,8 +186,8 @@ These two are for a balanced one-way random design when the Monte-Carlo
 default aborts near a zero ICC. Prefer `"searle"`. It is exact under normality, and
 in the skew study it landed closer to nominal coverage in most cells.
 `"burch"` adjusts for the tails of your data, but that adjustment is not a
-remedy for heavy tails. On strongly skewed subject effects both methods
-under-cover about as badly as the default.
+remedy for heavy tails. On strongly skewed subject effects `"burch"`
+under-covers about as badly as the default.
 
 Two deterministic classical intervals serve the **balanced one-way random
 design**. They are closed forms with no resampling, so `mc_samples`,
@@ -336,7 +339,7 @@ aborts on any other design. That includes
 constant offset per rater. It includes
 [fixed](glossary.html#fixed-vs--random-raters) raters, where the observed
 raters are the whole population of interest. And it includes unbalanced or
-incomplete data. It is a deterministic closed form: no resampling, no seed.
+incomplete data. It is a deterministic closed form: no resampling, no `seed`.
 Its calibration fixes two fences. `conf_level` must be 0.90, 0.95, or 0.99,
 since each level carries its own calibrated correction constant, never
 interpolated between levels. The calibration grid spans 2–10 raters and

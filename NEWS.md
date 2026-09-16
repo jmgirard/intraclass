@@ -20,7 +20,8 @@
   methods* articles are rewritten in plainer English. No sentence runs past
   25 words, except two in the interval-methods article that carry clauses
   the test suite pins verbatim. Each glossary term is defined in plain words
-  at its first use in each article. In the interval-methods article every
+  or linked to the glossary at its first use in each article. In the
+  interval-methods article every
   `ci_method` section now opens with a paragraph on what the method is for
   and when to choose it. Nothing computed changes.
 
