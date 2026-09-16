@@ -11,36 +11,38 @@ Suppose several raters each score the same set of things: essays,
 patients, video clips. You want to know whether the scores can be
 *trusted*. If two raters watch the same clip, will they land on the same
 number? If you swapped in a different rater, would the result hold up?
-That is a question about **interrater reliability**, and an **intraclass
+That is a question about **interrater reliability**. An **intraclass
 correlation coefficient (ICC)** is the number that answers it.
 
-An ICC runs from 0 to 1 and reports **the share of the variation in
+An ICC runs from 0 to 1. It reports **the share of the variation in
 scores that reflects real differences between the things being rated**,
 rather than disagreement or noise between raters. Near 1, almost all the
-spread in scores is genuine subject-to-subject difference and the raters
+spread in scores is genuine subject-to-subject difference. The raters
 barely disagree, and the ratings are highly reliable. Near 0, the raters
-are effectively adding noise, and a score tells you more about who
+are effectively adding noise. A score then tells you more about who
 happened to rate it than about the subject.
 
 `intraclass` estimates that number by fitting a **mixed model**, rather
 than from the classical ANOVA mean-squares formulas older tools use. The
 model separates subject variation from rater variation as [variance
-components](https://jmgirard.github.io/intraclass/articles/glossary.html#variance-component).
-The two approaches agree on clean, balanced data, but the model-based
-one also handles missing ratings, multiple designs, and honest
-confidence intervals. See
+components](https://jmgirard.github.io/intraclass/articles/glossary.html#variance-component),
+each a share of the total variation traced to one source. The two
+approaches agree on clean, balanced data. The model-based one also
+handles missing ratings, multiple designs, and honest confidence
+intervals. The
 [*Engines*](https://jmgirard.github.io/intraclass/articles/engines.md)
-for the machinery. This article walks the whole pipeline on a small
-example: **fit → estimate → interpret**. (New to any of the terms as
-they come up? The
+article covers the engine, the software that does the fitting. This
+article walks the whole pipeline on a small example: fit, estimate,
+interpret. New to any of the terms as they come up? The
 [*Glossary*](https://jmgirard.github.io/intraclass/articles/glossary.md)
-defines each one in a sentence.)
+defines each one in a sentence.
 
 ## The data
 
 We use the classic Shrout & Fleiss (1979) example, shipped with the
-package as `ratings`: 6 subjects each rated by the same 4 raters, one
-rating per cell. `intraclass` wants **long** format: one rating per row,
+package as `ratings`. It has 6 subjects each rated by the same 4 raters,
+one rating per cell. The design is **two-way**: the subjects share one
+set of raters. `intraclass` wants **long** format: one rating per row,
 with columns for the subject, the rater, and the score.
 
 ``` r
@@ -59,12 +61,15 @@ head(ratings)
 
 Call [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
 with the data and the three columns (unquoted). With the defaults, a
-single **two-way random** fit reports every defined formulation:
-absolute agreement and consistency, each for a single rater and for the
-average of your raters. Those four are `ICC(A,1)`, `ICC(A,k)`,
-`ICC(C,1)`, and `ICC(C,k)`. The next sections unpack the labels. They
-are grouped by error definition in the printout. We set a `seed` so the
-confidence interval is reproducible.
+single two-way random fit reports every defined formulation. It reports
+two kinds of coefficient. **Absolute agreement** asks whether raters
+give the same score. **Consistency** asks only that raters agree apart
+from a constant offset per rater. Each kind comes in a single-rater
+form, the reliability of one rater’s score, and an average-rater form,
+the reliability of a mean of several raters. Those four are `ICC(A,1)`,
+`ICC(A,k)`, `ICC(C,1)`, and `ICC(C,k)`. The next sections unpack the
+labels. They are grouped by error definition in the printout. We set a
+`seed` so the confidence interval is reproducible.
 
 ``` r
 
@@ -119,9 +124,10 @@ glance(fit)
 
 [`summary()`](https://rdrr.io/r/base/summary.html) is the other reading
 of the same fit. It reprints the report above, then appends a short
-**interpretive note for each error definition present**, plus one about
-what a single rating per cell cannot separate. Nothing is recomputed:
-the notes are read off the design, so they track whatever you fitted:
+**interpretive note for each error definition present**. It adds one
+more note, about what a single rating per cell cannot separate. Nothing
+is recomputed: the notes are read off the design, so they track whatever
+you fitted:
 
 ``` r
 
@@ -153,23 +159,23 @@ summary(fit)
 reliability of a *single* rater: how much you can trust one person’s
 score. `ICC(A,k)` = 0.62 is the reliability of the *mean* of all 4
 raters. Averaging cancels out independent rater noise, so the mean is
-always more reliable than one rater alone (this is the
+always more reliable than one rater alone. This is the
 **Spearman–Brown** relationship: more raters, higher reliability, with
-diminishing returns). Report `ICC(A,k)` when the averaged score is what
-you will actually use, and `ICC(A,1)` when downstream users see one
+diminishing returns. Report `ICC(A,k)` when the averaged score is what
+you will actually use. Report `ICC(A,1)` when downstream users see one
 rater’s judgment.
 
 **Absolute agreement vs. rank order.** These are **absolute-agreement**
-coefficients: if one rater scores consistently higher than another, that
+coefficients. If one rater scores consistently higher than another, that
 systematic gap counts as error. Here the raters differ sharply in
-average level, which is why the agreement ICC is low. That is a signal
-that the rating procedure has a level problem worth fixing. (If you only
-care that raters *rank* subjects the same way, ask for *consistency*
-instead, described below.)
+average level, so the agreement ICC is low. That is a signal that the
+rating procedure has a level problem worth fixing. If you only care that
+raters *rank* subjects the same way, ask for *consistency* instead,
+described below.
 
 ### Is this a good ICC?
 
-There is no universal cutoff, but two widely cited rules of thumb give a
+There is no universal cutoff. Two widely cited rules of thumb give a
 rough vocabulary. **Koo & Li (2016)** propose:
 
 | ICC       | Label     |
@@ -180,21 +186,20 @@ rough vocabulary. **Koo & Li (2016)** propose:
 | \> 0.90   | excellent |
 
 An older scheme, **Cicchetti (1994)**, draws its lines a little
-differently (\< 0.40 poor, 0.40–0.59 fair, 0.60–0.74 good, 0.75–1.00
-excellent). Treat these as conventions, not laws. The bar that matters
+differently: \< 0.40 poor, 0.40–0.59 fair, 0.60–0.74 good, 0.75–1.00
+excellent. Treat these as conventions, not laws. The bar that matters
 depends on the stakes of your decision, and on *which* ICC you are
 reading. An agreement coefficient and a consistency coefficient on the
 same data are not comparable to the same cutoff.
 
 Most important, and this is Koo & Li’s own recommendation: **judge the
 confidence interval, not just the point estimate.** Here the four-rater
-mean `ICC(A,k)` = 0.62 reads as “moderate,” but its 95% interval runs
-from 0.17 to 0.91, from “poor” all the way to “excellent.” With only six
+mean `ICC(A,k)` = 0.62 reads as “moderate”. Its 95% interval runs from
+0.17 to 0.91, from “poor” all the way to “excellent.” With only six
 subjects, the data simply cannot pin the reliability down to one band.
-That is why
-[`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) never
-returns a point estimate without an interval, and never labels a result
-for you: the honest summary is the whole interval.
+So [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
+never returns a point estimate without an interval, and never labels a
+result for you: the honest summary is the whole interval.
 
 ### About the confidence interval
 
@@ -202,7 +207,7 @@ The interval
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
 reports is a [**Monte-Carlo**
 interval](https://jmgirard.github.io/intraclass/articles/glossary.html#monte-carlo-interval),
-and it is
+built by simulating from the fitted model, and it is
 [**boundary-aware**](https://jmgirard.github.io/intraclass/articles/glossary.html#zero-variance-boundary).
 In plain terms: the default interval does not rely on a textbook formula
 that misbehaves when a variance is near zero. That is a common
@@ -213,8 +218,10 @@ simulates many plausible parameter sets from the fitted model, and reads
 the interval off the resulting spread of ICCs. This keeps the interval
 well-behaved right at that boundary. The [*Interval
 methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.md)
-article covers how it works and the alternatives (a parametric
-bootstrap, and Bayesian credible intervals).
+article covers how it works and the alternatives. One alternative is a
+parametric bootstrap, which refits the model on simulated data many
+times. Another is a Bayesian credible interval, which holds a chosen
+share, usually 95%, of the posterior probability.
 
 ## Consistency instead of agreement
 
@@ -244,8 +251,9 @@ present.
 
 By default raters are treated as **random**: a sample you want to
 generalize beyond, so that your reliability claim covers raters you did
-not use. If your raters are the entire population of interest you can
-pass `raters = "fixed"`, the classic `ICC(3,1)`. But
+not use. Raters are **fixed** when the observed raters are the whole
+population of interest. If yours are, you can pass `raters = "fixed"`,
+the classic `ICC(3,1)`. But
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) will
 warn: random is the recommended default for interrater reliability, and
 on balanced data the number is identical anyway.
