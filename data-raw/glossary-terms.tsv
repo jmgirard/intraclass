@@ -9,7 +9,7 @@ Consistency	\bconsistency\b	raters rank subjects the same way	term
 Credible interval	(?!)	see the confidence-interval entry	exempt
 Dependability coefficient	\bdependability\b	the generalizability-theory name for the agreement ICC	term
 D-study (decision study)	\bD-stud(y|ies)\b|decision stud(y|ies)	projects a fitted reliability to other rater counts	term
-Effective number of ratings: `k_eff`	effective number of ratings|effective [0-9.]+ raters	the harmonic mean of the per-subject rating counts	term
+Effective number of ratings: `k_eff`	effective number of ratings|effective [0-9.]+ raters	the harmonic mean of the rating counts	term
 Engine	\bengines?\b	the backend that fits the model	term
 Estimand	\bestimands?\b	the true quantity you are trying to estimate	term
 Exact-F interval	\bexact-F\b	a closed-form interval that assumes normal data	term
