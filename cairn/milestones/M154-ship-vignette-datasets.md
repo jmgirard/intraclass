@@ -21,10 +21,10 @@ Move every data simulation out of the articles and the README into one seeded `d
 
 ## Acceptance criteria
 
-- [ ] AC1: Running `Rscript data-raw/make-vignette-data.R` and then loading the four shipped objects from `data/` gives objects `identical()` to the ones the script built in that run, and `devtools::test()` is clean, so the vignette figures the suite pins are unchanged.
+- [x] AC1: Running `Rscript data-raw/make-vignette-data.R` and then loading the four shipped objects from `data/` gives objects `identical()` to the ones the script built in that run, and `devtools::test()` is clean, so the vignette figures the suite pins are unchanged.
 - [x] AC2: The four chunks named in Scope and `README.Rmd`'s `multilevel` chunk load a shipped dataset and build no data. As evidence, `grep -nE 'set\.seed\(|rnorm\(|sample\(' vignettes/*.Rmd README.Rmd` returns no line.
 - [ ] AC3: Each of the four datasets has a roxygen page in `R/data.R` whose description says the data are simulated and names `data-raw/make-vignette-data.R` and the seed, with `@format` and an `@examples` call, and a row under `_pkgdown.yml`'s Datasets section. `pkgdown::check_pkgdown()` passes and `devtools::check()` reports 0 errors, 0 warnings and no undocumented-dataset NOTE.
-- [ ] AC4: Every `set.seed(2025)`, `set.seed(11)` and `set.seed(88)` site in `tests/testthat/test-vignette-claims.R` is gone (`grep -cE 'set\.seed\((2025|11|88)\)'` prints 0). The tests that held them read the shipped objects and pass.
+- [x] AC4: Every `set.seed(2025)`, `set.seed(11)` and `set.seed(88)` site in `tests/testthat/test-vignette-claims.R` is gone (`grep -cE 'set\.seed\((2025|11|88)\)'` prints 0). The tests that held them read the shipped objects and pass.
 - [x] AC5: After `pkgdown::build_site()`, the built HTML of the four edited articles and of `index.html` contains no unrendered inline code (`grep -l '`r ' docs/articles/*.html docs/index.html` returns no file), and no vignette, README or roxygen text names a milestone number.
 
 ## Coverage
@@ -66,3 +66,5 @@ Move every data simulation out of the articles and the README into one seeded `d
 - AC2 evidence: `grep -nE 'set\.seed\(|rnorm\(|sample\(' vignettes/*.Rmd README.Rmd` returns no line. In the diff, the five named chunks call `str()`, `nrow()` or `icc()` on the shipped objects and build no data. PASS.
 - AC5 evidence: `pkgdown::build_site()` exit 0 with nine article pages built. `grep -l '`r ' docs/articles/*.html docs/index.html` returns no file. `grep -nE '\bM[0-9]{2,3}\b' vignettes/*.Rmd README.Rmd README.md man/*.Rd` is empty. The two roxygen hits in `R/abort.R` predate the branch (blame 2026-08-05) and are unchanged. `check-vignette-render-warnings.py` OK. PASS.
 - Gate fix: `air format --check .` failed on `data-raw/make-vignette-data.R` ([O] finding 1). Formatted it and re-ran the identity check, all four objects still `identical()` to the shipped files. Committed on the branch.
+- AC1 evidence: `data-raw/make-vignette-data.R` sourced into a fresh environment, then each object loaded from `data/`. All four `identical()` TRUE (320, 256, 240, 80 rows), and `git status` shows `data/` unchanged after the run. Full `devtools::test()`: FAIL 0, WARN 0, SKIP 2, PASS 9620. PASS.
+- AC4 evidence: `grep -cE 'set\.seed\((2025|11|88)\)' tests/testthat/test-vignette-claims.R` prints 0. That file run alone under the summary reporter shows every test passing and no skip, so the two suite skips lie in other files. PASS.
