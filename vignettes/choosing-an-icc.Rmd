@@ -79,8 +79,8 @@ about. Answer this question first.
 **Does the actual value need to match, or only the rank order?** *Absolute
 agreement* means raters give the same score. It treats a systematic difference
 between raters, one judge scoring consistently higher than another, as error.
-*Consistency* means raters rank subjects the same way. It forgives a constant
-per-rater offset.
+*Consistency* asks only that raters rank subjects the same way. It forgives a
+constant per-rater offset.
 
 ```{r type}
 agreement <- icc(ratings, score, subject, rater, type = "agreement", seed = 2024)
@@ -153,8 +153,8 @@ it uses whatever ratings are present. Two things change automatically:
   variance. So `icc()` fails loudly rather than returning a plausible-looking
   number.
 - The averaging divisor for `ICC(*,k)` becomes `k_eff`. `k_eff` is the
-  *effective* number of ratings: the harmonic mean of the rating counts, an
-  average that leans toward the smaller values. So a few
+  *effective* number of ratings: the harmonic mean of the per-subject rating
+  counts, an average that leans toward the smaller values. So a few
   well-rated subjects cannot disguise the many that were rated by fewer raters.
   It honestly reflects the ragged averages you actually computed.
 

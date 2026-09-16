@@ -15,25 +15,38 @@ coverage](https://codecov.io/gh/jmgirard/intraclass/graph/badge.svg)](https://ap
 <!-- badges: end -->
 
 **intraclass** computes interrater-reliability **intraclass correlation
-coefficients (ICCs)** within the generalizability-theory framework,
+coefficients (ICCs)**. An ICC is the share of the variation in scores
+that reflects real differences between the things rated, rather than
+rater noise. It works within the generalizability-theory framework,
 using **modern variance-component estimation** (linear mixed models)
 rather than the classical ANOVA / mean-squares approach.
 
-It aims to fit variance components with modern engines, and to compute
-the *correct* ICC for a stated design with proper boundary-aware
-Monte-Carlo interval estimation. It also aims to handle imbalanced,
-incomplete, and multilevel designs, and to help you decide **which ICC
-to choose, and why**. The docs and website are a place to learn ICC best
-practice, not just call functions.
+It aims to fit variance components, each a share of the total variation
+traced to one source, with modern software. The software that fits the
+model is the engine, the backend that fits the model. It aims to compute
+the *correct* ICC for a stated design, with a proper Monte-Carlo
+interval, built by simulating from the fitted model. That interval is
+boundary-aware: an estimate can land exactly at zero, and the interval
+still behaves. It also aims to handle imbalanced, incomplete, and
+multilevel designs, and to help you decide **which ICC to choose, and
+why**. The docs and website are a place to learn ICC best practice, not
+only to look up functions.
 
 The full interrater-reliability ICC family is implemented. That covers
-two-way designs (absolute agreement vs. consistency, single vs. average,
-random vs. fixed raters) and one-way designs. It covers imbalanced and
-incomplete (missing-cell) data. It also covers multilevel designs, at
-the subject or cluster level, with raters crossed with or nested in
-clusters or subjects. Everything just listed comes with boundary-aware
-Monte-Carlo intervals. Fits run on `glmmTMB` (the default) or `lme4`.
-Bayesian fits run on `brms`, and SEM fits on `lavaan`. The [engines
+two-way designs, where every subject rated by the same raters, and
+one-way designs. Within two-way, it covers absolute agreement, where
+raters give the same score, against consistency, where raters rank
+subjects the same way. It covers single-rater coefficients, the
+reliability of one rater’s score, and average-rater ones, the
+reliability of a mean of several raters. It covers random raters against
+fixed raters, where the observed raters are the whole population of
+interest. It covers imbalanced and incomplete (missing-cell) data. It
+also covers multilevel designs, at the subject level or the cluster
+level, how reliably raters distinguish cluster means. There the raters
+may be crossed with or nested in clusters or subjects. Everything just
+listed comes with boundary-aware Monte-Carlo intervals. Fits run on
+`glmmTMB` (the default) or `lme4`. Bayesian fits run on `brms`, and SEM
+fits on `lavaan`. The [engines
 article](https://jmgirard.github.io/intraclass/articles/engines.html)
 says which designs each one supports.
 
@@ -57,8 +70,8 @@ pak::pak("jmgirard/intraclass")
 intraclass declares `cli`, `generics`, `glmmTMB`, `lifecycle`, `rlang`,
 and `tibble` as its non-base `Imports:`. What an installation retrieves
 is the full dependency closure of those declarations, which is
-considerably larger. One member of that closure is worth naming:
-`glmmTMB` lists `lme4` in its own `Imports:`, so the `lme4` package is
+considerably larger. One member of that closure is worth naming.
+`glmmTMB` lists `lme4` in its own `Imports:`. So the `lme4` package is
 already on your library path after a plain install, whatever its
 `Suggests:` placement here implies. Having the package is not the same
 as having the engine, though. `engine = "lme4"` also needs `merDeriv`,
@@ -114,7 +127,7 @@ consistency, single vs. average, fixed vs. random raters, complete vs.
 incomplete. Each of those is an argument to `icc()`. Not sure which to
 report? `choose_icc()` walks the [*Choosing an
 ICC*](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.html)
-decision tree and hands back the coefficient or coefficients, the
+decision tree. It hands back the coefficient or coefficients, the
 reasoning, and the exact call to run. No data or fitting is required:
 
 ``` r
@@ -183,9 +196,10 @@ icc(school, score, subject = pupil, rater = rater, cluster = classroom, seed = 2
 
 ## How many raters do you need?
 
-`d_study()` projects the variance components of a fit to other rater
-counts, carrying the interval with them. So you can ask what reliability
-two raters would buy, or ten, without running the study again:
+`d_study()` runs a D-study, which projects a fitted reliability to other
+rater counts, carrying the interval with them. So you can ask what
+reliability two raters would buy, or ten, without running the study
+again:
 
 ``` r
 autoplot(d_study(fit, m = 1:10))
@@ -212,7 +226,8 @@ autoplot(d_study(fit, m = 1:10))
   the `ci_method` menu.
 - [*D-studies and
   replicates*](https://jmgirard.github.io/intraclass/articles/d-studies-and-replicates.html):
-  projection and within-cell replicates.
+  projection, and replicates, several ratings by the same rater of the
+  same subject.
 - [*Comparison with other
   packages*](https://jmgirard.github.io/intraclass/articles/comparison-with-other-packages.html):
   how the numbers line up.
@@ -249,7 +264,7 @@ repository](https://github.com/jmgirard/intraclass-paper).
 ## Contributing and support
 
 Bug reports and questions are welcome on the [issue
-tracker](https://github.com/jmgirard/intraclass/issues); [the
+tracker](https://github.com/jmgirard/intraclass/issues). [The
 contributing
 guide](https://github.com/jmgirard/intraclass/blob/main/CONTRIBUTING.md)
 says what to include, and why code contributions are not solicited.

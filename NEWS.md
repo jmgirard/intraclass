@@ -6,6 +6,14 @@
   section and links to the contributing guide and to the companion software
   paper's repository, <https://github.com/jmgirard/intraclass-paper>.
 
+## Documentation
+
+* The *Getting started*, *Choosing an ICC* and *Glossary* articles and the
+  README are rewritten in plainer English: no sentence runs past 25 words
+  except two the test suite pins verbatim, and each glossary term is defined
+  in plain words at its first use in every article. The glossary's entries
+  each open with a one-sentence definition. Nothing computed changes.
+
 # intraclass 0.1.0
 
 First public release.

@@ -50,7 +50,7 @@ the true ICC rises (on the larger grid; the smaller grid's margin does shrink
 across its levels). The `"burch"` width margin then collapses to near parity
 at a true ICC of 0.6, on the one grid reaching that value. It shrinks steadily
 as the subject count grows, measured at 5 raters. Every cell favouring the
-exact-F interval sits on that one grid.
+exact-F interval sits on the one grid reaching a true ICC of 0.6.
 Burch reports the reverse for symmetric heavy-tailed data with non-normal
 errors, and a third grid now measures that case. What `"burch"` does against
 `"searle"` depends on what the residual is drawn from. The three grids now
@@ -322,9 +322,9 @@ designs*](multilevel-designs.html#subject-level-vs.-cluster-level).
 An opt-in confidence-interval method for the one-way design, balanced or
 unbalanced (`ci_method = "npbootstrap"`; Ukoumunne et al. 2003). It
 resamples whole subjects with replacement. It stabilizes the variance with a
-log-F transform, studentizes, and back-transforms the endpoints. Studentizing
-means dividing each resampled estimate by its own standard error. So it takes
-a `seed` and `boot_samples`. Robust at the zero-variance boundary and to
+log-F transform. It then studentizes, meaning it scales each resampled
+estimate by its own standard error, and back-transforms the endpoints. So it
+takes a `seed` and `boot_samples`. Robust at the zero-variance boundary and to
 non-normal subject effects. See [*Confidence-interval
 methods*](interval-methods.html#the-opt-in-boundary-robust-methods).
 
