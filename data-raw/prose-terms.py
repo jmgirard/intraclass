@@ -98,8 +98,8 @@ def raw_sentences(path: str) -> list[str]:
     """Prose sentences with links still in place, so an anchor is visible.
 
     An `.R` file is read in the ruler's roxygen mode (M153): its prose is the
-    `#'` lines outside `@examples` blocks and outside `@noRd` blocks, never
-    its code.
+    `#'` lines outside `@examples` or `@examplesIf` blocks and outside `@noRd`
+    blocks, never its code.
     """
     with open(path, encoding="utf-8") as handle:
         raw = handle.read()
