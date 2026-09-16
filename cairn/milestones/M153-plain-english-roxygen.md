@@ -28,10 +28,10 @@ Apply R1 to R8 of `cairn/doctrine/prose-style.md` to every `#'` line outside `@e
 
 ## Coverage
 
-- AC1 → T1, T2, T3, T4
-- AC2 → T1, T2, T3, T4
+- AC1 → T1, T2, T3, T4, T6
+- AC2 → T1, T2, T3, T4, T6
 - AC3 → T1, T2, T3, T4
-- AC4 → T4, T5
+- AC4 → T4, T5, T6
 
 ## Tasks
 
@@ -40,10 +40,13 @@ Apply R1 to R8 of `cairn/doctrine/prose-style.md` to every `#'` line outside `@e
 - [ ] T3: Rewrite the roxygen of `R/d-study.R` (remove the `M9` reference at line 66 by stating the open question in plain words), `R/choose-icc.R`, `R/data.R`, `R/autoplot.R`, `R/icc-methods.R`, `R/intraclass-package.R` and `R/reexports.R`.
 - [ ] T4: R6 hunk audit per `prose-style.md` step 5 over every hunk of T1 to T3; repair widenings in place; run `devtools::document()`, the ruler, `check-mpl-doc-claims.py`, and the AC2/AC3 greps; add the NEWS bullet.
 - [ ] T5: Verify: `devtools::test()`, every `--self-test` checker, `tests/spelling.R`, `devtools::check()` raw Status line read for the spelling NOTE; check `git status` for `Rplots.pdf` after any example run.
+- [x] T6: Teach `data-raw/prose-profile.py` that an `@examplesIf` block is an examples block and `data-raw/prose-terms.py` to read an `.R` file in roxygen mode, each with a self-test case planted red on the old tool; re-record the pass baseline.
 
 ## Work log
 
 - 2026-09-16: created by /milestone-plan; survey and audit record in M151's work log. Plan gate chose excluding `@noRd` blocks over sweeping every `#'` line because they never render to `man/` and a user-facing promise over them is disproportionate; falsified by a `@noRd` block's text reaching a user through a rendered message.
+- 2026-09-16: implement gate: AC1 amended (substantive). `R/icc.R` carries the three `width_templates()` clauses twice, the flat clause 32 words with no sentence break, and `test-occasions-vocabulary.R` pins three help-page sentences of 30 to 35 words verbatim. The user adopted M152's AC1 shape extended to the `expect_says()` patterns. The wording is held for the fresh reader's re-audit before it is written. Two tool fixes accepted as T6, a minor amendment with the task appended: the ruler read an `@examplesIf` block as prose and `prose-terms.py` read an `.R` file as markdown. The `glance.icc()` bullet is split into sentences inside one bullet. The tracking edits tripped the user's `simple-english` lint hook over pre-existing record text. The records were left as they are, since they are append-only or gated sections.
+- 2026-09-16: T6 done. Both self-tests pass. The planted `@examplesIf` case counts 2 sentences on the old ruler and 1 on the new. The planted roxygen case exits 1 on the old term checker and 0 on the new. Baseline re-recorded after the ruler change: `R/*.R` 571 sentences, 86 over 25 (87 before, the dropped one being `R/autoplot.R`'s example block), 5 dashes. The eight in-scope files: `R/icc.R` 412/64, `R/d-study.R` 88/16, `R/choose-icc.R` 31/2, `R/data.R` 27/3, `R/autoplot.R` 4/1, `R/icc-methods.R` 6/0, `R/intraclass-package.R` 1/0, `R/reexports.R` 2/0.
 
 ## Decisions
 
