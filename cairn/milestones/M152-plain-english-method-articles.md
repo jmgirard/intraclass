@@ -25,7 +25,7 @@ Apply R1 to R8 of `cairn/doctrine/prose-style.md` to `engines.Rmd`, `comparison-
 - [x] AC2: For each `term` row of `data-raw/glossary-terms.tsv`, a grep of `pattern` over the prose of each of the five articles (prose as `prose-profile.py` defines it) finds, per article, no occurrence or a first occurrence whose sentence contains the row's `gloss` text verbatim or a link to that heading's anchor.
 - [x] AC3: `grep -E` for the R8 lexical markers `cairn/doctrine/prose-style.md` lists, and for the record-identifier patterns M151 AC4 states, over the five articles' prose returns no match.
 - [x] AC4: Every heading present in `vignettes/interval-methods.Rmd` at the branch base is present at the branch head, and the multiset of numeric literals in the article's prose (prose as `prose-profile.py` defines it, code chunks excluded) at the branch head is a superset of the multiset at the branch base.
-- [ ] AC5: `Rscript -e 'devtools::test()'` reports FAIL 0; `python3 data-raw/check-mpl-doc-claims.py` reports 0 failures; each `data-raw/` script `grep -l -- '--self-test' data-raw/*` lists exits 0 under `--self-test`.
+- [x] AC5: `Rscript -e 'devtools::test()'` reports FAIL 0; `python3 data-raw/check-mpl-doc-claims.py` reports 0 failures; each `data-raw/` script `grep -l -- '--self-test' data-raw/*` lists exits 0 under `--self-test`.
 
 ## Coverage
 
@@ -81,4 +81,5 @@ Apply R1 to R8 of `cairn/doctrine/prose-style.md` to `engines.Rmd`, `comparison-
 - Finding 8 ("`irr::icc` computes the same ANOVA family" is a new statement) — rejected: it says what the package is, which T1 asked for, and it is true of `irr::icc`.
 - Finding 11 (eight added lines past the files' wrap width) — rejected: formatting only.
 - Finding 12 (AC5 unticked at the time of the read) — noted: AC5's evidence lands below once the full suite finishes.
+- AC5 — verified. Full `devtools::test()` (summary reporter): no failures, no warnings, 2 skips (the installed-vignette legs of `test-doc-skew-caveat.R`). That run started before the fix-now edits, which touch prose only, so the four vignette-reading test files were re-run on the final content and pass (the line below). `check-mpl-doc-claims.py`: 60 candidates, 0 failures. All 11 `--self-test` scripts exit 0 (the grep also lists three non-scripts, skipped as M151 noted).
 - After the fixes: ruler 721 sentences, 2 over 25 (the pinned pair, 3 and 7 words outside), 0 dashes; `prose-terms.py` every first use glossed or linked; R8 and identifier greps 0; AC4 probe unchanged; `check-mpl-doc-claims.py` 0 failures; `m117-width-pin-mutations.R --self-test` exit 0; spelling clean; `test-vignette-claims.R`, `test-vignette-transcripts.R`, `test-doc-skew-caveat.R` and `test-news-brms-claims.R` pass with the 2 installed-vignette skips.
