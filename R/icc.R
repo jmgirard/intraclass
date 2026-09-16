@@ -1,19 +1,24 @@
-#' Intraclass correlation coefficient for a two-way design
+#' Intraclass correlation coefficients for interrater reliability
 #'
 #' Estimates interrater-reliability intraclass correlation coefficients (ICCs)
 #' from a fitted linear mixed model, rather than from classical ANOVA mean
-#' squares. `icc()` computes the two-way **absolute-agreement** (`ICC(A,*)`) or
-#' **consistency** (`ICC(C,*)`) coefficients of McGraw & Wong (1996). It reports
-#' them for a single rater (`ICC(*,1)`) or the mean of `k` raters (`ICC(*,k)`),
-#' treating the raters as a random sample (Case 2) or as fixed (Case 3).
+#' squares. `icc()` computes the two-way coefficients of McGraw & Wong (1996),
+#' for a design where the subjects share one set of raters. They come in two
+#' error definitions. **Absolute agreement** (`ICC(A,*)`) asks whether raters
+#' give the same score. **Consistency** (`ICC(C,*)`) asks whether raters agree
+#' apart from a constant offset per rater. Each is reported for a single rater
+#' (`ICC(*,1)`, the reliability of one rater's score) or for the mean of `k`
+#' raters (`ICC(*,k)`). The raters are treated as a random sample (Case 2) or
+#' as fixed (Case 3), meaning the observed raters are the whole population of
+#' interest.
 #'
 #' @section Which ICC is this, and when should you use it?:
 #' Three choices pin down the coefficient:
 #' * **Agreement vs. consistency** (`type`). **Absolute agreement** treats
 #'   systematic differences between raters (the rater main effect,
-#'   \eqn{\sigma^2_r}) as error: use it when the actual value matters and raters
+#'   \eqn{\sigma^2_r}) as error. Use it when the actual value matters and raters
 #'   must agree on the number (clinical scores, measurements). **Consistency**
-#'   ignores a constant per-rater offset: use it when only relative standing
+#'   ignores a constant per-rater offset. Use it when only relative standing
 #'   matters. A large gap between the two signals big systematic differences in
 #'   rater level, which is a rating-procedure problem worth fixing.
 #' * **Single vs. average** (`unit`). **`ICC(*,1)`** is the reliability of a
@@ -23,156 +28,172 @@
 #'   sample you wish to generalize beyond, and is the recommended default for
 #'   interrater reliability. **Fixed** treats them as the only raters of interest
 #'   and forgoes generalization. It is fit separately, with raters as fixed
-#'   effects, so on balanced data it matches the random point estimate but on
+#'   effects. So on balanced data it matches the random point estimate, but on
 #'   incomplete data it genuinely differs. `icc()` warns when you choose it.
-#'   Fixed-rater
-#'   consistency is the classic Shrout & Fleiss `ICC(3,1)`.
+#'   Fixed-rater consistency is the classic Shrout & Fleiss `ICC(3,1)`.
 #'
 #' @section Estimand:
-#' With a single rating per subject-by-rater cell, the subject-by-rater
-#' interaction and pure error are not separately identified. In that case only
-#' their sum, the residual variance \eqn{\sigma^2_{res}}, is estimable. Absolute agreement counts
-#' the rater main effect \eqn{\sigma^2_r} as error. Consistency drops it.
+#' The estimand is the true quantity you are trying to estimate. With a single
+#' rating per subject-by-rater cell, the subject-by-rater interaction and pure
+#' error cannot be separately estimated. In that case only their sum, the
+#' residual variance \eqn{\sigma^2_{res}}, is estimable. Absolute agreement
+#' counts the rater main effect \eqn{\sigma^2_r} as error. Consistency drops it.
+#'
 #' \deqn{ICC(A,1) = \sigma^2_s / (\sigma^2_s + \sigma^2_r + \sigma^2_{res})}
+#'
 #' \deqn{ICC(A,k) = \sigma^2_s / (\sigma^2_s + (\sigma^2_r + \sigma^2_{res}) / k)}
+#'
 #' \deqn{ICC(C,1) = \sigma^2_s / (\sigma^2_s + \sigma^2_{res})}
+#'
 #' \deqn{ICC(C,k) = \sigma^2_s / (\sigma^2_s + \sigma^2_{res} / k)}
+#'
 #' Here \eqn{\sigma^2_s} is the subject (signal) variance and `k` is the number
 #' of raters.
 #'
-#' @section Multilevel designs (subject vs. cluster level):
-#' When subjects are nested in higher-level clusters (pupils in classrooms,
-#' patients in clinics), single-level ICCs conflate the levels and are biased
-#' (ten Hove et al. 2022). Supplying `cluster` fits the five-component Design-1
-#' model
+#' @section Multilevel designs:
+#' Subjects are sometimes nested in higher-level clusters, such as pupils in
+#' classrooms or patients in clinics. There, single-level ICCs conflate the
+#' levels and are biased (ten Hove et al. 2022). Supplying `cluster` fits the
+#' five-component Design-1 model
+#'
 #' \deqn{score \sim 1 + (1|cluster) + (1|cluster{:}subject) + (1|rater) + (1|cluster{:}rater)}
-#' and reports two distinct reliabilities. The **subject level** (within-cluster)
-#' asks how reliably raters distinguish subjects *within* a cluster: its signal is
-#' the between-subject-within-cluster variance and cluster variance drops out. The
-#' **cluster level** (between-cluster) asks how reliably raters distinguish cluster
-#' means: its signal is the between-cluster variance and the rater-disagreement
-#' error is the cluster-by-rater term. Choose the level that matches the decision
-#' you will make (about a subject, or about a cluster). The agreement/consistency
-#' and single/average choices above apply at each level.
+#'
+#' and reports two distinct reliabilities. The **subject level**
+#' (within-cluster) asks how reliably raters distinguish subjects *within* a
+#' cluster, and the **cluster level** (between-cluster) asks how reliably
+#' raters distinguish cluster means. At the subject level the signal is the
+#' between-subject-within-cluster variance, and cluster variance drops out. At
+#' the cluster level the signal is the between-cluster variance, and the
+#' rater-disagreement error is the cluster-by-rater term. Choose the level that
+#' matches the decision you will make (about a subject, or about a cluster).
+#' The agreement/consistency and single/average choices above apply at each
+#' level.
 #'
 #' `level = "conflated"` reports the **biased single-level ICC** you would get by
 #' *ignoring* the clustering (ten Hove et al. 2022, Eq. 14). Between- and
 #' within-cluster subject variance are both counted as signal, and the
 #' rater-related terms as error. It is offered only as a **diagnostic contrast**,
 #' to quantify how much the nesting distorts reliability, and is never a
-#' recommended coefficient. `print()` flags it as such.
-#' It is the **flat two-way ICC** read off the multilevel
-#' fit, so it comes in both `type` forms: absolute agreement (Eq. 14) and
-#' **consistency** (which drops the rater main-effect variance, McGraw & Wong 1996).
-#' It needs a crossed (Design 1) random-rater design and works on both balanced and
-#' **incomplete** data (same `k_eff` divisor). Because it reads the cluster-by-rater
-#' variance, it needs raters that bridge clusters. Without bridging, the
-#' conflated level is dropped, like the cluster level. Request it alongside the
-#' correct levels, e.g. `level = c("subject", "cluster", "conflated")`.
+#' recommended coefficient. `print()` flags it as such. It is the **flat
+#' two-way ICC** read off the multilevel fit, so it comes in both `type` forms:
+#' absolute agreement (Eq. 14) and **consistency** (which drops the rater
+#' main-effect variance, McGraw & Wong 1996). It needs a crossed (Design 1)
+#' random-rater design and works on both balanced and **incomplete** data (same
+#' `k_eff` divisor). Because it reads the cluster-by-rater variance, it needs
+#' raters that bridge clusters. Without bridging, the conflated level, the
+#' single-level ICC that ignores clustering, is dropped, like the cluster level.
+#' Request it alongside the correct levels, e.g.
+#' `level = c("subject", "cluster", "conflated")`.
 #'
 #' The design is **inferred from the data** (ten Hove et al. 2022, Table 2). If
 #' raters are crossed with clusters (each rater rates in every cluster) the
-#' five-component model above is used (Design 1). Because the design is read from
-#' the rater **labels**, a rater label that appears in more than one cluster is
-#' taken to be the *same* rater (crossed). If your raters are cluster-specific but
-#' share labels, give them cluster-unique labels or declare
+#' five-component model above is used (Design 1). The design is read from the
+#' rater **labels**. So a rater label that appears in more than one cluster is
+#' taken to be the *same* rater (crossed). If your raters are cluster-specific
+#' but share labels, give them cluster-unique labels or declare
 #' `design = "nested_in_clusters"`. An example is "rater 1"/"rater 2" reused in
 #' every cluster, which is a nested design. Otherwise the design is treated as
-#' crossed and `icc()` prints a one-time note of that assumption.
-#' If raters are **nested in
-#' clusters** (each cluster has its own raters, Design 2) a four-component model is
-#' fit, with the rater variance carried by the nested rater-within-cluster term. If
-#' raters are **nested in subjects** (each subject has its own raters, Design 3) the
-#' rater variance is confounded into the residual, giving a three-component
-#' multilevel *one-way* model that reports agreement-only `ICC(1)`/`ICC(k)`. Both
-#' nested designs define only the **subject** level, because a cluster-level ICC
-#' needs raters crossed with clusters, so `level` is restricted to `"subject"`
-#' for them.
-#' Mixed patterns (some raters crossed, some nested) are not a supported design and
-#' raise an error. The **crossed** design (Design 1) additionally supports
-#' **incomplete** data, meaning subjects rated by different, overlapping rater
-#' subsets (missing cells). On such data it computes the subject-level ICCs by
-#' REML, with the averaging divisor set to the effective number of ratings per
-#' subject (`k_eff`, the harmonic mean). That is exactly what the single-level
-#' incomplete two-way ICC does. Identifiability is
-#' checked first: each cluster's subject-by-rater layout must be connected, and for
-#' absolute agreement raters must bridge clusters (otherwise the design is really
-#' rater-nested). When missing cells make the crossed-vs-nested pattern ambiguous,
-#' declare it with `design` (above). On incomplete data the **cluster** level is
-#' reported, when raters bridge clusters, as both the single-rater `ICC(c,1)` and
-#' the averaged `ICC(c,k)`. The average divides the cluster error by the
-#' effective number of raters behind each cluster's observed (cells-pooled) mean.
-#' That is the inverse-Simpson harmonic `k_c^eff`, reported as `k_c_eff`, and
-#' equal to the rater count on complete data. A rater-balanced cluster mean would
-#' have a different (higher) effective count. This averaged cluster `ICC(c,k)` on
-#' incomplete data ships for every random-rater engine: `glmmTMB`, `lme4`, and
-#' `brms`. The divisor is applied to the posterior draws' variance components
-#' exactly as for the frequentist fits.
-#' **Fixed raters**
-#' (`raters = "fixed"`) are supported for the crossed design at the **subject**
-#' level on both balanced and **incomplete** data. For that design and level, the
-#' rater main effect becomes the finite-population variance of the observed raters
-#' (McGraw & Wong Case 3A). So on balanced data consistency is identical to the random-rater case, and
+#' crossed and `icc()` prints a one-time note of that assumption. If raters are
+#' **nested in clusters** (each cluster has its own raters, Design 2) a
+#' four-component model is fit. Its rater variance is carried by the nested
+#' rater-within-cluster term. If raters are **nested in subjects** (each subject
+#' has its own raters, Design 3) the rater variance is confounded into the
+#' residual. That gives a three-component multilevel *one-way* model that
+#' reports agreement-only `ICC(1)`/`ICC(k)`. Both nested designs define only the
+#' **subject** level, because a cluster-level ICC needs raters crossed with
+#' clusters. So `level` is restricted to `"subject"` for them. Mixed patterns
+#' (some raters crossed, some nested) are not a supported design and raise an
+#' error.
+#'
+#' The **crossed** design (Design 1) additionally supports **incomplete** data,
+#' meaning subjects rated by different, overlapping rater subsets (missing
+#' cells). On such data it computes the subject-level ICCs by REML, a way to
+#' estimate variances that corrects maximum likelihood's downward bias. The
+#' averaging divisor is `k_eff`. That is the effective number of ratings, the
+#' harmonic mean of the per-subject rating counts, an average that leans toward
+#' the smaller values. That REML fit with the `k_eff` divisor is exactly what
+#' the single-level incomplete two-way ICC does. Identifiability is checked
+#' first. Each cluster's subject-by-rater layout must be connected, meaning
+#' that raters and subjects form one linked web. For
+#' absolute agreement raters must also bridge clusters (otherwise the design is
+#' really rater-nested). When missing cells make the crossed-vs-nested pattern
+#' ambiguous, declare it with `design` (above). On incomplete data the
+#' **cluster** level is reported, when raters bridge clusters, as both the
+#' single-rater `ICC(c,1)` and the averaged `ICC(c,k)`. The average divides the
+#' cluster error by the effective number of raters behind each cluster's
+#' observed (cells-pooled) mean. That is the inverse-Simpson harmonic `k_c^eff`,
+#' reported as `k_c_eff`, and equal to the rater count on complete data. A
+#' rater-balanced cluster mean would have a different (higher) effective count.
+#' This averaged cluster `ICC(c,k)` on incomplete data ships for every
+#' random-rater engine, the software that does the fitting: `glmmTMB`, `lme4`,
+#' and `brms`. Variance components are each a share of the total variation
+#' traced to one source. The divisor is applied to the posterior draws'
+#' variance components exactly as for the frequentist fits.
+#'
+#' **Fixed raters** (`raters = "fixed"`) are supported for the crossed design at
+#' the **subject** level on both balanced and **incomplete** data. For that
+#' design and level, the rater main effect becomes the finite-population
+#' variance, the spread of just the observed raters (McGraw & Wong Case 3A). So
+#' on balanced data consistency is identical to the random-rater case, and
 #' absolute agreement differs only by that term. On incomplete data both types
-#' differ from random, and the finite-population variance is read from the ragged
-#' rater-contrast fit.
-#' **Nested (Design 2) fixed raters** are likewise supported at the **subject**
-#' level on both balanced and **incomplete** data. There the finite-population
-#' rater variance is formed **per cluster**, from each cluster's own raters, and
-#' averaged over clusters. On ragged data each cluster uses its own effective
-#' rater count. The fixed-rater **cluster**
-#' level is supported for the crossed (Design 1) design on **balanced, complete**
+#' differ from random, and the finite-population variance is read from the
+#' ragged rater-contrast fit. **Nested (Design 2) fixed raters** are likewise
+#' supported at the **subject** level on both balanced and **incomplete** data.
+#' There the finite-population rater variance is formed **per cluster**, from
+#' each cluster's own raters, and averaged over clusters. On ragged data each
+#' cluster uses its own effective rater count. The fixed-rater **cluster** level
+#' is supported for the crossed (Design 1) design on **balanced, complete**
 #' data. Its signal is \eqn{\sigma^2_c}, and its agreement error is the
 #' finite-population \eqn{\theta^2_r} plus the cluster-by-rater term
-#' \eqn{\sigma^2_{cr}}. On balanced data it equals the
-#' random-rater cluster-level ICC. The Bayesian (`engine = "brms"`) fixed-rater
-#' **cluster** level is likewise supported for the crossed (Design 1) design on
-#' balanced, complete data, and the Bayesian incomplete/ragged fixed-rater **nested**
+#' \eqn{\sigma^2_{cr}}. On balanced data it equals the random-rater
+#' cluster-level ICC. The Bayesian (`engine = "brms"`) fixed-rater **cluster**
+#' level is likewise supported for the crossed (Design 1) design on balanced,
+#' complete data. The Bayesian incomplete/ragged fixed-rater **nested**
 #' (Design 2) subject level is supported too. Incomplete/unbalanced fixed-rater
 #' cluster-level estimation and Design-3 fixed raters (nested in subjects, with
 #' no separable rater effect) remain for later milestones.
 #'
 #' @section Within-cell replicates:
+#' A replicate is one of several ratings by the same rater of the same subject.
 #' When a subject-by-rater cell is rated **more than once** (within-cell
 #' replicates), `icc()` fits the two-way random model **with a subject-by-rater
 #' interaction**: `score ~ 1 + (1|subject) + (1|rater) + (1|subject:rater)`.
 #' That splits the single-rating residual into the **interaction**
 #' \eqn{\sigma^2_{sr}} and **pure error** \eqn{\sigma^2_e} (rating noise). The
 #' interaction asks whether a rater systematically rates a subject high or low,
-#' in stable disagreement. Both are reported. The
-#' single-occasion ICCs are unchanged in value from a one-rating-per-cell
-#' analysis, because a single rating's error still includes the interaction. The
-#' components are no longer confounded, though. And `occasions = "average"`
-#' reports the reliability of the mean of the replicates, which reduces
-#' \eqn{\sigma^2_e} but not \eqn{\sigma^2_{sr}}. With `raters = "fixed"` the
-#' rater main effect becomes the finite-population \eqn{\theta^2_r} (McGraw &
-#' Wong Case 3A, fit as
+#' in stable disagreement. Both are reported. The single-occasion ICCs are
+#' unchanged in value from a one-rating-per-cell analysis, because a single
+#' rating's error still includes the interaction. The components are no longer
+#' confounded, though. And `occasions = "average"` reports the reliability of
+#' the mean of the replicates, which reduces \eqn{\sigma^2_e} but not
+#' \eqn{\sigma^2_{sr}}. With `raters = "fixed"` the rater main effect becomes
+#' the finite-population \eqn{\theta^2_r} (McGraw & Wong Case 3A, fit as
 #' `score ~ 1 + rater + (1|subject) + (1|subject:rater)`). On balanced, complete
 #' data \eqn{\theta^2_r = \sigma^2_r}, so fixed reproduces the random-rater
-#' coefficients.
-#' **Multilevel** replicated designs add a `(1|cluster:subject:rater)` term (crossed
-#' Design 1 and nested Design 2), splitting the highest-order residual at the subject
-#' level. **Ragged** (unequal per-cell counts or missing cells) two-way random data
-#' fits the **single-occasion** family directly, the replicate analogue of an
-#' incomplete design. The occasion-averaged coefficient on ragged data is not yet
+#' coefficients. **Multilevel** replicated designs add a
+#' `(1|cluster:subject:rater)` term (crossed Design 1 and nested Design 2),
+#' splitting the highest-order residual at the subject level. **Ragged**
+#' (unequal per-cell counts or missing cells) two-way random data fits the
+#' **single-occasion** family directly, the replicate analogue of an incomplete
+#' design. The occasion-averaged coefficient on ragged data is not yet
 #' supported, because there is no single effective occasion count to average
-#' over. One-way
-#' replicates, fixed or multilevel ragged replicates, and `d_study()` projection off a
-#' replicate fit are planned for later milestones.
+#' over. One-way replicates, fixed or multilevel ragged replicates, and
+#' `d_study()` projection off a replicate fit are planned for later milestones.
 #'
 #' @section Confidence intervals:
-#' Intervals are Monte-Carlo: parameters are drawn from the fitted covariance on
-#' the model's internal (log) scale and back-transformed, so the interval is
-#' boundary-aware near the common zero-rater-variance case where the delta method
-#' fails. Pass `seed` for a reproducible interval.
+#' Intervals are Monte-Carlo, built by simulating from the fitted model.
+#' Parameters are drawn from the fitted covariance on the model's internal
+#' (log) scale and back-transformed. So the interval is boundary-aware near the
+#' common zero-rater-variance case, where an estimate can land exactly at zero
+#' and the delta method fails. Pass `seed` for a reproducible interval.
 #'
 #' **Coverage caveat: skewed or heavy-tailed subject effects.** The
 #' simulation draws parameters from a normal approximation to the fitted
-#' covariance, and that approximation degrades when the *subject* effects
+#' covariance. That approximation degrades when the *subject* effects
 #' themselves are strongly skewed or heavy-tailed. A one-way simulation study
 #' measured the default's coverage well below its nominal level across such
 #' data. It was worst at chi-square(1) subject effects with a true ICC of 0.6,
-#' 50 subjects and 5 raters, where intervals that were produced at all covered
+#' 50 subjects and 5 raters. There, intervals that were produced at all covered
 #' 0.6725 of the time. At 5 raters per subject, coverage falls as the subject
 #' count rises once the true ICC is moderate or high. Fewer raters is not a
 #' refuge: in every cell where both were measured, 2 raters covered worse than
@@ -181,16 +202,16 @@
 #' uniform subject effects under-covered only in cells where many runs
 #' aborted. Among cells that almost always report an interval, they showed no
 #' shortfall. Held-out cells at lognormal and Laplace subject effects
-#' under-covered at that same 50-subject, 5-rater geometry, covering 0.825 and
-#' 0.84, while their 20-subject, 3-rater cells were near nominal.
+#' under-covered at that same 50-subject, 5-rater geometry. They covered 0.825
+#' and 0.84, while their 20-subject, 3-rater cells were near nominal.
 #'
 #' This is not repaired by switching to a closed form. In every cell where the
 #' default under-covered without also aborting often, the balanced one-way
-#' opt-ins `"searle"` and `"burch"` under-covered too, and usually by more
-#' (see `ci_method`). The remaining methods were not run on that study, so
-#' nothing here recommends one. Treat an interval on visibly skewed or
-#' heavy-tailed subject effects as optimistic, and prefer reporting the
-#' variance components alongside it.
+#' opt-ins `"searle"` and `"burch"` under-covered too. Usually they
+#' under-covered by more (see `ci_method`). The remaining methods were not run
+#' on that study, so nothing here recommends one. Treat an interval on visibly
+#' skewed or heavy-tailed subject effects as optimistic, and prefer reporting
+#' the variance components alongside it.
 #'
 #' @param data A data frame with one rating per row.
 #' @param score,subject,rater Columns of `data` (unquoted): the numeric rating,
@@ -198,7 +219,7 @@
 #'   `score` (`Inf`, `-Inf`, `NaN`) is an error. An `NA` `score` is treated as a
 #'   rating that did not happen. The row is dropped with a suppressible
 #'   `intraclass_dropped_rows` warning, and the rest is analyzed as an
-#'   incomplete design, so a missing rating and an absent row give the same
+#'   incomplete design. So a missing rating and an absent row give the same
 #'   answer.
 #' @param cluster Optional column of `data` (unquoted) giving the higher-level
 #'   unit each subject is nested in (e.g. classroom, clinic). Supplying it switches
@@ -223,11 +244,11 @@
 #'   consistency is post-fit arithmetic on the same variance components, so the
 #'   second definition is free. Pass a single value to
 #'   report just that coefficient once you have named your estimand. A definition
-#'   that is undefined for the design (e.g. `"consistency"` for a Design-3
+#'   can be undefined for the design, e.g. `"consistency"` for a Design-3
 #'   nested-in-subjects fit, or a fixed-rater agreement projection to a different
-#'   rater count) is dropped with a message when reached via the default, and aborts
-#'   with a teaching error when requested explicitly. Not applicable when
-#'   `model = "oneway"`.
+#'   rater count. Such a definition is dropped with a message when reached via
+#'   the default, and aborts with a teaching error when requested explicitly.
+#'   Not applicable when `model = "oneway"`.
 #' @param raters Rater sampling. `"random"` (the default, two-way random,
 #'   Case 2) generalizes to a rater universe. `"fixed"` (two-way mixed, Case 3)
 #'   treats the observed raters as the entire population and is fit with raters
@@ -238,11 +259,12 @@
 #'   inference about fixed vs. random rater effects is not the same. Choosing
 #'   `"fixed"` emits a warning, because random is the recommended default for
 #'   interrater reliability.
-#' @param unit The averaging unit(s): `"single"` (-> `ICC(*,1)`), `"average"`
-#'   (-> `ICC(*,k)`), or a number `m` >= 1 for a D-study projection to the mean of
-#'   `m` raters (-> `ICC(*,m)`), or any combination. See [d_study()] for projecting
-#'   across a range of `m`. Projecting absolute agreement is not defined for fixed
-#'   raters (see [d_study()]).
+#' @param unit The averaging unit(s), any combination of: `"single"`
+#'   (`ICC(*,1)`), `"average"` (`ICC(*,k)`), or a number `m` >= 1 (`ICC(*,m)`).
+#'   A number is a D-study projection to the mean of `m` raters, where a D-study
+#'   projects the fitted variance components to other rater counts. See
+#'   [d_study()] for projecting across a range of `m`. Projecting absolute
+#'   agreement is not defined for fixed raters (see [d_study()]).
 #' @param occasions For data with **within-cell replicates** (more than one rating
 #'   per subject-by-rater cell), whether to average over them. Ask for `"single"`,
 #'   the reliability of one rating, and/or `"average"`, the mean of the `n_o`
@@ -259,10 +281,10 @@
 #'   `cluster` is not supplied. Only `"subject"` is available when raters are nested
 #'   in clusters.
 #' @param design Multilevel design (with a `cluster` column). `NULL` (the
-#'   default) infers it from the crossing pattern. There are two occasions to
+#'   default) infers it from the crossing pattern. There are two reasons to
 #'   override that inference. The first is when the rater *labels* do not mean
-#'   what the crossing pattern implies, as in a complete table whose rater labels
-#'   repeat across clusters. The second is when missing cells leave the pattern
+#'   what the crossing pattern implies. A complete table whose rater labels
+#'   repeat across clusters is one such case. The second is when missing cells leave the pattern
 #'   genuinely ambiguous between a crossed and a nested design. Declare the
 #'   design explicitly with `"crossed"`, `"nested_in_clusters"`, or
 #'   `"nested_in_subjects"`. A declaration is validated against the data, and
@@ -276,70 +298,73 @@
 #'   recovers the rater main effect from the mean structure (Jorgensen 2021).
 #'   **Consistency** ICCs from `"lavaan"` equal the mixed-model estimates exactly
 #'   on balanced data. **Absolute-agreement** ICCs from `"lavaan"` use the SEM
-#'   indicator-mean estimator of the rater variance. That estimator is asymptotically equivalent
-#'   to the mixed-model one and matches conventional generalizability-theory
-#'   software on real data (Vispoel et al. 2022). But it differs by a
-#'   small-sample term on tiny designs, e.g. 0.284 vs 0.290 on the 6-subject
-#'   example below. `"lme4"` covers every design `"glmmTMB"` does: two-way
-#'   (random or fixed raters), one-way, and the multilevel designs (crossed and
-#'   nested) at both levels. It covers them on both balanced and
-#'   **incomplete/ragged** data.
-#'   A ragged fit that lands exactly on a
-#'   variance-component boundary falls back to `"glmmTMB"` (which stays finite via its
-#'   log-SD parameterization) with a clear message. `"lavaan"`
-#'   covers the two-way design with random or fixed raters, on both complete and
-#'   **incomplete** data. For fixed raters the agreement rater term is the McGraw
-#'   & Wong Case-3A bias-corrected finite-population variance, which equals the
-#'   mixed-model estimate on balanced data. In the two-way SEM, with either rater
-#'   type, missing cells are estimated by full-information maximum likelihood, and
-#'   the parametric bootstrap is unavailable for incomplete SEM. It also covers the crossed (Design 1)
-#'   **multilevel** design at both levels, plus the conflated diagnostic, via a
-#'   two-level SEM. With **random**
-#'   raters the multilevel fit covers complete/balanced data. It also covers
-#'   **incomplete** data (missing cells estimated by two-level full-information
-#'   ML) and **unbalanced** data (unequal cluster sizes). For that random-rater
-#'   two-level fit the interval is the Monte-Carlo interval (the default). Its
-#'   parametric bootstrap, which simulates two-level datasets from the fitted
-#'   moments and refits per resample, is available on balanced/complete data
-#'   only. For that fit, incomplete or unbalanced data is Monte-Carlo only,
-#'   because resamples cannot reproduce a missingness pattern and the bootstrap
-#'   coverage is validated only on balanced data. With **fixed** raters the
-#'   between-level rater intercepts give the Case-3A finite-population
-#'   \eqn{\theta^2_r} at both levels, on complete, balanced data with equal
-#'   cluster sizes only. That path is Monte-Carlo only: its fixed-rater
-#'   bootstrap is not yet available. Because lavaan's
-#'   random-rater term is the raw quadratic form, the fixed-rater ICC differs from
-#'   the random-rater one by the finite-population correction, which the
-#'   REML-based mixed-model engines do not carry into their random estimate.
-#'   lavaan's two-level estimator is full-information ML, and there is no REML
-#'   analog. So with few clusters its cluster-level components
-#'   sit slightly below the REML estimates, and its absolute-agreement rater term
+#'   indicator-mean estimator, which reads the rater variance from the estimated
+#'   column means. That estimator is asymptotically equivalent to the
+#'   mixed-model one and matches conventional generalizability-theory software
+#'   on real data (Vispoel et al. 2022). But it differs by a small-sample term
+#'   on tiny designs, e.g. 0.284 vs 0.290 on the 6-subject example below.
+#'   `"lme4"` covers every design `"glmmTMB"` does: two-way (random or fixed
+#'   raters), one-way, and the multilevel designs (crossed and nested) at both
+#'   levels. It covers them on both balanced and **incomplete/ragged** data. A
+#'   ragged fit that lands exactly on a variance-component boundary falls back
+#'   to `"glmmTMB"` (which stays finite via its log-SD parameterization) with a
+#'   clear message. `"lavaan"` covers the two-way design with random or fixed
+#'   raters, on both complete and **incomplete** data. For fixed raters the
+#'   agreement rater term is the McGraw & Wong Case-3A bias-corrected
+#'   finite-population variance, which equals the mixed-model estimate on
+#'   balanced data. With either rater type, the two-way SEM estimates missing
+#'   cells by full-information maximum likelihood, which uses every observed
+#'   value rather than dropping incomplete cases. The parametric bootstrap,
+#'   which refits the model on simulated data many times, is unavailable for
+#'   incomplete SEM. It also covers the crossed (Design 1) **multilevel** design
+#'   at both levels, plus the conflated diagnostic, via a two-level SEM. With
+#'   **random** raters the multilevel fit covers complete/balanced data. It also
+#'   covers **incomplete** data (missing cells estimated by two-level
+#'   full-information ML) and **unbalanced** data (unequal cluster sizes). For
+#'   that random-rater two-level fit the interval is the Monte-Carlo interval
+#'   (the default). Its parametric bootstrap, which simulates two-level datasets
+#'   from the fitted moments and refits per resample, is available on
+#'   balanced/complete data only. For that fit, incomplete or unbalanced data is
+#'   Monte-Carlo only. Resamples cannot reproduce a missingness pattern, and the
+#'   bootstrap coverage is validated only on balanced data. With **fixed**
+#'   raters the between-level rater intercepts give the Case-3A
+#'   finite-population \eqn{\theta^2_r} at both levels, on complete, balanced
+#'   data with equal cluster sizes only. That path is Monte-Carlo only: its
+#'   fixed-rater bootstrap is not yet available. lavaan's random-rater term is
+#'   the raw quadratic form. So the fixed-rater ICC differs from the
+#'   random-rater one by the finite-population correction. The REML-based
+#'   mixed-model engines do not carry that correction into their random
+#'   estimate. lavaan's two-level estimator is full-information ML, and there is
+#'   no REML analog. So with few clusters its cluster-level components sit
+#'   slightly below the REML estimates, and its absolute-agreement rater term
 #'   slightly above. Both differences shrink as clusters grow. Its consistency
 #'   ICCs are ratios, so they agree with the mixed-model estimates essentially
 #'   exactly.
-#'   `"brms"` fits the **random**-rater model in a Bayesian
-#'   framework (Stan, via \pkg{brms}), under a sourced half-*t*(4, 0, 1) prior on
-#'   the random-effect SDs (ten Hove et al. 2020). The point estimate is the
-#'   posterior mode (MAP), and the interval is a percentile **credible** interval
-#'   (`ci_method = "posterior"`, forced). On **both balanced/complete and
-#'   incomplete/ragged** data it covers the two-way random single-level design,
-#'   and the crossed (Design 1) **multilevel** random design (subject and cluster
-#'   levels). On that same data it covers the two-way **fixed-rater**
-#'   single-level design (Case-3A finite-population \eqn{\theta^2_r}), and the
-#'   crossed (Design 1) multilevel **fixed-rater** design (subject level). On
-#'   that same data it also covers the nested **Design 2** and **Design 3**
-#'   *random* multilevel designs at the subject level, and the single-level
-#'   one-way random design. Design 2 nests raters in clusters. Design 3 nests
-#'   them in subjects, which is the multilevel one-way, agreement-only case. The
-#'   nested Design 2 *fixed-rater* multilevel design is covered at the subject
-#'   level on both balanced and incomplete/ragged data. On balanced/complete data
-#'   only it covers the crossed Design 1 *fixed-rater* **cluster** level, the
-#'   conflated diagnostic, and within-cell replicates.
-#'   Within-cell-replicate Bayesian fits and numeric-`unit` (D-study) projection are planned
-#'   for later milestones. `"lme4"` requires the
-#'   \pkg{lme4} and \pkg{merDeriv} packages. `"lavaan"` requires the
-#'   \pkg{lavaan} package. `"brms"` requires the \pkg{brms} package, and a
-#'   working Stan toolchain.
+#'   A prior is the distribution placed on a parameter before seeing the data.
+#'   `"brms"` fits the **random**-rater model in a Bayesian framework (Stan,
+#'   via \pkg{brms}). Its random-effect SDs carry a sourced half-*t*(4, 0, 1)
+#'   prior (ten Hove et al. 2020). The point estimate is the posterior mode
+#'   (MAP), the peak of the posterior distribution. The interval is a
+#'   percentile **credible** interval (`ci_method = "posterior"`, forced), which
+#'   holds a chosen share, usually 95%, of the posterior probability. On **both
+#'   balanced/complete and incomplete/ragged** data it covers the two-way random
+#'   single-level design, and the crossed (Design 1) **multilevel** random
+#'   design (subject and cluster levels). On that same data it covers the
+#'   two-way **fixed-rater** single-level design (Case-3A finite-population
+#'   \eqn{\theta^2_r}), and the crossed (Design 1) multilevel **fixed-rater**
+#'   design (subject level). On that same data it also covers the nested
+#'   **Design 2** and **Design 3** *random* multilevel designs at the subject
+#'   level. It covers the single-level one-way random design there too. Design 2
+#'   nests raters in clusters. Design 3 nests them in subjects, which is the
+#'   multilevel one-way, agreement-only case. The nested Design 2 *fixed-rater*
+#'   multilevel design is covered at the subject level on both balanced and
+#'   incomplete/ragged data. On balanced/complete data only it covers the
+#'   crossed Design 1 *fixed-rater* **cluster** level, the conflated diagnostic,
+#'   and within-cell replicates. Within-cell-replicate Bayesian fits and
+#'   numeric-`unit` (D-study) projection are planned for later milestones.
+#'   `"lme4"` requires the \pkg{lme4} and \pkg{merDeriv} packages. `"lavaan"`
+#'   requires the \pkg{lavaan} package. `"brms"` requires the \pkg{brms}
+#'   package, and a working Stan toolchain.
 #' @param conf_level Confidence level for the interval (default `0.95`). Any level
 #'   in `(0, 1)` is accepted, except under `ci_method = "mpl"`, which is calibrated
 #'   at 0.90, 0.95, and 0.99 only. At each of those levels the between-node
@@ -532,13 +557,13 @@
 #' @param boot_samples Number of resamples for `ci_method = "bootstrap"` (the
 #'   parametric bootstrap) and `"npbootstrap"` (the transformed bootstrap-*t*
 #'   subject resamples), default `999`. It does not change a
-#'   `ci_method = "montecarlo"` interval, but it is not unused on that path: when
-#'   that interval aborts, it is the count the suggestion machinery trials
+#'   `ci_method = "montecarlo"` interval, but it is not unused on that path.
+#'   When that interval aborts, it is the count the suggestion machinery trials
 #'   `"bootstrap"` at (capped) and names in the message.
 #' @param seed Optional integer seed for a reproducible interval (and, for
 #'   `engine = "brms"`, the Stan sampler seed). The global RNG state is restored
 #'   afterward. It also seeds the trial runs behind an error's suggestion, so it
-#'   can decide which method that error names, including for the deterministic
+#'   can decide which method that error names. That includes the deterministic
 #'   `"searle"` and `"burch"` intervals, whose own values ignore it.
 #' @param brm_args A named list of extra arguments forwarded to [brms::brm()] when
 #'   `engine = "brms"` (e.g. `backend`, `chains`, `iter`, `cores`, `control`). The
@@ -552,19 +577,20 @@
 #'   engine, is an error.
 #' @param prior Optional custom prior for `engine = "brms"`, as a \pkg{brms} prior
 #'   object (from [brms::set_prior()] or [brms::prior()]). Several priors can be
-#'   combined with `c()`. The default `NULL` uses the **sourced** half-*t*(4, 0, 1) prior on every
-#'   random-effect SD (ten Hove, Jorgensen & van der Ark 2020), the prior every
-#'   coverage result in this package depends on. Supplying a custom prior is a
+#'   combined with `c()`. The default `NULL` uses the **sourced** half-*t*(4, 0, 1)
+#'   prior on every random-effect SD (ten Hove, Jorgensen & van der Ark 2020).
+#'   That is the prior every coverage result in this package depends on.
+#'   Supplying a custom prior is a
 #'   deliberate deviation, intended for prior-sensitivity, method-comparison, or
 #'   simulation work, and it **voids those coverage guarantees**. `icc()` warns
 #'   loudly (a classed `intraclass_custom_prior` condition), because a vague or
 #'   flat SD prior can *worsen* small-*k* boundary bias. The half-*t* is weakly
 #'   informative on purpose. Ignored (must be `NULL`) for non-Bayesian engines.
 #' @param posterior_summary How to summarize the posterior draws into a credible
-#'   interval when `ci_method = "posterior"` (the Bayesian engine): `"percentile"`
-#'   (the default, a two-sided percentile interval) or `"hpdi"` (the
-#'   highest-posterior-density interval, the narrowest interval covering the
-#'   credible mass). Percentile is the default on several grounds. It is
+#'   interval when `ci_method = "posterior"` (the Bayesian engine).
+#'   `"percentile"` (the default) is a two-sided percentile interval. `"hpdi"`
+#'   is the highest-posterior-density interval, the narrowest interval covering
+#'   the credible mass. Percentile is the default on several grounds. It is
 #'   monotone-transformation invariant and degrades gracefully as the ICC
 #'   approaches the variance boundary. And ten Hove, Jorgensen & van der Ark
 #'   (2020) found percentile (not HPD) intervals give nominal coverage at small
@@ -576,11 +602,11 @@
 #' @details
 #' # The `"npbootstrap"` interval (one-way)
 #'
-#' For `unit = "average"` (the ICC(k), reliability of the mean of the *k* ratings)
-#' the transformed bootstrap-*t* interval is the exact monotone **Spearman-Brown**
-#' image of the single-rating ICC(1) interval. The map
+#' Take `unit = "average"`, the ICC(k), the reliability of the mean of the *k*
+#' ratings. Its transformed bootstrap-*t* interval is the exact monotone
+#' **Spearman-Brown** image of the single-rating ICC(1) interval. The map
 #' `g(rho) = k_eff*rho / (1 + (k_eff-1)*rho)` is applied to the two ICC(1)
-#' endpoints, with `k_eff` the effective number of ratings per subject (the
+#' endpoints. Here `k_eff` is the effective number of ratings per subject (the
 #' harmonic mean, `= k` on balanced data). Because that map is strictly
 #' increasing on the attainable range, the ICC(k) interval's coverage is
 #' **identical to the ICC(1) interval's, by construction**. It is not a separate
@@ -589,38 +615,40 @@
 #' On **unbalanced** data (unequal ratings per subject) the reducer uses the ANOVA
 #' effective group size `n0 = (N - sum(n_i^2)/N) / (k - 1)` (Ohyama 2025) in the
 #' `log F` transform. It studentizes `log(SSA) - log(SSE)`, the pivot the
-#' infinitesimal-jackknife SE is derived for (Ukoumunne et al. 2003, Appendix A),
-#' which coincides with the balanced `log F` pivot when subjects are equally rated.
-#' The Spearman-Brown map stays well-defined unbalanced because `k_eff <= n0` for
-#' every one-way design. So its pole `-1/(k_eff-1)` sits at or below the ICC(1)
-#' support boundary `-1/(n0-1)` and never falls inside the interval. Coverage
-#' inheritance therefore holds unbalanced exactly as it does balanced. A numeric
-#' `unit` (D-study projection to `m` raters), by contrast, is balanced-only: a chosen
-#' `m` may exceed `n0` and push the pole inside the support.
+#' infinitesimal-jackknife SE is derived for (Ukoumunne et al. 2003, Appendix A).
+#' That pivot coincides with the balanced `log F` pivot when subjects are
+#' equally rated. The Spearman-Brown map stays well-defined unbalanced because
+#' `k_eff <= n0` for every one-way design. So its pole `-1/(k_eff-1)` sits at or
+#' below the ICC(1) support boundary `-1/(n0-1)` and never falls inside the
+#' interval. Coverage inheritance therefore holds unbalanced exactly as it does
+#' balanced. A numeric `unit` (D-study projection to `m` raters), by contrast,
+#' is balanced-only: a chosen `m` may exceed `n0` and push the pole inside the
+#' support.
 #'
 #' Following Ukoumunne et al. (2003, §5.2), the endpoints are **not truncated** to
 #' `[0, 1]`. They are confined only to the estimator's own support, approaching
 #' `-1/(n0-1)` from above for ICC(1), and unbounded below for ICC(k). So a
 #' near-boundary lower endpoint can be negative, markedly so for ICC(k). Leaving
-#' them untruncated is what makes the coverage faithful to the published method. On
-#' unbalanced data the reported ICC(k) `std.error` (the spread of the resampled
-#' ICC(k) values) can likewise be large near the boundary, where a resample close to
-#' the pole inflates the untruncated ICC(k) scale. This is a faithful disclosure,
-#' not an error, and the coverage-bearing endpoints are unaffected.
+#' them untruncated is what makes the coverage faithful to the published method.
+#' On unbalanced data the reported ICC(k) `std.error` (the spread of the
+#' resampled ICC(k) values) can likewise be large near the boundary. There a
+#' resample close to the pole inflates the untruncated ICC(k) scale. This is a
+#' faithful disclosure, not an error, and the coverage-bearing endpoints are
+#' unaffected.
 #'
 #' The reported **point estimate** is the engine (REML) point, exactly as for every
 #' other `ci_method`. `ci_method` selects the interval, not the estimator. At the
-#' zero-between-variance boundary the point sits at, or numerically indistinguishable
-#' from, `0`, while the untruncated interval
-#' may extend below `0`. This is the normal picture for a boundary-respecting point
-#' beside an honest interval, and it signals that the data are consistent with values
-#' near and below zero.
+#' zero-between-variance boundary the point sits at, or numerically
+#' indistinguishable from, `0`, while the untruncated interval may extend below
+#' `0`. This is the normal picture for a boundary-respecting point beside an
+#' honest interval. It signals that the data are consistent with values near
+#' and below zero.
 #'
 #' # The classical `"searle"` and `"burch"` intervals (balanced one-way)
 #'
 #' Both are deterministic closed forms from the one-way ANOVA. `"searle"` inverts the
-#' exact-F pivot `F / (1 + n*lambda) ~ F(k-1, k(n-1))` (Searle 1971, Ch. 9 Table 9.14;
-#' the McGraw & Wong 1996 Table 7 limits). It is exact under normality. `"burch"` builds
+#' exact-F pivot `F / (1 + n*lambda) ~ F(k-1, k(n-1))` (Searle 1971, Ch. 9 Table 9.14,
+#' and the McGraw & Wong 1996 Table 7 limits). It is exact under normality. `"burch"` builds
 #' kurtosis-adjusted `log(1 + n*theta-hat)` limits (Burch 2011), so its width tracks
 #' the data's tail weight rather than widening by construction. On the two grids
 #' this package has measured that vary only the subject effect it came out
@@ -628,8 +656,8 @@
 #' How much narrower is conditional, and not in the direction one might guess.
 #' `"burch"`'s width margin holds much the same up to a true ICC of 0.3 rather than shrinking as the true ICC rises
 #' (on the larger grid; the smaller grid's margin does shrink across its levels).
-#' The margin then collapses to near parity at a true ICC of 0.6, on the one grid reaching that value,
-#' where every cell favouring `"searle"` sits.
+#' The margin then collapses to near parity at a true ICC of 0.6, on the one grid reaching that value.
+#' Every cell favouring `"searle"` sits at that value.
 #' And `"burch"`'s width margin
 #' shrinks steadily as the subject count grows, measured at 5 raters.
 #' Burch reports the reverse for symmetric heavy-tailed data with non-normal
@@ -642,7 +670,7 @@
 #' symmetric heavy-tailed family measured (a median width ratio of
 #' 1.2963 at t(5) with 100 subjects) and narrower at every lighter-tailed one,
 #' the normal included.
-#' Its robustness has a measured limit: on strongly skewed subject effects
+#' Its robustness has a measured limit. On strongly skewed subject effects
 #' `"burch"` under-covers about as badly as the default (see the coverage caveat
 #' under Confidence intervals). Both share the conventions above. For both, the
 #' `unit = "average"` (ICC(k))
