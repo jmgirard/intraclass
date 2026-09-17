@@ -79,8 +79,8 @@ icc(school, score, subject = pupil, rater = rater, cluster = classroom, type = "
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   level      index     estimate   95% CI
-#>   subject    ICC(A,1)     0.431   [0.249, 0.561]
-#>   subject    ICC(A,k)     0.751   [0.571, 0.836]
+#>   subject    ICC(A,1)     0.431   [0.254, 0.561]
+#>   subject    ICC(A,k)     0.751   [0.576, 0.836]
 #>   cluster    ICC(A,1)     0.880   [0.000, 0.972]
 #>   cluster    ICC(A,k)     0.967   [0.000, 0.993]
 #> 
@@ -120,12 +120,12 @@ icc(school, score,
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   level      index     estimate   95% CI
-#>   subject    ICC(A,1)     0.431   [0.249, 0.561]
-#>   subject    ICC(A,k)     0.751   [0.571, 0.836]
+#>   subject    ICC(A,1)     0.431   [0.254, 0.561]
+#>   subject    ICC(A,k)     0.751   [0.576, 0.836]
 #>   cluster    ICC(A,1)     0.880   [0.000, 0.972]
 #>   cluster    ICC(A,k)     0.967   [0.000, 0.993]
-#>   conflated  ICC(A,1)     0.705   [0.000, 0.805]
-#>   conflated  ICC(A,k)     0.905   [0.000, 0.943]
+#>   conflated  ICC(A,1)     0.705   [0.000, 0.807]
+#>   conflated  ICC(A,k)     0.905   [0.000, 0.944]
 #> 
 #> Variance components: cluster 0.998, subject 0.461, rater 0.136, cluster:rater 0.000, residual 0.473
 #> Diagnostic contrast: the 'conflated' level ignores the cluster structure
@@ -188,8 +188,8 @@ icc(school_d2, score, subject = pupil, rater = rater, cluster = classroom, type 
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   level      index     estimate   95% CI
-#>   subject    ICC(A,1)     0.429   [0.310, 0.548]
-#>   subject    ICC(A,k)     0.751   [0.642, 0.829]
+#>   subject    ICC(A,1)     0.429   [0.308, 0.549]
+#>   subject    ICC(A,k)     0.751   [0.641, 0.829]
 #> 
 #> Variance components: cluster 0.966, subject 0.458, rater:cluster 0.128, residual 0.481
 ```
@@ -208,8 +208,8 @@ icc(school_d3, score, subject = pupil, rater = rater, cluster = classroom, type 
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   level      index     estimate   95% CI
-#>   subject    ICC(1)       0.412   [0.290, 0.546]
-#>   subject    ICC(k)       0.737   [0.621, 0.828]
+#>   subject    ICC(1)       0.412   [0.289, 0.544]
+#>   subject    ICC(k)       0.737   [0.620, 0.827]
 #> 
 #> Variance components: cluster 0.998, subject 0.426, residual 0.609 (rater confounded)
 ```
@@ -244,8 +244,8 @@ icc(school, score,
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   level      index     estimate   95% CI
-#>   subject    ICC(A,1)     0.429   [0.310, 0.548]
-#>   subject    ICC(A,k)     0.751   [0.642, 0.829]
+#>   subject    ICC(A,1)     0.429   [0.308, 0.549]
+#>   subject    ICC(A,k)     0.751   [0.641, 0.829]
 #> 
 #> Variance components: cluster 0.966, subject 0.458, rater:cluster 0.128, residual 0.481
 ```
@@ -267,8 +267,8 @@ icc(school, score,
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   level      index     estimate   95% CI
-#>   subject    ICC(1)       0.412   [0.290, 0.546]
-#>   subject    ICC(k)       0.737   [0.621, 0.828]
+#>   subject    ICC(1)       0.412   [0.289, 0.544]
+#>   subject    ICC(k)       0.737   [0.620, 0.827]
 #> 
 #> Variance components: cluster 0.998, subject 0.426, residual 0.609 (rater confounded)
 ```
@@ -425,9 +425,9 @@ icc(school, score, subject = pupil, rater = rater, cluster = classroom,
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   level      index     estimate   95% CI
-#>   subject    ICC(A,1)     0.431   [0.318, 0.553]
-#>   subject    ICC(A,k)     0.751   [0.651, 0.832]
-#>   cluster    ICC(A,1)     0.880   [0.000, 0.943]
+#>   subject    ICC(A,1)     0.431   [0.318, 0.551]
+#>   subject    ICC(A,k)     0.751   [0.651, 0.831]
+#>   cluster    ICC(A,1)     0.880   [0.000, 0.944]
 #>   cluster    ICC(A,k)     0.967   [0.000, 0.985]
 #> 
 #> Variance components: cluster 0.998, subject 0.461, rater 0.136, cluster:rater 0.000, residual 0.473
@@ -486,10 +486,10 @@ d_study(
 #> # D-study projection: multilevel two-way random, absolute agreement
 #> Observed raters: 4 | CI: 95% montecarlo (10000 draws)
 #>     level  m  estimate          95% CI
-#>   subject  1     0.431  [0.249, 0.561]
-#>   subject  2     0.602  [0.399, 0.719]
-#>   subject  4     0.751  [0.571, 0.836]
-#>   subject  8     0.858  [0.727, 0.911]
+#>   subject  1     0.431  [0.254, 0.561]
+#>   subject  2     0.602  [0.405, 0.719]
+#>   subject  4     0.751  [0.576, 0.836]
+#>   subject  8     0.858  [0.731, 0.911]
 #>   cluster  1     0.880  [0.000, 0.972]
 #>   cluster  2     0.936  [0.000, 0.986]
 #>   cluster  4     0.967  [0.000, 0.993]
