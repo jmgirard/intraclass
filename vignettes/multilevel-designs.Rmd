@@ -225,7 +225,7 @@ matches the single-level incomplete case. `ICC(*,k)` averages over the
 ratings](glossary.html#effective-number-of-ratings-k_eff) (`k_eff`): the
 harmonic mean of the per-subject rating counts, an average that leans toward
 the smaller values. It is below the full panel size of
-`r nlevels(school$rater)`:
+`r nlevels(school_incomplete$rater)`:
 
 ```{r ml-incomplete-subject, eval = requireNamespace("glmmTMB", quietly = TRUE)}
 icc(school_incomplete, score, subject = pupil, rater = rater, cluster = classroom,

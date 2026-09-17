@@ -32,10 +32,8 @@ designs" article and the README use it.
 }
 \examples{
 str(school)
-\donttest{
 icc(school, score, subject = pupil, rater = rater, cluster = classroom,
   type = "agreement", seed = 1)
-}
 }
 \seealso{
 \link{school_incomplete} for the same design with a fifth of the

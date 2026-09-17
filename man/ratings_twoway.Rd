@@ -25,10 +25,8 @@ design is large enough for \code{ci_method = "mpl"}, which the six-subject
 }
 \examples{
 str(ratings_twoway)
-\donttest{
 icc(ratings_twoway, score, subject, rater, type = "agreement",
   ci_method = "mpl")
-}
 }
 \seealso{
 \link{ratings} for the Shrout and Fleiss worked example.

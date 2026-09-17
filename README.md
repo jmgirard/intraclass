@@ -182,6 +182,11 @@ icc(school, score, subject = pupil, rater = rater, cluster = classroom, seed = 2
 #> This message is displayed once per session.
 ```
 
+The cluster-level consistency rows sit on a boundary here: the
+classroom-by-rater variance is estimated at zero, so `ICC(C,1)` reaches
+1 and its interval spans the whole range. The multilevel article
+(`vignette("multilevel-designs")`) explains what each level measures.
+
 ## How many raters do you need?
 
 `d_study()` runs a D-study, which projects the fitted variance

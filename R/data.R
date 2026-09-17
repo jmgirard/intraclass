@@ -88,10 +88,8 @@
 #'   ratings removed.
 #' @examples
 #' str(school)
-#' \donttest{
 #' icc(school, score, subject = pupil, rater = rater, cluster = classroom,
 #'   type = "agreement", seed = 1)
-#' }
 "school"
 
 #' Simulated multilevel ratings with missing cells
@@ -138,10 +136,8 @@
 #' @seealso [ratings] for a design with one rating per cell.
 #' @examples
 #' str(ratings_replicates)
-#' \donttest{
 #' icc(ratings_replicates, score, subject, rater, type = "agreement",
 #'   occasions = c("single", "average"), seed = 1)
-#' }
 "ratings_replicates"
 
 #' Simulated balanced two-way ratings, twenty subjects by four raters
@@ -162,8 +158,6 @@
 #' @seealso [ratings] for the Shrout and Fleiss worked example.
 #' @examples
 #' str(ratings_twoway)
-#' \donttest{
 #' icc(ratings_twoway, score, subject, rater, type = "agreement",
 #'   ci_method = "mpl")
-#' }
 "ratings_twoway"

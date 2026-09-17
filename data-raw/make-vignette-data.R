@@ -32,7 +32,13 @@ pupil_effect <- rnorm(n_class * n_pupil, sd = 0.6)[
 rater_effect <- rnorm(n_rater, sd = 0.4)[grid$rater]
 school <- data.frame(
   classroom = factor(grid$classroom),
-  pupil = factor(paste(grid$classroom, grid$pupil, sep = "_")),
+  # Explicit levels in build order: `factor()` alone would sort the labels
+  # under the session's collation, so "10_1" lands before or after "1_1"
+  # depending on the locale and the rebuild would not reproduce the file.
+  pupil = factor(
+    paste(grid$classroom, grid$pupil, sep = "_"),
+    levels = unique(paste(grid$classroom, grid$pupil, sep = "_"))
+  ),
   rater = factor(grid$rater),
   score = 10 +
     class_effect +

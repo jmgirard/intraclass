@@ -32,10 +32,8 @@ uses it.
 }
 \examples{
 str(ratings_replicates)
-\donttest{
 icc(ratings_replicates, score, subject, rater, type = "agreement",
   occasions = c("single", "average"), seed = 1)
-}
 }
 \seealso{
 \link{ratings} for a design with one rating per cell.
