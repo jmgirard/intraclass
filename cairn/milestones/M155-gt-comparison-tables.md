@@ -1,6 +1,6 @@
 # M155: Comparison tables as hidden `gt` chunks
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** M154
 - **Driving RR:** —
@@ -41,7 +41,7 @@ Hide the vignette chunks that exist only to assemble a comparison table and rend
 - [x] T2: `comparison-with-other-packages.Rmd`: split or hide the five chunks, `validation-gap` to `include = FALSE`, style each `gt` table (title, plain headings, `fmt_number`).
 - [x] T3: `engines.Rmd` and `choosing-an-icc.Rmd`: split the three chunks and style the tables.
 - [x] T4: `interval-methods.Rmd`: split the three chunks and style the tables. Keep `ci-mpl`'s echoed call on the shipped `ratings_twoway`.
-- [ ] T5: Read every number the prose quotes beside a table against the rendered digits; `NEWS.md` entry; `devtools::check()`, `devtools::test()`, `pkgdown::build_site()`, the AC5 greps and the render-warnings checker.
+- [x] T5: Read every number the prose quotes beside a table against the rendered digits; `NEWS.md` entry; `devtools::check()`, `devtools::test()`, `pkgdown::build_site()`, the AC5 greps and the render-warnings checker.
 
 ## Work log
 
@@ -53,6 +53,9 @@ Hide the vignette chunks that exist only to assemble a comparison table and rend
 - 2026-09-16: T2 done: five comparison-article tables in `gt` (table chunks `irricc-table`, `incomplete-intraclass-table` follow their echoed calls). `validation-gap` is `include = FALSE` with `eval = exists("comparison")`. If `gt` is absent, the chunk skips. Minor fix under AC4: two sentences said the tools match to five decimals or are identical, but the built table shows 0.28977 against 0.28976 (published site too). Both now say "within 0.00001" (largest gap 7.2e-06).
 - 2026-09-16: T3 done: `engine-table`, `lavaan-table` and `incomplete-fixed-table` (one table, grouped by rater framing) follow their echoed calls. The built table shows fixed-rater consistency intervals wider than random ones (ICC(C,1) 0.218 to 0.906 against 0.228 to 0.906). The "random interval is the wider" sentence now names the agreement coefficients only. The engines prose figures (0.284, 0.290) match the 4-decimal table.
 - 2026-09-16: T4 done: `ci-bootstrap-table`, `ci-oneway-optin-table` and `ci-mpl-table` build each interval from two `fmt_number()` columns joined by `cols_merge()`. `ci-mpl` stays on `ratings_twoway`. The prose claims beside the three tables match the built digits. The local build needed the branch installed first (`R CMD INSTALL .`), because the installed copy predated `ratings_twoway`.
+- 2026-09-16: T5 done: NEWS entry. `devtools::test()` FAIL 0, WARN 0, SKIP 2, PASS 9624. `pkgdown::build_site()` exit 0. `gt_table` grep counts per article are 20, 8, 12 and 4, against 5, 2, 3 and 1 tables. The render-warnings checker passes. `devtools::check()` gives 0 errors, 0 warnings and 0 notes.
+- claim audit: 24 claims read, 2 corrected — NEWS.md, vignettes/comparison-with-other-packages.Rmd, vignettes/choosing-an-icc.Rmd, vignettes/engines.Rmd, vignettes/interval-methods.Rmd, DESCRIPTION
+- 2026-09-16: the two corrected NEWS sentences are the hidden `validation` fits and the incomplete-data interval claim, now scoped to the *Choosing an ICC* example. The same reader re-read both, and both hold. Status set to review.
 
 ## Decisions
 

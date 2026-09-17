@@ -22,10 +22,12 @@
   engines*, *Interval methods* and *Choosing an ICC* articles are now `gt`
   tables with a title, plain column headings and rounded numbers. The code
   that assembles each table is hidden. The calls that fit the models stay
-  visible. `gt` joins `Suggests:`. Without it, those tables are skipped.
-  Three sentences are corrected to match their tables. The packages agree to
-  within 0.00001, not exactly. On incomplete data, random raters give a wider
-  interval only for the agreement coefficients.
+  visible. The one exception is the `psych` and `irr` comparison: there, one
+  hidden chunk fits the models and builds the table. `gt` joins `Suggests:`. Without it,
+  those tables are skipped. Three sentences are corrected to match their
+  tables. The packages agree to within 0.00001, not exactly. In the
+  *Choosing an ICC* example on incomplete data, the random-rater interval is
+  wider only for the agreement coefficients.
 
 * The reference manual pages for `icc()`, `d_study()`, `choose_icc()`,
   `ratings` and `ratings_incomplete` are rewritten in plainer English. No
