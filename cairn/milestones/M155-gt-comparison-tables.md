@@ -56,6 +56,8 @@ Hide the vignette chunks that exist only to assemble a comparison table and rend
 - 2026-09-16: T5 done: NEWS entry. `devtools::test()` FAIL 0, WARN 0, SKIP 2, PASS 9624. `pkgdown::build_site()` exit 0. `gt_table` grep counts per article are 20, 8, 12 and 4, against 5, 2, 3 and 1 tables. The render-warnings checker passes. `devtools::check()` gives 0 errors, 0 warnings and 0 notes.
 - claim audit: 24 claims read, 2 corrected — NEWS.md, vignettes/comparison-with-other-packages.Rmd, vignettes/choosing-an-icc.Rmd, vignettes/engines.Rmd, vignettes/interval-methods.Rmd, DESCRIPTION
 - 2026-09-16: the two corrected NEWS sentences are the hidden `validation` fits and the incomplete-data interval claim, now scoped to the *Choosing an ICC* example. The same reader re-read both, and both hold. Status set to review.
+- 2026-09-16: review evidence recorded, all five criteria verified, and the consistency gate is clean apart from the stale ledger row inherited from `origin/main`.
+- step-7 approval: m155-gt-comparison-tables approved for merge (the maintainer chose to fix O1, O2, O8, O9 and G1 first, and the fixes are verified in the Review section).
 
 ## Decisions
 
@@ -89,3 +91,9 @@ Reviewers: [O] diff-bug found 10 findings. [S] blame-history found 1, the same a
 - O9 `NEWS.md:26`: one line wraps at about 88 characters. Proposed: fix now with O2.
 - O10 interval tables: `fmt_number` prints a Unicode minus. Proposed: reject, because it is `gt` display behavior.
 - G1 (gate, pre-existing): `record-claims.tsv:6` is stale on `origin/main`, so PR CI will be red. Proposed: fix now on the branch.
+
+Triage at the gate (2026-09-16): the maintainer accepted every proposed disposition.
+- Fixed: O1 (the irrICC sentence now says "agrees with ... to within 0.00001", measured gap 6.3e-06). O8 (fixing the raters removes that uncertainty "from the agreement coefficients"). O2 and O9 (NEWS drops the sentence count and rewraps). G1 (ledger row 6 now expects M154, M153, M152).
+- Follow-up: O3, O4 and S1 became one `[low]` ROADMAP candidate row on article prose without `gt`.
+- Rejected: O5, O6, O7 and O10, for the reasons above.
+- Fix verification: the two changed articles rebuild with exit 0, and the new sentences are in the built HTML. All ten CI checker runs exit 0, including `check-record-claims.py` and its self-test. The doc-reading tests (`doc-skew-caveat`, `news-brms-claims`, `vignette-transcripts`, `vignette-claims`) give FAIL 0, PASS 2892. `spelling::spell_check_package()` finds no errors, and `air format --check .` exits 0.

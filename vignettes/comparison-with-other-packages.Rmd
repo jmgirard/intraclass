@@ -116,7 +116,7 @@ match with `psych` is in fact checked on every test run of this package.
 A model-based tool from a different lineage agrees too. `irrICC` implements
 Gwet's ICCs, estimated by a moment method rather than either REML or ANOVA.
 Its two-way random absolute-agreement coefficient (`icc2r`), for which raters
-give the same score, reproduces `intraclass`'s `ICC(A,1)`:
+give the same score, agrees with `intraclass`'s `ICC(A,1)` to within 0.00001:
 
 ```{r irricc, eval = have_irr_icc}
 w <- reshape(ratings, idvar = "subject", timevar = "rater", direction = "wide")

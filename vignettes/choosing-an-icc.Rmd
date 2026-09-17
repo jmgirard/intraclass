@@ -208,9 +208,9 @@ rbind(
 For the agreement coefficients, the random interval is the wider of the two.
 The consistency intervals, which leave out rater differences, stay close.
 Generalizing to a rater universe
-carries the extra uncertainty of *which* raters you happened to sample, whereas
-fixing the raters removes it. So the choice matters more once data are
-incomplete.
+carries the extra uncertainty of *which* raters you happened to sample. Fixing
+the raters removes that uncertainty from the agreement coefficients. So the
+choice matters more once data are incomplete.
 
 ### When a design is not identified
 
