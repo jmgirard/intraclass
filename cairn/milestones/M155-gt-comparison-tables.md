@@ -38,7 +38,7 @@ Hide the vignette chunks that exist only to assemble a comparison table and rend
 ## Tasks
 
 - [x] T1: Add `gt` to `Suggests:`, confirm `setup-r-dependencies` installs it in the check and pkgdown jobs (it installs Suggests by default, LESSONS M139), write the D-046 cross-reference into the milestone-local Decisions.
-- [ ] T2: `comparison-with-other-packages.Rmd`: split or hide the five chunks, `validation-gap` to `include = FALSE`, style each `gt` table (title, plain headings, `fmt_number`).
+- [x] T2: `comparison-with-other-packages.Rmd`: split or hide the five chunks, `validation-gap` to `include = FALSE`, style each `gt` table (title, plain headings, `fmt_number`).
 - [ ] T3: `engines.Rmd` and `choosing-an-icc.Rmd`: split the three chunks and style the tables.
 - [ ] T4: `interval-methods.Rmd`: split the three chunks and style the tables. Keep `ci-mpl`'s echoed call on the shipped `ratings_twoway`.
 - [ ] T5: Read every number the prose quotes beside a table against the rendered digits; `NEWS.md` entry; `devtools::check()`, `devtools::test()`, `pkgdown::build_site()`, the AC5 greps and the render-warnings checker.
@@ -49,10 +49,11 @@ Hide the vignette chunks that exist only to assemble a comparison table and rend
 - 2026-09-16: plan gate chose `gt` in Suggests with an `eval` guard and no fallback over a kable fallback because CRAN and CI install Suggests and two renderings would drift; falsified by a reader building the articles without `gt` and missing a table.
 - 2026-09-16: plan chose greps plus built-site inspection over a committed chunk-options checker because D-021 bars a new checker over the repo's own docs; falsified by a wrong shipped number traced to a chunk option.
 - 2026-09-16: implement started on `m155-gt-comparison-tables`; question gate skipped, nothing left open (the dependency gate ran at plan, D-046).
-- 2026-09-16: T1 done: `gt` added to `Suggests:`; `check-standard.yaml` and `pkgdown.yaml` call `setup-r-dependencies@v2` with no `dependencies:` override, so both install Suggests.
+- 2026-09-16: T1 done: `gt` added to `Suggests:`. `check-standard.yaml` and `pkgdown.yaml` call `setup-r-dependencies@v2` with no `dependencies:` override, so both install Suggests.
+- 2026-09-16: T2 done: five comparison-article tables in `gt` (table chunks `irricc-table`, `incomplete-intraclass-table` follow their echoed calls). `validation-gap` is `include = FALSE` with `eval = exists("comparison")`, so it skips when `gt` is absent. Minor fix under AC4: two sentences said the tools match to five decimals or are identical, but the built table shows 0.28977 against 0.28976 (published site too). Both now say "within 0.00001" (largest gap 7.2e-06).
 
 ## Decisions
 
-- 2026-09-16: `gt` joins `Suggests:` with an `eval` guard and no fallback — recorded cross-cutting as D-046.
+- 2026-09-16: `gt` joins `Suggests:` with an `eval` guard and no fallback. The cross-cutting record is D-046.
 
 ## Review

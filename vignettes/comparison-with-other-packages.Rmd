@@ -60,7 +60,7 @@ instead derive the coefficients from classical **ANOVA mean squares**. Those
 are different computational routes to the same population quantity, and they
 are known to converge to each other. The table shows how close they land here:
 
-```{r validation, eval = have_psych && have_irr}
+```{r validation, echo = FALSE, eval = have_psych && have_irr && requireNamespace("gt", quietly = TRUE)}
 wm <- to_wide(ratings)
 # Scalar `type` and `unit` make this a one-row fit, so `[1]` is that row --
 # the coefficient asked for. Elsewhere, select by `term`.
@@ -89,15 +89,24 @@ comparison <- do.call(rbind, lapply(rows, function(r) {
   )
 }))
 
-knitr::kable(comparison, digits = 5, row.names = FALSE)
+gt::gt(comparison) |>
+  gt::tab_header(title = "The ICC family on the balanced ratings data") |>
+  gt::cols_label(
+    coefficient = "Coefficient",
+    intraclass = "intraclass (REML)",
+    psych = "psych (ANOVA)",
+    irr = "irr (ANOVA)"
+  ) |>
+  gt::fmt_number(columns = c(intraclass, psych, irr), decimals = 5)
 ```
 
-```{r validation-gap, eval = have_psych && have_irr}
+```{r validation-gap, include = FALSE, eval = exists("comparison")}
 max_gap <- max(abs(comparison$intraclass - comparison$psych),
                abs(comparison$intraclass - comparison$irr))
 ```
 
-Every coefficient matches to five decimal places. The largest disagreement
+Every coefficient agrees to within 0.00001, so no two tools differ by more
+than one in the fifth decimal place. The largest disagreement
 anywhere in the table is `r if (exists("max_gap")) format(max_gap, digits = 2) else "<1e-5"`.
 That residual is not error in either tool. It is the small-sample gap between a
 REML fit and ANOVA mean squares, which vanishes as the sample grows. **On the
@@ -120,11 +129,17 @@ gwet_agree <- irrICC::icc2.inter.fn(gwet_frame)$icc2r
 intraclass_a1 <- with(tidy(icc(ratings, subject = subject, rater = rater, score = score,
                               model = "twoway", type = "agreement",
                               unit = "single")), estimate[term == "ICC(A,1)"])
+```
 
+```{r irricc-table, echo = FALSE, eval = have_irr_icc && requireNamespace("gt", quietly = TRUE)}
 data.frame(
   source   = c("intraclass ICC(A,1)", "irrICC icc2r (Gwet)"),
   estimate = c(intraclass_a1, gwet_agree)
-)
+) |>
+  gt::gt() |>
+  gt::tab_header(title = "Single-rater absolute agreement on the ratings data") |>
+  gt::cols_label(source = "Package and coefficient", estimate = "Estimate") |>
+  gt::fmt_number(columns = estimate, decimals = 5)
 ```
 
 ## What does it add? (differentiation)
@@ -137,24 +152,40 @@ data are rarely so tidy, and that is where the packages diverge.
 The `ratings_incomplete` dataset is the same study with four ratings missing.
 In particular, the second rater scored only two of the six subjects:
 
-```{r incomplete-show}
+```{r incomplete-show, echo = FALSE, eval = requireNamespace("gt", quietly = TRUE)}
 wide_incomplete <- reshape(ratings_incomplete, idvar = "subject",
                            timevar = "rater", direction = "wide")
 wide_incomplete <- wide_incomplete[order(as.integer(as.character(wide_incomplete$subject))), ]
 colnames(wide_incomplete) <- c("subject", paste0("rater", 1:4))
-knitr::kable(wide_incomplete, row.names = FALSE)
+gt::gt(wide_incomplete) |>
+  gt::tab_header(title = "Scores in ratings_incomplete, one row per subject") |>
+  gt::cols_label(
+    subject = "Subject",
+    rater1 = "Rater 1",
+    rater2 = "Rater 2",
+    rater3 = "Rater 3",
+    rater4 = "Rater 4"
+  ) |>
+  gt::fmt_number(columns = rater1:rater4, decimals = 0) |>
+  gt::sub_missing(missing_text = "not rated")
 ```
 
 A classical ANOVA ICC needs a complete rectangle, so `psych` and `irr`
 **listwise-delete** any subject with a missing cell. Here that discards the
 four subjects rater 2 skipped, leaving only two:
 
-```{r incomplete-classical}
+```{r incomplete-classical, echo = FALSE, eval = requireNamespace("gt", quietly = TRUE)}
 wm_inc <- to_wide(ratings_incomplete)
 surviving <- sum(stats::complete.cases(wm_inc))
-c(observed_cells = nrow(ratings_incomplete),
-  possible_cells = nrow(ratings),
-  subjects_after_listwise_deletion = surviving)
+data.frame(
+  quantity = c("Observed ratings", "Possible ratings",
+               "Subjects left after listwise deletion"),
+  value = c(nrow(ratings_incomplete), nrow(ratings), surviving)
+) |>
+  gt::gt() |>
+  gt::tab_header(title = "What listwise deletion leaves of ratings_incomplete") |>
+  gt::cols_label(quantity = "Quantity", value = "Count") |>
+  gt::fmt_number(columns = value, decimals = 0)
 ```
 
 An ICC computed from two subjects is not usable, whatever its value.
@@ -168,10 +199,20 @@ the smaller values. That count accounts for the imbalance:
 fit_inc <- icc(ratings_incomplete, subject = subject, rater = rater, score = score,
                model = "twoway", type = "agreement", unit = "average")
 gl_inc <- glance(fit_inc)
-c(estimate = with(tidy(fit_inc), estimate[term == "ICC(A,k)"]),
-  subjects_used = gl_inc$n_subjects,
-  ratings_used = gl_inc$n_obs,
-  k_eff = gl_inc$k_eff)
+```
+
+```{r incomplete-intraclass-table, echo = FALSE, eval = requireNamespace("gt", quietly = TRUE)}
+data.frame(
+  quantity = c("ICC(A,k) estimate", "Subjects used", "Ratings used",
+               "Effective number of ratings (k_eff)"),
+  value = c(with(tidy(fit_inc), estimate[term == "ICC(A,k)"]),
+            gl_inc$n_subjects, gl_inc$n_obs, gl_inc$k_eff)
+) |>
+  gt::gt() |>
+  gt::tab_header(title = "intraclass on ratings_incomplete") |>
+  gt::cols_label(quantity = "Quantity", value = "Value") |>
+  gt::fmt_number(columns = value, rows = c(1, 4), decimals = 3) |>
+  gt::fmt_number(columns = value, rows = c(2, 3), decimals = 0)
 ```
 
 All six subjects and all twenty observed ratings contribute, and nothing is
@@ -232,7 +273,7 @@ of each, see the companion articles:
 
 If your design is **balanced and complete** and you only need the classic
 McGraw–Wong coefficients, `psych` and `irr` are mature and familiar. As the
-table above shows, they are numerically identical to `intraclass` there. Reach
+table above shows, they agree with `intraclass` there to within 0.00001. Reach
 for `intraclass` when your data are **incomplete or unbalanced**, or when
 raters are **nested in clusters**. Reach for it too when you need an
 **interval you can trust near the boundary**. And reach for it when you want
