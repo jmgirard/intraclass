@@ -18,6 +18,17 @@
 
 ## Documentation
 
+* The comparison tables in the *Comparison with other packages*, *Estimation
+  engines*, *Interval methods* and *Choosing an ICC* articles are now `gt`
+  tables with a title, plain column headings and rounded numbers. The code
+  that assembles each table is hidden. The calls that fit the models stay
+  visible. The one exception is the `psych` and `irr` comparison: there, one
+  hidden chunk fits the models and builds the table. `gt` joins `Suggests:`.
+  Without it, those tables are skipped. The sentences that disagreed with
+  their tables are corrected. The packages agree to within 0.00001, not
+  exactly. In the *Choosing an ICC* example on incomplete data, the
+  random-rater interval is wider only for the agreement coefficients.
+
 * The reference manual pages for `icc()`, `d_study()`, `choose_icc()`,
   `ratings` and `ratings_incomplete` are rewritten in plainer English. No
   sentence runs past 25 words, except seven on the `icc()` and `d_study()`
