@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-16 (M153 done pass). M153 archived; M150 rotated out (retention 3); the one deferred finding pruned by the §7 chip, the "Three prose-apparatus deferrals" row not extended; one LESSONS line added, the M76 line retired (CI's `check-references` fails on the mistake it warned about); no D-entry, no Known issue, no RB/RR pair; all four doctrine modules within their stated budgets; `git branch --no-merged` shows only `backup/m136-pre-rewrite`, expected noise. validate green._
+_Last hygiene check: 2026-09-17 (M154 done pass). M154 archived; M151 rotated out (retention 3); one LESSONS line added and the M142 line compressed to stay under the 20,000-byte cap, nothing retired; no candidate row touched, no D-entry, no Known issue, no RB/RR pair; all four doctrine modules within their stated budgets; `git branch --no-merged` shows only `backup/m136-pre-rewrite`, expected noise. validate green._
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,12 +9,11 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M154 | Ship the vignettes' simulated datasets from `data-raw/` | review | — | normal | milestones/M154-ship-vignette-datasets.md |
 | M155 | Comparison tables as hidden `gt` chunks | planned | M154 | normal | milestones/M155-gt-comparison-tables.md |
+| M154 | Ship the vignettes' simulated datasets from `data-raw/` | done | — | normal | milestones/archive/M154-ship-vignette-datasets.md |
 | M153 | Plain-English pass over the roxygen surface | done | M151 | normal | milestones/archive/M153-plain-english-roxygen.md |
 | M152 | Plain-English pass over the method articles | done | M151 | normal | milestones/archive/M152-plain-english-method-articles.md |
-| M151 | The plain-English standard, and the reader path | done | — | normal | milestones/archive/M151-plain-english-standard-reader-path.md |
-<!-- terminal-row retention: retention is 3 (tracking-rules Weight caps); M150 rotated out 2026-09-16 at the M153 done pass as the oldest terminal row by merge order, its archive file still resolving there. Kept: M153, M152, M151 [claim:roadmap-terminal-rows]. -->
+<!-- terminal-row retention: retention is 3 (tracking-rules Weight caps); M151 rotated out 2026-09-17 at the M154 done pass as the oldest terminal row by merge order, its archive file still resolving there. Kept: M154, M153, M152 [claim:roadmap-terminal-rows]. -->
 <!-- rows grouped by status; keep only the 3 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
