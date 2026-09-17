@@ -64,6 +64,10 @@ reference:
     contents:
       - ratings
       - ratings_incomplete
+      - school
+      - school_incomplete
+      - ratings_replicates
+      - ratings_twoway
 
   - title: Package overview
     contents:

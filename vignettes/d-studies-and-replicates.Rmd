@@ -164,25 +164,13 @@ replicates*. Then you can separate two things that a single rating confounds.
 The first is the **subject-by-rater interaction**: does a rater systematically
 score a particular subject high or low, a *stable* disagreement? The second is
 **pure error**, meaning how much a rater's repeat ratings of the same subject
-wobble. `icc()` detects the replicates and fits the interaction model
-automatically:
+wobble. The shipped `ratings_replicates` data are simulated for this case:
+20 subjects, 4 raters, and 3 ratings in every subject-by-rater cell (see
+`?ratings_replicates`). `icc()` detects the replicates and fits the
+interaction model automatically:
 
 ```{r replicates-data, eval = requireNamespace("glmmTMB", quietly = TRUE)}
-set.seed(2025)
-ns <- 20
-nr <- 4
-no <- 3
-grid <- expand.grid(subject = seq_len(ns), rater = seq_len(nr), occ = seq_len(no))
-subj <- rnorm(ns, sd = 1.1)[grid$subject]
-rater <- rnorm(nr, sd = 0.8)[grid$rater]
-sr <- rnorm(ns * nr, sd = 0.6)[(grid$rater - 1) * ns + grid$subject]
-reps <- data.frame(
-  subject = factor(grid$subject),
-  rater = factor(grid$rater),
-  score = 10 + subj + rater + sr + rnorm(nrow(grid), sd = 0.7)
-)
-
-icc(reps, score, subject, rater, type = "agreement", occasions = c("single", "average"))
+icc(ratings_replicates, score, subject, rater, type = "agreement", occasions = c("single", "average"))
 ```
 
 The variance-components line now shows `subject:rater` (the interaction) and
@@ -214,7 +202,7 @@ fixed and asks "how reliable would each rater's mean of `n_o` ratings be?".
 Supply exactly one axis per call (`m` **or** `n_o`).
 
 ```{r occasion-dstudy, eval = requireNamespace("glmmTMB", quietly = TRUE)}
-fit_rep <- icc(reps, score, subject, rater, type = "agreement", occasions = "average")
+fit_rep <- icc(ratings_replicates, score, subject, rater, type = "agreement", occasions = "average")
 d_study(fit_rep, n_o = 1:6)
 ```
 

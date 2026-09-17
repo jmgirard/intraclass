@@ -125,23 +125,17 @@ choose_icc(model = "twoway", type = "consistency", unit = "average", raters = "r
 
 For **multilevel** data, meaning subjects nested in clusters such as pupils
 in classrooms or patients in clinics, pass a `cluster` column. Then `icc()`
-reports subject-level and cluster-level reliability separately:
+reports subject-level and cluster-level reliability separately. The shipped
+`school` data are a simulated example, pupils nested in classrooms:
 
 ```{r multilevel}
-set.seed(1)
-grid <- expand.grid(pupil = 1:5, classroom = 1:12, rater = 1:4)
-grid$score <- with(grid,
-  10 + rnorm(12, sd = 1.2)[classroom] +
-    rnorm(60, sd = 0.6)[(classroom - 1) * 5 + pupil] +
-    rnorm(4, sd = 0.4)[rater] + rnorm(nrow(grid), sd = 0.7))
-school <- data.frame(
-  pupil = factor(paste(grid$classroom, grid$pupil, sep = "_")),
-  classroom = factor(grid$classroom),
-  rater = factor(grid$rater),
-  score = grid$score)
-
 icc(school, score, subject = pupil, rater = rater, cluster = classroom, seed = 2024)
 ```
+
+The cluster-level consistency rows sit on a boundary here: the
+classroom-by-rater variance is estimated at zero, so `ICC(C,1)` reaches 1 and
+its interval spans the whole range. The multilevel article
+(`vignette("multilevel-designs")`) explains what each level measures.
 
 ## How many raters do you need?
 

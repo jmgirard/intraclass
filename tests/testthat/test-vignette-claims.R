@@ -400,36 +400,13 @@ test_that("d-studies-and-replicates.Rmd: fixed-rater agreement refuses a numeric
 
 # Multilevel claims (multilevel-designs.Rmd) ------------------------------
 # The multilevel-designs article's example asserts that on the simulated
-# `school` design the cluster-level ICC is the larger of the two levels. Rebuild
-# the exact seeded dataset the vignette uses and check the claim holds (#1).
+# `school` design the cluster-level ICC is the larger of the two levels. Read
+# the shipped dataset the vignette uses and check the claim holds (#1).
 
 test_that("multilevel-designs.Rmd: cluster-level ICC exceeds subject-level on `school`", {
   skip_if_not_installed("glmmTMB")
 
-  set.seed(2025)
-  n_class <- 16
-  n_pupil <- 5
-  n_rater <- 4
-  grid <- expand.grid(
-    pupil = seq_len(n_pupil),
-    classroom = seq_len(n_class),
-    rater = seq_len(n_rater)
-  )
-  class_effect <- rnorm(n_class, sd = 1.3)[grid$classroom]
-  pupil_effect <- rnorm(n_class * n_pupil, sd = 0.6)[
-    (grid$classroom - 1) * n_pupil + grid$pupil
-  ]
-  rater_effect <- rnorm(n_rater, sd = 0.4)[grid$rater]
-  school <- data.frame(
-    classroom = factor(grid$classroom),
-    pupil = factor(paste(grid$classroom, grid$pupil, sep = "_")),
-    rater = factor(grid$rater),
-    score = 10 +
-      class_effect +
-      pupil_effect +
-      rater_effect +
-      rnorm(nrow(grid), sd = 0.7)
-  )
+  school <- intraclass::school
 
   e <- icc(
     school,
@@ -474,32 +451,8 @@ test_that("multilevel-designs.Rmd: cluster-level ICC exceeds subject-level on `s
 test_that("multilevel-designs.Rmd: ragged `school` supports subject + cluster ICC(c,1) and ICC(c,k)", {
   skip_if_not_installed("glmmTMB")
 
-  set.seed(2025)
-  n_class <- 16
-  n_pupil <- 5
-  n_rater <- 4
-  grid <- expand.grid(
-    pupil = seq_len(n_pupil),
-    classroom = seq_len(n_class),
-    rater = seq_len(n_rater)
-  )
-  class_effect <- rnorm(n_class, sd = 1.3)[grid$classroom]
-  pupil_effect <- rnorm(n_class * n_pupil, sd = 0.6)[
-    (grid$classroom - 1) * n_pupil + grid$pupil
-  ]
-  rater_effect <- rnorm(n_rater, sd = 0.4)[grid$rater]
-  school <- data.frame(
-    classroom = factor(grid$classroom),
-    pupil = factor(paste(grid$classroom, grid$pupil, sep = "_")),
-    rater = factor(grid$rater),
-    score = 10 +
-      class_effect +
-      pupil_effect +
-      rater_effect +
-      rnorm(nrow(grid), sd = 0.7)
-  )
-  set.seed(11)
-  school_ragged <- school[-sample(nrow(school), round(0.2 * nrow(school))), ]
+  school_ragged <- intraclass::school_incomplete
+  n_rater <- nlevels(school_ragged$rater)
 
   sub <- icc(
     school_ragged,
@@ -567,30 +520,7 @@ test_that("multilevel-designs.Rmd: ragged `school` supports subject + cluster IC
 test_that("multilevel-designs.Rmd: balanced fixed-rater `school` matches random at the subject level", {
   skip_if_not_installed("glmmTMB")
 
-  set.seed(2025)
-  n_class <- 16
-  n_pupil <- 5
-  n_rater <- 4
-  grid <- expand.grid(
-    pupil = seq_len(n_pupil),
-    classroom = seq_len(n_class),
-    rater = seq_len(n_rater)
-  )
-  class_effect <- rnorm(n_class, sd = 1.3)[grid$classroom]
-  pupil_effect <- rnorm(n_class * n_pupil, sd = 0.6)[
-    (grid$classroom - 1) * n_pupil + grid$pupil
-  ]
-  rater_effect <- rnorm(n_rater, sd = 0.4)[grid$rater]
-  school <- data.frame(
-    classroom = factor(grid$classroom),
-    pupil = factor(paste(grid$classroom, grid$pupil, sep = "_")),
-    rater = factor(grid$rater),
-    score = 10 +
-      class_effect +
-      pupil_effect +
-      rater_effect +
-      rnorm(nrow(grid), sd = 0.7)
-  )
+  school <- intraclass::school
   sub <- function(x, index) {
     x$estimates$estimate[x$estimates$index == index]
   }
@@ -660,30 +590,7 @@ test_that("multilevel-designs.Rmd: balanced fixed-rater `school` matches random 
 test_that("multilevel-designs.Rmd: nested relabels of `school` infer Designs 2 and 3", {
   skip_if_not_installed("glmmTMB")
 
-  set.seed(2025)
-  n_class <- 16
-  n_pupil <- 5
-  n_rater <- 4
-  grid <- expand.grid(
-    pupil = seq_len(n_pupil),
-    classroom = seq_len(n_class),
-    rater = seq_len(n_rater)
-  )
-  class_effect <- rnorm(n_class, sd = 1.3)[grid$classroom]
-  pupil_effect <- rnorm(n_class * n_pupil, sd = 0.6)[
-    (grid$classroom - 1) * n_pupil + grid$pupil
-  ]
-  rater_effect <- rnorm(n_rater, sd = 0.4)[grid$rater]
-  school <- data.frame(
-    classroom = factor(grid$classroom),
-    pupil = factor(paste(grid$classroom, grid$pupil, sep = "_")),
-    rater = factor(grid$rater),
-    score = 10 +
-      class_effect +
-      pupil_effect +
-      rater_effect +
-      rnorm(nrow(grid), sd = 0.7)
-  )
+  school <- intraclass::school
 
   # Design 2: each classroom has its own raters -> subject level only.
   school_d2 <- school
@@ -728,30 +635,7 @@ test_that("multilevel-designs.Rmd: nested relabels of `school` infer Designs 2 a
 test_that("multilevel-designs.Rmd: a declared `design` overrides the labels' own reading", {
   skip_if_not_installed("glmmTMB")
 
-  set.seed(2025)
-  n_class <- 16
-  n_pupil <- 5
-  n_rater <- 4
-  grid <- expand.grid(
-    pupil = seq_len(n_pupil),
-    classroom = seq_len(n_class),
-    rater = seq_len(n_rater)
-  )
-  class_effect <- rnorm(n_class, sd = 1.3)[grid$classroom]
-  pupil_effect <- rnorm(n_class * n_pupil, sd = 0.6)[
-    (grid$classroom - 1) * n_pupil + grid$pupil
-  ]
-  rater_effect <- rnorm(n_rater, sd = 0.4)[grid$rater]
-  school <- data.frame(
-    classroom = factor(grid$classroom),
-    pupil = factor(paste(grid$classroom, grid$pupil, sep = "_")),
-    rater = factor(grid$rater),
-    score = 10 +
-      class_effect +
-      pupil_effect +
-      rater_effect +
-      rnorm(nrow(grid), sd = 0.7)
-  )
+  school <- intraclass::school
   args <- list(
     school,
     quote(score),
@@ -1593,36 +1477,21 @@ test_that("interval-methods.Rmd: at zero between-subject variance `\"burch\"` ab
   expect_identical(avg$conf.high, -Inf)
 })
 
-# The article's own `ci-mpl` chunk data, rebuilt at its seed (`ratings` is too
-# small for the MPL calibration grid). Shared by every test that needs it --
-# one construction, so a change to the article's simulation cannot leave a copy
-# stale in one test while another still passes. Callers that need the rater
-# count read it off the frame rather than restating the 4.
+# The article's own `ci-mpl` chunk data: the shipped `ratings_twoway` dataset
+# (`ratings` is too small for the MPL calibration grid). Shared by every test
+# that needs it, so the tests and the article read one object. Callers that
+# need the rater count read it off the frame rather than restating the 4.
 vc_mpl_sim <- function() {
-  set.seed(88)
-  n_s <- 20
-  n_r <- 4
-  subj_eff <- rnorm(n_s, sd = sqrt(0.6))
-  rater_eff <- rnorm(n_r, sd = sqrt(0.1))
-  noise <- matrix(rnorm(n_s * n_r, sd = sqrt(0.2)), n_s, n_r)
-  data.frame(
-    subject = factor(rep(seq_len(n_s), times = n_r)),
-    rater = factor(rep(seq_len(n_r), each = n_s)),
-    score = as.numeric(
-      outer(subj_eff, rep(1, n_r)) +
-        outer(rep(1, n_s), rater_eff) +
-        noise
-    )
-  )
+  intraclass::ratings_twoway
 }
 
 test_that("interval-methods.Rmd: the `\"mpl\"` fences are the ones the article names", {
   skip_if_not_installed("glmmTMB")
 
-  # Article lines 257-275, run on the article's own simulated design (the
-  # `ci-mpl` chunk's data, rebuilt at its seed -- `ratings` is too small for
-  # the calibration grid). One shared builder, so this test and the
-  # per-`ci_method` fence pins below cannot drift apart (M133 review, B2).
+  # Article lines 257-275, run on the article's own design (the `ci-mpl`
+  # chunk's shipped data -- `ratings` is too small for the calibration grid).
+  # One shared accessor, so this test and the per-`ci_method` fence pins
+  # below cannot drift apart (M133 review, B2).
   sim <- vc_mpl_sim()
   n_r <- nlevels(sim$rater)
 

@@ -6,6 +6,16 @@
   section and links to the contributing guide and to the companion software
   paper's repository, <https://github.com/jmgirard/intraclass-paper>.
 
+* Four simulated teaching datasets now ship with the package: `school`
+  (pupils nested in classrooms), `school_incomplete` (the same design with a
+  fifth of the ratings dropped), `ratings_replicates` (three ratings per
+  subject-by-rater cell) and `ratings_twoway` (20 subjects by 4 raters). The
+  articles and the README load them instead of simulating data inline, so the
+  examples can be run from a fresh session with no setup. Each has a
+  reference page that names the generating script and seed. The values the
+  articles report do not change. The README's multilevel example, which
+  used its own smaller simulation before, now shows the `school` results.
+
 ## Documentation
 
 * The reference manual pages for `icc()`, `d_study()`, `choose_icc()`,
