@@ -51,11 +51,14 @@ The choice is about the fitting backend, not the estimand.
 ```{r engine, eval = requireNamespace("lme4", quietly = TRUE) && requireNamespace("merDeriv", quietly = TRUE)}
 glmmtmb <- tidy(icc(ratings, score, subject, rater, engine = "glmmTMB", seed = 1))
 lme4 <- tidy(icc(ratings, score, subject, rater, engine = "lme4", seed = 1))
-data.frame(
-  term = glmmtmb$term,
-  glmmTMB = round(glmmtmb$estimate, 4),
-  lme4 = round(lme4$estimate, 4)
-)
+```
+
+```{r engine-table, echo = FALSE, eval = requireNamespace("lme4", quietly = TRUE) && requireNamespace("merDeriv", quietly = TRUE) && requireNamespace("gt", quietly = TRUE)}
+data.frame(term = glmmtmb$term, glmmTMB = glmmtmb$estimate, lme4 = lme4$estimate) |>
+  gt::gt() |>
+  gt::tab_header(title = "Point estimates on the ratings data by engine") |>
+  gt::cols_label(term = "Coefficient", glmmTMB = "glmmTMB", lme4 = "lme4") |>
+  gt::fmt_number(columns = c(glmmTMB, lme4), decimals = 4)
 ```
 
 The two point estimates agree to well within rounding, and their Monte-Carlo
@@ -84,11 +87,14 @@ coefficient you ask for.
 ```{r lavaan, eval = requireNamespace("lavaan", quietly = TRUE)}
 glmmtmb <- tidy(icc(ratings, score, subject, rater, engine = "glmmTMB", seed = 1))
 lavaan <- tidy(icc(ratings, score, subject, rater, engine = "lavaan", seed = 1))
-data.frame(
-  term = glmmtmb$term,
-  glmmTMB = round(glmmtmb$estimate, 4),
-  lavaan = round(lavaan$estimate, 4)
-)
+```
+
+```{r lavaan-table, echo = FALSE, eval = requireNamespace("lavaan", quietly = TRUE) && requireNamespace("gt", quietly = TRUE)}
+data.frame(term = glmmtmb$term, glmmTMB = glmmtmb$estimate, lavaan = lavaan$estimate) |>
+  gt::gt() |>
+  gt::tab_header(title = "Point estimates on the ratings data: mixed model and SEM") |>
+  gt::cols_label(term = "Coefficient", glmmTMB = "glmmTMB (mixed model)", lavaan = "lavaan (SEM)") |>
+  gt::fmt_number(columns = c(glmmTMB, lavaan), decimals = 4)
 ```
 
 **Consistency** coefficients, where raters agree apart from a constant offset

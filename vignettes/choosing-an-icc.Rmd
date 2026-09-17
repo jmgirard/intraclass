@@ -186,12 +186,28 @@ random_inc <- tidy(icc(ratings_incomplete, score, subject, rater,
   raters = "random", seed = 2024))
 fixed_inc <- suppressWarnings(tidy(icc(ratings_incomplete, score, subject, rater,
   raters = "fixed", seed = 2024)))
-
-random_inc[, c("term", "estimate", "conf.low", "conf.high")]
-fixed_inc[, c("term", "estimate", "conf.low", "conf.high")]
 ```
 
-The random interval is the wider of the two. Generalizing to a rater universe
+```{r incomplete-fixed-table, echo = FALSE, eval = requireNamespace("gt", quietly = TRUE)}
+cols <- c("term", "estimate", "conf.low", "conf.high")
+rbind(
+  data.frame(raters = "Random raters", random_inc[, cols]),
+  data.frame(raters = "Fixed raters", fixed_inc[, cols])
+) |>
+  gt::gt(groupname_col = "raters") |>
+  gt::tab_header(title = "Random and fixed raters on ratings_incomplete") |>
+  gt::cols_label(
+    term = "Coefficient",
+    estimate = "Estimate",
+    conf.low = "95% interval, lower",
+    conf.high = "95% interval, upper"
+  ) |>
+  gt::fmt_number(columns = c(estimate, conf.low, conf.high), decimals = 3)
+```
+
+For the agreement coefficients, the random interval is the wider of the two.
+The consistency intervals, which leave out rater differences, stay close.
+Generalizing to a rater universe
 carries the extra uncertainty of *which* raters you happened to sample, whereas
 fixing the raters removes it. So the choice matters more once data are
 incomplete.

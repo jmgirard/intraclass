@@ -39,7 +39,7 @@ Hide the vignette chunks that exist only to assemble a comparison table and rend
 
 - [x] T1: Add `gt` to `Suggests:`, confirm `setup-r-dependencies` installs it in the check and pkgdown jobs (it installs Suggests by default, LESSONS M139), write the D-046 cross-reference into the milestone-local Decisions.
 - [x] T2: `comparison-with-other-packages.Rmd`: split or hide the five chunks, `validation-gap` to `include = FALSE`, style each `gt` table (title, plain headings, `fmt_number`).
-- [ ] T3: `engines.Rmd` and `choosing-an-icc.Rmd`: split the three chunks and style the tables.
+- [x] T3: `engines.Rmd` and `choosing-an-icc.Rmd`: split the three chunks and style the tables.
 - [ ] T4: `interval-methods.Rmd`: split the three chunks and style the tables. Keep `ci-mpl`'s echoed call on the shipped `ratings_twoway`.
 - [ ] T5: Read every number the prose quotes beside a table against the rendered digits; `NEWS.md` entry; `devtools::check()`, `devtools::test()`, `pkgdown::build_site()`, the AC5 greps and the render-warnings checker.
 
@@ -50,7 +50,8 @@ Hide the vignette chunks that exist only to assemble a comparison table and rend
 - 2026-09-16: plan chose greps plus built-site inspection over a committed chunk-options checker because D-021 bars a new checker over the repo's own docs; falsified by a wrong shipped number traced to a chunk option.
 - 2026-09-16: implement started on `m155-gt-comparison-tables`; question gate skipped, nothing left open (the dependency gate ran at plan, D-046).
 - 2026-09-16: T1 done: `gt` added to `Suggests:`. `check-standard.yaml` and `pkgdown.yaml` call `setup-r-dependencies@v2` with no `dependencies:` override, so both install Suggests.
-- 2026-09-16: T2 done: five comparison-article tables in `gt` (table chunks `irricc-table`, `incomplete-intraclass-table` follow their echoed calls). `validation-gap` is `include = FALSE` with `eval = exists("comparison")`, so it skips when `gt` is absent. Minor fix under AC4: two sentences said the tools match to five decimals or are identical, but the built table shows 0.28977 against 0.28976 (published site too). Both now say "within 0.00001" (largest gap 7.2e-06).
+- 2026-09-16: T2 done: five comparison-article tables in `gt` (table chunks `irricc-table`, `incomplete-intraclass-table` follow their echoed calls). `validation-gap` is `include = FALSE` with `eval = exists("comparison")`. If `gt` is absent, the chunk skips. Minor fix under AC4: two sentences said the tools match to five decimals or are identical, but the built table shows 0.28977 against 0.28976 (published site too). Both now say "within 0.00001" (largest gap 7.2e-06).
+- 2026-09-16: T3 done: `engine-table`, `lavaan-table` and `incomplete-fixed-table` (one table, grouped by rater framing) follow their echoed calls. The built table shows fixed-rater consistency intervals wider than random ones (ICC(C,1) 0.218 to 0.906 against 0.228 to 0.906), so the "random interval is the wider" sentence now names the agreement coefficients only. The engines prose figures (0.284, 0.290) match the 4-decimal table.
 
 ## Decisions
 
