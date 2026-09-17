@@ -98,8 +98,8 @@ agreement
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   index     estimate   95% CI
-#>   ICC(A,1)     0.290   [0.050, 0.713]
-#>   ICC(A,k)     0.620   [0.173, 0.909]
+#>   ICC(A,1)     0.290   [0.050, 0.711]
+#>   ICC(A,k)     0.620   [0.173, 0.908]
 #> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
@@ -111,8 +111,8 @@ consistency
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   index     estimate   95% CI
-#>   ICC(C,1)     0.715   [0.343, 0.924]
-#>   ICC(C,k)     0.909   [0.676, 0.980]
+#>   ICC(C,1)     0.715   [0.340, 0.926]
+#>   ICC(C,k)     0.909   [0.673, 0.980]
 #> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 ```
@@ -235,28 +235,27 @@ random_inc <- tidy(icc(ratings_incomplete, score, subject, rater,
   raters = "random", seed = 2024))
 fixed_inc <- suppressWarnings(tidy(icc(ratings_incomplete, score, subject, rater,
   raters = "fixed", seed = 2024)))
-
-random_inc[, c("term", "estimate", "conf.low", "conf.high")]
-#> # A tibble: 4 × 4
-#>   term     estimate conf.low conf.high
-#>   <chr>       <dbl>    <dbl>     <dbl>
-#> 1 ICC(A,1)    0.249   0.0380     0.693
-#> 2 ICC(A,k)    0.521   0.114      0.881
-#> 3 ICC(C,1)    0.629   0.228      0.906
-#> 4 ICC(C,k)    0.847   0.491      0.969
-fixed_inc[, c("term", "estimate", "conf.low", "conf.high")]
-#> # A tibble: 4 × 4
-#>   term     estimate conf.low conf.high
-#>   <chr>       <dbl>    <dbl>     <dbl>
-#> 1 ICC(A,1)    0.236   0.0574     0.630
-#> 2 ICC(A,k)    0.503   0.166      0.848
-#> 3 ICC(C,1)    0.621   0.218      0.906
-#> 4 ICC(C,k)    0.843   0.477      0.969
 ```
 
-The random interval is the wider of the two. Generalizing to a rater
-universe carries the extra uncertainty of *which* raters you happened to
-sample, whereas fixing the raters removes it. So the choice matters more
+| Random and fixed raters on ratings_incomplete |  |  |  |
+|----|----|----|----|
+| Coefficient | Estimate | 95% interval, lower | 95% interval, upper |
+| Random raters |  |  |  |
+| ICC(A,1) | 0.249 | 0.038 | 0.693 |
+| ICC(A,k) | 0.521 | 0.114 | 0.881 |
+| ICC(C,1) | 0.629 | 0.228 | 0.906 |
+| ICC(C,k) | 0.847 | 0.491 | 0.969 |
+| Fixed raters |  |  |  |
+| ICC(A,1) | 0.236 | 0.057 | 0.630 |
+| ICC(A,k) | 0.503 | 0.166 | 0.848 |
+| ICC(C,1) | 0.621 | 0.218 | 0.906 |
+| ICC(C,k) | 0.843 | 0.477 | 0.969 |
+
+For the agreement coefficients, the random interval is the wider of the
+two. The consistency intervals, which leave out rater differences, stay
+close. Generalizing to a rater universe carries the extra uncertainty of
+*which* raters you happened to sample. Fixing the raters removes that
+uncertainty from the agreement coefficients. So the choice matters more
 once data are incomplete.
 
 ### When a design is not identified

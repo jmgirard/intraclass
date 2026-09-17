@@ -70,18 +70,15 @@ mc <- tidy(icc(ratings, score, subject, rater, seed = 1))
 bs <- tidy(icc(ratings, score, subject, rater,
   ci_method = "bootstrap", boot_samples = 999, seed = 1
 ))
-data.frame(
-  term = mc$term,
-  estimate = round(mc$estimate, 3),
-  mc = sprintf("[%.2f, %.2f]", mc$conf.low, mc$conf.high),
-  bootstrap = sprintf("[%.2f, %.2f]", bs$conf.low, bs$conf.high)
-)
-#>       term estimate           mc    bootstrap
-#> 1 ICC(A,1)    0.290 [0.05, 0.71] [0.02, 0.72]
-#> 2 ICC(A,k)    0.620 [0.17, 0.91] [0.09, 0.91]
-#> 3 ICC(C,1)    0.715 [0.34, 0.92] [0.15, 0.90]
-#> 4 ICC(C,k)    0.909 [0.67, 0.98] [0.41, 0.97]
 ```
+
+| Monte-Carlo and bootstrap 95% intervals on the ratings data |  |  |  |
+|----|----|----|----|
+| Coefficient | Estimate | Monte-Carlo | Parametric bootstrap |
+| ICC(A,1) | 0.290 | \[0.05, 0.71\] | \[0.02, 0.72\] |
+| ICC(A,k) | 0.620 | \[0.17, 0.91\] | \[0.09, 0.91\] |
+| ICC(C,1) | 0.715 | \[0.33, 0.93\] | \[0.15, 0.90\] |
+| ICC(C,k) | 0.909 | \[0.67, 0.98\] | \[0.41, 0.97\] |
 
 The point estimates are identical (same fit). The bootstrap’s lower
 bounds run markedly lower. This is a very small design (six subjects),
@@ -322,18 +319,13 @@ bu <- tidy(icc(ratings, score, subject, rater,
 np <- tidy(icc(ratings, score, subject, rater,
   model = "oneway", ci_method = "npbootstrap", boot_samples = 199, seed = 1
 ))
-data.frame(
-  term = mc$term,
-  estimate = round(mc$estimate, 3),
-  montecarlo = sprintf("[%.2f, %.2f]", mc$conf.low, mc$conf.high),
-  searle = sprintf("[%.2f, %.2f]", se$conf.low, se$conf.high),
-  burch = sprintf("[%.2f, %.2f]", bu$conf.low, bu$conf.high),
-  npbootstrap = sprintf("[%.2f, %.2f]", np$conf.low, np$conf.high)
-)
-#>     term estimate   montecarlo        searle         burch   npbootstrap
-#> 1 ICC(1)    0.166 [0.01, 0.83] [-0.13, 0.72] [-0.13, 0.56] [-0.05, 0.89]
-#> 2 ICC(k)    0.443 [0.03, 0.95] [-0.88, 0.91] [-0.90, 0.84] [-0.26, 0.97]
 ```
+
+| One-way 95% intervals on the ratings data by method |  |  |  |  |  |
+|----|----|----|----|----|----|
+| Coefficient | Estimate | Monte-Carlo | Searle | Burch | Nonparametric bootstrap |
+| ICC(1) | 0.166 | \[0.01, 0.83\] | \[−0.13, 0.72\] | \[−0.13, 0.56\] | \[−0.05, 0.89\] |
+| ICC(k) | 0.443 | \[0.03, 0.95\] | \[−0.88, 0.91\] | \[−0.90, 0.84\] | \[−0.26, 0.97\] |
 
 All four columns share the same point estimate: `ci_method` selects the
 interval, never the estimator. The visible difference is at the lower
@@ -389,16 +381,13 @@ and 4 raters (see
 
 mc2 <- tidy(icc(ratings_twoway, score, subject, rater, type = "agreement", seed = 1))
 ml <- tidy(icc(ratings_twoway, score, subject, rater, type = "agreement", ci_method = "mpl"))
-data.frame(
-  term = mc2$term,
-  estimate = round(mc2$estimate, 3),
-  montecarlo = sprintf("[%.2f, %.2f]", mc2$conf.low, mc2$conf.high),
-  mpl = sprintf("[%.2f, %.2f]", ml$conf.low, ml$conf.high)
-)
-#>       term estimate   montecarlo          mpl
-#> 1 ICC(A,1)    0.709 [0.47, 0.84] [0.42, 0.87]
-#> 2 ICC(A,k)    0.907 [0.78, 0.95] [0.75, 0.96]
 ```
+
+| Monte-Carlo and modified profile-likelihood 95% intervals on ratings_twoway |  |  |  |
+|----|----|----|----|
+| Coefficient | Estimate | Monte-Carlo | Modified profile likelihood |
+| ICC(A,1) | 0.709 | \[0.48, 0.84\] | \[0.42, 0.87\] |
+| ICC(A,k) | 0.907 | \[0.78, 0.96\] | \[0.75, 0.96\] |
 
 The two point estimates agree, from the same REML fit. The `"mpl"`
 interval is the wider of the pair at this comfortably interior cell.

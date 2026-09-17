@@ -54,17 +54,15 @@ fitting backend, not the estimand.
 
 glmmtmb <- tidy(icc(ratings, score, subject, rater, engine = "glmmTMB", seed = 1))
 lme4 <- tidy(icc(ratings, score, subject, rater, engine = "lme4", seed = 1))
-data.frame(
-  term = glmmtmb$term,
-  glmmTMB = round(glmmtmb$estimate, 4),
-  lme4 = round(lme4$estimate, 4)
-)
-#>       term glmmTMB   lme4
-#> 1 ICC(A,1)  0.2898 0.2898
-#> 2 ICC(A,k)  0.6201 0.6201
-#> 3 ICC(C,1)  0.7148 0.7148
-#> 4 ICC(C,k)  0.9093 0.9093
 ```
+
+| Point estimates on the ratings data by engine |         |        |
+|-----------------------------------------------|---------|--------|
+| Coefficient                                   | glmmTMB | lme4   |
+| ICC(A,1)                                      | 0.2898  | 0.2898 |
+| ICC(A,k)                                      | 0.6201  | 0.6201 |
+| ICC(C,1)                                      | 0.7148  | 0.7148 |
+| ICC(C,k)                                      | 0.9093  | 0.9093 |
 
 The two point estimates agree to well within rounding, and their
 Monte-Carlo intervals coincide to about `0.01`. The lme4 interval is
@@ -93,17 +91,15 @@ estimator. It matters which coefficient you ask for.
 
 glmmtmb <- tidy(icc(ratings, score, subject, rater, engine = "glmmTMB", seed = 1))
 lavaan <- tidy(icc(ratings, score, subject, rater, engine = "lavaan", seed = 1))
-data.frame(
-  term = glmmtmb$term,
-  glmmTMB = round(glmmtmb$estimate, 4),
-  lavaan = round(lavaan$estimate, 4)
-)
-#>       term glmmTMB lavaan
-#> 1 ICC(A,1)  0.2898 0.2843
-#> 2 ICC(A,k)  0.6201 0.6137
-#> 3 ICC(C,1)  0.7148 0.7148
-#> 4 ICC(C,k)  0.9093 0.9093
 ```
+
+| Point estimates on the ratings data: mixed model and SEM |  |  |
+|----|----|----|
+| Coefficient | glmmTMB (mixed model) | lavaan (SEM) |
+| ICC(A,1) | 0.2898 | 0.2843 |
+| ICC(A,k) | 0.6201 | 0.6137 |
+| ICC(C,1) | 0.7148 | 0.7148 |
+| ICC(C,k) | 0.9093 | 0.9093 |
 
 **Consistency** coefficients, where raters agree apart from a constant
 offset per rater, are a ratio of the subject and residual variances. So

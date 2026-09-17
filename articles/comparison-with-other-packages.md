@@ -42,66 +42,29 @@ mean squares**. Those are different computational routes to the same
 population quantity, and they are known to converge to each other. The
 table shows how close they land here:
 
-``` r
+| The ICC family on the balanced ratings data |  |  |  |
+|----|----|----|----|
+| Coefficient | intraclass (REML) | psych (ANOVA) | irr (ANOVA) |
+| ICC(1) | 0.16574 | 0.16574 | 0.16574 |
+| ICC(1,k) | 0.44280 | 0.44280 | 0.44280 |
+| ICC(A,1) | 0.28977 | 0.28976 | 0.28976 |
+| ICC(A,k) | 0.62006 | 0.62005 | 0.62005 |
+| ICC(C,1) | 0.71484 | 0.71484 | 0.71484 |
+| ICC(C,k) | 0.90932 | 0.90932 | 0.90932 |
 
-wm <- to_wide(ratings)
-# Scalar `type` and `unit` make this a one-row fit, so `[1]` is that row --
-# the coefficient asked for. Elsewhere, select by `term`.
-ic <- function(model, type, unit) {
-  tidy(icc(ratings, subject = subject, rater = rater, score = score,
-           model = model, type = type, unit = unit))$estimate[1]
-}
-ps <- psych::ICC(wm)$results
-psv <- stats::setNames(ps$ICC, ps$type)
-
-rows <- list(
-  c("ICC(1)",   "oneway", "agreement",   "single",  "ICC1"),
-  c("ICC(1,k)", "oneway", "agreement",   "average", "ICC1k"),
-  c("ICC(A,1)", "twoway", "agreement",   "single",  "ICC2"),
-  c("ICC(A,k)", "twoway", "agreement",   "average", "ICC2k"),
-  c("ICC(C,1)", "twoway", "consistency", "single",  "ICC3"),
-  c("ICC(C,k)", "twoway", "consistency", "average", "ICC3k")
-)
-
-comparison <- do.call(rbind, lapply(rows, function(r) {
-  data.frame(
-    coefficient = r[1],
-    intraclass  = ic(r[2], r[3], r[4]),
-    psych       = unname(psv[r[5]]),
-    irr         = irr::icc(wm, model = r[2], type = r[3], unit = r[4])$value
-  )
-}))
-
-knitr::kable(comparison, digits = 5, row.names = FALSE)
-```
-
-| coefficient | intraclass |   psych |     irr |
-|:------------|-----------:|--------:|--------:|
-| ICC(1)      |    0.16574 | 0.16574 | 0.16574 |
-| ICC(1,k)    |    0.44280 | 0.44280 | 0.44280 |
-| ICC(A,1)    |    0.28977 | 0.28976 | 0.28976 |
-| ICC(A,k)    |    0.62006 | 0.62005 | 0.62005 |
-| ICC(C,1)    |    0.71484 | 0.71484 | 0.71484 |
-| ICC(C,k)    |    0.90932 | 0.90932 | 0.90932 |
-
-``` r
-
-max_gap <- max(abs(comparison$intraclass - comparison$psych),
-               abs(comparison$intraclass - comparison$irr))
-```
-
-Every coefficient matches to five decimal places. The largest
-disagreement anywhere in the table is 7.2e-06. That residual is not
-error in either tool. It is the small-sample gap between a REML fit and
-ANOVA mean squares, which vanishes as the sample grows. **On the designs
-classical tools handle, you lose nothing by using `intraclass`.** The
-match with `psych` is in fact checked on every test run of this package.
+Every coefficient agrees to within 0.00001, so no two tools differ by
+more than one in the fifth decimal place. The largest disagreement
+anywhere in the table is 7.2e-06. That residual is not error in either
+tool. It is the small-sample gap between a REML fit and ANOVA mean
+squares, which vanishes as the sample grows. **On the designs classical
+tools handle, you lose nothing by using `intraclass`.** The match with
+`psych` is in fact checked on every test run of this package.
 
 A model-based tool from a different lineage agrees too. `irrICC`
 implements Gwet’s ICCs, estimated by a moment method rather than either
 REML or ANOVA. Its two-way random absolute-agreement coefficient
-(`icc2r`), for which raters give the same score, reproduces
-`intraclass`’s `ICC(A,1)`:
+(`icc2r`), for which raters give the same score, agrees with
+`intraclass`’s `ICC(A,1)` to within 0.00001:
 
 ``` r
 
@@ -115,15 +78,13 @@ gwet_agree <- irrICC::icc2.inter.fn(gwet_frame)$icc2r
 intraclass_a1 <- with(tidy(icc(ratings, subject = subject, rater = rater, score = score,
                               model = "twoway", type = "agreement",
                               unit = "single")), estimate[term == "ICC(A,1)"])
-
-data.frame(
-  source   = c("intraclass ICC(A,1)", "irrICC icc2r (Gwet)"),
-  estimate = c(intraclass_a1, gwet_agree)
-)
-#>                source  estimate
-#> 1 intraclass ICC(A,1) 0.2897700
-#> 2 irrICC icc2r (Gwet) 0.2897638
 ```
+
+| Single-rater absolute agreement on the ratings data |          |
+|-----------------------------------------------------|----------|
+| Package and coefficient                             | Estimate |
+| intraclass ICC(A,1)                                 | 0.28977  |
+| irrICC icc2r (Gwet)                                 | 0.28976  |
 
 ## What does it add? (differentiation)
 
@@ -136,40 +97,26 @@ The `ratings_incomplete` dataset is the same study with four ratings
 missing. In particular, the second rater scored only two of the six
 subjects:
 
-``` r
-
-wide_incomplete <- reshape(ratings_incomplete, idvar = "subject",
-                           timevar = "rater", direction = "wide")
-wide_incomplete <- wide_incomplete[order(as.integer(as.character(wide_incomplete$subject))), ]
-colnames(wide_incomplete) <- c("subject", paste0("rater", 1:4))
-knitr::kable(wide_incomplete, row.names = FALSE)
-```
-
-| subject | rater1 | rater2 | rater3 | rater4 |
-|:--------|-------:|-------:|-------:|-------:|
-| 1       |      9 |      2 |      5 |      8 |
-| 2       |      6 |      1 |      3 |      2 |
-| 3       |      8 |     NA |      6 |      8 |
-| 4       |      7 |     NA |      2 |      6 |
-| 5       |     10 |     NA |      6 |      9 |
-| 6       |      6 |     NA |      4 |      7 |
+| Scores in ratings_incomplete, one row per subject |  |  |  |  |
+|----|----|----|----|----|
+| Subject | Rater 1 | Rater 2 | Rater 3 | Rater 4 |
+| 1 | 9 | 2 | 5 | 8 |
+| 2 | 6 | 1 | 3 | 2 |
+| 3 | 8 | not rated | 6 | 8 |
+| 4 | 7 | not rated | 2 | 6 |
+| 5 | 10 | not rated | 6 | 9 |
+| 6 | 6 | not rated | 4 | 7 |
 
 A classical ANOVA ICC needs a complete rectangle, so `psych` and `irr`
 **listwise-delete** any subject with a missing cell. Here that discards
 the four subjects rater 2 skipped, leaving only two:
 
-``` r
-
-wm_inc <- to_wide(ratings_incomplete)
-surviving <- sum(stats::complete.cases(wm_inc))
-c(observed_cells = nrow(ratings_incomplete),
-  possible_cells = nrow(ratings),
-  subjects_after_listwise_deletion = surviving)
-#>                   observed_cells                   possible_cells 
-#>                               20                               24 
-#> subjects_after_listwise_deletion 
-#>                                2
-```
+| What listwise deletion leaves of ratings_incomplete |       |
+|-----------------------------------------------------|-------|
+| Quantity                                            | Count |
+| Observed ratings                                    | 20    |
+| Possible ratings                                    | 24    |
+| Subjects left after listwise deletion               | 2     |
 
 An ICC computed from two subjects is not usable, whatever its value.
 `intraclass` instead fits the mixed model to **every observed rating**.
@@ -184,13 +131,15 @@ the imbalance:
 fit_inc <- icc(ratings_incomplete, subject = subject, rater = rater, score = score,
                model = "twoway", type = "agreement", unit = "average")
 gl_inc <- glance(fit_inc)
-c(estimate = with(tidy(fit_inc), estimate[term == "ICC(A,k)"]),
-  subjects_used = gl_inc$n_subjects,
-  ratings_used = gl_inc$n_obs,
-  k_eff = gl_inc$k_eff)
-#>      estimate subjects_used  ratings_used         k_eff 
-#>     0.5205561     6.0000000    20.0000000     3.2727273
 ```
+
+| intraclass on ratings_incomplete    |       |
+|-------------------------------------|-------|
+| Quantity                            | Value |
+| ICC(A,k) estimate                   | 0.521 |
+| Subjects used                       | 6     |
+| Ratings used                        | 20    |
+| Effective number of ratings (k_eff) | 3.273 |
 
 All six subjects and all twenty observed ratings contribute, and nothing
 is thrown away. `irrICC` can also fit incomplete data with its own
@@ -261,8 +210,8 @@ details of each, see the companion articles:
 
 If your design is **balanced and complete** and you only need the
 classic McGraw–Wong coefficients, `psych` and `irr` are mature and
-familiar. As the table above shows, they are numerically identical to
-`intraclass` there. Reach for `intraclass` when your data are
+familiar. As the table above shows, they agree with `intraclass` there
+to within 0.00001. Reach for `intraclass` when your data are
 **incomplete or unbalanced**, or when raters are **nested in clusters**.
 Reach for it too when you need an **interval you can trust near the
 boundary**. And reach for it when you want the package to help you
