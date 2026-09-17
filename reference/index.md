@@ -75,6 +75,14 @@ Worked rater-reliability examples used across the docs and vignettes.
   : Rater reliability example (Shrout & Fleiss, 1979)
 - [`ratings_incomplete`](https://jmgirard.github.io/intraclass/reference/ratings_incomplete.md)
   : Rater reliability example with missing cells
+- [`school`](https://jmgirard.github.io/intraclass/reference/school.md)
+  : Simulated multilevel ratings: pupils nested in classrooms
+- [`school_incomplete`](https://jmgirard.github.io/intraclass/reference/school_incomplete.md)
+  : Simulated multilevel ratings with missing cells
+- [`ratings_replicates`](https://jmgirard.github.io/intraclass/reference/ratings_replicates.md)
+  : Simulated ratings with three ratings per subject-rater cell
+- [`ratings_twoway`](https://jmgirard.github.io/intraclass/reference/ratings_twoway.md)
+  : Simulated balanced two-way ratings, twenty subjects by four raters
 
 ## Package overview
 

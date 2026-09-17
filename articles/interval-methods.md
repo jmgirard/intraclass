@@ -79,7 +79,7 @@ data.frame(
 #>       term estimate           mc    bootstrap
 #> 1 ICC(A,1)    0.290 [0.05, 0.71] [0.02, 0.72]
 #> 2 ICC(A,k)    0.620 [0.17, 0.91] [0.09, 0.91]
-#> 3 ICC(C,1)    0.715 [0.33, 0.93] [0.15, 0.90]
+#> 3 ICC(C,1)    0.715 [0.34, 0.92] [0.15, 0.90]
 #> 4 ICC(C,k)    0.909 [0.67, 0.98] [0.41, 0.97]
 ```
 
@@ -380,25 +380,15 @@ one-sided bound at half the complementary level. Separately, at
 `conf_level = 0.99` with two raters the interval can be near-vacuous.
 
 The shipped `ratings` data are too small for the calibration grid (six
-subjects), so the demonstration simulates a balanced two-way design
-inside it:
+subjects). So the demonstration uses the shipped `ratings_twoway` data
+instead. They are a simulated balanced two-way design with 20 subjects
+and 4 raters (see
+[`?ratings_twoway`](https://jmgirard.github.io/intraclass/reference/ratings_twoway.md)):
 
 ``` r
 
-set.seed(88)
-n_s <- 20
-n_r <- 4
-subj_eff <- rnorm(n_s, sd = sqrt(0.6))
-rater_eff <- rnorm(n_r, sd = sqrt(0.1))
-noise <- matrix(rnorm(n_s * n_r, sd = sqrt(0.2)), n_s, n_r)
-sim <- data.frame(
-  subject = factor(rep(seq_len(n_s), times = n_r)),
-  rater = factor(rep(seq_len(n_r), each = n_s)),
-  score = as.numeric(outer(subj_eff, rep(1, n_r)) +
-    outer(rep(1, n_s), rater_eff) + noise)
-)
-mc2 <- tidy(icc(sim, score, subject, rater, type = "agreement", seed = 1))
-ml <- tidy(icc(sim, score, subject, rater, type = "agreement", ci_method = "mpl"))
+mc2 <- tidy(icc(ratings_twoway, score, subject, rater, type = "agreement", seed = 1))
+ml <- tidy(icc(ratings_twoway, score, subject, rater, type = "agreement", ci_method = "mpl"))
 data.frame(
   term = mc2$term,
   estimate = round(mc2$estimate, 3),
@@ -407,7 +397,7 @@ data.frame(
 )
 #>       term estimate   montecarlo          mpl
 #> 1 ICC(A,1)    0.709 [0.47, 0.84] [0.42, 0.87]
-#> 2 ICC(A,k)    0.907 [0.78, 0.96] [0.75, 0.96]
+#> 2 ICC(A,k)    0.907 [0.78, 0.95] [0.75, 0.96]
 ```
 
 The two point estimates agree, from the same REML fit. The `"mpl"`

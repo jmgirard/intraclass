@@ -151,21 +151,11 @@ choose_icc(model = "twoway", type = "consistency", unit = "average", raters = "r
 For **multilevel** data, meaning subjects nested in clusters such as
 pupils in classrooms or patients in clinics, pass a `cluster` column.
 Then [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
-reports subject-level and cluster-level reliability separately:
+reports subject-level and cluster-level reliability separately. The
+shipped `school` data are a simulated example, pupils nested in
+classrooms:
 
 ``` r
-
-set.seed(1)
-grid <- expand.grid(pupil = 1:5, classroom = 1:12, rater = 1:4)
-grid$score <- with(grid,
-  10 + rnorm(12, sd = 1.2)[classroom] +
-    rnorm(60, sd = 0.6)[(classroom - 1) * 5 + pupil] +
-    rnorm(4, sd = 0.4)[rater] + rnorm(nrow(grid), sd = 0.7))
-school <- data.frame(
-  pupil = factor(paste(grid$classroom, grid$pupil, sep = "_")),
-  classroom = factor(grid$classroom),
-  rater = factor(grid$rater),
-  score = grid$score)
 
 icc(school, score, subject = pupil, rater = rater, cluster = classroom, seed = 2024)
 #> ℹ Treating raters with the same label in different clusters as the same raters
@@ -173,25 +163,31 @@ icc(school, score, subject = pupil, rater = rater, cluster = classroom, seed = 2
 #> ℹ If each cluster has its own raters, give them cluster-unique labels or pass
 #>   `design = "nested_in_clusters"`.
 #> ── Intraclass correlation: multilevel two-way random, absolute agreement & consi
-#> Subjects: 60 in 12 clusters | Raters: 4 (random) | Observations: 240 (complete)
+#> Subjects: 80 in 16 clusters | Raters: 4 (random) | Observations: 320 (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   level      index     estimate   95% CI
 #>   Absolute agreement
-#>   subject    ICC(A,1)     0.322   [0.162, 0.484]
-#>   subject    ICC(A,k)     0.655   [0.436, 0.790]
-#>   cluster    ICC(A,1)     0.870   [0.005, 0.973]
-#>   cluster    ICC(A,k)     0.964   [0.018, 0.993]
+#>   subject    ICC(A,1)     0.431   [0.256, 0.565]
+#>   subject    ICC(A,k)     0.751   [0.579, 0.838]
+#>   cluster    ICC(A,1)     0.880   [0.000, 0.972]
+#>   cluster    ICC(A,k)     0.967   [0.000, 0.993]
 #>   Consistency
-#>   subject    ICC(C,1)     0.383   [0.245, 0.544]
-#>   subject    ICC(C,k)     0.713   [0.565, 0.827]
-#>   cluster    ICC(C,1)     0.995   [0.005, 1.000]
-#>   cluster    ICC(C,k)     0.999   [0.018, 1.000]
+#>   subject    ICC(C,1)     0.493   [0.372, 0.615]
+#>   subject    ICC(C,k)     0.796   [0.703, 0.865]
+#>   cluster    ICC(C,1)     1.000   [0.000, 1.000]
+#>   cluster    ICC(C,k)     1.000   [0.000, 1.000]
 #> 
-#> Variance components: cluster 1.036, subject 0.305, rater 0.150, cluster:rater 0.005, residual 0.492
+#> Variance components: cluster 0.998, subject 0.461, rater 0.136, cluster:rater 0.000, residual 0.473
 #> 
 #> This message is displayed once per session.
 ```
+
+The cluster-level consistency rows sit on a boundary here: the
+classroom-by-rater variance is estimated at zero, so `ICC(C,1)` reaches
+1 and its interval spans the whole range. The multilevel article
+([`vignette("multilevel-designs")`](https://jmgirard.github.io/intraclass/articles/multilevel-designs.md))
+explains what each level measures.
 
 ## How many raters do you need?
 
