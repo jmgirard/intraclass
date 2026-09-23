@@ -1151,7 +1151,7 @@ test_that("the merDeriv requirement message names the entry check, not a method"
   # display concern: collapse whitespace and assert at two widths.
   collapse <- function(x) gsub("\\s+", " ", trimws(x))
   expected <- paste0(
-    "to supply the lme4 parameter covariance; every lme4 fit checks for it ",
+    "to supply the lme4 parameter covariance. Every lme4 fit checks for it ",
     "on entry, whatever interval method you ask for."
   )
   for (w in c(2000L, 80L)) {
