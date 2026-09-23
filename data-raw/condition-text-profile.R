@@ -9,7 +9,7 @@
 # WHAT IT READS. Two sources, reported separately.
 #
 # 1. Call sites. `utils::getParseData()` over every `R/*.R` file finds each call
-#    to one of the condition functions in `COND_FUNS` below, and to
+#    to one of the condition functions in `cond_funs` below, and to
 #    `rlang::check_installed()`. The message argument (the first argument, or
 #    `message`; `reason` for `check_installed()`) is assembled statically:
 #    a string literal is itself, `c()` makes one line per element, `paste0()`
@@ -50,7 +50,7 @@
 
 suppressMessages(devtools::load_all(quiet = TRUE))
 
-COND_FUNS <- c(
+cond_funs <- c(
   "abort_intraclass",
   "abort_unsupported",
   "abort_unidentified",
@@ -63,10 +63,10 @@ COND_FUNS <- c(
   "cli_warn",
   "cli_inform"
 )
-ALL_FUNS <- c(COND_FUNS, "check_installed")
-LIMIT <- 25L
+all_funs <- c(cond_funs, "check_installed")
+word_limit <- 25L
 
-ABBREVIATIONS <- c(
+abbreviations <- c(
   "e.g.",
   "i.e.",
   "cf.",
@@ -87,7 +87,7 @@ ABBREVIATIONS <- c(
   "ms.",
   "mrs."
 )
-R8_MARKERS <- c(
+r8_markers <- c(
   "which is why",
   "[Tt]hat is why",
   "\\bprecisely\\b",
@@ -232,7 +232,7 @@ call_sites <- function(files) {
     exprs <- parse(f, keep.source = TRUE)
     pd <- utils::getParseData(exprs)
     top <- pd[pd$parent == 0 & pd$token == "expr", ]
-    hits <- pd[pd$token == "SYMBOL_FUNCTION_CALL" & pd$text %in% ALL_FUNS, ]
+    hits <- pd[pd$token == "SYMBOL_FUNCTION_CALL" & pd$text %in% all_funs, ]
     for (i in seq_len(nrow(hits))) {
       call_id <- pd$parent[pd$id == hits$parent[i]]
       txt <- utils::getParseText(pd, call_id)
@@ -349,7 +349,7 @@ split_sentences <- function(p) {
   for (piece in pieces) {
     cand <- if (nzchar(pending)) paste(pending, piece) else piece
     last <- tolower(sub(".*\\s", "", cand))
-    held <- last %in% ABBREVIATIONS || grepl("(^|\\s)[A-Z]\\.$", cand)
+    held <- last %in% abbreviations || grepl("(^|\\s)[A-Z]\\.$", cand)
     if (held) {
       pending <- cand
     } else {
@@ -393,8 +393,8 @@ count_dashes <- function(p) {
 measure <- function(label, raw) {
   p <- normalize(raw)
   sents <- split_sentences(p)
-  long <- sents[vapply(sents, n_words, integer(1)) > LIMIT]
-  r8 <- R8_MARKERS[vapply(R8_MARKERS, grepl, logical(1), x = p, perl = TRUE)]
+  long <- sents[vapply(sents, n_words, integer(1)) > word_limit]
+  r8 <- r8_markers[vapply(r8_markers, grepl, logical(1), x = p, perl = TRUE)]
   list(
     label = label,
     text = p,
@@ -463,7 +463,7 @@ report <- function(prof, verbose = FALSE, dump = FALSE) {
     length(res),
     n_sent,
     n_dash,
-    LIMIT,
+    word_limit,
     n_long,
     n_r8,
     length(unres)
