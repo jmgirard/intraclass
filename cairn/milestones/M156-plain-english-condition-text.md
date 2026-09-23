@@ -2,14 +2,14 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M156: Plain-English pass over the condition text, and NEWS under R7/R8
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP1, GP8
 - **Resolves:** —
 - **Surface tier:** user-facing — users read these errors, warnings, install prompts and release notes
-- **Branch/PR:** —
+- **Branch/PR:** m156-plain-english-condition-text
 
 ## Goal
 
