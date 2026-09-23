@@ -142,7 +142,8 @@ detect_multilevel_design <- function(df, call = rlang::caller_env()) {
              Hove et al. (2022).",
         i = "On incomplete data this is often a ragged crossed (Design 1) design. \\
              Set {.code design = \"crossed\"} to declare it (validated against the \\
-             data). For a nested design, each rater must rate a single cluster."
+             data). Or, for a nested design, each rater must rate a single \\
+             cluster."
       ),
       call = call
     )
