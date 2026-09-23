@@ -137,12 +137,12 @@ detect_multilevel_design <- function(df, call = rlang::caller_env()) {
     abort_unidentified(
       c(
         "The raters are neither fully crossed with nor fully nested in clusters.",
-        i = "Some raters rate in several clusters while others rate in only one, \\
-             which is not unambiguously one of the multilevel designs of ten Hove \\
-             et al. (2022).",
-        i = "On incomplete data this is often a ragged crossed (Design 1) design: \\
-             set {.code design = \"crossed\"} to declare it (validated against the \\
-             data), or each rater must rate a single cluster for a nested design."
+        i = "Some raters rate in several clusters while others rate in only one. \\
+             That mix is not unambiguously one of the multilevel designs of ten \\
+             Hove et al. (2022).",
+        i = "On incomplete data this is often a ragged crossed (Design 1) design. \\
+             Set {.code design = \"crossed\"} to declare it (validated against the \\
+             data). For a nested design, each rater must rate a single cluster."
       ),
       call = call
     )
@@ -161,7 +161,7 @@ detect_multilevel_design <- function(df, call = rlang::caller_env()) {
       "The raters are neither fully crossed with nor fully nested in subjects.",
       i = "Within a cluster some raters rate a single subject while others rate \\
            several, which is not unambiguously one of the multilevel designs.",
-      i = "Design 2 has each rater rate several subjects in its cluster; Design 3 \\
+      i = "Design 2 has each rater rate several subjects in its cluster. Design 3 \\
            has each rater rate a single subject.",
       i = "On {.emph incomplete} data missing cells can blur this: declare the \\
            design with {.code design = \"nested_in_clusters\"} or \\

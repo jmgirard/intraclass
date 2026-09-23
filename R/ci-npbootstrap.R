@@ -143,7 +143,7 @@ npb_guard_sb_pole <- function(ends, m, method, call) {
        {.code unit = {.val {m}}} on this data.",
       i = "The Spearman-Brown projection has a pole at \\
            {.field rho = {.val {round(pole, 4)}}}, and an ICC(1) confidence limit \\
-           of {.val {round(unname(crossed[[1]]), 4)}} lies past it -- the projected \\
+           of {.val {round(unname(crossed[[1]]), 4)}} lies past it. The projected \\
            limit would fall outside the ICC's support rather than inside it.",
       i = "Project to a smaller {.arg unit}, use {.code unit = \"average\"}, or use \\
            {.code ci_method = \"montecarlo\"} for this projection."
@@ -213,7 +213,7 @@ npbootstrap_ci <- function(
       c(
         "The one-way transformed bootstrap-t interval is undefined for this data.",
         i = "The studentized pivot needs a finite {.field log F} and a non-zero \\
-             jackknife SE; this data gives log F = {.val {signif(obs$logf, 6)}} \\
+             jackknife SE. This data gives log F = {.val {signif(obs$logf, 6)}} \\
              and jackknife SE = {.val {signif(obs$se_ij_logf, 6)}}.",
         i = "Inspect the data before retrying.",
         hint
@@ -265,7 +265,7 @@ npbootstrap_ci <- function(
         "The one-way transformed bootstrap-t interval could not be computed: \\
          {.val {n_bad}} of {.val {boot_samples}} resamples were degenerate \\
          (SSA = 0 or SE = 0).",
-        i = "The design is too small to resample stably; use a larger design.",
+        i = "The design is too small to resample stably. Use a larger design.",
         hint
       ),
       class = "intraclass_singular_fit",

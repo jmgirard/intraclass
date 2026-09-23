@@ -506,7 +506,9 @@ glue_exprs <- function(text) {
   )
   m <- unlist(regmatches(strs, gregexpr("\\{[^{}]*\\}", strs)))
   m <- m[!grepl("^\\{[.?]", m)]
-  sort(m)
+  # Unnamed: `vapply()` names each element by its literal's text, and a
+  # reworded literal must not count as a changed expression.
+  sort(unname(m))
 }
 
 compare_tokens <- function(ref, files = Sys.glob("R/*.R")) {
@@ -643,6 +645,13 @@ self_test <- function() {
       glue_exprs("x <- \"{m} rows\"")
     ),
     "a changed glue expression differs"
+  )
+  check(
+    identical(
+      glue_exprs("x <- \"Kept {n} rows; see why.\""),
+      glue_exprs("x <- \"Kept {n} rows. See why.\"")
+    ),
+    "reworded text around the same glue expression compares equal"
   )
   check(length(hint_bullets()) > 0L, "the hint builders emit bullets")
   cat(if (ok) "self-test: OK\n" else "self-test: FAILED\n")

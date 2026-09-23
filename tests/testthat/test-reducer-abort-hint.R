@@ -613,7 +613,7 @@ ac5_expected <- list(
     "The one-way transformed bootstrap-t interval is undefined for this ",
     "data.\n",
     "i The studentized pivot needs a finite log F and a non-zero ",
-    "jackknife SE; this data gives log F = Inf and jackknife SE = NaN.\n",
+    "jackknife SE. This data gives log F = Inf and jackknife SE = NaN.\n",
     "i Inspect the data before retrying."
   )
 )

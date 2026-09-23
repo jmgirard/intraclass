@@ -102,7 +102,7 @@ warn_fixed_raters <- function(.envir = rlang::caller_env()) {
   warn_intraclass(
     c(
       "Modeling raters as {.strong fixed} restricts inference to exactly these \\
-       raters; you cannot generalize to other raters.",
+       raters. You cannot generalize to other raters.",
       i = "For interrater reliability, the two-way {.strong random} model \\
            ({.code raters = \"random\"}) is the recommended default \\
            (ten Hove et al. 2024; McGraw & Wong 1996, Case 2).",
