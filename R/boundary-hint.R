@@ -463,26 +463,26 @@ boundary_fenced_hint <- function(
       if (is.null(seed)) {
         return(c(
           i = paste0(
-            "{.code ci_method = \"npbootstrap\"}, run on your data with \\
+            "{.code ci_method = \"npbootstrap\"} was run on your data with \\
              {.code seed = ",
             hint_verify_seed,
-            "}, returns an interval where ",
+            "} and returns an interval where ",
             contrast,
-            " cannot: the transformed \\
+            " cannot. The transformed \\
              bootstrap-t resamples subjects rather than simulating from the \\
              fitted model. Pass {.code seed = ",
             hint_verify_seed,
-            "} to reproduce that verified run; an unseeded call resamples \\
+            "} to reproduce that verified run. An unseeded call resamples \\
              differently and can fail on a small design."
           )
         ))
       }
       return(c(
         i = paste0(
-          "{.code ci_method = \"npbootstrap\"}, run on your data under your \\
-           {.code seed}, returns an interval where ",
+          "{.code ci_method = \"npbootstrap\"} was run on your data under your \\
+           {.code seed} and returns an interval where ",
           contrast,
-          " cannot: the transformed bootstrap-t resamples subjects rather than \\
+          " cannot. The transformed bootstrap-t resamples subjects rather than \\
            simulating from the fitted model."
         )
       ))
@@ -506,27 +506,29 @@ boundary_fenced_hint <- function(
     # that would actually mislead; the conditional statement lives in `?icc`
     # and the per-level figures in the interval-methods article.
     blurb <- c(
-      searle = "{.code ci_method = \"searle\"} (best calibrated when the data \\
-                are close to normal)",
-      burch = "{.code ci_method = \"burch\"} (dips below the nominal level in \\
-               fewer cells -- but measured to under-cover on heavy-tailed or \\
-               skewed subject effects, as the default does)"
+      searle = "{.code ci_method = \"searle\"}, best calibrated when the data \\
+                are close to normal",
+      burch = "{.code ci_method = \"burch\"}, which dips below the nominal level \\
+               in fewer cells. But it was measured to under-cover on heavy-tailed \\
+               or skewed subject effects, as the default does"
     )
     lead <- if (length(named) > 1L) {
       paste0(
-        "Two interval methods, run on your data, return an interval where ",
+        "Two interval methods were run on your data and return an interval \\
+         where ",
         contrast,
-        " cannot: "
+        " cannot. One is "
       )
     } else {
       paste0(
-        "An interval method, run on your data, returns an interval where ",
+        "An interval method was run on your data and returns an interval \\
+         where ",
         contrast,
-        " cannot: "
+        " cannot. It is "
       )
     }
     return(c(
-      i = paste0(lead, paste(blurb[named], collapse = " and "), ".")
+      i = paste0(lead, paste(blurb[named], collapse = ". The other is "), ".")
     ))
   }
 
@@ -551,9 +553,10 @@ boundary_fenced_hint <- function(
   }
   c(
     i = paste0(
-      "{.code ci_method = \"mpl\"}, run on your data, returns an interval where ",
+      "{.code ci_method = \"mpl\"} was run on your data and returns an interval \\
+       where ",
       contrast,
-      " cannot: the modified profile-likelihood interval was just verified on \\
+      " cannot. The modified profile-likelihood interval was just verified on \\
        this dataset at this boundary, at the cost of being conservative."
     )
   )
@@ -580,25 +583,25 @@ boundary_engine_hint <- function(
     return(character(0))
   }
   blurb <- c(
-    bootstrap = "{.code ci_method = \"bootstrap\"} (refits the fitted model to \\
-                 simulated responses, so it never leans on the parameter \\
-                 covariance)",
-    montecarlo = "{.code ci_method = \"montecarlo\"} (draws from the fitted \\
-                  parameter covariance on the engine's log scale)"
+    bootstrap = "{.code ci_method = \"bootstrap\"}, which refits the fitted \\
+                 model to simulated responses, so it never leans on the \\
+                 parameter covariance",
+    montecarlo = "{.code ci_method = \"montecarlo\"}, which draws from the \\
+                  fitted parameter covariance on the engine's log scale"
   )
   lead <- if (length(named) > 1L) {
     paste0(
-      "Two model-based interval methods, run on your data, return an interval \\
-       where ",
+      "Two model-based interval methods were run on your data and return an \\
+       interval where ",
       contrast,
-      " cannot: "
+      " cannot. One is "
     )
   } else {
     paste0(
-      "A model-based interval method, run on your data, returns an interval \\
-       where ",
+      "A model-based interval method was run on your data and returns an \\
+       interval where ",
       contrast,
-      " cannot: "
+      " cannot. It is "
     )
   }
   # `boot_samples` means DIFFERENT things to different methods -- subject
@@ -633,20 +636,20 @@ boundary_engine_hint <- function(
       hint_verify_seed,
       "}",
       spec,
-      "; pass the same to reproduce ",
+      ". Pass the same to reproduce ",
       if (many) "them" else "it",
-      ", as an unseeded call draws differently and can fail on a small design."
+      ". An unseeded call draws differently and can fail on a small design."
     )
   } else {
     paste0(
       if (many) {
-        ", both run under your {.code seed}"
+        ". Both were run under your {.code seed}"
       } else {
-        ", run under your {.code seed}"
+        ". It was run under your {.code seed}"
       },
       spec,
       "."
     )
   }
-  c(i = paste0(lead, paste(blurb[named], collapse = " and "), tail))
+  c(i = paste0(lead, paste(blurb[named], collapse = ". The other is "), tail))
 }

@@ -585,7 +585,10 @@ test_that("verification passes no hint to any candidate it runs (AC4)", {
   expect_false("hint" %in% names(seen[["burch"]]))
 })
 
-# The three shipped messages AC5 freezes, at 703fc1b. The resample guard is
+# The three shipped messages AC5 freezes, at 703fc1b, re-frozen by the M156
+# prose pass: only the npbootstrap bullet's semicolon became a full stop, and
+# the pinned property (no hint bullet where nothing works) is unchanged. The
+# resample guard is
 # outside this criterion by construction: `gen_mse0` never reaches it. The
 # bootstrap guard reports a glmmTMB CONVERGENCE COUNT, a property of the
 # optimizer on this platform's BLAS rather than of the message, so that integer
@@ -926,7 +929,7 @@ test_that("a two-method engine bullet says whose resample count it names", {
   # naming a number.
   expect_match(
     boundary_engine_hint(function(m) TRUE, "the default", seed = 3L),
-    "both run under your",
+    "Both were run under your",
     fixed = TRUE
   )
 })
