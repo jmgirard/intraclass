@@ -44,7 +44,7 @@ Bring the text of every condition the package raises, and `NEWS.md`, under the h
 ## Tasks
 
 - [x] T1: Write `data-raw/condition-text-profile.R`, a hand-run ruler that CI does not run (D-021). It finds the call sites with `getParseData()` and assembles each message and each `boundary-hint.R` bullet branch. It counts R1 and R2, sweeps R8, and with `--verbose` prints each offender with file:line. Its `--self-test` plants a spaced dash and a 26-word sentence and sees both fail. Its `--compare-tokens <ref>` reports the AC4 token and `{…}` differences against a ref read by `git show`, never by a checkout. Record the baseline in the work log. The ruler stays frozen for the pass.
-- [ ] T2: Rewrite the scope paragraph of `cairn/doctrine/prose-style.md` (lines 13–16). Add the condition-text surface, its R7 reason and its ruler. Compress other text so the file stays under its budget.
+- [x] T2: Rewrite the scope paragraph of `cairn/doctrine/prose-style.md` (lines 13–16). Add the condition-text surface, its R7 reason and its ruler. Compress other text so the file stays under its budget.
 - [ ] T3: Reword the messages in `R/icc.R` (82 sites). Update each test that quotes them in the same commit.
 - [ ] T4: Reword the messages and `check_installed()` reasons in `R/engine-*.R`, `merderiv_reason()` included. Update their tests.
 - [ ] T5: Reword the messages in `R/abort.R`, `R/choose-icc.R`, `R/ci-*.R`, `R/d-study.R`, `R/design.R` and `R/autoplot*.R`. Update their tests and `tests/testthat/_snaps/`.
@@ -61,3 +61,4 @@ Bring the text of every condition the package raises, and `NEWS.md`, under the h
 - 2026-09-23: plan chose a new R ruler over a condition-text mode in `prose-profile.py`, because assembling the hint bullets needs R to run the builders. D-029's extend-first note was about M116's test. Falsified by a Python mode that reaches the same assembled text.
 - 2026-09-23: implement gate skipped, nothing left open by the plan.
 - 2026-09-23: T1 done. `data-raw/condition-text-profile.R` written, `--self-test` OK (planted 26-word sentence, em dash via assignment, spaced `--` via `paste0`, R8 marker, bullet split folds, class and glue changes caught). Baseline: sites 208, lines 437, sentences 455, R1 dashes 12, R2 over 25 words 45, R8 0; 7 sites leave only `hint` unresolved, which the 23 enumerated bullets cover; largest variant count per site 2. `--compare-tokens main` 0 differences over 24 files.
+- 2026-09-23: T2 done. The doctrine scope paragraph now names condition text, its ruler and the R7 reason; 118 lines, 7,036 bytes by `wc -l -c`, so no other compression was needed.

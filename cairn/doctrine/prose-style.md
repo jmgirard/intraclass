@@ -5,15 +5,17 @@
      here rather than let the module grow. -->
 
 This page owns the writing standard for every surface a user reads: the
-vignettes, the roxygen blocks that become `man/`, `README.Rmd`, and `NEWS.md`.
-It states eight rules, R1–R8: two measured by a committed ruler, two swept by
-a committed term table and a hand-run grep, four judgment at a read-through.
+vignettes, the roxygen blocks that become `man/`, `README.Rmd`, `NEWS.md`, and
+the condition text: the errors, warnings, notes and install reasons the package
+raises, with the method hints `R/boundary-hint.R` builds (M156). It states
+eight rules, R1–R8: two measured by a committed ruler, two swept by a committed
+term table and a hand-run grep, four judgment at a read-through.
 
-It does not own status, task lists, or the record of which pass applied it —
-those live in `cairn/ROADMAP.md` and the milestone files. It does not reach
-`cli` condition text in `R/abort.R` and `R/boundary-hint.R`: that surface is
-guarded by `data-raw/check-abort-remedy-verdicts.R` and pinned by
-rendered-message tests, and stays a ROADMAP candidate row.
+Condition text is held to R1–R6 and R8, measured by
+`Rscript data-raw/condition-text-profile.R` (its header says what it
+assembles). R7 does not apply: a message is read alone, so it has no file in
+which a first use occurs. Status and the record of each pass live in
+`cairn/ROADMAP.md` and the milestone files.
 
 ## The rules
 
