@@ -28,7 +28,7 @@ Bring the text of every condition the package raises, and `NEWS.md`, under the h
 - [x] AC3: Each reworded message and hint states the same claim as the text it replaced, never wider or narrower (R6's rule line), judged per hunk of `git diff main -- R/`; and the prose beside each rendered condition in the built articles (found by searching `docs/articles/*.html` output blocks for `Error` and `Warning` lines after `pkgdown::build_site()`) and in `README.md` still describes the condition it sits beside.
 - [x] AC4: The pass changes what conditions say, never which conditions fire or how: the `utils::getParseData()` token stream of each `R/*.R` file differs from `main`'s only in the string-literal tokens AC1 assembles, the tokens joining them into a message (commas, parentheses, `c`, `paste0`, `paste`, cli bullet names) and `if`/`else` tokens whose condition expression is unchanged; the `{…}` expressions inside each literal are unchanged; and `test-boundary-abort-hint.R`, `test-reducer-abort-hint.R` and `test-abort-remedy-truthfulness.R` pass with each test's asserted set of named methods unchanged.
 - [x] AC5: `cairn/doctrine/prose-style.md` names condition text as a governed surface under R1–R6 and R8, states why R7 does not apply to it, names the `condition-text-profile.R` procedure, no longer says it does not reach `cli` condition text, and stays within its stated budget (< 120 lines, < 8,000 bytes by `wc -l -c`).
-- [ ] AC6: In `NEWS.md`, each glossary term's first prose use carries its gloss verbatim, as `python3 data-raw/prose-terms.py NEWS.md` reports with `grep -n 'glossary.html' NEWS.md` finding no link (R7); the R8 markers find no hit; and per hunk of `git diff main -- NEWS.md` no claim widens or narrows (R6).
+- [x] AC6: In `NEWS.md`, each glossary term's first prose use carries its gloss verbatim, as `python3 data-raw/prose-terms.py NEWS.md` reports with `grep -n 'glossary.html' NEWS.md` finding no link (R7); the R8 markers find no hit; and per hunk of `git diff main -- NEWS.md` no claim widens or narrows (R6).
 - [x] AC7: `NEWS.md` carries one Documentation bullet saying the messages were reworded and nothing computed changed; `devtools::test()` reports 0 failures and 0 warnings, `R CMD check`'s Status line reads OK, and `air format --check .` and `lintr::lint_package()` are clean.
 
 ## Coverage
@@ -109,3 +109,39 @@ Findings. [O] is the diff reviewer, [B] the blame-history reviewer, [P] the prio
 - O6, O7, O8, B1: `NEWS.md` glosses copied verbatim from `data-raw/glossary-terms.tsv` are narrower than or at odds with the package (D-study counts, Monte-Carlo method, two-way, cluster level). Proposed: follow-up candidate row to revise those glossary glosses.
 - P1: two `NEWS.md` bullets grew to 875 and 842 bytes, over the old 500-byte guide. Proposed: follow-up, joined to the glossary row, because the glosses caused the growth.
 - O17, P2, P3: tests keep their method sets, the hint tense holds, and the `R/design.R` "or" is intact. Noted, no action.
+
+### Re-review (2026-09-23, after T10)
+
+Sync: `origin/main` = `main` = merge base (badf2a6), no merge needed. No PR exists (resume route d). Every criterion was re-run on HEAD fb6bee2, because T10 changed `R/icc.R`, `R/engine-brms.R` and `NEWS.md`.
+
+- AC1 evidence (fresh): ruler sites 208, lines 437, sentences 574, R1 0, R2 0, R8 0, exit 0. `--self-test` OK. `--dump` has 24 `(bullet)` lines. A `grep` for em dash, en dash and spaced `--` over the dump finds none.
+- AC2 evidence (fresh): each of the seven R8 markers over the dump: 0 hits.
+- AC3 evidence (fresh): fresh install, then `pkgdown::build_site()`. The same five package conditions render, with the T10 text of the fixed-rater projection error. The prose beside each still describes it. `README.md` renders none. R6 per hunk of `git diff main -- R/`: findings R2-O1 and R2-O2 below each show a sentence split that dropped a limiting phrase. Both messages fire only in the limited case (fixed raters, and a fit with no replicates), so the claim a user reads there is unchanged. This review judges them wording fixes, not an AC3 failure, and the gate decides.
+- AC4 evidence (fresh): `--compare-tokens main` 24 files, 0 differences. The [O] reviewer found no class, field, `if`-condition, glue or bullet-name change. `test-boundary-abort-hint.R` 1331, `test-reducer-abort-hint.R` 182, `test-abort-remedy-truthfulness.R` 29 expectations, 0 failures.
+- AC5 evidence (fresh): the scope paragraph names condition text, the R7 reason and the ruler, and has no "does not reach" exclusion. `wc -l -c`: 118 lines, 7,036 bytes.
+- AC6 evidence: `python3 data-raw/prose-terms.py NEWS.md` reports every first use glossed or linked, exit 0. `grep -c glossary.html NEWS.md` is 0. The seven R8 markers find 0 hits in `NEWS.md`. R6 per hunk: the brms bullet now gives the reason "Because the interval comes from the posterior draws", which matches the lock in `R/icc.R`. The [O] and [B] reviewers found no other claim widened or narrowed by a rewrite. The Monte-Carlo gloss (R2-O3) is verbatim glossary text that O7 already deferred.
+- AC7 evidence (fresh): the Documentation bullet is at `NEWS.md` lines 20 to 25. `devtools::test()`: FAIL 0, WARN 0, SKIP 2. `devtools::check()`: raw `Status: OK`, 0 errors, 0 warnings, 0 notes. `air format --check .` exit 0. `lintr::lint_package()` 0 lints.
+- Gate: `cairn_validate.py` all checks passed (one advisory: 11 tasks over the 10-task tripwire). `devtools::document()` leaves no diff. `check-mpl-doc-claims.py` 64/0, `check-record-claims.py` 7/0. No `DESIGN.md` principle changed.
+
+Round-2 findings, most severe first within each reviewer. [B] found no new regressions and confirmed O9, O10, O11, O12, B2 and O14 against the code.
+
+- R2-O1: `R/icc.R` fixed-rater projection abort. The O12 split leaves "There is no 'average of m freshly sampled raters' to project to." without its "so" link to the fixed-rater frame. Proposed: fix now, "So there is no…".
+- R2-O2: `R/d-study.R` occasion abort. The split leaves "Pure error and the subject-by-rater interaction are confounded." without the "Without replicated ratings" condition. Proposed: fix now, "…are then confounded."
+- R2-O3: `NEWS.md` Monte-Carlo gloss "built by simulating from the fitted model" reads like the parametric bootstrap. Proposed: follow-up, already in the glossary-gloss candidate row (O7).
+- R2-O4: `NEWS.md` Documentation bullet. "The errors… the package raises" also covers forwarded third-party text, and "are reworded" implies every message changed. Proposed: fix now, "The package's own errors, warnings, notes and install prompts now use plainer English."
+- R2-O5: `NEWS.md` "…to other rater counts, each component a share of the total variation…" reads as a fragment. Proposed: fix now, "…, and each component is a share…", keeping both glosses in the sentence.
+- R2-O6: `NEWS.md` "it adds a cluster level": "it" can point to the column or to the ICC. Proposed: fix now, "the column also adds a cluster level".
+- R2-O7: `R/boundary-hint.R` unseeded tail lost its "as" reason link. Proposed: fix now, "Pass the same to reproduce it, because an unseeded call draws differently…". No test pins the text.
+- R2-O8: `R/icc.R` "This is because its Spearman-Brown pole…" is wordy. Proposed: reject, because the claim is right and O11 fixed it.
+- R2-O9: `R/icc.R` brms abort "…the following designs so far. They are…". Proposed: reject, because one sentence runs past 25 words and "They are" names the designs.
+- R2-O10: the hint bullets mix "was run" with "returns". Proposed: reject, as P2 judged in round 1.
+- R2-O11: `R/icc.R` mpl abort, no comma before "use". Proposed: fix now.
+- R2-O12: no class, field or condition change. Noted.
+- R2-O13: `test-reducer-abort-hint.R` comment has a broken wrap, no commit, and calls an abort info line a "bullet". Proposed: fix now, rewrapped, citing b8600cb.
+- R2-O14: `cairn/doctrine/prose-style.md` later sections name only `prose-profile.py` as the R1/R2 gate, and the scope rewrite dropped the pointer to `check-abort-remedy-verdicts.R`. Proposed: fix now, within the 120-line budget.
+- R2-O15: the ruler's 64-variant cap is silent, and the header does not say `hint_bullets()` covers one argument set. Proposed: follow-up, added to the ruler blind-spots candidate row.
+- R2-O16: `data-raw/README.md` line 77 is 93 characters, doctrine line 11 is 81, and `NEWS.md` lines 63 to 66 wrap raggedly. Proposed: fix now.
+- R2-O17: tests and vignettes that quote messages are consistent. Noted.
+- R2-P1: the `NEWS.md` brms bullet grew to 668 bytes at T10. Proposed: follow-up, joined to the glossary row with P1.
+- R2-P2: AC3 was not re-checked after T10. Resolved by this round's site rebuild. Noted.
+- R2-P3: the credible-interval gloss hard-codes "usually 95%". Proposed: follow-up, the glossary row.
