@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-24 (M156 done pass). M156 archived, and M153 rotated out with the `roadmap-terminal-rows` ledger row. The M152 LESSONS line was extended (19,998 bytes). No D-entry, Known issue or RB/RR pair. The four doctrine modules are within budget. validate green._
+_Last hygiene check: 2026-09-24 (M157 done pass). M157 archived, and M154 rotated out with the `roadmap-terminal-rows` ledger row. One LESSONS line added, and the M71 and M72 lines trimmed (19,993 bytes). No D-entry, Known issue or RB/RR pair. The four doctrine modules are within budget. validate green._
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,11 +9,10 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M157 | Plain-English printed guidance, corrected glossary glosses, and no record IDs in messages | review | — | normal | milestones/M157-plain-english-printed-text-glosses.md |
+| M157 | Plain-English printed guidance, corrected glossary glosses, and no record IDs in messages | done | — | normal | milestones/archive/M157-plain-english-printed-text-glosses.md |
 | M156 | Plain-English pass over the condition text, and NEWS under R7/R8 | done | — | normal | milestones/archive/M156-plain-english-condition-text.md |
 | M155 | Comparison tables as hidden `gt` chunks | done | M154 | normal | milestones/archive/M155-gt-comparison-tables.md |
-| M154 | Ship the vignettes' simulated datasets from `data-raw/` | done | — | normal | milestones/archive/M154-ship-vignette-datasets.md |
-<!-- terminal-row retention: retention is 3 (tracking-rules Weight caps); M153 rotated out 2026-09-24 at the M156 done pass as the oldest terminal row by merge order, its archive file still resolving there. Kept: M156, M155, M154 [claim:roadmap-terminal-rows]. -->
+<!-- terminal-row retention: retention is 3 (tracking-rules Weight caps); M154 rotated out 2026-09-24 at the M157 done pass as the oldest terminal row by merge order, its archive file still resolving there. Kept: M157, M156, M155 [claim:roadmap-terminal-rows]. -->
 <!-- rows grouped by status; keep only the 3 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
