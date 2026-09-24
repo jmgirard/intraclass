@@ -80,6 +80,9 @@ Bring the text of every condition the package raises, and `NEWS.md`, under the h
 - 2026-09-23: claim audit: 16 claims read, 2 corrected — NEWS.md
 - 2026-09-23: claim-audit corrections, re-read once by the same reader and judged true. "except between citations" became "except between references", because "(M20; ADR-030)" is not a citation. The brms reason became "Because the interval comes from the posterior draws", because the lock in `R/icc.R` rests on the credible interval, not the point estimate. `test-news-brms-claims.R` passes on a fresh install.
 - 2026-09-23: T10 done. The full suite at 975c5c1 shows FAIL 0, WARN 0, SKIP 2, and `lintr` finds 0 lints. The later commit changed only NEWS, and its brms test passes. `air` is clean. Status → review.
+- 2026-09-23: re-review. Fresh evidence for AC1 to AC7, and AC6 ticked. Three fresh reviewers returned round-2 findings, recorded in the Review section. No return.
+- 2026-09-23: step-7 approval: m156-plain-english-condition-text approved for merge (fix-now edits first).
+- 2026-09-23: fix-now edits landed in db96abe, and R2-O7 was reverted because it failed AC1's ruler. After a fresh install, the full suite shows FAIL 0, WARN 0, SKIP 2.
 
 ## Review
 
