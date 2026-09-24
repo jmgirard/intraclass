@@ -68,8 +68,9 @@ methods*](interval-methods.html#the-opt-in-boundary-robust-methods).
 
 ## Confidence interval vs. credible interval
 
-A **confidence interval** is a range built so that, across many hypothetical
-repetitions of the study, 95% of such ranges would contain the true ICC. The
+A **confidence interval** is a range built with many hypothetical repetitions
+of the study in mind. Across them, the chosen share (95% by default) of such
+ranges would contain the true ICC. The
 frequentist engines output one. A **credible interval** is a range that
 holds the share of the posterior probability that the confidence level sets.
 That level is the `conf_level` argument, 0.95 by default. The Bayesian `brms`
@@ -118,7 +119,7 @@ replicates*](d-studies-and-replicates.html).
 
 ## D-study (decision study)
 
-A forward-looking projection that projects the fitted variance components to
+A forward-looking projection of the fitted variance components to
 other rater or occasion counts. It asks how reliable the mean of some other
 number of raters (or occasions) would be. It reuses the variance components you
 already estimated, with no refitting. It answers "how many raters do I
@@ -321,7 +322,7 @@ means. The **subject level** asks
 how reliably raters distinguish subjects *within* a cluster. The **cluster
 level** asks how reliably raters distinguish *cluster means*. `icc()` reports
 both from one fit. See [*Multilevel
-designs*](multilevel-designs.html#subject-level-vs.-cluster-level).
+designs*](multilevel-designs.html#subject-level-vs--cluster-level).
 
 ## Transformed bootstrap-*t*
 

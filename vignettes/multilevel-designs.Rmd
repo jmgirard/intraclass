@@ -20,9 +20,10 @@ ICC*](choosing-an-icc.html) articles treat the **subject** as the object of
 measurement. But subjects are often nested in higher-level **clusters**, such
 as pupils in classrooms or patients in clinics. Then "reliability" splits in
 two: how well raters tell *subjects* apart, and how well they tell *clusters*
-apart. Here the subject level is reliability within a cluster, and the
-cluster level is reliability of cluster means. The second question is the
-[cluster-level](glossary.html#subject-level-vs--cluster-level) ICC. Those are different questions with
+apart. The second is the
+[cluster-level](glossary.html#subject-level-vs--cluster-level) ICC, where the
+subject level is reliability within a cluster, and the cluster level is
+reliability of cluster means. Those are different questions with
 different answers. Reporting one when you needed the other can be badly
 misleading. Ignoring the nesting gives a [conflated
 ICC](glossary.html#conflated-icc), the single-level ICC that ignores

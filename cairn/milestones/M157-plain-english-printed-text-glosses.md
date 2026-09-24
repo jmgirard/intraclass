@@ -69,6 +69,7 @@ Finish three plain-English fixes that M156 left as candidate rows: the printed g
 - 2026-09-23: claim audit: 34 claims read, 6 corrected — R/autoplot.R, R/choose-icc.R, vignettes/choosing-an-icc.Rmd, NEWS.md, R/d-study.R, R/icc.R, vignettes/comparison-with-other-packages.Rmd, vignettes/interval-methods.Rmd. The re-read found all six holding. The reader also flagged the crossed-design question in `choosing-an-icc.Rmd`, which was reworded.
 - 2026-09-23: discovered sub-task (minor amendment). AC6's pattern needs 2–3 digits after `M`, so it misses single-digit IDs. A wider sweep found "(M9)" in `R/d-study.R` and "(M5)" and "(spec M9)" in `R/icc.R`. All three were removed, the NEWS bullet now says four messages, and the wider sweep finds 0.
 - 2026-09-23: T8 done. `air format --check` clean. `document()` makes no diff. Every `data-raw/` checker passes `--self-test` and a normal run. `devtools::check()` on d8d3db2: 0 errors, 0 warnings, 0 notes, with the full suite passing inside it. AC1, AC2 and AC5–AC7 were re-measured after the audit fixes, and all hold. Status set to review.
+- 2026-09-23: step-7 approval: m157-plain-english-printed-text-glosses approved for merge. The user accepted the proposed triage: fix findings 1, 2, 5, 6, 7 and 8 (multilevel article only), and reject 3, 4, 9, 10 and 12.
 
 ## Decisions
 
@@ -85,3 +86,16 @@ Fresh evidence, 2026-09-23, on branch head c814a5b (main at 556be90, not moved).
 - AC7: `git diff -U0 main -- NEWS.md` touches 6 bullets. Measured alone, they give 38 sentences, 0 dashes, 0 over 25 words, and 0 R8 marker hits. The added Documentation bullet says the printed guidance was reworded and that five glossary definitions were corrected.
 - Consistency gate: `cairn_validate.py` all checks passed (exit 0). No DESIGN principle changed, so `cairn_impact` is skipped. `document()` makes no diff. `pkgdown::check_pkgdown()` reports no problems. README.md matches README.Rmd. NEWS has the Documentation bullet. No new top-level files. `check()` is clean as above.
 - Independent review, three lenses. The blame-history reviewer [S] found nothing. The prior-review reviewer [S] found nothing: the archived M151/M153/M156 findings are resolved, not reintroduced, and the PR-comment probe is empty. The diff-bug reviewer [O] reported 12 minor findings, ranked. Their dispositions are recorded at the step-7 gate below.
+- Finding 1 (fix now): the glossary link to `#subject-level-vs.-cluster-level` now points to `#subject-level-vs--cluster-level`. The broken link predates this branch.
+- Finding 2 (fix now): the conflated note's "Report subject or cluster." narrowed "report subject/cluster", so it now reads "Report the subject level, the cluster level, or both."
+- Finding 3 (reject): a definition of both levels claims nothing about when a cluster level is reported, and in NEWS the condition follows at once.
+- Finding 4 (reject): the credible-interval gloss cannot carry `conf_level`, because `prose-terms.py` normalizes code. The glossary entry names it.
+- Finding 5 (fix now): the confidence half of the glossary entry now says "the chosen share (95% by default)". It was split into two sentences to stay within 25 words.
+- Finding 6 (fix now): "A forward-looking projection that projects" became "A forward-looking projection of".
+- Finding 7 (fix now): autoplot's "the confidence interval its `ci_method` sets" became "the interval its `ci_method` sets", which also covers the posterior case.
+- Finding 8 (fix now in `multilevel-designs.Rmd` only): the "the second is" frame is restored, with the gloss folded into that sentence. The other three vignette insertions read correctly and stay (reject).
+- Finding 9 (reject): the glossary entry must carry the gloss sentence, and the overlap is mild.
+- Finding 10 (reject): the plan chose a one-off printed-text script and recorded what would prove that choice wrong.
+- Finding 11 (resolved): the AC3 evidence was recorded before the gate.
+- Finding 12 (reject): line length is formatting only.
+- After the fixes: AC1 gives 0 hits in 169 + 110 strings. AC2 gives 64 sentences, 0 over 25 words. The AC5 search finds 0 old glosses and `prose-terms.py` is clean. Ruler counts are unchanged from the pre-fix evidence. AC6 gives 0 hits in 1,683 strings. `document()` rewrote only `icc.Rd`. The affected test files (methods, multilevel, choose-icc, printing, exported-contract, vignette-claims) pass with 0 failures.

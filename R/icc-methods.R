@@ -265,7 +265,8 @@ format.icc <- function(x, ...) {
     icc_mute(c(
       "Diagnostic contrast: the 'conflated' level ignores the cluster structure",
       "(ten Hove et al. 2022, Eq. 14). It shows the bias from a single-level",
-      "analysis and is NOT a recommended coefficient. Report subject or cluster."
+      "analysis and is NOT a recommended coefficient. Report the subject level,",
+      "the cluster level, or both."
     ))
   }
 
