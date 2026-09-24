@@ -1205,7 +1205,7 @@ icc <- function(
       abort_unidentified(c(
         "Each subject must be nested in a single cluster.",
         i = "Some {.arg subject} levels appear in more than one {.arg cluster}. \\
-             Multilevel ICCs (M5) assume subjects nested in clusters."
+             Multilevel ICCs assume subjects nested in clusters."
       ))
     }
     if (max(colSums(cluster_of)) < 2L) {
@@ -2858,7 +2858,7 @@ validate_design <- function(design, call = rlang::caller_env()) {
       c(
         "{.arg design} must be {.code NULL} (infer) or one of {.val {choices}}.",
         i = "Declare {.arg design} only to resolve a ragged pattern that is \\
-             ambiguous between a crossed and a nested design (spec M9)."
+             ambiguous between a crossed and a nested design."
       ),
       call = call
     )

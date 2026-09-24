@@ -51,9 +51,9 @@ icc(
 }
 \arguments{
 \item{what}{Which plot to draw. \code{"coefficients"} (the default) draws a
-forest plot of each ICC index with its confidence interval. That interval
-is Monte-Carlo, built by drawing parameter values from the fitted model's
-uncertainty.
+forest plot of each ICC index with the confidence interval its
+\code{ci_method} sets. The default is the Monte-Carlo interval, built by
+drawing parameter values from the fitted model's uncertainty.
 \code{"components"} draws the
 variance-component decomposition.}
 

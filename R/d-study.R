@@ -287,7 +287,7 @@ d_study <- function(
         abort_unsupported(c(
           "Cluster-level D-study projection is not supported on incomplete data.",
           i = "The per-cluster effective-rater divisor behind a ragged cluster mean \\
-               is an open modeling question (M9). Only the subject level projects on \\
+               is an open modeling question. Only the subject level projects on \\
                incomplete data.",
           i = "Refit with {.code level = \"subject\"} for an incomplete multilevel \\
                D-study."

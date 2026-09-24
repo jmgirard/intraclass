@@ -35,7 +35,8 @@
 #' default. In a non-interactive session, leaving one unanswered is an error
 #' naming the unanswered decision, rather than quietly picking one for you.
 #'
-#' @param model `"twoway"` (crossed: the same raters judge every subject) or
+#' @param model `"twoway"` (crossed: each rater is tracked across the subjects
+#'   they score) or
 #'   `"oneway"` (raters are interchangeable across subjects). Defaults to
 #'   `"twoway"`. Under `"oneway"` the `type` and `raters` choices do not exist
 #'   (there is no rater term), and supplying them is an error.

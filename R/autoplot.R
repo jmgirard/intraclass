@@ -157,9 +157,9 @@ plot.icc_dstudy <- function(x, ...) {
 
 #' @rdname icc
 #' @param what Which plot to draw. `"coefficients"` (the default) draws a
-#'   forest plot of each ICC index with its confidence interval. That interval
-#'   is Monte-Carlo, built by drawing parameter values from the fitted model's
-#'   uncertainty.
+#'   forest plot of each ICC index with the confidence interval its
+#'   `ci_method` sets. The default is the Monte-Carlo interval, built by
+#'   drawing parameter values from the fitted model's uncertainty.
 #'   `"components"` draws the
 #'   variance-component decomposition.
 #' @examplesIf rlang::is_installed(c("ggplot2", "glmmTMB"))

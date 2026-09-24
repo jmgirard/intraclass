@@ -52,9 +52,9 @@ str(ratings)
 
 ## A prior question: are the raters crossed? (`model`)
 
-**Is every subject rated by the *same* set of raters, or by a different set
-each time?** If the same raters judge everyone, the design is *crossed*, like
-`ratings`. Keep the default `model = "twoway"`, and the four choices below
+**Do the *same* raters score more than one subject, or does each subject get a
+different set?** If each rater is tracked across the subjects they score, the design
+is *crossed*, like `ratings`. Keep the default `model = "twoway"`, and the four choices below
 apply. Suppose instead each subject is rated by whichever raters happened to
 be available. Then "rater 1" for one subject has nothing to do with "rater 1"
 for another. Those raters are *interchangeable*, and the design is **one-way**

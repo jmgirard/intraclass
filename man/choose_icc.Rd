@@ -20,7 +20,8 @@ choose_icc(
 \method{print}{icc_recommendation}(x, ...)
 }
 \arguments{
-\item{model}{\code{"twoway"} (crossed: the same raters judge every subject) or
+\item{model}{\code{"twoway"} (crossed: each rater is tracked across the subjects
+they score) or
 \code{"oneway"} (raters are interchangeable across subjects). Defaults to
 \code{"twoway"}. Under \code{"oneway"} the \code{type} and \code{raters} choices do not exist
 (there is no rater term), and supplying them is an error.}

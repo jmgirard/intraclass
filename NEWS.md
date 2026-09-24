@@ -28,9 +28,10 @@
   `print()` and `summary()` add to an `icc()` fit, now use plainer English.
   None uses a dash as punctuation, and no sentence runs past 25 words. Which
   note prints, and when, is unchanged. Five definitions in the *Glossary*
-  article said less than the package does, and they are corrected. Every page
-  that quoted them now carries the new text. One `d_study()` error no longer
-  cites internal record numbers. Nothing computed changes.
+  article were imprecise or said less than the package does, and they are
+  corrected. Every page that quoted them now carries the new text. Four error
+  messages from `icc()` and `d_study()` no longer cite internal record
+  numbers. Nothing computed changes.
 
 * Four articles now show their comparison tables as `gt` tables with a title,
   plain column headings and rounded numbers. The four are *Comparison with

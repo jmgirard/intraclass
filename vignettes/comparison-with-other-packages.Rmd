@@ -260,8 +260,8 @@ of each, see the companion articles:
 
 - [*Choosing an ICC*](choosing-an-icc.html): the selection framework the last
   matrix row points to.
-- [*Multilevel designs*](multilevel-designs.html): reliability when raters
-  are nested, where the subject level is reliability within a cluster, and the
+- [*Multilevel designs*](multilevel-designs.html): subjects nested in
+  clusters, where the subject level is reliability within a cluster, and the
   cluster level is reliability of cluster means.
 - [*Interval methods*](interval-methods.html): the Monte-Carlo interval, built
   by drawing parameter values from the fitted model's uncertainty. The article

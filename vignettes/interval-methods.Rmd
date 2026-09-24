@@ -188,8 +188,7 @@ So its coverage is inherited by construction, balanced or not. A numeric
 `unit` is a [D-study](glossary.html#d-study-decision-study) projection, which
 projects the fitted variance components to other rater or
 [occasion](glossary.html#occasion-within-cell-replicate) counts.
-That
-projection is restricted to balanced data. Reach for this method for boundary
+Here it projects to the mean of `m` raters. That projection is restricted to balanced data. Reach for this method for boundary
 robustness, an interval that exists where the Monte-Carlo default aborts.
 Reach for it too for robustness to non-normal subject effects. Its endpoints
 are deliberately left untruncated on the estimator's own support (Ukoumunne
