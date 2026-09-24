@@ -21,7 +21,7 @@
 * The errors, warnings, notes and install prompts the package raises are
   reworded in plainer English. None uses a dash as punctuation, and no
   sentence runs past 25 words. Long sentences are split, and semicolons
-  become full stops except between citations. Which condition fires, and
+  become full stops except between references. Which condition fires, and
   when, is unchanged. Nothing computed changes.
 
 * Four articles now show their comparison tables as `gt` tables with a title,
@@ -133,9 +133,9 @@ newer.
   Its point estimate is the posterior mode, the peak of the posterior
   distribution. Its interval is a percentile **credible** interval, which
   holds a chosen share, usually 95%, of the posterior probability. Because
-  both come from the posterior, `ci_method = "posterior"` is forced. Supplying
-  a custom `prior` is a deliberate deviation: `icc()` warns, and the coverage
-  results this package reports no longer apply.
+  the interval comes from the posterior draws, `ci_method = "posterior"` is
+  forced. Supplying a custom `prior` is a deliberate deviation: `icc()` warns,
+  and the coverage results this package reports no longer apply.
 * The `lme4` package itself is already on your library path after a plain
   install, because `glmmTMB` lists it in its own `Imports`, but the lme4 engine
   also needs **merDeriv**, which does not arrive. `merDeriv`, `lavaan` and
