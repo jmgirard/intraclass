@@ -2,14 +2,14 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M157: Plain-English printed guidance, corrected glossary glosses, and no record IDs in messages
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP1, GP8
 - **Resolves:** —
 - **Surface tier:** user-facing — users read the printed walkthrough, the print and summary notes, the glossed docs and NEWS
-- **Branch/PR:** —
+- **Branch/PR:** m157-plain-english-printed-text-glosses
 
 ## Goal
 
@@ -43,7 +43,7 @@ Finish three plain-English fixes that M156 left as candidate rows: the printed g
 
 ## Tasks
 
-- [ ] T1: Rewrite the five glosses in `data-raw/glossary-terms.tsv` against what the package does. The sources are `d_study(n_o=)` for the D-study gloss, and the parameter draws in `R/boundary-hint.R` and `vignettes/glossary.Rmd:217` for the Monte-Carlo gloss. They are the `conf_level` argument for the credible interval, incomplete two-way data for the two-way gloss, and both levels for the subject vs. cluster gloss. Update the matching `vignettes/glossary.Rmd` entries so that each carries its new gloss. After the edit, count fields on the touched rows with `awk -F'\t' '{print NF}'` (LESSONS, M153).
+- [x] T1: Rewrite the five glosses in `data-raw/glossary-terms.tsv` against what the package does. The sources are `d_study(n_o=)` for the D-study gloss, and the parameter draws in `R/boundary-hint.R` and `vignettes/glossary.Rmd:217` for the Monte-Carlo gloss. They are the `conf_level` argument for the credible interval, incomplete two-way data for the two-way gloss, and both levels for the subject vs. cluster gloss. Update the matching `vignettes/glossary.Rmd` entries so that each carries its new gloss. After the edit, count fields on the touched rows with `awk -F'\t' '{print NF}'` (LESSONS, M153).
 - [ ] T2: Carry each new gloss to every site that quotes the old one. Find the sites with AC5's search. On 2026-09-23 a line grep found them in `NEWS.md`, `README.Rmd` and six vignettes. It also found them in the roxygen of `R/icc.R`, `R/d-study.R`, `R/autoplot.R` and `R/data.R`. Re-run `devtools::document()` and knit `README.Rmd`. Audit each hunk for R6: the widening is intended only where the gloss was narrow, and a split must not strand a frame (LESSONS, M152). Run AC5's search and `prose-terms.py`.
 - [ ] T3: Rewrite `choose_icc()`'s printed text: the questions and choice labels (`R/choose-icc.R:148-213`), `recommendation_rationale()` (`:489-545`) and `recommendation_notes()` (`:548-572`). Replace every ` -- ` and split every semicolon join that can be two sentences. Make the two-way label and rationale match T1's two-way gloss. Re-record `tests/testthat/_snaps/choose-icc.md` and read every hunk.
 - [ ] T4: Rewrite the notes `format.icc()` and `summary.icc()` print (`R/icc-methods.R:238-269`, `:310-357`), keeping every branch condition as it is. Re-record the snapshots under `tests/testthat/_snaps/` and read every hunk.
@@ -59,6 +59,8 @@ Finish three plain-English fixes that M156 left as candidate rows: the printed g
 - 2026-09-23: plan gate chose drafting the five new glosses in implement, against AC4's properties, over settling their wording in the plan, because AC4 already fixes what each must say; falsified by a review finding that a gloss meets AC4 but misstates the package.
 - 2026-09-23: plan chose a one-off measurement script for AC1 and AC2 over extending `data-raw/condition-text-profile.R` to printed text, because extending that ruler widens a checker M156 shipped over the repo's own source; falsified by a printed-text defect that the one-off script cannot see and an extended ruler can.
 - 2026-09-23: plan gate dropped the NEWS bullet-size part of the glossary row (no rule sets a size) and filed two new candidate rows: R2 over the older `NEWS.md` bullets, and R7 misses in `R/data.R`.
+- 2026-09-23: implement started on branch `m157-plain-english-printed-text-glosses`. Question gate: the user accepted the five drafted glosses as written. The credible-interval gloss says "the confidence level". `prose-terms.py` turns a code span into the word `code` and drops underscores, so no gloss can carry `conf_level`. The glossary entry names `conf_level`.
+- 2026-09-23: T1 done. Five glosses rewritten in `glossary-terms.tsv` and the five `glossary.Rmd` entries. The credible-interval entry ties the level to `conf_level` (read against `R/ci-posterior.R`). `awk` field count: 4 on all 35 rows.
 
 ## Decisions
 
