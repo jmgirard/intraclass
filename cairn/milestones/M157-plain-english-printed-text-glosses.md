@@ -2,7 +2,7 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M157: Plain-English printed guidance, corrected glossary glosses, and no record IDs in messages
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -50,7 +50,7 @@ Finish three plain-English fixes that M156 left as candidate rows: the printed g
 - [x] T5: Measure AC1 and AC2 with a one-off script kept in the work log, not committed. It lists the `STR_CONST` tokens of the two files. It renders the `choose_icc()` combinations, and the walkthrough labels through a fake `ask`. It prints and summarizes six fits: one-way, nested raters, two-way unreplicated, two-way replicated, incomplete two-way, and an incomplete crossed multilevel fit with `level = c("subject", "cluster", "conflated")` and `unit = "both"`. That last fit prints the `k_c_eff` and conflated notes. It writes each prose string as its own paragraph to a scratch `.md` file and runs `prose-profile.py --limit 25 --verbose` on it. Do the per-hunk R6 audit over T3 and T4.
 - [x] T6: Remove "(M20; ADR-030)" from the `n_o` message at `R/d-study.R:229` without changing its meaning. Update any test that pins the text. Run AC6's literal sweep and the condition-text ruler.
 - [x] T7: Add the `NEWS.md` Documentation bullet and measure it as AC7 says. Extend the scope paragraph of `cairn/doctrine/prose-style.md` to name the printed guidance under R1–R6 and R8. The module is at 119 lines against its budget of under 120, so rewrite in place and check with `wc -l -c`.
-- [ ] T8: Gate: `air format .`, `devtools::document()`, the full test suite and `devtools::check()`. Run every `data-raw/` checker with `--self-test` before the push, because a roxygen edit can re-key the MPL doc-claims ledger (LESSONS, M130). Re-measure AC5–AC7 after any fix made at the gate (LESSONS, M142).
+- [x] T8: Gate: `air format .`, `devtools::document()`, the full test suite and `devtools::check()`. Run every `data-raw/` checker with `--self-test` before the push, because a roxygen edit can re-key the MPL doc-claims ledger (LESSONS, M130). Re-measure AC5–AC7 after any fix made at the gate (LESSONS, M142).
 
 ## Work log
 
@@ -68,6 +68,7 @@ Finish three plain-English fixes that M156 left as candidate rows: the printed g
 - 2026-09-23: T7 done. The NEWS Documentation bullet names no glossary term, so it takes no first use from the older bullets. AC7 script (whole bullets holding a changed line of `git diff -U0 main -- NEWS.md`): 6 bullets, 38 sentences, 0 dashes and 0 over 25 words after one older 29-word sentence was split. R8 grep: no hits. Doctrine scope paragraph names the printed guidance: 119 lines, 7,147 bytes.
 - 2026-09-23: claim audit: 34 claims read, 6 corrected — R/autoplot.R, R/choose-icc.R, vignettes/choosing-an-icc.Rmd, NEWS.md, R/d-study.R, R/icc.R, vignettes/comparison-with-other-packages.Rmd, vignettes/interval-methods.Rmd. The re-read found all six holding. The reader also flagged the crossed-design question in `choosing-an-icc.Rmd`, which was reworded.
 - 2026-09-23: discovered sub-task (minor amendment). AC6's pattern needs 2–3 digits after `M`, so it misses single-digit IDs. A wider sweep found "(M9)" in `R/d-study.R` and "(M5)" and "(spec M9)" in `R/icc.R`. All three were removed, the NEWS bullet now says four messages, and the wider sweep finds 0.
+- 2026-09-23: T8 done. `air format --check` clean. `document()` makes no diff. Every `data-raw/` checker passes `--self-test` and a normal run. `devtools::check()` on d8d3db2: 0 errors, 0 warnings, 0 notes, with the full suite passing inside it. AC1, AC2 and AC5–AC7 were re-measured after the audit fixes, and all hold. Status set to review.
 
 ## Decisions
 
