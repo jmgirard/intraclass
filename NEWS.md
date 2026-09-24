@@ -27,7 +27,7 @@
 * Four articles now show their comparison tables as `gt` tables with a title,
   plain column headings and rounded numbers. The four are *Comparison with
   other packages*, *Estimation engines* (an engine is the software that does
-  the fitting), *Interval methods* and *Choosing an ICC*. The code
+  the fitting), *Confidence-interval methods* and *Choosing an ICC*. The code
   that assembles each table is hidden. The calls that fit the models stay
   visible. The one exception is the `psych` and `irr` comparison: there, one
   hidden chunk fits the models and builds the table. `gt` joins `Suggests:`.
@@ -53,11 +53,11 @@
   *Getting started*, *Choosing an ICC* and the README. The glossary's entries
   each open with a one-sentence definition. Nothing computed changes.
 
-* Five more articles are rewritten in plainer English. One covers the D-study,
-  which projects the fitted variance components to other rater counts, each a
-  share of the total variation traced to one source. It also covers the
-  within-cell replicate, one of several ratings by the same rater of the same
-  subject. The five are *Estimation engines*, *Comparison with other
+* Five more articles are rewritten in plainer English. A D-study projects the
+  fitted variance components to other rater counts, each component a share of
+  the total variation traced to one source. One of the five covers D-studies
+  and the within-cell replicate, one of several ratings by the same rater of
+  the same subject. The five are *Estimation engines*, *Comparison with other
   packages*, *D-studies and within-cell replicates*, *Multilevel designs* and
   *Confidence-interval methods*. No sentence runs past
   25 words, except two in the interval-methods article that carry clauses

@@ -29,8 +29,9 @@
 # whitespace becomes one space. A sentence ends at `.`, `!` or `?` plus
 # whitespace, with the abbreviations `prose-profile.py` holds back. A word is a
 # whitespace token with an alphanumeric character. R1 counts an em or en dash,
-# or a `--`/`---` that is not flanked by digits; R2 counts sentences over the
-# limit; R8 counts the doctrine's seven markers.
+# `--` or `---`, except one flanked by digits or joining a letter to a capital
+# (the doctrine's R1 exceptions, as in `Spearman--Brown`). R2 counts sentences
+# over the limit. R8 counts the doctrine's seven markers.
 #
 # Usage, from the repo root:
 #   Rscript data-raw/condition-text-profile.R            # totals, exit 1 on a hit
@@ -41,10 +42,16 @@
 #
 # `--compare-tokens <ref>` reads each `R/*.R` file at `<ref>` with `git show`
 # (never a checkout) and compares its `getParseData()` terminal tokens with the
-# working tree's. Comments are dropped. Every string literal becomes `S`, then
-# the joins M156 AC4 allows are folded until nothing changes: a bullet name
-# (`name = S`, `"name" = S`) and a `c()`, `paste0()` or `paste()` call whose
-# every argument is `S` each become `S`. What remains must be identical. It also
+# working tree's. Comments are dropped. A string literal that is message text
+# becomes `S`: an argument of `c()`, `paste0()` or `paste()`, an `if` branch
+# value, or a condition call's message argument (`is_message_literal()`). Every
+# other literal keeps its text, class strings included. Then the joins M156 AC4
+# allows are folded until nothing changes: any `name = S` or `"name" = S` (a
+# bullet name, or a `paste()` argument such as `collapse`), and a `c()`,
+# `paste0()` or `paste()` call whose every argument is `S`, each become `S`.
+# What remains must be identical. A literal inside `c()` that is code rather
+# than message text (a method-name vector) is masked too, and its change goes
+# unreported: that is this comparison's known limit. It also
 # compares, per file, the multiset of glue expressions inside the literals
 # (a `{...}` span whose content does not open with `.` or `?`).
 
@@ -474,10 +481,75 @@ report <- function(prof, verbose = FALSE, dump = FALSE) {
 # --- token comparison --------------------------------------------------------------
 
 token_stream <- function(text) {
-  pd <- utils::getParseData(parse(text = text, keep.source = TRUE))
-  pd <- pd[pd$terminal & pd$token != "COMMENT", ]
+  full <- utils::getParseData(parse(text = text, keep.source = TRUE))
+  pd <- full[full$terminal & full$token != "COMMENT", ]
   pd <- pd[order(pd$line1, pd$col1), ]
-  ifelse(pd$token == "STR_CONST", "S", pd$text)
+  masked <- vapply(
+    seq_len(nrow(pd)),
+    function(i) {
+      pd$token[i] == "STR_CONST" && is_message_literal(full, pd$id[i])
+    },
+    logical(1)
+  )
+  ifelse(masked, "S", pd$text)
+}
+
+# Is this string literal message text? Only then is it masked. A literal is
+# message text when it is an argument of `c()`, `paste0()` or `paste()`, a
+# branch value of an `if`, or the message argument of a condition call (the
+# first unnamed argument, or `message`; `reason` for `check_installed()`).
+# Every other literal (a class string, a `grepl()` pattern, a comparison value)
+# keeps its text, so a change to it shows as a difference.
+is_message_literal <- function(pd, id) {
+  kids <- function(p) {
+    k <- pd[pd$parent == p, ]
+    k[order(k$line1, k$col1), ]
+  }
+  arg <- pd$parent[pd$id == id]
+  call <- pd$parent[pd$id == arg]
+  if (!length(call) || call == 0) {
+    return(FALSE)
+  }
+  k <- kids(call)
+  if ("'{'" %in% k$token) {
+    # A braced branch: the literal is the block's value; look one level up.
+    arg <- call
+    call <- pd$parent[pd$id == call]
+    k <- kids(call)
+  }
+  if ("IF" %in% k$token) {
+    return(TRUE)
+  }
+  head_expr <- k$id[k$token == "expr"][1]
+  fn <- pd$text[pd$parent == head_expr & pd$token == "SYMBOL_FUNCTION_CALL"]
+  if (!length(fn)) {
+    return(FALSE)
+  }
+  if (fn %in% c("c", "paste0", "paste")) {
+    return(TRUE)
+  }
+  if (!fn %in% all_funs) {
+    return(FALSE)
+  }
+  pos <- which(k$id == arg)
+  if (pos > 2 && k$token[pos - 1] == "EQ_SUB") {
+    return(k$text[pos - 2] %in% c("message", "reason"))
+  }
+  if (fn == "check_installed") {
+    return(FALSE)
+  }
+  args <- k[k$token == "expr", ][-1, ]
+  unnamed <- args$id[
+    !vapply(
+      args$id,
+      function(a) {
+        p <- which(k$id == a)
+        p > 1 && k$token[p - 1] == "EQ_SUB"
+      },
+      logical(1)
+    )
+  ]
+  length(unnamed) > 0 && unnamed[1] == arg
 }
 
 fold_tokens <- function(tok) {
@@ -637,7 +709,24 @@ self_test <- function() {
   )
   check(
     !identical(fold_tokens(token_stream(a)), fold_tokens(token_stream(d))),
-    "a changed class argument differs"
+    "a class argument changed to a symbol differs"
+  )
+  e <- "f <- function() abort_intraclass(\"One. Two.\", class = \"k2\")"
+  check(
+    !identical(fold_tokens(token_stream(a)), fold_tokens(token_stream(e))),
+    "a changed class string differs"
+  )
+  g1 <- "f <- function(x) if (grepl(\"a\", x)) abort_intraclass(\"One.\")"
+  g2 <- "f <- function(x) if (grepl(\"b\", x)) abort_intraclass(\"One.\")"
+  check(
+    !identical(fold_tokens(token_stream(g1)), fold_tokens(token_stream(g2))),
+    "a changed code literal outside the message differs"
+  )
+  h1 <- "f <- function(m) { x <- if (m) \"One\" else \"Two\"; paste0(x, \".\") }"
+  h2 <- "f <- function(m) { x <- if (m) \"Uno\" else \"Dos\"; paste0(x, \"!\") }"
+  check(
+    identical(fold_tokens(token_stream(h1)), fold_tokens(token_stream(h2))),
+    "reworded if-branch and paste0 literals fold to the same stream"
   )
   check(
     !identical(
