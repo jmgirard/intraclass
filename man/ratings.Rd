@@ -25,8 +25,8 @@ ratings
 \description{
 The six-target, four-judge worked example from Shrout and Fleiss (1979), in
 the long, one-rating-per-row format that \code{\link[=icc]{icc()}} consumes. Every subject is
-rated by every rater, a complete, balanced two-way design where the subjects
-share one set of raters. So it is the reference case on which \code{icc()}
+rated by every rater, a complete, balanced two-way design where each rater
+is tracked across the subjects they score. So it is the reference case on which \code{icc()}
 returns the canonical coefficients \code{ICC(A,1)} = 0.290, \code{ICC(A,k)} = 0.620,
 \code{ICC(C,1)} = 0.715, and \code{ICC(C,k)} = 0.909.
 }

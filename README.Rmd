@@ -31,8 +31,9 @@ classical ANOVA / mean-squares approach.
 
 It aims to fit variance components, each a share of the total variation
 traced to one source. It uses modern engines, an engine being the software
-that does the fitting. It aims to compute the *correct* ICC for a stated design, with a
-proper Monte-Carlo interval, built by simulating from the fitted model. That
+that does the fitting. It aims to compute the *correct* ICC for a stated design. It gives a
+proper Monte-Carlo interval, built by drawing parameter values from the fitted
+model's uncertainty. That
 interval is boundary-aware: an estimate can land exactly at zero, and the
 interval still behaves. It also aims to handle imbalanced, incomplete, and
 multilevel designs, and to help you decide **which ICC to choose, and why**.
@@ -40,7 +41,8 @@ The docs and website are a place to learn ICC best practice, not only to look
 up functions.
 
 The full interrater-reliability ICC family is implemented. That covers
-two-way designs, where the subjects share one set of raters, and one-way
+two-way designs, where each rater is tracked across the subjects they score,
+and one-way
 designs. Within two-way, it covers absolute agreement, where raters give the
 same score, against consistency, where raters agree apart from a constant
 offset per rater. It
@@ -48,8 +50,9 @@ covers single-rater coefficients, the reliability of one rater's score, and
 average-rater ones, the reliability of a mean of several raters. It covers
 random raters against fixed raters, where the observed raters are the whole
 population of interest. It covers imbalanced and incomplete (missing-cell)
-data. It also covers multilevel designs, at the subject level or at the
-cluster level, which is how reliably raters distinguish cluster means. There
+data. It also covers multilevel designs, where the subject level is
+reliability within a cluster, and the cluster level is reliability of cluster
+means. In such a design
 the raters may be
 crossed with or nested in clusters or subjects. Everything just listed comes
 with boundary-aware Monte-Carlo intervals. Fits run on `glmmTMB` (the
@@ -140,7 +143,9 @@ its interval spans the whole range. The multilevel article
 ## How many raters do you need?
 
 `d_study()` runs a D-study, which projects the fitted variance components to
-other rater counts, carrying the interval with them. So you can ask what reliability two
+other rater or
+[occasion](https://jmgirard.github.io/intraclass/articles/glossary.html#occasion-within-cell-replicate)
+counts, carrying the interval with them. So you can ask what reliability two
 raters would buy, or ten, without running the study again:
 
 ```{r plot-dstudy, fig.width = 9, fig.height = 5, fig.alt = "Projected reliability against the number of raters, from 1 to 10, as two rising curves with Monte-Carlo interval bands: consistency above, absolute agreement below, both climbing steeply from one to four raters and flattening after that."}

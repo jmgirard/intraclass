@@ -42,8 +42,8 @@ knitr::include_graphics("choosing-icc-tree.svg")
 
 `ratings` is the six-subject, four-rater example of Shrout and Fleiss (1979),
 in the long, one-row-per-rating format `icc()` expects. Every subject is rated
-by every rater. So it is a complete, balanced **two-way** design: the
-subjects share one set of raters, and every cell is filled. That is the clean
+by every rater. So it is a complete, balanced **two-way** design: each
+rater is tracked across the subjects they score, and every cell is filled. That is the clean
 case in which the choices below are easiest to see.
 
 ```{r data}
@@ -238,10 +238,12 @@ Everything above takes the subject as the object of measurement. Subjects may
 themselves be nested in higher-level units, such as pupils within classrooms
 or patients within clinics. Then you may instead want the reliability of the
 *cluster* mean, a multilevel ICC (ten Hove, Jorgensen & van der Ark, 2022).
-Pass a `cluster` column to `icc()`. It then reports the **subject-level**
-coefficient, how reliably raters distinguish subjects within a cluster, beside
-the **cluster-level** coefficient, how reliably raters distinguish cluster
-means. The [*Multilevel designs*](multilevel-designs.html) article works a
+Pass a `cluster` column to `icc()`. It then reports two coefficients, where the
+**subject level** is reliability within a cluster, and the **cluster level** is
+reliability of cluster means. The subject level asks how reliably raters
+distinguish subjects within a cluster, and the cluster level asks the same of
+cluster means. The [*Multilevel designs*](multilevel-designs.html) article
+works a
 full example.
 
 ## Once you have a number

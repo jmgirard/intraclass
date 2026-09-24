@@ -78,8 +78,8 @@ be asked the outstanding questions one at a time.
 The two structural facts about your design default to the common case,
 matching \code{\link[=icc]{icc()}}. They are whether the raters are crossed (\code{model}) and
 whether subjects are nested in clusters (\code{multilevel}). The common case is
-a crossed, non-multilevel two-way design, where the subjects share one set
-of raters. The choices that actually select the coefficient are \code{type},
+a crossed, non-multilevel two-way design, where each rater is tracked across
+the subjects they score. The choices that actually select the coefficient are \code{type},
 \code{unit}, \code{raters}, and \code{level} when multilevel. None of them has a silent
 default. In a non-interactive session, leaving one unanswered is an error
 naming the unanswered decision, rather than quietly picking one for you.
