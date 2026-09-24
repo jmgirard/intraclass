@@ -201,8 +201,8 @@ mpl_interval <- function(
          fit: the profile deviance is degenerate at its own maximum-likelihood \\
          estimate.",
         i = "This happens when a variance component is estimated at or near \\
-             zero -- for example, raters in perfect or near-perfect agreement \\
-             (error variance ~ 0). Inspect the ratings; an interrater interval \\
+             zero, for example with raters in perfect or near-perfect agreement \\
+             (error variance ~ 0). Inspect the ratings. An interrater interval \\
              is not estimable from near-constant disagreement."
       ),
       class = "intraclass_engine_error",
@@ -229,7 +229,7 @@ mpl_interval <- function(
             "The modified-profile-likelihood {label} limit could not be \\
              located: the profile deviance crosses the critical value on \\
              that side, but root-finding failed.",
-            i = "This is a numerical failure, not a boundary limit; the \\
+            i = "This is a numerical failure, not a boundary limit. The \\
                  endpoint is not reported as 0 or 1. Inspect the data for \\
                  near-degenerate structure before trying another method."
           ),
@@ -303,7 +303,7 @@ mpl_kappa_lookup <- function(
         "{.code ci_method = \"mpl\"} is calibrated at {.code conf_level} \\
          {.val {format(levels_ok, nsmall = 2L)}} only.",
         i = "kappa_m is calibrated per level and is not interpolated across \\
-             levels (#5); use {.code ci_method = \"montecarlo\"}."
+             levels (#5). Use {.code ci_method = \"montecarlo\"}."
       ),
       call = call
     )
@@ -315,9 +315,9 @@ mpl_kappa_lookup <- function(
     abort_unsupported(
       c(
         "{.code ci_method = \"mpl\"} is calibrated for \\
-         {min(r_nodes)}-{max(r_nodes)} raters; this design has {n_r}.",
-        i = "The kappa_m correction table does not cover this rater count; \\
-             use {.code ci_method = \"montecarlo\"}."
+         {min(r_nodes)}-{max(r_nodes)} raters. This design has {n_r}.",
+        i = "The kappa_m correction table does not cover this rater count. \\
+             Use {.code ci_method = \"montecarlo\"}."
       ),
       call = call
     )
@@ -326,9 +326,9 @@ mpl_kappa_lookup <- function(
     abort_unsupported(
       c(
         "{.code ci_method = \"mpl\"} is calibrated for \\
-         {min(s_nodes)}-{max(s_nodes)} subjects; this design has {n_s}.",
+         {min(s_nodes)}-{max(s_nodes)} subjects. This design has {n_s}.",
         i = "kappa_m is not calibrated outside this range and is not extrapolated \\
-             (#5); use {.code ci_method = \"montecarlo\"}."
+             (#5). Use {.code ci_method = \"montecarlo\"}."
       ),
       call = call
     )

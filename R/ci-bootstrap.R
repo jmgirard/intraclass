@@ -74,7 +74,7 @@ bootstrap_ci <- function(
       c(
         "{.val {n_fail}} of {.val {boot_samples}} bootstrap refits did not \\
          converge and were dropped.",
-        i = "The interval is based on the {.val {n_ok}} that did; treat it with \\
+        i = "The interval is based on the {.val {n_ok}} that did. Treat it with \\
              caution."
       ),
       class = "intraclass_bootstrap_dropouts"

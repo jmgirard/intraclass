@@ -50,10 +50,10 @@ rmvn <- function(
       c(
         "The Monte-Carlo interval could not be computed: the fitted parameter \\
          covariance is not finite.",
-        i = "A variance component was not identified -- the model is \\
-             over-parameterized or degenerate for this design (for replicates, too \\
-             few cells rated more than once to separate the interaction from pure \\
-             error).",
+        i = "A variance component was not identified: the model is \\
+             over-parameterized or degenerate for this design. For replicates, \\
+             this means too few cells were rated more than once to separate the \\
+             interaction from pure error.",
         i = "Provide more replicated cells (or a less degenerate design), or \\
              aggregate to one rating per subject-by-rater cell.",
         # M93: the design-aware opt-in `ci_method` bullet, or nothing.

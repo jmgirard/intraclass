@@ -862,7 +862,7 @@ icc <- function(
        it requires {.code ci_method = \"posterior\"}.",
       i = "{.code \"montecarlo\"} and {.code \"bootstrap\"} do not apply to a \\
            Bayesian fit.",
-      i = "Drop {.arg ci_method} -- it defaults to {.val posterior} for \\
+      i = "Drop {.arg ci_method}: it defaults to {.val posterior} for \\
            {.code engine = \"brms\"}."
     ))
   }
@@ -887,7 +887,7 @@ icc <- function(
   if (length(brm_args) > 0L && engine != "brms") {
     abort_unsupported(c(
       "{.arg brm_args} only applies to {.code engine = \"brms\"}.",
-      i = "It forwards arguments to {.fn brms::brm}; drop it for other engines."
+      i = "It forwards arguments to {.fn brms::brm}. Drop it for other engines."
     ))
   }
   reserved <- intersect(names(brm_args), c("formula", "data", "prior", "seed"))
@@ -895,7 +895,7 @@ icc <- function(
     abort_intraclass(c(
       "{.arg brm_args} may not set {.val {reserved}}.",
       i = "The model formula, data, the sourced half-{.emph t} prior, and \\
-           {.arg seed} are set by {.pkg intraclass}; pass only sampler/backend \\
+           {.arg seed} are set by {.pkg intraclass}. Pass only sampler/backend \\
            knobs (e.g. {.code backend}, {.code chains}, {.code iter}, {.code cores}).",
       i = if ("prior" %in% reserved) {
         "To use a custom prior, pass the {.arg prior} argument of {.fn icc}, not \\
@@ -916,8 +916,8 @@ icc <- function(
     if (engine != "brms") {
       abort_unsupported(c(
         "{.arg prior} only applies to {.code engine = \"brms\"}.",
-        i = "The sourced half-{.emph t} prior is specific to the Bayesian engine; \\
-             drop {.arg prior} for other engines."
+        i = "The sourced half-{.emph t} prior is specific to the Bayesian engine. \\
+             Drop {.arg prior} for other engines."
       ))
     }
     if (!inherits(prior, "brmsprior")) {
@@ -934,7 +934,7 @@ icc <- function(
         "!" = "This VOIDS the package's coverage guarantees: the credible-interval \\
                coverage results (ten Hove et al. 2020) hold only for the sourced \\
                prior.",
-        i = "A vague or flat SD prior can WORSEN small-{.var k} boundary bias -- the \\
+        i = "A vague or flat SD prior can WORSEN small-{.var k} boundary bias. The \\
              half-{.emph t} is weakly informative on purpose (Principle #3's regime).",
         i = "Leave {.arg prior} unset for the sourced default unless you are running \\
              prior-sensitivity or method-comparison work."
@@ -957,7 +957,7 @@ icc <- function(
   if (posterior_summary == "hpdi" && ci_method != "posterior") {
     abort_unsupported(c(
       "{.code posterior_summary = \"hpdi\"} requires {.code ci_method = \"posterior\"}.",
-      i = "The HPDI is computed from the {.pkg brms} posterior draws; \\
+      i = "The HPDI is computed from the {.pkg brms} posterior draws. \\
            {.code \"montecarlo\"} and {.code \"bootstrap\"} report a percentile interval \\
            and produce no posterior to take an HPDI of.",
       i = "Use {.code engine = \"brms\"} (which defaults to {.code ci_method = \\
@@ -986,7 +986,7 @@ icc <- function(
       abort_unsupported(c(
         "Numeric {.arg unit} (D-study projection) is not supported for \\
          multilevel ICCs yet.",
-        i = "Use {.val single} or {.val average}; multilevel D-study projection \\
+        i = "Use {.val single} or {.val average}. Multilevel D-study projection \\
              is planned for a later milestone."
       ))
     }
@@ -1002,7 +1002,7 @@ icc <- function(
       abort_intraclass(c(
         "{.arg design} requires a {.arg cluster} column.",
         i = "The multilevel design only applies once subjects are nested in \\
-             clusters; supply {.arg cluster}, or drop {.arg design}."
+             clusters. Supply {.arg cluster}, or drop {.arg design}."
       ))
     }
   }
@@ -1026,8 +1026,8 @@ icc <- function(
   if (engine == "lavaan" && oneway) {
     abort_unsupported(c(
       "The {.pkg lavaan} engine does not support the one-way design.",
-      i = "{.code engine = \"lavaan\"} is not available for one-way designs; \\
-           use {.code engine = \"glmmTMB\"}.",
+      i = "{.code engine = \"lavaan\"} is not available for one-way designs. \\
+           Use {.code engine = \"glmmTMB\"}.",
       i = "SEM for one-way designs is planned for a later milestone."
     ))
   }
@@ -1059,7 +1059,7 @@ icc <- function(
     if (raters == "fixed") {
       abort_unsupported(c(
         "Fixed raters do not apply to a one-way ICC.",
-        i = "One-way designs treat raters as interchangeable; use the default \\
+        i = "One-way designs treat raters as interchangeable. Use the default \\
              {.code raters = \"random\"}, or {.code model = \"twoway\"} for \\
              fixed raters."
       ))
@@ -1180,7 +1180,7 @@ icc <- function(
     abort_unidentified(c(
       "A one-way ICC needs at least one subject rated more than once to \\
        separate the subject and residual variances.",
-      i = "Every {.arg subject} was rated once; provide replicate ratings."
+      i = "Every {.arg subject} was rated once. Provide replicate ratings."
     ))
   }
 
@@ -1199,8 +1199,8 @@ icc <- function(
     if (any(rowSums(cluster_of) > 1L)) {
       abort_unidentified(c(
         "Each subject must be nested in a single cluster.",
-        i = "Some {.arg subject} levels appear in more than one {.arg cluster}; \\
-             multilevel ICCs (M5) assume subjects nested in clusters."
+        i = "Some {.arg subject} levels appear in more than one {.arg cluster}. \\
+             Multilevel ICCs (M5) assume subjects nested in clusters."
       ))
     }
     if (max(colSums(cluster_of)) < 2L) {
@@ -1263,8 +1263,8 @@ icc <- function(
     if (ml_design != "crossed") {
       abort_inapplicable(c(
         "The conflated ICC needs raters crossed with clusters (Design 1).",
-        i = "It collapses the crossed five-component decomposition; with nested \\
-             raters that decomposition is not defined.",
+        i = "It collapses the crossed five-component decomposition. With nested \\
+             raters, that decomposition is not defined.",
         i = "Use {.code level = \"subject\"}, or cross the raters with clusters."
       ))
     }
@@ -1282,8 +1282,8 @@ icc <- function(
     if (ml_design == "nested_in_subjects") {
       abort_unsupported(c(
         "Fixed raters are not defined when raters are nested within subjects.",
-        i = "With each subject rated by its own raters (Design 3) the rater main \\
-             effect is confounded into residual, so there is no rater effect to \\
+        i = "With each subject rated by its own raters (Design 3), the rater main \\
+             effect is confounded into residual. That leaves no rater effect to \\
              treat as fixed (ten Hove et al. 2022, p. 6).",
         i = "Use {.code raters = \"random\"} (the default)."
       ))
@@ -1332,8 +1332,8 @@ icc <- function(
       abort_unsupported(c(
         "Cluster-level IRR is not defined when raters are nested in clusters or \\
          subjects.",
-        i = "A cluster-level ICC needs raters crossed with clusters (Design 1); \\
-             with nested raters only the subject level is defined \\
+        i = "A cluster-level ICC needs raters crossed with clusters (Design 1). \\
+             With nested raters, only the subject level is defined \\
              (ten Hove et al. 2022, p. 6).",
         i = "Use {.code level = \"subject\"}, or cross the raters with clusters."
       ))
@@ -1350,16 +1350,17 @@ icc <- function(
       if (identical(type, "consistency")) {
         abort_unsupported(c(
           "Consistency is not defined when raters are nested within subjects.",
-          i = "With each subject rated by its own raters (Design 3) the rater main \\
-               effect cannot be separated, so only absolute agreement is defined \\
+          i = "With each subject rated by its own raters (Design 3), the rater main \\
+               effect cannot be separated. Only absolute agreement is then defined \\
                (ten Hove et al. 2022, p. 6).",
           i = "Use the default {.code type = \"agreement\"}."
         ))
       }
       cli::cli_inform(c(
-        "!" = "Dropping {.val consistency}: not defined when raters are nested within \\
-               subjects (Design 3) -- the rater main effect cannot be separated, so \\
-               only absolute agreement is defined (ten Hove et al. 2022, p. 6)."
+        "!" = "Dropping {.val consistency}: it is not defined when raters are nested \\
+               within subjects (Design 3). The rater main effect cannot be \\
+               separated, so only absolute agreement is defined (ten Hove et al. \\
+               2022, p. 6)."
       ))
       type <- setdiff(type, "consistency")
     }
@@ -1465,7 +1466,7 @@ icc <- function(
           abort_unsupported(c(
             "Within-cell replicates are not supported for fixed-rater multilevel \\
              designs yet.",
-            i = "Multilevel replicates ship for random raters; the fixed-rater case \\
+            i = "Multilevel replicates ship for random raters. The fixed-rater case \\
                  is planned for a later milestone.",
             i = "Use {.code raters = \"random\"} with replicated multilevel data."
           ))
@@ -1515,7 +1516,7 @@ icc <- function(
             "Ragged or incomplete within-cell replicates are not supported for fixed \\
              raters yet.",
             i = "Fixed-rater replicates ship for balanced, complete data (every cell \\
-                 present and rated the same number of times); the ragged and \\
+                 present and rated the same number of times). The ragged and \\
                  incomplete cases are planned for a later milestone.",
             i = "Use {.code raters = \"random\"} for ragged or incomplete replicated \\
                  data, or provide an equal number of ratings in every cell of a \\
@@ -1632,8 +1633,8 @@ icc <- function(
         cli::cli_inform(c(
           "!" = "Dropping {.val agreement}: raters do not bridge clusters, so the \\
                  rater main-effect variance cannot be separated from the \\
-                 cluster-by-rater variance -- this design is effectively rater-nested \\
-                 (Design 2) for agreement. Reporting {.val consistency}."
+                 cluster-by-rater variance. For agreement, this design is effectively \\
+                 rater-nested (Design 2). Reporting {.val consistency}."
         ))
         type <- setdiff(type, "agreement")
       }
@@ -1722,7 +1723,7 @@ icc <- function(
       abort_unsupported(c(
         "{.code ci_method = {.val {ci_method}}} is available only for the one-way \\
          random design ({.code model = \"oneway\"}).",
-        i = "It is a one-way ICC interval method; use \\
+        i = "It is a one-way ICC interval method. Use \\
              {.code ci_method = \"montecarlo\"} for two-way, cluster, or \\
              multilevel designs."
       ))
@@ -1743,8 +1744,8 @@ icc <- function(
         abort_unsupported(c(
           "{.code ci_method = {.val {ci_method}}} requires a balanced one-way \\
            design (every subject rated the same number of times).",
-          i = "Unbalanced support (per-subject {.var n_i}) is not yet implemented; \\
-               use {.code ci_method = \"montecarlo\"}."
+          i = "Unbalanced support (per-subject {.var n_i}) is not yet implemented. \\
+               Use {.code ci_method = \"montecarlo\"}."
         ))
       }
       numeric_unit_requested <- any(vapply(unit, is.numeric, logical(1)))
@@ -1754,8 +1755,8 @@ icc <- function(
            supports {.code unit = \"single\"} (ICC(1)) and {.code \"average\"} \\
            (ICC(k)) only.",
           i = "A numeric {.arg unit} (D-study projection to {.var m} raters) is not \\
-               yet available unbalanced -- its Spearman-Brown pole is not guaranteed \\
-               interior when {.var m} exceeds the effective size; use \\
+               yet available unbalanced. This is because its Spearman-Brown pole is \\
+               not guaranteed interior when {.var m} exceeds the effective size. Use \\
                {.code unit = \"average\"}, or {.code ci_method = \"montecarlo\"} for \\
                a projection."
         ))
@@ -1777,7 +1778,7 @@ icc <- function(
     if ("consistency" %in% type) {
       if (type_supplied) {
         abort_unsupported(c(
-          "{.code ci_method = \"mpl\"} is an absolute-agreement interval; it does \\
+          "{.code ci_method = \"mpl\"} is an absolute-agreement interval. It does \\
            not define a consistency (ICC(C,.)) interval.",
           i = "Use {.code type = \"agreement\"}, or \\
                {.code ci_method = \"montecarlo\"} for consistency."
@@ -1797,14 +1798,14 @@ icc <- function(
         "{.code ci_method = \"mpl\"} is available only for the two-way random \\
          absolute-agreement ICC(A,1)/ICC(A,k) with one rating per subject-rater cell.",
         i = "It is the modified-profile-likelihood interval for the balanced-complete \\
-             two-way random design; for one-way, multilevel, fixed-rater, or \\
-             within-cell-replicate designs use {.code ci_method = \"montecarlo\"}."
+             two-way random design. For one-way, multilevel, fixed-rater, or \\
+             within-cell-replicate designs, use {.code ci_method = \"montecarlo\"}."
       ))
     }
     if (!balanced) {
       abort_unsupported(c(
         "{.code ci_method = \"mpl\"} requires balanced, complete two-way data.",
-        i = "The likelihood assumes every subject x rater cell is observed; use \\
+        i = "The likelihood assumes every subject x rater cell is observed. Use \\
              {.code ci_method = \"montecarlo\"}."
       ))
     }
@@ -1830,7 +1831,7 @@ icc <- function(
         "{.code ci_method = \"mpl\"} is calibrated at {.code conf_level} \\
          {.val {format(mpl_levels, nsmall = 2L)}} only.",
         i = "Its kappa_m correction is calibrated separately for each level and is \\
-             not interpolated between them; for another level use \\
+             not interpolated between them. For another level, use \\
              {.code ci_method = \"montecarlo\"}."
       ))
     }
@@ -1884,7 +1885,7 @@ icc <- function(
         "The {.pkg lavaan} engine supports only the crossed (Design 1) \\
          multilevel design.",
         i = "With raters nested in clusters or subjects there is no two-level \\
-             SEM parameterization of the decomposition yet; use \\
+             SEM parameterization of the decomposition yet. Use \\
              {.code engine = \"glmmTMB\"} (default) or {.code \"lme4\"}."
       ))
     }
@@ -1920,7 +1921,7 @@ icc <- function(
         "The {.pkg lavaan} multilevel engine needs complete, balanced data \\
          with equal cluster sizes for fixed raters.",
         i = "Incomplete or unbalanced fixed-rater multilevel SEM is planned for \\
-             a later milestone; use {.code engine = \"glmmTMB\"} (default) or \\
+             a later milestone. Use {.code engine = \"glmmTMB\"} (default) or \\
              {.code \"lme4\"}."
       ))
     }
@@ -2036,12 +2037,12 @@ icc <- function(
       if (replicates) {
         abort_unsupported(c(
           "The {.pkg brms} engine supports incomplete/ragged data only for the \\
-           two-way single-level (random or fixed), single-level one-way, crossed \\
-           (Design 1) multilevel (random or fixed), and nested Design 2/3 (random) \\
-           designs so far.",
+           following designs so far. They are the two-way single-level (random or \\
+           fixed), the single-level one-way, the crossed (Design 1) multilevel \\
+           (random or fixed), and the nested Design 2/3 (random).",
           i = "Incomplete Bayesian within-cell replicate ICCs are planned for a later \\
-               milestone; use {.code engine = \"glmmTMB\"} (default) or {.code \"lme4\"} \\
-               for incomplete data."
+               milestone. For incomplete data, use {.code engine = \"glmmTMB\"} \\
+               (default) or {.code \"lme4\"}."
         ))
       }
     }
@@ -2049,7 +2050,7 @@ icc <- function(
       abort_unsupported(c(
         "Numeric {.arg unit} (a D-study projection) is not supported for the \\
          {.pkg brms} engine yet.",
-        i = "Use {.val single} or {.val average}; Bayesian D-study projection is \\
+        i = "Use {.val single} or {.val average}. Bayesian D-study projection is \\
              planned for a later milestone."
       ))
     }
@@ -2529,7 +2530,7 @@ icc <- function(
       "The ICC is undefined: the signal and every error variance component were \\
        estimated at exactly zero.",
       i = "This degenerate boundary (no between- or within-group variance) leaves \\
-           the variance ratio 0/0; inspect the data or the fitted model."
+           the variance ratio 0/0. Inspect the data or the fitted model."
     ))
   }
   # A bootstrap fit carries its kept resample components so d_study() can project a
@@ -2909,8 +2910,8 @@ abort_fixed_agr_projection <- function(
       c(
         "Projecting absolute agreement to a different number of raters is not \\
          defined for {.val fixed} raters.",
-        i = "With fixed raters the rater term is the finite-population variance \\
-             of exactly the raters you observed, so there is no 'average of m \\
+        i = "With fixed raters, the rater term is the finite-population variance \\
+             of exactly the raters you observed. So there is no 'average of m \\
              freshly sampled raters' to project to.",
         i = "Use {.code raters = \"random\"} to project absolute agreement, or \\
              {.code type = \"consistency\"} for a fixed-rater D-study."

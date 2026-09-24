@@ -518,7 +518,7 @@ fixed_abort_bullets <- c(
   "Ragged or incomplete within-cell replicates are not supported for fixed raters yet.",
   paste(
     "Fixed-rater replicates ship for balanced, complete data (every cell",
-    "present and rated the same number of times); the ragged and incomplete",
+    "present and rated the same number of times). The ragged and incomplete",
     "cases are planned for a later milestone."
   ),
   paste(

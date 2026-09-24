@@ -247,7 +247,7 @@ d_study <- function(
   if (occasion_axis && !is.null(m)) {
     abort_unsupported(c(
       "Project the rater count {.arg m} OR the occasion count {.arg n_o}, not both.",
-      i = "A joint {.code m x n_o} reliability surface is not supported; call \\
+      i = "A joint {.code m x n_o} reliability surface is not supported. Call \\
            {.fn d_study} once per axis.",
       i = "Supply {.arg n_o} for an occasion projection or {.arg m} for a rater \\
            projection (the default)."
@@ -257,8 +257,8 @@ d_study <- function(
     abort_unsupported(c(
       "Occasion-count projection ({.arg n_o}) requires a within-cell replicate fit.",
       i = "Without replicated ratings (more than one rating per subject-by-rater \\
-           cell) there is no occasion facet to project; pure error and the \\
-           subject-by-rater interaction are confounded.",
+           cell), there is no occasion facet to project. Pure error and the \\
+           subject-by-rater interaction are then confounded.",
       i = "Refit with replicated data, or project the rater count {.arg m} instead."
     ))
   }
@@ -283,7 +283,7 @@ d_study <- function(
         abort_unsupported(c(
           "Cluster-level D-study projection is not supported on incomplete data.",
           i = "The per-cluster effective-rater divisor behind a ragged cluster mean \\
-               is an open modeling question (M9); only the subject level projects on \\
+               is an open modeling question (M9). Only the subject level projects on \\
                incomplete data.",
           i = "Refit with {.code level = \"subject\"} for an incomplete multilevel \\
                D-study."
@@ -292,7 +292,7 @@ d_study <- function(
       cli::cli_inform(
         c(
           i = "Cluster-level D-study projection is not available on incomplete data \\
-               (the ragged ICC(c,k) divisor is unresolved); projecting the subject \\
+               (the ragged ICC(c,k) divisor is unresolved). Projecting the subject \\
                level only.",
           i = "Subject-level projection is unaffected."
         ),
@@ -312,7 +312,7 @@ d_study <- function(
         c(
           i = "The cluster-level ICC does not average over occasions (its error set \\
                has no pure-error term), so its occasion curve is flat.",
-          i = "Subject-level reliability rises with more occasions; cluster-level \\
+          i = "Subject-level reliability rises with more occasions. Cluster-level \\
                reliability is unchanged."
         ),
         .frequency = "once",

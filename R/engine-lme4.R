@@ -59,7 +59,7 @@ lme4_bootmer_refit <- function(fit, extract) {
 # which has already checked. One expression, so the 12 cannot drift apart again.
 merderiv_reason <- function() {
   paste0(
-    "to supply the lme4 parameter covariance; every lme4 fit checks for it ",
+    "to supply the lme4 parameter covariance. Every lme4 fit checks for it ",
     "on entry, whatever interval method you ask for."
   )
 }
@@ -96,10 +96,10 @@ fit_lme4 <- function(data, call = rlang::caller_env()) {
       c(
         "The {.pkg lme4} engine cannot return an interval for a singular \\
          (boundary) fit.",
-        i = "A variance component was estimated at exactly zero; the \\
+        i = "A variance component was estimated at exactly zero. The \\
              {.pkg lme4} engine defers boundary fits to the boundary-robust \\
-             default (its {.pkg merDeriv} covariance is singular there, and a \\
-             bootstrap resamples degenerately).",
+             default: its {.pkg merDeriv} covariance is singular there, and a \\
+             bootstrap resamples degenerately.",
         i = "Use {.code engine = \"glmmTMB\"} (for either {.arg ci_method}), \\
              which stays finite here."
       ),
@@ -231,10 +231,10 @@ fit_lme4_oneway <- function(data, call = rlang::caller_env()) {
       c(
         "The {.pkg lme4} engine cannot return an interval for a singular \\
          (boundary) fit.",
-        i = "A variance component was estimated at exactly zero; the \\
+        i = "A variance component was estimated at exactly zero. The \\
              {.pkg lme4} engine defers boundary fits to the boundary-robust \\
-             default (its {.pkg merDeriv} covariance is singular there, and a \\
-             bootstrap resamples degenerately).",
+             default: its {.pkg merDeriv} covariance is singular there, and a \\
+             bootstrap resamples degenerately.",
         i = "Use {.code engine = \"glmmTMB\"} (for either {.arg ci_method}), \\
              which stays finite here."
       ),
@@ -356,10 +356,10 @@ fit_lme4_fixed <- function(data, call = rlang::caller_env()) {
       c(
         "The {.pkg lme4} engine cannot return an interval for a singular \\
          (boundary) fit.",
-        i = "A variance component was estimated at exactly zero; the \\
+        i = "A variance component was estimated at exactly zero. The \\
              {.pkg lme4} engine defers boundary fits to the boundary-robust \\
-             default (its {.pkg merDeriv} covariance is singular there, and a \\
-             bootstrap resamples degenerately).",
+             default: its {.pkg merDeriv} covariance is singular there, and a \\
+             bootstrap resamples degenerately.",
         i = "Use {.code engine = \"glmmTMB\"} (for either {.arg ci_method}), \\
              which stays finite here."
       ),
@@ -486,10 +486,10 @@ lme4_ml_contract <- function(fit, groups, call = rlang::caller_env()) {
       c(
         "The {.pkg lme4} engine cannot return an interval for a singular \\
          (boundary) fit.",
-        i = "A variance component was estimated at exactly zero; the \\
+        i = "A variance component was estimated at exactly zero. The \\
              {.pkg lme4} engine defers boundary fits to the boundary-robust \\
-             default (its {.pkg merDeriv} covariance is singular there, and a \\
-             bootstrap resamples degenerately).",
+             default: its {.pkg merDeriv} covariance is singular there, and a \\
+             bootstrap resamples degenerately.",
         i = "Use {.code engine = \"glmmTMB\"} (for either {.arg ci_method}), \\
              which stays finite here."
       ),
@@ -751,10 +751,10 @@ fit_lme4_multilevel_fixed <- function(data, call = rlang::caller_env()) {
       c(
         "The {.pkg lme4} engine cannot return an interval for a singular \\
          (boundary) fit.",
-        i = "A variance component was estimated at exactly zero; the \\
+        i = "A variance component was estimated at exactly zero. The \\
              {.pkg lme4} engine defers boundary fits to the boundary-robust \\
-             default (its {.pkg merDeriv} covariance is singular there, and a \\
-             bootstrap resamples degenerately).",
+             default: its {.pkg merDeriv} covariance is singular there, and a \\
+             bootstrap resamples degenerately.",
         i = "Use {.code engine = \"glmmTMB\"} (for either {.arg ci_method}), \\
              which stays finite here."
       ),
@@ -878,10 +878,10 @@ fit_lme4_replicates_fixed <- function(data, call = rlang::caller_env()) {
       c(
         "The {.pkg lme4} engine cannot return an interval for a singular \\
          (boundary) fit.",
-        i = "A variance component was estimated at exactly zero; the \\
+        i = "A variance component was estimated at exactly zero. The \\
              {.pkg lme4} engine defers boundary fits to the boundary-robust \\
-             default (its {.pkg merDeriv} covariance is singular there, and a \\
-             bootstrap resamples degenerately).",
+             default: its {.pkg merDeriv} covariance is singular there, and a \\
+             bootstrap resamples degenerately.",
         i = "Use {.code engine = \"glmmTMB\"} (for either {.arg ci_method}), \\
              which stays finite here."
       ),
@@ -1002,10 +1002,10 @@ fit_lme4_nested_fixed <- function(data, call = rlang::caller_env()) {
       c(
         "The {.pkg lme4} engine cannot return an interval for a singular \\
          (boundary) fit.",
-        i = "A variance component was estimated at exactly zero; the \\
+        i = "A variance component was estimated at exactly zero. The \\
              {.pkg lme4} engine defers boundary fits to the boundary-robust \\
-             default (its {.pkg merDeriv} covariance is singular there, and a \\
-             bootstrap resamples degenerately).",
+             default: its {.pkg merDeriv} covariance is singular there, and a \\
+             bootstrap resamples degenerately.",
         i = "Use {.code engine = \"glmmTMB\"} (for either {.arg ci_method}), \\
              which stays finite here."
       ),

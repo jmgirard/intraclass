@@ -585,8 +585,11 @@ test_that("verification passes no hint to any candidate it runs (AC4)", {
   expect_false("hint" %in% names(seen[["burch"]]))
 })
 
-# The three shipped messages AC5 freezes, at 703fc1b. The resample guard is
-# outside this criterion by construction: `gen_mse0` never reaches it. The
+# The three shipped messages AC5 freezes, at 703fc1b, re-frozen at b8600cb by
+# the M156 prose pass: only a semicolon in the `npbootstrap_ci()` abort's info
+# line became a full stop, and the pinned property (no hint bullet where
+# nothing works) is unchanged. The resample guard is outside this criterion by
+# construction: `gen_mse0` never reaches it. The
 # bootstrap guard reports a glmmTMB CONVERGENCE COUNT, a property of the
 # optimizer on this platform's BLAS rather than of the message, so that integer
 # alone is normalized on both sides and every other byte is pinned as-is.
@@ -613,7 +616,7 @@ ac5_expected <- list(
     "The one-way transformed bootstrap-t interval is undefined for this ",
     "data.\n",
     "i The studentized pivot needs a finite log F and a non-zero ",
-    "jackknife SE; this data gives log F = Inf and jackknife SE = NaN.\n",
+    "jackknife SE. This data gives log F = Inf and jackknife SE = NaN.\n",
     "i Inspect the data before retrying."
   )
 )
@@ -926,7 +929,7 @@ test_that("a two-method engine bullet says whose resample count it names", {
   # naming a number.
   expect_match(
     boundary_engine_hint(function(m) TRUE, "the default", seed = 3L),
-    "both run under your",
+    "Both were run under your",
     fixed = TRUE
   )
 })
