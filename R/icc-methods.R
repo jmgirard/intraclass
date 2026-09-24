@@ -264,8 +264,8 @@ format.icc <- function(x, ...) {
   conflated_note <- if (ml && "conflated" %in% e$level) {
     icc_mute(c(
       "Diagnostic contrast: the 'conflated' level ignores the cluster structure",
-      "(ten Hove et al. 2022, Eq. 14) -- it shows the bias from a single-level",
-      "analysis and is NOT a recommended coefficient; report subject/cluster."
+      "(ten Hove et al. 2022, Eq. 14). It shows the bias from a single-level",
+      "analysis and is NOT a recommended coefficient. Report subject or cluster."
     ))
   }
 
@@ -310,7 +310,7 @@ summary.icc <- function(object, ...) {
   notes <- if (identical(object$design$model, "oneway")) {
     c(
       "One-way random: each subject is rated by a possibly different set of",
-      "interchangeable raters, so systematic rater differences cannot be",
+      "interchangeable raters. So systematic rater differences cannot be",
       "separated and are absorbed into the residual (a conservative ICC)."
     )
   } else if (!design_has_rater_facet(object$design)) {
@@ -321,7 +321,7 @@ summary.icc <- function(object, ...) {
     # shape the one-way note above uses.
     c(
       "Raters nested in subjects: each subject is rated by its own set of",
-      "raters, so systematic rater differences cannot be separated and are",
+      "raters. So systematic rater differences cannot be separated and are",
       "absorbed into the residual (a conservative ICC)."
     )
   } else {
@@ -337,7 +337,7 @@ summary.icc <- function(object, ...) {
       } else {
         paste(
           "Consistency ignores the rater main effect (systematic differences in",
-          "rater level); only relative standing counts."
+          "rater level). Only relative standing counts."
         )
       }
     }
@@ -346,7 +346,7 @@ summary.icc <- function(object, ...) {
     cell_note <- if (isTRUE(object$design$replicates)) {
       c(
         "Within-cell replicates separate the subject-by-rater interaction from",
-        "pure error; occasion averaging reduces pure error only."
+        "pure error. Occasion averaging reduces pure error only."
       )
     } else {
       c(

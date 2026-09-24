@@ -19,7 +19,7 @@
       Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
       
       Absolute agreement counts the rater main effect (systematic differences in rater level) as error.
-      Consistency ignores the rater main effect (systematic differences in rater level); only relative standing counts.
+      Consistency ignores the rater main effect (systematic differences in rater level). Only relative standing counts.
       A single rating per cell confounds the subject-by-rater interaction with
       residual error.
 
