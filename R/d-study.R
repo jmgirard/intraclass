@@ -258,7 +258,7 @@ d_study <- function(
       "Occasion-count projection ({.arg n_o}) requires a within-cell replicate fit.",
       i = "Without replicated ratings (more than one rating per subject-by-rater \\
            cell), there is no occasion facet to project. Pure error and the \\
-           subject-by-rater interaction are confounded.",
+           subject-by-rater interaction are then confounded.",
       i = "Refit with replicated data, or project the rater count {.arg m} instead."
     ))
   }

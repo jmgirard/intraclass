@@ -18,8 +18,8 @@
 
 ## Documentation
 
-* The errors, warnings, notes and install prompts the package raises are
-  reworded in plainer English. None uses a dash as punctuation, and no
+* The package's own errors, warnings, notes and install prompts now use
+  plainer English. None uses a dash as punctuation, and no
   sentence runs past 25 words. Long sentences are split, and semicolons
   become full stops except between references. Which condition fires, and
   when, is unchanged. Nothing computed changes.
@@ -54,18 +54,17 @@
   each open with a one-sentence definition. Nothing computed changes.
 
 * Five more articles are rewritten in plainer English. A D-study projects the
-  fitted variance components to other rater counts, each component a share of
-  the total variation traced to one source. One of the five covers D-studies
-  and the within-cell replicate, one of several ratings by the same rater of
-  the same subject. The five are *Estimation engines*, *Comparison with other
+  fitted variance components to other rater counts, and each component is a
+  share of the total variation traced to one source. One of the five covers
+  D-studies and the within-cell replicate, one of several ratings by the same
+  rater of the same subject. The five are *Estimation engines*, *Comparison with other
   packages*, *D-studies and within-cell replicates*, *Multilevel designs* and
-  *Confidence-interval methods*. No sentence runs past
-  25 words, except two in the interval-methods article that carry clauses
-  the test suite pins verbatim. Each glossary term is defined in plain words
-  or linked to the glossary at its first use in each article. In the
-  interval-methods article every
-  `ci_method` section now opens with a paragraph on what the method is for
-  and when to choose it. Nothing computed changes.
+  *Confidence-interval methods*. No sentence runs past 25 words, except two
+  in the interval-methods article that carry clauses the test suite pins
+  verbatim. Each glossary term is defined in plain words or linked to the
+  glossary at its first use in each article. In the interval-methods article
+  every `ci_method` section now opens with a paragraph on what the method is
+  for and when to choose it. Nothing computed changes.
 
 # intraclass 0.1.0
 
@@ -92,10 +91,10 @@ newer.
   imbalanced, incomplete, and multilevel (nested) designs: unequal ratings per
   subject, missing ratings, and subjects nested in a higher-level unit such as
   a classroom or clinic. A `cluster` column on a two-way design switches on the
-  multilevel ICC. When the same raters span every cluster, it adds a cluster
-  level: how reliably raters distinguish cluster means. See *Multilevel
-  designs: subject and cluster level* and `?icc` for the layouts and where it
-  refuses.
+  multilevel ICC. When the same raters span every cluster, the column also
+  adds a cluster level: how reliably raters distinguish cluster means. See
+  *Multilevel designs: subject and cluster level* and `?icc` for the layouts
+  and where it refuses.
 * Rating a subject-by-rater cell more than once gives a within-cell replicate
   design. On a two-way random design `icc()` splits the single-rating residual
   into a subject-by-rater interaction and pure error, and `occasions` reports

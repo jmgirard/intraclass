@@ -1799,7 +1799,7 @@ icc <- function(
          absolute-agreement ICC(A,1)/ICC(A,k) with one rating per subject-rater cell.",
         i = "It is the modified-profile-likelihood interval for the balanced-complete \\
              two-way random design. For one-way, multilevel, fixed-rater, or \\
-             within-cell-replicate designs use {.code ci_method = \"montecarlo\"}."
+             within-cell-replicate designs, use {.code ci_method = \"montecarlo\"}."
       ))
     }
     if (!balanced) {
@@ -2911,7 +2911,7 @@ abort_fixed_agr_projection <- function(
         "Projecting absolute agreement to a different number of raters is not \\
          defined for {.val fixed} raters.",
         i = "With fixed raters, the rater term is the finite-population variance \\
-             of exactly the raters you observed. There is no 'average of m \\
+             of exactly the raters you observed. So there is no 'average of m \\
              freshly sampled raters' to project to.",
         i = "Use {.code raters = \"random\"} to project absolute agreement, or \\
              {.code type = \"consistency\"} for a fixed-rater D-study."

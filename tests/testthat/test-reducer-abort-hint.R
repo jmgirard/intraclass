@@ -585,11 +585,11 @@ test_that("verification passes no hint to any candidate it runs (AC4)", {
   expect_false("hint" %in% names(seen[["burch"]]))
 })
 
-# The three shipped messages AC5 freezes, at 703fc1b, re-frozen by the M156
-# prose pass: only the npbootstrap bullet's semicolon became a full stop, and
-# the pinned property (no hint bullet where nothing works) is unchanged. The
-# resample guard is
-# outside this criterion by construction: `gen_mse0` never reaches it. The
+# The three shipped messages AC5 freezes, at 703fc1b, re-frozen at b8600cb by
+# the M156 prose pass: only a semicolon in the `npbootstrap_ci()` abort's info
+# line became a full stop, and the pinned property (no hint bullet where
+# nothing works) is unchanged. The resample guard is outside this criterion by
+# construction: `gen_mse0` never reaches it. The
 # bootstrap guard reports a glmmTMB CONVERGENCE COUNT, a property of the
 # optimizer on this platform's BLAS rather than of the message, so that integer
 # alone is normalized on both sides and every other byte is pinned as-is.

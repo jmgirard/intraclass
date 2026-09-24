@@ -74,7 +74,8 @@ package raises, which `prose-profile.py` cannot reach. It assembles each
 message from its call site in `R/`, with the hint bullets from
 `R/boundary-hint.R`, and counts dashes, long sentences and the R8 markers. Its
 `--compare-tokens <ref>` option compares the code around the messages with
-that ref. Its header states what it assembles and where `--compare-tokens` can miss a change.
+that ref. Its header states what it assembles and where `--compare-tokens`
+can miss a change.
 
 ```
 python3 data-raw/prose-profile.py --limit 25 'vignettes/*.Rmd' --verbose

@@ -6,16 +6,16 @@
 
 This page owns the writing standard for every surface a user reads: the
 vignettes, the roxygen blocks that become `man/`, `README.Rmd`, `NEWS.md`, and
-the condition text: the errors, warnings, notes and install reasons the package
-raises, with the method hints `R/boundary-hint.R` builds (M156). It states
-eight rules, R1–R8: two measured by a committed ruler, two swept by a committed
-term table and a hand-run grep, four judgment at a read-through.
+the condition text: the errors, warnings, notes and install reasons the
+package raises, with the method hints `R/boundary-hint.R` builds (M156). It
+states eight rules, R1–R8: two measured by a committed ruler, two swept by a
+committed term table and a hand-run grep, four judgment at a read-through.
 
-Condition text is held to R1–R6 and R8, measured by
-`Rscript data-raw/condition-text-profile.R` (its header says what it
-assembles). R7 does not apply: a message is read alone, so it has no file in
-which a first use occurs. Status and the record of each pass live in
-`cairn/ROADMAP.md` and the milestone files.
+Condition text is held to R1–R6 and R8, measured by the ruler
+`data-raw/condition-text-profile.R`, whose header says what it assembles. R7
+does not apply: a message is read alone, so it has no file in which a first
+use occurs. `data-raw/check-abort-remedy-verdicts.R` and tests guard each
+named remedy. Pass records live in `cairn/ROADMAP.md` and the milestones.
 
 ## The rules
 
@@ -52,13 +52,14 @@ which a first use occurs. Status and the record of each pass live in
   under judgment and may add its marker in a later pass. Headings and
   sentences may end in a question mark (M151 gate).
 
-R1 and R2 are gated: `data-raw/prose-profile.py` counts them, and a pass that
-claims to have applied them reports zero. The one exemption is a clause a test
-pins verbatim and that admits no sentence break: a pass carrying such a clause
-records it with the pass, with the clause's word count and the sentence's. R4
-and R5 are counted by the same ruler but carry no target: a zero on either has
-no non-arbitrary threshold and would fight readability. R3 and R6 are uncounted;
-R7 and R8 are swept as stated above.
+R1 and R2 are gated: `data-raw/prose-profile.py` counts them (condition text:
+`condition-text-profile.R`), and a pass that claims to have applied them
+reports zero. The one exemption is a clause a test pins verbatim and that
+admits no sentence break: a pass carrying such a clause records it with the
+pass, with the clause's word count and the sentence's. R4 and R5 are counted
+by the same ruler but carry no target: a zero on either has no non-arbitrary
+threshold and would fight readability. R3 and R6 are uncounted; R7 and R8 are
+swept as stated above.
 
 R6 is the one that can silently break something. A dash spliced into two
 sentences, a clause hoisted out of a parenthesis, an "and" turned into a full
