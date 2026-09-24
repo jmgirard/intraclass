@@ -205,8 +205,8 @@ fit_brms_common <- function(
         "The {.pkg brms} fit shows weak MCMC convergence (max R-hat \\
          {.val {round(conv$rhat, 3)}}, min bulk-ESS {.val {round(conv$ess_bulk)}}).",
         i = "Draw more/longer chains via {.arg brm_args} (e.g. {.code iter}, \\
-             {.code chains}, {.code warmup}). For reference, ten Hove et al. (2020) \\
-             used R-hat < 1.10 and bulk-ESS > 100.",
+             {.code chains}, {.code warmup}). The thresholds ten Hove et al. (2020) \\
+             used are R-hat < 1.10 and bulk-ESS > 100.",
         i = "Treat the credible interval with caution until the chains converge."
       ),
       class = "intraclass_brms_convergence"

@@ -20,9 +20,9 @@
 
 * The errors, warnings, notes and install prompts the package raises are
   reworded in plainer English. None uses a dash as punctuation, and no
-  sentence runs past 25 words. Long sentences are split and semicolons become
-  full stops. Which condition fires, and when, is unchanged. Nothing computed
-  changes.
+  sentence runs past 25 words. Long sentences are split, and semicolons
+  become full stops except between citations. Which condition fires, and
+  when, is unchanged. Nothing computed changes.
 
 * Four articles now show their comparison tables as `gt` tables with a title,
   plain column headings and rounded numbers. The four are *Comparison with
@@ -93,8 +93,9 @@ newer.
   subject, missing ratings, and subjects nested in a higher-level unit such as
   a classroom or clinic. A `cluster` column on a two-way design switches on the
   multilevel ICC. When the same raters span every cluster, it adds a cluster
-  level: how reliably raters distinguish cluster means. See *Multilevel designs: subject and cluster level* and `?icc` for
-  the layouts and where it refuses.
+  level: how reliably raters distinguish cluster means. See *Multilevel
+  designs: subject and cluster level* and `?icc` for the layouts and where it
+  refuses.
 * Rating a subject-by-rater cell more than once gives a within-cell replicate
   design. On a two-way random design `icc()` splits the single-rating residual
   into a subject-by-rater interaction and pure error, and `occasions` reports
@@ -131,10 +132,10 @@ newer.
   sourced half-*t*(4, 0, 1) prior on every random-effect standard deviation.
   Its point estimate is the posterior mode, the peak of the posterior
   distribution. Its interval is a percentile **credible** interval, which
-  holds a chosen share, usually 95%, of the posterior probability. For that
-  reason, `ci_method = "posterior"` is forced. Supplying a custom `prior`
-  is a deliberate deviation: `icc()` warns, and the coverage results this
-  package reports no longer apply.
+  holds a chosen share, usually 95%, of the posterior probability. Because
+  both come from the posterior, `ci_method = "posterior"` is forced. Supplying
+  a custom `prior` is a deliberate deviation: `icc()` warns, and the coverage
+  results this package reports no longer apply.
 * The `lme4` package itself is already on your library path after a plain
   install, because `glmmTMB` lists it in its own `Imports`, but the lme4 engine
   also needs **merDeriv**, which does not arrive. `merDeriv`, `lavaan` and

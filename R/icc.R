@@ -1755,8 +1755,8 @@ icc <- function(
            supports {.code unit = \"single\"} (ICC(1)) and {.code \"average\"} \\
            (ICC(k)) only.",
           i = "A numeric {.arg unit} (D-study projection to {.var m} raters) is not \\
-               yet available unbalanced. Its Spearman-Brown pole is not guaranteed \\
-               interior when {.var m} exceeds the effective size. Use \\
+               yet available unbalanced. This is because its Spearman-Brown pole is \\
+               not guaranteed interior when {.var m} exceeds the effective size. Use \\
                {.code unit = \"average\"}, or {.code ci_method = \"montecarlo\"} for \\
                a projection."
         ))
@@ -2036,8 +2036,8 @@ icc <- function(
       # here.)
       if (replicates) {
         abort_unsupported(c(
-          "The {.pkg brms} engine supports incomplete/ragged data only for four \\
-           design families so far. They are the two-way single-level (random or \\
+          "The {.pkg brms} engine supports incomplete/ragged data only for the \\
+           following designs so far. They are the two-way single-level (random or \\
            fixed), the single-level one-way, the crossed (Design 1) multilevel \\
            (random or fixed), and the nested Design 2/3 (random).",
           i = "Incomplete Bayesian within-cell replicate ICCs are planned for a later \\
@@ -2911,7 +2911,7 @@ abort_fixed_agr_projection <- function(
         "Projecting absolute agreement to a different number of raters is not \\
          defined for {.val fixed} raters.",
         i = "With fixed raters, the rater term is the finite-population variance \\
-             of exactly the raters you observed. That term has no 'average of m \\
+             of exactly the raters you observed. There is no 'average of m \\
              freshly sampled raters' to project to.",
         i = "Use {.code raters = \"random\"} to project absolute agreement, or \\
              {.code type = \"consistency\"} for a fixed-rater D-study."
