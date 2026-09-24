@@ -2,7 +2,7 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M156: Plain-English pass over the condition text, and NEWS under R7/R8
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -52,7 +52,7 @@ Bring the text of every condition the package raises, and `NEWS.md`, under the h
 - [x] T7: In `NEWS.md`, gloss each first-use glossary term verbatim, clear the R8 markers and add the Documentation bullet. Run `test-news-brms-claims.R` and `python3 data-raw/check-mpl-doc-claims.py --self-test`, and re-key any ledger row the edit makes stale.
 - [x] T8: Read the whole extract for R3–R5. Audit every hunk of `git diff main -- R/ NEWS.md` for R6. Build the site and check the prose beside each rendered condition. Run the ruler and `--compare-tokens main` until both report zero.
 - [x] T9: Gate: `air format .`, `devtools::document()`, `devtools::test()`, `devtools::check()` with its raw Status line read, `lintr::lint_package()`, and every `data-raw/check-*.py --self-test`.
-- [ ] T10: Apply the review's fix-now items (Review section O9, O10, O11, O12, O14, O15, O16 and B2). In the `NEWS.md` brms bullet, put the forced-method reason back on the Bayesian engine. Then re-run the ruler, `--compare-tokens main`, `prose-terms.py NEWS.md` and the affected tests.
+- [x] T10: Apply the review's fix-now items (Review section O9, O10, O11, O12, O14, O15, O16 and B2). In the `NEWS.md` brms bullet, put the forced-method reason back on the Bayesian engine. Then re-run the ruler, `--compare-tokens main`, `prose-terms.py NEWS.md` and the affected tests.
 - [x] T11: Add two candidate rows to `cairn/ROADMAP.md`, searching first. One is for the ruler blind spots (O1 to O5). The other is for the glossary glosses narrower than the package (O6, O7, O8, B1), with the NEWS bullet growth (P1).
 
 ## Work log
@@ -79,6 +79,7 @@ Bring the text of every condition the package raises, and `NEWS.md`, under the h
 - 2026-09-23: T11 done. Search-first found no overlap. Three candidate rows were added: glossary glosses narrower than the package, the `condition-text-profile.R` blind spots, and internal record IDs in the `R/d-study.R` message. The third was found during T10 and goes beyond T11's two rows. ROADMAP 55 lines, 22,653 bytes.
 - 2026-09-23: claim audit: 16 claims read, 2 corrected — NEWS.md
 - 2026-09-23: claim-audit corrections, re-read once by the same reader and judged true. "except between citations" became "except between references", because "(M20; ADR-030)" is not a citation. The brms reason became "Because the interval comes from the posterior draws", because the lock in `R/icc.R` rests on the credible interval, not the point estimate. `test-news-brms-claims.R` passes on a fresh install.
+- 2026-09-23: T10 done. The full suite at 975c5c1 shows FAIL 0, WARN 0, SKIP 2, and `lintr` finds 0 lints. The later commit changed only NEWS, and its brms test passes. `air` is clean. Status → review.
 
 ## Review
 
