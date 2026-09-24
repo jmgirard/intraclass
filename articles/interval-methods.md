@@ -77,7 +77,7 @@ bs <- tidy(icc(ratings, score, subject, rater,
 | Coefficient | Estimate | Monte-Carlo | Parametric bootstrap |
 | ICC(A,1) | 0.290 | \[0.05, 0.71\] | \[0.02, 0.72\] |
 | ICC(A,k) | 0.620 | \[0.17, 0.91\] | \[0.09, 0.91\] |
-| ICC(C,1) | 0.715 | \[0.33, 0.93\] | \[0.15, 0.90\] |
+| ICC(C,1) | 0.715 | \[0.34, 0.92\] | \[0.15, 0.90\] |
 | ICC(C,k) | 0.909 | \[0.67, 0.98\] | \[0.41, 0.97\] |
 
 The point estimates are identical (same fit). The bootstrap’s lower
@@ -389,8 +389,8 @@ ml <- tidy(icc(ratings_twoway, score, subject, rater, type = "agreement", ci_met
 | Monte-Carlo and modified profile-likelihood 95% intervals on ratings_twoway |  |  |  |
 |----|----|----|----|
 | Coefficient | Estimate | Monte-Carlo | Modified profile likelihood |
-| ICC(A,1) | 0.709 | \[0.48, 0.84\] | \[0.42, 0.87\] |
-| ICC(A,k) | 0.907 | \[0.78, 0.96\] | \[0.75, 0.96\] |
+| ICC(A,1) | 0.709 | \[0.47, 0.84\] | \[0.42, 0.87\] |
+| ICC(A,k) | 0.907 | \[0.78, 0.95\] | \[0.75, 0.96\] |
 
 The two point estimates agree, from the same REML fit. The `"mpl"`
 interval is the wider of the pair at this comfortably interior cell.
