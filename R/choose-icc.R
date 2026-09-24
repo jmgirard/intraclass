@@ -29,13 +29,14 @@
 #' The two structural facts about your design default to the common case,
 #' matching [icc()]. They are whether the raters are crossed (`model`) and
 #' whether subjects are nested in clusters (`multilevel`). The common case is
-#' a crossed, non-multilevel two-way design, where the subjects share one set
-#' of raters. The choices that actually select the coefficient are `type`,
+#' a crossed, non-multilevel two-way design, where each rater is tracked across
+#' the subjects they score. The choices that actually select the coefficient are `type`,
 #' `unit`, `raters`, and `level` when multilevel. None of them has a silent
 #' default. In a non-interactive session, leaving one unanswered is an error
 #' naming the unanswered decision, rather than quietly picking one for you.
 #'
-#' @param model `"twoway"` (crossed: the same raters judge every subject) or
+#' @param model `"twoway"` (crossed: each rater is tracked across the subjects
+#'   they score) or
 #'   `"oneway"` (raters are interchangeable across subjects). Defaults to
 #'   `"twoway"`. Under `"oneway"` the `type` and `raters` choices do not exist
 #'   (there is no rater term), and supplying them is an error.
@@ -151,8 +152,8 @@ collect_answers_interactively <- function(answers, ask = ask_choice) {
       "Are the raters crossed, or interchangeable across subjects?",
       c("twoway", "oneway"),
       c(
-        "Crossed -- the same raters judge every subject (two-way)",
-        "Interchangeable -- a different set per subject (one-way)"
+        "Crossed: each rater is tracked across the subjects they score (two-way)",
+        "Interchangeable: a different set per subject (one-way)"
       )
     )
   }
@@ -163,8 +164,8 @@ collect_answers_interactively <- function(answers, ask = ask_choice) {
       "Does the actual value need to match, only the rank order, or both?",
       c("agreement", "consistency", "both"),
       c(
-        "Absolute agreement -- the value itself must match",
-        "Consistency -- only the rank order must match",
+        "Absolute agreement: the value itself must match",
+        "Consistency: only the rank order must match",
         "Both"
       )
     )
@@ -187,8 +188,8 @@ collect_answers_interactively <- function(answers, ask = ask_choice) {
       "Are your raters a sample you generalize beyond, or the only raters of interest?",
       c("random", "fixed"),
       c(
-        "Random -- a sample; generalize to the rater universe",
-        "Fixed -- exactly these raters, no generalization"
+        "Random: a sample that you generalize to the rater universe",
+        "Fixed: exactly these raters, no generalization"
       )
     )
   }
@@ -197,7 +198,7 @@ collect_answers_interactively <- function(answers, ask = ask_choice) {
       "multilevel",
       "Are subjects nested in higher-level clusters (e.g. pupils in classrooms)?",
       c(FALSE, TRUE),
-      c("No", "Yes -- subjects are nested in clusters")
+      c("No", "Yes: subjects are nested in clusters")
     )
   }
   if (isTRUE(answers$multilevel) && is.null(answers$level)) {
@@ -206,8 +207,8 @@ collect_answers_interactively <- function(answers, ask = ask_choice) {
       "Which reliability: within-cluster, between-cluster, or both?",
       c("subject", "cluster", "both"),
       c(
-        "Subject level -- rating a subject within its cluster",
-        "Cluster level -- the cluster mean",
+        "Subject level: rating a subject within its cluster",
+        "Cluster level: the cluster mean",
         "Both"
       )
     )
@@ -493,9 +494,9 @@ recommendation_rationale <- function(
 ) {
   out <- c(
     model = if (oneway) {
-      "One-way: raters are interchangeable across subjects, so systematic rater differences are absorbed into error -- the most conservative ICC."
+      "One-way: raters are interchangeable across subjects, so systematic rater differences are absorbed into error. This gives the most conservative ICC."
     } else {
-      "Crossed (two-way): the same raters judge every subject."
+      "Crossed (two-way): each rater is tracked across the subjects they score."
     }
   )
   if (!oneway) {
@@ -503,9 +504,9 @@ recommendation_rationale <- function(
       out,
       type = switch(
         type,
-        agreement = "Absolute agreement: the value itself must match; a systematic difference between raters counts as error.",
-        consistency = "Consistency: only the rank order must match; a constant per-rater offset is forgiven.",
-        both = "Both error definitions: absolute agreement (the value itself must match) and consistency (a constant per-rater offset is forgiven) side by side."
+        agreement = "Absolute agreement: the value itself must match. A systematic difference between raters counts as error.",
+        consistency = "Consistency: only the rank order must match. A constant per-rater offset is forgiven.",
+        both = "Both error definitions side by side: absolute agreement, where the value itself must match, and consistency, where a constant per-rater offset is forgiven."
       )
     )
   }
@@ -524,7 +525,7 @@ recommendation_rationale <- function(
       raters = switch(
         raters,
         random = "Random raters: a sample you generalize beyond, to the rater universe they were drawn from.",
-        fixed = "Fixed raters: exactly these judges; the coefficient does not generalize past them."
+        fixed = "Fixed raters: exactly these judges. The coefficient does not generalize past them."
       )
     )
   }
@@ -535,7 +536,7 @@ recommendation_rationale <- function(
         level,
         subject = "Subject level: reliability of rating a subject within its cluster.",
         cluster = "Cluster level: reliability of the cluster mean.",
-        both = "Both levels: within-cluster (subject) and between-cluster (cluster) reliability side by side."
+        both = "Both levels side by side: within-cluster reliability at the subject level, and between-cluster reliability at the cluster level."
       )
     )
   }
@@ -556,7 +557,7 @@ recommendation_notes <- function(type, raters, multilevel, oneway) {
   if (identical(raters, "fixed")) {
     notes <- c(
       notes,
-      "Random raters is the recommended default for interrater reliability; use fixed only when these are the entire population of raters you will ever use."
+      "Random raters is the recommended default for interrater reliability. Use fixed only when these are the entire population of raters you will ever use."
     )
   }
   notes <- c(

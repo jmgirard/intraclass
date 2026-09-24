@@ -51,8 +51,10 @@ icc(
 }
 \arguments{
 \item{what}{Which plot to draw. \code{"coefficients"} (the default) draws a
-forest plot of each ICC index with its Monte-Carlo confidence interval,
-built by simulating from the fitted model. \code{"components"} draws the
+forest plot of each ICC index with the interval its
+\code{ci_method} sets. The default is the Monte-Carlo interval, built by
+drawing parameter values from the fitted model's uncertainty.
+\code{"components"} draws the
 variance-component decomposition.}
 
 \item{...}{Unused. Present so the method signature matches the generic.}
@@ -113,8 +115,9 @@ interrater reliability.}
 
 \item{unit}{The averaging unit(s), any combination of: \code{"single"}
 (\verb{ICC(*,1)}), \code{"average"} (\verb{ICC(*,k)}), or a number \code{m} >= 1 (\verb{ICC(*,m)}).
-A number is a D-study projection to the mean of \code{m} raters, where a D-study
-projects the fitted variance components to other rater counts. See
+A number asks for a D-study, which projects the fitted variance components
+to other rater or occasion counts. Here it projects to the mean of \code{m}
+raters. See
 \code{\link[=d_study]{d_study()}} for projecting across a range of \code{m}. Projecting absolute
 agreement is not defined for fixed raters (see \code{\link[=d_study]{d_study()}}).}
 
@@ -202,7 +205,8 @@ via \pkg{brms}). Its random-effect SDs carry a sourced half-\emph{t}(4, 0, 1)
 prior (ten Hove et al. 2020). The point estimate is the posterior mode
 (MAP), the peak of the posterior distribution. The interval is a
 percentile \strong{credible} interval (\code{ci_method = "posterior"}, forced), which
-holds a chosen share, usually 95\%, of the posterior probability. On \strong{both
+holds the share of the posterior probability that the confidence level
+sets. On \strong{both
 balanced/complete and incomplete/ragged} data it covers the two-way random
 single-level design, and the crossed (Design 1) \strong{multilevel} random
 design (subject and cluster levels). On that same data it covers the
@@ -545,7 +549,8 @@ or the variance-component decomposition when \code{what = "components"}.
 Estimates interrater-reliability intraclass correlation coefficients (ICCs)
 from a fitted linear mixed model, rather than from classical ANOVA mean
 squares. \code{icc()} computes the two-way coefficients of McGraw & Wong (1996),
-for a design where the subjects share one set of raters. They come in two
+for a design where each rater is tracked across the subjects they score.
+They come in two
 error definitions. \strong{Absolute agreement} (\verb{ICC(A,*)}) asks whether raters
 give the same score. \strong{Consistency} (\verb{ICC(C,*)}) asks whether raters agree
 apart from a constant offset per rater. Each is reported for a single rater
@@ -607,10 +612,11 @@ five-component Design-1 model
 
 \deqn{score \sim 1 + (1|cluster) + (1|cluster{:}subject) + (1|rater) + (1|cluster{:}rater)}
 
-and reports two distinct reliabilities. The \strong{subject level}
-(within-cluster) asks how reliably raters distinguish subjects \emph{within} a
-cluster, and the \strong{cluster level} (between-cluster) asks how reliably
-raters distinguish cluster means. At the subject level the signal is the
+and reports two distinct reliabilities: the subject level is reliability
+within a cluster, and the cluster level is reliability of cluster means. The
+\strong{subject level} (within-cluster) asks how reliably raters distinguish
+subjects \emph{within} a cluster. The \strong{cluster level} (between-cluster) asks the
+same of cluster means. At the subject level the signal is the
 between-subject-within-cluster variance, and cluster variance drops out. At
 the cluster level the signal is the between-cluster variance, and the
 rater-disagreement error is the cluster-by-rater term. Choose the level that
@@ -734,7 +740,8 @@ over. One-way replicates, fixed or multilevel ragged replicates, and
 
 \section{Confidence intervals}{
 
-Intervals are Monte-Carlo, built by simulating from the fitted model.
+Intervals are Monte-Carlo, built by drawing parameter values from the fitted
+model's uncertainty.
 Parameters are drawn from the fitted covariance on the model's internal
 (log) scale and back-transformed. So the interval is boundary-aware near the
 common zero-rater-variance case, where an estimate can land exactly at zero

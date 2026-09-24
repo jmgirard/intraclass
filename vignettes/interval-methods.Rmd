@@ -20,7 +20,7 @@ ICC could be "poor" or "excellent" and you would not know it. So every `icc()`
 coefficient comes with an interval, never a bare number, and the `ci_method`
 argument selects how that interval is built. This article covers the default
 [**Monte-Carlo** interval](glossary.html#monte-carlo-interval), built by
-simulating from the fitted model. It also covers the [parametric
+drawing parameter values from the fitted model's uncertainty. It also covers the [parametric
 bootstrap](glossary.html#parametric-bootstrap), which refits the model on
 simulated data many times. It then covers the [four opt-in
 methods](#the-opt-in-boundary-robust-methods) for the
@@ -34,12 +34,12 @@ closed-form interval that assumes normal data. The third is the
 interval with a kurtosis adjustment. The fourth is the [modified profile
 likelihood](glossary.html#modified-profile-likelihood) (`"mpl"`), which
 profiles the likelihood in the ICC with a small-sample correction. It is the
-two-way counterpart, for the design where the subjects share one set of
-raters. It serves only that design's balanced, complete, random case with
+two-way counterpart, for the design where each rater is tracked across the
+subjects they score. It serves only that design's balanced, complete, random case with
 absolute [agreement](glossary.html#absolute-agreement), where raters give the
 same score. Last is the Bayesian [**credible**
-interval](glossary.html#credible-interval), which holds a chosen share,
-usually 95%, of the posterior probability. That interval comes with the brms
+interval](glossary.html#credible-interval), which holds the share of
+the posterior probability that the confidence level sets. That interval comes with the brms
 [engine](glossary.html#engine), the software that does the fitting. Terms are
 defined in the [*Glossary*](glossary.html).
 
@@ -101,10 +101,10 @@ boundary](glossary.html#zero-variance-boundary). Another is the multilevel
 designs, which carry more [variance
 components](glossary.html#variance-component), each a share of the total
 variation traced to one source, and often few clusters. In the multilevel
-case the bootstrap's
+case the subject level is reliability within a cluster, and the cluster level
+is reliability of cluster means. There the bootstrap's
 [cluster-level](glossary.html#subject-level-vs--cluster-level) interval in
-particular carries more resampling noise, the cluster level being how
-reliably raters distinguish cluster means. The bootstrap is available for
+particular carries more resampling noise. The bootstrap is available for
 every design the `"glmmTMB"` and `"lme4"` engines fit. The `"lavaan"` engine
 bootstraps complete data, and a multilevel lavaan fit needs balanced clusters
 and random raters besides. Anywhere off those fences lavaan is Monte-Carlo
@@ -186,8 +186,9 @@ interval. Any `conf_level` in `(0, 1)` is accepted. `unit = "average"`, the
 ICC(k), is the exact monotone Spearman-Brown image of the ICC(1) endpoints.
 So its coverage is inherited by construction, balanced or not. A numeric
 `unit` is a [D-study](glossary.html#d-study-decision-study) projection, which
-projects the fitted variance components to other rater counts. That
-projection is restricted to balanced data. Reach for this method for boundary
+projects the fitted variance components to other rater or
+[occasion](glossary.html#occasion-within-cell-replicate) counts.
+Here it projects to the mean of `m` raters. That projection is restricted to balanced data. Reach for this method for boundary
 robustness, an interval that exists where the Monte-Carlo default aborts.
 Reach for it too for robustness to non-normal subject effects. Its endpoints
 are deliberately left untruncated on the estimator's own support (Ukoumunne

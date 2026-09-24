@@ -115,13 +115,15 @@ Projects the reliability of a fitted \code{\link[=icc]{icc()}} to the mean of \c
 any \code{m}. It reuses the fit's variance components, each a share of the total
 variation traced to one source. This is a generalizability-theory \strong{decision
 study} (D-study), which projects the fitted variance components to other
-rater counts. It answers "how reliable would the mean of \code{m} raters be?"
+rater or
+\href{https://jmgirard.github.io/intraclass/articles/glossary.html#occasion-within-cell-replicate}{occasion}
+counts. It answers "how reliable would the mean of \code{m} raters be?"
 and, read as a curve, "how many raters do I need?". The point estimate and
 its interval reuse the fit stored on \code{x}, and no model is refit. The
 interval is boundary-aware, since an estimate can land exactly at zero. The
-band follows the fit's \code{ci_method}. A Monte-Carlo fit, whose interval is
-built by simulating from the fitted model, reprojects one draw from the
-parameter covariance across every \code{m}. A \strong{bootstrap} fit, which refits the
+band follows the fit's \code{ci_method}. A Monte-Carlo fit has an interval
+built by drawing parameter values from the fitted model's uncertainty. It
+reprojects one draw from the parameter covariance across every \code{m}. A \strong{bootstrap} fit, which refits the
 model on simulated data many times, reprojects its stored resamples. So on
 a bootstrap fit, at \code{m} = the observed rater count the band matches the
 fitted \verb{ICC(*,k)} interval exactly.
@@ -142,8 +144,9 @@ Projection is defined for random raters, under both error definitions.
 Those are agreement, where raters give the same score, and consistency,
 where raters agree apart from a constant offset per rater. It is also
 defined for fixed-rater \strong{consistency}, fixed meaning the observed raters
-are the whole population of interest. In a two-way design the subjects
-share one set of raters. The \strong{one-way} model, where they need not, is
+are the whole population of interest. In a two-way design each rater is
+tracked across the subjects they score. The \strong{one-way} model, where raters
+are not tracked, is
 defined too, as a Spearman-Brown projection of \code{ICC(1)}. Projection is \strong{not}
 defined for fixed-rater absolute agreement. There the rater term is the
 finite-population variance, the spread of just the observed raters. So
@@ -155,8 +158,9 @@ there is no "average of \code{m} freshly sampled raters" to project to.
 
 For a multilevel fit (a \code{cluster} column), \code{d_study()} projects the rater
 count \code{m} for each correctly-partitioned level on the object. Those are the
-\strong{subject} and/or \strong{cluster} level, the cluster level being how reliably
-raters distinguish cluster means. It returns one reliability curve per
+\strong{subject} and/or \strong{cluster} level, where the subject level is reliability
+within a cluster, and the cluster level is reliability of cluster means. It
+returns one reliability curve per
 level, and the returned object gains a \code{level} column that \code{autoplot()}
 facets by. \code{tidy()} carries that column on every projection, \code{NA} where the
 fit is not multilevel.

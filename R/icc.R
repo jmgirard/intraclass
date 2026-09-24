@@ -3,7 +3,8 @@
 #' Estimates interrater-reliability intraclass correlation coefficients (ICCs)
 #' from a fitted linear mixed model, rather than from classical ANOVA mean
 #' squares. `icc()` computes the two-way coefficients of McGraw & Wong (1996),
-#' for a design where the subjects share one set of raters. They come in two
+#' for a design where each rater is tracked across the subjects they score.
+#' They come in two
 #' error definitions. **Absolute agreement** (`ICC(A,*)`) asks whether raters
 #' give the same score. **Consistency** (`ICC(C,*)`) asks whether raters agree
 #' apart from a constant offset per rater. Each is reported for a single rater
@@ -58,10 +59,11 @@
 #'
 #' \deqn{score \sim 1 + (1|cluster) + (1|cluster{:}subject) + (1|rater) + (1|cluster{:}rater)}
 #'
-#' and reports two distinct reliabilities. The **subject level**
-#' (within-cluster) asks how reliably raters distinguish subjects *within* a
-#' cluster, and the **cluster level** (between-cluster) asks how reliably
-#' raters distinguish cluster means. At the subject level the signal is the
+#' and reports two distinct reliabilities: the subject level is reliability
+#' within a cluster, and the cluster level is reliability of cluster means. The
+#' **subject level** (within-cluster) asks how reliably raters distinguish
+#' subjects *within* a cluster. The **cluster level** (between-cluster) asks the
+#' same of cluster means. At the subject level the signal is the
 #' between-subject-within-cluster variance, and cluster variance drops out. At
 #' the cluster level the signal is the between-cluster variance, and the
 #' rater-disagreement error is the cluster-by-rater term. Choose the level that
@@ -181,7 +183,8 @@
 #' `d_study()` projection off a replicate fit are planned for later milestones.
 #'
 #' @section Confidence intervals:
-#' Intervals are Monte-Carlo, built by simulating from the fitted model.
+#' Intervals are Monte-Carlo, built by drawing parameter values from the fitted
+#' model's uncertainty.
 #' Parameters are drawn from the fitted covariance on the model's internal
 #' (log) scale and back-transformed. So the interval is boundary-aware near the
 #' common zero-rater-variance case, where an estimate can land exactly at zero
@@ -261,8 +264,9 @@
 #'   interrater reliability.
 #' @param unit The averaging unit(s), any combination of: `"single"`
 #'   (`ICC(*,1)`), `"average"` (`ICC(*,k)`), or a number `m` >= 1 (`ICC(*,m)`).
-#'   A number is a D-study projection to the mean of `m` raters, where a D-study
-#'   projects the fitted variance components to other rater counts. See
+#'   A number asks for a D-study, which projects the fitted variance components
+#'   to other rater or occasion counts. Here it projects to the mean of `m`
+#'   raters. See
 #'   [d_study()] for projecting across a range of `m`. Projecting absolute
 #'   agreement is not defined for fixed raters (see [d_study()]).
 #' @param occasions For data with **within-cell replicates** (more than one rating
@@ -346,7 +350,8 @@
 #'   prior (ten Hove et al. 2020). The point estimate is the posterior mode
 #'   (MAP), the peak of the posterior distribution. The interval is a
 #'   percentile **credible** interval (`ci_method = "posterior"`, forced), which
-#'   holds a chosen share, usually 95%, of the posterior probability. On **both
+#'   holds the share of the posterior probability that the confidence level
+#'   sets. On **both
 #'   balanced/complete and incomplete/ragged** data it covers the two-way random
 #'   single-level design, and the crossed (Design 1) **multilevel** random
 #'   design (subject and cluster levels). On that same data it covers the
@@ -1200,7 +1205,7 @@ icc <- function(
       abort_unidentified(c(
         "Each subject must be nested in a single cluster.",
         i = "Some {.arg subject} levels appear in more than one {.arg cluster}. \\
-             Multilevel ICCs (M5) assume subjects nested in clusters."
+             Multilevel ICCs assume subjects nested in clusters."
       ))
     }
     if (max(colSums(cluster_of)) < 2L) {
@@ -2853,7 +2858,7 @@ validate_design <- function(design, call = rlang::caller_env()) {
       c(
         "{.arg design} must be {.code NULL} (infer) or one of {.val {choices}}.",
         i = "Declare {.arg design} only to resolve a ragged pattern that is \\
-             ambiguous between a crossed and a nested design (spec M9)."
+             ambiguous between a crossed and a nested design."
       ),
       call = call
     )

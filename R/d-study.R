@@ -22,13 +22,15 @@
 #' any `m`. It reuses the fit's variance components, each a share of the total
 #' variation traced to one source. This is a generalizability-theory **decision
 #' study** (D-study), which projects the fitted variance components to other
-#' rater counts. It answers "how reliable would the mean of `m` raters be?"
+#' rater or
+#' [occasion](https://jmgirard.github.io/intraclass/articles/glossary.html#occasion-within-cell-replicate)
+#' counts. It answers "how reliable would the mean of `m` raters be?"
 #' and, read as a curve, "how many raters do I need?". The point estimate and
 #' its interval reuse the fit stored on `x`, and no model is refit. The
 #' interval is boundary-aware, since an estimate can land exactly at zero. The
-#' band follows the fit's `ci_method`. A Monte-Carlo fit, whose interval is
-#' built by simulating from the fitted model, reprojects one draw from the
-#' parameter covariance across every `m`. A **bootstrap** fit, which refits the
+#' band follows the fit's `ci_method`. A Monte-Carlo fit has an interval
+#' built by drawing parameter values from the fitted model's uncertainty. It
+#' reprojects one draw from the parameter covariance across every `m`. A **bootstrap** fit, which refits the
 #' model on simulated data many times, reprojects its stored resamples. So on
 #' a bootstrap fit, at `m` = the observed rater count the band matches the
 #' fitted `ICC(*,k)` interval exactly.
@@ -48,8 +50,9 @@
 #' Those are agreement, where raters give the same score, and consistency,
 #' where raters agree apart from a constant offset per rater. It is also
 #' defined for fixed-rater **consistency**, fixed meaning the observed raters
-#' are the whole population of interest. In a two-way design the subjects
-#' share one set of raters. The **one-way** model, where they need not, is
+#' are the whole population of interest. In a two-way design each rater is
+#' tracked across the subjects they score. The **one-way** model, where raters
+#' are not tracked, is
 #' defined too, as a Spearman-Brown projection of `ICC(1)`. Projection is **not**
 #' defined for fixed-rater absolute agreement. There the rater term is the
 #' finite-population variance, the spread of just the observed raters. So
@@ -59,8 +62,9 @@
 #' @section Multilevel projections:
 #' For a multilevel fit (a `cluster` column), `d_study()` projects the rater
 #' count `m` for each correctly-partitioned level on the object. Those are the
-#' **subject** and/or **cluster** level, the cluster level being how reliably
-#' raters distinguish cluster means. It returns one reliability curve per
+#' **subject** and/or **cluster** level, where the subject level is reliability
+#' within a cluster, and the cluster level is reliability of cluster means. It
+#' returns one reliability curve per
 #' level, and the returned object gains a `level` column that `autoplot()`
 #' facets by. `tidy()` carries that column on every projection, `NA` where the
 #' fit is not multilevel.
@@ -226,7 +230,7 @@ d_study <- function(
     abort_unsupported(c(
       "D-study projection is not supported off a ragged within-cell replicate fit.",
       i = "Projecting the mean of unequal per-cell replicate counts needs an \\
-           effective-n_o divisor that is an open modeling question (M20; ADR-030).",
+           effective-n_o divisor that is an open modeling question.",
       i = "Refit with balanced, complete replicated data to project rater counts."
     ))
   }
@@ -283,7 +287,7 @@ d_study <- function(
         abort_unsupported(c(
           "Cluster-level D-study projection is not supported on incomplete data.",
           i = "The per-cluster effective-rater divisor behind a ragged cluster mean \\
-               is an open modeling question (M9). Only the subject level projects on \\
+               is an open modeling question. Only the subject level projects on \\
                incomplete data.",
           i = "Refit with {.code level = \"subject\"} for an incomplete multilevel \\
                D-study."

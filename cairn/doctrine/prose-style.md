@@ -5,16 +5,16 @@
      here rather than let the module grow. -->
 
 This page owns the writing standard for every surface a user reads: the
-vignettes, the roxygen blocks that become `man/`, `README.Rmd`, `NEWS.md`, and
-the condition text: the errors, warnings, notes and install reasons the
-package raises, with the method hints `R/boundary-hint.R` builds (M156). It
-states eight rules, R1–R8: two measured by a committed ruler, two swept by a
-committed term table and a hand-run grep, four judgment at a read-through.
+vignettes, the roxygen blocks that become `man/`, `README.Rmd`, `NEWS.md`, the
+condition text (errors, warnings, notes, install reasons and method hints,
+M156), and the printed guidance that `choose_icc()`, `format.icc()` and
+`summary.icc()` print (M157). It states eight rules, R1–R8: two measured by a
+ruler, two swept by a term table and a grep, four by judgment at a read-through.
 
-Condition text is held to R1–R6 and R8, measured by the ruler
-`data-raw/condition-text-profile.R`, whose header says what it assembles. R7
-does not apply: a message is read alone, so it has no file in which a first
-use occurs. `data-raw/check-abort-remedy-verdicts.R` and tests guard each
+Condition text and printed guidance are held to R1–R6 and R8. R7 does not
+apply: a message is read alone, with no file for a first use.
+`data-raw/condition-text-profile.R` measures condition text, and a pass measures
+printed guidance. `data-raw/check-abort-remedy-verdicts.R` and tests guard each
 named remedy. Pass records live in `cairn/ROADMAP.md` and the milestones.
 
 ## The rules
