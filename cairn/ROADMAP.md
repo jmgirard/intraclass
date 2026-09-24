@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-09-17 (M155 done pass). M155 archived, M152 rotated out with the `roadmap-terminal-rows` ledger row. No LESSONS change (19,994 bytes), no D-entry, no Known issue, no RB/RR pair. One candidate row was added at review. The four doctrine modules are within budget. validate green._
+_Last hygiene check: 2026-09-24 (M156 done pass). M156 archived, and M153 rotated out with the `roadmap-terminal-rows` ledger row. The M152 LESSONS line was extended (19,998 bytes). No D-entry, Known issue or RB/RR pair. The four doctrine modules are within budget. validate green._
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,11 +9,10 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M156 | Plain-English pass over the condition text, and NEWS under R7/R8 | review | — | normal | milestones/M156-plain-english-condition-text.md |
+| M156 | Plain-English pass over the condition text, and NEWS under R7/R8 | done | — | normal | milestones/archive/M156-plain-english-condition-text.md |
 | M155 | Comparison tables as hidden `gt` chunks | done | M154 | normal | milestones/archive/M155-gt-comparison-tables.md |
 | M154 | Ship the vignettes' simulated datasets from `data-raw/` | done | — | normal | milestones/archive/M154-ship-vignette-datasets.md |
-| M153 | Plain-English pass over the roxygen surface | done | M151 | normal | milestones/archive/M153-plain-english-roxygen.md |
-<!-- terminal-row retention: retention is 3 (tracking-rules Weight caps); M152 rotated out 2026-09-17 at the M155 done pass as the oldest terminal row by merge order, its archive file still resolving there. Kept: M155, M154, M153 [claim:roadmap-terminal-rows]. -->
+<!-- terminal-row retention: retention is 3 (tracking-rules Weight caps); M153 rotated out 2026-09-24 at the M156 done pass as the oldest terminal row by merge order, its archive file still resolving there. Kept: M156, M155, M154 [claim:roadmap-terminal-rows]. -->
 <!-- rows grouped by status; keep only the 3 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
