@@ -33,9 +33,9 @@ argument.](choosing-icc-tree.svg)
 (1979), in the long, one-row-per-rating format
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
 expects. Every subject is rated by every rater. So it is a complete,
-balanced **two-way** design: the subjects share one set of raters, and
-every cell is filled. That is the clean case in which the choices below
-are easiest to see.
+balanced **two-way** design: each rater is tracked across the subjects
+they score, and every cell is filled. That is the clean case in which
+the choices below are easiest to see.
 
 ``` r
 
@@ -48,13 +48,14 @@ str(ratings)
 
 ## A prior question: are the raters crossed? (`model`)
 
-**Is every subject rated by the *same* set of raters, or by a different
-set each time?** If the same raters judge everyone, the design is
-*crossed*, like `ratings`. Keep the default `model = "twoway"`, and the
-four choices below apply. Suppose instead each subject is rated by
-whichever raters happened to be available. Then “rater 1” for one
-subject has nothing to do with “rater 1” for another. Those raters are
-*interchangeable*, and the design is **one-way** (`model = "oneway"`).
+**Do the *same* raters score more than one subject, or does each subject
+get a different set?** If each rater is tracked across the subjects they
+score, the design is *crossed*, like `ratings`. Keep the default
+`model = "twoway"`, and the four choices below apply. Suppose instead
+each subject is rated by whichever raters happened to be available. Then
+“rater 1” for one subject has nothing to do with “rater 1” for another.
+Those raters are *interchangeable*, and the design is **one-way**
+(`model = "oneway"`).
 
 ``` r
 
@@ -295,10 +296,11 @@ within classrooms or patients within clinics. Then you may instead want
 the reliability of the *cluster* mean, a multilevel ICC (ten Hove,
 Jorgensen & van der Ark, 2022). Pass a `cluster` column to
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md). It
-then reports the **subject-level** coefficient, how reliably raters
-distinguish subjects within a cluster, beside the **cluster-level**
-coefficient, how reliably raters distinguish cluster means. The
-[*Multilevel
+then reports two coefficients, where the **subject level** is
+reliability within a cluster, and the **cluster level** is reliability
+of cluster means. The subject level asks how reliably raters distinguish
+subjects within a cluster, and the cluster level asks the same of
+cluster means. The [*Multilevel
 designs*](https://jmgirard.github.io/intraclass/articles/multilevel-designs.md)
 article works a full example.
 
@@ -359,8 +361,8 @@ choose_icc(type = "agreement", unit = "single", raters = "random")
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1)
 #> 
 #> Why:
-#>   - Crossed (two-way): the same raters judge every subject.
-#>   - Absolute agreement: the value itself must match; a systematic difference between raters counts as error.
+#>   - Crossed (two-way): each rater is tracked across the subjects they score.
+#>   - Absolute agreement: the value itself must match. A systematic difference between raters counts as error.
 #>   - Single rater: you will act on one rater's score.
 #>   - Random raters: a sample you generalize beyond, to the rater universe they were drawn from.
 #> 

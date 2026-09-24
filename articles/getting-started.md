@@ -41,9 +41,9 @@ defines each one in a sentence.
 
 We use the classic Shrout & Fleiss (1979) example, shipped with the
 package as `ratings`. It has 6 subjects each rated by the same 4 raters,
-one rating per cell. The design is **two-way**: the subjects share one
-set of raters. `intraclass` wants **long** format: one rating per row,
-with columns for the subject, the rater, and the score.
+one rating per cell. The design is **two-way**: each rater is tracked
+across the subjects they score. `intraclass` wants **long** format: one
+rating per row, with columns for the subject, the rater, and the score.
 
 ``` r
 
@@ -148,7 +148,7 @@ summary(fit)
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
 #> 
 #> Absolute agreement counts the rater main effect (systematic differences in rater level) as error.
-#> Consistency ignores the rater main effect (systematic differences in rater level); only relative standing counts.
+#> Consistency ignores the rater main effect (systematic differences in rater level). Only relative standing counts.
 #> A single rating per cell confounds the subject-by-rater interaction with
 #> residual error.
 ```
@@ -207,7 +207,8 @@ The interval
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
 reports is a [**Monte-Carlo**
 interval](https://jmgirard.github.io/intraclass/articles/glossary.html#monte-carlo-interval),
-built by simulating from the fitted model, and it is
+built by drawing parameter values from the fitted model’s uncertainty,
+and it is
 [**boundary-aware**](https://jmgirard.github.io/intraclass/articles/glossary.html#zero-variance-boundary).
 In plain terms: the default interval does not rely on a textbook formula
 that misbehaves when a variance is near zero. That is a common
@@ -220,8 +221,8 @@ well-behaved right at that boundary. The [*Interval
 methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.md)
 article covers how it works and the alternatives. One alternative is a
 parametric bootstrap, which refits the model on simulated data many
-times. Another is a Bayesian credible interval, which holds a chosen
-share, usually 95%, of the posterior probability.
+times. Another is a Bayesian credible interval, which holds the share of
+the posterior probability that the confidence level sets.
 
 ## Consistency instead of agreement
 

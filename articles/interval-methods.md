@@ -12,8 +12,8 @@ coefficient comes with an interval, never a bare number, and the
 `ci_method` argument selects how that interval is built. This article
 covers the default [**Monte-Carlo**
 interval](https://jmgirard.github.io/intraclass/articles/glossary.html#monte-carlo-interval),
-built by simulating from the fitted model. It also covers the
-[parametric
+built by drawing parameter values from the fitted model’s uncertainty.
+It also covers the [parametric
 bootstrap](https://jmgirard.github.io/intraclass/articles/glossary.html#parametric-bootstrap),
 which refits the model on simulated data many times. It then covers the
 [four opt-in methods](#the-opt-in-boundary-robust-methods) for the
@@ -31,14 +31,14 @@ closed form (`"burch"`), a closed-form interval with a kurtosis
 adjustment. The fourth is the [modified profile
 likelihood](https://jmgirard.github.io/intraclass/articles/glossary.html#modified-profile-likelihood)
 (`"mpl"`), which profiles the likelihood in the ICC with a small-sample
-correction. It is the two-way counterpart, for the design where the
-subjects share one set of raters. It serves only that design’s balanced,
-complete, random case with absolute
+correction. It is the two-way counterpart, for the design where each
+rater is tracked across the subjects they score. It serves only that
+design’s balanced, complete, random case with absolute
 [agreement](https://jmgirard.github.io/intraclass/articles/glossary.html#absolute-agreement),
 where raters give the same score. Last is the Bayesian [**credible**
 interval](https://jmgirard.github.io/intraclass/articles/glossary.html#credible-interval),
-which holds a chosen share, usually 95%, of the posterior probability.
-That interval comes with the brms
+which holds the share of the posterior probability that the confidence
+level sets. That interval comes with the brms
 [engine](https://jmgirard.github.io/intraclass/articles/glossary.html#engine),
 the software that does the fitting. Terms are defined in the
 [*Glossary*](https://jmgirard.github.io/intraclass/articles/glossary.md).
@@ -92,10 +92,11 @@ boundary](https://jmgirard.github.io/intraclass/articles/glossary.html#zero-vari
 Another is the multilevel designs, which carry more [variance
 components](https://jmgirard.github.io/intraclass/articles/glossary.html#variance-component),
 each a share of the total variation traced to one source, and often few
-clusters. In the multilevel case the bootstrap’s
+clusters. In the multilevel case the subject level is reliability within
+a cluster, and the cluster level is reliability of cluster means. There
+the bootstrap’s
 [cluster-level](https://jmgirard.github.io/intraclass/articles/glossary.html#subject-level-vs--cluster-level)
-interval in particular carries more resampling noise, the cluster level
-being how reliably raters distinguish cluster means. The bootstrap is
+interval in particular carries more resampling noise. The bootstrap is
 available for every design the `"glmmTMB"` and `"lme4"` engines fit. The
 `"lavaan"` engine bootstraps complete data, and a multilevel lavaan fit
 needs balanced clusters and random raters besides. Anywhere off those
@@ -183,13 +184,15 @@ coverage is inherited by construction, balanced or not. A numeric `unit`
 is a
 [D-study](https://jmgirard.github.io/intraclass/articles/glossary.html#d-study-decision-study)
 projection, which projects the fitted variance components to other rater
-counts. That projection is restricted to balanced data. Reach for this
-method for boundary robustness, an interval that exists where the
-Monte-Carlo default aborts. Reach for it too for robustness to
-non-normal subject effects. Its endpoints are deliberately left
-untruncated on the estimator’s own support (Ukoumunne et al. 2003,
-§5.2). So a near-boundary lower limit can be negative. That is honest
-disclosure, not an error.
+or
+[occasion](https://jmgirard.github.io/intraclass/articles/glossary.html#occasion-within-cell-replicate)
+counts. Here it projects to the mean of `m` raters. That projection is
+restricted to balanced data. Reach for this method for boundary
+robustness, an interval that exists where the Monte-Carlo default
+aborts. Reach for it too for robustness to non-normal subject effects.
+Its endpoints are deliberately left untruncated on the estimator’s own
+support (Ukoumunne et al. 2003, §5.2). So a near-boundary lower limit
+can be negative. That is honest disclosure, not an error.
 
 ### The classical closed forms (`ci_method = "searle"` and `"burch"`)
 

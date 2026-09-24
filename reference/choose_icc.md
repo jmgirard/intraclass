@@ -30,10 +30,11 @@ print(x, ...)
 
 - model:
 
-  `"twoway"` (crossed: the same raters judge every subject) or
-  `"oneway"` (raters are interchangeable across subjects). Defaults to
-  `"twoway"`. Under `"oneway"` the `type` and `raters` choices do not
-  exist (there is no rater term), and supplying them is an error.
+  `"twoway"` (crossed: each rater is tracked across the subjects they
+  score) or `"oneway"` (raters are interchangeable across subjects).
+  Defaults to `"twoway"`. Under `"oneway"` the `type` and `raters`
+  choices do not exist (there is no rater term), and supplying them is
+  an error.
 
 - type:
 
@@ -101,12 +102,12 @@ matching
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md). They
 are whether the raters are crossed (`model`) and whether subjects are
 nested in clusters (`multilevel`). The common case is a crossed,
-non-multilevel two-way design, where the subjects share one set of
-raters. The choices that actually select the coefficient are `type`,
-`unit`, `raters`, and `level` when multilevel. None of them has a silent
-default. In a non-interactive session, leaving one unanswered is an
-error naming the unanswered decision, rather than quietly picking one
-for you.
+non-multilevel two-way design, where each rater is tracked across the
+subjects they score. The choices that actually select the coefficient
+are `type`, `unit`, `raters`, and `level` when multilevel. None of them
+has a silent default. In a non-interactive session, leaving one
+unanswered is an error naming the unanswered decision, rather than
+quietly picking one for you.
 
 ## See also
 
@@ -127,8 +128,8 @@ choose_icc(type = "agreement", unit = "single", raters = "random")
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1)
 #> 
 #> Why:
-#>   - Crossed (two-way): the same raters judge every subject.
-#>   - Absolute agreement: the value itself must match; a systematic difference between raters counts as error.
+#>   - Crossed (two-way): each rater is tracked across the subjects they score.
+#>   - Absolute agreement: the value itself must match. A systematic difference between raters counts as error.
 #>   - Single rater: you will act on one rater's score.
 #>   - Random raters: a sample you generalize beyond, to the rater universe they were drawn from.
 #> 
@@ -147,16 +148,16 @@ choose_icc(type = "consistency", unit = "average", raters = "fixed")
 #> Shrout & Fleiss equivalent: ICC(C,k) = ICC(3,k)
 #> 
 #> Why:
-#>   - Crossed (two-way): the same raters judge every subject.
-#>   - Consistency: only the rank order must match; a constant per-rater offset is forgiven.
+#>   - Crossed (two-way): each rater is tracked across the subjects they score.
+#>   - Consistency: only the rank order must match. A constant per-rater offset is forgiven.
 #>   - Average: you will act on the mean of your raters.
-#>   - Fixed raters: exactly these judges; the coefficient does not generalize past them.
+#>   - Fixed raters: exactly these judges. The coefficient does not generalize past them.
 #> 
 #> Run this on your data:
 #>   icc(data, score, subject, rater, type = "consistency", raters = "fixed", unit = "average")
 #> 
 #> Notes:
-#>   - Random raters is the recommended default for interrater reliability; use fixed only when these are the entire population of raters you will ever use.
+#>   - Random raters is the recommended default for interrater reliability. Use fixed only when these are the entire population of raters you will ever use.
 #>   - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.
 
 # Both error definitions side by side: the emitted call leaves `type` out,
@@ -169,8 +170,8 @@ choose_icc(type = "both", unit = "single", raters = "random")
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1)
 #> 
 #> Why:
-#>   - Crossed (two-way): the same raters judge every subject.
-#>   - Both error definitions: absolute agreement (the value itself must match) and consistency (a constant per-rater offset is forgiven) side by side.
+#>   - Crossed (two-way): each rater is tracked across the subjects they score.
+#>   - Both error definitions side by side: absolute agreement, where the value itself must match, and consistency, where a constant per-rater offset is forgiven.
 #>   - Single rater: you will act on one rater's score.
 #>   - Random raters: a sample you generalize beyond, to the rater universe they were drawn from.
 #> 
@@ -190,7 +191,7 @@ choose_icc(model = "oneway", unit = "single")
 #> Shrout & Fleiss equivalent: ICC(1) = ICC(1,1)
 #> 
 #> Why:
-#>   - One-way: raters are interchangeable across subjects, so systematic rater differences are absorbed into error -- the most conservative ICC.
+#>   - One-way: raters are interchangeable across subjects, so systematic rater differences are absorbed into error. This gives the most conservative ICC.
 #>   - Single rater: you will act on one rater's score.
 #> 
 #> Run this on your data:
@@ -210,11 +211,11 @@ choose_icc(type = "agreement", unit = "single", raters = "random",
 #>   cluster: ICC(A,1)
 #> 
 #> Why:
-#>   - Crossed (two-way): the same raters judge every subject.
-#>   - Absolute agreement: the value itself must match; a systematic difference between raters counts as error.
+#>   - Crossed (two-way): each rater is tracked across the subjects they score.
+#>   - Absolute agreement: the value itself must match. A systematic difference between raters counts as error.
 #>   - Single rater: you will act on one rater's score.
 #>   - Random raters: a sample you generalize beyond, to the rater universe they were drawn from.
-#>   - Both levels: within-cluster (subject) and between-cluster (cluster) reliability side by side.
+#>   - Both levels side by side: within-cluster reliability at the subject level, and between-cluster reliability at the cluster level.
 #> 
 #> Run this on your data:
 #>   icc(data, score, subject, rater, cluster, type = "agreement", unit = "single")

@@ -102,8 +102,8 @@ package is installed.</p>
 every rater. There the whole ICC family is defined for all of these
 tools, so we can line them up coefficient by coefficient. The
 <code>ratings</code> dataset is six subjects each scored by the same
-four raters. That is a two-way design: the subjects share one set of
-raters.</p>
+four raters. That is a two-way design: each rater is tracked across the
+subjects they score.</p>
 <p><code>intraclass</code> estimates the coefficients from <a href="glossary.html#variance-component">variance components</a>, each a
 share of the total variation traced to one source. It fits them by <a href="glossary.html#reml">REML</a> in a mixed model. REML, restricted
 maximum likelihood, is a way to estimate variances that corrects maximum
@@ -2699,12 +2699,14 @@ cases. For the details of each, see the companion articles:</p>
 selection framework the last matrix row points to.</li>
 <li>
 <a href="multilevel-designs.html"><em>Multilevel designs</em></a>:
-subject-level and cluster-level reliability when raters are nested, the
-cluster level being how reliably raters distinguish cluster means.</li>
+subjects nested in clusters, where the subject level is reliability
+within a cluster, and the cluster level is reliability of cluster
+means.</li>
 <li>
 <a href="interval-methods.html"><em>Interval methods</em></a>: the
-Monte-Carlo interval, built by simulating from the fitted model, and the
-bootstrap, which refits the model on simulated data many times.</li>
+Monte-Carlo interval, built by drawing parameter values from the fitted
+model’s uncertainty. The article also covers the bootstrap, which refits
+the model on simulated data many times.</li>
 <li>
 <a href="engines.html"><em>Estimation engines</em></a>: the engine,
 the software that does the fitting, in its mixed-model, SEM, and

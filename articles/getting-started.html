@@ -115,9 +115,10 @@ each one in a sentence.</p>
 <p>We use the classic Shrout &amp; Fleiss (1979) example, shipped with
 the package as <code>ratings</code>. It has 6 subjects each rated by the
 same 4 raters, one rating per cell. The design is
-<strong>two-way</strong>: the subjects share one set of raters.
-<code>intraclass</code> wants <strong>long</strong> format: one rating
-per row, with columns for the subject, the rater, and the score.</p>
+<strong>two-way</strong>: each rater is tracked across the subjects they
+score. <code>intraclass</code> wants <strong>long</strong> format: one
+rating per row, with columns for the subject, the rater, and the
+score.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ratings</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   subject rater score</span></span>
@@ -212,7 +213,7 @@ you fitted:</p>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Absolute agreement counts the rater main effect (systematic differences in rater level) as error.</span></span>
-<span><span class="co">#&gt; Consistency ignores the rater main effect (systematic differences in rater level); only relative standing counts.</span></span>
+<span><span class="co">#&gt; Consistency ignores the rater main effect (systematic differences in rater level). Only relative standing counts.</span></span>
 <span><span class="co">#&gt; A single rating per cell confounds the subject-by-rater interaction with</span></span>
 <span><span class="co">#&gt; residual error.</span></span></code></pre></div>
 </div>
@@ -286,7 +287,8 @@ interval.</p>
 <h3 id="about-the-confidence-interval">About the confidence interval<a class="anchor" aria-label="anchor" href="#about-the-confidence-interval"></a>
 </h3>
 <p>The interval <code><a href="../reference/icc.html">icc()</a></code> reports is a <a href="glossary.html#monte-carlo-interval"><strong>Monte-Carlo</strong>
-interval</a>, built by simulating from the fitted model, and it is <a href="glossary.html#zero-variance-boundary"><strong>boundary-aware</strong></a>.
+interval</a>, built by drawing parameter values from the fitted model’s
+uncertainty, and it is <a href="glossary.html#zero-variance-boundary"><strong>boundary-aware</strong></a>.
 In plain terms: the default interval does not rely on a textbook formula
 that misbehaves when a variance is near zero. That is a common
 situation: raters who barely differ push the rater variance to its zero
@@ -297,8 +299,8 @@ boundary. The <a href="interval-methods.html"><em>Interval
 methods</em></a> article covers how it works and the alternatives. One
 alternative is a parametric bootstrap, which refits the model on
 simulated data many times. Another is a Bayesian credible interval,
-which holds a chosen share, usually 95%, of the posterior
-probability.</p>
+which holds the share of the posterior probability that the confidence
+level sets.</p>
 </div>
 </div>
 <div class="section level2">

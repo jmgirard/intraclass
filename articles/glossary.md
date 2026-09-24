@@ -62,13 +62,15 @@ methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.html#t
 
 ## Confidence interval vs. credible interval
 
-A **confidence interval** is a range built so that, across many
-hypothetical repetitions of the study, 95% of such ranges would contain
-the true ICC. The frequentist engines output one. A **credible
-interval** is a range that holds 95% of the posterior probability. The
-Bayesian `brms` engine outputs one. You can say directly “there is a 95%
-chance the ICC lies in here, given the data and the prior.” They answer
-subtly different questions. See [*Confidence-interval
+A **confidence interval** is a range built with many hypothetical
+repetitions of the study in mind. Across them, the chosen share (95% by
+default) of such ranges would contain the true ICC. The frequentist
+engines output one. A **credible interval** is a range that holds the
+share of the posterior probability that the confidence level sets. That
+level is the `conf_level` argument, 0.95 by default. The Bayesian `brms`
+engine outputs one. At the default level you can say directly “there is
+a 95% chance the ICC lies in here, given the data and the prior.” They
+answer subtly different questions. See [*Confidence-interval
 methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.md).
 
 ## Conflated ICC
@@ -115,10 +117,11 @@ replicates*](https://jmgirard.github.io/intraclass/articles/d-studies-and-replic
 
 ## D-study (decision study)
 
-A forward-looking projection: how reliable would the mean of some other
-number of raters (or occasions) be? It reuses the variance components
-you already estimated, with no refitting. It answers “how many raters do
-I need?”. See [*D-studies and within-cell
+A forward-looking projection of the fitted variance components to other
+rater or occasion counts. It asks how reliable the mean of some other
+number of raters (or occasions) would be. It reuses the variance
+components you already estimated, with no refitting. It answers “how
+many raters do I need?”. See [*D-studies and within-cell
 replicates*](https://jmgirard.github.io/intraclass/articles/d-studies-and-replicates.md).
 
 ## Effective number of ratings: `k_eff`
@@ -226,13 +229,14 @@ methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.html#t
 ## Monte-Carlo interval
 
 The default confidence-interval method (`ci_method = "montecarlo"`),
-built by simulating from the fitted model. It draws many parameter
-vectors from the fitted model’s estimated covariance, on a scale that
-respects the zero-variance boundary. It recomputes the ICC for each
-draw, and takes the 2.5% and 97.5% quantiles. Fast and boundary-aware.
-It does assume the fitted parameters are approximately normally
-distributed around the truth. It under-covers when the subject effects
-are strongly skewed or heavy-tailed. See [*When the default
+built by drawing parameter values from the fitted model’s uncertainty.
+It draws many parameter vectors from the fitted model’s estimated
+covariance, on a scale that respects the zero-variance boundary. It
+simulates no new data. It recomputes the ICC for each draw, and takes
+the 2.5% and 97.5% quantiles. Fast and boundary-aware. It does assume
+the fitted parameters are approximately normally distributed around the
+truth. It under-covers when the subject effects are strongly skewed or
+heavy-tailed. See [*When the default
 under-covers*](https://jmgirard.github.io/intraclass/articles/interval-methods.html#when-the-default-under-covers).
 See also [*Confidence-interval
 methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.md).
@@ -283,12 +287,12 @@ ratings. A ragged replicate fit separates the two columns most sharply:
 
 ## One-way vs. two-way
 
-The `model` argument. In a **two-way** design the subjects share one set
-of raters. So a rater main effect can be estimated, and either counted
-as error (agreement) or set aside (consistency). A **one-way** design
-has each subject rated by possibly *different* raters. So rater identity
-is not modeled, and only an agreement-style `ICC(1)` / `ICC(k)` is
-defined.
+The `model` argument. In a **two-way** design each rater is tracked
+across the subjects they score, whether every rater scores every subject
+or not. So a rater main effect can be estimated, and either counted as
+error (agreement) or set aside (consistency). A **one-way** design has
+each subject rated by possibly *different* raters. So rater identity is
+not modeled, and only an agreement-style `ICC(1)` / `ICC(k)` is defined.
 
 ## Parametric bootstrap
 
@@ -338,12 +342,14 @@ raters and is always at least as high.
 ## Subject level vs. cluster level
 
 Two reliabilities defined in a **multilevel** design, where subjects are
-nested in clusters such as pupils in classrooms. The **subject level**
-asks how reliably raters distinguish subjects *within* a cluster. The
-**cluster level** asks how reliably raters distinguish *cluster means*.
+nested in clusters such as pupils in classrooms. Here the subject level
+is reliability within a cluster, and the cluster level is reliability of
+cluster means. The **subject level** asks how reliably raters
+distinguish subjects *within* a cluster. The **cluster level** asks how
+reliably raters distinguish *cluster means*.
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
 reports both from one fit. See [*Multilevel
-designs*](https://jmgirard.github.io/intraclass/articles/multilevel-designs.html#subject-level-vs.-cluster-level).
+designs*](https://jmgirard.github.io/intraclass/articles/multilevel-designs.html#subject-level-vs--cluster-level).
 
 ## Transformed bootstrap-*t*
 

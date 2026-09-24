@@ -28,7 +28,7 @@ On a **balanced** design, every subject is rated by every rater. There
 the whole ICC family is defined for all of these tools, so we can line
 them up coefficient by coefficient. The `ratings` dataset is six
 subjects each scored by the same four raters. That is a two-way design:
-the subjects share one set of raters.
+each rater is tracked across the subjects they score.
 
 `intraclass` estimates the coefficients from [variance
 components](https://jmgirard.github.io/intraclass/articles/glossary.html#variance-component),
@@ -194,13 +194,14 @@ details of each, see the companion articles:
   the selection framework the last matrix row points to.
 - [*Multilevel
   designs*](https://jmgirard.github.io/intraclass/articles/multilevel-designs.md):
-  subject-level and cluster-level reliability when raters are nested,
-  the cluster level being how reliably raters distinguish cluster means.
+  subjects nested in clusters, where the subject level is reliability
+  within a cluster, and the cluster level is reliability of cluster
+  means.
 - [*Interval
   methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.md):
-  the Monte-Carlo interval, built by simulating from the fitted model,
-  and the bootstrap, which refits the model on simulated data many
-  times.
+  the Monte-Carlo interval, built by drawing parameter values from the
+  fitted model’s uncertainty. The article also covers the bootstrap,
+  which refits the model on simulated data many times.
 - [*Estimation
   engines*](https://jmgirard.github.io/intraclass/articles/engines.md):
   the engine, the software that does the fitting, in its mixed-model,

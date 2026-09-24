@@ -3,14 +3,15 @@
 Estimates interrater-reliability intraclass correlation coefficients
 (ICCs) from a fitted linear mixed model, rather than from classical
 ANOVA mean squares. `icc()` computes the two-way coefficients of McGraw
-& Wong (1996), for a design where the subjects share one set of raters.
-They come in two error definitions. **Absolute agreement** (`ICC(A,*)`)
-asks whether raters give the same score. **Consistency** (`ICC(C,*)`)
-asks whether raters agree apart from a constant offset per rater. Each
-is reported for a single rater (`ICC(*,1)`, the reliability of one
-rater's score) or for the mean of `k` raters (`ICC(*,k)`). The raters
-are treated as a random sample (Case 2) or as fixed (Case 3), meaning
-the observed raters are the whole population of interest.
+& Wong (1996), for a design where each rater is tracked across the
+subjects they score. They come in two error definitions. **Absolute
+agreement** (`ICC(A,*)`) asks whether raters give the same score.
+**Consistency** (`ICC(C,*)`) asks whether raters agree apart from a
+constant offset per rater. Each is reported for a single rater
+(`ICC(*,1)`, the reliability of one rater's score) or for the mean of
+`k` raters (`ICC(*,k)`). The raters are treated as a random sample (Case
+2) or as fixed (Case 3), meaning the observed raters are the whole
+population of interest.
 
 ## Usage
 
@@ -65,8 +66,9 @@ icc(
 - what:
 
   Which plot to draw. `"coefficients"` (the default) draws a forest plot
-  of each ICC index with its Monte-Carlo confidence interval, built by
-  simulating from the fitted model. `"components"` draws the
+  of each ICC index with the interval its `ci_method` sets. The default
+  is the Monte-Carlo interval, built by drawing parameter values from
+  the fitted model's uncertainty. `"components"` draws the
   variance-component decomposition.
 
 - ...:
@@ -146,8 +148,9 @@ icc(
 
   The averaging unit(s), any combination of: `"single"` (`ICC(*,1)`),
   `"average"` (`ICC(*,k)`), or a number `m` \>= 1 (`ICC(*,m)`). A number
-  is a D-study projection to the mean of `m` raters, where a D-study
-  projects the fitted variance components to other rater counts. See
+  asks for a D-study, which projects the fitted variance components to
+  other rater or occasion counts. Here it projects to the mean of `m`
+  raters. See
   [`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)
   for projecting across a range of `m`. Projecting absolute agreement is
   not defined for fixed raters (see
@@ -248,27 +251,27 @@ icc(
   carry a sourced half-*t*(4, 0, 1) prior (ten Hove et al. 2020). The
   point estimate is the posterior mode (MAP), the peak of the posterior
   distribution. The interval is a percentile **credible** interval
-  (`ci_method = "posterior"`, forced), which holds a chosen share,
-  usually 95%, of the posterior probability. On **both balanced/complete
-  and incomplete/ragged** data it covers the two-way random single-level
-  design, and the crossed (Design 1) **multilevel** random design
-  (subject and cluster levels). On that same data it covers the two-way
-  **fixed-rater** single-level design (Case-3A finite-population
-  \\\theta^2_r\\), and the crossed (Design 1) multilevel **fixed-rater**
-  design (subject level). On that same data it also covers the nested
-  **Design 2** and **Design 3** *random* multilevel designs at the
-  subject level. It covers the single-level one-way random design there
-  too. Design 2 nests raters in clusters. Design 3 nests them in
-  subjects, which is the multilevel one-way, agreement-only case. The
-  nested Design 2 *fixed-rater* multilevel design is covered at the
-  subject level on both balanced and incomplete/ragged data. On
-  balanced/complete data only it covers the crossed Design 1
-  *fixed-rater* **cluster** level, the conflated diagnostic, and
-  within-cell replicates. Within-cell-replicate Bayesian fits and
-  numeric-`unit` (D-study) projection are planned for later milestones.
-  `"lme4"` requires the lme4 and merDeriv packages. `"lavaan"` requires
-  the lavaan package. `"brms"` requires the brms package, and a working
-  Stan toolchain.
+  (`ci_method = "posterior"`, forced), which holds the share of the
+  posterior probability that the confidence level sets. On **both
+  balanced/complete and incomplete/ragged** data it covers the two-way
+  random single-level design, and the crossed (Design 1) **multilevel**
+  random design (subject and cluster levels). On that same data it
+  covers the two-way **fixed-rater** single-level design (Case-3A
+  finite-population \\\theta^2_r\\), and the crossed (Design 1)
+  multilevel **fixed-rater** design (subject level). On that same data
+  it also covers the nested **Design 2** and **Design 3** *random*
+  multilevel designs at the subject level. It covers the single-level
+  one-way random design there too. Design 2 nests raters in clusters.
+  Design 3 nests them in subjects, which is the multilevel one-way,
+  agreement-only case. The nested Design 2 *fixed-rater* multilevel
+  design is covered at the subject level on both balanced and
+  incomplete/ragged data. On balanced/complete data only it covers the
+  crossed Design 1 *fixed-rater* **cluster** level, the conflated
+  diagnostic, and within-cell replicates. Within-cell-replicate Bayesian
+  fits and numeric-`unit` (D-study) projection are planned for later
+  milestones. `"lme4"` requires the lme4 and merDeriv packages.
+  `"lavaan"` requires the lavaan package. `"brms"` requires the brms
+  package, and a working Stan toolchain.
 
 - conf_level:
 
@@ -697,16 +700,18 @@ fits the five-component Design-1 model
 \$\$score \sim 1 + (1\|cluster) + (1\|cluster{:}subject) + (1\|rater) +
 (1\|cluster{:}rater)\$\$
 
-and reports two distinct reliabilities. The **subject level**
-(within-cluster) asks how reliably raters distinguish subjects *within*
-a cluster, and the **cluster level** (between-cluster) asks how reliably
-raters distinguish cluster means. At the subject level the signal is the
-between-subject-within-cluster variance, and cluster variance drops out.
-At the cluster level the signal is the between-cluster variance, and the
-rater-disagreement error is the cluster-by-rater term. Choose the level
-that matches the decision you will make (about a subject, or about a
-cluster). The agreement/consistency and single/average choices above
-apply at each level.
+and reports two distinct reliabilities: the subject level is reliability
+within a cluster, and the cluster level is reliability of cluster means.
+The **subject level** (within-cluster) asks how reliably raters
+distinguish subjects *within* a cluster. The **cluster level**
+(between-cluster) asks the same of cluster means. At the subject level
+the signal is the between-subject-within-cluster variance, and cluster
+variance drops out. At the cluster level the signal is the
+between-cluster variance, and the rater-disagreement error is the
+cluster-by-rater term. Choose the level that matches the decision you
+will make (about a subject, or about a cluster). The
+agreement/consistency and single/average choices above apply at each
+level.
 
 `level = "conflated"` reports the **biased single-level ICC** you would
 get by *ignoring* the clustering (ten Hove et al. 2022, Eq. 14).
@@ -832,12 +837,12 @@ projection off a replicate fit are planned for later milestones.
 
 ## Confidence intervals
 
-Intervals are Monte-Carlo, built by simulating from the fitted model.
-Parameters are drawn from the fitted covariance on the model's internal
-(log) scale and back-transformed. So the interval is boundary-aware near
-the common zero-rater-variance case, where an estimate can land exactly
-at zero and the delta method fails. Pass `seed` for a reproducible
-interval.
+Intervals are Monte-Carlo, built by drawing parameter values from the
+fitted model's uncertainty. Parameters are drawn from the fitted
+covariance on the model's internal (log) scale and back-transformed. So
+the interval is boundary-aware near the common zero-rater-variance case,
+where an estimate can land exactly at zero and the delta method fails.
+Pass `seed` for a reproducible interval.
 
 **Coverage caveat: skewed or heavy-tailed subject effects.** The
 simulation draws parameters from a normal approximation to the fitted

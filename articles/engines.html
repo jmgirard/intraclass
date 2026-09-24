@@ -101,21 +101,22 @@ Any unfamiliar term is defined in the <a href="glossary.html"><em>Glossary</em><
 <p>By default <code><a href="../reference/icc.html">icc()</a></code> fits the variance components with
 <strong>glmmTMB</strong>. You can instead request <strong>lme4</strong>
 with <code>engine = "lme4"</code> for the random two-way design, where
-the subjects share one set of raters. The lme4 package itself arrives
-with the installation, because glmmTMB names lme4 in its own
-<code>Imports:</code>. But the engine needs one piece more:
+each rater is tracked across the subjects they score. The lme4 package
+itself arrives with the installation, because glmmTMB names lme4 in its
+own <code>Imports:</code>. But the engine needs one piece more:
 <strong>merDeriv</strong>. It supplies the parameter covariance behind
 the default <a href="glossary.html#monte-carlo-interval">Monte-Carlo
-interval</a>, an interval built by simulating from the fitted model.
-Every lme4 fit checks for merDeriv on entry, whatever interval method
-you ask for. merDeriv sits in <code>Suggests:</code> and is fetched only
-on request. So a plain install leaves you with the lme4 package but not
-the lme4 engine. Both engines are <a href="glossary.html#reml">REML</a>
-mixed-model fits of the same model. REML, restricted maximum likelihood,
-is a way to estimate variances that corrects maximum likelihood’s
-downward bias. On a given dataset the two engines therefore return the
-same coefficients to numerical tolerance. The choice is about the
-fitting backend, not the estimand.</p>
+interval</a>, an interval built by drawing parameter values from the
+fitted model’s uncertainty. Every lme4 fit checks for merDeriv on entry,
+whatever interval method you ask for. merDeriv sits in
+<code>Suggests:</code> and is fetched only on request. So a plain
+install leaves you with the lme4 package but not the lme4 engine. Both
+engines are <a href="glossary.html#reml">REML</a> mixed-model fits of
+the same model. REML, restricted maximum likelihood, is a way to
+estimate variances that corrects maximum likelihood’s downward bias. On
+a given dataset the two engines therefore return the same coefficients
+to numerical tolerance. The choice is about the fitting backend, not the
+estimand.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">glmmtmb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, engine <span class="op">=</span> <span class="st">"glmmTMB"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">lme4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, engine <span class="op">=</span> <span class="st">"lme4"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -1146,17 +1147,18 @@ covers complete <strong>and incomplete</strong> data, the latter by <a href="glo
 rather than dropping incomplete cases. The <a href="glossary.html#parametric-bootstrap">parametric bootstrap</a>,
 which refits the model on simulated data many times, is available on
 complete data, and Monte-Carlo throughout. It also covers the crossed
-(Design 1) <strong>multilevel</strong> design as a two-level SEM. That
-fit reports the subject-level ICC and the <a href="glossary.html#subject-level-vs--cluster-level">cluster-level</a>
-ICC, which says how reliably raters distinguish cluster means, off one
-five-component fit. That route takes random raters, on balanced data and
-on incomplete or unbalanced data alike, and gives a Monte-Carlo
-interval. Two-level SEM estimation is full-information ML with no REML
-analog. So with few clusters its cluster-level components sit slightly
-below the REML estimates, and its agreement rater term slightly above.
-Both are documented differences that shrink as the cluster count grows.
-Consistency ICCs agree essentially exactly. One-way designs are still
-directed to the mixed-model engines.</p>
+(Design 1) <strong>multilevel</strong> design as a two-level SEM. There
+the subject level is reliability within a cluster, and the cluster level
+is reliability of cluster means. That fit reports the subject-level ICC
+and the <a href="glossary.html#subject-level-vs--cluster-level">cluster-level</a>
+ICC off one five-component fit. That route takes random raters, on
+balanced data and on incomplete or unbalanced data alike, and gives a
+Monte-Carlo interval. Two-level SEM estimation is full-information ML
+with no REML analog. So with few clusters its cluster-level components
+sit slightly below the REML estimates, and its agreement rater term
+slightly above. Both are documented differences that shrink as the
+cluster count grows. Consistency ICCs agree essentially exactly. One-way
+designs are still directed to the mixed-model engines.</p>
 </div>
 <div class="section level2">
 <h2 id="a-bayesian-engine-brms">A Bayesian engine (<code>brms</code>)<a class="anchor" aria-label="anchor" href="#a-bayesian-engine-brms"></a>
@@ -1170,8 +1172,8 @@ variance component and reads the ICC off the draws. The point estimate
 is the <a href="glossary.html#posterior-mode-map">posterior
 <strong>mode</strong> (MAP)</a>, the peak of the posterior distribution.
 The interval is a <a href="glossary.html#confidence-interval-vs--credible-interval"><strong>credible</strong>
-interval</a>, which holds a chosen share, usually 95%, of the posterior
-probability. The <a href="interval-methods.html#bayesian-credible-intervals-ci_method-posterior"><em>Confidence-interval
+interval</a>, which holds the share of the posterior probability that
+the confidence level sets. The <a href="interval-methods.html#bayesian-credible-intervals-ci_method-posterior"><em>Confidence-interval
 methods</em></a> article covers it. Because it samples a Stan model,
 this engine is slower than the others. It also needs the
 <code>brms</code> package, an optional <code>Suggests</code> dependency.

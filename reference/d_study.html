@@ -4,13 +4,15 @@ Projects the reliability of a fitted icc() to the mean of m raters, for
 any m. It reuses the fit's variance components, each a share of the total
 variation traced to one source. This is a generalizability-theory decision
 study (D-study), which projects the fitted variance components to other
-rater counts. It answers &quot;how reliable would the mean of m raters be?&quot;
+rater or
+occasion
+counts. It answers &quot;how reliable would the mean of m raters be?&quot;
 and, read as a curve, &quot;how many raters do I need?&quot;. The point estimate and
 its interval reuse the fit stored on x, and no model is refit. The
 interval is boundary-aware, since an estimate can land exactly at zero. The
-band follows the fit's ci_method. A Monte-Carlo fit, whose interval is
-built by simulating from the fitted model, reprojects one draw from the
-parameter covariance across every m. A bootstrap fit, which refits the
+band follows the fit's ci_method. A Monte-Carlo fit has an interval
+built by drawing parameter values from the fitted model's uncertainty. It
+reprojects one draw from the parameter covariance across every m. A bootstrap fit, which refits the
 model on simulated data many times, reprojects its stored resamples. So on
 a bootstrap fit, at m = the observed rater count the band matches the
 fitted ICC(*,k) interval exactly."><meta property="og:description" content="
@@ -18,13 +20,15 @@ Projects the reliability of a fitted icc() to the mean of m raters, for
 any m. It reuses the fit's variance components, each a share of the total
 variation traced to one source. This is a generalizability-theory decision
 study (D-study), which projects the fitted variance components to other
-rater counts. It answers &quot;how reliable would the mean of m raters be?&quot;
+rater or
+occasion
+counts. It answers &quot;how reliable would the mean of m raters be?&quot;
 and, read as a curve, &quot;how many raters do I need?&quot;. The point estimate and
 its interval reuse the fit stored on x, and no model is refit. The
 interval is boundary-aware, since an estimate can land exactly at zero. The
-band follows the fit's ci_method. A Monte-Carlo fit, whose interval is
-built by simulating from the fitted model, reprojects one draw from the
-parameter covariance across every m. A bootstrap fit, which refits the
+band follows the fit's ci_method. A Monte-Carlo fit has an interval
+built by drawing parameter values from the fitted model's uncertainty. It
+reprojects one draw from the parameter covariance across every m. A bootstrap fit, which refits the
 model on simulated data many times, reprojects its stored resamples. So on
 a bootstrap fit, at m = the observed rater count the band matches the
 fitted ICC(*,k) interval exactly."><meta property="og:image" content="https://jmgirard.github.io/intraclass/logo.png"></head><body>
@@ -79,13 +83,15 @@ fitted ICC(*,k) interval exactly."><meta property="og:image" content="https://jm
 any <code>m</code>. It reuses the fit's variance components, each a share of the total
 variation traced to one source. This is a generalizability-theory <strong>decision
 study</strong> (D-study), which projects the fitted variance components to other
-rater counts. It answers "how reliable would the mean of <code>m</code> raters be?"
+rater or
+<a href="https://jmgirard.github.io/intraclass/articles/glossary.html#occasion-within-cell-replicate">occasion</a>
+counts. It answers "how reliable would the mean of <code>m</code> raters be?"
 and, read as a curve, "how many raters do I need?". The point estimate and
 its interval reuse the fit stored on <code>x</code>, and no model is refit. The
 interval is boundary-aware, since an estimate can land exactly at zero. The
-band follows the fit's <code>ci_method</code>. A Monte-Carlo fit, whose interval is
-built by simulating from the fitted model, reprojects one draw from the
-parameter covariance across every <code>m</code>. A <strong>bootstrap</strong> fit, which refits the
+band follows the fit's <code>ci_method</code>. A Monte-Carlo fit has an interval
+built by drawing parameter values from the fitted model's uncertainty. It
+reprojects one draw from the parameter covariance across every <code>m</code>. A <strong>bootstrap</strong> fit, which refits the
 model on simulated data many times, reprojects its stored resamples. So on
 a bootstrap fit, at <code>m</code> = the observed rater count the band matches the
 fitted <code>ICC(*,k)</code> interval exactly.</p>
@@ -225,8 +231,9 @@ permitted.</p>
 Those are agreement, where raters give the same score, and consistency,
 where raters agree apart from a constant offset per rater. It is also
 defined for fixed-rater <strong>consistency</strong>, fixed meaning the observed raters
-are the whole population of interest. In a two-way design the subjects
-share one set of raters. The <strong>one-way</strong> model, where they need not, is
+are the whole population of interest. In a two-way design each rater is
+tracked across the subjects they score. The <strong>one-way</strong> model, where raters
+are not tracked, is
 defined too, as a Spearman-Brown projection of <code>ICC(1)</code>. Projection is <strong>not</strong>
 defined for fixed-rater absolute agreement. There the rater term is the
 finite-population variance, the spread of just the observed raters. So
@@ -239,8 +246,9 @@ there is no "average of <code>m</code> freshly sampled raters" to project to.
 
 <p>For a multilevel fit (a <code>cluster</code> column), <code>d_study()</code> projects the rater
 count <code>m</code> for each correctly-partitioned level on the object. Those are the
-<strong>subject</strong> and/or <strong>cluster</strong> level, the cluster level being how reliably
-raters distinguish cluster means. It returns one reliability curve per
+<strong>subject</strong> and/or <strong>cluster</strong> level, where the subject level is reliability
+within a cluster, and the cluster level is reliability of cluster means. It
+returns one reliability curve per
 level, and the returned object gains a <code>level</code> column that <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code>
 facets by. <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code> carries that column on every projection, <code>NA</code> where the
 fit is not multilevel.

@@ -102,9 +102,9 @@ computes it.</p>
 <p><code>ratings</code> is the six-subject, four-rater example of Shrout
 and Fleiss (1979), in the long, one-row-per-rating format
 <code><a href="../reference/icc.html">icc()</a></code> expects. Every subject is rated by every rater. So it
-is a complete, balanced <strong>two-way</strong> design: the subjects
-share one set of raters, and every cell is filled. That is the clean
-case in which the choices below are easiest to see.</p>
+is a complete, balanced <strong>two-way</strong> design: each rater is
+tracked across the subjects they score, and every cell is filled. That
+is the clean case in which the choices below are easiest to see.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">ratings</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 'data.frame':    24 obs. of  3 variables:</span></span>
@@ -115,13 +115,13 @@ case in which the choices below are easiest to see.</p>
 <div class="section level2">
 <h2 id="a-prior-question-are-the-raters-crossed-model">A prior question: are the raters crossed? (<code>model</code>)<a class="anchor" aria-label="anchor" href="#a-prior-question-are-the-raters-crossed-model"></a>
 </h2>
-<p><strong>Is every subject rated by the <em>same</em> set of raters, or
-by a different set each time?</strong> If the same raters judge
-everyone, the design is <em>crossed</em>, like <code>ratings</code>.
-Keep the default <code>model = "twoway"</code>, and the four choices
-below apply. Suppose instead each subject is rated by whichever raters
-happened to be available. Then “rater 1” for one subject has nothing to
-do with “rater 1” for another. Those raters are
+<p><strong>Do the <em>same</em> raters score more than one subject, or
+does each subject get a different set?</strong> If each rater is tracked
+across the subjects they score, the design is <em>crossed</em>, like
+<code>ratings</code>. Keep the default <code>model = "twoway"</code>,
+and the four choices below apply. Suppose instead each subject is rated
+by whichever raters happened to be available. Then “rater 1” for one
+subject has nothing to do with “rater 1” for another. Those raters are
 <em>interchangeable</em>, and the design is <strong>one-way</strong>
 (<code>model = "oneway"</code>).</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
@@ -857,11 +857,11 @@ Subjects may themselves be nested in higher-level units, such as pupils
 within classrooms or patients within clinics. Then you may instead want
 the reliability of the <em>cluster</em> mean, a multilevel ICC (ten
 Hove, Jorgensen &amp; van der Ark, 2022). Pass a <code>cluster</code>
-column to <code><a href="../reference/icc.html">icc()</a></code>. It then reports the
-<strong>subject-level</strong> coefficient, how reliably raters
-distinguish subjects within a cluster, beside the
-<strong>cluster-level</strong> coefficient, how reliably raters
-distinguish cluster means. The <a href="multilevel-designs.html"><em>Multilevel designs</em></a> article
+column to <code><a href="../reference/icc.html">icc()</a></code>. It then reports two coefficients, where
+the <strong>subject level</strong> is reliability within a cluster, and
+the <strong>cluster level</strong> is reliability of cluster means. The
+subject level asks how reliably raters distinguish subjects within a
+cluster, and the cluster level asks the same of cluster means. The <a href="multilevel-designs.html"><em>Multilevel designs</em></a> article
 works a full example.</p>
 </div>
 <div class="section level2">
@@ -955,8 +955,8 @@ quick way to settle the choice before you run the model.</p>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1)</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: bold;">Why:</span></span></span>
-<span><span class="co">#&gt; <span style="font-weight: 100;">  - Crossed (two-way): the same raters judge every subject.</span></span></span>
-<span><span class="co">#&gt; <span style="font-weight: 100;">  - Absolute agreement: the value itself must match; a systematic difference between raters counts as error.</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">  - Crossed (two-way): each rater is tracked across the subjects they score.</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">  - Absolute agreement: the value itself must match. A systematic difference between raters counts as error.</span></span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">  - Single rater: you will act on one rater's score.</span></span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">  - Random raters: a sample you generalize beyond, to the rater universe they were drawn from.</span></span></span>
 <span><span class="co">#&gt; </span></span>

@@ -28,6 +28,21 @@
   stops except between references. Which condition fires, and when, is
   unchanged. Nothing computed changes.
 
+- The questions and advice that
+  [`choose_icc()`](https://jmgirard.github.io/intraclass/reference/choose_icc.md)
+  prints, and the notes that
+  [`print()`](https://rdrr.io/r/base/print.html) and
+  [`summary()`](https://rdrr.io/r/base/summary.html) add to an
+  [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) fit,
+  now use plainer English. None uses a dash as punctuation, and no
+  sentence runs past 25 words. Which note prints, and when, is
+  unchanged. Five definitions in the *Glossary* article were imprecise
+  or said less than the package does, and they are corrected. Every page
+  that quoted them now carries the new text. Four error messages from
+  [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) and
+  [`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)
+  no longer cite internal record numbers. Nothing computed changes.
+
 - Four articles now show their comparison tables as `gt` tables with a
   title, plain column headings and rounded numbers. The four are
   *Comparison with other packages*, *Estimation engines* (an engine is
@@ -68,9 +83,10 @@
   computed changes.
 
 - Five more articles are rewritten in plainer English. A D-study
-  projects the fitted variance components to other rater counts, and
-  each component is a share of the total variation traced to one source.
-  One of the five covers D-studies and the within-cell replicate, one of
+  projects the fitted variance components to other rater or
+  [occasion](https://jmgirard.github.io/intraclass/articles/glossary.html#occasion-within-cell-replicate)
+  counts, each a share of the total variation traced to one source. One
+  of the five covers D-studies and the within-cell replicate, one of
   several ratings by the same rater of the same subject. The five are
   *Estimation engines*, *Comparison with other packages*, *D-studies and
   within-cell replicates*, *Multilevel designs* and *Confidence-interval
@@ -103,17 +119,18 @@ requires R 4.5.0 or newer.
   argument picks single or average. The `raters` argument picks random
   or fixed raters, where fixed means the observed raters are the whole
   population of interest. The `model` argument picks one-way or two-way,
-  where two-way means the subjects share one set of raters. See *Getting
-  started* and
+  where two-way means each rater is tracked across the subjects they
+  score. See *Getting started* and
   [`?icc`](https://jmgirard.github.io/intraclass/reference/icc.md).
 - Data need not form a complete, balanced grid. There is support for
-  imbalanced, incomplete, and multilevel (nested) designs: unequal
-  ratings per subject, missing ratings, and subjects nested in a
+  imbalanced, incomplete, and multilevel (nested) designs. That covers
+  unequal ratings per subject, missing ratings, and subjects nested in a
   higher-level unit such as a classroom or clinic. A `cluster` column on
-  a two-way design switches on the multilevel ICC. When the same raters
-  span every cluster, the column also adds a cluster level: how reliably
-  raters distinguish cluster means. See *Multilevel designs: subject and
-  cluster level* and
+  a two-way design switches on the multilevel ICC. In a multilevel
+  design the subject level is reliability within a cluster, and the
+  cluster level is reliability of cluster means. When the same raters
+  span every cluster, the column also adds the cluster level. See
+  *Multilevel designs: subject and cluster level* and
   [`?icc`](https://jmgirard.github.io/intraclass/reference/icc.md) for
   the layouts and where it refuses.
 - Rating a subject-by-rater cell more than once gives a within-cell
@@ -169,10 +186,10 @@ requires R 4.5.0 or newer.
   models under a sourced half-*t*(4, 0, 1) prior on every random-effect
   standard deviation. Its point estimate is the posterior mode, the peak
   of the posterior distribution. Its interval is a percentile
-  **credible** interval, which holds a chosen share, usually 95%, of the
-  posterior probability. Because the interval comes from the posterior
-  draws, `ci_method = "posterior"` is forced. Supplying a custom `prior`
-  is a deliberate deviation:
+  **credible** interval, which holds the share of the posterior
+  probability that the confidence level sets. Because the interval comes
+  from the posterior draws, `ci_method = "posterior"` is forced.
+  Supplying a custom `prior` is a deliberate deviation:
   [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
   warns, and the coverage results this package reports no longer apply.
 - The `lme4` package itself is already on your library path after a
@@ -183,12 +200,12 @@ requires R 4.5.0 or newer.
 
 ### Confidence intervals
 
-- `ci_method` selects the interval: `"montecarlo"` (the default
-  Monte-Carlo interval, built by simulating from the fitted model),
+- `ci_method` selects the interval: `"montecarlo"` (the default),
   `"bootstrap"`, `"npbootstrap"`, `"searle"`, `"burch"`, `"mpl"`, and
-  `"posterior"` under **brms**. Where a method does not apply to the
-  design, the call aborts with a classed error. *Confidence-interval
-  methods* compares them;
+  `"posterior"` under **brms**. The default is the Monte-Carlo interval,
+  built by drawing parameter values from the fitted model’s uncertainty.
+  Where a method does not apply to the design, the call aborts with a
+  classed error. *Confidence-interval methods* compares them;
   [`?icc`](https://jmgirard.github.io/intraclass/reference/icc.md) gives
   the per-method conditions.
 - Interval coverage was studied by simulation before release, and the

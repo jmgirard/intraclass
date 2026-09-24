@@ -15,7 +15,8 @@ in classrooms or patients in clinics. Then “reliability” splits in two:
 how well raters tell *subjects* apart, and how well they tell *clusters*
 apart. The second is the
 [cluster-level](https://jmgirard.github.io/intraclass/articles/glossary.html#subject-level-vs--cluster-level)
-ICC: how reliably raters distinguish cluster means. Those are different
+ICC, where the subject level is reliability within a cluster, and the
+cluster level is reliability of cluster means. Those are different
 questions with different answers. Reporting one when you needed the
 other can be badly misleading. Ignoring the nesting gives a [conflated
 ICC](https://jmgirard.github.io/intraclass/articles/glossary.html#conflated-icc),
@@ -31,8 +32,9 @@ spans crossed and nested layouts, complete and incomplete data, and
 raters, where the observed raters are the whole population of interest.
 It ends with the multilevel
 [D-study](https://jmgirard.github.io/intraclass/articles/glossary.html#d-study-decision-study),
-which projects the fitted variance components to other rater counts. Any
-unfamiliar term is defined in the
+which projects the fitted variance components to other rater or
+[occasion](https://jmgirard.github.io/intraclass/articles/glossary.html#occasion-within-cell-replicate)
+counts. Any unfamiliar term is defined in the
 [*Glossary*](https://jmgirard.github.io/intraclass/articles/glossary.md).
 
 ## Subject level vs. cluster level
@@ -129,17 +131,18 @@ icc(school, score,
 #> 
 #> Variance components: cluster 0.998, subject 0.461, rater 0.136, cluster:rater 0.000, residual 0.473
 #> Diagnostic contrast: the 'conflated' level ignores the cluster structure
-#> (ten Hove et al. 2022, Eq. 14) -- it shows the bias from a single-level
-#> analysis and is NOT a recommended coefficient; report subject/cluster.
+#> (ten Hove et al. 2022, Eq. 14). It shows the bias from a single-level
+#> analysis and is NOT a recommended coefficient. Report the subject level,
+#> the cluster level, or both.
 ```
 
 The conflated value lands between the two correct levels and matches
 neither: it over- or under-states the reliability of any real decision.
 It is printed with a warning label and is **never** a coefficient to
 report. It exists only to quantify the cost of ignoring the structure.
-It is the flat two-way ICC read off the fit, the design where the
-subjects share one set of raters. So it comes in two forms. One is
-absolute agreement, where raters give the same score. The other is
+It is the flat two-way ICC read off the fit, the design where each rater
+is tracked across the subjects they score. So it comes in two forms. One
+is absolute agreement, where raters give the same score. The other is
 [consistency](https://jmgirard.github.io/intraclass/articles/glossary.html#consistency),
 where raters agree apart from a constant offset per rater. A default
 `level = "conflated"` call reports both. It needs a crossed,
@@ -547,8 +550,8 @@ choose_icc(model = "twoway", multilevel = TRUE, level = "cluster",
 #>   cluster: ICC(C,1)
 #> 
 #> Why:
-#>   - Crossed (two-way): the same raters judge every subject.
-#>   - Consistency: only the rank order must match; a constant per-rater offset is forgiven.
+#>   - Crossed (two-way): each rater is tracked across the subjects they score.
+#>   - Consistency: only the rank order must match. A constant per-rater offset is forgiven.
 #>   - Single rater: you will act on one rater's score.
 #>   - Random raters: a sample you generalize beyond, to the rater universe they were drawn from.
 #>   - Cluster level: reliability of the cluster mean.

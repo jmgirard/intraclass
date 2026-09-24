@@ -12,10 +12,12 @@ components](https://jmgirard.github.io/intraclass/articles/glossary.html#varianc
 each a share of the total variation traced to one source. Two things you
 can do with that fit. The first is a [**decision
 study**](https://jmgirard.github.io/intraclass/articles/glossary.html#d-study-decision-study),
-which projects the fitted variance components to other rater counts. The
-second is to separate the subject-by-rater interaction from pure error.
-That needs **within-cell replicates**, each one of several ratings by
-the same rater of the same subject. This article also shows the
+which projects the fitted variance components to other rater or
+[occasion](https://jmgirard.github.io/intraclass/articles/glossary.html#occasion-within-cell-replicate)
+counts. The second is to separate the subject-by-rater interaction from
+pure error. That needs **within-cell replicates**, each one of several
+ratings by the same rater of the same subject. This article also shows
+the
 [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
 methods that visualize a fit. Unfamiliar terms are defined in the
 [*Glossary*](https://jmgirard.github.io/intraclass/articles/glossary.md).
@@ -69,8 +71,8 @@ The projection has its own interval settings: `conf_level`, `mc_samples`
 and `seed`. Each defaults to the fit’s own whenever the fit carries
 them. A default
 [Monte-Carlo](https://jmgirard.github.io/intraclass/articles/glossary.html#monte-carlo-interval)
-fit, whose interval is built by simulating from the fitted model, does
-carry them. Pass any of them to
+fit, whose interval is built by drawing parameter values from the fitted
+model’s uncertainty, does carry them. Pass any of them to
 [`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)
 to override it for this call alone. The `seed = 1` above is the fit’s
 own seed passed explicitly. So the `m = 4` row reproduces the fit’s
@@ -282,13 +284,14 @@ That 3 is the fitted per-cell replicate count. Averaging cuts pure error
 but not the interaction, so those coefficients are higher.
 
 Within-cell replicates extend beyond this balanced two-way random
-example, where the subjects share one set of raters. **Fixed** raters
-(balanced) are supported. So are **multilevel** designs (crossed Design
-1 and nested Design 2, balanced), and **ragged** replicates at a single
-occasion. What remains open is the occasion-*averaged* coefficient on
-ragged replicates. There unequal per-cell counts leave no single
-effective-occasion divisor with a validated oracle. The compound
-fixed-by-ragged and multilevel-by-ragged corners are open too.
+example, where each rater is tracked across the subjects they score.
+**Fixed** raters (balanced) are supported. So are **multilevel** designs
+(crossed Design 1 and nested Design 2, balanced), and **ragged**
+replicates at a single occasion. What remains open is the
+occasion-*averaged* coefficient on ragged replicates. There unequal
+per-cell counts leave no single effective-occasion divisor with a
+validated oracle. The compound fixed-by-ragged and multilevel-by-ragged
+corners are open too.
 
 ## How many occasions do I need? A D-study on the occasion facet
 
@@ -326,11 +329,12 @@ the occasion projection is defined even where a rater projection is not.
 In particular, **fixed-rater absolute agreement projects on the occasion
 axis**. It is only the *rater* axis that is undefined for fixed absolute
 agreement, having no “freshly sampled rater” to add. On a **multilevel**
-replicate fit the subject-level curve rises with `n_o`, while the
+replicate fit the subject level is reliability within a cluster, and the
+cluster level is reliability of cluster means. There the subject-level
+curve rises with `n_o`, while the
 [cluster-level](https://jmgirard.github.io/intraclass/articles/glossary.html#subject-level-vs--cluster-level)
-curve, how reliably raters distinguish cluster means, is **flat**. The
-cluster-level error set has no pure-error term, so occasions cannot
-change it, and
+curve is **flat**. The cluster-level error set has no pure-error term,
+so occasions cannot change it, and
 [`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)
 says so with a note.
 

@@ -84,11 +84,12 @@
 share of the total variation traced to one source. Two things you can do
 with that fit. The first is a <a href="glossary.html#d-study-decision-study"><strong>decision
 study</strong></a>, which projects the fitted variance components to
-other rater counts. The second is to separate the subject-by-rater
-interaction from pure error. That needs <strong>within-cell
-replicates</strong>, each one of several ratings by the same rater of
-the same subject. This article also shows the <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code>
-methods that visualize a fit. Unfamiliar terms are defined in the <a href="glossary.html"><em>Glossary</em></a>.</p>
+other rater or <a href="glossary.html#occasion-within-cell-replicate">occasion</a> counts.
+The second is to separate the subject-by-rater interaction from pure
+error. That needs <strong>within-cell replicates</strong>, each one of
+several ratings by the same rater of the same subject. This article also
+shows the <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> methods that visualize a fit.
+Unfamiliar terms are defined in the <a href="glossary.html"><em>Glossary</em></a>.</p>
 <div class="section level2">
 <h2 id="how-many-raters-do-i-need-a-d-study">How many raters do I need? A D-study<a class="anchor" aria-label="anchor" href="#how-many-raters-do-i-need-a-d-study"></a>
 </h2>
@@ -130,12 +131,12 @@ directly.</p>
 <code>conf_level</code>, <code>mc_samples</code> and <code>seed</code>.
 Each defaults to the fit’s own whenever the fit carries them. A default
 <a href="glossary.html#monte-carlo-interval">Monte-Carlo</a> fit, whose
-interval is built by simulating from the fitted model, does carry them.
-Pass any of them to <code><a href="../reference/d_study.html">d_study()</a></code> to override it for this call
-alone. The <code>seed = 1</code> above is the fit’s own seed passed
-explicitly. So the <code>m = 4</code> row reproduces the fit’s
-<code>ICC(A,k)</code> <em>interval</em> exactly, and not merely its
-estimate.</p>
+interval is built by drawing parameter values from the fitted model’s
+uncertainty, does carry them. Pass any of them to <code><a href="../reference/d_study.html">d_study()</a></code>
+to override it for this call alone. The <code>seed = 1</code> above is
+the fit’s own seed passed explicitly. So the <code>m = 4</code> row
+reproduces the fit’s <code>ICC(A,k)</code> <em>interval</em> exactly,
+and not merely its estimate.</p>
 <p><code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code> turns the projection into one row per projected
 point, and <code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code> summarizes the projection as a
 whole:</p>
@@ -303,7 +304,7 @@ reliability of a mean over all four raters, each at that same three.
 That 3 is the fitted per-cell replicate count. Averaging cuts pure error
 but not the interaction, so those coefficients are higher.</p>
 <p>Within-cell replicates extend beyond this balanced two-way random
-example, where the subjects share one set of raters.
+example, where each rater is tracked across the subjects they score.
 <strong>Fixed</strong> raters (balanced) are supported. So are
 <strong>multilevel</strong> designs (crossed Design 1 and nested Design
 2, balanced), and <strong>ragged</strong> replicates at a single
@@ -347,12 +348,13 @@ rater projection is not. In particular, <strong>fixed-rater absolute
 agreement projects on the occasion axis</strong>. It is only the
 <em>rater</em> axis that is undefined for fixed absolute agreement,
 having no “freshly sampled rater” to add. On a
-<strong>multilevel</strong> replicate fit the subject-level curve rises
-with <code>n_o</code>, while the <a href="glossary.html#subject-level-vs--cluster-level">cluster-level</a>
-curve, how reliably raters distinguish cluster means, is
-<strong>flat</strong>. The cluster-level error set has no pure-error
-term, so occasions cannot change it, and <code><a href="../reference/d_study.html">d_study()</a></code> says so
-with a note.</p>
+<strong>multilevel</strong> replicate fit the subject level is
+reliability within a cluster, and the cluster level is reliability of
+cluster means. There the subject-level curve rises with
+<code>n_o</code>, while the <a href="glossary.html#subject-level-vs--cluster-level">cluster-level</a>
+curve is <strong>flat</strong>. The cluster-level error set has no
+pure-error term, so occasions cannot change it, and
+<code><a href="../reference/d_study.html">d_study()</a></code> says so with a note.</p>
 </div>
 <div class="section level2">
 <h2 id="visualizing-a-fit">Visualizing a fit<a class="anchor" aria-label="anchor" href="#visualizing-a-fit"></a>

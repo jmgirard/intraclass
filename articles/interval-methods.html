@@ -85,13 +85,13 @@ the same ICC could be “poor” or “excellent” and you would not know it.
 So every <code><a href="../reference/icc.html">icc()</a></code> coefficient comes with an interval, never a
 bare number, and the <code>ci_method</code> argument selects how that
 interval is built. This article covers the default <a href="glossary.html#monte-carlo-interval"><strong>Monte-Carlo</strong>
-interval</a>, built by simulating from the fitted model. It also covers
-the <a href="glossary.html#parametric-bootstrap">parametric
-bootstrap</a>, which refits the model on simulated data many times. It
-then covers the <a href="#the-opt-in-boundary-robust-methods">four
-opt-in methods</a> for the near-<a href="glossary.html#zero-variance-boundary">boundary</a> terrain the
-default struggles on, where an estimate can land exactly at zero. The
-first is the <a href="glossary.html#transformed-bootstrap-t">transformed
+interval</a>, built by drawing parameter values from the fitted model’s
+uncertainty. It also covers the <a href="glossary.html#parametric-bootstrap">parametric bootstrap</a>,
+which refits the model on simulated data many times. It then covers the
+<a href="#the-opt-in-boundary-robust-methods">four opt-in methods</a>
+for the near-<a href="glossary.html#zero-variance-boundary">boundary</a>
+terrain the default struggles on, where an estimate can land exactly at
+zero. The first is the <a href="glossary.html#transformed-bootstrap-t">transformed
 bootstrap-<em>t</em></a> (<code>"npbootstrap"</code>), which resamples
 whole subjects and studentizes. The second is the <a href="glossary.html#exact-f-interval">exact-F</a> closed form
 (<code>"searle"</code>), a closed-form interval that assumes normal
@@ -100,11 +100,12 @@ closed form (<code>"burch"</code>), a closed-form interval with a
 kurtosis adjustment. The fourth is the <a href="glossary.html#modified-profile-likelihood">modified profile
 likelihood</a> (<code>"mpl"</code>), which profiles the likelihood in
 the ICC with a small-sample correction. It is the two-way counterpart,
-for the design where the subjects share one set of raters. It serves
-only that design’s balanced, complete, random case with absolute <a href="glossary.html#absolute-agreement">agreement</a>, where raters give
-the same score. Last is the Bayesian <a href="glossary.html#credible-interval"><strong>credible</strong>
-interval</a>, which holds a chosen share, usually 95%, of the posterior
-probability. That interval comes with the brms <a href="glossary.html#engine">engine</a>, the software that does the
+for the design where each rater is tracked across the subjects they
+score. It serves only that design’s balanced, complete, random case with
+absolute <a href="glossary.html#absolute-agreement">agreement</a>, where
+raters give the same score. Last is the Bayesian <a href="glossary.html#credible-interval"><strong>credible</strong>
+interval</a>, which holds the share of the posterior probability that
+the confidence level sets. That interval comes with the brms <a href="glossary.html#engine">engine</a>, the software that does the
 fitting. Terms are defined in the <a href="glossary.html"><em>Glossary</em></a>.</p>
 <div class="section level2">
 <h2 id="monte-carlo-and-the-parametric-bootstrap">Monte-Carlo and the parametric bootstrap<a class="anchor" aria-label="anchor" href="#monte-carlo-and-the-parametric-bootstrap"></a>
@@ -629,9 +630,10 @@ two methods can diverge more where the asymptotics are strained. One
 such place is near the <a href="glossary.html#zero-variance-boundary">zero-variance boundary</a>.
 Another is the multilevel designs, which carry more <a href="glossary.html#variance-component">variance components</a>, each a
 share of the total variation traced to one source, and often few
-clusters. In the multilevel case the bootstrap’s <a href="glossary.html#subject-level-vs--cluster-level">cluster-level</a>
-interval in particular carries more resampling noise, the cluster level
-being how reliably raters distinguish cluster means. The bootstrap is
+clusters. In the multilevel case the subject level is reliability within
+a cluster, and the cluster level is reliability of cluster means. There
+the bootstrap’s <a href="glossary.html#subject-level-vs--cluster-level">cluster-level</a>
+interval in particular carries more resampling noise. The bootstrap is
 available for every design the <code>"glmmTMB"</code> and
 <code>"lme4"</code> engines fit. The <code>"lavaan"</code> engine
 bootstraps complete data, and a multilevel lavaan fit needs balanced
@@ -720,13 +722,15 @@ Spearman-Brown image of the ICC(1) endpoints. So its coverage is
 inherited by construction, balanced or not. A numeric <code>unit</code>
 is a <a href="glossary.html#d-study-decision-study">D-study</a>
 projection, which projects the fitted variance components to other rater
-counts. That projection is restricted to balanced data. Reach for this
-method for boundary robustness, an interval that exists where the
-Monte-Carlo default aborts. Reach for it too for robustness to
-non-normal subject effects. Its endpoints are deliberately left
-untruncated on the estimator’s own support (Ukoumunne et al. 2003,
-§5.2). So a near-boundary lower limit can be negative. That is honest
-disclosure, not an error.</p>
+or <a href="glossary.html#occasion-within-cell-replicate">occasion</a>
+counts. Here it projects to the mean of <code>m</code> raters. That
+projection is restricted to balanced data. Reach for this method for
+boundary robustness, an interval that exists where the Monte-Carlo
+default aborts. Reach for it too for robustness to non-normal subject
+effects. Its endpoints are deliberately left untruncated on the
+estimator’s own support (Ukoumunne et al. 2003, §5.2). So a
+near-boundary lower limit can be negative. That is honest disclosure,
+not an error.</p>
 </div>
 <div class="section level3">
 <h3 id="the-classical-closed-forms-ci_method-searle-and-burch">The classical closed forms (<code>ci_method = "searle"</code> and

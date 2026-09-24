@@ -87,7 +87,8 @@ subjects are often nested in higher-level <strong>clusters</strong>,
 such as pupils in classrooms or patients in clinics. Then “reliability”
 splits in two: how well raters tell <em>subjects</em> apart, and how
 well they tell <em>clusters</em> apart. The second is the <a href="glossary.html#subject-level-vs--cluster-level">cluster-level</a>
-ICC: how reliably raters distinguish cluster means. Those are different
+ICC, where the subject level is reliability within a cluster, and the
+cluster level is reliability of cluster means. Those are different
 questions with different answers. Reporting one when you needed the
 other can be badly misleading. Ignoring the nesting gives a <a href="glossary.html#conflated-icc">conflated ICC</a>, the single-level
 ICC that ignores clustering, which is biased for both questions.</p>
@@ -97,8 +98,8 @@ share of the total variation traced to one source. The family spans
 crossed and nested layouts, complete and incomplete data, and <a href="glossary.html#fixed-vs--random-raters">fixed</a> raters, where the
 observed raters are the whole population of interest. It ends with the
 multilevel <a href="glossary.html#d-study-decision-study">D-study</a>,
-which projects the fitted variance components to other rater counts. Any
-unfamiliar term is defined in the <a href="glossary.html"><em>Glossary</em></a>.</p>
+which projects the fitted variance components to other rater or <a href="glossary.html#occasion-within-cell-replicate">occasion</a> counts.
+Any unfamiliar term is defined in the <a href="glossary.html"><em>Glossary</em></a>.</p>
 <div class="section level2">
 <h2 id="subject-level-vs--cluster-level">Subject level vs. cluster level<a class="anchor" aria-label="anchor" href="#subject-level-vs--cluster-level"></a>
 </h2>
@@ -188,17 +189,18 @@ directly rather than take it on faith:</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Variance components: cluster 0.998, subject 0.461, rater 0.136, cluster:rater 0.000, residual 0.473</span></span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Diagnostic contrast: the 'conflated' level ignores the cluster structure</span></span></span>
-<span><span class="co">#&gt; <span style="font-weight: 100;">(ten Hove et al. 2022, Eq. 14) -- it shows the bias from a single-level</span></span></span>
-<span><span class="co">#&gt; <span style="font-weight: 100;">analysis and is NOT a recommended coefficient; report subject/cluster.</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="font-weight: 100;">(ten Hove et al. 2022, Eq. 14). It shows the bias from a single-level</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">analysis and is NOT a recommended coefficient. Report the subject level,</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">the cluster level, or both.</span></span></span></code></pre></div>
 <p>The conflated value lands between the two correct levels and matches
 neither: it over- or under-states the reliability of any real decision.
 It is printed with a warning label and is <strong>never</strong> a
 coefficient to report. It exists only to quantify the cost of ignoring
 the structure. It is the flat two-way ICC read off the fit, the design
-where the subjects share one set of raters. So it comes in two forms.
-One is absolute agreement, where raters give the same score. The other
-is <a href="glossary.html#consistency">consistency</a>, where raters
-agree apart from a constant offset per rater. A default
+where each rater is tracked across the subjects they score. So it comes
+in two forms. One is absolute agreement, where raters give the same
+score. The other is <a href="glossary.html#consistency">consistency</a>,
+where raters agree apart from a constant offset per rater. A default
 <code>level = "conflated"</code> call reports both. It needs a crossed,
 random-rater design with raters that bridge the clusters, and works on
 complete or incomplete data.</p>
@@ -555,8 +557,8 @@ fitting anything:</p>
 <span><span class="co">#&gt; <span style="font-weight: bold;">  cluster: ICC(C,1)</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: bold;">Why:</span></span></span>
-<span><span class="co">#&gt; <span style="font-weight: 100;">  - Crossed (two-way): the same raters judge every subject.</span></span></span>
-<span><span class="co">#&gt; <span style="font-weight: 100;">  - Consistency: only the rank order must match; a constant per-rater offset is forgiven.</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">  - Crossed (two-way): each rater is tracked across the subjects they score.</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">  - Consistency: only the rank order must match. A constant per-rater offset is forgiven.</span></span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">  - Single rater: you will act on one rater's score.</span></span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">  - Random raters: a sample you generalize beyond, to the rater universe they were drawn from.</span></span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">  - Cluster level: reliability of the cluster mean.</span></span></span>

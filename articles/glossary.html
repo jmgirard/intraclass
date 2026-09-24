@@ -145,14 +145,16 @@ methods</em></a>.</p>
 <div class="section level2">
 <h2 id="confidence-interval-vs--credible-interval">Confidence interval vs. credible interval<a class="anchor" aria-label="anchor" href="#confidence-interval-vs--credible-interval"></a>
 </h2>
-<p>A <strong>confidence interval</strong> is a range built so that,
-across many hypothetical repetitions of the study, 95% of such ranges
-would contain the true ICC. The frequentist engines output one. A
-<strong>credible interval</strong> is a range that holds 95% of the
-posterior probability. The Bayesian <code>brms</code> engine outputs
-one. You can say directly “there is a 95% chance the ICC lies in here,
-given the data and the prior.” They answer subtly different questions.
-See <a href="interval-methods.html"><em>Confidence-interval
+<p>A <strong>confidence interval</strong> is a range built with many
+hypothetical repetitions of the study in mind. Across them, the chosen
+share (95% by default) of such ranges would contain the true ICC. The
+frequentist engines output one. A <strong>credible interval</strong> is
+a range that holds the share of the posterior probability that the
+confidence level sets. That level is the <code>conf_level</code>
+argument, 0.95 by default. The Bayesian <code>brms</code> engine outputs
+one. At the default level you can say directly “there is a 95% chance
+the ICC lies in here, given the data and the prior.” They answer subtly
+different questions. See <a href="interval-methods.html"><em>Confidence-interval
 methods</em></a>.</p>
 </div>
 <div class="section level2">
@@ -205,8 +207,9 @@ replicates</em></a>.</p>
 <div class="section level2">
 <h2 id="d-study-decision-study">D-study (decision study)<a class="anchor" aria-label="anchor" href="#d-study-decision-study"></a>
 </h2>
-<p>A forward-looking projection: how reliable would the mean of some
-other number of raters (or occasions) be? It reuses the variance
+<p>A forward-looking projection of the fitted variance components to
+other rater or occasion counts. It asks how reliable the mean of some
+other number of raters (or occasions) would be. It reuses the variance
 components you already estimated, with no refitting. It answers “how
 many raters do I need?”. See <a href="d-studies-and-replicates.html"><em>D-studies and within-cell
 replicates</em></a>.</p>
@@ -327,14 +330,14 @@ methods</em></a>.</p>
 <h2 id="monte-carlo-interval">Monte-Carlo interval<a class="anchor" aria-label="anchor" href="#monte-carlo-interval"></a>
 </h2>
 <p>The default confidence-interval method
-(<code>ci_method = "montecarlo"</code>), built by simulating from the
-fitted model. It draws many parameter vectors from the fitted model’s
-estimated covariance, on a scale that respects the zero-variance
-boundary. It recomputes the ICC for each draw, and takes the 2.5% and
-97.5% quantiles. Fast and boundary-aware. It does assume the fitted
-parameters are approximately normally distributed around the truth. It
-under-covers when the subject effects are strongly skewed or
-heavy-tailed. See <a href="interval-methods.html#when-the-default-under-covers"><em>When the
+(<code>ci_method = "montecarlo"</code>), built by drawing parameter
+values from the fitted model’s uncertainty. It draws many parameter
+vectors from the fitted model’s estimated covariance, on a scale that
+respects the zero-variance boundary. It simulates no new data. It
+recomputes the ICC for each draw, and takes the 2.5% and 97.5%
+quantiles. Fast and boundary-aware. It does assume the fitted parameters
+are approximately normally distributed around the truth. It under-covers
+when the subject effects are strongly skewed or heavy-tailed. See <a href="interval-methods.html#when-the-default-under-covers"><em>When the
 default under-covers</em></a>. See also <a href="interval-methods.html"><em>Confidence-interval
 methods</em></a>.</p>
 </div>
@@ -383,7 +386,8 @@ A ragged replicate fit separates the two columns most sharply:
 <h2 id="one-way-vs--two-way">One-way vs. two-way<a class="anchor" aria-label="anchor" href="#one-way-vs--two-way"></a>
 </h2>
 <p>The <code>model</code> argument. In a <strong>two-way</strong> design
-the subjects share one set of raters. So a rater main effect can be
+each rater is tracked across the subjects they score, whether every
+rater scores every subject or not. So a rater main effect can be
 estimated, and either counted as error (agreement) or set aside
 (consistency). A <strong>one-way</strong> design has each subject rated
 by possibly <em>different</em> raters. So rater identity is not modeled,
@@ -445,11 +449,13 @@ as high.</p>
 <h2 id="subject-level-vs--cluster-level">Subject level vs. cluster level<a class="anchor" aria-label="anchor" href="#subject-level-vs--cluster-level"></a>
 </h2>
 <p>Two reliabilities defined in a <strong>multilevel</strong> design,
-where subjects are nested in clusters such as pupils in classrooms. The
-<strong>subject level</strong> asks how reliably raters distinguish
-subjects <em>within</em> a cluster. The <strong>cluster level</strong>
-asks how reliably raters distinguish <em>cluster means</em>.
-<code><a href="../reference/icc.html">icc()</a></code> reports both from one fit. See <a href="multilevel-designs.html#subject-level-vs.-cluster-level"><em>Multilevel
+where subjects are nested in clusters such as pupils in classrooms. Here
+the subject level is reliability within a cluster, and the cluster level
+is reliability of cluster means. The <strong>subject level</strong> asks
+how reliably raters distinguish subjects <em>within</em> a cluster. The
+<strong>cluster level</strong> asks how reliably raters distinguish
+<em>cluster means</em>. <code><a href="../reference/icc.html">icc()</a></code> reports both from one fit.
+See <a href="multilevel-designs.html#subject-level-vs--cluster-level"><em>Multilevel
 designs</em></a>.</p>
 </div>
 <div class="section level2">
