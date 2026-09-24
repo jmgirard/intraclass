@@ -9,7 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M156 | Plain-English pass over the condition text, and NEWS under R7/R8 | review | — | normal | milestones/M156-plain-english-condition-text.md |
+| M156 | Plain-English pass over the condition text, and NEWS under R7/R8 | in-progress | — | normal | milestones/M156-plain-english-condition-text.md |
 | M155 | Comparison tables as hidden `gt` chunks | done | M154 | normal | milestones/archive/M155-gt-comparison-tables.md |
 | M154 | Ship the vignettes' simulated datasets from `data-raw/` | done | — | normal | milestones/archive/M154-ship-vignette-datasets.md |
 | M153 | Plain-English pass over the roxygen surface | done | M151 | normal | milestones/archive/M153-plain-english-roxygen.md |

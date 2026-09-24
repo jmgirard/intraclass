@@ -2,7 +2,7 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M156: Plain-English pass over the condition text, and NEWS under R7/R8
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -52,6 +52,8 @@ Bring the text of every condition the package raises, and `NEWS.md`, under the h
 - [x] T7: In `NEWS.md`, gloss each first-use glossary term verbatim, clear the R8 markers and add the Documentation bullet. Run `test-news-brms-claims.R` and `python3 data-raw/check-mpl-doc-claims.py --self-test`, and re-key any ledger row the edit makes stale.
 - [x] T8: Read the whole extract for R3–R5. Audit every hunk of `git diff main -- R/ NEWS.md` for R6. Build the site and check the prose beside each rendered condition. Run the ruler and `--compare-tokens main` until both report zero.
 - [x] T9: Gate: `air format .`, `devtools::document()`, `devtools::test()`, `devtools::check()` with its raw Status line read, `lintr::lint_package()`, and every `data-raw/check-*.py --self-test`.
+- [ ] T10: Apply the review's fix-now items (Review section O9, O10, O11, O12, O14, O15, O16 and B2). In the `NEWS.md` brms bullet, put the forced-method reason back on the Bayesian engine. Then re-run the ruler, `--compare-tokens main`, `prose-terms.py NEWS.md` and the affected tests.
+- [ ] T11: Add two candidate rows to `cairn/ROADMAP.md`, searching first. One is for the ruler blind spots (O1 to O5). The other is for the glossary glosses narrower than the package (O6, O7, O8, B1), with the NEWS bullet growth (P1).
 
 ## Work log
 
@@ -72,6 +74,7 @@ Bring the text of every condition the package raises, and `NEWS.md`, under the h
 - 2026-09-23: claim audit: 105 claims read, 4 corrected — NEWS.md, data-raw/condition-text-profile.R
 - 2026-09-23: claim-audit corrections: NEWS article title "Interval methods" → "Confidence-interval methods"; the D-study gloss sentence whose "each a share…" attached to the wrong noun, rewritten; the ruler header's R1 exceptions stated in full; `--compare-tokens` masked every literal, so a changed class string went unseen: it now masks only message literals (`is_message_literal()`), with self-test cases for a changed class string, a changed `grepl()` pattern and reworded `if`/`paste0` literals, and its remaining limit (a code literal inside `c()`) stated in the header. Re-run: 0 differences against `main`.
 - 2026-09-23: status → review.
+- 2026-09-23: review return (defect return 1): AC6 fails its R6 clause, because the `NEWS.md` brms bullet's "For that reason" now points at the credible-interval gloss (O9). The user chose return and fix at the gate and accepted the proposed dispositions. T10 and T11 were added. AC1 to AC5 and AC7 stay ticked against their evidence. Status → in-progress.
 
 ## Review
 
