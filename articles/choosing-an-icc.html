@@ -164,8 +164,8 @@ asks only that raters agree apart from a constant offset per rater.</p>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">  index     estimate   95% CI</span></span></span>
-<span><span class="co">#&gt;   ICC(A,1)  <span style="font-weight: bold;">   0.290</span>   <span style="font-weight: 100;">[0.050, 0.711]</span></span></span>
-<span><span class="co">#&gt;   ICC(A,k)  <span style="font-weight: bold;">   0.620</span>   <span style="font-weight: 100;">[0.173, 0.908]</span></span></span>
+<span><span class="co">#&gt;   ICC(A,1)  <span style="font-weight: bold;">   0.290</span>   <span style="font-weight: 100;">[0.050, 0.713]</span></span></span>
+<span><span class="co">#&gt;   ICC(A,k)  <span style="font-weight: bold;">   0.620</span>   <span style="font-weight: 100;">[0.173, 0.909]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Variance components: subject 2.556, rater 5.244, residual 1.019</span></span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)</span></span></span>
@@ -177,8 +177,8 @@ asks only that raters agree apart from a constant offset per rater.</p>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">  index     estimate   95% CI</span></span></span>
-<span><span class="co">#&gt;   ICC(C,1)  <span style="font-weight: bold;">   0.715</span>   <span style="font-weight: 100;">[0.340, 0.926]</span></span></span>
-<span><span class="co">#&gt;   ICC(C,k)  <span style="font-weight: bold;">   0.909</span>   <span style="font-weight: 100;">[0.673, 0.980]</span></span></span>
+<span><span class="co">#&gt;   ICC(C,1)  <span style="font-weight: bold;">   0.715</span>   <span style="font-weight: 100;">[0.343, 0.924]</span></span></span>
+<span><span class="co">#&gt;   ICC(C,k)  <span style="font-weight: bold;">   0.909</span>   <span style="font-weight: 100;">[0.676, 0.980]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Variance components: subject 2.556, rater 5.244, residual 1.019</span></span></span></code></pre></div>
 <p>Here <code>ICC(A,1)</code> is 0.29 but <code>ICC(C,1)</code> is 0.71.
@@ -220,7 +220,7 @@ observed raters are the whole population of interest. Then the
 coefficient does not generalize past them.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fixed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, raters <span class="op">=</span> <span class="st">"fixed"</span>, seed <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Modeling raters as <span style="font-weight: bold;">fixed</span> restricts inference to exactly these raters; you</span></span>
+<span><span class="co">#&gt; Warning: Modeling raters as <span style="font-weight: bold;">fixed</span> restricts inference to exactly these raters. You</span></span>
 <span><span class="co">#&gt; cannot generalize to other raters.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> For interrater reliability, the two-way <span style="font-weight: bold;">random</span> model (`raters = "random"`) is</span></span>
 <span><span class="co">#&gt;   the recommended default (ten Hove et al. 2024; McGraw &amp; Wong 1996, Case 2).</span></span>

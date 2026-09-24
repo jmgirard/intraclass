@@ -226,7 +226,7 @@ icc(ratings, score, subject, rater, engine = "brms",
 #> Using a custom `prior` instead of the sourced half-t(4, 0, 1).
 #> ! This VOIDS the package's coverage guarantees: the credible-interval coverage
 #>   results (ten Hove et al. 2020) hold only for the sourced prior.
-#> ℹ A vague or flat SD prior can WORSEN small-`k` boundary bias -- the half-t is
+#> ℹ A vague or flat SD prior can WORSEN small-`k` boundary bias. The half-t is
 #>   weakly informative on purpose (Principle #3's regime).
 #> ℹ Leave `prior` unset for the sourced default unless you are running
 #>   prior-sensitivity or method-comparison work.
