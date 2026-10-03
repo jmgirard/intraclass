@@ -287,10 +287,27 @@ test_that("the reachable bootstrap abort takes DEGENERATE data, where no method 
     seed = 1
   )
   # `info` (not expect_in(), which needs a newer testthat than DESCRIPTION pins)
-  # so a failure names the site actually reached.
+  # so a failure names the site actually reached, and, when icc() returned, the
+  # components and estimates it returned.
+  returned <- if (identical(site, "ok")) {
+    fit <- suppressWarnings(suppressMessages(icc(
+      d,
+      score,
+      subject,
+      rater,
+      ci_method = "bootstrap",
+      model = "oneway",
+      boot_samples = 30L,
+      seed = 1
+    )))
+    utils::capture.output(
+      print(unlist(fit$components)),
+      print(as.data.frame(fit$estimates))
+    )
+  }
   expect_true(
     site %in% c("C", "point-fit"),
-    info = paste("site reached:", site)
+    info = paste(c(paste("site reached:", site), returned), collapse = "\n")
   )
 
   # Every method the mapping table would name aborts on this data too. The abort
