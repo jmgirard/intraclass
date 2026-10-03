@@ -278,16 +278,20 @@ test_that("O-FCL/reduction (PRIMARY): balanced fixed == random M5 CLUSTER level"
     pick(ra, "ICC(A,k)", "cluster"),
     tolerance = 1e-4
   )
-  # Consistency uses only sigma^2_cr (no rater main effect), so fixed == random exactly.
+  # Consistency uses only sigma^2_cr (no rater main effect), so fixed == random
+  # exactly at the REML optimum. The two are separate fits, and glmmTMB's
+  # relative-convergence stop leaves each within a few 1e-6 of that optimum (the
+  # fixed fit's value moves by that much between starting points at an
+  # unchanged objective), so the tolerance is 1e-5, not 1e-6.
   expect_equal(
     pick(fc, "ICC(C,1)", "cluster"),
     pick(rc, "ICC(C,1)", "cluster"),
-    tolerance = 1e-6
+    tolerance = 1e-5
   )
   expect_equal(
     pick(fc, "ICC(C,k)", "cluster"),
     pick(rc, "ICC(C,k)", "cluster"),
-    tolerance = 1e-6
+    tolerance = 1e-5
   )
 })
 

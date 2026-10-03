@@ -283,24 +283,21 @@ test_that("connectedness: non-bridging raters drop agreement, keep consistency (
   d$cluster <- factor(d$cluster)
   d$score <- stats::rnorm(nrow(d))
   withr::local_options(rlib_message_verbosity = "verbose")
-  # The non-bridging design also draws a glmmTMB fitting warning, which the
-  # package re-signals; assert it rather than let it escape the test.
-  expect_warning(
-    expect_message(
-      x <- icc(
-        d,
-        score,
-        subject,
-        rater,
-        cluster = cluster,
-        design = "crossed",
-        level = "subject",
-        seed = 1
-      ),
-      "Dropping .*agreement.*bridge clusters"
+  # With glmmTMB's own default start this fit also ended on a non-positive-definite
+  # Hessian and drew a fitting warning. The data-scaled start reaches the same
+  # REML objective with a positive-definite Hessian, so no warning is expected.
+  expect_message(
+    x <- icc(
+      d,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      design = "crossed",
+      level = "subject",
+      seed = 1
     ),
-    "The glmmTMB engine reported a fitting warning.",
-    fixed = TRUE
+    "Dropping .*agreement.*bridge clusters"
   )
   expect_setequal(unique(x$estimates$type), "consistency")
   # Explicit agreement on the same design still aborts loudly.
