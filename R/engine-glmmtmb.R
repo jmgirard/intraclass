@@ -42,11 +42,7 @@ glmmtmb_simulate_refit <- function(fit, extract) {
         boot_data <- base_data
         boot_data$score <- y
         refit <- tryCatch(
-          suppressWarnings(glmmTMB::glmmTMB(
-            form,
-            data = boot_data,
-            REML = TRUE
-          )),
+          suppressWarnings(glmmtmb_reml(form, boot_data)),
           error = function(e) NULL
         )
         if (is.null(refit) || !isTRUE(refit$sdr$pdHess)) {
@@ -61,24 +57,41 @@ glmmtmb_simulate_refit <- function(fit, extract) {
   }
 }
 
+# Data-scaled starting values for a glmmTMB REML fit. glmmTMB starts every
+# log-SD at 0, an SD of 1. On scores whose spread is far above 1 (e.g. times in
+# milliseconds) that start can leave the optimizer at a false optimum with a
+# variance at 0, or make the fit fail. Each random-effect SD and the residual SD
+# instead start at sd(score) / sqrt(number of variance terms), so the start
+# splits the observed variance evenly. Constant scores keep glmmTMB's default.
+glmmtmb_start <- function(formula, data) {
+  par <- glmmTMB::glmmTMB(formula, data = data, REML = TRUE, doFit = FALSE)$parameters
+  n_theta <- length(par$theta)
+  s <- log(stats::sd(data$score) / sqrt(n_theta + 1))
+  if (!is.finite(s)) {
+    return(NULL)
+  }
+  start <- list(theta = rep(s, n_theta))
+  disp <- intersect(c("betadisp", "betad"), names(par))[1]
+  if (!is.na(disp)) {
+    start[[disp]] <- rep(s, length(par[[disp]]))
+  }
+  start
+}
+
+# Every glmmTMB fit in the package goes through this call (REML, scaled start).
+glmmtmb_reml <- function(formula, data) {
+  glmmTMB::glmmTMB(
+    formula,
+    data = data,
+    REML = TRUE,
+    start = glmmtmb_start(formula, data)
+  )
+}
+
 fit_glmmtmb <- function(data, call = rlang::caller_env()) {
   rlang::check_installed("glmmTMB", reason = "to fit the ICC model.")
 
-  fit <- withCallingHandlers(
-    glmmTMB::glmmTMB(
-      score ~ 1 + (1 | subject) + (1 | rater),
-      data = data,
-      REML = TRUE
-    ),
-    warning = function(w) {
-      # Surface fit trouble through cli, but keep it non-fatal (PRINCIPLES.md #8).
-      cli::cli_warn(c(
-        "The {.pkg glmmTMB} engine reported a fitting warning.",
-        i = conditionMessage(w)
-      ))
-      invokeRestart("muffleWarning")
-    }
-  )
+  fit <- fit_glmmtmb_ml_model(score ~ 1 + (1 | subject) + (1 | rater), data)
 
   vc <- glmmTMB::VarCorr(fit)$cond
   extract <- function(f) {
@@ -151,20 +164,7 @@ fit_glmmtmb <- function(data, call = rlang::caller_env()) {
 fit_glmmtmb_oneway <- function(data, call = rlang::caller_env()) {
   rlang::check_installed("glmmTMB", reason = "to fit the ICC model.")
 
-  fit <- withCallingHandlers(
-    glmmTMB::glmmTMB(
-      score ~ 1 + (1 | subject),
-      data = data,
-      REML = TRUE
-    ),
-    warning = function(w) {
-      cli::cli_warn(c(
-        "The {.pkg glmmTMB} engine reported a fitting warning.",
-        i = conditionMessage(w)
-      ))
-      invokeRestart("muffleWarning")
-    }
-  )
+  fit <- fit_glmmtmb_ml_model(score ~ 1 + (1 | subject), data)
 
   vc <- glmmTMB::VarCorr(fit)$cond
   extract <- function(f) {
@@ -238,11 +238,12 @@ fit_glmmtmb_oneway <- function(data, call = rlang::caller_env()) {
 # parameter "theta_1|<group>.1" (verified against VarCorr); residual at
 # "disp~(Intercept)" -- the same log-SD scale as fit_glmmtmb() (ADR-002/003).
 
-# Fit a multilevel glmmTMB model (REML), routing convergence warnings through cli
-# (PRINCIPLES.md #8). Shared by every multilevel design (D1/D2/...).
+# Fit a glmmTMB model (REML, scaled start), routing convergence warnings through
+# cli but keeping them non-fatal (PRINCIPLES.md #8). Shared by every design:
+# two-way, one-way, fixed-rater, and the multilevel designs (D1/D2/...).
 fit_glmmtmb_ml_model <- function(formula, data) {
   withCallingHandlers(
-    glmmTMB::glmmTMB(formula, data = data, REML = TRUE),
+    glmmtmb_reml(formula, data),
     warning = function(w) {
       cli::cli_warn(c(
         "The {.pkg glmmTMB} engine reported a fitting warning.",
@@ -699,20 +700,7 @@ fit_glmmtmb_fixed <- function(data, call = rlang::caller_env()) {
   rlang::check_installed("glmmTMB", reason = "to fit the ICC model.")
   k <- nlevels(data$rater)
 
-  fit <- withCallingHandlers(
-    glmmTMB::glmmTMB(
-      score ~ 1 + rater + (1 | subject),
-      data = data,
-      REML = TRUE
-    ),
-    warning = function(w) {
-      cli::cli_warn(c(
-        "The {.pkg glmmTMB} engine reported a fitting warning.",
-        i = conditionMessage(w)
-      ))
-      invokeRestart("muffleWarning")
-    }
-  )
+  fit <- fit_glmmtmb_ml_model(score ~ 1 + rater + (1 | subject), data)
 
   vc <- glmmTMB::VarCorr(fit)$cond
   sd_subject <- as.numeric(attr(vc$subject, "stddev"))
