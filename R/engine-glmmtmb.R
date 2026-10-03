@@ -64,7 +64,12 @@ glmmtmb_simulate_refit <- function(fit, extract) {
 # instead start at sd(score) / sqrt(number of variance terms), so the start
 # splits the observed variance evenly. Constant scores keep glmmTMB's default.
 glmmtmb_start <- function(formula, data) {
-  par <- glmmTMB::glmmTMB(formula, data = data, REML = TRUE, doFit = FALSE)$parameters
+  par <- glmmTMB::glmmTMB(
+    formula,
+    data = data,
+    REML = TRUE,
+    doFit = FALSE
+  )$parameters
   n_theta <- length(par$theta)
   s <- log(stats::sd(data$score) / sqrt(n_theta + 1))
   if (!is.finite(s)) {

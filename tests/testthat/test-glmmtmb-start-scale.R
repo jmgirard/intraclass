@@ -16,8 +16,10 @@ scale_two_way <- function(seed = 11L, n_s = 17L, n_r = 2L) {
   )
   subj <- stats::rnorm(n_s, 0, 0.65)
   rater <- seq(-0.3, 0.3, length.out = n_r)
-  grid$score <- 6 + subj[as.integer(grid$subject)] +
-    rater[as.integer(grid$rater)] + stats::rnorm(nrow(grid), 0, 0.9)
+  grid$score <- 6 +
+    subj[as.integer(grid$subject)] +
+    rater[as.integer(grid$rater)] +
+    stats::rnorm(nrow(grid), 0, 0.9)
   grid
 }
 
@@ -31,8 +33,10 @@ scale_multilevel <- function(seed = 13L, n_c = 6L, n_s = 5L, n_r = 3L) {
   grid$subject <- factor(paste(grid$cluster, grid$s, sep = "_"))
   clus <- stats::rnorm(n_c, 0, 0.6)
   subj <- stats::rnorm(nlevels(grid$subject), 0, 0.6)
-  grid$score <- 6 + clus[as.integer(grid$cluster)] +
-    subj[as.integer(grid$subject)] + stats::rnorm(nrow(grid), 0, 0.8)
+  grid$score <- 6 +
+    clus[as.integer(grid$cluster)] +
+    subj[as.integer(grid$subject)] +
+    stats::rnorm(nrow(grid), 0, 0.8)
   grid
 }
 
@@ -40,7 +44,9 @@ icc_quiet <- function(...) {
   suppressMessages(suppressWarnings(icc(..., seed = 1)))
 }
 
-estimates <- function(x) stats::setNames(x$estimates$estimate, x$estimates$index)
+estimates <- function(x) {
+  stats::setNames(x$estimates$estimate, x$estimates$index)
+}
 
 test_that("two-way random glmmTMB ICCs do not depend on the score scale", {
   skip_if_not_installed("glmmTMB")
@@ -65,7 +71,11 @@ test_that("two-way random glmmTMB matches lme4's REML fit on large-scale scores"
   skip_if_not_installed("lme4")
   big <- transform(scale_two_way(), score = score * 100)
 
-  ref <- lme4::lmer(score ~ 1 + (1 | subject) + (1 | rater), data = big, REML = TRUE)
+  ref <- lme4::lmer(
+    score ~ 1 + (1 | subject) + (1 | rater),
+    data = big,
+    REML = TRUE
+  )
   ref_subject <- as.data.frame(lme4::VarCorr(ref))$vcov[
     as.data.frame(lme4::VarCorr(ref))$grp == "subject"
   ]
@@ -82,11 +92,17 @@ test_that("fixed-rater and one-way glmmTMB ICCs do not depend on the score scale
   for (args in list(list(raters = "fixed"), list(model = "oneway"))) {
     small_fit <- do.call(
       icc_quiet,
-      c(list(d, quote(score), subject = quote(subject), rater = quote(rater)), args)
+      c(
+        list(d, quote(score), subject = quote(subject), rater = quote(rater)),
+        args
+      )
     )
     big_fit <- do.call(
       icc_quiet,
-      c(list(big, quote(score), subject = quote(subject), rater = quote(rater)), args)
+      c(
+        list(big, quote(score), subject = quote(subject), rater = quote(rater)),
+        args
+      )
     )
     expect_gt(big_fit$components$subject, 1)
     expect_equal(estimates(big_fit), estimates(small_fit), tolerance = 1e-4)
@@ -99,11 +115,19 @@ test_that("multilevel glmmTMB ICCs do not depend on the score scale", {
   big <- transform(d, score = score * 100)
 
   small_fit <- icc_quiet(
-    d, score, subject = subject, rater = rater, cluster = cluster,
+    d,
+    score,
+    subject = subject,
+    rater = rater,
+    cluster = cluster,
     level = c("subject", "cluster")
   )
   big_fit <- icc_quiet(
-    big, score, subject = subject, rater = rater, cluster = cluster,
+    big,
+    score,
+    subject = subject,
+    rater = rater,
+    cluster = cluster,
     level = c("subject", "cluster")
   )
   # The rater variance sits near 0 here, a flat direction of the likelihood, so
