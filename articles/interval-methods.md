@@ -389,8 +389,8 @@ ml <- tidy(icc(ratings_twoway, score, subject, rater, type = "agreement", ci_met
 | Monte-Carlo and modified profile-likelihood 95% intervals on ratings_twoway |  |  |  |
 |----|----|----|----|
 | Coefficient | Estimate | Monte-Carlo | Modified profile likelihood |
-| ICC(A,1) | 0.709 | \[0.48, 0.84\] | \[0.42, 0.87\] |
-| ICC(A,k) | 0.907 | \[0.78, 0.96\] | \[0.75, 0.96\] |
+| ICC(A,1) | 0.709 | \[0.46, 0.84\] | \[0.42, 0.87\] |
+| ICC(A,k) | 0.907 | \[0.77, 0.96\] | \[0.75, 0.96\] |
 
 The two point estimates agree, from the same REML fit. The `"mpl"`
 interval is the wider of the pair at this comfortably interior cell.

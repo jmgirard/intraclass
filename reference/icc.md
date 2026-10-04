@@ -1007,10 +1007,10 @@ icc(ratings, score, subject, rater, seed = 1)
 #> 
 #>   index     estimate   95% CI
 #>   Absolute agreement
-#>   ICC(A,1)     0.290   [0.050, 0.712]
-#>   ICC(A,k)     0.620   [0.173, 0.908]
+#>   ICC(A,1)     0.290   [0.050, 0.708]
+#>   ICC(A,k)     0.620   [0.175, 0.906]
 #>   Consistency
-#>   ICC(C,1)     0.715   [0.335, 0.925]
+#>   ICC(C,1)     0.715   [0.334, 0.925]
 #>   ICC(C,k)     0.909   [0.668, 0.980]
 #> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019

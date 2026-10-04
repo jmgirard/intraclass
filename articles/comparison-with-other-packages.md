@@ -47,14 +47,14 @@ table shows how close they land here:
 | Coefficient | intraclass (REML) | psych (ANOVA) | irr (ANOVA) |
 | ICC(1) | 0.16574 | 0.16574 | 0.16574 |
 | ICC(1,k) | 0.44280 | 0.44280 | 0.44280 |
-| ICC(A,1) | 0.28977 | 0.28976 | 0.28976 |
-| ICC(A,k) | 0.62006 | 0.62005 | 0.62005 |
+| ICC(A,1) | 0.28976 | 0.28976 | 0.28976 |
+| ICC(A,k) | 0.62005 | 0.62005 | 0.62005 |
 | ICC(C,1) | 0.71484 | 0.71484 | 0.71484 |
 | ICC(C,k) | 0.90932 | 0.90932 | 0.90932 |
 
 Every coefficient agrees to within 0.00001, so no two tools differ by
 more than one in the fifth decimal place. The largest disagreement
-anywhere in the table is 7.2e-06. That residual is not error in either
+anywhere in the table is 1.3e-06. That residual is not error in either
 tool. It is the small-sample gap between a REML fit and ANOVA mean
 squares, which vanishes as the sample grows. **On the designs classical
 tools handle, you lose nothing by using `intraclass`.** The match with
@@ -83,7 +83,7 @@ intraclass_a1 <- with(tidy(icc(ratings, subject = subject, rater = rater, score 
 | Single-rater absolute agreement on the ratings data |          |
 |-----------------------------------------------------|----------|
 | Package and coefficient                             | Estimate |
-| intraclass ICC(A,1)                                 | 0.28977  |
+| intraclass ICC(A,1)                                 | 0.28976  |
 | irrICC icc2r (Gwet)                                 | 0.28976  |
 
 ## What does it add? (differentiation)

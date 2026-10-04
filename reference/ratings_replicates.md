@@ -55,10 +55,10 @@ icc(ratings_replicates, score, subject, rater, type = "agreement",
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   index     occasions estimate   95% CI
-#>   ICC(A,1)          1    0.263   [0.079, 0.492]
-#>   ICC(A,1)          3    0.300   [0.085, 0.561]
-#>   ICC(A,k)          1    0.588   [0.256, 0.795]
-#>   ICC(A,k)          3    0.631   [0.270, 0.837]
+#>   ICC(A,1)          1    0.263   [0.080, 0.491]
+#>   ICC(A,1)          3    0.300   [0.084, 0.563]
+#>   ICC(A,k)          1    0.588   [0.257, 0.794]
+#>   ICC(A,k)          3    0.631   [0.269, 0.837]
 #> 
 #> Variance components: subject 0.631, rater 0.901, subject:rater 0.428, residual 0.443
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)

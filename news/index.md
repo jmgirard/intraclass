@@ -20,6 +20,18 @@
   change. The README’s multilevel example, which used its own smaller
   simulation before, now shows the `school` results.
 
+### Bug fixes
+
+- If the scores spread far more than 1 unit, the default
+  `engine = "glmmTMB"` sometimes stopped before the best solution, with
+  the subject variance at 0. Heartbeat intervals in milliseconds are an
+  example.
+  [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) then
+  reported an ICC of 0 with an interval of \[0, 0\], or failed to fit.
+  Every glmmTMB fit now starts from values scaled to the spread of the
+  scores. Multiplying every score by a constant now leaves the ICC
+  unchanged.
+
 ### Documentation
 
 - The package’s own errors, warnings, notes and install prompts now use
