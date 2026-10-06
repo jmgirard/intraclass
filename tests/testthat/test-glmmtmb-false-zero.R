@@ -44,11 +44,39 @@ fz_first_icc <- function(d, args, engine = "glmmTMB") {
   stats::setNames(fit$estimates$estimate[1], fit$estimates$index[1])
 }
 
-# ICC(A,1) of the fixed-rater engine fit, read from its variance components so
-# that no interval is computed (the zero-width refusal would stop icc()).
-fz_fixed_icc_a1 <- function(d) {
-  comp <- suppressMessages(suppressWarnings(fit_glmmtmb_fixed(d)$components))
-  comp$subject / (comp$subject + comp$rater + comp$residual)
+# The lme4 oracle. On a singular (boundary) fit the lme4 engine refuses with
+# `intraclass_singular_fit` and reports no ICC, so that seed has no oracle value
+# and falls outside the grid's domain (NA). Any other error still fails the test.
+fz_lme4_icc <- function(d, args) {
+  tryCatch(
+    fz_first_icc(d, args, engine = "lme4"),
+    intraclass_singular_fit = function(e) NA_real_
+  )
+}
+
+# The first ICC of each model -- ICC(A,1) for the two two-way models, ICC(1)
+# one-way -- read from the engine fit's variance components, so that no interval
+# is computed (the zero-width refusal of D-048 would stop icc() on a false zero).
+# Each is the subject component over the sum of all components.
+fz_engines <- list(
+  fixed = function(d) fit_glmmtmb_fixed(d),
+  random = function(d) fit_glmmtmb(d),
+  oneway = function(d) fit_glmmtmb_oneway(d)
+)
+
+fz_engine_icc <- function(d, m) {
+  comp <- suppressMessages(suppressWarnings(fz_engines[[m]](d)$components))
+  comp$subject / sum(unlist(comp))
+}
+
+# Both engines' REML objectives on the same scale: glmmTMB's minimized
+# `fit$fit$objective` and lme4's `REMLcrit() / 2` (measured to agree to 10
+# decimals on the fixed-rater model, M158 T2).
+fz_objectives <- function(d, m) {
+  f <- fz_models[[m]]$formula
+  g <- suppressMessages(suppressWarnings(fit_glmmtmb_ml_model(f, d)))
+  l <- suppressMessages(suppressWarnings(lme4::lmer(f, data = d, REML = TRUE)))
+  c(glmmTMB = g$fit$objective, lme4 = lme4::REMLcrit(l) / 2)
 }
 
 test_that("the second start reaches the REML optimum on a planted false zero (AC1)", {
@@ -58,20 +86,31 @@ test_that("the second start reaches the REML optimum on a planted false zero (AC
   local_mocked_bindings(glmmtmb_start = function(formula, data) NULL)
 
   for (m in names(fz_models)) {
+    in_domain <- 0L
     for (seed in fz_seeds) {
       small <- scale_two_way(seed)
       big <- transform(small, score = score * fz_scale)
-      ref <- fz_first_icc(big, fz_models[[m]]$args, engine = "lme4")
-      if (!(ref > 0.01)) {
+      ref <- fz_lme4_icc(big, fz_models[[m]]$args)
+      if (!isTRUE(ref > 0.01)) {
         next
       }
+      in_domain <- in_domain + 1L
       got <- fz_first_icc(big, fz_models[[m]]$args)
       unscaled <- fz_first_icc(small, fz_models[[m]]$args)
       info <- paste0("model ", m, ", seed ", seed)
       expect_identical(names(got), names(ref), info = info)
-      expect_equal(unname(got), unname(ref), tolerance = 1e-4, info = info)
-      expect_equal(unname(got), unname(unscaled), tolerance = 1e-5, info = info)
+      # Absolute 1e-4 against lme4; where a variance sits at the boundary the
+      # likelihood is flat and the two optimizers stop up to 1.3e-4 apart (random
+      # raters, seed 5), so 1e-3 is accepted only where both objectives agree.
+      gap <- abs(unname(got) - unname(ref))
+      if (gap >= 1e-4) {
+        obj <- fz_objectives(big, m)
+        expect_lt(abs(obj[["glmmTMB"]] - obj[["lme4"]]), 1e-6, label = info)
+        expect_lt(gap, 1e-3, label = info)
+      }
+      expect_lt(abs(unname(got) - unname(unscaled)), 1e-5, label = info)
     }
+    expect_gt(in_domain, 0L, label = paste("in-domain seeds, model", m))
   }
 })
 
@@ -84,16 +123,18 @@ test_that("with the second start disabled, the planted frame reaches the false z
     glmmtmb_retry_start = function(fit, data) NULL
   )
 
-  reached <- vapply(
-    fz_seeds,
-    function(seed) {
-      big <- transform(scale_two_way(seed), score = score * fz_scale)
-      ref <- fz_first_icc(big, fz_models$fixed$args, engine = "lme4")
-      ref > 0.01 && fz_fixed_icc_a1(big) < 1e-6
-    },
-    logical(1)
-  )
-  expect_true(any(reached))
+  for (m in names(fz_models)) {
+    reached <- vapply(
+      fz_seeds,
+      function(seed) {
+        big <- transform(scale_two_way(seed), score = score * fz_scale)
+        ref <- fz_lme4_icc(big, fz_models[[m]]$args)
+        isTRUE(ref > 0.01) && fz_engine_icc(big, m) < 1e-6
+      },
+      logical(1)
+    )
+    expect_true(any(reached), label = paste("false zero reached, model", m))
+  }
 })
 
 test_that("the kept fit's REML objective never exceeds the first fit's (AC2)", {

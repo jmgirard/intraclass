@@ -243,20 +243,93 @@ fit_glmmtmb_oneway <- function(data, call = rlang::caller_env()) {
 # parameter "theta_1|<group>.1" (verified against VarCorr); residual at
 # "disp~(Intercept)" -- the same log-SD scale as fit_glmmtmb() (ADR-002/003).
 
-# Fit a glmmTMB model (REML, scaled start), routing convergence warnings through
-# cli but keeping them non-fatal (PRINCIPLES.md #8). Shared by every design:
-# two-way, one-way, fixed-rater, and the multilevel designs (D1/D2/...).
-fit_glmmtmb_ml_model <- function(formula, data) {
-  withCallingHandlers(
-    glmmtmb_reml(formula, data),
+# Second start for a fit that left a variance near zero (D-048, M158). A
+# random-effect or residual SD below `glmmtmb_zero_sd` times sd(score) is near
+# zero. Either the REML optimum lies on or near the boundary, or the optimizer
+# stalled there: a false zero, whose interval printed as [0.000, 0.000] while the
+# lme4 engine reported an ICC well above 0. Stalled SDs were measured from 1e-25
+# up to 3e-3 of sd(score) (M158 T2), so the threshold is 1e-2; a retry on a fit
+# that was already at its optimum costs one fit and changes nothing, because the
+# lower REML objective is kept. The second start puts each such SD at sd(score),
+# every other SD at the even split of `glmmtmb_start()`, and the fixed effects
+# at the first fit's estimates. Starting the other SDs at their fitted values
+# instead was measured to stall again when one of them had absorbed the stuck
+# variance (M158 T2). NULL when no SD is near zero or the scores have no finite
+# spread (no retry).
+glmmtmb_zero_sd <- 1e-2
+
+glmmtmb_retry_start <- function(fit, data) {
+  s <- stats::sd(data$score)
+  if (!is.finite(s) || s <= 0) {
+    return(NULL)
+  }
+  par <- fit$obj$env$parList(fit$fit$par)
+  disp <- intersect(c("betadisp", "betad"), names(par))[1]
+  log_sd <- c(par$theta, if (!is.na(disp)) par[[disp]])
+  stuck <- !is.finite(log_sd) | log_sd < log(glmmtmb_zero_sd * s)
+  if (!any(stuck)) {
+    return(NULL)
+  }
+  log_sd <- ifelse(stuck, log(s), log(s / sqrt(length(log_sd))))
+  n_theta <- length(par$theta)
+  start <- list(beta = par$beta, theta = log_sd[seq_len(n_theta)])
+  if (!is.na(disp)) {
+    start[[disp]] <- log_sd[-seq_len(n_theta)]
+  }
+  start
+}
+
+# The second fit, from `glmmtmb_retry_start()`'s start; a seam for the tests.
+glmmtmb_second_fit <- function(formula, data, start) {
+  glmmTMB::glmmTMB(formula, data = data, REML = TRUE, start = start)
+}
+
+# Evaluate a fit, holding its warnings back so that only the kept fit's reach
+# the user.
+glmmtmb_capture <- function(expr) {
+  warnings <- list()
+  value <- withCallingHandlers(
+    expr,
     warning = function(w) {
-      cli::cli_warn(c(
-        "The {.pkg glmmTMB} engine reported a fitting warning.",
-        i = conditionMessage(w)
-      ))
+      warnings[[length(warnings) + 1L]] <<- w
       invokeRestart("muffleWarning")
     }
   )
+  list(value = value, warnings = warnings)
+}
+
+# Fit a glmmTMB model (REML, scaled start), routing convergence warnings through
+# cli but keeping them non-fatal (PRINCIPLES.md #8). Shared by every design:
+# two-way, one-way, fixed-rater, and the multilevel designs (D1/D2/...). A fit
+# with a variance at numerical zero is refit once from a second start, and the
+# fit with the lower REML objective is kept (D-048); a second fit that fails
+# leaves the first in place.
+fit_glmmtmb_ml_model <- function(formula, data) {
+  kept <- glmmtmb_capture(glmmtmb_reml(formula, data))
+  start <- tryCatch(
+    glmmtmb_retry_start(kept$value, data),
+    error = function(e) NULL
+  )
+  if (!is.null(start)) {
+    second <- tryCatch(
+      glmmtmb_capture(glmmtmb_second_fit(formula, data, start)),
+      error = function(e) NULL
+    )
+    if (!is.null(second)) {
+      o1 <- kept$value$fit$objective
+      o2 <- second$value$fit$objective
+      if (is.finite(o2) && (!is.finite(o1) || o2 < o1)) {
+        kept <- second
+      }
+    }
+  }
+  for (w in kept$warnings) {
+    cli::cli_warn(c(
+      "The {.pkg glmmTMB} engine reported a fitting warning.",
+      i = conditionMessage(w)
+    ))
+  }
+  kept$value
 }
 
 # Build the six-field engine contract from a fitted multilevel glmmTMB model.
