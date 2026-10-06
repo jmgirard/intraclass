@@ -9,6 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
+| M158 | glmmTMB fits retry a variance stuck at zero, and a zero-width interval is refused | planned | — | high | milestones/M158-glmmtmb-false-zero.md |
 | M157 | Plain-English printed guidance, corrected glossary glosses, and no record IDs in messages | done | — | normal | milestones/archive/M157-plain-english-printed-text-glosses.md |
 | M156 | Plain-English pass over the condition text, and NEWS under R7/R8 | done | — | normal | milestones/archive/M156-plain-english-condition-text.md |
 | M155 | Comparison tables as hidden `gt` chunks | done | M154 | normal | milestones/archive/M155-gt-comparison-tables.md |
