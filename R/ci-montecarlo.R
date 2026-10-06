@@ -151,13 +151,57 @@ mc_interval <- function(
   two_sided_interval(vals[finite], conf_level)
 }
 
+# The zero-width refusal (D-048, M158). A glmmTMB fit that leaves a variance at
+# or near zero can put every Monte-Carlo draw or bootstrap refit on the same ICC,
+# so the interval collapses to a point: the false zero printed 0.000 [0.000,
+# 0.000], and data with no variation within subjects printed 1 [1, 1]. Neither
+# describes the uncertainty in the data, so an interval narrower than
+# `zero_width_tol` is refused rather than reported. Gated to glmmTMB fits: the
+# other engines meet the boundary through their own guards (D-004), and an lme4
+# fit is pinned as not refused here. Shared by `mc_ci()` and `bootstrap_ci()`.
+zero_width_tol <- sqrt(.Machine$double.eps)
+
+refuse_zero_width <- function(
+  intervals,
+  engine,
+  call = rlang::caller_env(),
+  hint = character(0)
+) {
+  if (!identical(engine$engine, "glmmTMB")) {
+    return(invisible(intervals))
+  }
+  width <- vapply(
+    intervals,
+    function(iv) iv$conf.high - iv$conf.low,
+    numeric(1)
+  )
+  if (any(is.finite(width) & width < zero_width_tol)) {
+    abort_intraclass(
+      c(
+        "The interval could not be computed: its lower and upper limits are \\
+         equal.",
+        i = "A fitted variance is at or near zero, so every draw gives the same \\
+             ICC. An interval with no width says nothing about the uncertainty \\
+             in your data.",
+        i = "Inspect the data, for example for scores that do not vary within \\
+             subjects.",
+        hint
+      ),
+      class = c("intraclass_zero_width_interval", "intraclass_singular_fit"),
+      call = call
+    )
+  }
+  invisible(intervals)
+}
+
 mc_ci <- function(
   engine,
   estimands,
   conf_level = 0.95,
   mc_samples = 10000L,
   seed = NULL,
-  hint = character(0)
+  hint = character(0),
+  call = rlang::caller_env()
 ) {
   components <- mc_components(
     engine,
@@ -165,7 +209,9 @@ mc_ci <- function(
     seed = seed,
     hint = hint
   )
-  lapply(estimands, function(est) {
+  out <- lapply(estimands, function(est) {
     mc_interval(components, est, conf_level, hint = hint)
   })
+  refuse_zero_width(out, engine, call = call, hint = hint)
+  out
 }

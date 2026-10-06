@@ -176,3 +176,156 @@ test_that("a second fit that raises an error leaves the first fit in place (AC2)
   expect_identical(kept$fit$objective, first$fit$objective)
   expect_identical(kept$fit$par, first$fit$par)
 })
+
+# The zero-width refusal (D-048) ------------------------------------------------
+#
+# Fired at the reducers with stub engines (GP9): `mc_ci()` and `bootstrap_ci()`
+# each get draws on four components, where `wide` = subject / (subject +
+# residual) varies across draws and `flat` = c / (c + z) is 1 on every draw, so
+# its interval has zero width. Two estimands, one collapsed, check that the
+# guard reads every reported interval.
+fz_wide <- list(
+  signal = "subject",
+  error = "residual",
+  error_divisors = list(1)
+)
+fz_flat <- list(signal = "c", error = "z", error_divisors = list(1))
+
+fz_mc_stub <- function(engine) {
+  list(
+    engine = engine,
+    estimate = c(a = 0, b = 0),
+    vcov = diag(1, 2),
+    to_components = function(par) {
+      n <- ncol(par)
+      list(
+        subject = exp(par[1, ]),
+        residual = exp(par[2, ]),
+        c = rep(1, n),
+        z = rep(0, n)
+      )
+    }
+  )
+}
+
+fz_boot_stub <- function(engine) {
+  list(
+    engine = engine,
+    simulate_refit = function(n, seed = NULL) {
+      rbind(
+        subject = seq(1, 2, length.out = n),
+        residual = seq(2, 1, length.out = n),
+        c = rep(1, n),
+        z = rep(0, n)
+      )
+    }
+  )
+}
+
+test_that("mc_ci() refuses a zero-width interval on a glmmTMB fit only (AC3)", {
+  expect_error(
+    mc_ci(
+      fz_mc_stub("glmmTMB"),
+      list(fz_wide, fz_flat),
+      mc_samples = 200L,
+      seed = 1
+    ),
+    class = "intraclass_zero_width_interval"
+  )
+  cnd <- rlang::catch_cnd(mc_ci(
+    fz_mc_stub("glmmTMB"),
+    list(fz_wide, fz_flat),
+    mc_samples = 200L,
+    seed = 1
+  ))
+  expect_s3_class(cnd, "intraclass_singular_fit")
+
+  # The same collapsed interval on an lme4 fit is reported, not refused.
+  out <- mc_ci(
+    fz_mc_stub("lme4"),
+    list(fz_wide, fz_flat),
+    mc_samples = 200L,
+    seed = 1
+  )
+  expect_identical(out[[2]]$conf.high - out[[2]]$conf.low, 0)
+  # A glmmTMB interval with width is reported.
+  ok <- mc_ci(fz_mc_stub("glmmTMB"), list(fz_wide), mc_samples = 200L, seed = 1)
+  expect_gt(ok[[1]]$conf.high - ok[[1]]$conf.low, 0.1)
+})
+
+test_that("bootstrap_ci() refuses a zero-width interval on a glmmTMB fit only (AC3)", {
+  expect_error(
+    bootstrap_ci(
+      fz_boot_stub("glmmTMB"),
+      list(fz_wide, fz_flat),
+      boot_samples = 50L,
+      call = rlang::current_env()
+    ),
+    class = "intraclass_zero_width_interval"
+  )
+  cnd <- rlang::catch_cnd(bootstrap_ci(
+    fz_boot_stub("glmmTMB"),
+    list(fz_wide, fz_flat),
+    boot_samples = 50L,
+    call = rlang::current_env()
+  ))
+  expect_s3_class(cnd, "intraclass_singular_fit")
+
+  out <- bootstrap_ci(
+    fz_boot_stub("lme4"),
+    list(fz_wide, fz_flat),
+    boot_samples = 50L
+  )
+  expect_identical(out[[2]]$conf.high - out[[2]]$conf.low, 0)
+  ok <- bootstrap_ci(fz_boot_stub("glmmTMB"), list(fz_wide), boot_samples = 50L)
+  expect_gt(ok[[1]]$conf.high - ok[[1]]$conf.low, 0.1)
+})
+
+test_that("icc() refuses every planted false zero under both interval methods (AC3)", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  skip_on_cran()
+  # Both masks stay on for the icc() runs: the planted fit is the one refused.
+  local_mocked_bindings(
+    glmmtmb_start = function(formula, data) NULL,
+    glmmtmb_retry_start = function(fit, data) NULL
+  )
+
+  planted <- Filter(
+    function(seed) {
+      big <- transform(scale_two_way(seed), score = score * fz_scale)
+      g <- fz_engine_icc(big, "fixed")
+      isTRUE(fz_lme4_icc(big, fz_models$fixed$args) > 0.01) &&
+        (!is.finite(g) || g < 1e-6)
+    },
+    fz_seeds
+  )
+  expect_gt(length(planted), 0L)
+
+  for (method in c("montecarlo", "bootstrap")) {
+    zero_width <- 0L
+    for (seed in planted) {
+      big <- transform(scale_two_way(seed), score = score * fz_scale)
+      cnd <- rlang::catch_cnd(
+        suppressMessages(suppressWarnings(icc(
+          big,
+          score,
+          subject = subject,
+          rater = rater,
+          raters = "fixed",
+          type = "agreement",
+          ci_method = method,
+          mc_samples = 200L,
+          boot_samples = 30L,
+          seed = 1
+        ))),
+        classes = "error"
+      )
+      expect_s3_class(cnd, "intraclass_singular_fit")
+      if (inherits(cnd, "intraclass_zero_width_interval")) {
+        zero_width <- zero_width + 1L
+      }
+    }
+    expect_gt(zero_width, 0L, label = paste("zero-width refusals,", method))
+  }
+})
