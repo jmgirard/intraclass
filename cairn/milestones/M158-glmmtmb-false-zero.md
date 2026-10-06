@@ -1,13 +1,13 @@
 # M158: glmmTMB fits retry a variance stuck at zero, and a zero-width interval is refused
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP1, GP1, GP7, GP9
 - **Resolves:** —
 - **Surface tier:** user-facing — it changes what `icc()` returns or refuses on the default engine
-- **Branch/PR:** —
+- **Branch/PR:** m158-glmmtmb-false-zero
 
 ## Goal
 
@@ -41,7 +41,7 @@ A default-engine fit under `ci_method = "montecarlo"` or `"bootstrap"` never rep
 
 ## Tasks
 
-- [ ] T1: Write `tests/testthat/test-glmmtmb-false-zero.R` first. It holds the AC1 grid with `glmmtmb_start()` masked, the lme4 and unscaled oracles, and the planted-defect control. Make sure that it is red on `main` before T2.
+- [x] T1: Write `tests/testthat/test-glmmtmb-false-zero.R` first. It holds the AC1 grid with `glmmtmb_start()` masked, the lme4 and unscaled oracles, and the planted-defect control. Make sure that it is red on `main` before T2.
 - [ ] T2: Add the second start to `fit_glmmtmb_ml_model()` in `R/engine-glmmtmb.R`. It fires on any random-effect or residual SD below a stated fraction of `sd(score)`. Its start does not route through `glmmtmb_start()`. Keep the fit with the lower `fit$fit$objective`, and route its warnings through the existing cli handler. A code comment names the new D-entry (GP7). Add the AC2 assertion.
 - [ ] T3: Add the zero-width refusal where the Monte-Carlo and bootstrap intervals are reduced (`R/ci-montecarlo.R`, `R/ci-bootstrap.R`), gated to glmmTMB fits. Raise it with class `c("intraclass_zero_width_interval", "intraclass_singular_fit")`. Build its hint through the existing boundary-hint path, which names a method only after it runs (D-018). Add the two reducer-level tests, the lme4 control, and the `icc()`-level test of AC3.
 - [ ] T4: Rewrite the degenerate-data test in `test-boundary-abort-hint.R` under GP9. It asserts that `icc()` raises an error and returns nothing, not which site raises it. Keep its loop over the other methods.
@@ -60,6 +60,7 @@ A default-engine fit under `ci_method = "montecarlo"` or `"bootstrap"` never rep
 - 2026-10-06: question set: retry or refuse — retry from a second start, then refuse a zero-width interval. Re-run the student's two task files — no, synthetic data only, so the real-data criterion and its task were removed and the criteria renumbered. Fold in the red degenerate-data test — yes.
 - 2026-10-06: plan gate chose a second start plus a zero-width refusal over refusal alone, because refusal alone gives an abort where the REML optimum exists; falsified by a planted false zero that the second start does not move off zero while lme4 reports above 0.01.
 - 2026-10-06: plan chose the second start over an automatic lme4 cross-check, because the cross-check runs a second engine inside the default path, close to the fallback D-026 refused; falsified by a user-reported false zero that the second start leaves in place.
+- 2026-10-06: T1 done. `test-glmmtmb-false-zero.R` holds the AC1 grid, the AC1 control and two AC2 tests, and all four fail on the unchanged code. `scale_two_way()` moved to the new `helper-glmmtmb-frames.R` so both test files share it. The second start's seams are named `glmmtmb_retry_start()` and `glmmtmb_second_fit()`, so a test can disable the retry or plant a failure in it.
 
 ## Decisions
 
