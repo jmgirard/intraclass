@@ -1897,3 +1897,32 @@ package code calls it. Rejected: a `kable` fallback branch in every table chunk,
 and leaving the tables as printed data frames. Reopened by a reader building
 the articles without `gt` and reporting a missing table, or by `gt` leaving
 CRAN.
+
+### D-047 (2026-10-06): Triage pass drops five records-checking candidates on principle
+
+**Context.** A `/cairn-triage` pass read every ROADMAP candidate and every
+Known issues entry. Five candidate rows asked for checkers, ledgers or proofs
+over this repo's own records and doc claims. Each row was already barred by
+D-021, or belonged to a group of review findings from several milestones that
+records-hygiene §7 says to disposition rather than extend.
+
+**Decision.** The pass drops these five rows. (1) *M48's AC7 cross-checked
+workflow files while promising checks*: a guard over the repo's own CI
+configuration, which D-021 bars. Its only trigger is a user reaching a false
+platform claim, and that is a user-visible bug for `/hotfix` on its own
+merits. The archived criterion cannot be edited. (2) *Three prose-apparatus
+deferrals*: guards over doc claims (D-021), and hardening `prose-profile.py`,
+which guards no shipped behavior (§7). The script's own header still lists its
+six blind spots. (3) *Ledger + CI checker pinning abort-remedy truthfulness*:
+D-021 bars it, and a misleading remedy bullet is a `/hotfix` defect that needs
+no ledger. (4) *Harden `check-mpl-doc-claims.py`*: its findings come from M94,
+M106 and PR #115, and none affects what shipped (§7). Its trigger, the next
+MPL doc-surface change, fired at M152 and M153 without the work, and its other
+trigger names M95, which is done. (5) *Per-class reachability proof for the
+doc-claim pin*: the M123 plan gate refused it under D-021.
+
+**Consequences.** No prior entry is superseded, because this entry applies
+D-021 and does not change it. The text of each dropped row is in git at the
+parent of this pass's commit. Any one of the five returns as a candidate only
+by superseding this entry, and for items 1, 2, 3 and 5 that also means
+superseding D-021.

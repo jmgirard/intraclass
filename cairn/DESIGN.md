@@ -267,3 +267,26 @@ paths (`theta2r_moment_draws()` / `brms_theta2r_moment_draws()`); ADR-038
   script-to-fixture map is guarded by `tests/testthat/test-brms-oracle-map.R`
   (GP7). (Constraint confirmed 2026-07-12; rewritten from its resolved form
   at the 2026-09-04 triage pass.)
+- **Design 3 fits carry internal design fields and a rater count that read
+  as a crossed design.** On a fit with no rater facet and one-way-style
+  `ICC(1)`/`ICC(k)` labels, `design$type` is `"agreement"` and
+  `design$model` is `"twoway"`. Both fields are internal under D-035 clause
+  2. `n_raters` reports 480 on the 20x6x4 fixture: a true count of nested
+  rater ids that reads as a crossed rater count. A legacy `icc_dstudy`
+  object with no `icc_design_label` attribute renders a Design 3 projection
+  as one-way (the fallbacks in `R/d-study.R` and `R/autoplot.R`), but this
+  version never builds such an object. Accepted at M143, which left these
+  fields unchanged on purpose. (Routed from candidates 2026-10-06; added
+  2026-08-26 — M138 amendment audit round 1, finding 7, and the M143
+  review.)
+- **Multilevel lavaan bootstrap intervals cover only the balanced, complete,
+  random design.** The crossed fixed-rater cell and the random incomplete or
+  unbalanced cells ship Monte Carlo intervals only. The bootstrap factory
+  (`lavaan_ml_simulate_refit`, `lavaan_multilevel_components`) is
+  random-only and does not apply the per-refit Case-3A θ²_r correction. It
+  accepts unequal cluster sizes, but its coverage is validated on balanced
+  data only, and no unbalanced coverage oracle exists. Incomplete data
+  cannot bootstrap at all (ADR-031). Bootstrap parity also inherits M56's
+  cluster-level cross-platform flake. Accepted at the M57 and M58 gates.
+  (Routed from candidates 2026-10-06; added 2026-07-17 — M56 factory, M57
+  fixed cell, M58/MD-1 random incomplete or unbalanced cells.)
