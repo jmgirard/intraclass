@@ -177,6 +177,74 @@ test_that("a second fit that raises an error leaves the first fit in place (AC2)
   expect_identical(kept$fit$par, first$fit$par)
 })
 
+# Which fit is kept, at the seams: the first and second fits are stubs that carry
+# only an objective and a label, so the keep rule is read with no optimizer.
+fz_keep <- function(o1, o2) {
+  local_mocked_bindings(
+    glmmtmb_reml = function(formula, data) {
+      list(fit = list(objective = o1), which = "first")
+    },
+    glmmtmb_retry_start = function(fit, data) list(),
+    glmmtmb_second_fit = function(formula, data, start) {
+      list(fit = list(objective = o2), which = "second")
+    }
+  )
+  fit_glmmtmb_ml_model(score ~ 1, data.frame(score = 1:3))$which
+}
+
+test_that("the second fit is kept only past the 1e-6 margin, or over a non-finite first fit (AC2)", {
+  expect_identical(fz_keep(100, 100 - 5e-7), "first")
+  expect_identical(fz_keep(100, 100 - 2e-6), "second")
+  expect_identical(fz_keep(100, 100 + 1), "first")
+  expect_identical(fz_keep(100, NaN), "first")
+  expect_identical(fz_keep(NaN, 100), "second")
+  expect_identical(fz_keep(NaN, NaN), "first")
+})
+
+test_that("a first fit that warns and then errors signals its warning before the error (AC2)", {
+  local_mocked_bindings(
+    glmmtmb_reml = function(formula, data) {
+      warning("planted warning")
+      stop("planted failure")
+    }
+  )
+  seen <- character(0)
+  messages <- character(0)
+  cnd <- tryCatch(
+    withCallingHandlers(
+      fit_glmmtmb_ml_model(score ~ 1, data.frame(score = 1:3)),
+      warning = function(w) {
+        seen <<- c(seen, "warning")
+        messages <<- c(messages, conditionMessage(w))
+        invokeRestart("muffleWarning")
+      }
+    ),
+    error = function(e) {
+      seen <<- c(seen, "error")
+      e
+    }
+  )
+  expect_identical(seen, c("warning", "error"))
+  expect_match(messages, "planted warning", fixed = TRUE)
+  expect_match(conditionMessage(cnd), "planted failure", fixed = TRUE)
+})
+
+test_that("the second start holds only finite values when a fixed effect is not finite (AC2)", {
+  first <- list(
+    fit = list(par = NULL),
+    obj = list(
+      env = list(
+        parList = function(par) {
+          list(beta = c(NaN, 1), theta = -50, betadisp = 0)
+        }
+      )
+    )
+  )
+  start <- glmmtmb_retry_start(first, data.frame(score = c(1, 4, 9)))
+  expect_false(is.null(start))
+  expect_true(all(is.finite(unlist(start))))
+})
+
 # The zero-width refusal (D-048) ------------------------------------------------
 #
 # Fired at the reducers with stub engines (GP9): `mc_ci()` and `bootstrap_ci()`

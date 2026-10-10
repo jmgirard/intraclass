@@ -1,6 +1,6 @@
 # M158: glmmTMB fits retry a variance stuck at zero, and a zero-width interval is refused
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -48,7 +48,7 @@ A default-engine fit that stops with a variance near zero is refit once from a s
 - [x] T5: Make the "Refit with `engine = \"glmmTMB\"`" line of the Monte-Carlo overflow abort engine-aware (`R/ci-montecarlo.R:143`), passing the engine name into `mc_interval()`. Add the AC5 test, which calls `mc_interval()` directly (GP9).
 - [x] T6: Write the D-entry, the three `DESIGN.md § Boundary-fit policy` rows, and the NEWS bullet.
 - [x] T7: Run `devtools::document()`, `devtools::test()`, `devtools::check()` (read the raw Status line), `air format .`, and `lintr::lint_package()`.
-- [ ] T8: Fix the second start in `R/engine-glmmtmb.R` (AC2). Keep the second fit only in AC2's two cases, and correct the comment that says a retry "changes nothing". Signal a first fit's captured warnings before its error propagates. Drop non-finite fixed effects from the second start. Add the AC2 tests. They plant second objectives 5e-7 lower, 2e-6 lower and NaN. They also plant a first fit that warns and then errors, and a first fit with a NaN fixed effect.
+- [x] T8: Fix the second start in `R/engine-glmmtmb.R` (AC2). Keep the second fit only in AC2's two cases, and correct the comment that says a retry "changes nothing". Signal a first fit's captured warnings before its error propagates. Drop non-finite fixed effects from the second start. Add the AC2 tests. They plant second objectives 5e-7 lower, 2e-6 lower and NaN. They also plant a first fit that warns and then errors, and a first fit with a NaN fixed effect.
 - [ ] T9: Change `refuse_zero_width()` to refuse finite, equal limits (AC3). Rewrite its two reducer tests, remove the `icc()` test of planted false zeros, and add the `icc()` test on the 20-by-3 frame. That test prints the widths it saw, as provenance. Reword the degenerate-data test to AC4. Make the `engine` argument of `mc_interval()` take the engine object, and update `mc_ci()`, `d_study()` and the AC5 test.
 - [ ] T10: Write the new D-entry, the three `DESIGN.md § Boundary-fit policy` rows, and the comments at the second start and the refusal (AC6). Rewrite the NEWS bullet: state exact equality, narrow "now reaches the `lme4` result" to what AC1 tests, and keep each sentence at 25 words or fewer.
 - [ ] T11: Run `devtools::document()`, `devtools::test()`, `devtools::check()` (read the raw Status line), `air format --check .`, `lintr::lint_package()`, and the `data-raw` checkers of `lint.yaml`.
@@ -94,6 +94,8 @@ A default-engine fit that stops with a variance near zero is refit once from a s
 - 2026-10-10: the re-cut is committed on this branch, not on `main`. The live copy of this file is here, and a commit on `main` splits it across two branches.
 - 2026-10-10: plan kept 11 tasks, over the split tripwire of about 10. T1 to T7 are done, and T8 to T11 fit one session.
 - 2026-10-10: remainder ledger. Exact-equality refusal: AC3, T9. Diff-bug #2, #4 and #6 and blame-history #3: AC2, T8. Blame-history #6: T9. Diff-bug #9 and prior-review #1: AC6, T10. The four follow-ups and the unclassed glmmTMB errors stay candidate rows. The second row now names all three messages.
+- 2026-10-10: implement resumed on the re-cut. `main` has not moved (`535085e`), so no merge was needed.
+- 2026-10-10: T8 done. `glmmtmb_second_wins()` holds AC2's keep rule with `glmmtmb_keep_tol` = 1e-6. `glmmtmb_capture()` now returns a first-fit error, and `fit_glmmtmb_ml_model()` signals its warnings through `glmmtmb_warn()` and then re-signals the error with `rlang::cnd_signal()`. A non-finite fixed effect leaves `beta` out of the second start. The three new AC2 tests failed on the old code, one per fix. Full `devtools::test()`: no failures, no warnings, the same 4 skips.
 
 ## Decisions
 

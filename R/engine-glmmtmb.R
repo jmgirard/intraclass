@@ -249,15 +249,19 @@ fit_glmmtmb_oneway <- function(data, call = rlang::caller_env()) {
 # zero. Either the REML optimum lies on or near the boundary, or the optimizer
 # stalled there: a false zero, whose interval printed as [0.000, 0.000] while the
 # lme4 engine reported an ICC well above 0. Stalled SDs were measured as small as
-# 3e-55 and as large as 3e-3 of sd(score) (M158), so the threshold is 1e-2; a retry on a fit
-# that was already at its optimum costs one fit and changes nothing, because the
-# lower REML objective is kept. The second start puts each such SD at sd(score),
-# every other SD at the even split of `glmmtmb_start()`, and the fixed effects
-# at the first fit's estimates. Starting the other SDs at their fitted values
-# instead was measured to stall again when one of them had absorbed the stuck
-# variance (M158 T2). NULL when no SD is near zero or the scores have no finite
-# spread (no retry).
+# 3e-55 and as large as 3e-3 of sd(score) (M158), so the threshold is 1e-2. A retry on a fit
+# that was already at its optimum costs one fit. Its second fit can stop a hair
+# lower, so the second fit is kept only when its REML objective is lower by more
+# than `glmmtmb_keep_tol` (D-049); a smaller gain is optimizer noise and leaves
+# the first fit, and the interval it gives, in place. The second start puts each
+# such SD at sd(score), every other SD at the even split of `glmmtmb_start()`,
+# and the fixed effects at the first fit's estimates when all are finite (else
+# glmmTMB's own fixed-effect start). Starting the other SDs at their fitted
+# values instead was measured to stall again when one of them had absorbed the
+# stuck variance (M158 T2). NULL when no SD is near zero or the scores have no
+# finite spread (no retry).
 glmmtmb_zero_sd <- 1e-2
+glmmtmb_keep_tol <- 1e-6
 
 glmmtmb_retry_start <- function(fit, data) {
   s <- stats::sd(data$score)
@@ -273,7 +277,10 @@ glmmtmb_retry_start <- function(fit, data) {
   }
   log_sd <- ifelse(stuck, log(s), log(s / sqrt(length(log_sd))))
   n_theta <- length(par$theta)
-  start <- list(beta = par$beta, theta = log_sd[seq_len(n_theta)])
+  start <- list(theta = log_sd[seq_len(n_theta)])
+  if (all(is.finite(par$beta))) {
+    start$beta <- par$beta
+  }
   if (!is.na(disp)) {
     start[[disp]] <- log_sd[-seq_len(n_theta)]
   }
@@ -286,50 +293,76 @@ glmmtmb_second_fit <- function(formula, data, start) {
 }
 
 # Evaluate a fit, holding its warnings back so that only the kept fit's reach
-# the user.
+# the user. An error is returned in `error`, with the warnings raised before it,
+# so the caller decides whether they reach the user.
 glmmtmb_capture <- function(expr) {
   warnings <- list()
-  value <- withCallingHandlers(
-    expr,
-    warning = function(w) {
-      warnings[[length(warnings) + 1L]] <<- w
-      invokeRestart("muffleWarning")
-    }
+  value <- tryCatch(
+    withCallingHandlers(
+      expr,
+      warning = function(w) {
+        warnings[[length(warnings) + 1L]] <<- w
+        invokeRestart("muffleWarning")
+      }
+    ),
+    error = function(e) e
   )
-  list(value = value, warnings = warnings)
+  if (inherits(value, "error")) {
+    return(list(value = NULL, warnings = warnings, error = value))
+  }
+  list(value = value, warnings = warnings, error = NULL)
+}
+
+# Route captured fitting warnings through cli, non-fatal (PRINCIPLES.md #8).
+glmmtmb_warn <- function(warnings) {
+  for (w in warnings) {
+    cli::cli_warn(c(
+      "The {.pkg glmmTMB} engine reported a fitting warning.",
+      i = conditionMessage(w)
+    ))
+  }
+}
+
+# Whether the second fit replaces the first (D-049): only when both REML
+# objectives are finite and the second is lower by more than `glmmtmb_keep_tol`,
+# or when only the second is finite.
+glmmtmb_second_wins <- function(o1, o2) {
+  if (!isTRUE(is.finite(o2))) {
+    return(FALSE)
+  }
+  !isTRUE(is.finite(o1)) || o2 < o1 - glmmtmb_keep_tol
 }
 
 # Fit a glmmTMB model (REML, scaled start), routing convergence warnings through
 # cli but keeping them non-fatal (PRINCIPLES.md #8). Shared by every design:
 # two-way, one-way, fixed-rater, and the multilevel designs (D1/D2/...). A fit
 # with a random-effect or residual SD below `glmmtmb_zero_sd` of sd(score) is
-# refit once from a second start, and the fit with the lower REML objective is
-# kept (D-048); a second fit that fails leaves the first in place.
+# refit once from a second start (D-048), and the second fit is kept only when
+# `glmmtmb_second_wins()` says so (D-049); a second fit that fails leaves the
+# first in place. A first fit that fails signals its warnings, then its error.
 fit_glmmtmb_ml_model <- function(formula, data) {
   kept <- glmmtmb_capture(glmmtmb_reml(formula, data))
+  if (!is.null(kept$error)) {
+    glmmtmb_warn(kept$warnings)
+    rlang::cnd_signal(kept$error)
+  }
   start <- tryCatch(
     glmmtmb_retry_start(kept$value, data),
     error = function(e) NULL
   )
   if (!is.null(start)) {
-    second <- tryCatch(
-      glmmtmb_capture(glmmtmb_second_fit(formula, data, start)),
-      error = function(e) NULL
-    )
-    if (!is.null(second)) {
-      o1 <- kept$value$fit$objective
-      o2 <- second$value$fit$objective
-      if (is.finite(o2) && (!is.finite(o1) || o2 < o1)) {
-        kept <- second
-      }
+    second <- glmmtmb_capture(glmmtmb_second_fit(formula, data, start))
+    if (
+      is.null(second$error) &&
+        glmmtmb_second_wins(
+          kept$value$fit$objective,
+          second$value$fit$objective
+        )
+    ) {
+      kept <- second
     }
   }
-  for (w in kept$warnings) {
-    cli::cli_warn(c(
-      "The {.pkg glmmTMB} engine reported a fitting warning.",
-      i = conditionMessage(w)
-    ))
-  }
+  glmmtmb_warn(kept$warnings)
   kept$value
 }
 
