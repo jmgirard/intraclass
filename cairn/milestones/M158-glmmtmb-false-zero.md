@@ -95,3 +95,25 @@ Pass 1, 2026-10-10, on `2005886` (no PR yet; `main` at `535085e` plus the triage
 - AC6 evidence: `grep -c '^### D-048' cairn/DECISIONS.md` gives 1. Its heading names the three superseded D-004 cells. `grep -n D-048 cairn/DESIGN.md` hits lines 236, 245 and 246: the glmmTMB fit-time row and the Monte-Carlo and Bootstrap interval-time rows. `R/engine-glmmtmb.R:247` and `:307`, at the second start, name D-048. `NEWS.md` has one new Bug fixes bullet. Its claims map to tests: the second start and the better fit kept to AC2, reaching the lme4 result to AC1, the refusal and its class to AC3, the data with no variation within subjects to AC4, and the remedy to AC5. The two remaining sentences are a definition of "engine" and of "Monte-Carlo interval". `prose-terms.py NEWS.md` passes.
 - Gate: `cairn_validate.py` passes. No principle text changed, so `cairn_impact` is skipped. `devtools::document()` gives no diff. `pkgdown::check_pkgdown()` reports no problems. README is untouched. `NEWS.md` has the Bug fixes bullet with no milestone number. The branch adds no new top-level file. The NEWS bullet was rewrapped at review after the claim-audit edits left two lines past the wrap width, with no change to its words. `devtools::check()` on `2005886` is running.
 - spawned: diff-bug, blame-history, prior-review
+- `devtools::check()` on `2005886`: raw Status line "Status: OK", 0 errors, 0 warnings, 0 notes.
+- diff-bug #1: the zero-width refusal uses an absolute bound, so it refuses correct tight intervals near ICC 1. Reproduced on a 20-subject, 3-rater frame with rater-error SD 1e-4 and 1e-5: `intraclass_zero_width_interval` under both methods, where `main` reports the interval — floor return (load-bearing defect). Its repair changes AC3 and the Goal, so it goes to the user.
+- diff-bug #2: the second start replaces the first fit on noise-level objective gains (median -1e-9), which shifts reported intervals on ordinary boundary data. The comment "changes nothing" is false — fix now: keep the second fit only when its objective is lower by more than a tolerance, and correct the comment.
+- diff-bug #3: fit selection ignores `sdr$pdHess`, so a lower-objective second fit with a non-positive-definite Hessian replaces a positive-definite first fit (not observed in 80 probes) — follow-up.
+- diff-bug #4: warnings collected by `glmmtmb_capture()` are lost when the first fit errors — fix now.
+- diff-bug #5: the AC4 test passes on any error, an unrelated bug included — reject, planned change (AC4 asserts the refusal without naming the site, under GP9).
+- diff-bug #6: `glmmtmb_retry_start()` copies non-finite fixed effects from a NaN first fit into the second start — fix now.
+- diff-bug #7: the zero-width refusal now runs inside the hint verification, so a hint no longer names a method that returns a collapsed interval, and no test pins that — follow-up.
+- diff-bug #8: bootstrap refits skip the second start — reject, planned change (Scope Out).
+- diff-bug #9: the NEWS sentence "now reaches the `lme4` result" is broader than the planted grid that tests it — fix now (narrow the wording).
+- blame-history #1: the degenerate-data test no longer pins which site is reached (M93) — reject, planned change (T4 under GP9).
+- blame-history #2: M93's remedy pins were rewritten — reject, planned change (T5, AC5).
+- blame-history #3: warning routing is deferred, warnings are lost on an error, and no test covers it — fix now, with diff-bug #4, and add a test.
+- blame-history #4: the `tryCatch` around the retry swallows a bug in the retry code — reject, planned change (D-048 records that a failed second fit leaves the first in place).
+- blame-history #5: the point fit and the bootstrap refits now differ — reject, planned change (Scope Out).
+- blame-history #6: `mc_interval(engine =)` takes a name while `mc_ci(engine =)` and `refuse_zero_width(engine =)` take the engine object — fix now (rename the `mc_interval()` argument).
+- blame-history #7 and #8: `scale_two_way()` moved unchanged, and the new abort fits the M93/M103 hint machinery — nothing to do.
+- prior-review #1: the NEWS bullet's first sentence is 36 words by `prose-profile.py --verbose`, over the 25-word limit — fix now.
+- prior-review #2: the "engine" gloss sits after its first use — reject, false (`prose-terms.py NEWS.md` passes).
+- prior-review #3: the M93 site pin was loosened — reject, planned change (same as blame-history #1).
+- prior-review #4: `bh_site()` has no label for the zero-width abort, so M93's sweep would read it as "other" — follow-up.
+- prior-review #5: `d_study()` applies no zero-width refusal — follow-up.
