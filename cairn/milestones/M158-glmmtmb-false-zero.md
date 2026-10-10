@@ -155,10 +155,10 @@ Pass 2, 2026-10-10, on `aa4d7eb` (no PR yet; `main` at `535085e`, unmoved since 
 - diff-bug #3: `d_study()` reports exactly equal limits with no refusal, and at `m = 1e9` equal limits can be correct rounding — follow-up (the M158 follow-ups row, item d).
 - diff-bug #4: the keep rule ignores `sdr$pdHess` — follow-up (the M158 follow-ups row, item a).
 - diff-bug #5: bootstrap refits never get the second start — reject, planned change (Scope Out).
-- diff-bug #6: the refusal message states a cause the guard never checks, and says "draw" under bootstrap — fix now.
+- diff-bug #6: the refusal message states a cause the guard never checks, and says "draw" under bootstrap — fix now, fixed 004aaae.
 - diff-bug #7: a bootstrap refusal's hint can name `"montecarlo"`, which can return a 1e-13-wide interval on the same fit (unconfirmed) — follow-up (the M158 follow-ups row, item b).
-- diff-bug #8: a caught first-fit error re-signalled with `rlang::cnd_signal()` loses glmmTMB's own stack and changes how it prints — fix now.
-- diff-bug #9: `glmmtmb_warn()` reads the warning text as cli markup, so a `{` in it errors and hides the fit error — fix now.
+- diff-bug #8: a caught first-fit error re-signalled with `rlang::cnd_signal()` loses glmmTMB's own stack and changes how it prints — fix now, fixed 004aaae.
+- diff-bug #9: `glmmtmb_warn()` reads the warning text as cli markup, so a `{` in it errors and hides the fit error — fix now, fixed 004aaae.
 - diff-bug #10: messages from a discarded fit still reach the user, and under `options(warn = 2)` a replayed first-fit warning becomes the error — follow-up (the M158 follow-ups row, item e).
 - diff-bug #11: the retry also fires on a correct tiny SD and costs one more fit — reject, planned change (D-048 accepts one extra fit).
 - diff-bug #12: the AC2 grid check follows from the keep rule — reject, planned change (AC2 asks for it, and the seam tests discriminate).
@@ -168,7 +168,7 @@ Pass 2, 2026-10-10, on `aa4d7eb` (no PR yet; `main` at `535085e`, unmoved since 
 - blame-history #1: one estimand with equal limits aborts the whole call — reject, planned change (AC3 says "any reported estimand").
 - blame-history #2: the first fit's warnings are dropped when the second fit is kept — reject, planned change (only the kept fit's warnings reach the user, D-048). The M150 pins pass in the full suite.
 - blame-history #3: the `NULL` default of `mc_interval(engine =)` keeps the old remedy for a caller that omits it — reject, false (both callers pass it, and the default serves M93's direct test).
-- blame-history #4: the re-signalled first-fit error loses its stack — fix now, with diff-bug #8.
+- blame-history #4: the re-signalled first-fit error loses its stack — fix now, with diff-bug #8, fixed 004aaae.
 - blame-history #5: `d_study()` has no refusal — follow-up (item d).
 - blame-history #6: the AC4 test passes on a returned interval 1e-10 wide — reject, planned change (AC4).
 - blame-history #7: the `tryCatch` around `glmmtmb_retry_start()` hides a bug in it — reject, planned change (D-048: a failed second start leaves the first fit).
@@ -181,4 +181,5 @@ Pass 2, 2026-10-10, on `aa4d7eb` (no PR yet; `main` at `535085e`, unmoved since 
 - prior-review #5: `bh_site()` has no zero-width label — follow-up (item c).
 - prior-review #6: `d_study()` has no refusal — follow-up (item d).
 - prior-review #7: NEWS says "at or near 0" where the code's threshold is 1e-2 of `sd(score)` — reject, style (the plain gloss; a stated threshold would add a claim no test pins).
-- prior-review #8: the re-signalled error loses its stack — fix now, with diff-bug #8.
+- prior-review #8: the re-signalled error loses its stack — fix now, with diff-bug #8, fixed 004aaae.
+- Fix-now verification on `004aaae`: `glmmtmb_capture()` no longer catches an error. An error calling handler hands the held warnings to `glmmtmb_warn()`, and the error propagates from the fit unchanged. `glmmtmb_warn()` passes the text as a cli value, and the refusal message no longer names a cause or draws. Three new tests failed on `0ec700d`'s code, one per fix. They check that the caller's error handler sees `glmmtmb_reml()` on the stack, that a warning with braces passes through verbatim, and that the refusal message has no "draw". `test-glmmtmb-false-zero.R`: 13 tests, 0 failed. Full `devtools::test()`: no failures, no warnings, the same 4 skips. `lintr::lint_package()`: 0 lints. The AC2, AC3 and AC5 tests of the evidence lines above pass unchanged. The `mc_ci()` refusal test now has 8 expectations.
