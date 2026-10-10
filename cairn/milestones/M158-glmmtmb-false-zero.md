@@ -1,6 +1,6 @@
 # M158: glmmTMB fits retry a variance stuck at zero, and a zero-width interval is refused
 
-- **Status:** review
+- **Status:** planned
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -80,6 +80,8 @@ A default-engine fit under `ci_method = "montecarlo"` or `"bootstrap"` never rep
 - 2026-10-10: claim audit: 31 claims read, 5 corrected — R/engine-glmmtmb.R, NEWS.md, tests/testthat/test-glmmtmb-false-zero.R, tests/testthat/test-boundary-abort-hint.R
 - 2026-10-10: the claim audit found that the degenerate-data frame now raises an unclassed glmmTMB "LU factorization" error at the point fit on macOS. The first fit fails before any second start runs, so M158 did not cause it. It became a candidate row, because D-022 sets the route for a fix.
 - 2026-10-10: T7 done. `devtools::check()`: raw Status line "Status: OK", 0 errors, 0 warnings, 0 notes. It ran on `0561cd5`, before the claim-audit commit, which changed only comments and NEWS wording. Full `devtools::test()` on `e454a39`: no failures, no warnings, and the same 4 skips as `main`. Status set to review.
+- 2026-10-10: review return 1: diff-bug #1. The zero-width refusal's absolute bound of `sqrt(.Machine$double.eps)` refuses correct tight intervals near ICC 1. Reproduced on a 20-subject, 3-rater frame with rater-error SD 1e-4 and 1e-5, under `"montecarlo"` and `"bootstrap"`. No width bound tells a false zero from real near-perfect agreement. The repair rewrites the Goal and AC3, and AC3 already carries two `re-audit:` lines, so the choice went to the user.
+- 2026-10-10: stop, goal found wrong. The user chose to refuse only exactly equal limits (`conf.low == conf.high`), as in the ICC 1 [1, 1] case, and to leave false zeros to the second start. Status back to planned for a `/milestone-plan` re-cut. The re-cut keeps the work of T1 to T7 on this branch and adds the seven fix-now items in the Review section (diff-bug #2, #4, #6, #9; blame-history #3, #6; prior-review #1). The four follow-ups are the candidate row "Four M158 review follow-ups on the glmmTMB boundary path".
 
 ## Decisions
 
