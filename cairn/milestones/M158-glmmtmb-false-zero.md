@@ -73,6 +73,7 @@ A default-engine fit under `ci_method = "montecarlo"` or `"bootstrap"` never rep
 - 2026-10-06: T3 implementation. `refuse_zero_width()` in `R/ci-montecarlo.R` runs at the end of `mc_ci()` and `bootstrap_ci()`. It is gated on `engine$engine == "glmmTMB"` and raises `c("intraclass_zero_width_interval", "intraclass_singular_fit")`, with the existing lazy boundary hint. `mc_ci()` gained a `call` argument. With the guard masked out, both reducer tests fail, and the `icc()` test fails on six planted seeds.
 - 2026-10-06: checkpoint, T3 not yet checked off. `test-glmmtmb-false-zero.R` passes in full. The full `devtools::test()` run is in progress.
 - 2026-10-10: T3 done. Full `devtools::test()`: no failures, no warnings, 4 skips. Two skips are vignettes that are not installed. The other two are in `test-reducer-abort-hint.R`, where glmmTMB's point fit dies on that data on this machine. `main` skips the same two in a worktree run, so the second start did not cause them.
+- 2026-10-10: T4 checkpoint. The degenerate-data test now asserts only that `icc()` raises an error and returns no result, and it prints any returned result on failure. The helper `bh_probe_any()` lost its last caller and was removed. `test-boundary-abort-hint.R` passes on its own. The full suite runs after T5 and closes both tasks.
 
 ## Decisions
 

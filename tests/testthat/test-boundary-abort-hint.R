@@ -113,24 +113,6 @@ bh_probe <- function(d, ...) {
   )
 }
 
-# As bh_probe(), but also classifies a RAW unclassed error as "point-fit". On
-# DEGENERATE data the glmmTMB point fit can die inside `TMB::sdreport` with an
-# unclassed "LU factorization ... failed" before any CI-stage guard runs -- the M84
-# lesson, and platform-dependent: macOS completes the same fit that Linux and Windows
-# abort on, so a probe that lets the raw error escape is green locally and red on CI.
-# Handler order matters: `intraclass_singular_fit` is registered first, so a classed
-# abort still classifies by site rather than falling into the catch-all.
-bh_probe_any <- function(d, ...) {
-  tryCatch(
-    {
-      suppressWarnings(suppressMessages(icc(d, score, subject, rater, ...)))
-      "ok"
-    },
-    intraclass_singular_fit = function(e) bh_site(conditionMessage(e)),
-    error = function(e) "point-fit"
-  )
-}
-
 # THE acceptance predicate, defined once. A method is accepted only if `icc()` returns
 # AND every interval it reports is finite and correctly ordered. "Did not raise" is NOT
 # acceptance: M93 pass 4 shipped `burch` returning NaN and `searle` returning
@@ -273,24 +255,14 @@ test_that("the reachable bootstrap abort takes DEGENERATE data, where no method 
     rater = factor(rep(1:2, times = 3)),
     score = rep(c(1, 5, 9), each = 2)
   )
-  # Two outcomes both support the exclusion, and which one occurs is a platform
-  # fact, not a contract: "C" is the bootstrap guard firing (macOS), "point-fit" is
-  # the engine dying on the same table before any CI-stage guard is reached
-  # (Linux/Windows). The second is the STRONGER form of the finding -- there the
-  # bootstrap site is not even reached -- so accept either and pin that it is never
-  # a Monte-Carlo site, which is what the AC2 exclusion actually rests on.
-  site <- bh_probe_any(
-    d,
-    ci_method = "bootstrap",
-    model = "oneway",
-    boot_samples = 30L,
-    seed = 1
-  )
-  # `info` (not expect_in(), which needs a newer testthat than DESCRIPTION pins)
-  # so a failure names the site actually reached, and, when icc() returned, the
-  # components and estimates it returned.
-  returned <- if (identical(site, "ok")) {
-    fit <- suppressWarnings(suppressMessages(icc(
+  # Which guard stops this call is a platform fact, not a contract (GP9): the
+  # bootstrap refit guard on macOS, glmmTMB's own point-fit error on Linux and
+  # Windows. On Ubuntu's R CMD check of 2026-10-03 the fit instead survived with
+  # a residual variance of 1.7e-33 and icc() returned ICC 1 [1, 1]; an interval
+  # with no width is now refused (D-048, M158). The claim AC2 rests on is that
+  # icc() returns no result on this data, so that is all this asserts.
+  call_icc <- function() {
+    suppressWarnings(suppressMessages(icc(
       d,
       score,
       subject,
@@ -300,14 +272,20 @@ test_that("the reachable bootstrap abort takes DEGENERATE data, where no method 
       boot_samples = 30L,
       seed = 1
     )))
+  }
+  cnd <- rlang::catch_cnd(call_icc(), classes = "error")
+  # When icc() returns, the failure prints the components and estimates it
+  # returned.
+  returned <- if (is.null(cnd)) {
+    fit <- call_icc()
     utils::capture.output(
       print(unlist(fit$components)),
       print(as.data.frame(fit$estimates))
     )
   }
-  expect_true(
-    site %in% c("C", "point-fit"),
-    info = paste(c(paste("site reached:", site), returned), collapse = "\n")
+  expect_false(
+    is.null(cnd),
+    info = paste(c("icc() returned a result:", returned), collapse = "\n")
   )
 
   # Every method the mapping table would name aborts on this data too. The abort
