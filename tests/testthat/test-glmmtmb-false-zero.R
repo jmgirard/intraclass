@@ -329,3 +329,26 @@ test_that("icc() refuses every planted false zero under both interval methods (A
     expect_gt(zero_width, 0L, label = paste("zero-width refusals,", method))
   }
 })
+
+# The overflow abort's remedy names no engine the call already used (M158) ------
+
+fz_overflow_message <- function(engine) {
+  cnd <- rlang::catch_cnd(
+    mc_interval(
+      list(subject = c(1, Inf), residual = c(1, 1)),
+      icc_estimand(unit = "single", k_eff = 3, oneway = TRUE),
+      engine = engine
+    ),
+    classes = "intraclass_singular_fit"
+  )
+  expect_false(is.null(cnd))
+  cli::ansi_strip(cli::format_message(conditionMessage(cnd)))
+}
+
+test_that("the overflow abort tells only a non-glmmTMB caller to refit with glmmTMB (AC5)", {
+  glmmtmb <- fz_overflow_message("glmmTMB")
+  lme4 <- fz_overflow_message("lme4")
+  expect_match(glmmtmb, "draws were non-finite", fixed = TRUE)
+  expect_false(grepl("glmmTMB", glmmtmb, fixed = TRUE))
+  expect_match(lme4, "engine = \"glmmTMB\"", fixed = TRUE)
+})

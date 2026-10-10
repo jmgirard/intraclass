@@ -74,6 +74,7 @@ A default-engine fit under `ci_method = "montecarlo"` or `"bootstrap"` never rep
 - 2026-10-06: checkpoint, T3 not yet checked off. `test-glmmtmb-false-zero.R` passes in full. The full `devtools::test()` run is in progress.
 - 2026-10-10: T3 done. Full `devtools::test()`: no failures, no warnings, 4 skips. Two skips are vignettes that are not installed. The other two are in `test-reducer-abort-hint.R`, where glmmTMB's point fit dies on that data on this machine. `main` skips the same two in a worktree run, so the second start did not cause them.
 - 2026-10-10: T4 checkpoint. The degenerate-data test now asserts only that `icc()` raises an error and returns no result, and it prints any returned result on failure. The helper `bh_probe_any()` lost its last caller and was removed. `test-boundary-abort-hint.R` passes on its own. The full suite runs after T5 and closes both tasks.
+- 2026-10-10: T5 and T6 checkpoint, none checked off. `mc_interval()` takes the engine name from `mc_ci()` and `d_study()`. A glmmTMB caller now gets "Inspect the data and the fitted model." in place of the refit-with-glmmTMB line, and the AC5 test in `test-glmmtmb-false-zero.R` passes. `mc_ci()` now also passes its `call` to `mc_interval()`. D-048 and the three boundary-policy rows are drafted. The NEWS bullet and the full suite are still open.
 
 ## Decisions
 

@@ -539,7 +539,7 @@ d_study <- function(
     components <- mc_components(x$mc, mc_samples = mc_samples, seed = seed)
     intervals <- lapply(
       estimands,
-      function(e) mc_interval(components, e, conf_level)
+      function(e) mc_interval(components, e, conf_level, engine = x$engine)
     )
   }
 

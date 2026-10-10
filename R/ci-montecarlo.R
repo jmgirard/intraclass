@@ -125,7 +125,8 @@ mc_interval <- function(
   estimand,
   conf_level = 0.95,
   call = rlang::caller_env(),
-  hint = character(0)
+  hint = character(0),
+  engine = NULL
 ) {
   vals <- icc_point(components, estimand)
   finite <- is.finite(vals)
@@ -134,13 +135,21 @@ mc_interval <- function(
   # a material fraction means an unstable fit, and because the overflow is
   # one-sided (upper tail), silently dropping them would bias the interval down --
   # so fail loudly (PRINCIPLES.md #5) instead of truncating.
+  # The remedy names the glmmTMB engine only to a caller on another engine: a
+  # glmmTMB fit told to refit with glmmTMB is told nothing (M158). `engine` is
+  # the engine name; NULL (a caller that does not pass it) keeps the line.
+  remedy <- if (identical(engine, "glmmTMB")) {
+    "Inspect the data and the fitted model."
+  } else {
+    "Refit with {.code engine = \"glmmTMB\"} or inspect the model."
+  }
   if (mean(!finite) > 0.01) {
     abort_intraclass(
       c(
         "The Monte-Carlo interval could not be computed: \\
          {.val {round(100 * mean(!finite))}}% of draws were non-finite.",
         i = "A variance component overflowed, which indicates an unstable fit.",
-        i = "Refit with {.code engine = \"glmmTMB\"} or inspect the model.",
+        i = remedy,
         # M93: the design-aware opt-in `ci_method` bullet, or nothing.
         hint
       ),
@@ -210,7 +219,14 @@ mc_ci <- function(
     hint = hint
   )
   out <- lapply(estimands, function(est) {
-    mc_interval(components, est, conf_level, hint = hint)
+    mc_interval(
+      components,
+      est,
+      conf_level,
+      call = call,
+      hint = hint,
+      engine = engine$engine
+    )
   })
   refuse_zero_width(out, engine, call = call, hint = hint)
   out
