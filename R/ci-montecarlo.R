@@ -125,7 +125,8 @@ mc_interval <- function(
   estimand,
   conf_level = 0.95,
   call = rlang::caller_env(),
-  hint = character(0)
+  hint = character(0),
+  engine = NULL
 ) {
   vals <- icc_point(components, estimand)
   finite <- is.finite(vals)
@@ -134,13 +135,22 @@ mc_interval <- function(
   # a material fraction means an unstable fit, and because the overflow is
   # one-sided (upper tail), silently dropping them would bias the interval down --
   # so fail loudly (PRINCIPLES.md #5) instead of truncating.
+  # The remedy names the glmmTMB engine only to a caller on another engine: a
+  # glmmTMB fit told to refit with glmmTMB is told nothing (M158). `engine` is
+  # the engine object, as in `mc_ci()`; NULL (a caller that does not pass it)
+  # keeps the line.
+  remedy <- if (identical(engine$engine, "glmmTMB")) {
+    "Inspect the data and the fitted model."
+  } else {
+    "Refit with {.code engine = \"glmmTMB\"} or inspect the model."
+  }
   if (mean(!finite) > 0.01) {
     abort_intraclass(
       c(
         "The Monte-Carlo interval could not be computed: \\
          {.val {round(100 * mean(!finite))}}% of draws were non-finite.",
         i = "A variance component overflowed, which indicates an unstable fit.",
-        i = "Refit with {.code engine = \"glmmTMB\"} or inspect the model.",
+        i = remedy,
         # M93: the design-aware opt-in `ci_method` bullet, or nothing.
         hint
       ),
@@ -151,13 +161,61 @@ mc_interval <- function(
   two_sided_interval(vals[finite], conf_level)
 }
 
+# The zero-width refusal (D-048; narrowed by D-049, M158). A glmmTMB fit that
+# leaves a variance at zero can put every Monte-Carlo draw or bootstrap refit on
+# the same ICC, so the interval collapses to a point: data with no variation
+# within subjects printed 1 [1, 1]. That describes no uncertainty in the data,
+# so an interval whose two limits are finite and exactly equal is refused rather
+# than reported. Only exact equality: a width bound also refused correct tight
+# intervals of near-perfect agreement (M158 review), and no bound tells those
+# from a false zero, which the second start of `fit_glmmtmb_ml_model()` handles.
+# Gated to glmmTMB fits: the other engines meet the boundary through their own
+# guards (D-004), and an lme4 fit is pinned as not refused here. Shared by
+# `mc_ci()` and `bootstrap_ci()`.
+refuse_zero_width <- function(
+  intervals,
+  engine,
+  call = rlang::caller_env(),
+  hint = character(0)
+) {
+  if (!identical(engine$engine, "glmmTMB")) {
+    return(invisible(intervals))
+  }
+  equal <- vapply(
+    intervals,
+    function(iv) {
+      is.finite(iv$conf.low) &&
+        is.finite(iv$conf.high) &&
+        iv$conf.low == iv$conf.high
+    },
+    logical(1)
+  )
+  if (any(equal)) {
+    abort_intraclass(
+      c(
+        "The interval could not be computed: its lower and upper limits are \\
+         equal.",
+        i = "An interval with no width says nothing about the uncertainty in \\
+             your data.",
+        i = "Inspect the data and the fitted variances, for example for scores \\
+             that do not vary within subjects.",
+        hint
+      ),
+      class = c("intraclass_zero_width_interval", "intraclass_singular_fit"),
+      call = call
+    )
+  }
+  invisible(intervals)
+}
+
 mc_ci <- function(
   engine,
   estimands,
   conf_level = 0.95,
   mc_samples = 10000L,
   seed = NULL,
-  hint = character(0)
+  hint = character(0),
+  call = rlang::caller_env()
 ) {
   components <- mc_components(
     engine,
@@ -165,7 +223,16 @@ mc_ci <- function(
     seed = seed,
     hint = hint
   )
-  lapply(estimands, function(est) {
-    mc_interval(components, est, conf_level, hint = hint)
+  out <- lapply(estimands, function(est) {
+    mc_interval(
+      components,
+      est,
+      conf_level,
+      call = call,
+      hint = hint,
+      engine = engine
+    )
   })
+  refuse_zero_width(out, engine, call = call, hint = hint)
+  out
 }
