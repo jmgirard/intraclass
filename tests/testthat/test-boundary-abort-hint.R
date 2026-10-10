@@ -260,8 +260,9 @@ test_that("the reachable bootstrap abort takes DEGENERATE data, where no method 
   # error ("LU factorization") on macOS at M158 and on Linux and Windows. On
   # Ubuntu's R CMD check of 2026-10-03 the fit instead survived with
   # a residual variance of 1.7e-33 and icc() returned ICC 1 [1, 1]; an interval
-  # with no width is now refused (D-048, M158). The claim AC2 rests on is that
-  # icc() returns no result on this data, so that is all this asserts.
+  # whose two limits are exactly equal is now refused (D-049, M158). So icc()
+  # either returns no result on this data, or returns one with no interval whose
+  # limits are equal; that is all this asserts.
   call_icc <- function() {
     suppressWarnings(suppressMessages(icc(
       d,
@@ -274,20 +275,21 @@ test_that("the reachable bootstrap abort takes DEGENERATE data, where no method 
       seed = 1
     )))
   }
-  cnd <- rlang::catch_cnd(call_icc(), classes = "error")
-  # When icc() returns, the failure prints the components and estimates it
-  # returned.
-  returned <- if (is.null(cnd)) {
-    fit <- call_icc()
-    utils::capture.output(
+  fit <- tryCatch(call_icc(), error = function(e) NULL)
+  # When icc() returns, it reports no interval whose limits are exactly equal,
+  # and a failure prints the components and estimates it returned.
+  if (!is.null(fit)) {
+    lo <- fit$estimates$conf.low
+    hi <- fit$estimates$conf.high
+    returned <- utils::capture.output(
       print(unlist(fit$components)),
       print(as.data.frame(fit$estimates))
     )
+    expect_false(
+      any(is.finite(lo) & is.finite(hi) & lo == hi),
+      info = paste(c("icc() returned a result:", returned), collapse = "\n")
+    )
   }
-  expect_false(
-    is.null(cnd),
-    info = paste(c("icc() returned a result:", returned), collapse = "\n")
-  )
 
   # Every method the mapping table would name aborts on this data too. The abort
   # CLASS is deliberately not asserted: our own guards raise

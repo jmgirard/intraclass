@@ -137,8 +137,9 @@ mc_interval <- function(
   # so fail loudly (PRINCIPLES.md #5) instead of truncating.
   # The remedy names the glmmTMB engine only to a caller on another engine: a
   # glmmTMB fit told to refit with glmmTMB is told nothing (M158). `engine` is
-  # the engine name; NULL (a caller that does not pass it) keeps the line.
-  remedy <- if (identical(engine, "glmmTMB")) {
+  # the engine object, as in `mc_ci()`; NULL (a caller that does not pass it)
+  # keeps the line.
+  remedy <- if (identical(engine$engine, "glmmTMB")) {
     "Inspect the data and the fitted model."
   } else {
     "Refit with {.code engine = \"glmmTMB\"} or inspect the model."
@@ -160,16 +161,17 @@ mc_interval <- function(
   two_sided_interval(vals[finite], conf_level)
 }
 
-# The zero-width refusal (D-048, M158). A glmmTMB fit that leaves a variance at
-# or near zero can put every Monte-Carlo draw or bootstrap refit on the same ICC,
-# so the interval collapses to a point: the false zero printed 0.000 [0.000,
-# 0.000], and data with no variation within subjects printed 1 [1, 1]. Neither
-# describes the uncertainty in the data, so an interval narrower than
-# `zero_width_tol` is refused rather than reported. Gated to glmmTMB fits: the
-# other engines meet the boundary through their own guards (D-004), and an lme4
-# fit is pinned as not refused here. Shared by `mc_ci()` and `bootstrap_ci()`.
-zero_width_tol <- sqrt(.Machine$double.eps)
-
+# The zero-width refusal (D-048; narrowed by D-049, M158). A glmmTMB fit that
+# leaves a variance at zero can put every Monte-Carlo draw or bootstrap refit on
+# the same ICC, so the interval collapses to a point: data with no variation
+# within subjects printed 1 [1, 1]. That describes no uncertainty in the data,
+# so an interval whose two limits are finite and exactly equal is refused rather
+# than reported. Only exact equality: a width bound also refused correct tight
+# intervals of near-perfect agreement (M158 review), and no bound tells those
+# from a false zero, which the second start of `fit_glmmtmb_ml_model()` handles.
+# Gated to glmmTMB fits: the other engines meet the boundary through their own
+# guards (D-004), and an lme4 fit is pinned as not refused here. Shared by
+# `mc_ci()` and `bootstrap_ci()`.
 refuse_zero_width <- function(
   intervals,
   engine,
@@ -179,12 +181,16 @@ refuse_zero_width <- function(
   if (!identical(engine$engine, "glmmTMB")) {
     return(invisible(intervals))
   }
-  width <- vapply(
+  equal <- vapply(
     intervals,
-    function(iv) iv$conf.high - iv$conf.low,
-    numeric(1)
+    function(iv) {
+      is.finite(iv$conf.low) &&
+        is.finite(iv$conf.high) &&
+        iv$conf.low == iv$conf.high
+    },
+    logical(1)
   )
-  if (any(is.finite(width) & width < zero_width_tol)) {
+  if (any(equal)) {
     abort_intraclass(
       c(
         "The interval could not be computed: its lower and upper limits are \\
@@ -225,7 +231,7 @@ mc_ci <- function(
       conf_level,
       call = call,
       hint = hint,
-      engine = engine$engine
+      engine = engine
     )
   })
   refuse_zero_width(out, engine, call = call, hint = hint)

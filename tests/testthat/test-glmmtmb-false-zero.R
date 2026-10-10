@@ -245,19 +245,22 @@ test_that("the second start holds only finite values when a fixed effect is not 
   expect_true(all(is.finite(unlist(start))))
 })
 
-# The zero-width refusal (D-048) ------------------------------------------------
+# The refusal of equal limits (D-048, D-049) -------------------------------------
 #
 # Fired at the reducers with stub engines (GP9): `mc_ci()` and `bootstrap_ci()`
-# each get draws on four components, where `wide` = subject / (subject +
-# residual) varies across draws and `flat` = c / (c + z) is 1 on every draw, so
-# its interval has zero width. Two estimands, one collapsed, check that the
-# guard reads every reported interval.
+# each get draws on six components, where `wide` = subject / (subject +
+# residual) varies across draws, `flat` = c / (c + z) is 1 on every draw, so its
+# two limits are equal, and `tiny` = t / (t + u) is 1 - u with u spread over
+# [0, 1e-10], so its interval is about 1e-10 wide. Two estimands, one with equal
+# limits, check that the guard reads every reported interval; `tiny` checks that
+# a narrow interval whose limits differ is reported.
 fz_wide <- list(
   signal = "subject",
   error = "residual",
   error_divisors = list(1)
 )
 fz_flat <- list(signal = "c", error = "z", error_divisors = list(1))
+fz_tiny <- list(signal = "t", error = "u", error_divisors = list(1))
 
 fz_mc_stub <- function(engine) {
   list(
@@ -270,7 +273,9 @@ fz_mc_stub <- function(engine) {
         subject = exp(par[1, ]),
         residual = exp(par[2, ]),
         c = rep(1, n),
-        z = rep(0, n)
+        z = rep(0, n),
+        t = rep(1, n),
+        u = 1e-10 * stats::pnorm(par[1, ])
       )
     }
   )
@@ -284,13 +289,22 @@ fz_boot_stub <- function(engine) {
         subject = seq(1, 2, length.out = n),
         residual = seq(2, 1, length.out = n),
         c = rep(1, n),
-        z = rep(0, n)
+        z = rep(0, n),
+        t = rep(1, n),
+        u = seq(0, 1e-10, length.out = n)
       )
     }
   )
 }
 
-test_that("mc_ci() refuses a zero-width interval on a glmmTMB fit only (AC3)", {
+# A width that is above 0 and below the bound D-049 withdrew.
+fz_expect_tiny <- function(iv) {
+  width <- iv$conf.high - iv$conf.low
+  expect_gt(width, 0)
+  expect_lt(width, sqrt(.Machine$double.eps))
+}
+
+test_that("mc_ci() refuses equal limits on a glmmTMB fit only (AC3)", {
   expect_error(
     mc_ci(
       fz_mc_stub("glmmTMB"),
@@ -308,7 +322,7 @@ test_that("mc_ci() refuses a zero-width interval on a glmmTMB fit only (AC3)", {
   ))
   expect_s3_class(cnd, "intraclass_singular_fit")
 
-  # The same collapsed interval on an lme4 fit is reported, not refused.
+  # The same equal limits on an lme4 fit are reported, not refused.
   out <- mc_ci(
     fz_mc_stub("lme4"),
     list(fz_wide, fz_flat),
@@ -316,12 +330,18 @@ test_that("mc_ci() refuses a zero-width interval on a glmmTMB fit only (AC3)", {
     seed = 1
   )
   expect_identical(out[[2]]$conf.high - out[[2]]$conf.low, 0)
-  # A glmmTMB interval with width is reported.
-  ok <- mc_ci(fz_mc_stub("glmmTMB"), list(fz_wide), mc_samples = 200L, seed = 1)
+  # A glmmTMB interval about 1e-10 wide is reported, beside a wide one.
+  ok <- mc_ci(
+    fz_mc_stub("glmmTMB"),
+    list(fz_wide, fz_tiny),
+    mc_samples = 200L,
+    seed = 1
+  )
   expect_gt(ok[[1]]$conf.high - ok[[1]]$conf.low, 0.1)
+  fz_expect_tiny(ok[[2]])
 })
 
-test_that("bootstrap_ci() refuses a zero-width interval on a glmmTMB fit only (AC3)", {
+test_that("bootstrap_ci() refuses equal limits on a glmmTMB fit only (AC3)", {
   expect_error(
     bootstrap_ci(
       fz_boot_stub("glmmTMB"),
@@ -345,56 +365,51 @@ test_that("bootstrap_ci() refuses a zero-width interval on a glmmTMB fit only (A
     boot_samples = 50L
   )
   expect_identical(out[[2]]$conf.high - out[[2]]$conf.low, 0)
-  ok <- bootstrap_ci(fz_boot_stub("glmmTMB"), list(fz_wide), boot_samples = 50L)
+  ok <- bootstrap_ci(
+    fz_boot_stub("glmmTMB"),
+    list(fz_wide, fz_tiny),
+    boot_samples = 50L
+  )
   expect_gt(ok[[1]]$conf.high - ok[[1]]$conf.low, 0.1)
+  fz_expect_tiny(ok[[2]])
 })
 
-test_that("icc() refuses every planted false zero under both interval methods (AC3)", {
+# Near-perfect agreement: 20 subjects, 3 raters, rater error SD 1e-5. Its
+# intervals near ICC 1 are narrower than sqrt(.Machine$double.eps) but their
+# limits differ, so neither method refuses them (M158 review pass 1, diff-bug
+# #1). Another abort here is a platform fact, not this rule (GP9), so only the
+# zero-width class is asserted; the widths or the class seen go in the info.
+test_that("icc() does not refuse tight intervals of near-perfect agreement (AC3)", {
   skip_if_not_installed("glmmTMB")
-  skip_if_not_installed("lme4")
   skip_on_cran()
-  # Both masks stay on for the icc() runs: the planted fit is the one refused.
-  local_mocked_bindings(
-    glmmtmb_start = function(formula, data) NULL,
-    glmmtmb_retry_start = function(fit, data) NULL
-  )
-
-  planted <- Filter(
-    function(seed) {
-      big <- transform(scale_two_way(seed), score = score * fz_scale)
-      g <- fz_engine_icc(big, "fixed")
-      isTRUE(fz_lme4_icc(big, fz_models$fixed$args) > 0.01) &&
-        (!is.finite(g) || g < 1e-6)
-    },
-    fz_seeds
-  )
-  expect_gt(length(planted), 0L)
-
+  d <- with_rng_seed(1, {
+    g <- expand.grid(subject = factor(1:20), rater = factor(1:3))
+    g$score <- stats::rnorm(20)[g$subject] + stats::rnorm(nrow(g), 0, 1e-5)
+    g
+  })
   for (method in c("montecarlo", "bootstrap")) {
-    zero_width <- 0L
-    for (seed in planted) {
-      big <- transform(scale_two_way(seed), score = score * fz_scale)
-      cnd <- rlang::catch_cnd(
-        suppressMessages(suppressWarnings(icc(
-          big,
-          score,
-          subject = subject,
-          rater = rater,
-          raters = "fixed",
-          type = "agreement",
-          ci_method = method,
-          mc_samples = 200L,
-          boot_samples = 30L,
-          seed = 1
-        ))),
-        classes = "error"
-      )
-      expect_s3_class(cnd, "intraclass_singular_fit")
-      if (inherits(cnd, "intraclass_zero_width_interval")) {
-        zero_width <- zero_width + 1L
-      }
+    res <- tryCatch(
+      suppressMessages(suppressWarnings(icc(
+        d,
+        score,
+        subject = subject,
+        rater = rater,
+        ci_method = method,
+        mc_samples = 500L,
+        boot_samples = 50L,
+        seed = 1
+      ))),
+      error = function(e) e
+    )
+    seen <- if (inherits(res, "error")) {
+      class(res)[1]
+    } else {
+      format(res$estimates$conf.high - res$estimates$conf.low, digits = 3)
     }
-    expect_gt(zero_width, 0L, label = paste("zero-width refusals,", method))
+    expect_false(
+      inherits(res, "intraclass_zero_width_interval"),
+      info = paste0(method, ": ", paste(seen, collapse = " "))
+    )
   }
 })
 
@@ -405,7 +420,7 @@ fz_overflow_message <- function(engine) {
     mc_interval(
       list(subject = c(1, Inf), residual = c(1, 1)),
       icc_estimand(unit = "single", k_eff = 3, oneway = TRUE),
-      engine = engine
+      engine = list(engine = engine)
     ),
     classes = "intraclass_singular_fit"
   )
