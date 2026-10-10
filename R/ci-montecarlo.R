@@ -195,11 +195,10 @@ refuse_zero_width <- function(
       c(
         "The interval could not be computed: its lower and upper limits are \\
          equal.",
-        i = "A fitted variance is at or near zero, so every draw gives the same \\
-             ICC. An interval with no width says nothing about the uncertainty \\
-             in your data.",
-        i = "Inspect the data, for example for scores that do not vary within \\
-             subjects.",
+        i = "An interval with no width says nothing about the uncertainty in \\
+             your data.",
+        i = "Inspect the data and the fitted variances, for example for scores \\
+             that do not vary within subjects.",
         hint
       ),
       class = c("intraclass_zero_width_interval", "intraclass_singular_fit"),

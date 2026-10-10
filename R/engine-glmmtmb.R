@@ -295,32 +295,34 @@ glmmtmb_second_fit <- function(formula, data, start) {
 }
 
 # Evaluate a fit, holding its warnings back so that only the kept fit's reach
-# the user. An error is returned in `error`, with the warnings raised before it,
-# so the caller decides whether they reach the user.
-glmmtmb_capture <- function(expr) {
+# the user. An error is never caught here: it propagates from where the fit
+# signalled it, with its stack intact. `on_error`, when given, receives the
+# warnings held back so far, at the moment the error is signalled, so a failed
+# first fit still shows them before its error.
+glmmtmb_capture <- function(expr, on_error = NULL) {
   warnings <- list()
-  value <- tryCatch(
-    withCallingHandlers(
-      expr,
-      warning = function(w) {
-        warnings[[length(warnings) + 1L]] <<- w
-        invokeRestart("muffleWarning")
-      }
-    ),
-    error = function(e) e
+  value <- withCallingHandlers(
+    expr,
+    warning = function(w) {
+      warnings[[length(warnings) + 1L]] <<- w
+      invokeRestart("muffleWarning")
+    },
+    error = function(e) {
+      if (!is.null(on_error)) on_error(warnings)
+    }
   )
-  if (inherits(value, "error")) {
-    return(list(value = NULL, warnings = warnings, error = value))
-  }
-  list(value = value, warnings = warnings, error = NULL)
+  list(value = value, warnings = warnings)
 }
 
-# Route captured fitting warnings through cli, non-fatal (PRINCIPLES.md #8).
+# Route captured fitting warnings through cli, non-fatal (PRINCIPLES.md #8). The
+# warning's text is passed as a value, so braces in it are not read as cli
+# markup.
 glmmtmb_warn <- function(warnings) {
   for (w in warnings) {
+    text <- conditionMessage(w)
     cli::cli_warn(c(
       "The {.pkg glmmTMB} engine reported a fitting warning.",
-      i = conditionMessage(w)
+      i = "{text}"
     ))
   }
 }
@@ -343,19 +345,21 @@ glmmtmb_second_wins <- function(o1, o2) {
 # `glmmtmb_second_wins()` says so (D-049); a second fit that fails leaves the
 # first in place. A first fit that fails signals its warnings, then its error.
 fit_glmmtmb_ml_model <- function(formula, data) {
-  kept <- glmmtmb_capture(glmmtmb_reml(formula, data))
-  if (!is.null(kept$error)) {
-    glmmtmb_warn(kept$warnings)
-    rlang::cnd_signal(kept$error)
-  }
+  kept <- glmmtmb_capture(
+    glmmtmb_reml(formula, data),
+    on_error = glmmtmb_warn
+  )
   start <- tryCatch(
     glmmtmb_retry_start(kept$value, data),
     error = function(e) NULL
   )
   if (!is.null(start)) {
-    second <- glmmtmb_capture(glmmtmb_second_fit(formula, data, start))
+    second <- tryCatch(
+      glmmtmb_capture(glmmtmb_second_fit(formula, data, start)),
+      error = function(e) NULL
+    )
     if (
-      is.null(second$error) &&
+      !is.null(second) &&
         glmmtmb_second_wins(
           kept$value$fit$objective,
           second$value$fit$objective

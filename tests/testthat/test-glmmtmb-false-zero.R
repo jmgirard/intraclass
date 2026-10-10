@@ -231,6 +231,36 @@ test_that("a first fit that warns and then errors signals its warning before the
   expect_match(conditionMessage(cnd), "planted failure", fixed = TRUE)
 })
 
+test_that("a first fit's error reaches the caller from inside the fit, unchanged (M158 review)", {
+  local_mocked_bindings(
+    glmmtmb_reml = function(formula, data) stop("planted failure")
+  )
+  # The caller's handler sees the stack at the original signal: the failing fit
+  # is still on it, as it was before the second start existed.
+  in_fit <- FALSE
+  cnd <- tryCatch(
+    withCallingHandlers(
+      fit_glmmtmb_ml_model(score ~ 1, data.frame(score = 1:3)),
+      error = function(e) {
+        calls <- vapply(sys.calls(), function(x) deparse(x)[1], character(1))
+        in_fit <<- any(grepl("^glmmtmb_reml\\(", calls))
+      }
+    ),
+    error = function(e) e
+  )
+  expect_true(in_fit)
+  expect_s3_class(cnd, "simpleError")
+  expect_identical(conditionMessage(cnd), "planted failure")
+})
+
+test_that("a fitting warning that contains braces reaches the user verbatim (M158 review)", {
+  expect_warning(
+    glmmtmb_warn(list(simpleWarning("bad {brace} in a message"))),
+    "bad {brace} in a message",
+    fixed = TRUE
+  )
+})
+
 test_that("the second start holds only finite values when a fixed effect is not finite (AC2)", {
   first <- list(
     fit = list(par = NULL),
@@ -323,6 +353,11 @@ test_that("mc_ci() refuses equal limits on a glmmTMB fit only (AC3)", {
     seed = 1
   ))
   expect_s3_class(cnd, "intraclass_singular_fit")
+  # The message states what failed, never a cause the guard has not checked, and
+  # says nothing about draws, which a bootstrap interval does not have.
+  msg <- cli::ansi_strip(cli::format_message(conditionMessage(cnd)))
+  expect_match(msg, "lower and upper limits are equal", fixed = TRUE)
+  expect_false(grepl("draw", msg, fixed = TRUE))
 
   # The same equal limits on an lme4 fit are reported, not refused.
   out <- mc_ci(
