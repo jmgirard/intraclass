@@ -7,7 +7,8 @@
 # (glmmtmb_start()). These tests plant the old start again by masking
 # glmmtmb_start() to return NULL, so they check the second start on its own:
 # a fit that leaves an SD below 1e-2 of sd(score) is refit once from another start
-# and the fit with the lower REML objective is kept.
+# and the second fit is kept only when its REML objective is lower by more than
+# 1e-6, or when only its objective is finite (D-049).
 #
 # Two oracles: the lme4 engine (a different optimizer on the same REML criterion)
 # and scale invariance (the same fit on the unscaled scores).
@@ -56,7 +57,8 @@ fz_lme4_icc <- function(d, args) {
 
 # The first ICC of each model -- ICC(A,1) for the two two-way models, ICC(1)
 # one-way -- read from the engine fit's variance components, so that no interval
-# is computed (the zero-width refusal of D-048 would stop icc() on a false zero).
+# is computed (on a false zero icc() can abort at the interval stage, or report
+# an interval of near-zero width).
 # Each is the subject component over the sum of all components.
 fz_engines <- list(
   fixed = function(d) fit_glmmtmb_fixed(d),
@@ -374,9 +376,10 @@ test_that("bootstrap_ci() refuses equal limits on a glmmTMB fit only (AC3)", {
   fz_expect_tiny(ok[[2]])
 })
 
-# Near-perfect agreement: 20 subjects, 3 raters, rater error SD 1e-5. Its
-# intervals near ICC 1 are narrower than sqrt(.Machine$double.eps) but their
-# limits differ, so neither method refuses them (M158 review pass 1, diff-bug
+# Near-perfect agreement: 20 subjects, 3 raters, rater error SD 1e-5. Some of
+# its intervals near ICC 1 are narrower than sqrt(.Machine$double.eps) (the
+# consistency ones under Monte Carlo, all four under bootstrap, M158 claim
+# audit), but their limits differ, so neither method refuses them (M158 review pass 1, diff-bug
 # #1). Another abort here is a platform fact, not this rule (GP9), so only the
 # zero-width class is asserted; the widths or the class seen go in the info.
 test_that("icc() does not refuse tight intervals of near-perfect agreement (AC3)", {

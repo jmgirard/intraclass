@@ -248,12 +248,14 @@ fit_glmmtmb_oneway <- function(data, call = rlang::caller_env()) {
 # random-effect or residual SD below `glmmtmb_zero_sd` times sd(score) is near
 # zero. Either the REML optimum lies on or near the boundary, or the optimizer
 # stalled there: a false zero, whose interval printed as [0.000, 0.000] while the
-# lme4 engine reported an ICC well above 0. Stalled SDs were measured as small as
-# 3e-55 and as large as 3e-3 of sd(score) (M158), so the threshold is 1e-2. A retry on a fit
+# lme4 engine reported an ICC well above 0. Stalled subject SDs were measured as
+# large as 3e-3 of sd(score) (`scale_two_way()` seeds 1-40, scores times 1000,
+# glmmTMB's default start, M158), so the threshold is 1e-2. A retry on a fit
 # that was already at its optimum costs one fit. Its second fit can stop a hair
 # lower, so the second fit is kept only when its REML objective is lower by more
-# than `glmmtmb_keep_tol` (D-049); a smaller gain is optimizer noise and leaves
-# the first fit, and the interval it gives, in place. The second start puts each
+# than `glmmtmb_keep_tol`, or when only its objective is finite (D-049); a
+# smaller gain is optimizer noise and leaves the first fit, and the interval it
+# gives, in place. The second start puts each
 # such SD at sd(score), every other SD at the even split of `glmmtmb_start()`,
 # and the fixed effects at the first fit's estimates when all are finite (else
 # glmmTMB's own fixed-effect start). Starting the other SDs at their fitted

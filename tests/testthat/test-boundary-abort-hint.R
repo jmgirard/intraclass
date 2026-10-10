@@ -257,8 +257,8 @@ test_that("the reachable bootstrap abort takes DEGENERATE data, where no method 
   )
   # Which guard stops this call is a platform fact, not a contract (GP9): the
   # bootstrap refit guard on macOS before PR #176, and glmmTMB's own point-fit
-  # error ("LU factorization") on macOS at M158 and on Linux and Windows. On
-  # Ubuntu's R CMD check of 2026-10-03 the fit instead survived with
+  # error ("LU factorization") on macOS at M158 and usually on Linux and
+  # Windows. On Ubuntu's R CMD check of 2026-10-03, though, the fit survived with
   # a residual variance of 1.7e-33 and icc() returned ICC 1 [1, 1]; an interval
   # whose two limits are exactly equal is now refused (D-049, M158). So icc()
   # either returns no result on this data, or returns one with no interval whose

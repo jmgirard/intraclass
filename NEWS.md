@@ -28,10 +28,10 @@
 * If a default `engine = "glmmTMB"` fit stops with a variance at or near 0,
   the fit now runs once more from a second starting point. The engine is the
   software that does the fitting. If the second fit is better than the first
-  by a set margin, it replaces the first. Otherwise the first fit is kept.
-  On test data where glmmTMB's own starting
-  values stopped at a false 0, the fit now reaches the ICC of the `lme4`
-  engine. Under `ci_method = "montecarlo"` or `"bootstrap"`, a glmmTMB
+  by a set margin, or the first has no finite result, it replaces the first.
+  Otherwise the first fit is kept. On test data where the default starting
+  values of glmmTMB stopped at a false 0, the fit now reaches the ICC of the
+  `lme4` engine. Under `ci_method = "montecarlo"` or `"bootstrap"`, a glmmTMB
   interval whose two limits are exactly equal is no longer reported.
   `icc()` stops with an error of class `intraclass_zero_width_interval`
   instead. Before, scores that did not vary within subjects sometimes printed

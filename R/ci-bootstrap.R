@@ -91,7 +91,8 @@ bootstrap_ci <- function(
   out <- lapply(estimands, function(est) {
     two_sided_interval(icc_point(components, est), conf_level)
   })
-  # A glmmTMB interval with no width is refused (D-048).
+  # A glmmTMB interval whose limits are finite and exactly equal is refused
+  # (D-048, D-049).
   refuse_zero_width(out, engine, call = call, hint = hint)
   # Expose the kept resample components so a D-study projection can reproject them
   # across `m` without a second round of refits (M18 Slice 4, ADR-028). The fit
