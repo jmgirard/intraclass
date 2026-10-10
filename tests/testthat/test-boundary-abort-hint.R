@@ -256,8 +256,9 @@ test_that("the reachable bootstrap abort takes DEGENERATE data, where no method 
     score = rep(c(1, 5, 9), each = 2)
   )
   # Which guard stops this call is a platform fact, not a contract (GP9): the
-  # bootstrap refit guard on macOS, glmmTMB's own point-fit error on Linux and
-  # Windows. On Ubuntu's R CMD check of 2026-10-03 the fit instead survived with
+  # bootstrap refit guard on macOS before PR #176, and glmmTMB's own point-fit
+  # error ("LU factorization") on macOS at M158 and on Linux and Windows. On
+  # Ubuntu's R CMD check of 2026-10-03 the fit instead survived with
   # a residual variance of 1.7e-33 and icc() returned ICC 1 [1, 1]; an interval
   # with no width is now refused (D-048, M158). The claim AC2 rests on is that
   # icc() returns no result on this data, so that is all this asserts.

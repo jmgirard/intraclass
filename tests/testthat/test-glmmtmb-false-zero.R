@@ -6,7 +6,7 @@
 # behind PR #176). PR #176 replaced that start with a data-scaled one
 # (glmmtmb_start()). These tests plant the old start again by masking
 # glmmtmb_start() to return NULL, so they check the second start on its own:
-# a fit that leaves a variance at numerical zero is refit once from another start
+# a fit that leaves an SD below 1e-2 of sd(score) is refit once from another start
 # and the fit with the lower REML objective is kept.
 #
 # Two oracles: the lme4 engine (a different optimizer on the same REML criterion)

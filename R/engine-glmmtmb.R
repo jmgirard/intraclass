@@ -83,7 +83,8 @@ glmmtmb_start <- function(formula, data) {
   start
 }
 
-# Every glmmTMB fit in the package goes through this call (REML, scaled start).
+# Every glmmTMB fit in the package goes through this call (REML, scaled start),
+# except the second start of `fit_glmmtmb_ml_model()` (`glmmtmb_second_fit()`).
 glmmtmb_reml <- function(formula, data) {
   glmmTMB::glmmTMB(
     formula,
@@ -247,8 +248,8 @@ fit_glmmtmb_oneway <- function(data, call = rlang::caller_env()) {
 # random-effect or residual SD below `glmmtmb_zero_sd` times sd(score) is near
 # zero. Either the REML optimum lies on or near the boundary, or the optimizer
 # stalled there: a false zero, whose interval printed as [0.000, 0.000] while the
-# lme4 engine reported an ICC well above 0. Stalled SDs were measured from 1e-25
-# up to 3e-3 of sd(score) (M158 T2), so the threshold is 1e-2; a retry on a fit
+# lme4 engine reported an ICC well above 0. Stalled SDs were measured as small as
+# 3e-55 and as large as 3e-3 of sd(score) (M158), so the threshold is 1e-2; a retry on a fit
 # that was already at its optimum costs one fit and changes nothing, because the
 # lower REML objective is kept. The second start puts each such SD at sd(score),
 # every other SD at the even split of `glmmtmb_start()`, and the fixed effects
@@ -301,9 +302,9 @@ glmmtmb_capture <- function(expr) {
 # Fit a glmmTMB model (REML, scaled start), routing convergence warnings through
 # cli but keeping them non-fatal (PRINCIPLES.md #8). Shared by every design:
 # two-way, one-way, fixed-rater, and the multilevel designs (D1/D2/...). A fit
-# with a variance at numerical zero is refit once from a second start, and the
-# fit with the lower REML objective is kept (D-048); a second fit that fails
-# leaves the first in place.
+# with a random-effect or residual SD below `glmmtmb_zero_sd` of sd(score) is
+# refit once from a second start, and the fit with the lower REML objective is
+# kept (D-048); a second fit that fails leaves the first in place.
 fit_glmmtmb_ml_model <- function(formula, data) {
   kept <- glmmtmb_capture(glmmtmb_reml(formula, data))
   start <- tryCatch(
