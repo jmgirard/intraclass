@@ -1,6 +1,6 @@
 # M158: glmmTMB fits retry a variance stuck at zero, and a zero-width interval is refused
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -51,7 +51,7 @@ A default-engine fit that stops with a variance near zero is refit once from a s
 - [x] T8: Fix the second start in `R/engine-glmmtmb.R` (AC2). Keep the second fit only in AC2's two cases, and correct the comment that says a retry "changes nothing". Signal a first fit's captured warnings before its error propagates. Drop non-finite fixed effects from the second start. Add the AC2 tests. They plant second objectives 5e-7 lower, 2e-6 lower and NaN. They also plant a first fit that warns and then errors, and a first fit with a NaN fixed effect.
 - [x] T9: Change `refuse_zero_width()` to refuse finite, equal limits (AC3). Rewrite its two reducer tests, remove the `icc()` test of planted false zeros, and add the `icc()` test on the 20-by-3 frame. That test prints the widths it saw, as provenance. Reword the degenerate-data test to AC4. Make the `engine` argument of `mc_interval()` take the engine object, and update `mc_ci()`, `d_study()` and the AC5 test.
 - [x] T10: Write the new D-entry, the three `DESIGN.md § Boundary-fit policy` rows, and the comments at the second start and the refusal (AC6). Rewrite the NEWS bullet: state exact equality, narrow "now reaches the `lme4` result" to what AC1 tests, and keep each sentence at 25 words or fewer.
-- [ ] T11: Run `devtools::document()`, `devtools::test()`, `devtools::check()` (read the raw Status line), `air format --check .`, `lintr::lint_package()`, and the `data-raw` checkers of `lint.yaml`.
+- [x] T11: Run `devtools::document()`, `devtools::test()`, `devtools::check()` (read the raw Status line), `air format --check .`, `lintr::lint_package()`, and the `data-raw` checkers of `lint.yaml`.
 
 ## Work log
 
@@ -101,6 +101,7 @@ A default-engine fit that stops with a variance near zero is refit once from a s
 - 2026-10-10: claim audit: 46 claims read, 7 corrected — tests/testthat/test-glmmtmb-false-zero.R, tests/testthat/test-boundary-abort-hint.R, R/engine-glmmtmb.R, R/ci-bootstrap.R, NEWS.md
 - 2026-10-10: the claim audit's re-read found all seven corrected claims hold. It also found that one more comment in `R/engine-glmmtmb.R` left out the case where only the second objective is finite, and that comment was fixed. The lower 3e-55 figure for stalled SDs was dropped, because the rebuilt glmmTMB gave 8.2e-22 and no record held the old figure. The 3e-3 figure now names its procedure.
 - 2026-10-10: T11 first `devtools::check()` gave "Status: 1 ERROR": `spelling.R` flagged "glmmTMB's" in the new NEWS bullet. Its `testthat.R` run passed. The bullet now says "the default starting values of glmmTMB", and `spelling::spell_check_package()` finds no errors. `inst/WORDLIST` is unchanged.
+- 2026-10-10: T11 done. `devtools::check()` on `b365db9`: raw Status line "Status: OK", 0 errors, 0 warnings, 0 notes. `devtools::document()` gives no diff. `air format --check .` passes, `lintr::lint_package()` reports 0 lints, and every `lint.yaml` checker passes with its self-test. The last full `devtools::test()` ran on the T9 code (no failures, no warnings, the same 4 skips), and later commits changed only comments, NEWS and records. Status set to review.
 
 ## Decisions
 
