@@ -1,6 +1,6 @@
 # M158: glmmTMB fits retry a variance stuck at zero, and a zero-width interval is refused
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -47,7 +47,7 @@ A default-engine fit under `ci_method = "montecarlo"` or `"bootstrap"` never rep
 - [x] T4: Rewrite the degenerate-data test in `test-boundary-abort-hint.R` under GP9. It asserts that `icc()` raises an error and returns nothing, not which site raises it. Keep its loop over the other methods.
 - [x] T5: Make the "Refit with `engine = \"glmmTMB\"`" line of the Monte-Carlo overflow abort engine-aware (`R/ci-montecarlo.R:143`), passing the engine name into `mc_interval()`. Add the AC5 test, which calls `mc_interval()` directly (GP9).
 - [x] T6: Write the D-entry, the three `DESIGN.md § Boundary-fit policy` rows, and the NEWS bullet.
-- [ ] T7: Run `devtools::document()`, `devtools::test()`, `devtools::check()` (read the raw Status line), `air format .`, and `lintr::lint_package()`.
+- [x] T7: Run `devtools::document()`, `devtools::test()`, `devtools::check()` (read the raw Status line), `air format .`, and `lintr::lint_package()`.
 
 ## Work log
 
@@ -79,6 +79,7 @@ A default-engine fit under `ci_method = "montecarlo"` or `"bootstrap"` never rep
 - 2026-10-10: T7 so far: `devtools::document()` gives no diff, `air format --check .` passes, `lintr::lint_package()` reports 0 lints, and every `data-raw` checker in `lint.yaml` passes with its self-test. `devtools::check()` and the full `devtools::test()` are still open.
 - 2026-10-10: claim audit: 31 claims read, 5 corrected — R/engine-glmmtmb.R, NEWS.md, tests/testthat/test-glmmtmb-false-zero.R, tests/testthat/test-boundary-abort-hint.R
 - 2026-10-10: the claim audit found that the degenerate-data frame now raises an unclassed glmmTMB "LU factorization" error at the point fit on macOS. The first fit fails before any second start runs, so M158 did not cause it. It became a candidate row, because D-022 sets the route for a fix.
+- 2026-10-10: T7 done. `devtools::check()`: raw Status line "Status: OK", 0 errors, 0 warnings, 0 notes. It ran on `0561cd5`, before the claim-audit commit, which changed only comments and NEWS wording. Full `devtools::test()` on `e454a39`: no failures, no warnings, and the same 4 skips as `main`. Status set to review.
 
 ## Decisions
 
