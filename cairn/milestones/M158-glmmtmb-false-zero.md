@@ -102,6 +102,7 @@ A default-engine fit that stops with a variance near zero is refit once from a s
 - 2026-10-10: the claim audit's re-read found all seven corrected claims hold. It also found that one more comment in `R/engine-glmmtmb.R` left out the case where only the second objective is finite, and that comment was fixed. The lower 3e-55 figure for stalled SDs was dropped, because the rebuilt glmmTMB gave 8.2e-22 and no record held the old figure. The 3e-3 figure now names its procedure.
 - 2026-10-10: T11 first `devtools::check()` gave "Status: 1 ERROR": `spelling.R` flagged "glmmTMB's" in the new NEWS bullet. Its `testthat.R` run passed. The bullet now says "the default starting values of glmmTMB", and `spelling::spell_check_package()` finds no errors. `inst/WORDLIST` is unchanged.
 - 2026-10-10: T11 done. `devtools::check()` on `b365db9`: raw Status line "Status: OK", 0 errors, 0 warnings, 0 notes. `devtools::document()` gives no diff. `air format --check .` passes, `lintr::lint_package()` reports 0 lints, and every `lint.yaml` checker passes with its self-test. The last full `devtools::test()` ran on the T9 code (no failures, no warnings, the same 4 skips), and later commits changed only comments, NEWS and records. Status set to review.
+- 2026-10-10: step-7 approval: m158-glmmtmb-false-zero approved for merge
 
 ## Decisions
 
