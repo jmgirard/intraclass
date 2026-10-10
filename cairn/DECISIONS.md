@@ -1957,3 +1957,32 @@ rows now cite. A bootstrap boundary refit is still a kept draw. What changes is
 that an interval whose limits are equal is not reported. Reopened by a reported
 false zero that the second start leaves in place while lme4 finds a nonzero
 ICC, or by data where a zero-width interval is the correct answer.
+
+### D-049 (2026-10-10): the glmmTMB interval refusal takes exactly equal limits only, and a second fit must win by more than 1e-6 — supersedes D-048's width bound and kept-fit rule
+
+**Context.** D-048 refused a glmmTMB Monte-Carlo or bootstrap interval
+narrower than `sqrt(.Machine$double.eps)`. It also kept the second start's fit
+whenever its REML objective was lower. The M158 review found that the width
+bound refused correct tight intervals where agreement is near perfect and the
+ICC is near 1. No width bound tells such an interval from the interval of a
+false zero. The review also found that the second fit replaced the first on
+gains at the optimizer's noise level. Those swaps moved reported intervals on
+ordinary boundary data.
+
+**Decision.** *Refusal:* the rule covers a glmmTMB fit under
+`ci_method = "montecarlo"` or `"bootstrap"`. There an interval whose two limits
+are finite and exactly equal aborts with class
+`intraclass_zero_width_interval`, which also carries `intraclass_singular_fit`.
+An interval whose limits differ is reported, however narrow. The user chose
+this rule at the M158 review return. *Kept fit:* if both REML objectives are
+finite, the second fit replaces the first only when it is lower by more than
+1e-6. If only the second objective is finite, the second fit is kept. Rejected:
+a smaller width bound, because any width bound refuses some correct interval
+near 1.
+
+**Consequences.** This supersedes D-048's width bound and its kept-fit rule.
+The rest of D-048 stands. A false zero whose interval has a nonzero width is
+reported, and the second start is the only guard against it. The boundary-fit
+policy rows cite D-048 and D-049. Reopened by a reported false zero that the
+second start leaves in place while lme4 finds a nonzero ICC. Also reopened by
+data where exactly equal limits are the correct answer.

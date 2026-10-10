@@ -25,18 +25,20 @@
   fit. Every glmmTMB fit now starts from values scaled to the spread of the
   scores. Multiplying every score by a constant now leaves the ICC unchanged.
 
-* The model fit of a default `engine = "glmmTMB"` call that stops with a
-  variance at or near 0 is now run once more from a second starting point,
-  and the better of the two fits is kept. The engine is the software that
-  does the fitting. A fit that stopped at a false 0, where the `lme4` engine
-  finds an ICC well above 0, now reaches the `lme4` result. Under
-  `ci_method = "montecarlo"` or `"bootstrap"`, a glmmTMB interval whose two
-  limits are equal or nearly equal is no longer reported. `icc()` stops with
-  an error of class `intraclass_zero_width_interval` instead. Before, scores
-  that did not vary within subjects sometimes printed an ICC of 1 with an
-  interval of [1, 1]. A Monte-Carlo interval is built by drawing parameter
-  values from the fitted model's uncertainty. When one of its variances
-  overflows, the error no longer tells a glmmTMB user to refit with
+* If a default `engine = "glmmTMB"` fit stops with a variance at or near 0,
+  the fit now runs once more from a second starting point. The engine is the
+  software that does the fitting. If the second fit is better than the first
+  by a set margin, it replaces the first. Otherwise the first fit is kept.
+  On test data where glmmTMB's own starting
+  values stopped at a false 0, the fit now reaches the ICC of the `lme4`
+  engine. Under `ci_method = "montecarlo"` or `"bootstrap"`, a glmmTMB
+  interval whose two limits are exactly equal is no longer reported.
+  `icc()` stops with an error of class `intraclass_zero_width_interval`
+  instead. Before, scores that did not vary within subjects sometimes printed
+  an ICC of 1 with an interval of [1, 1]. A narrow interval whose limits
+  differ is still reported. A Monte-Carlo interval is built by drawing
+  parameter values from the fitted model's uncertainty. When one of its
+  variances overflows, the error no longer tells a glmmTMB user to refit with
   `engine = "glmmTMB"`.
 
 ## Documentation
