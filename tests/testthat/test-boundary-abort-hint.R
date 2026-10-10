@@ -590,13 +590,15 @@ test_that("the hint is ADDITIVE: class, lead and generic remedies unchanged (AC2
     fixed = TRUE
   )
   expect_match(m, "which indicates an unstable fit", fixed = TRUE)
-  expect_match(m, "or inspect the model", fixed = TRUE)
+  # These are glmmTMB fits, so the generic remedy is the glmmTMB form: since M158
+  # it no longer tells a glmmTMB caller to refit with glmmTMB.
+  expect_match(m, "Inspect the data and the fitted model.", fixed = TRUE)
 
   # A design with no opt-in method keeps EXACTLY those remedies and gains nothing --
   # this is what makes the additivity claim testable rather than asserted.
   m_fixed <- bh_first_abort(bh_twoway, raters = "fixed")
   skip_if(is.null(m_fixed), "no fixed-rater MC abort in the seed sweep")
-  expect_match(m_fixed, "or inspect the model", fixed = TRUE)
+  expect_match(m_fixed, "Inspect the data and the fitted model.", fixed = TRUE)
   for (s in c("searle", "burch", "npbootstrap", "\"mpl\"")) {
     expect_no_match(m_fixed, s, fixed = TRUE)
   }
