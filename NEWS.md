@@ -27,16 +27,17 @@
 
 * The model fit of a default `engine = "glmmTMB"` call that stops with a
   variance at or near 0 is now run once more from a second starting point,
-  and the better of the two fits is kept. The engine is the software that does the fitting. A fit
-  that stopped at a false 0, where the `lme4` engine finds an ICC well above
-  0, now reaches the `lme4` result. Under
+  and the better of the two fits is kept. The engine is the software that
+  does the fitting. A fit that stopped at a false 0, where the `lme4` engine
+  finds an ICC well above 0, now reaches the `lme4` result. Under
   `ci_method = "montecarlo"` or `"bootstrap"`, a glmmTMB interval whose two
-  limits are equal or nearly equal is no longer reported. `icc()` stops with an error of
-  class `intraclass_zero_width_interval` instead. Before, scores that did not
-  vary within subjects sometimes printed an ICC of 1 with an interval of
-  [1, 1]. A Monte-Carlo interval is built by drawing parameter values from
-  the fitted model's uncertainty. When one of its variances overflows, the
-  error no longer tells a glmmTMB user to refit with `engine = "glmmTMB"`.
+  limits are equal or nearly equal is no longer reported. `icc()` stops with
+  an error of class `intraclass_zero_width_interval` instead. Before, scores
+  that did not vary within subjects sometimes printed an ICC of 1 with an
+  interval of [1, 1]. A Monte-Carlo interval is built by drawing parameter
+  values from the fitted model's uncertainty. When one of its variances
+  overflows, the error no longer tells a glmmTMB user to refit with
+  `engine = "glmmTMB"`.
 
 ## Documentation
 
