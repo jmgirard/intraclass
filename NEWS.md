@@ -25,6 +25,22 @@
   fit. Every glmmTMB fit now starts from values scaled to the spread of the
   scores. Multiplying every score by a constant now leaves the ICC unchanged.
 
+* If a default `engine = "glmmTMB"` fit stops with a variance at or near 0,
+  the fit now runs once more from a second starting point. The engine is the
+  software that does the fitting. If the second fit is better than the first
+  by a set margin, or the first has no finite result, it replaces the first.
+  Otherwise the first fit is kept. On test data where the default starting
+  values of glmmTMB stopped at a false 0, the fit now reaches the ICC of the
+  `lme4` engine. Under `ci_method = "montecarlo"` or `"bootstrap"`, a glmmTMB
+  interval whose two limits are exactly equal is no longer reported.
+  `icc()` stops with an error of class `intraclass_zero_width_interval`
+  instead. Before, scores that did not vary within subjects sometimes printed
+  an ICC of 1 with an interval of [1, 1]. A narrow interval whose limits
+  differ is still reported. A Monte-Carlo interval is built by drawing
+  parameter values from the fitted model's uncertainty. When one of its
+  variances overflows, the error no longer tells a glmmTMB user to refit with
+  `engine = "glmmTMB"`.
+
 ## Documentation
 
 * The package's own errors, warnings, notes and install prompts now use

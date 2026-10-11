@@ -6,22 +6,8 @@
 # icc() then printed as ICC 0.000 [0.000, 0.000]. Two oracles pin the fix:
 # an ICC is unchanged when every score is multiplied by a constant, so a fit on
 # `score * 100` must match the fit on `score`; and the lme4 engine (a different
-# optimizer) must reach the same REML estimate.
-
-scale_two_way <- function(seed = 11L, n_s = 17L, n_r = 2L) {
-  set.seed(seed)
-  grid <- expand.grid(
-    subject = factor(seq_len(n_s)),
-    rater = factor(letters[seq_len(n_r)])
-  )
-  subj <- stats::rnorm(n_s, 0, 0.65)
-  rater <- seq(-0.3, 0.3, length.out = n_r)
-  grid$score <- 6 +
-    subj[as.integer(grid$subject)] +
-    rater[as.integer(grid$rater)] +
-    stats::rnorm(nrow(grid), 0, 0.9)
-  grid
-}
+# optimizer) must reach the same REML estimate. `scale_two_way()` lives in
+# helper-glmmtmb-frames.R, shared with test-glmmtmb-false-zero.R.
 
 scale_multilevel <- function(seed = 13L, n_c = 6L, n_s = 5L, n_r = 3L) {
   set.seed(seed)

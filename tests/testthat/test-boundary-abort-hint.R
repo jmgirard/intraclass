@@ -113,24 +113,6 @@ bh_probe <- function(d, ...) {
   )
 }
 
-# As bh_probe(), but also classifies a RAW unclassed error as "point-fit". On
-# DEGENERATE data the glmmTMB point fit can die inside `TMB::sdreport` with an
-# unclassed "LU factorization ... failed" before any CI-stage guard runs -- the M84
-# lesson, and platform-dependent: macOS completes the same fit that Linux and Windows
-# abort on, so a probe that lets the raw error escape is green locally and red on CI.
-# Handler order matters: `intraclass_singular_fit` is registered first, so a classed
-# abort still classifies by site rather than falling into the catch-all.
-bh_probe_any <- function(d, ...) {
-  tryCatch(
-    {
-      suppressWarnings(suppressMessages(icc(d, score, subject, rater, ...)))
-      "ok"
-    },
-    intraclass_singular_fit = function(e) bh_site(conditionMessage(e)),
-    error = function(e) "point-fit"
-  )
-}
-
 # THE acceptance predicate, defined once. A method is accepted only if `icc()` returns
 # AND every interval it reports is finite and correctly ordered. "Did not raise" is NOT
 # acceptance: M93 pass 4 shipped `burch` returning NaN and `searle` returning
@@ -273,24 +255,16 @@ test_that("the reachable bootstrap abort takes DEGENERATE data, where no method 
     rater = factor(rep(1:2, times = 3)),
     score = rep(c(1, 5, 9), each = 2)
   )
-  # Two outcomes both support the exclusion, and which one occurs is a platform
-  # fact, not a contract: "C" is the bootstrap guard firing (macOS), "point-fit" is
-  # the engine dying on the same table before any CI-stage guard is reached
-  # (Linux/Windows). The second is the STRONGER form of the finding -- there the
-  # bootstrap site is not even reached -- so accept either and pin that it is never
-  # a Monte-Carlo site, which is what the AC2 exclusion actually rests on.
-  site <- bh_probe_any(
-    d,
-    ci_method = "bootstrap",
-    model = "oneway",
-    boot_samples = 30L,
-    seed = 1
-  )
-  # `info` (not expect_in(), which needs a newer testthat than DESCRIPTION pins)
-  # so a failure names the site actually reached, and, when icc() returned, the
-  # components and estimates it returned.
-  returned <- if (identical(site, "ok")) {
-    fit <- suppressWarnings(suppressMessages(icc(
+  # Which guard stops this call is a platform fact, not a contract (GP9): the
+  # bootstrap refit guard on macOS before PR #176, and glmmTMB's own point-fit
+  # error ("LU factorization") on macOS at M158 and usually on Linux and
+  # Windows. On Ubuntu's R CMD check of 2026-10-03, though, the fit survived with
+  # a residual variance of 1.7e-33 and icc() returned ICC 1 [1, 1]; an interval
+  # whose two limits are exactly equal is now refused (D-049, M158). So icc()
+  # either returns no result on this data, or returns one with no interval whose
+  # limits are equal; that is all this asserts.
+  call_icc <- function() {
+    suppressWarnings(suppressMessages(icc(
       d,
       score,
       subject,
@@ -300,15 +274,22 @@ test_that("the reachable bootstrap abort takes DEGENERATE data, where no method 
       boot_samples = 30L,
       seed = 1
     )))
-    utils::capture.output(
+  }
+  fit <- tryCatch(call_icc(), error = function(e) NULL)
+  # When icc() returns, it reports no interval whose limits are exactly equal,
+  # and a failure prints the components and estimates it returned.
+  if (!is.null(fit)) {
+    lo <- fit$estimates$conf.low
+    hi <- fit$estimates$conf.high
+    returned <- utils::capture.output(
       print(unlist(fit$components)),
       print(as.data.frame(fit$estimates))
     )
+    expect_false(
+      any(is.finite(lo) & is.finite(hi) & lo == hi),
+      info = paste(c("icc() returned a result:", returned), collapse = "\n")
+    )
   }
-  expect_true(
-    site %in% c("C", "point-fit"),
-    info = paste(c(paste("site reached:", site), returned), collapse = "\n")
-  )
 
   # Every method the mapping table would name aborts on this data too. The abort
   # CLASS is deliberately not asserted: our own guards raise
@@ -612,13 +593,15 @@ test_that("the hint is ADDITIVE: class, lead and generic remedies unchanged (AC2
     fixed = TRUE
   )
   expect_match(m, "which indicates an unstable fit", fixed = TRUE)
-  expect_match(m, "or inspect the model", fixed = TRUE)
+  # These are glmmTMB fits, so the generic remedy is the glmmTMB form: since M158
+  # it no longer tells a glmmTMB caller to refit with glmmTMB.
+  expect_match(m, "Inspect the data and the fitted model.", fixed = TRUE)
 
   # A design with no opt-in method keeps EXACTLY those remedies and gains nothing --
   # this is what makes the additivity claim testable rather than asserted.
   m_fixed <- bh_first_abort(bh_twoway, raters = "fixed")
   skip_if(is.null(m_fixed), "no fixed-rater MC abort in the seed sweep")
-  expect_match(m_fixed, "or inspect the model", fixed = TRUE)
+  expect_match(m_fixed, "Inspect the data and the fitted model.", fixed = TRUE)
   for (s in c("searle", "burch", "npbootstrap", "\"mpl\"")) {
     expect_no_match(m_fixed, s, fixed = TRUE)
   }

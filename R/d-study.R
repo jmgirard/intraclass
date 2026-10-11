@@ -536,10 +536,13 @@ d_study <- function(
       function(e) two_sided_interval(icc_point(bc, e), conf_level)
     )
   } else {
-    components <- mc_components(x$mc, mc_samples = mc_samples, seed = seed)
+    # The fit's engine object: its stored draw inputs plus the engine name, so
+    # `mc_interval()` takes the same object as `mc_ci()` does.
+    engine <- c(x$mc, engine = x$engine)
+    components <- mc_components(engine, mc_samples = mc_samples, seed = seed)
     intervals <- lapply(
       estimands,
-      function(e) mc_interval(components, e, conf_level)
+      function(e) mc_interval(components, e, conf_level, engine = engine)
     )
   }
 
