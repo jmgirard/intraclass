@@ -78,10 +78,10 @@ Consistency gate: `cairn_validate.py` all checks passed. `devtools::document()` 
 
 spawned: diff-bug, blame-history, prior-review
 
-- diff-bug #1: AC2's test has no positive control, so a foreign registration that silently failed would leave every "not the marker" assertion passing — fix now.
-- diff-bug #2: the DESIGN.md Known issues entry speaks of a legacy `intraclass_dstudy` object with no `icc_design_label`, which no version can build, so the fallbacks are unreachable — fix now (reword the entry).
-- diff-bug #3: DESIGN.md GP2 does not point to D-050's class-name exception — fix now.
-- diff-bug #4: DESIGN.md Conventions does not record that result classes take the `intraclass_` prefix — fix now.
+- diff-bug #1: AC2's test has no positive control, so a foreign registration that silently failed would leave every "not the marker" assertion passing — fix now, fixed 648d3c8.
+- diff-bug #2: the DESIGN.md Known issues entry speaks of a legacy `intraclass_dstudy` object with no `icc_design_label`, which no version can build, so the fallbacks are unreachable — fix now (reword the entry), fixed 648d3c8.
+- diff-bug #3: DESIGN.md GP2 does not point to D-050's class-name exception — fix now, fixed 648d3c8.
+- diff-bug #4: DESIGN.md Conventions does not record that result classes take the `intraclass_` prefix — fix now, fixed 648d3c8.
 - diff-bug #5: "## Breaking changes" sits after two ungrouped feature bullets in NEWS — reject (style).
 - diff-bug #6: the test cleanup's `rm()` would warn if something removed the entry first — reject (false: no code path removes it, and the reviewer found none).
 - diff-bug #7: `d[, 1:2]` on a `d_study()` result keeps the class and `format()` then fails with "subscript out of bounds", the same on main — follow-up (new candidate row "M159 review follow-ups on the renamed result classes").
@@ -89,5 +89,7 @@ spawned: diff-bug, blame-history, prior-review
 - blame-history #2: `d_study()` rejects a saved 0.1.0 `icc` object with no hint to re-run `icc()` — follow-up (same new row: a hint needs the old class string in R/, which AC3 forbids in this milestone).
 - blame-history #3: the foreign-method test changes S3 tables and relies on withr — reject (false: cleanup restores the replaced entry, and withr is in Suggests at `DESCRIPTION:46`).
 - blame-history #4 to #9: reflow lost no words, vocabulary pins match, the lint suppressions and `R/zzz.R` are intact, kept names are intact, GP2 and D-050 agree — noted, no change.
-- prior-review #1: old method names stay in `cairn/doctrine/prose-style.md:10-11`, the ROADMAP display-surfaces row and `cairn/LESSONS.md:29`, the stale-rename shape of M48 P5 — fix now.
-- prior-review #2: `test-class-names.R` compares two `cli::cli_fmt()` captures with no non-empty check (LESSONS M129) — fix now, with diff-bug #1.
+- prior-review #1: old method names stay in `cairn/doctrine/prose-style.md:10-11`, the ROADMAP display-surfaces row and `cairn/LESSONS.md:29`, the stale-rename shape of M48 P5 — fix now, fixed 648d3c8.
+- prior-review #2: `test-class-names.R` compares two `cli::cli_fmt()` captures with no non-empty check (LESSONS M129) — fix now, with diff-bug #1, fixed 648d3c8.
+
+After the fixes: full `devtools::test()` on `648d3c8` gave 0 failed, 0 errors, 10000 passed, 4 skipped (the 6 added expectations are the positive control and the non-empty check). `cairn_validate.py` all checks passed. `cairn_impact.py --changed` reports no changed principles (GP2 gained a pointer to D-050, its rule text unchanged). The linter count on `cairn/doctrine/prose-style.md` is 36 before and after the edit.
