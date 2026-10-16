@@ -7,7 +7,7 @@
 - **Principles touched:** GP2
 - **Resolves:** —
 - **Surface tier:** user-facing — users see the result class through `class()`, `inherits()` and the help pages
-- **Branch/PR:** m159-package-prefixed-result-classes
+- **Branch/PR:** m159-package-prefixed-result-classes, https://github.com/jmgirard/intraclass/pull/178
 
 ## Goal
 
