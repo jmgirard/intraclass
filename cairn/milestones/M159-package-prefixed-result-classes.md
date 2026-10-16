@@ -61,6 +61,7 @@ The results of `icc()`, `d_study()` and `choose_icc()` carry the classes `"intra
 - 2026-10-16: claim audit: 46 claims read, 0 corrected — NEWS.md, data-raw/oracle-bayesian-vignette.R, tests/testthat/test-class-names.R, R/icc.R, R/d-study.R, R/choose-icc.R, R/zzz.R, R/design.R, man/, tests/testthat/test-occasions-vocabulary.R (fresh Opus reader; it also re-ran roxygen on a copy and found man/ and NAMESPACE byte-identical).
 - 2026-10-16: T2 to T6 done. `devtools::test()`: 0 failed, 0 errors, 9994 passed, 4 skipped (vignettes not installed, and glmmTMB's point fit dying on two reducer-hint frames, both unrelated). `devtools::document()` leaves no diff, and `air format --check .` is clean. The D-entry (D-050) landed with the plan commit. Status set to review.
 - 2026-10-16: step-7 approval: m159-package-prefixed-result-classes approved for merge
+- 2026-10-16: CI wait on PR #178 reached the harness ceiling and was stopped: check-references, checkpoint-guard, lint, format-check and pkgdown pass; test-coverage and the three R-CMD-check jobs (ubuntu release, ubuntu 4.5.0, windows release) still pending. Not merged.
 
 ## Decisions
 
