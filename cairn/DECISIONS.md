@@ -1986,3 +1986,30 @@ reported, and the second start is the only guard against it. The boundary-fit
 policy rows cite D-048 and D-049. Reopened by a reported false zero that the
 second start leaves in place while lme4 finds a nonzero ICC. Also reopened by
 data where exactly equal limits are the correct answer.
+
+### D-050 (2026-10-16): result classes take the `intraclass_` prefix with no deprecation period — an exception to GP2
+
+**Context.** `icc()` results had class `"icc"` since M1, a default that no
+record chose. performance's `icc()` uses the same class and registers
+`print.icc` and `as.data.frame.icc`. When performance is loaded after
+intraclass, its print method replaces intraclass's, and a printed result shows
+only its header. GP2 asks for a lifecycle deprecation cycle for a breaking
+change after the first CRAN submission, and PRINCIPLES.md #7 says that
+fitted-object classes are explicit and documented.
+
+**Decision.** The three result classes become `"intraclass_icc"`,
+`"intraclass_dstudy"` and `"intraclass_recommendation"`. The old names are
+dropped at once, with no transition class and no deprecation period. The user
+chose this at the M159 plan gate. Result classes from now on take the
+`intraclass_` prefix, the same as the package's condition classes. Rejected:
+keeping `"icc"` as a second class for one release. performance's
+`as.data.frame.icc` would still catch intraclass results, and a class name
+cannot give a deprecation warning, so the transition would warn no one.
+
+**Consequences.** This is an exception to GP2 for class names only. GP2 stands
+for exported functions and arguments. Code that tests `inherits(x, "icc")`
+breaks, and results saved under 0.1.0 lose their methods until they are
+re-created. The companion paper's examples call functions and methods, not
+class names, so they keep running. The `icc()` function name still collides
+with performance's when both packages are attached. Reopened by a report of
+user code that a transition class would have kept working.
