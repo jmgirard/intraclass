@@ -1,6 +1,6 @@
 # M159: Result classes take the package prefix, so performance cannot replace their methods
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -40,11 +40,11 @@ The results of `icc()`, `d_study()` and `choose_icc()` carry the classes `"intra
 ## Tasks
 
 - [x] T1: Write `tests/testthat/test-class-names.R` first: the three class-vector assertions (AC1) and the foreign-method test (AC2). Register the foreign methods with `registerS3method()` and remove them when the test ends with `withr::defer()` and `rm()` on the generic's `.__S3MethodsTable__.`. Use `skip_if_not_installed()` where a generic needs a Suggests package. See it red on the current code.
-- [ ] T2: Rename the `icc` class: the constructor at `R/icc.R:2660`, the methods in `R/icc-methods.R` and `R/autoplot.R` (`format`, `print`, `summary`, `tidy`, `glance`, `plot`, `autoplot`), the lazy registration at `R/zzz.R:13`, and the `d_study()` check and message at `R/d-study.R:210-211`. Update the roxygen that names the class and run `devtools::document()`.
-- [ ] T3: Rename `icc_dstudy` and `icc_recommendation` the same way: the constructors at `R/d-study.R:577` and `R/choose-icc.R:604`, their methods, `R/zzz.R:12`, and their roxygen. Keep the internal helper names `new_icc_recommendation()` and `resolve_icc_recommendation()`. Run `devtools::document()`.
-- [ ] T4: Update every remaining hit of the AC3 command in tests, comments, vignettes and README. Change the old names in `cairn/DESIGN.md`. Run the AC3 command and record its output in the work log.
-- [ ] T5: Append the D-entry for the GP2 exception if the plan commit did not carry it, and write the NEWS entry (AC5) under a breaking-changes heading. Before you write the masking sentence, observe it by attaching both packages in a fresh R session.
-- [ ] T6: Run the `verify` slot (`devtools::document()`, `devtools::test()`), then `air format .`.
+- [x] T2: Rename the `icc` class: the constructor at `R/icc.R:2660`, the methods in `R/icc-methods.R` and `R/autoplot.R` (`format`, `print`, `summary`, `tidy`, `glance`, `plot`, `autoplot`), the lazy registration at `R/zzz.R:13`, and the `d_study()` check and message at `R/d-study.R:210-211`. Update the roxygen that names the class and run `devtools::document()`.
+- [x] T3: Rename `icc_dstudy` and `icc_recommendation` the same way: the constructors at `R/d-study.R:577` and `R/choose-icc.R:604`, their methods, `R/zzz.R:12`, and their roxygen. Keep the internal helper names `new_icc_recommendation()` and `resolve_icc_recommendation()`. Run `devtools::document()`.
+- [x] T4: Update every remaining hit of the AC3 command in tests, comments, vignettes and README. Change the old names in `cairn/DESIGN.md`. Run the AC3 command and record its output in the work log.
+- [x] T5: Append the D-entry for the GP2 exception if the plan commit did not carry it, and write the NEWS entry (AC5) under a breaking-changes heading. Before you write the masking sentence, observe it by attaching both packages in a fresh R session.
+- [x] T6: Run the `verify` slot (`devtools::document()`, `devtools::test()`), then `air format .`.
 
 ## Work log
 
@@ -59,6 +59,7 @@ The results of `icc()`, `d_study()` and `choose_icc()` carry the classes `"intra
 - 2026-10-16: T1: `test-class-names.R` written. On the current code both tests fail: the class vectors are the old ones, and the foreign `"icc"` methods return the marker for all five generics. The foreign-method helper restores any entry it replaced, so an `"icc"` method intraclass still has survives the test. Printed output is compared through `cli::cli_fmt()`.
 - 2026-10-16: checkpoint, T2 to T5 not yet ticked (suite run pending): the rename in R/, tests and roxygen was delegated to one Sonnet subagent and the comment rewrap to a second. Verified: the AC3 command prints no lines after `devtools::document()`. The first subagent renamed the internal helpers `new_icc_recommendation()` and `resolve_icc_recommendation()` against T3, and I restored them. The fixture `bayesian-vignette-oracle.rds` stored two fits with class `"icc"`. Their class was set to `"intraclass_icc"` in place, with every other element checked identical, and the generating script's header records it. NEWS entry written (the plain-English linter reports 0 violations in it). The masking was observed in fresh sessions: the package attached last masks the `icc()` of the other. The DESIGN.md legacy-object note was corrected.
 - 2026-10-16: claim audit: 46 claims read, 0 corrected — NEWS.md, data-raw/oracle-bayesian-vignette.R, tests/testthat/test-class-names.R, R/icc.R, R/d-study.R, R/choose-icc.R, R/zzz.R, R/design.R, man/, tests/testthat/test-occasions-vocabulary.R (fresh Opus reader; it also re-ran roxygen on a copy and found man/ and NAMESPACE byte-identical).
+- 2026-10-16: T2 to T6 done. `devtools::test()`: 0 failed, 0 errors, 9994 passed, 4 skipped (vignettes not installed, and glmmTMB's point fit dying on two reducer-hint frames, both unrelated). `devtools::document()` leaves no diff, and `air format --check .` is clean. The D-entry (D-050) landed with the plan commit. Status set to review.
 
 ## Decisions
 
