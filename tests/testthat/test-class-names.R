@@ -48,6 +48,9 @@ test_that("methods another package registers on \"icc\" do not reach a result", 
     glance = glance(fit),
     print = cli::cli_fmt(print(fit))
   )
+  # A capture of cli output can be empty (LESSONS M129), and two empty
+  # captures would compare identical.
+  expect_gt(length(before$print), 0L)
 
   marker <- "foreign icc method"
   foreign <- function(x, ...) marker
@@ -63,6 +66,15 @@ test_that("methods another package registers on \"icc\" do not reach a result", 
       frame
     )
   }
+
+  # Positive control: the foreign methods do reach an object of class "icc",
+  # so the assertions below fail if the registration does not take effect.
+  plain <- structure(list(), class = "icc")
+  for (generic in c("print", "format", "summary")) {
+    expect_identical(match.fun(generic)(plain), marker)
+  }
+  expect_identical(tidy(plain), marker)
+  expect_identical(glance(plain), marker)
 
   print_value <- NULL
   printed <- cli::cli_fmt(print_value <- print(fit))

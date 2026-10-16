@@ -7,8 +7,8 @@
 This page owns the writing standard for every surface a user reads: the
 vignettes, the roxygen blocks that become `man/`, `README.Rmd`, `NEWS.md`, the
 condition text (errors, warnings, notes, install reasons and method hints,
-M156), and the printed guidance that `choose_icc()`, `format.icc()` and
-`summary.icc()` print (M157). It states eight rules, R1–R8: two measured by a
+M156), and the printed guidance that `choose_icc()`, `format.intraclass_icc()`
+and `summary.intraclass_icc()` print (M157, method names corrected M159). It states eight rules, R1–R8: two measured by a
 ruler, two swept by a term table and a grep, four by judgment at a read-through.
 
 Condition text and printed guidance are held to R1–R6 and R8. R7 does not

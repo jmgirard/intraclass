@@ -101,6 +101,10 @@ vignettes, `cairn/estimand-specs/`). (Design interview, 2026-07-12.)
   bare `stop()`/`warning()`/`cat()`/`print()`.
 - **Format with `air`** (`air format .`); CI enforces `air format --check`;
   `lintr` owns semantic linters only.
+- **S3 class names take the `intraclass_` prefix:** result classes
+  (`intraclass_icc`, `intraclass_dstudy`, `intraclass_recommendation`) and
+  condition classes alike, so no other package's methods can reach them.
+  (D-050)
 - Tracking travels with code (cairn: same commit as the work).
 - **Doctrine modules** (`cairn/doctrine/`, transferable craft standards — D-033,
   D-034):
@@ -154,7 +158,8 @@ D-entry).
 - GP2: **CRAN is the one-way door.** Exported behavior may change with just a
   D-entry until the first CRAN submission; from then on, breaking changes take a
   lifecycle deprecation cycle — the companion paper's examples must keep
-  running.
+  running. D-050 excepts the result class names, renamed with no
+  deprecation period at M159.
 - GP3: **Platform honesty.** Support commitments are exactly what CI verifies
   (`check-standard.yaml:38`). On `push` to the default branch: R release on
   macOS, Windows and Ubuntu; R devel, oldrel-1 and the declared floor 4.5.0 on
@@ -272,12 +277,12 @@ paths (`theta2r_moment_draws()` / `brms_theta2r_moment_draws()`); ADR-038
   `ICC(1)`/`ICC(k)` labels, `design$type` is `"agreement"` and
   `design$model` is `"twoway"`. Both fields are internal under D-035 clause
   2. `n_raters` reports 480 on the 20x6x4 fixture: a true count of nested
-  rater ids that reads as a crossed rater count. A legacy
-  `intraclass_dstudy` object with no `icc_design_label` attribute renders a
-  Design 3 projection as one-way (the fallbacks in `R/d-study.R` and
-  `R/autoplot.R`), but this version never builds such an object. An object
-  saved under the old class name `icc_dstudy` reaches none of these methods
-  (corrected M159). Accepted at M143, which left these
+  rater ids that reads as a crossed rater count. The fallbacks in
+  `R/d-study.R` and `R/autoplot.R` for a projection with no
+  `icc_design_label` attribute render a Design 3 projection as one-way, but
+  no object reaches them. Every `intraclass_dstudy` object carries the
+  attribute, and an object saved under the old class name `icc_dstudy`
+  reaches none of these methods (corrected M159). Accepted at M143, which left these
   fields unchanged on purpose. (Routed from candidates 2026-10-06; added
   2026-08-26 — M138 amendment audit round 1, finding 7, and the M143
   review.)
