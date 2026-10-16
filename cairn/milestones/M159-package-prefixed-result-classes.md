@@ -21,12 +21,12 @@ The results of `icc()`, `d_study()` and `choose_icc()` carry the classes `"intra
 
 ## Acceptance criteria
 
-- [ ] AC1: `icc()` returns an object whose class vector is exactly `"intraclass_icc"`. `choose_icc()` returns an object whose class vector is exactly `"intraclass_recommendation"`. `d_study()` returns an object whose first class is `"intraclass_dstudy"` and whose class vector contains none of `"icc"`, `"icc_dstudy"` and `"icc_recommendation"`. A test asserts each of these three class vectors.
-- [ ] AC2: A test registers, on class `"icc"`, a method that returns a fixed marker value for each of `print`, `format`, `summary`, `tidy` and `glance`. With those methods registered, none of these five generics called on an `icc()` result returns the marker. With them registered, `format()`, `tidy()` and `glance()` on that result return values identical to the values computed before the registration, and the output that `print()` writes is identical to the output it wrote before.
-- [ ] AC3: The command `` grep -rnE '\bicc_(dstudy|recommendation)\b|['"'"'"]icc['"'"'"]|[a-z]\.icc\b|S3method\([a-z.]+,icc\)|\}\{icc\}|\{\.cls icc\}|`icc`|\\code\{icc\}' R/ NAMESPACE tests/ man/ vignettes/ README.Rmd | grep -v -e '^tests/testthat/test-class-names.R:' -e 'exists("icc", mode = "function")' ``, run from the repo root in `zsh` or `bash`, prints no lines.
-- [ ] AC4: With ggplot2 loaded, `ggplot2::autoplot()` on an `icc()` result and on a `d_study()` result each returns a `ggplot` object, and a test asserts both.
-- [ ] AC5: The development section of `NEWS.md` carries an entry that names each of the three old class names with its new name. It says that code testing for an old class name must change to the new one, and that the change was made without a deprecation period. It also says that attaching both intraclass and performance still masks one of the two `icc()` functions.
-- [ ] AC6: The `verify` slot of `cairn/PROFILE.md` is clean: `devtools::document()` leaves no diff, and `devtools::test()` reports no failures.
+- [x] AC1: `icc()` returns an object whose class vector is exactly `"intraclass_icc"`. `choose_icc()` returns an object whose class vector is exactly `"intraclass_recommendation"`. `d_study()` returns an object whose first class is `"intraclass_dstudy"` and whose class vector contains none of `"icc"`, `"icc_dstudy"` and `"icc_recommendation"`. A test asserts each of these three class vectors.
+- [x] AC2: A test registers, on class `"icc"`, a method that returns a fixed marker value for each of `print`, `format`, `summary`, `tidy` and `glance`. With those methods registered, none of these five generics called on an `icc()` result returns the marker. With them registered, `format()`, `tidy()` and `glance()` on that result return values identical to the values computed before the registration, and the output that `print()` writes is identical to the output it wrote before.
+- [x] AC3: The command `` grep -rnE '\bicc_(dstudy|recommendation)\b|['"'"'"]icc['"'"'"]|[a-z]\.icc\b|S3method\([a-z.]+,icc\)|\}\{icc\}|\{\.cls icc\}|`icc`|\\code\{icc\}' R/ NAMESPACE tests/ man/ vignettes/ README.Rmd | grep -v -e '^tests/testthat/test-class-names.R:' -e 'exists("icc", mode = "function")' ``, run from the repo root in `zsh` or `bash`, prints no lines.
+- [x] AC4: With ggplot2 loaded, `ggplot2::autoplot()` on an `icc()` result and on a `d_study()` result each returns a `ggplot` object, and a test asserts both.
+- [x] AC5: The development section of `NEWS.md` carries an entry that names each of the three old class names with its new name. It says that code testing for an old class name must change to the new one, and that the change was made without a deprecation period. It also says that attaching both intraclass and performance still masks one of the two `icc()` functions.
+- [x] AC6: The `verify` slot of `cairn/PROFILE.md` is clean: `devtools::document()` leaves no diff, and `devtools::test()` reports no failures.
 
 ## Coverage
 
@@ -64,3 +64,30 @@ The results of `icc()`, `d_study()` and `choose_icc()` carry the classes `"intra
 ## Decisions
 
 ## Review
+
+Pass 1 (2026-10-16), on branch head `37b8c0e`, main not moved since the branch was cut.
+
+- AC1 evidence: fresh `devtools::test()` ran `test-class-names.R` with 0 failures. Its first test asserts `class(icc(...))` is exactly `"intraclass_icc"`, `class(choose_icc(...))` is exactly `"intraclass_recommendation"`, and `d_study()`'s first class is `"intraclass_dstudy"` with none of the three old names. The diff-bug reviewer confirmed all three class vectors directly.
+- AC2 evidence: the same run passed the second test in `test-class-names.R`. It registers marker methods on `"icc"` for `print`, `format`, `summary`, `tidy` and `glance`, then asserts that no generic returns the marker, that `format()`, `tidy()` and `glance()` are identical to their values before the registration, and that the `cli::cli_fmt()` capture of `print()` is identical. On the pre-rename code (T1, `c23fbd0`) every marker assertion failed, so the foreign methods did reach an `"icc"` object.
+- AC3 evidence: the AC3 command, run from the repo root in `zsh`, prints 0 lines. The same pattern over `main` (`git grep -nE` on the same paths) finds 68 lines, so the search reaches old-name uses when they exist.
+- AC4 evidence: the fresh run passed `test-autoplot.R` with ggplot2 installed and 0 skips there. It asserts `expect_s3_class(p, "ggplot")` on `autoplot()` of an `icc()` result and of a `d_study()` result. The diff-bug reviewer also called both through the lazy registration and got ggplot objects.
+- AC5 evidence: `NEWS.md` "## Breaking changes" under the development heading names `icc` → `intraclass_icc`, `icc_dstudy` → `intraclass_dstudy` and `icc_recommendation` → `intraclass_recommendation`. It says code testing an old name must use the new one, that the change has no deprecation period, and that the package attached last masks the other's `icc()`. The masking was observed in fresh sessions in both attach orders, and the claim audit verified each sentence.
+- AC6 evidence: `devtools::document()` leaves `git status` empty. Fresh `devtools::test()`: 0 failed, 0 errors, 9994 passed, 4 skipped (vignettes not installed, and glmmTMB's point fit dying on reducer-hint frames, as on main).
+
+Consistency gate: `cairn_validate.py` all checks passed. `devtools::document()` no diff. README.Rmd and README.md unchanged. `pkgdown::check_pkgdown()` no problems. NEWS entry present with no milestone numbers. No new top-level files. `devtools::check()` Status OK (0 errors, 0 warnings, 0 notes). `air format --check .` clean. `cairn_impact.py --changed` is run after the GP2 annotation below.
+
+spawned: diff-bug, blame-history, prior-review
+
+- diff-bug #1: AC2's test has no positive control, so a foreign registration that silently failed would leave every "not the marker" assertion passing — fix now.
+- diff-bug #2: the DESIGN.md Known issues entry speaks of a legacy `intraclass_dstudy` object with no `icc_design_label`, which no version can build, so the fallbacks are unreachable — fix now (reword the entry).
+- diff-bug #3: DESIGN.md GP2 does not point to D-050's class-name exception — fix now.
+- diff-bug #4: DESIGN.md Conventions does not record that result classes take the `intraclass_` prefix — fix now.
+- diff-bug #5: "## Breaking changes" sits after two ungrouped feature bullets in NEWS — reject (style).
+- diff-bug #6: the test cleanup's `rm()` would warn if something removed the entry first — reject (false: no code path removes it, and the reviewer found none).
+- diff-bug #7: `d[, 1:2]` on a `d_study()` result keeps the class and `format()` then fails with "subscript out of bounds", the same on main — follow-up (new candidate row "M159 review follow-ups on the renamed result classes").
+- blame-history #1: the fixture was edited in place, against the script-output rule and D-024 clause 4 — reject (false: D-024 governs re-runs that replace values, and this edit replaced no value; every element except the two class attributes is `identical()` to main, and a rerun now writes the same class).
+- blame-history #2: `d_study()` rejects a saved 0.1.0 `icc` object with no hint to re-run `icc()` — follow-up (same new row: a hint needs the old class string in R/, which AC3 forbids in this milestone).
+- blame-history #3: the foreign-method test changes S3 tables and relies on withr — reject (false: cleanup restores the replaced entry, and withr is in Suggests at `DESCRIPTION:46`).
+- blame-history #4 to #9: reflow lost no words, vocabulary pins match, the lint suppressions and `R/zzz.R` are intact, kept names are intact, GP2 and D-050 agree — noted, no change.
+- prior-review #1: old method names stay in `cairn/doctrine/prose-style.md:10-11`, the ROADMAP display-surfaces row and `cairn/LESSONS.md:29`, the stale-rename shape of M48 P5 — fix now.
+- prior-review #2: `test-class-names.R` compares two `cli::cli_fmt()` captures with no non-empty check (LESSONS M129) — fix now, with diff-bug #1.
