@@ -223,9 +223,9 @@ oneway_sf_label <- function(index) {
 # Human-readable design phrase for the report header (M2 spec §5; M6 spec §6).
 icc_design_phrase <- function(type, raters, oneway = FALSE) {
   # `raters` is NA where the design has no rater facet -- what a one-way
-  # projection now carries (M138). `format.icc_dstudy()`'s legacy-object fallback
-  # cannot pass `oneway`, so read it off the NA as well, rather than let
-  # `switch(NA_character_, ...)` return NULL and empty the header.
+  # projection now carries (M138). `format.intraclass_dstudy()`'s legacy-object
+  # fallback cannot pass `oneway`, so read it off the NA as well, rather than
+  # let `switch(NA_character_, ...)` return NULL and empty the header.
   if (oneway || is.na(raters)) {
     return("one-way random")
   }
@@ -244,10 +244,11 @@ icc_design_phrase <- function(type, raters, oneway = FALSE) {
   sprintf("%s, %s", design, error)
 }
 
-# The full human-readable design label for an `icc` object, multilevel-aware: the
-# two-way/one-way phrase, prefixed with the inferred multilevel design (ten Hove
-# et al. 2022; spec M8 §4) when present. Shared by `format.icc` (report header)
-# and `autoplot.icc` (plot title) so the two never drift.
+# The full human-readable design label for an `intraclass_icc` object,
+# multilevel-aware: the two-way/one-way phrase, prefixed with the inferred
+# multilevel design (ten Hove et al. 2022; spec M8 §4) when present. Shared by
+# `format.intraclass_icc` (report header) and `autoplot.intraclass_icc` (plot
+# title) so the two never drift.
 icc_design_label <- function(design) {
   ow <- identical(design$model, "oneway")
   phrase <- icc_design_phrase(design$type, design$raters, oneway = ow)
@@ -273,8 +274,9 @@ icc_design_label <- function(design) {
 # honouring the design variants: one-way and Design 3 confound the rater into the
 # residual (`confounded = TRUE`, no rater bar); Design 2's rater slot holds the
 # rater-in-cluster variance (labelled "rater:cluster"); Design 1 adds cluster and
-# cluster:rater terms. Shared by `format.icc` (prose) and `autoplot.icc`
-# (`what = "components"` bars) so the labels and ordering never drift.
+# cluster:rater terms. Shared by `format.intraclass_icc` (prose) and
+# `autoplot.intraclass_icc` (`what = "components"` bars) so the labels and
+# ordering never drift.
 icc_components_view <- function(x) {
   vc <- x$components
   ml <- isTRUE(x$design$multilevel)

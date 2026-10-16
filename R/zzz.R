@@ -2,15 +2,16 @@
 #
 # `autoplot()` is the generic that draws the D-study reliability curve, but its
 # home is ggplot2 -- a Suggests dependency (light-install path; see ADR-002 and
-# the install notes). We therefore register `autoplot.icc_dstudy()` LAZILY: only
-# once ggplot2 is loaded, via `s3_register()`, so `intraclass` still installs and
-# attaches without ggplot2 present. `s3_register()` is the canonical, dependency-
-# free helper vendored from vctrs (https://vctrs.r-lib.org/reference/s3_register.html);
-# copied here rather than adding vctrs to Imports.
+# the install notes). We therefore register `autoplot.intraclass_dstudy()`
+# LAZILY: only once ggplot2 is loaded, via `s3_register()`, so `intraclass`
+# still installs and attaches without ggplot2 present. `s3_register()` is the
+# canonical, dependency-free helper vendored from vctrs
+# (https://vctrs.r-lib.org/reference/s3_register.html); copied here rather than
+# adding vctrs to Imports.
 
 .onLoad <- function(libname, pkgname) {
-  s3_register("ggplot2::autoplot", "icc_dstudy")
-  s3_register("ggplot2::autoplot", "icc")
+  s3_register("ggplot2::autoplot", "intraclass_dstudy")
+  s3_register("ggplot2::autoplot", "intraclass_icc")
   invisible()
 }
 

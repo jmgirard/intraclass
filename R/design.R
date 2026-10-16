@@ -177,9 +177,9 @@ detect_multilevel_design <- function(df, call = rlang::caller_env()) {
 # Design 3 (raters nested in subjects), whose rater effect is confounded into the
 # residual (estimand-spec M8 §3b). Neither reports a rater treatment on the
 # exported surfaces (D-042). Kept in one place because the two producers of
-# `glance()$raters` -- `glance.icc()` and `d_study()`'s `icc_raters` -- each
-# tested `model == "oneway"` on their own, which is how the one-way rule reached
-# one of them and not the other.
+# `glance()$raters` -- `glance.intraclass_icc()` and `d_study()`'s `icc_raters`
+# -- each tested `model == "oneway"` on their own, which is how the one-way rule
+# reached one of them and not the other.
 design_has_rater_facet <- function(design) {
   !identical(design$model, "oneway") &&
     !identical(design$ml_design, "nested_in_subjects")

@@ -54,7 +54,7 @@ test_that("engine = \"brms\" forces ci_method = \"posterior\" by default", {
   )
   # Either it fit (brms present) or it aborted on the missing package -- never on the
   # ci_method (the default upgraded to "posterior" silently).
-  if (inherits(err, "icc")) {
+  if (inherits(err, "intraclass_icc")) {
     expect_identical(err$ci$method, "posterior")
   } else {
     expect_false(grepl("ci_method", conditionMessage(err)))
@@ -175,7 +175,7 @@ test_that("posterior_summary = \"hpdi\" only applies to ci_method = \"posterior\
   # The default ("percentile") is a silent no-op for a non-Bayesian fit (not an error).
   expect_s3_class(
     icc(d, score, subject, rater, seed = 1, posterior_summary = "percentile"),
-    "icc"
+    "intraclass_icc"
   )
 })
 
@@ -1613,7 +1613,7 @@ test_that("brms fits the two-way random ICC end to end (O-Bayes-agree sanity)", 
     brm_args = list(chains = 2, iter = 1000, refresh = 0)
   ))
 
-  expect_s3_class(fit, "icc")
+  expect_s3_class(fit, "intraclass_icc")
   expect_identical(fit$engine, "brms")
   expect_identical(fit$ci$method, "posterior")
   # samples = post-warmup draws = chains * (iter/2) = 2 * 500.
@@ -1640,7 +1640,7 @@ test_that("brms fits the two-way random ICC end to end (O-Bayes-agree sanity)", 
   }
 
   # The header reports a Bayesian (MCMC) engine and a CREDIBLE interval (format() is the
-  # deterministic source print.icc renders verbatim).
+  # deterministic source print.intraclass_icc renders verbatim).
   hdr <- paste(format(fit), collapse = "\n")
   expect_match(hdr, "brms (MCMC)", fixed = TRUE)
   expect_match(hdr, "posterior credible", fixed = TRUE)
@@ -1674,7 +1674,7 @@ test_that("brms fits the one-way random ICC end to end (O-Bayes-OW-agree)", {
     brm_args = list(chains = 2, iter = 1000, refresh = 0)
   ))
 
-  expect_s3_class(fit, "icc")
+  expect_s3_class(fit, "intraclass_icc")
   expect_identical(fit$engine, "brms")
   expect_identical(fit$ci$method, "posterior")
   expect_identical(fit$ci$samples, 1000L)
@@ -2292,7 +2292,7 @@ test_that("brms fits the crossed multilevel ICC end to end (O-Bayes-ML-agree)", 
 
   # Structure: the five-component fit yields subject- AND cluster-level rows, a
   # posterior credible interval, and the Bayesian engine label.
-  expect_s3_class(fit, "icc")
+  expect_s3_class(fit, "intraclass_icc")
   expect_identical(fit$engine, "brms")
   expect_identical(fit$ci$method, "posterior")
   td <- tidy(fit)
@@ -2412,7 +2412,7 @@ test_that("brms fits the crossed multilevel FIXED cluster-level ICC (O-Bayes-FCL
 
   # Cell 1's behavioral change: brms FIXED raters now returns BOTH levels (before M38 the
   # cluster row was dropped for brms fixed). Explicit `type = "agreement"`: single + average units.
-  expect_s3_class(fit_fixed, "icc")
+  expect_s3_class(fit_fixed, "intraclass_icc")
   expect_identical(fit_fixed$engine, "brms")
   td <- tidy(fit_fixed)
   expect_setequal(td$level, c("subject", "cluster"))
@@ -2518,7 +2518,7 @@ test_that("brms fits the conflated diagnostic end to end (O-Bayes-Conflated-agre
 
   # Structure: a conflated row alongside the subject row, a posterior credible interval, the
   # Bayesian engine label. Conflated carries NO Shrout & Fleiss label.
-  expect_s3_class(fit, "icc")
+  expect_s3_class(fit, "intraclass_icc")
   expect_identical(fit$ci$method, "posterior")
   td <- tidy(fit)
   expect_true("conflated" %in% td$level)
@@ -2596,7 +2596,7 @@ test_that("brms fits within-cell replicates end to end (O-Bayes-Rep-agree)", {
   ))
 
   # Structure: single- AND average-occasion rows (occasions 1 and n_o), a credible interval.
-  expect_s3_class(fit, "icc")
+  expect_s3_class(fit, "intraclass_icc")
   expect_identical(fit$ci$method, "posterior")
   expect_setequal(fit$estimates$occasions, c(1, n_o))
   td <- tidy(fit)
@@ -2677,7 +2677,7 @@ test_that("brms fits fixed-rater within-cell replicates end to end (O-Bayes-FRep
     brm_args = list(chains = 2, iter = 1200, refresh = 0)
   ))
 
-  expect_s3_class(fit, "icc")
+  expect_s3_class(fit, "intraclass_icc")
   expect_identical(fit$ci$method, "posterior")
   expect_setequal(fit$estimates$occasions, c(1, n_o))
   td <- tidy(fit)
@@ -2763,7 +2763,7 @@ test_that("brms fits multilevel within-cell replicates end to end (O-Bayes-MLRep
       seed = 1,
       brm_args = list(chains = 2, iter = 1200, refresh = 0)
     ))
-    expect_s3_class(fit, "icc")
+    expect_s3_class(fit, "intraclass_icc")
     expect_identical(fit$ci$method, "posterior")
     td <- tidy(fit)
     expect_true(all(
@@ -2838,7 +2838,7 @@ test_that("brms fits incomplete/ragged two-way random data end to end (O-Bayes-I
     brm_args = list(chains = 2, iter = 1200, refresh = 0)
   ))
 
-  expect_s3_class(fit, "icc")
+  expect_s3_class(fit, "intraclass_icc")
   expect_identical(fit$ci$method, "posterior")
   td <- tidy(fit)
   expect_true(all(
@@ -2908,7 +2908,7 @@ test_that("brms fits incomplete/ragged one-way random data end to end (O-Bayes-I
     brm_args = list(chains = 2, iter = 1200, refresh = 0)
   ))
 
-  expect_s3_class(fit, "icc")
+  expect_s3_class(fit, "intraclass_icc")
   expect_identical(fit$ci$method, "posterior")
   td <- tidy(fit)
   expect_true(all(
@@ -2984,7 +2984,7 @@ test_that("brms fits ragged crossed multilevel random data end to end (O-Bayes-I
     brm_args = list(chains = 2, iter = 1200, refresh = 0)
   )))
 
-  expect_s3_class(fit, "icc")
+  expect_s3_class(fit, "intraclass_icc")
   expect_identical(fit$ci$method, "posterior")
   td <- tidy(fit)
   expect_true(all(
@@ -3092,7 +3092,7 @@ test_that("brms fits the crossed fixed-rater multilevel ICC end to end (O-Bayes-
 
   # Structure: the five-component fixed fit, pinned to `level = "subject"`, yields subject-level
   # rows, a posterior credible interval, the Bayesian engine label, and theta^2_r in the rater slot.
-  expect_s3_class(fa, "icc")
+  expect_s3_class(fa, "intraclass_icc")
   expect_identical(fa$engine, "brms")
   expect_identical(fa$ci$method, "posterior")
   expect_setequal(
@@ -3248,7 +3248,7 @@ test_that("brms fits the nested fixed-rater multilevel ICC end to end (O-Bayes-F
 
   # Structure: nested fixed yields SUBJECT-level rows only, with theta^2_{r:c} in the rater
   # slot and NO cluster / cluster_rater component (the cell-mean fit absorbs the cluster).
-  expect_s3_class(fa, "icc")
+  expect_s3_class(fa, "intraclass_icc")
   expect_identical(fa$engine, "brms")
   expect_identical(fa$design$ml_design, "nested_in_clusters")
   expect_setequal(names(fa$components), c("subject", "rater", "residual"))
@@ -3379,7 +3379,7 @@ test_that("brms fits the nested Design 2 ICC end to end (O-Bayes-NML-agree)", {
 
   # Structure: Design 2 is SUBJECT LEVEL ONLY (no cluster-level row), a posterior
   # credible interval, the Bayesian engine label, and the nested-design report.
-  expect_s3_class(fit, "icc")
+  expect_s3_class(fit, "intraclass_icc")
   expect_identical(fit$engine, "brms")
   expect_identical(fit$ci$method, "posterior")
   td <- tidy(fit)
@@ -3498,7 +3498,7 @@ test_that("brms fits the nested Design 3 ICC end to end (O-Bayes-NML-agree)", {
 
   # Structure: the multilevel one-way yields ICC(1)/ICC(k) (no A/C letter), subject level
   # only, a posterior credible interval, and the Bayesian engine label.
-  expect_s3_class(fit, "icc")
+  expect_s3_class(fit, "intraclass_icc")
   expect_identical(fit$engine, "brms")
   expect_identical(fit$ci$method, "posterior")
   td <- tidy(fit)

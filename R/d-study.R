@@ -124,7 +124,7 @@
 #' notes this. **Ragged** replicate fits are refused for either axis (the
 #' occasion-averaged ragged divisor is an open modeling question).
 #'
-#' @param x An `icc` object returned by [icc()].
+#' @param x An `intraclass_icc` object returned by [icc()].
 #' @param m Numeric vector of rater counts to project to (each \eqn{\ge 1}).
 #'   Defaults to `1:(2 * n_raters)`, a curve from one rater to twice the
 #'   observed count. Mutually exclusive with `n_o`.
@@ -138,13 +138,13 @@
 #'   Override to change the confidence level, the number of Monte-Carlo draws,
 #'   or the seed.
 #'
-#' @return `d_study()` returns an `icc_dstudy` object: a tibble with one row per
-#'   projected point. Its columns are `m`, `index` (e.g. `"ICC(A,3)"`), `type`,
-#'   `estimate`, `std.error`, `conf.low`, and `conf.high`, and it carries the
-#'   design and interval settings as attributes. `tidy()` names that
+#' @return `d_study()` returns an `intraclass_dstudy` object: a tibble with one
+#'   row per projected point. Its columns are `m`, `index` (e.g. `"ICC(A,3)"`),
+#'   `type`, `estimate`, `std.error`, `conf.low`, and `conf.high`, and it
+#'   carries the design and interval settings as attributes. `tidy()` names that
 #'   coefficient column `term`, following the broom glossary. The object keeps
-#'   `index`. If the fitted `icc` reports both error definitions (the default),
-#'   `d_study()` projects **one reliability curve per definition**,
+#'   `index`. If the fitted `intraclass_icc` reports both error definitions (the
+#'   default), `d_study()` projects **one reliability curve per definition**,
 #'   distinguished by the `type` column. A single-type fit projects a single
 #'   curve. A multilevel projection gains a `level` column (one curve per
 #'   level), and a replicate projection an `occasions` column, each where it
@@ -153,41 +153,41 @@
 #'   own layout is internal, and only the tidied columns are a stable contract.
 #'
 #'   The methods documented on this page return the objects below.
-#'   * `tidy.icc_dstudy()`: a tibble with one row per projected point. Its
-#'     columns, in this order, are `m`, `occasions`, `level`, `term`, `type`,
-#'     `estimate`, `std.error`, `conf.low`, `conf.high`, `conf.level`,
+#'   * `tidy.intraclass_dstudy()`: a tibble with one row per projected point.
+#'     Its columns, in this order, are `m`, `occasions`, `level`, `term`,
+#'     `type`, `estimate`, `std.error`, `conf.low`, `conf.high`, `conf.level`,
 #'     `method`. `term` is the projected ICC index, named for the broom
 #'     glossary. Every column is present on every projection. `occasions`
-#'     reports the per-cell occasion count the row is projected at, which may
-#'     be non-integer, and which divides pure error, so a row whose error set
+#'     reports the per-cell occasion count the row is projected at, which may be
+#'     non-integer, and which divides pure error, so a row whose error set
 #'     carries no pure-error term does not move with it. On a rater projection
 #'     the column takes every distinct occasion value the fit's own
 #'     `tidy()$occasions` column carries, and the cluster rows of a multilevel
 #'     projection take the smallest of those. On an occasion projection every
 #'     row takes the swept `n_o`, cluster rows included, whose curve is flat
-#'     across it. `occasions` is `NA` outside a replicate projection. `level`
-#'     is `NA` outside a multilevel one, and `type` where the design defines
-#'     no error definition.
-#'   * `glance.icc_dstudy()`: a one-row tibble of projection-level summaries.
-#'     It carries the distinct projected rater counts `m` and their range, the
-#'     error definition(s), the rater treatment, the observed rater count, and
-#'     the interval settings. The rater treatment is `NA` on a projection of a
-#'     fit that estimates no separable rater main effect. One such fit is
-#'     `model = "oneway"`, whose raters are interchangeable and carry no facet.
-#'     The other is `design = "nested_in_subjects"`, whose rater effect is
-#'     confounded into the residual. The count and range are held at the
-#'     observed rater count when the sweep is over occasions, so they are not
-#'     a row count.
-#'   * `format.icc_dstudy()`: a character vector holding the printed projection
-#'     table, one line per element.
-#'   * `print.icc_dstudy()`: the `icc_dstudy` object invisibly, having emitted
-#'     that table.
-#'   * `autoplot.icc_dstudy()`: a `ggplot` object holding the reliability curve,
-#'     faceted by level for a multilevel projection.
-#'   * `plot.icc_dstudy()`: the `icc_dstudy` object invisibly, having drawn that
-#'     curve.
+#'     across it. `occasions` is `NA` outside a replicate projection. `level` is
+#'     `NA` outside a multilevel one, and `type` where the design defines no
+#'     error definition.
+#'   * `glance.intraclass_dstudy()`: a one-row tibble of projection-level
+#'     summaries. It carries the distinct projected rater counts `m` and their
+#'     range, the error definition(s), the rater treatment, the observed rater
+#'     count, and the interval settings. The rater treatment is `NA` on a
+#'     projection of a fit that estimates no separable rater main effect. One
+#'     such fit is `model = "oneway"`, whose raters are interchangeable and
+#'     carry no facet. The other is `design = "nested_in_subjects"`, whose rater
+#'     effect is confounded into the residual. The count and range are held at
+#'     the observed rater count when the sweep is over occasions, so they are
+#'     not a row count.
+#'   * `format.intraclass_dstudy()`: a character vector holding the printed
+#'     projection table, one line per element.
+#'   * `print.intraclass_dstudy()`: the `intraclass_dstudy` object invisibly,
+#'     having emitted that table.
+#'   * `autoplot.intraclass_dstudy()`: a `ggplot` object holding the reliability
+#'     curve, faceted by level for a multilevel projection.
+#'   * `plot.intraclass_dstudy()`: the `intraclass_dstudy` object invisibly,
+#'     having drawn that curve.
 #'
-#'   `tidy.icc_dstudy()` and `glance.icc_dstudy()` implement the
+#'   `tidy.intraclass_dstudy()` and `glance.intraclass_dstudy()` implement the
 #'   [tidy()][generics::tidy] and [glance()][generics::glance] generics.
 #'
 #' @references
@@ -207,8 +207,10 @@ d_study <- function(
   mc_samples = NULL,
   seed = NULL
 ) {
-  if (!inherits(x, "icc")) {
-    abort_intraclass("{.arg x} must be an {.cls icc} object from {.fn icc}.")
+  if (!inherits(x, "intraclass_icc")) {
+    abort_intraclass(
+      "{.arg x} must be an {.cls intraclass_icc} object from {.fn icc}."
+    )
   }
   type <- x$design$type
   raters <- x$design$raters
@@ -574,7 +576,7 @@ d_study <- function(
 
   structure(
     tbl,
-    class = c("icc_dstudy", class(tbl)),
+    class = c("intraclass_dstudy", class(tbl)),
     icc_type = type,
     # NA where the design has no rater facet, so `glance()` on a projection reads
     # the same as `glance()` on the fit it came from -- both read the shared
@@ -653,7 +655,7 @@ validate_n_o <- function(n_o, call = rlang::caller_env()) {
 #' @rdname d_study
 #' @param ... Unused. Present so the method signature matches the generic.
 #' @export
-format.icc_dstudy <- function(x, ...) {
+format.intraclass_dstudy <- function(x, ...) {
   ci_pct <- format(100 * attr(x, "conf.level"), trim = TRUE)
   # icc_design_label is multilevel-aware; older objects fall back to the phrase.
   label <- attr(x, "icc_design_label")
@@ -739,14 +741,14 @@ format.icc_dstudy <- function(x, ...) {
 
 #' @rdname d_study
 #' @export
-print.icc_dstudy <- function(x, ...) {
+print.intraclass_dstudy <- function(x, ...) {
   cli::cli_verbatim(format(x, ...))
   invisible(x)
 }
 
 #' @rdname d_study
 #' @export
-tidy.icc_dstudy <- function(x, ...) {
+tidy.intraclass_dstudy <- function(x, ...) {
   # Every identifier column is present on every projection, NA where the design does
   # not define it: `occasions` outside a replicate projection, `level` outside a
   # multilevel one, `type` where the design defines no error definition (D-035).
@@ -773,7 +775,7 @@ tidy.icc_dstudy <- function(x, ...) {
 
 #' @rdname d_study
 #' @export
-glance.icc_dstudy <- function(x, ...) {
+glance.intraclass_dstudy <- function(x, ...) {
   tibble::tibble(
     n_m = length(unique(x$m)),
     m_min = min(x$m),

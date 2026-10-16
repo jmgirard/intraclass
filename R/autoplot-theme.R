@@ -1,11 +1,12 @@
 # Shared plot styling for the autoplot methods ---------------------------------
 #
-# A cohesive internal look for the three `icc` plot views (the coefficient forest
-# plot, the variance-component bars, and the d-study reliability curve). These
-# helpers reference ggplot2 and are only ever called from the
-# `check_installed("ggplot2")`-guarded autoplot methods, so ggplot2 stays a
-# Suggests dependency (ADR-010 light-install). Internal only -- not exported; a
-# user-facing `theme_intraclass()` is a deferred candidate (M61 plan gate).
+# A cohesive internal look for the three `intraclass_icc` plot views (the
+# coefficient forest plot, the variance-component bars, and the d-study
+# reliability curve). These helpers reference ggplot2 and are only ever called
+# from the `check_installed("ggplot2")`-guarded autoplot methods, so ggplot2
+# stays a Suggests dependency (ADR-010 light-install). Internal only -- not
+# exported; a user-facing `theme_intraclass()` is a deferred candidate (M61 plan
+# gate).
 
 # The Okabe-Ito qualitative palette: eight colourblind-safe hues (Okabe & Ito
 # 2008, the grDevices/ggplot2 reference palette). Component-bar fills and the

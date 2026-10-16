@@ -236,7 +236,10 @@ test_that("replicate scope guards fail loudly (#5, #8)", {
   # occasion-AVERAGED coefficient stays deferred to research (no validated effective-n_o
   # divisor). See the O-RagRep block below for the full ragged oracles.
   ragged <- d[-1, ]
-  expect_s3_class(suppressMessages(icc(ragged, score, subject, rater)), "icc")
+  expect_s3_class(
+    suppressMessages(icc(ragged, score, subject, rater)),
+    "intraclass_icc"
+  )
   expect_error(
     suppressMessages(icc(ragged, score, subject, rater, occasions = "average")),
     class = "intraclass_unsupported"

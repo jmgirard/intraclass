@@ -692,9 +692,9 @@
 #' value is a finite, well-calibrated interval on the near-zero-ICC boundary where the
 #' Monte-Carlo default aborts.
 #'
-#' @return `icc()` returns an `icc` object: a list with the estimate table,
-#'   variance components, design, engine, interval settings, sample sizes, the
-#'   fitted model, and the call.
+#' @return `icc()` returns an `intraclass_icc` object: a list with the estimate
+#'   table, variance components, design, engine, interval settings, sample
+#'   sizes, the fitted model, and the call.
 #'
 #'   **What of that object is stable.** The supported way to read a fit is
 #'   through the methods below, plus two elements of the list itself. Those are
@@ -710,28 +710,29 @@
 #'   whether or not a table happens to report it.
 #'
 #'   The methods documented on this page return the objects below.
-#'   * `tidy.icc()`: a tibble with one row per estimated coefficient. Its
-#'     columns, in this order, are `term`, `occasions`, `type`, `level`,
+#'   * `tidy.intraclass_icc()`: a tibble with one row per estimated coefficient.
+#'     Its columns, in this order, are `term`, `occasions`, `type`, `level`,
 #'     `sf_index`, `estimate`, `std.error`, `conf.low`, `conf.high`,
 #'     `conf.level`, `method`. `term` is the coefficient's ICC index, named for
 #'     the broom glossary. Every column is present on every fit. `occasions`
 #'     reports the per-rater occasion divisor that row's coefficient applies to
 #'     pure error. On a fit that splits within-cell replicates it reads 1
-#'     wherever the row averages no occasions. That covers every
-#'     single-occasion row, and every row whose error set carries no pure-error
-#'     term to average. The cluster rows of a multilevel fit are one such case.
-#'     It reads the fitted per-cell occasion count where the row does average.
-#'     On a fit that splits none it is `NA`. It is not in general the number of
-#'     ratings the coefficient averages, because it counts occasions per rater:
-#'     an occasion-averaged `ICC(*,k)` row averages `k` raters at that occasion
+#'     wherever the row averages no occasions. That covers every single-occasion
+#'     row, and every row whose error set carries no pure-error term to average.
+#'     The cluster rows of a multilevel fit are one such case. It reads the
+#'     fitted per-cell occasion count where the row does average. On a fit that
+#'     splits none it is `NA`. It is not in general the number of ratings the
+#'     coefficient averages, because it counts occasions per rater: an
+#'     occasion-averaged `ICC(*,k)` row averages `k` raters at that occasion
 #'     count each. `glance()` reports a different quantity as `n_o`, the
 #'     observed per-cell occasion count of the fitted design. `n_o` is itself
-#'     `NA` under the condition the `glance.icc()` bullet below states, which a
-#'     ragged replicate design meets while `occasions` still reads 1.
-#'   * `glance.icc()`: a one-row tibble of model-level summaries. It carries
-#'     the sample sizes, the design flags, the effective rater counts, and the
-#'     variance components. It also carries the occasion count `n_o`, the
-#'     engine and interval settings, and the sampler diagnostics `rhat` and
+#'     `NA` under the condition the `glance.intraclass_icc()` bullet below
+#'     states, which a ragged replicate design meets while `occasions` still
+#'     reads 1.
+#'   * `glance.intraclass_icc()`: a one-row tibble of model-level summaries. It
+#'     carries the sample sizes, the design flags, the effective rater counts,
+#'     and the variance components. It also carries the occasion count `n_o`,
+#'     the engine and interval settings, and the sampler diagnostics `rhat` and
 #'     `ess_bulk`. Among the design flags are the rater treatment `raters` and
 #'     `replicates`. `raters` is `NA` where the design estimates no separable
 #'     rater main effect. One such design is a `model = "oneway"` fit, whose
@@ -740,9 +741,9 @@
 #'     into the residual. `replicates` says whether the fitted design splits
 #'     within-cell replicates. It is `FALSE` on a one-way fit, which has no
 #'     rater facet and so no cells to split. `n_o` is `NA` unless the fitted
-#'     design splits within-cell replicates *and* defines one occasion count
-#'     per cell. Defining one count per cell means the same number of ratings
-#'     in every cell, and every cell the design defines present. The cells the
+#'     design splits within-cell replicates *and* defines one occasion count per
+#'     cell. Defining one count per cell means the same number of ratings in
+#'     every cell, and every cell the design defines present. The cells the
 #'     design defines are the full subject-by-rater grid when crossed and the
 #'     block-diagonal one when raters are nested in clusters. On a design
 #'     failing either condition, `n_o` is reported as `NA` or the fit refused
@@ -750,17 +751,20 @@
 #'     for the non-Bayesian engines, which do not sample. Every column is
 #'     present on every fit, so two glanced fits row-bind just as two tidied
 #'     ones do.
-#'   * `format.icc()`: a character vector holding the printed report, one line per
-#'     element.
-#'   * `print.icc()`: the `icc` object invisibly, having emitted that report.
-#'   * `summary.icc()`: the `icc` object invisibly, having emitted the report
-#'     followed by the interpretive notes.
-#'   * `autoplot.icc()`: a `ggplot` object holding the coefficient forest plot,
-#'     or the variance-component decomposition when `what = "components"`.
-#'   * `plot.icc()`: the `icc` object invisibly, having drawn that same plot.
+#'   * `format.intraclass_icc()`: a character vector holding the printed report,
+#'     one line per element.
+#'   * `print.intraclass_icc()`: the `intraclass_icc` object invisibly, having
+#'     emitted that report.
+#'   * `summary.intraclass_icc()`: the `intraclass_icc` object invisibly, having
+#'     emitted the report followed by the interpretive notes.
+#'   * `autoplot.intraclass_icc()`: a `ggplot` object holding the coefficient
+#'     forest plot, or the variance-component decomposition when
+#'     `what = "components"`.
+#'   * `plot.intraclass_icc()`: the `intraclass_icc` object invisibly, having
+#'     drawn that same plot.
 #'
-#'   `tidy.icc()` and `glance.icc()` implement the [tidy()][generics::tidy] and
-#'   [glance()][generics::glance] generics.
+#'   `tidy.intraclass_icc()` and `glance.intraclass_icc()` implement the
+#'   [tidy()][generics::tidy] and [glance()][generics::glance] generics.
 #'
 #' @references
 #' Burch, B. D. (2011). Assessing the performance of normal-based and REML-based
@@ -2657,7 +2661,7 @@ icc <- function(
       },
       call = match.call()
     ),
-    class = "icc"
+    class = "intraclass_icc"
   )
 }
 

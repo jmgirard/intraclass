@@ -57,16 +57,16 @@
 #'   `"cluster"` (between-cluster reliability), or `"both"`. Required when
 #'   `multilevel = TRUE`.
 #'
-#' @return `choose_icc()` returns an `icc_recommendation` object (a list). It
-#'   carries the recommended coefficient rows (`$rows`), the exact `icc()` call as
-#'   a string (`$call`), the per-decision rationale (`$rationale`), and any notes
-#'   (`$notes`).
+#' @return `choose_icc()` returns an `intraclass_recommendation` object (a
+#'   list). It carries the recommended coefficient rows (`$rows`), the exact
+#'   `icc()` call as a string (`$call`), the per-decision rationale
+#'   (`$rationale`), and any notes (`$notes`).
 #'
 #'   The methods documented on this page return the objects below.
-#'   * `format.icc_recommendation()`: a character vector holding the printed
-#'     recommendation, one line per element.
-#'   * `print.icc_recommendation()`: the `icc_recommendation` object invisibly,
-#'     having emitted that recommendation.
+#'   * `format.intraclass_recommendation()`: a character vector holding the
+#'     printed recommendation, one line per element.
+#'   * `print.intraclass_recommendation()`: the `intraclass_recommendation`
+#'     object invisibly, having emitted that recommendation.
 #'
 #' @seealso [icc()], and `vignette("choosing-an-icc")` for the full decision tree.
 #'
@@ -277,11 +277,11 @@ prompt_line <- function(prompt) {
   readline(prompt)
 }
 
-# Resolve a (possibly partial) answer set into an `icc_recommendation`, or abort.
-# The two structural axes default to the common case; the coefficient-selecting
-# axes are required (a NULL there is a loud underspecification error, #5), and
-# axes that do not exist for the chosen design are rejected (an applicability
-# error, #5) -- never silently ignored.
+# Resolve a (possibly partial) answer set into an `intraclass_recommendation`,
+# or abort. The two structural axes default to the common case; the
+# coefficient-selecting axes are required (a NULL there is a loud
+# underspecification error, #5), and axes that do not exist for the chosen
+# design are rejected (an applicability error, #5) -- never silently ignored.
 resolve_icc_recommendation <- function(answers, call = rlang::caller_env()) {
   model <- if (is.null(answers$model)) "twoway" else answers$model
   model <- validate_choice(model, c("twoway", "oneway"), "model", call = call)
@@ -405,8 +405,8 @@ reject_inapplicable <- function(answers, args, design_phrase, call) {
 }
 
 # The recommended coefficient rows. Reuses `icc_estimand()` -- the same label
-# source a fitted `icc` object uses -- so the recommended McGraw-Wong and
-# Shrout-Fleiss labels cannot drift from what `icc()` prints. One row per
+# source a fitted `intraclass_icc` object uses -- so the recommended McGraw-Wong
+# and Shrout-Fleiss labels cannot drift from what `icc()` prints. One row per
 # requested (type x level x unit); `k_eff` is irrelevant to the label. Type is
 # the outermost loop, the order `icc()` itself builds its estimate table in
 # (ADR-054 print grouping), so a both-type recommendation lists its rows in the
@@ -601,15 +601,15 @@ new_icc_recommendation <- function(
       rationale = rationale,
       notes = notes
     ),
-    class = "icc_recommendation"
+    class = "intraclass_recommendation"
   )
 }
 
 #' @rdname choose_icc
-#' @param x An `icc_recommendation` object.
+#' @param x An `intraclass_recommendation` object.
 #' @param ... Unused. Present so the method signature matches the generic.
 #' @export
-format.icc_recommendation <- function(x, ...) {
+format.intraclass_recommendation <- function(x, ...) {
   design <- if (x$oneway) {
     "one-way random"
   } else {
@@ -684,9 +684,9 @@ format.icc_recommendation <- function(x, ...) {
 
 #' @rdname choose_icc
 #' @export
-print.icc_recommendation <- function(x, ...) {
+print.intraclass_recommendation <- function(x, ...) {
   # Join to one string so blank-line separators survive cli_verbatim (see
-  # print.icc); section spacing is part of the restyle (M43).
+  # print.intraclass_icc); section spacing is part of the restyle (M43).
   cli::cli_verbatim(paste(format(x, ...), collapse = "\n"))
   invisible(x)
 }

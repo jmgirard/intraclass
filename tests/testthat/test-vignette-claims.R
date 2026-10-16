@@ -203,7 +203,7 @@ test_that("the occasion D-study rises to a ceiling below 1 and lifts fixed agree
     )
   )
   expect_error(d_study(fixed, m = 1:4), class = "intraclass_unidentified")
-  expect_s3_class(d_study(fixed, n_o = 1:4), "icc_dstudy")
+  expect_s3_class(d_study(fixed, n_o = 1:4), "intraclass_dstudy")
 })
 
 test_that("a disconnected design is rejected, not guessed at", {

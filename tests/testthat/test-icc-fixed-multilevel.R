@@ -490,7 +490,7 @@ test_that("O-IFML: a ragged fixed design that goes singular defers lme4 to glmmT
       engine = "glmmTMB",
       seed = 1
     )),
-    "icc"
+    "intraclass_icc"
   )
 })
 

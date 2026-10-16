@@ -78,7 +78,7 @@ test_that("a multi-valued choice argument aborts classed, never collapses", {
 test_that("the scalar defaults still fit, and each choice is still accepted", {
   # The passing control: the abort above is about arity, not about the values.
   fit <- icc(ratings, score, subject, rater, seed = 1)
-  expect_s3_class(fit, "icc")
+  expect_s3_class(fit, "intraclass_icc")
   expect_identical(fit$design$raters, "random")
   expect_identical(
     suppressWarnings(
@@ -125,7 +125,7 @@ test_that("every choose_icc() answer is a choice argument (D-037)", {
   )
   # The passing control: the abort is about arity, not the values -- each single
   # answer still recommends.
-  expect_s3_class(do.call(choose_icc, base), "icc_recommendation")
+  expect_s3_class(do.call(choose_icc, base), "intraclass_recommendation")
 })
 
 test_that("autoplot's `what` is a choice argument on the same terms", {
@@ -170,7 +170,7 @@ nested_replicate_frame <- function(seed = 42) {
 
 # 2. A stable tidy/glance schema ------------------------------------------------
 
-test_that("tidy.icc names the coefficient column `term` and always carries `occasions`", {
+test_that("tidy.intraclass_icc names the coefficient column `term` and always carries `occasions`", {
   td <- tidy(icc(ratings, score, subject, rater, seed = 1))
   expect_identical(
     names(td),
@@ -202,7 +202,7 @@ test_that("a replicate fit fills `occasions`, and the two schemas row-bind", {
   expect_identical(nrow(bound), nrow(td_rep) + nrow(td_plain))
 })
 
-test_that("tidy.icc_dstudy always carries `occasions`, `level` and `type`", {
+test_that("tidy.intraclass_dstudy always carries `occasions`, `level` and `type`", {
   fit <- icc(ratings, score, subject, rater, seed = 1)
   td <- tidy(d_study(fit, m = 2:4))
   expect_identical(
@@ -227,7 +227,7 @@ test_that("tidy.icc_dstudy always carries `occasions`, `level` and `type`", {
   expect_false(any(is.na(td$type)))
 })
 
-test_that("glance.icc names the replicate split instead of shifting var_residual", {
+test_that("glance.intraclass_icc names the replicate split instead of shifting var_residual", {
   gl <- glance(icc(ratings, score, subject, rater, seed = 1))
   expect_true(all(
     c("var_subject_rater", "n_o", "rhat", "ess_bulk") %in% names(gl)
@@ -249,7 +249,7 @@ test_that("glance.icc names the replicate split instead of shifting var_residual
   expect_identical(gl_rep$n_o, 2L)
 })
 
-test_that("glance.icc reports `n_o` on a nested replicate design, not just a crossed one", {
+test_that("glance.intraclass_icc reports `n_o` on a nested replicate design, not just a crossed one", {
   gl <- glance(
     icc(
       nested_replicate_frame(),
@@ -294,7 +294,7 @@ test_that("d_study aborts classed on an out-of-range conf_level or sample count"
   expect_true(all(ok$conf.level == 0.9))
 })
 
-test_that("tidy.icc_dstudy fills the columns the design defines, and only those", {
+test_that("tidy.intraclass_dstudy fills the columns the design defines, and only those", {
   # The all-NA case above shows the columns are present; these show they are NA
   # by design rather than never populated (M48 review F10).
   rep_proj <- tidy(d_study(
@@ -387,7 +387,7 @@ design3_frame <- function(seed = 7) {
   d
 }
 
-test_that("glance.icc carries `raters` and `replicates`, one name set per design", {
+test_that("glance.intraclass_icc carries `raters` and `replicates`, one name set per design", {
   skip_if_not_installed("glmmTMB")
   ml <- multilevel_replicate_frame()
   fits <- list(
@@ -539,11 +539,11 @@ test_that("glance() on a projection reads `raters` as glance() on the fit does",
 
 test_that("the multilevel header names a rater treatment only where one exists", {
   skip_if_not_installed("glmmTMB")
-  # All three multilevel designs render through the same `format.icc()` branch.
-  # Design 3's raters are nested in subjects, so no rater main effect is
-  # separable: its header states the rater count without a treatment word
-  # (D-042). Designs 1 and 2 each keep theirs -- the controls that show the edit
-  # is keyed on the design, not on the branch.
+  # All three multilevel designs render through the same
+  # `format.intraclass_icc()` branch. Design 3's raters are nested in subjects,
+  # so no rater main effect is separable: its header states the rater count
+  # without a treatment word (D-042). Designs 1 and 2 each keep theirs -- the
+  # controls that show the edit is keyed on the design, not on the branch.
   fits <- list(
     design1 = icc(
       multilevel_replicate_frame(),
@@ -580,8 +580,8 @@ test_that("the multilevel header names a rater treatment only where one exists",
     )
   )
 
-  # The rater line, captured through cli's own sink: `print.icc()` writes via
-  # cli, so `capture.output()` returns character(0) for it (M129).
+  # The rater line, captured through cli's own sink: `print.intraclass_icc()`
+  # writes via cli, so `capture.output()` returns character(0) for it (M129).
   rater_line <- vapply(
     fits,
     function(x) {

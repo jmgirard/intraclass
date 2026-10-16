@@ -272,10 +272,12 @@ paths (`theta2r_moment_draws()` / `brms_theta2r_moment_draws()`); ADR-038
   `ICC(1)`/`ICC(k)` labels, `design$type` is `"agreement"` and
   `design$model` is `"twoway"`. Both fields are internal under D-035 clause
   2. `n_raters` reports 480 on the 20x6x4 fixture: a true count of nested
-  rater ids that reads as a crossed rater count. A legacy `icc_dstudy`
-  object with no `icc_design_label` attribute renders a Design 3 projection
-  as one-way (the fallbacks in `R/d-study.R` and `R/autoplot.R`), but this
-  version never builds such an object. Accepted at M143, which left these
+  rater ids that reads as a crossed rater count. A legacy
+  `intraclass_dstudy` object with no `icc_design_label` attribute renders a
+  Design 3 projection as one-way (the fallbacks in `R/d-study.R` and
+  `R/autoplot.R`), but this version never builds such an object. An object
+  saved under the old class name `icc_dstudy` reaches none of these methods
+  (corrected M159). Accepted at M143, which left these
   fields unchanged on purpose. (Routed from candidates 2026-10-06; added
   2026-08-26 — M138 amendment audit round 1, finding 7, and the M143
   review.)

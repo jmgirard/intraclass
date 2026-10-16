@@ -6,7 +6,8 @@
 # `check_installed()` and registered lazily in zzz.R (light-install path).
 
 #' @rdname d_study
-#' @param object An `icc_dstudy` object (the `autoplot()`/`plot()` argument).
+#' @param object An `intraclass_dstudy` object (the `autoplot()`/`plot()`
+#'   argument).
 #' @examplesIf rlang::is_installed(c("ggplot2", "glmmTMB"))
 #' fit_ag <- icc(ratings, score, subject, rater, type = "agreement", seed = 1)
 #' ggplot2::autoplot(d_study(fit_ag, m = 1:12)) # the D-study reliability curve
@@ -15,7 +16,7 @@
 # zzz.R; lintr does not see it as an S3 method (not a NAMESPACE export), so the
 # `generic.class` dot trips object_name_linter -- suppressed here, not renamed.
 # nolint start: object_name_linter.
-autoplot.icc_dstudy <- function(object, ...) {
+autoplot.intraclass_dstudy <- function(object, ...) {
   # nolint end
   rlang::check_installed(
     "ggplot2",
@@ -133,7 +134,7 @@ autoplot.icc_dstudy <- function(object, ...) {
       ggplot2::theme(legend.position = "bottom")
   }
   # A multilevel projection has one panel per level; facet so the subject- and
-  # cluster-level curves are not overplotted (mirrors autoplot.icc).
+  # cluster-level curves are not overplotted (mirrors autoplot.intraclass_icc).
   if (ml) {
     p <- p + ggplot2::facet_wrap(ggplot2::vars(.data$level))
   }
@@ -142,12 +143,12 @@ autoplot.icc_dstudy <- function(object, ...) {
 
 #' @rdname d_study
 #' @export
-plot.icc_dstudy <- function(x, ...) {
-  print(autoplot.icc_dstudy(x, ...))
+plot.intraclass_dstudy <- function(x, ...) {
+  print(autoplot.intraclass_dstudy(x, ...))
   invisible(x)
 }
 
-# Plots for a fitted `icc` object -----------------------------------------------
+# Plots for a fitted `intraclass_icc` object -----------------------------------
 #
 # Two views of a fitted estimator, selected by `what` (M11, ADR-020): the
 # coefficient forest plot (each estimated index as a point + Monte-Carlo CI band)
@@ -168,11 +169,15 @@ plot.icc_dstudy <- function(x, ...) {
 #' ggplot2::autoplot(fit, what = "components") # variance-component decomposition
 #' @importFrom rlang .data
 # S3 method for ggplot2::autoplot (a Suggests generic), lazily registered in
-# zzz.R; see the icc_dstudy note above for why object_name_linter is suppressed.
+# zzz.R; see the intraclass_dstudy note above for why object_name_linter is
+# suppressed.
 # nolint start: object_name_linter.
-autoplot.icc <- function(object, what = "coefficients", ...) {
+autoplot.intraclass_icc <- function(object, what = "coefficients", ...) {
   # nolint end
-  rlang::check_installed("ggplot2", reason = "to plot an {.cls icc} object.")
+  rlang::check_installed(
+    "ggplot2",
+    reason = "to plot an {.cls intraclass_icc} object."
+  )
   what <- validate_choice(what, c("coefficients", "components"), "what")
   switch(
     what,
@@ -312,7 +317,7 @@ autoplot_icc_components <- function(object) {
 
 #' @rdname icc
 #' @export
-plot.icc <- function(x, ...) {
-  print(autoplot.icc(x, ...))
+plot.intraclass_icc <- function(x, ...) {
+  print(autoplot.intraclass_icc(x, ...))
   invisible(x)
 }

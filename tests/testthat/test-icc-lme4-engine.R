@@ -434,7 +434,7 @@ test_that("incomplete multilevel lme4 degrades loudly to glmmTMB at the boundary
       engine = "glmmTMB",
       seed = 1
     ),
-    "icc"
+    "intraclass_icc"
   )
 })
 
