@@ -1,13 +1,13 @@
 # M159: Result classes take the package prefix, so performance cannot replace their methods
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP2
 - **Resolves:** —
 - **Surface tier:** user-facing — users see the result class through `class()`, `inherits()` and the help pages
-- **Branch/PR:** —
+- **Branch/PR:** m159-package-prefixed-result-classes
 
 ## Goal
 
@@ -39,7 +39,7 @@ The results of `icc()`, `d_study()` and `choose_icc()` carry the classes `"intra
 
 ## Tasks
 
-- [ ] T1: Write `tests/testthat/test-class-names.R` first: the three class-vector assertions (AC1) and the foreign-method test (AC2). Register the foreign methods with `registerS3method()` and remove them when the test ends with `withr::defer()` and `rm()` on the generic's `.__S3MethodsTable__.`. Use `skip_if_not_installed()` where a generic needs a Suggests package. See it red on the current code.
+- [x] T1: Write `tests/testthat/test-class-names.R` first: the three class-vector assertions (AC1) and the foreign-method test (AC2). Register the foreign methods with `registerS3method()` and remove them when the test ends with `withr::defer()` and `rm()` on the generic's `.__S3MethodsTable__.`. Use `skip_if_not_installed()` where a generic needs a Suggests package. See it red on the current code.
 - [ ] T2: Rename the `icc` class: the constructor at `R/icc.R:2660`, the methods in `R/icc-methods.R` and `R/autoplot.R` (`format`, `print`, `summary`, `tidy`, `glance`, `plot`, `autoplot`), the lazy registration at `R/zzz.R:13`, and the `d_study()` check and message at `R/d-study.R:210-211`. Update the roxygen that names the class and run `devtools::document()`.
 - [ ] T3: Rename `icc_dstudy` and `icc_recommendation` the same way: the constructors at `R/d-study.R:577` and `R/choose-icc.R:604`, their methods, `R/zzz.R:12`, and their roxygen. Keep the internal helper names `new_icc_recommendation()` and `resolve_icc_recommendation()`. Run `devtools::document()`.
 - [ ] T4: Update every remaining hit of the AC3 command in tests, comments, vignettes and README. Change the old names in `cairn/DESIGN.md`. Run the AC3 command and record its output in the work log.
@@ -56,6 +56,7 @@ The results of `icc()`, `d_study()` and `choose_icc()` carry the classes `"intra
 - 2026-10-16: plan gate chose a simulated clash (foreign methods registered in a test) over adding performance to Suggests for a real-package test, because it needs no new dependency; falsified by a clash that the simulated methods do not reproduce.
 - 2026-10-16: criteria audit (full mode, fresh Opus reader) returned 7 findings: (1) GP2, #6 and #7 block a plain rename → asked at the question set, D-entry added; (2) the regression test trips AC3 → that file excluded; (3) the count and a function-name line over-matched → count dropped, `exists("icc", mode = "function")` excluded; (4) the pattern missed NAMESPACE, Rd `\method`, `\code{}` and prose forms → pattern widened, DESIGN.md added to T4, the estimand spec left out on purpose; (5) foreign-method cleanup → moved to T1, `as.data.frame` left to AC1; (6, 7) no finding.
 - 2026-10-16: inbox sweep: no open issues or PRs.
+- 2026-10-16: T1: `test-class-names.R` written. On the current code both tests fail: the class vectors are the old ones, and the foreign `"icc"` methods return the marker for all five generics. The foreign-method helper restores any entry it replaced, so an `"icc"` method intraclass still has survives the test. Printed output is compared through `cli::cli_fmt()`.
 
 ## Decisions
 
