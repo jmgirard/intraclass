@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-10-11 (M158 done). Graduated: the glmmTMB false zero ICC row and the degenerate-data bootstrap test row. M155 rotated out of the table. No lesson added, because LESSONS.md is at 19,993 of 20,000 bytes. Doctrine modules within budget. validate green._
+_Last hygiene check: 2026-10-16 (status audit). Nothing changed since M158: no open issues or PRs, no outside merges, no orphaned issues. validate green, byte and doctrine budgets within limits._
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
