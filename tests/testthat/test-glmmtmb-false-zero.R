@@ -277,7 +277,7 @@ test_that("the second start holds only finite values when a fixed effect is not 
   expect_true(all(is.finite(unlist(start))))
 })
 
-# The refusal of equal limits (D-048, D-049) -------------------------------------
+# The refusal of equal limits (D-048, D-049, D-053) ------------------------------
 #
 # Fired at the reducers with stub engines (GP9): `mc_ci()` and `bootstrap_ci()`
 # each get draws on six components, where `wide` = subject / (subject +
@@ -336,79 +336,73 @@ fz_expect_tiny <- function(iv) {
   expect_lt(width, sqrt(.Machine$double.eps))
 }
 
-test_that("mc_ci() refuses equal limits on a glmmTMB fit only (AC3)", {
-  expect_error(
-    mc_ci(
-      fz_mc_stub("glmmTMB"),
-      list(fz_wide, fz_flat),
+test_that("mc_ci() refuses equal limits on glmmTMB and lme4 fits only (AC3; M162 AC3)", {
+  for (engine in c("glmmTMB", "lme4")) {
+    cnd <- rlang::catch_cnd(
+      mc_ci(
+        fz_mc_stub(engine),
+        list(fz_wide, fz_flat),
+        mc_samples = 200L,
+        seed = 1
+      ),
+      classes = "error"
+    )
+    expect_s3_class(cnd, "intraclass_zero_width_interval")
+    expect_s3_class(cnd, "intraclass_singular_fit")
+    # The message states what failed, never a cause the guard has not checked,
+    # and says nothing about draws, which a bootstrap interval does not have.
+    msg <- cli::ansi_strip(cli::format_message(conditionMessage(cnd)))
+    expect_match(msg, "lower and upper limits are equal", fixed = TRUE)
+    expect_false(grepl("draw", msg, fixed = TRUE))
+    # An interval about 1e-10 wide is reported, beside a wide one.
+    ok <- mc_ci(
+      fz_mc_stub(engine),
+      list(fz_wide, fz_tiny),
       mc_samples = 200L,
       seed = 1
-    ),
-    class = "intraclass_zero_width_interval"
-  )
-  cnd <- rlang::catch_cnd(mc_ci(
-    fz_mc_stub("glmmTMB"),
-    list(fz_wide, fz_flat),
-    mc_samples = 200L,
-    seed = 1
-  ))
-  expect_s3_class(cnd, "intraclass_singular_fit")
-  # The message states what failed, never a cause the guard has not checked, and
-  # says nothing about draws, which a bootstrap interval does not have.
-  msg <- cli::ansi_strip(cli::format_message(conditionMessage(cnd)))
-  expect_match(msg, "lower and upper limits are equal", fixed = TRUE)
-  expect_false(grepl("draw", msg, fixed = TRUE))
+    )
+    expect_gt(ok[[1]]$conf.high - ok[[1]]$conf.low, 0.1)
+    fz_expect_tiny(ok[[2]])
+  }
 
-  # The same equal limits on an lme4 fit are reported, not refused.
+  # The same equal limits on a lavaan fit are reported, not refused.
   out <- mc_ci(
-    fz_mc_stub("lme4"),
+    fz_mc_stub("lavaan"),
     list(fz_wide, fz_flat),
     mc_samples = 200L,
     seed = 1
   )
   expect_identical(out[[2]]$conf.high - out[[2]]$conf.low, 0)
-  # A glmmTMB interval about 1e-10 wide is reported, beside a wide one.
-  ok <- mc_ci(
-    fz_mc_stub("glmmTMB"),
-    list(fz_wide, fz_tiny),
-    mc_samples = 200L,
-    seed = 1
-  )
-  expect_gt(ok[[1]]$conf.high - ok[[1]]$conf.low, 0.1)
-  fz_expect_tiny(ok[[2]])
 })
 
-test_that("bootstrap_ci() refuses equal limits on a glmmTMB fit only (AC3)", {
-  expect_error(
-    bootstrap_ci(
-      fz_boot_stub("glmmTMB"),
-      list(fz_wide, fz_flat),
-      boot_samples = 50L,
-      call = rlang::current_env()
-    ),
-    class = "intraclass_zero_width_interval"
-  )
-  cnd <- rlang::catch_cnd(bootstrap_ci(
-    fz_boot_stub("glmmTMB"),
-    list(fz_wide, fz_flat),
-    boot_samples = 50L,
-    call = rlang::current_env()
-  ))
-  expect_s3_class(cnd, "intraclass_singular_fit")
+test_that("bootstrap_ci() refuses equal limits on glmmTMB and lme4 fits only (AC3; M162 AC3)", {
+  for (engine in c("glmmTMB", "lme4")) {
+    cnd <- rlang::catch_cnd(
+      bootstrap_ci(
+        fz_boot_stub(engine),
+        list(fz_wide, fz_flat),
+        boot_samples = 50L,
+        call = rlang::current_env()
+      ),
+      classes = "error"
+    )
+    expect_s3_class(cnd, "intraclass_zero_width_interval")
+    expect_s3_class(cnd, "intraclass_singular_fit")
+    ok <- bootstrap_ci(
+      fz_boot_stub(engine),
+      list(fz_wide, fz_tiny),
+      boot_samples = 50L
+    )
+    expect_gt(ok[[1]]$conf.high - ok[[1]]$conf.low, 0.1)
+    fz_expect_tiny(ok[[2]])
+  }
 
   out <- bootstrap_ci(
-    fz_boot_stub("lme4"),
+    fz_boot_stub("lavaan"),
     list(fz_wide, fz_flat),
     boot_samples = 50L
   )
   expect_identical(out[[2]]$conf.high - out[[2]]$conf.low, 0)
-  ok <- bootstrap_ci(
-    fz_boot_stub("glmmTMB"),
-    list(fz_wide, fz_tiny),
-    boot_samples = 50L
-  )
-  expect_gt(ok[[1]]$conf.high - ok[[1]]$conf.low, 0.1)
-  fz_expect_tiny(ok[[2]])
 })
 
 # Near-perfect agreement: 20 subjects, 3 raters, rater error SD 1e-5. Some of
