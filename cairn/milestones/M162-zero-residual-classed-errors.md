@@ -4,14 +4,14 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M162: Raw glmmTMB and lme4 errors reach the caller as intraclass_singular_fit, and lme4 refuses equal interval limits
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate; RR<NN> whose Binding criteria bind this milestone's ACs (binding-criteria check), or — -->
 - **Principles touched:** GP1, GP7, GP9   <!-- owner: plan · create/amend-via-gate; comma-separated IPn/GPn ids this milestone touches, or — -->
 - **Resolves:** —   <!-- owner: plan · create/amend-via-gate; comma-separated GitHub issues the scope absorbs, each `#N closes` (the PR closes it at merge) or `#N partial` (the remainder gets a candidate row), or — ; skill conduct only — no validate check parses it -->
 - **Surface tier:** user-facing — it changes which conditions `icc()` raises and which lme4 intervals it reports   <!-- owner: plan · create/amend-via-gate; user-facing | internal — <one-clause reason>; skill conduct only — no validate check parses it -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create; a companion checkout the milestone also works in is one further entry per checkout, `companion: <abs-path> <branch>` (implement), its PR URL appended by review — /milestone-review merges companions first, in listed order -->
+- **Branch/PR:** m162-zero-residual-classed-errors   <!-- owner: implement (branch) / review (PR URL) · create; a companion checkout the milestone also works in is one further entry per checkout, `companion: <abs-path> <branch>` (implement), its PR URL appended by review — /milestone-review merges companions first, in listed order -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -73,6 +73,8 @@ On the glmmTMB and lme4 engines, a fit that cannot support an interval ends in t
 - 2026-10-17: plan gate chose "not an rlang error" as the re-raise filter over a list of pass-through classes because package and rlang errors are all rlang errors and engine errors are not; falsified by a glmmTMB or lme4 error that is an rlang error.
 - 2026-10-17: collisions: D-022 quoted and not superseded (its objection was a wrapper matching text). D-048's glmmTMB-only gate superseded by D-053. D-052's Untouched clause names this data. Candidate rows absorbed in part: "two-way data with zero residual", "M161 review follow-ups on the flat-scores refusal". GitHub inbox: 0 open issues, 0 open PRs.
 - 2026-10-17: lessons surfaced: M93 (render messages with `cli::format_message()`), M141 (CI lints `tests/`), M150 (`expect_warning()` takes one warning). No dependency change and no outward action beyond the merge-gate PR.
+- 2026-10-17: started /milestone-implement on branch m162-zero-residual-classed-errors.
+- 2026-10-17: T1: `test-zero-residual.R` written. On the unchanged code it fails with 28 of 72 calls unclassed (glmmTMB 10: LU factorization, 'a' is computationally singular; lme4 18: Downdated VtV), about 55 s. Subject values come from `round(2 * sin(i), 3)`, so the test draws no random numbers. Box left open until T2 makes it pass.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->

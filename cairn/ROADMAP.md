@@ -9,7 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M162 | Raw glmmTMB and lme4 errors reach the caller as intraclass_singular_fit, and lme4 refuses equal interval limits | planned | — | normal | milestones/M162-zero-residual-classed-errors.md |
+| M162 | Raw glmmTMB and lme4 errors reach the caller as intraclass_singular_fit, and lme4 refuses equal interval limits | in-progress | — | normal | milestones/M162-zero-residual-classed-errors.md |
 | M161 | Data whose scores do not vary within any subject are refused classed before any fit | done | — | normal | milestones/archive/M161-flat-scores-refusal.md |
 | M160 | easystats model_parameters method for icc() results | done | — | normal | milestones/archive/M160-model-parameters-method.md |
 | M159 | Result classes take the package prefix, so performance cannot replace their methods | done | — | high | milestones/archive/M159-package-prefixed-result-classes.md |
