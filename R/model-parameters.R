@@ -11,7 +11,12 @@
 #'   other value is an error. Fit again with `icc(conf_level = )` for another
 #'   level.
 #' @rdname icc
+# lintr does not see this as an S3 method (not a NAMESPACE export), so the
+# `generic.class` dot and the method's length trip two name linters --
+# suppressed here, not renamed, as for autoplot (R/autoplot.R).
+# nolint start: object_name_linter, object_length_linter.
 model_parameters.intraclass_icc <- function(model, ci = NULL, ...) {
+  # nolint end
   # The table reports the interval the fit already computed. An interval at
   # another level needs a new fit, so a different `ci` fails loudly (#5) rather
   # than returning limits at a level the caller did not ask for.

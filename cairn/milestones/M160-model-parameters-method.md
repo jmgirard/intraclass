@@ -67,6 +67,7 @@
 - 2026-10-17: T4: first `devtools::check()` at d0042f1 gave 1 error, 0 warnings, 0 notes: the spelling test flagged "easystats" (in NEWS and ?icc); added it to `inst/WORDLIST`, and `spelling::spell_check_package()` then found no errors. Check re-run pending.
 - 2026-10-17: T4 done: `devtools::check()` at 01831ae reports 0 errors, 0 warnings, 0 notes. Status set to review.
 - 2026-10-17: step-7 approval: m160-model-parameters-method approved for merge
+- 2026-10-17: PR #179 CI: the lint job failed on R/model-parameters.R:14 (object_name_linter and object_length_linter; lintr does not see the lazily registered method as S3). Fixed with a `nolint` block for both linters, the pattern R/autoplot.R uses; comment-only change, so no re-approval. Local `lintr::lint_package()` found no lints, `devtools::document()` no diff, and the model-parameters tests ran 81 expectations, 0 failed.
 
 ## Decisions
 
