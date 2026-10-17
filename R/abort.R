@@ -191,3 +191,47 @@ abort_unsupported <- function(
     .envir = .envir
   )
 }
+
+#' Re-raise an unclassed glmmTMB or lme4 engine error as a singular fit
+#'
+#' Evaluates `expr`, the engine dispatch of `icc()`. On the glmmTMB and lme4
+#' engines, an error that is not an rlang error (the engines' own errors, such
+#' as lme4's C++ exceptions and base `solve()` failures) is re-raised as
+#' `intraclass_singular_fit`, with the original error as its parent (D-053).
+#' The package's and rlang's own errors, for example the classed deferrals and
+#' a missing optional package, pass unchanged. The handler matches no message
+#' text (D-022). It is a calling handler, so an error that an engine function
+#' catches itself, such as a failed second start, never reaches it, and the
+#' warnings an engine function shows before its error still come first. The
+#' lavaan engine re-raises its own errors, and brms is not covered.
+#'
+#' @param engine The `engine` argument of `icc()`.
+#' @param expr The engine dispatch, evaluated lazily.
+#' @keywords internal
+#' @noRd
+reraise_engine_error <- function(engine, expr, call = rlang::caller_env()) {
+  if (!engine %in% c("glmmTMB", "lme4")) {
+    return(expr)
+  }
+  withCallingHandlers(
+    expr,
+    error = function(e) {
+      if (inherits(e, "rlang_error")) {
+        return()
+      }
+      abort_intraclass(
+        c(
+          "The {.pkg {engine}} engine could not fit the model to these data.",
+          i = "A variance component that the data cannot identify can cause \\
+               this, for example when scores vary only by rater, or are \\
+               exactly a subject value plus a rater value.",
+          i = "Inspect the data and check that {.arg score}, \\
+               {.arg subject} and {.arg rater} name the intended columns."
+        ),
+        class = "intraclass_singular_fit",
+        parent = e,
+        call = call
+      )
+    }
+  )
+}

@@ -105,3 +105,104 @@ test_that("zero-residual two-way data return a result or a classed singular-fit 
   # The grid reaches the degenerate path, so the check above is not vacuous.
   expect_gt(n_abort, 0L)
 })
+
+# The re-raise at the engine dispatch (AC2) ------------------------------------
+#
+# Each engine function is replaced by a stub that raises a given error, so the
+# tests check the handler, not whether a real fit fails.
+
+# An error in the shape of lme4's C++ exceptions: not an rlang error.
+zr_cpp_error <- function(msg) {
+  structure(
+    class = c("Rcpp::exception", "C++Error", "error", "condition"),
+    list(message = msg, call = NULL)
+  )
+}
+
+zr_call <- function(engine, model = "twoway") {
+  rlang::catch_cnd(
+    suppressWarnings(icc(
+      sf_ratings_long(),
+      score = score,
+      subject = subject,
+      rater = rater,
+      model = model,
+      engine = engine,
+      mc_samples = 200L,
+      seed = 1
+    )),
+    classes = "error"
+  )
+}
+
+test_that("an unclassed engine error is re-raised as a singular fit (AC2)", {
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+
+  # One glmmTMB function on the two-way branch, one lme4 function on the
+  # one-way branch; each raises a base simpleError and a C++-style error.
+  cases <- list(
+    list(engine = "glmmTMB", model = "twoway", fn = "fit_glmmtmb"),
+    list(engine = "lme4", model = "oneway", fn = "fit_lme4_oneway")
+  )
+  for (case in cases) {
+    errors <- list(
+      simpleError(paste(case$engine, "stub simple failure")),
+      zr_cpp_error(paste(case$engine, "stub C++ failure"))
+    )
+    for (err in errors) {
+      stub <- rlang::set_names(list(function(...) stop(err)), case$fn)
+      cnd <- local({
+        rlang::inject(local_mocked_bindings(!!!stub))
+        zr_call(case$engine, case$model)
+      })
+      expect_s3_class(cnd, "intraclass_singular_fit")
+      expect_s3_class(cnd, "intraclass_error")
+      expect_identical(cnd$parent, err)
+      msg <- cli::ansi_strip(conditionMessage(cnd))
+      expect_match(
+        msg,
+        paste("The", case$engine, "engine could not fit"),
+        fixed = TRUE
+      )
+      expect_match(msg, conditionMessage(err), fixed = TRUE)
+    }
+  }
+})
+
+test_that("classed errors and other engines pass the re-raise unchanged (AC2)", {
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+
+  # A package error from an engine function keeps its own class.
+  local({
+    local_mocked_bindings(
+      fit_glmmtmb = function(...) {
+        abort_unidentified("stub unidentified design")
+      }
+    )
+    cnd <- zr_call("glmmTMB")
+    expect_s3_class(cnd, "intraclass_unidentified")
+    expect_false(inherits(cnd, "intraclass_singular_fit"))
+    expect_null(cnd$parent)
+  })
+  # An rlang error, such as a missing optional package, keeps its own class.
+  local({
+    local_mocked_bindings(
+      fit_lme4 = function(...) {
+        rlang::abort("stub missing package", class = "zr_stub_rlang_error")
+      }
+    )
+    cnd <- zr_call("lme4")
+    expect_s3_class(cnd, "zr_stub_rlang_error")
+    expect_false(inherits(cnd, "intraclass_singular_fit"))
+  })
+  # The lavaan engine is outside the handler: its plain error is not re-raised.
+  local({
+    err <- simpleError("lavaan stub failure")
+    local_mocked_bindings(fit_lavaan = function(...) stop(err))
+    cnd <- zr_call("lavaan")
+    expect_identical(class(cnd), class(err))
+    expect_identical(conditionMessage(cnd), "lavaan stub failure")
+  })
+})

@@ -52,8 +52,8 @@ On the glmmTMB and lme4 engines, a fit that cannot support an interval ends in t
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Write `test-zero-residual.R` with the AC1 grid. Fix the subject values by a seed, keep `mc_samples` and `boot_samples` small, and add `skip_on_cran()`. Run it on main and record which calls end in an error without a package class.
-- [ ] T2: Wrap the `engine_fit <-` dispatch in `icc()` in one handler, active for `engine` "glmmTMB" and "lme4" only. Keep the engine warnings that reach the user before the error. Write the message with cli. For lme4 it can point at glmmTMB, and for glmmTMB it points at the data. Add the AC2 tests, rendering messages with `cli::format_message()` (LESSONS, M93).
+- [x] T1: Write `test-zero-residual.R` with the AC1 grid. Fix the subject values by a seed, keep `mc_samples` and `boot_samples` small, and add `skip_on_cran()`. Run it on main and record which calls end in an error without a package class.
+- [x] T2: Wrap the `engine_fit <-` dispatch in `icc()` in one handler, active for `engine` "glmmTMB" and "lme4" only. Keep the engine warnings that reach the user before the error. Write the message with cli. For lme4 it can point at glmmTMB, and for glmmTMB it points at the data. Add the AC2 tests, rendering messages with `cli::format_message()` (LESSONS, M93).
 - [ ] T3: Extend the gate in `refuse_zero_width()` to lme4 and update its header comment. Turn the lme4 pin at `test-glmmtmb-false-zero.R:362` into a refusal pin, and add the AC3 controls under both methods.
 - [ ] T4: Write the NEWS entry. Update the DESIGN.md Boundary-fit policy rows (lme4 fit-time, Monte-Carlo, Bootstrap) and the classed-deferral bullet to cite D-053. If the `test-boundary-policy.R` pins for those rows name the old behavior, update them.
 - [ ] T5: Run `devtools::document()`, `devtools::test()` and `devtools::check()`, and read the raw Status line. Run `lintr::lint_package()` too, since CI lints `tests/` (LESSONS, M141).
@@ -75,6 +75,7 @@ On the glmmTMB and lme4 engines, a fit that cannot support an interval ends in t
 - 2026-10-17: lessons surfaced: M93 (render messages with `cli::format_message()`), M141 (CI lints `tests/`), M150 (`expect_warning()` takes one warning). No dependency change and no outward action beyond the merge-gate PR.
 - 2026-10-17: started /milestone-implement on branch m162-zero-residual-classed-errors.
 - 2026-10-17: T1: `test-zero-residual.R` written. On the unchanged code it fails with 28 of 72 calls unclassed (glmmTMB 10: LU factorization, 'a' is computationally singular; lme4 18: Downdated VtV), about 55 s. Subject values come from `round(2 * sin(i), 3)`, so the test draws no random numbers. Box left open until T2 makes it pass.
+- 2026-10-17: T1, T2 done. `reraise_engine_error()` in `R/abort.R` wraps the `engine_fit` dispatch in `icc()` (the block's re-indent is most of the `R/icc.R` diff). It is a calling handler, so errors an engine function catches itself never reach it. One message for both engines names the engine and points at the data, not at glmmTMB, since glmmTMB also fails on this data; the engine's error is the parent, which `conditionMessage()` shows as "Caused by error". Grid test passes (72 calls). With the handler replaced by a pass-through, the grid test and the re-raise test failed (17 failures) and the pass-through controls stayed green. Full suite: 5 failures, all in `test-glmmtmb-false-zero.R`, which T3 had already edited while the suite ran on the pre-T3 code; the rest passed (10398).
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
