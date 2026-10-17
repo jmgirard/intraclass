@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-10-16 (status audit). Nothing changed since M158: no open issues or PRs, no outside merges, no orphaned issues. validate green, byte and doctrine budgets within limits._
+_Last hygiene check: 2026-10-16 (M159 done). Added the row "M159 review follow-ups on the renamed result classes". M156 rotated out of the table. No lesson added, because LESSONS.md is at 19,996 of 20,000 bytes. Doctrine modules within budget. validate green._
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,11 +9,10 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M159 | Result classes take the package prefix, so performance cannot replace their methods | review | — | high | milestones/M159-package-prefixed-result-classes.md |
+| M159 | Result classes take the package prefix, so performance cannot replace their methods | done | — | high | milestones/archive/M159-package-prefixed-result-classes.md |
 | M158 | glmmTMB fits retry a variance stuck at zero, and a zero-width interval is refused | done | — | high | milestones/archive/M158-glmmtmb-false-zero.md |
 | M157 | Plain-English printed guidance, corrected glossary glosses, and no record IDs in messages | done | — | normal | milestones/archive/M157-plain-english-printed-text-glosses.md |
-| M156 | Plain-English pass over the condition text, and NEWS under R7/R8 | done | — | normal | milestones/archive/M156-plain-english-condition-text.md |
-<!-- terminal-row retention: retention is 3 (tracking-rules Weight caps); M155 rotated out 2026-10-11 at the M158 done pass as the oldest terminal row by merge order, its archive file still resolving there. Kept: M158, M157, M156 [claim:roadmap-terminal-rows]. -->
+<!-- terminal-row retention: retention is 3 (tracking-rules Weight caps); M156 rotated out 2026-10-16 at the M159 done pass as the oldest terminal row by merge order, its archive file still resolving there. Kept: M159, M158, M157 [claim:roadmap-terminal-rows]. -->
 <!-- rows grouped by status; keep only the 3 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
