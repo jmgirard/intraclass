@@ -237,7 +237,8 @@
 #'   no rater main effect to model, so `type` does not apply and the
 #'   coefficients are `ICC(1)` / `ICC(k)`.
 #'   Fixed raters and a `cluster` (multilevel) structure are not defined for a
-#'   one-way design.
+#'   one-way design. In `model_parameters()`, `model` is instead the
+#'   `intraclass_icc` object.
 #' @param type Error definition(s) (two-way only): `"agreement"` (absolute
 #'   agreement) counts systematic rater differences as error, and
 #'   `"consistency"` ignores them. Like `unit` and `level`, `type` is
@@ -705,7 +706,8 @@
 #'   reading an implementation detail. `tidy()` and `glance()` are the stable
 #'   tables, not a re-export of the list. They report the estimated
 #'   coefficients and the model-level summaries, column by column as documented
-#'   below. Those two tables, plus `$fit` and `$call`, are the whole supported
+#'   below. The `model_parameters()` table is `tidy()` under other column
+#'   names. Those tables, plus `$fit` and `$call`, are the whole supported
 #'   surface. Everything else the list holds falls under the rule above,
 #'   whether or not a table happens to report it.
 #'
@@ -762,6 +764,21 @@
 #'     `what = "components"`.
 #'   * `plot.intraclass_icc()`: the `intraclass_icc` object invisibly, having
 #'     drawn that same plot.
+#'   * `model_parameters.intraclass_icc()`: available when the \pkg{parameters}
+#'     package is installed, through [parameters::model_parameters()]. It
+#'     returns a `parameters_model` data frame with one row per row of `tidy()`,
+#'     under the column names of the easystats packages, the family that
+#'     \pkg{parameters} belongs to. `Parameter` is `term`, `Type` is
+#'     `type`, `Level` is `level`, `Occasions` is `occasions`, `SF_Index` is
+#'     `sf_index`, `Coefficient` is `estimate`, `SE` is `std.error`, `CI` is
+#'     `conf.level`, `CI_low` is `conf.low`, `CI_high` is `conf.high`, and
+#'     `Method` is `method`. The column names are stable. Their order is not,
+#'     except that `Parameter` is always the first column. On a multilevel
+#'     fit, `Parameter` repeats across levels (`ICC(A,1)` at the subject level
+#'     and at the cluster level), so read it together with `Level`. The
+#'     printed table is titled "Intraclass correlation coefficients" and hides
+#'     the columns that are all `NA`. It shows `Level` in the `Parameter`
+#'     label, as in `ICC(A,1) [subject]`.
 #'
 #'   `tidy.intraclass_icc()` and `glance.intraclass_icc()` implement the
 #'   [tidy()][generics::tidy] and [glance()][generics::glance] generics.

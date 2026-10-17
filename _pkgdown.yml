@@ -39,8 +39,8 @@ reference:
       two-way, multilevel (subject vs. cluster level, crossed or nested), and
       incomplete (ragged) data — all with boundary-aware Monte-Carlo confidence
       intervals. The `print()`, `summary()`, `tidy()`, `glance()`, `autoplot()`
-      (coefficient forest / variance-component decomposition) and `plot()`
-      methods are documented on this page.
+      (coefficient forest / variance-component decomposition), `plot()` and
+      `model_parameters()` methods are documented on this page.
     contents:
       - icc
 
