@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-10-17 (M161 done). Graduated the row "Data with no variation within subjects ends in an unclassed glmmTMB error"; added "M161 review follow-ups on the flat-scores refusal" at review. M158 rotated out, with the record-claims pin. No lesson added (LESSONS.md has no byte room). Doctrine modules within budget. validate green._
+_Last hygiene check: 2026-10-17 (lessons pass). Dropped the 2026-07-19 (M71) merge_guard lesson by user override: plugin `is_guarded_merge()` guards `git merge` only on main, so the premise is false. Merged 2026-08-08 (M113) into 2026-08-08 (M114). Trimmed 2026-08-22 (M130) to its pkgdown and `--self-test` remainder (rest owned by `doctrine/data-raw-checkers.md`). Corrected the `figure/` clause of 2026-08-22 (M131) (`.Rbuildignore:20`). No decision entry. validate green._
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
