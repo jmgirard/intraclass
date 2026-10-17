@@ -1,4 +1,4 @@
-# S3 methods for `icc` objects -------------------------------------------------
+# S3 methods for `intraclass_icc` objects --------------------------------------
 #
 # PRINCIPLES.md #7: explicit tidy generics. print/summary/format plus tidy/glance
 # via the generics package. All user-facing text goes through cli (#8).
@@ -30,14 +30,15 @@ icc_type_heading <- function(type) {
 }
 
 #' @rdname icc
-#' @param x,object An `icc` object.
+#' @param x,object An `intraclass_icc` object.
 #' @param ... Unused. Present so the method signature matches the generic.
 #' @export
-format.icc <- function(x, ...) {
+format.intraclass_icc <- function(x, ...) {
   ci_pct <- format(100 * x$ci$conf_level, trim = TRUE)
   ml <- isTRUE(x$design$multilevel)
   ow <- identical(x$design$model, "oneway")
-  # Multilevel-aware design phrase, shared with autoplot.icc (spec M8 §4).
+  # Multilevel-aware design phrase, shared with autoplot.intraclass_icc
+  # (spec M8 §4).
   phrase <- icc_design_label(x$design)
   header <- icc_rule(sprintf("Intraclass correlation: %s", phrase))
   cell_total <- x$n$subjects * x$n$raters
@@ -270,7 +271,8 @@ format.icc <- function(x, ...) {
     ))
   }
 
-  # Shared with autoplot.icc (what = "components") so labels/ordering never drift.
+  # Shared with autoplot.intraclass_icc (what = "components") so
+  # labels/ordering never drift.
   view <- icc_components_view(x)
   d3 <- function(v) formatC(v, format = "f", digits = 3)
   body <- paste(
@@ -298,7 +300,7 @@ format.icc <- function(x, ...) {
 
 #' @rdname icc
 #' @export
-print.icc <- function(x, ...) {
+print.intraclass_icc <- function(x, ...) {
   # Join to one string so the blank-line section separators in format() survive:
   # cli_verbatim() drops empty vector elements but honours embedded "\n" (M43).
   cli::cli_verbatim(paste(format(x, ...), collapse = "\n"))
@@ -307,7 +309,7 @@ print.icc <- function(x, ...) {
 
 #' @rdname icc
 #' @export
-summary.icc <- function(object, ...) {
+summary.intraclass_icc <- function(object, ...) {
   notes <- if (identical(object$design$model, "oneway")) {
     c(
       "One-way random: each subject is rated by a possibly different set of",
@@ -358,14 +360,14 @@ summary.icc <- function(object, ...) {
     c(type_notes, cell_note)
   }
   # The report (format) plus a blank line plus the interpretive notes, emitted as
-  # one string so the section blanks render (see print.icc).
+  # one string so the section blanks render (see print.intraclass_icc).
   cli::cli_verbatim(paste(c(format(object, ...), "", notes), collapse = "\n"))
   invisible(object)
 }
 
 #' @rdname icc
 #' @export
-tidy.icc <- function(x, ...) {
+tidy.intraclass_icc <- function(x, ...) {
   # `term` rather than `index`: the broom glossary the re-exported generic belongs to
   # keys the coefficient-identifying column as `term`, which is what the wider
   # tidy ecosystem (modelsummary and friends) looks for (D-035).
@@ -395,7 +397,7 @@ tidy.icc <- function(x, ...) {
 
 #' @rdname icc
 #' @export
-glance.icc <- function(x, ...) {
+glance.intraclass_icc <- function(x, ...) {
   or_na <- function(v) if (is.null(v)) NA_real_ else v
   tibble::tibble(
     n_subjects = x$n$subjects,

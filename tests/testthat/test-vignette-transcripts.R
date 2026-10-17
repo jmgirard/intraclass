@@ -63,12 +63,12 @@ pasted_blocks <- function(path) {
   unname(split(sub("^[[:space:]]*#>[[:space:]]?", "", lines[is_out]), run))
 }
 
-# `print.icc()` emits through cli, which writes to its own output connection --
-# `utils::capture.output()` returns character(0) for it. `cli::cli_fmt()` captures
-# the real print() path, so this pins what a user actually sees. The fixture
-# carries the cli rendering mode its transcripts were produced under (width,
-# Unicode glyphs, colour); testthat's default mode is ASCII, so rendering
-# without these would compare "──" against "--".
+# `print.intraclass_icc()` emits through cli, which writes to its own output
+# connection -- `utils::capture.output()` returns character(0) for it.
+# `cli::cli_fmt()` captures the real print() path, so this pins what a user
+# actually sees. The fixture carries the cli rendering mode its transcripts were
+# produced under (width, Unicode glyphs, colour); testthat's default mode is
+# ASCII, so rendering without these would compare "──" against "--".
 render_under_fixture_options <- function(x) {
   withr::with_options(fixture$render_options, cli::cli_fmt(print(x)))
 }

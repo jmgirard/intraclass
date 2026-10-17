@@ -85,8 +85,8 @@ rmvn <- function(
 # quantiles, while `d_study()` reuses the SAME draws across a range of projected
 # rater counts (so the reliability curve and its band are internally coherent).
 # `mc` is a list with `estimate`, `vcov`, and `to_components` (from the engine
-# fit, stored on the `icc` object). Seeded via `with_rng_seed()` (PRINCIPLES.md
-# #9, #12); the global RNG stream is left untouched.
+# fit, stored on the `intraclass_icc` object). Seeded via `with_rng_seed()`
+# (PRINCIPLES.md #9, #12); the global RNG stream is left untouched.
 mc_components <- function(
   mc,
   mc_samples = 10000L,

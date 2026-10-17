@@ -619,8 +619,8 @@ test_that("the contract is unchanged: still aborts, still returns no interval (A
   # violation this criterion forbids is `icc()` RETURNING an interval where it should
   # abort, and a `skip_if_not(found, ...)` ending is green on exactly that -- no seed
   # aborts, `found` stays FALSE, and the test skips over the fallback default it exists
-  # to forbid. An `expect_false(inherits(got, "icc"))` reached only when `got` is
-  # already a condition is a tautology for the same reason.
+  # to forbid. An `expect_false(inherits(got, "intraclass_icc"))` reached only
+  # when `got` is already a condition is a tautology for the same reason.
   got <- NULL
   for (sd in 1:12) {
     d <- bh_twoway(seed = sd)
@@ -637,7 +637,7 @@ test_that("the contract is unchanged: still aborts, still returns no interval (A
     }
   }
   # An error, not a value: whatever the sweep ended on must NOT be an interval.
-  expect_false(inherits(got, "icc"))
+  expect_false(inherits(got, "intraclass_icc"))
   expect_s3_class(got, "intraclass_singular_fit")
   expect_s3_class(got, "rlang_error")
 })

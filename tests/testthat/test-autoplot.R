@@ -1,7 +1,7 @@
 # test-autoplot.R
 # ===========================================================================
-# Plot methods for `icc` objects (M11, ADR-020) -- and backfill coverage for
-# the M4.5 `autoplot.icc_dstudy` reliability curve.
+# Plot methods for `intraclass_icc` objects (M11, ADR-020) -- and backfill
+# coverage for the M4.5 `autoplot.intraclass_dstudy` reliability curve.
 #
 # There is no estimand and no new number here (PRINCIPLES.md #1 is numerically
 # N/A): a plot method is correct iff it FAITHFULLY RENDERS the object's already
@@ -234,7 +234,7 @@ test_that("components plot handles a nested design (Design 2)", {
   )
 })
 
-test_that("plot.icc returns its input invisibly", {
+test_that("plot.intraclass_icc returns its input invisibly", {
   skip_if_not_installed("glmmTMB")
   skip_if_not_installed("ggplot2")
   fit <- icc(sf_ratings_long(), score, subject, rater, seed = 1)
@@ -243,7 +243,18 @@ test_that("plot.icc returns its input invisibly", {
   expect_invisible(plot(fit))
 })
 
-test_that("autoplot.icc_dstudy renders each projected curve faithfully", {
+test_that("plot.intraclass_dstudy returns its input invisibly", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("ggplot2")
+  fit <- icc(sf_ratings_long(), score, subject, rater, seed = 1)
+  d <- d_study(fit, m = c(1, 2, 4))
+  pdf(NULL)
+  on.exit(dev.off(), add = TRUE)
+  expect_invisible(plot(d))
+  expect_identical(plot(d), d)
+})
+
+test_that("autoplot.intraclass_dstudy renders each projected curve faithfully", {
   skip_if_not_installed("glmmTMB")
   skip_if_not_installed("ggplot2")
   fit <- icc(
@@ -269,7 +280,7 @@ test_that("autoplot.icc_dstudy renders each projected curve faithfully", {
   expect_equal(sort(round(ribbon$ymax, 8)), sort(round(ds$conf.high, 8)))
 })
 
-test_that("autoplot.icc_dstudy draws overlaid curves as separate lines", {
+test_that("autoplot.intraclass_dstudy draws overlaid curves as separate lines", {
   skip_if_not_installed("glmmTMB")
   skip_if_not_installed("ggplot2")
   fit <- icc(
@@ -291,7 +302,7 @@ test_that("autoplot.icc_dstudy draws overlaid curves as separate lines", {
   }
 })
 
-test_that("autoplot.icc_dstudy separates replicate occasion curves too", {
+test_that("autoplot.intraclass_dstudy separates replicate occasion curves too", {
   skip_if_not_installed("glmmTMB")
   skip_if_not_installed("ggplot2")
   # A within-cell replicate fit projects one curve per occasion setting; on the
@@ -418,11 +429,12 @@ test_that("ggplot2 stays a Suggests dependency (light-install, ADR-010)", {
 # axes -- eight plots, all drawn from a replicated fit.
 #
 # No enumerated cell reaches the `identical(id_cols, "occasions")` branch of
-# `autoplot.icc_dstudy()`: `type` is an unconditional column of every
-# `icc_dstudy` (`R/d-study.R`), so `occasions` is never the only curve-identity
-# column and the "Occasions averaged" title is unreachable. AC2 asserts only
-# the absence in that case, which is what the loop below does -- plus the
-# positive key form wherever a legend carries the occasion setting at all.
+# `autoplot.intraclass_dstudy()`: `type` is an unconditional column of every
+# `intraclass_dstudy` (`R/d-study.R`), so `occasions` is never the only
+# curve-identity column and the "Occasions averaged" title is unreachable. AC2
+# asserts only the absence in that case, which is what the loop below does --
+# plus the positive key form wherever a legend carries the occasion setting at
+# all.
 
 m146_replicate_fixture <- function() {
   set.seed(42)

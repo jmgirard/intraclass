@@ -2,8 +2,8 @@
 % Please edit documentation in R/choose-icc.R
 \name{choose_icc}
 \alias{choose_icc}
-\alias{format.icc_recommendation}
-\alias{print.icc_recommendation}
+\alias{format.intraclass_recommendation}
+\alias{print.intraclass_recommendation}
 \title{Recommend an ICC and the call that computes it}
 \usage{
 choose_icc(
@@ -15,9 +15,9 @@ choose_icc(
   level = NULL
 )
 
-\method{format}{icc_recommendation}(x, ...)
+\method{format}{intraclass_recommendation}(x, ...)
 
-\method{print}{icc_recommendation}(x, ...)
+\method{print}{intraclass_recommendation}(x, ...)
 }
 \arguments{
 \item{model}{\code{"twoway"} (crossed: each rater is tracked across the subjects
@@ -47,22 +47,22 @@ generalization). Required for a two-way design.}
 \code{"cluster"} (between-cluster reliability), or \code{"both"}. Required when
 \code{multilevel = TRUE}.}
 
-\item{x}{An \code{icc_recommendation} object.}
+\item{x}{An \code{intraclass_recommendation} object.}
 
 \item{...}{Unused. Present so the method signature matches the generic.}
 }
 \value{
-\code{choose_icc()} returns an \code{icc_recommendation} object (a list). It
-carries the recommended coefficient rows (\verb{$rows}), the exact \code{icc()} call as
-a string (\verb{$call}), the per-decision rationale (\verb{$rationale}), and any notes
-(\verb{$notes}).
+\code{choose_icc()} returns an \code{intraclass_recommendation} object (a
+list). It carries the recommended coefficient rows (\verb{$rows}), the exact
+\code{icc()} call as a string (\verb{$call}), the per-decision rationale
+(\verb{$rationale}), and any notes (\verb{$notes}).
 
 The methods documented on this page return the objects below.
 \itemize{
-\item \code{format.icc_recommendation()}: a character vector holding the printed
-recommendation, one line per element.
-\item \code{print.icc_recommendation()}: the \code{icc_recommendation} object invisibly,
-having emitted that recommendation.
+\item \code{format.intraclass_recommendation()}: a character vector holding the
+printed recommendation, one line per element.
+\item \code{print.intraclass_recommendation()}: the \code{intraclass_recommendation}
+object invisibly, having emitted that recommendation.
 }
 }
 \description{

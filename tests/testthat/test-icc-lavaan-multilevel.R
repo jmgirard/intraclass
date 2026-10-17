@@ -344,7 +344,7 @@ test_that("O-SEM-ML/mc: montecarlo intervals at both levels are finite, bracketi
 
   # The same six-field contract serves d_study() reprojection unchanged
   # (both levels, MC intervals) -- smoke, not an oracle.
-  expect_s3_class(d_study(x_sem, m = c(3, 8)), "icc_dstudy")
+  expect_s3_class(d_study(x_sem, m = c(3, 8)), "intraclass_dstudy")
 })
 
 test_that("multilevel lavaan out-of-scope combinations abort with classed conditions", {

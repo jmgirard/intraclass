@@ -67,7 +67,7 @@ test_that("?icc says occasions is the per-rater occasion divisor, not a ratings 
   for (nm in names(pages)) {
     expect_gt(nchar(pages[[nm]]), 1000L)
   }
-  expect_says(pages, "tidy.icc(): a tibble")
+  expect_says(pages, "tidy.intraclass_icc(): a tibble")
 
   expect_says(
     pages,
@@ -112,7 +112,7 @@ test_that("?icc says occasions is the per-rater occasion divisor, not a ratings 
     paste0(
       "glance() reports a different quantity as n_o, the observed per-cell ",
       "occasion count of the fitted design. n_o is itself NA under the ",
-      "condition the glance.icc() bullet below states, which a ragged ",
+      "condition the glance.intraclass_icc() bullet below states, which a ragged ",
       "replicate design meets while occasions still reads 1"
     )
   )
@@ -132,7 +132,7 @@ test_that("?d_study states the projection's own occasions rule and no glance() c
   for (nm in names(pages)) {
     expect_gt(nchar(pages[[nm]]), 1000L)
   }
-  expect_says(pages, "tidy.icc_dstudy(): a tibble")
+  expect_says(pages, "tidy.intraclass_dstudy(): a tibble")
 
   # The projection's `occasions` is the count the row is projected at. It can
   # be non-integer (M138), and it divides pure error, so a row with no
@@ -175,9 +175,9 @@ test_that("?d_study states the projection's own occasions rule and no glance() c
   )
   expect_silent_on(pages, "the setting held fixed on a rater projection")
 
-  # `glance.icc_dstudy()` carries no `n_o` column, so the contrast ?icc draws
-  # has no referent on this page and must not be copied onto it. `n_o` itself
-  # is all over the page as the swept argument, so the absence check names the
-  # contrast phrase, never the symbol.
+  # `glance.intraclass_dstudy()` carries no `n_o` column, so the contrast ?icc
+  # draws has no referent on this page and must not be copied onto it. `n_o`
+  # itself is all over the page as the swept argument, so the absence check
+  # names the contrast phrase, never the symbol.
   expect_silent_on(pages, "reports a different quantity as n_o")
 })

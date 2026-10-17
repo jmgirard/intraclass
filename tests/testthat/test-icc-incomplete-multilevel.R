@@ -283,7 +283,7 @@ test_that("O-IML/ident: cluster x rater disconnection gates agreement only", {
       type = "consistency",
       seed = 1
     )),
-    "icc"
+    "intraclass_icc"
   )
 })
 
@@ -319,7 +319,7 @@ test_that("ambiguous ragged pattern aborts unless `design` is declared", {
       level = "subject",
       seed = 1
     ),
-    "icc"
+    "intraclass_icc"
   )
 })
 
@@ -472,7 +472,7 @@ test_that("O-cluster-ck: averaged cluster-level ICC(c,k) ships on incomplete dat
   # inverse-Simpson harmonic k_c^eff -- no abort, no drop. A default call reports the
   # full A1/Ak/C1/Ck family at BOTH levels.
   fit <- icc(d, score, subject, rater, cluster = cluster, seed = 1)
-  expect_s3_class(fit, "icc")
+  expect_s3_class(fit, "intraclass_icc")
   e <- fit$estimates
   expect_setequal(
     e$index[e$level == "cluster"],

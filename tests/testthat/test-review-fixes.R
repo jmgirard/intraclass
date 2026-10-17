@@ -31,7 +31,7 @@ test_that("d_study() projects a one-way fit instead of crashing (review #2)", {
   skip_if_not_installed("glmmTMB")
   f <- icc(ratings, score, subject, rater, model = "oneway", seed = 1)
   ds <- d_study(f, m = c(1, 4, 8))
-  expect_s3_class(ds, "icc_dstudy")
+  expect_s3_class(ds, "intraclass_dstudy")
   expect_identical(ds$index, c("ICC(1)", "ICC(4)", "ICC(8)"))
   # At m = 1 the projection is the one-way single-rater ICC(1); the curve rises.
   icc1 <- icc(
@@ -63,7 +63,7 @@ test_that("fixed-rater multilevel default call needs no explicit level (review #
     raters = "fixed",
     seed = 1
   ))
-  expect_s3_class(fit, "icc")
+  expect_s3_class(fit, "intraclass_icc")
   expect_setequal(unique(fit$estimates$level), c("subject", "cluster"))
   # An explicit cluster-only request now SUCCEEDS on balanced data (M37); it equals the
   # random-rater cluster-level ICC (O-FCL/reduction in test-icc-fixed-multilevel.R).
@@ -128,8 +128,14 @@ test_that("seed is validated with a classed error (review #6)", {
     )
   }
   # NULL (ambient RNG) and a whole number are accepted.
-  expect_s3_class(icc(ratings, score, subject, rater, seed = NULL), "icc")
-  expect_s3_class(icc(ratings, score, subject, rater, seed = 7), "icc")
+  expect_s3_class(
+    icc(ratings, score, subject, rater, seed = NULL),
+    "intraclass_icc"
+  )
+  expect_s3_class(
+    icc(ratings, score, subject, rater, seed = 7),
+    "intraclass_icc"
+  )
 })
 
 # Finding 1 -- crossed detection surfaces the reused-label assumption ---------

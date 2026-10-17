@@ -308,9 +308,9 @@ test_that("invalid answer values abort with a classed intraclass error", {
 
 # --- object + print -----------------------------------------------------------
 
-test_that("choose_icc() returns a printable icc_recommendation", {
+test_that("choose_icc() returns a printable intraclass_recommendation", {
   rec <- choose_icc(type = "agreement", unit = "single", raters = "random")
-  expect_s3_class(rec, "icc_recommendation")
+  expect_s3_class(rec, "intraclass_recommendation")
   out <- format(rec)
   expect_true(any(grepl("Recommended ICC", out)))
   expect_true(any(grepl("icc(data, score, subject, rater", out, fixed = TRUE)))
@@ -537,7 +537,7 @@ test_that("choose_icc() routes through the shell only when interactive", {
   )
   rlang::local_interactive(TRUE)
   rec <- choose_icc()
-  expect_s3_class(rec, "icc_recommendation")
+  expect_s3_class(rec, "intraclass_recommendation")
   expect_equal(rec$rows$index, "ICC(C,1)")
 })
 

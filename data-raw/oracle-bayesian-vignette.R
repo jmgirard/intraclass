@@ -5,6 +5,8 @@
 # (tests/testthat/fixtures/bayesian-vignette-oracle.rds) asserted in
 # tests/testthat/test-vignette-transcripts.R. Seeded (PRINCIPLES.md #12); no
 # fabricated values (#4) -- the reference is this script's own seeded output.
+# M159 (D-050) set the class of the two stored fits from "icc" to
+# "intraclass_icc" in place, without a rerun; every other element is unchanged.
 #
 # WHAT THIS BACKS
 # ---------------------------------------------------------------------------
@@ -22,21 +24,21 @@
 #
 # WHY THE STORED FITS ARE STRIPPED
 # ---------------------------------------------------------------------------
-# A whole `icc` object from the brms engine serializes to ~4 MB, and ~1.6 MB
-# even with `$fit` removed, because `$mc`/`$boot`/`$call` carry environments
-# that drag the brmsfit back in. tests/ ships inside the CRAN tarball, so the
-# fixture stores ONLY the elements `format.icc()` reads -- verified below by
-# re-rendering the stripped object and requiring the render to be identical to
-# the full object's. That keeps this fixture in line with its siblings (the
-# other bayesian-*-oracle.rds files are 0.8-3 KB).
+# A whole `intraclass_icc` object from the brms engine serializes to ~4 MB, and
+# ~1.6 MB even with `$fit` removed, because `$mc`/`$boot`/`$call` carry
+# environments that drag the brmsfit back in. tests/ ships inside the CRAN
+# tarball, so the fixture stores ONLY the elements `format.intraclass_icc()`
+# reads -- verified below by re-rendering the stripped object and requiring the
+# render to be identical to the full object's. That keeps this fixture in line
+# with its siblings (the other bayesian-*-oracle.rds files are 0.8-3 KB).
 #
 # WHY THE RENDER OPTIONS ARE RECORDED
 # ---------------------------------------------------------------------------
-# `print.icc()` draws a cli rule padded to the console width and uses Unicode
-# box-drawing and bullet glyphs, so a block's text depends on the cli rendering
-# MODE as well as the width -- and testthat runs cli in ASCII mode by default.
-# The vignettes were written at width 80 with Unicode on; the fixture records
-# the whole option set and the test renders under it.
+# `print.intraclass_icc()` draws a cli rule padded to the console width and uses
+# Unicode box-drawing and bullet glyphs, so a block's text depends on the cli
+# rendering MODE as well as the width -- and testthat runs cli in ASCII mode by
+# default. The vignettes were written at width 80 with Unicode on; the fixture
+# records the whole option set and the test renders under it.
 #
 # SOURCE (sourced -- PRINCIPLES.md #1/#4)
 # ---------------------------------------------------------------------------
@@ -62,12 +64,12 @@ devtools::load_all(".", quiet = TRUE)
 fit_seed <- 1L
 out_path <- "tests/testthat/fixtures/bayesian-vignette-oracle.rds"
 
-# The cli rendering mode, not just the width. `print.icc()` draws a cli rule
-# padded to the console width AND uses Unicode box-drawing and bullet glyphs;
-# testthat runs cli in ASCII mode by default, so a pin that fixed only the width
-# would compare the vignette's "──" against a rendered "--" and fail for a
-# reason that has nothing to do with the transcript. The fixture carries this
-# set so the generator and the test cannot drift apart.
+# The cli rendering mode, not just the width. `print.intraclass_icc()` draws a
+# cli rule padded to the console width AND uses Unicode box-drawing and bullet
+# glyphs; testthat runs cli in ASCII mode by default, so a pin that fixed only
+# the width would compare the vignette's "──" against a rendered "--" and
+# fail for a reason that has nothing to do with the transcript. The fixture
+# carries this set so the generator and the test cannot drift apart.
 render_options <- list(
   cli.width = 80L,
   width = 80L,
@@ -76,7 +78,8 @@ render_options <- list(
   cli.num_colors = 1L
 )
 
-# `format.icc()` reads exactly these; nothing else survives into the fixture.
+# `format.intraclass_icc()` reads exactly these; nothing else survives into the
+# fixture.
 render_elements <- c(
   "estimates",
   "components",
@@ -88,10 +91,10 @@ render_elements <- c(
   "n"
 )
 
-# `print.icc()` emits through cli, and cli writes to its OWN output connection --
-# `utils::capture.output()` returns character(0) for it, which would make the
-# strip check below compare two empty vectors and pass vacuously. `cli::cli_fmt()`
-# captures the real print() path.
+# `print.intraclass_icc()` emits through cli, and cli writes to its OWN output
+# connection -- `utils::capture.output()` returns character(0) for it, which
+# would make the strip check below compare two empty vectors and pass vacuously.
+# `cli::cli_fmt()` captures the real print() path.
 render <- function(x) {
   withr::with_options(render_options, cli::cli_fmt(print(x)))
 }

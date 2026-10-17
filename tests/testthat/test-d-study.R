@@ -901,7 +901,7 @@ test_that("O-RepDS: fixed consistency projects, fixed agreement refused", {
       seed = 1
     )
   )
-  expect_s3_class(d_study(con, m = 1:3), "icc_dstudy")
+  expect_s3_class(d_study(con, m = 1:3), "intraclass_dstudy")
   agr <- suppressWarnings(
     icc(
       d,
@@ -1046,7 +1046,7 @@ test_that("O-OccDS/lift: fixed absolute agreement PROJECTS on the occasion axis"
   # axis-specific); the occasion axis projects it (ADR-049).
   expect_error(d_study(fa, m = 1:3), class = "intraclass_unidentified")
   ds <- d_study(fa, n_o = c(1, 3, 8))
-  expect_s3_class(ds, "icc_dstudy")
+  expect_s3_class(ds, "intraclass_dstudy")
   expect_true(all(diff(ds$estimate) > 0))
   # Reduction at the fitted occasion settings holds for fixed agreement too.
   for (o in c(1, 3)) {
