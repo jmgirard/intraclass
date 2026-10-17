@@ -69,10 +69,10 @@ exact <code><a href="icc.html">icc()</a></code> call that computes them. It does
 <span>  level <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S3 method for class 'icc_recommendation'</span></span>
+<span><span class="co"># S3 method for class 'intraclass_recommendation'</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S3 method for class 'icc_recommendation'</span></span>
+<span><span class="co"># S3 method for class 'intraclass_recommendation'</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -120,7 +120,7 @@ generalization). Required for a two-way design.</p></dd>
 
 
 <dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>An <code>icc_recommendation</code> object.</p></dd>
+<dd><p>An <code>intraclass_recommendation</code> object.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -129,14 +129,14 @@ generalization). Required for a two-way design.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p><code>choose_icc()</code> returns an <code>icc_recommendation</code> object (a list). It
-carries the recommended coefficient rows (<code>$rows</code>), the exact <code><a href="icc.html">icc()</a></code> call as
-a string (<code>$call</code>), the per-decision rationale (<code>$rationale</code>), and any notes
-(<code>$notes</code>).</p>
-<p>The methods documented on this page return the objects below.</p><ul><li><p><code>format.icc_recommendation()</code>: a character vector holding the printed
-recommendation, one line per element.</p></li>
-<li><p><code>print.icc_recommendation()</code>: the <code>icc_recommendation</code> object invisibly,
-having emitted that recommendation.</p></li>
+    <p><code>choose_icc()</code> returns an <code>intraclass_recommendation</code> object (a
+list). It carries the recommended coefficient rows (<code>$rows</code>), the exact
+<code><a href="icc.html">icc()</a></code> call as a string (<code>$call</code>), the per-decision rationale
+(<code>$rationale</code>), and any notes (<code>$notes</code>).</p>
+<p>The methods documented on this page return the objects below.</p><ul><li><p><code>format.intraclass_recommendation()</code>: a character vector holding the
+printed recommendation, one line per element.</p></li>
+<li><p><code>print.intraclass_recommendation()</code>: the <code>intraclass_recommendation</code>
+object invisibly, having emitted that recommendation.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

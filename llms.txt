@@ -295,8 +295,8 @@ emits the exact
 that computes it — no fitting, teaching-first.
 
 - [`choose_icc()`](https://jmgirard.github.io/intraclass/reference/choose_icc.md)
-  [`format(`*`<icc_recommendation>`*`)`](https://jmgirard.github.io/intraclass/reference/choose_icc.md)
-  [`print(`*`<icc_recommendation>`*`)`](https://jmgirard.github.io/intraclass/reference/choose_icc.md)
+  [`format(`*`<intraclass_recommendation>`*`)`](https://jmgirard.github.io/intraclass/reference/choose_icc.md)
+  [`print(`*`<intraclass_recommendation>`*`)`](https://jmgirard.github.io/intraclass/reference/choose_icc.md)
   : Recommend an ICC and the call that computes it
 
 ## Estimating an ICC
@@ -316,13 +316,13 @@ Monte-Carlo confidence intervals. The
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) methods are
 documented on this page.
 
-- [`autoplot.icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
-  [`plot(`*`<icc>`*`)`](https://jmgirard.github.io/intraclass/reference/icc.md)
-  [`format(`*`<icc>`*`)`](https://jmgirard.github.io/intraclass/reference/icc.md)
-  [`print(`*`<icc>`*`)`](https://jmgirard.github.io/intraclass/reference/icc.md)
-  [`summary(`*`<icc>`*`)`](https://jmgirard.github.io/intraclass/reference/icc.md)
-  [`tidy(`*`<icc>`*`)`](https://jmgirard.github.io/intraclass/reference/icc.md)
-  [`glance(`*`<icc>`*`)`](https://jmgirard.github.io/intraclass/reference/icc.md)
+- [`autoplot.intraclass_icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
+  [`plot(`*`<intraclass_icc>`*`)`](https://jmgirard.github.io/intraclass/reference/icc.md)
+  [`format(`*`<intraclass_icc>`*`)`](https://jmgirard.github.io/intraclass/reference/icc.md)
+  [`print(`*`<intraclass_icc>`*`)`](https://jmgirard.github.io/intraclass/reference/icc.md)
+  [`summary(`*`<intraclass_icc>`*`)`](https://jmgirard.github.io/intraclass/reference/icc.md)
+  [`tidy(`*`<intraclass_icc>`*`)`](https://jmgirard.github.io/intraclass/reference/icc.md)
+  [`glance(`*`<intraclass_icc>`*`)`](https://jmgirard.github.io/intraclass/reference/icc.md)
   [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) :
   Intraclass correlation coefficients for interrater reliability
 
@@ -333,13 +333,13 @@ the curve, plus its
 [`tidy()`](https://generics.r-lib.org/reference/tidy.html)/[`glance()`](https://generics.r-lib.org/reference/glance.html)/[`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)/[`plot()`](https://rdrr.io/r/graphics/plot.default.html)
 methods.
 
-- [`autoplot.icc_dstudy()`](https://jmgirard.github.io/intraclass/reference/d_study.md)
-  [`plot(`*`<icc_dstudy>`*`)`](https://jmgirard.github.io/intraclass/reference/d_study.md)
+- [`autoplot.intraclass_dstudy()`](https://jmgirard.github.io/intraclass/reference/d_study.md)
+  [`plot(`*`<intraclass_dstudy>`*`)`](https://jmgirard.github.io/intraclass/reference/d_study.md)
   [`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)
-  [`format(`*`<icc_dstudy>`*`)`](https://jmgirard.github.io/intraclass/reference/d_study.md)
-  [`print(`*`<icc_dstudy>`*`)`](https://jmgirard.github.io/intraclass/reference/d_study.md)
-  [`tidy(`*`<icc_dstudy>`*`)`](https://jmgirard.github.io/intraclass/reference/d_study.md)
-  [`glance(`*`<icc_dstudy>`*`)`](https://jmgirard.github.io/intraclass/reference/d_study.md)
+  [`format(`*`<intraclass_dstudy>`*`)`](https://jmgirard.github.io/intraclass/reference/d_study.md)
+  [`print(`*`<intraclass_dstudy>`*`)`](https://jmgirard.github.io/intraclass/reference/d_study.md)
+  [`tidy(`*`<intraclass_dstudy>`*`)`](https://jmgirard.github.io/intraclass/reference/d_study.md)
+  [`glance(`*`<intraclass_dstudy>`*`)`](https://jmgirard.github.io/intraclass/reference/d_study.md)
   **\[experimental\]** : Project reliability to other numbers of raters
 
 ## Tidy methods

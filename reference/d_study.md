@@ -24,9 +24,9 @@ interval exactly.
 ## Usage
 
 ``` r
-autoplot.icc_dstudy(object, ...)
+autoplot.intraclass_dstudy(object, ...)
 
-# S3 method for class 'icc_dstudy'
+# S3 method for class 'intraclass_dstudy'
 plot(x, ...)
 
 d_study(
@@ -38,16 +38,16 @@ d_study(
   seed = NULL
 )
 
-# S3 method for class 'icc_dstudy'
+# S3 method for class 'intraclass_dstudy'
 format(x, ...)
 
-# S3 method for class 'icc_dstudy'
+# S3 method for class 'intraclass_dstudy'
 print(x, ...)
 
-# S3 method for class 'icc_dstudy'
+# S3 method for class 'intraclass_dstudy'
 tidy(x, ...)
 
-# S3 method for class 'icc_dstudy'
+# S3 method for class 'intraclass_dstudy'
 glance(x, ...)
 ```
 
@@ -55,7 +55,7 @@ glance(x, ...)
 
 - object:
 
-  An `icc_dstudy` object (the
+  An `intraclass_dstudy` object (the
   [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)/[`plot()`](https://rdrr.io/r/graphics/plot.default.html)
   argument).
 
@@ -65,7 +65,7 @@ glance(x, ...)
 
 - x:
 
-  An `icc` object returned by
+  An `intraclass_icc` object returned by
   [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md).
 
 - m:
@@ -90,67 +90,68 @@ glance(x, ...)
 
 ## Value
 
-`d_study()` returns an `icc_dstudy` object: a tibble with one row per
-projected point. Its columns are `m`, `index` (e.g. `"ICC(A,3)"`),
+`d_study()` returns an `intraclass_dstudy` object: a tibble with one row
+per projected point. Its columns are `m`, `index` (e.g. `"ICC(A,3)"`),
 `type`, `estimate`, `std.error`, `conf.low`, and `conf.high`, and it
 carries the design and interval settings as attributes.
 [`tidy()`](https://generics.r-lib.org/reference/tidy.html) names that
 coefficient column `term`, following the broom glossary. The object
-keeps `index`. If the fitted `icc` reports both error definitions (the
-default), `d_study()` projects **one reliability curve per definition**,
-distinguished by the `type` column. A single-type fit projects a single
-curve. A multilevel projection gains a `level` column (one curve per
-level), and a replicate projection an `occasions` column, each where it
-applies. [`tidy()`](https://generics.r-lib.org/reference/tidy.html)
-carries both columns on every projection, `NA` where the fit does not
-define them. Read the projection with
+keeps `index`. If the fitted `intraclass_icc` reports both error
+definitions (the default), `d_study()` projects **one reliability curve
+per definition**, distinguished by the `type` column. A single-type fit
+projects a single curve. A multilevel projection gains a `level` column
+(one curve per level), and a replicate projection an `occasions` column,
+each where it applies.
+[`tidy()`](https://generics.r-lib.org/reference/tidy.html) carries both
+columns on every projection, `NA` where the fit does not define them.
+Read the projection with
 [`tidy()`](https://generics.r-lib.org/reference/tidy.html): the object's
 own layout is internal, and only the tidied columns are a stable
 contract.
 
 The methods documented on this page return the objects below.
 
-- `tidy.icc_dstudy()`: a tibble with one row per projected point. Its
-  columns, in this order, are `m`, `occasions`, `level`, `term`, `type`,
-  `estimate`, `std.error`, `conf.low`, `conf.high`, `conf.level`,
-  `method`. `term` is the projected ICC index, named for the broom
-  glossary. Every column is present on every projection. `occasions`
-  reports the per-cell occasion count the row is projected at, which may
-  be non-integer, and which divides pure error, so a row whose error set
-  carries no pure-error term does not move with it. On a rater
-  projection the column takes every distinct occasion value the fit's
-  own `tidy()$occasions` column carries, and the cluster rows of a
+- `tidy.intraclass_dstudy()`: a tibble with one row per projected point.
+  Its columns, in this order, are `m`, `occasions`, `level`, `term`,
+  `type`, `estimate`, `std.error`, `conf.low`, `conf.high`,
+  `conf.level`, `method`. `term` is the projected ICC index, named for
+  the broom glossary. Every column is present on every projection.
+  `occasions` reports the per-cell occasion count the row is projected
+  at, which may be non-integer, and which divides pure error, so a row
+  whose error set carries no pure-error term does not move with it. On a
+  rater projection the column takes every distinct occasion value the
+  fit's own `tidy()$occasions` column carries, and the cluster rows of a
   multilevel projection take the smallest of those. On an occasion
   projection every row takes the swept `n_o`, cluster rows included,
   whose curve is flat across it. `occasions` is `NA` outside a replicate
   projection. `level` is `NA` outside a multilevel one, and `type` where
   the design defines no error definition.
 
-- `glance.icc_dstudy()`: a one-row tibble of projection-level summaries.
-  It carries the distinct projected rater counts `m` and their range,
-  the error definition(s), the rater treatment, the observed rater
-  count, and the interval settings. The rater treatment is `NA` on a
-  projection of a fit that estimates no separable rater main effect. One
-  such fit is `model = "oneway"`, whose raters are interchangeable and
-  carry no facet. The other is `design = "nested_in_subjects"`, whose
-  rater effect is confounded into the residual. The count and range are
-  held at the observed rater count when the sweep is over occasions, so
-  they are not a row count.
+- `glance.intraclass_dstudy()`: a one-row tibble of projection-level
+  summaries. It carries the distinct projected rater counts `m` and
+  their range, the error definition(s), the rater treatment, the
+  observed rater count, and the interval settings. The rater treatment
+  is `NA` on a projection of a fit that estimates no separable rater
+  main effect. One such fit is `model = "oneway"`, whose raters are
+  interchangeable and carry no facet. The other is
+  `design = "nested_in_subjects"`, whose rater effect is confounded into
+  the residual. The count and range are held at the observed rater count
+  when the sweep is over occasions, so they are not a row count.
 
-- `format.icc_dstudy()`: a character vector holding the printed
+- `format.intraclass_dstudy()`: a character vector holding the printed
   projection table, one line per element.
 
-- `print.icc_dstudy()`: the `icc_dstudy` object invisibly, having
-  emitted that table.
+- `print.intraclass_dstudy()`: the `intraclass_dstudy` object invisibly,
+  having emitted that table.
 
-- `autoplot.icc_dstudy()`: a `ggplot` object holding the reliability
-  curve, faceted by level for a multilevel projection.
+- `autoplot.intraclass_dstudy()`: a `ggplot` object holding the
+  reliability curve, faceted by level for a multilevel projection.
 
-- `plot.icc_dstudy()`: the `icc_dstudy` object invisibly, having drawn
-  that curve.
+- `plot.intraclass_dstudy()`: the `intraclass_dstudy` object invisibly,
+  having drawn that curve.
 
-`tidy.icc_dstudy()` and `glance.icc_dstudy()` implement the
-[tidy()](https://generics.r-lib.org/reference/tidy.html) and
+`tidy.intraclass_dstudy()` and `glance.intraclass_dstudy()` implement
+the [tidy()](https://generics.r-lib.org/reference/tidy.html) and
 [glance()](https://generics.r-lib.org/reference/glance.html) generics.
 
 ## Projection is extrapolation
@@ -270,20 +271,20 @@ d_study(fit, m = 1:8)
 #> # D-study projection: two-way random, absolute agreement & consistency
 #> Observed raters: 4 | CI: 95% montecarlo (10000 draws)
 #>          type  m  estimate          95% CI
-#>     agreement  1     0.290  [0.050, 0.706]
-#>     agreement  2     0.449  [0.096, 0.828]
-#>     agreement  3     0.550  [0.137, 0.878]
+#>     agreement  1     0.290  [0.050, 0.708]
+#>     agreement  2     0.449  [0.096, 0.829]
+#>     agreement  3     0.550  [0.137, 0.879]
 #>     agreement  4     0.620  [0.175, 0.906]
-#>     agreement  5     0.671  [0.210, 0.923]
-#>     agreement  6     0.710  [0.241, 0.935]
-#>     agreement  7     0.741  [0.271, 0.944]
-#>     agreement  8     0.765  [0.298, 0.950]
-#>   consistency  1     0.715  [0.339, 0.924]
-#>   consistency  2     0.834  [0.507, 0.961]
-#>   consistency  3     0.883  [0.606, 0.973]
-#>   consistency  4     0.909  [0.672, 0.980]
-#>   consistency  5     0.926  [0.720, 0.984]
-#>   consistency  6     0.938  [0.755, 0.987]
-#>   consistency  7     0.946  [0.782, 0.988]
-#>   consistency  8     0.953  [0.804, 0.990]
+#>     agreement  5     0.671  [0.209, 0.924]
+#>     agreement  6     0.710  [0.241, 0.936]
+#>     agreement  7     0.741  [0.270, 0.944]
+#>     agreement  8     0.765  [0.297, 0.951]
+#>   consistency  1     0.715  [0.334, 0.925]
+#>   consistency  2     0.834  [0.501, 0.961]
+#>   consistency  3     0.883  [0.601, 0.974]
+#>   consistency  4     0.909  [0.668, 0.980]
+#>   consistency  5     0.926  [0.715, 0.984]
+#>   consistency  6     0.938  [0.751, 0.987]
+#>   consistency  7     0.946  [0.779, 0.989]
+#>   consistency  8     0.953  [0.801, 0.990]
 ```

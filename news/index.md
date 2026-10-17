@@ -20,6 +20,30 @@
   change. The README’s multilevel example, which used its own smaller
   simulation before, now shows the `school` results.
 
+### Breaking changes
+
+- The result classes now start with the package name.
+  [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
+  returns an `intraclass_icc` object instead of `icc`.
+  [`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)
+  returns `intraclass_dstudy` instead of `icc_dstudy`, and
+  [`choose_icc()`](https://jmgirard.github.io/intraclass/reference/choose_icc.md)
+  returns `intraclass_recommendation` instead of `icc_recommendation`.
+  The performance package also uses the class `icc`. When performance
+  was loaded after intraclass, its print method replaced the intraclass
+  one, and a printed result showed only its header. Code that tests for
+  an old class name, for example `inherits(x, "icc")`, must use the new
+  name. The change has no deprecation period, because a class name
+  cannot give a warning. Results saved with an earlier version keep the
+  old class, so run
+  [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
+  again to get the new one. If you attach both intraclass and
+  performance, the package that you attach last still masks the
+  [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
+  function of the other. Call
+  [`intraclass::icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
+  to be sure which function runs.
+
 ### Bug fixes
 
 - If the scores spread far more than 1 unit, the default

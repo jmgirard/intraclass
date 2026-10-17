@@ -66,8 +66,8 @@ oneway
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   index     estimate   95% CI
-#>   ICC(1)       0.166   [0.008, 0.832]
-#>   ICC(k)       0.443   [0.032, 0.952]
+#>   ICC(1)       0.166   [0.008, 0.838]
+#>   ICC(k)       0.443   [0.032, 0.954]
 #> 
 #> Variance components: subject 1.244, residual 6.264 (rater confounded)
 #> Shrout & Fleiss equivalent: ICC(1) = ICC(1,1), ICC(k) = ICC(1,k)
@@ -99,8 +99,8 @@ agreement
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   index     estimate   95% CI
-#>   ICC(A,1)     0.290   [0.050, 0.713]
-#>   ICC(A,k)     0.620   [0.173, 0.909]
+#>   ICC(A,1)     0.290   [0.050, 0.717]
+#>   ICC(A,k)     0.620   [0.173, 0.910]
 #> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
@@ -112,8 +112,8 @@ consistency
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   index     estimate   95% CI
-#>   ICC(C,1)     0.715   [0.343, 0.924]
-#>   ICC(C,k)     0.909   [0.676, 0.980]
+#>   ICC(C,1)     0.715   [0.341, 0.926]
+#>   ICC(C,k)     0.909   [0.674, 0.980]
 #> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 ```

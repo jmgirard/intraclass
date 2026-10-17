@@ -19,10 +19,10 @@ choose_icc(
   level = NULL
 )
 
-# S3 method for class 'icc_recommendation'
+# S3 method for class 'intraclass_recommendation'
 format(x, ...)
 
-# S3 method for class 'icc_recommendation'
+# S3 method for class 'intraclass_recommendation'
 print(x, ...)
 ```
 
@@ -69,7 +69,7 @@ print(x, ...)
 
 - x:
 
-  An `icc_recommendation` object.
+  An `intraclass_recommendation` object.
 
 - ...:
 
@@ -77,19 +77,19 @@ print(x, ...)
 
 ## Value
 
-`choose_icc()` returns an `icc_recommendation` object (a list). It
-carries the recommended coefficient rows (`$rows`), the exact
+`choose_icc()` returns an `intraclass_recommendation` object (a list).
+It carries the recommended coefficient rows (`$rows`), the exact
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) call
 as a string (`$call`), the per-decision rationale (`$rationale`), and
 any notes (`$notes`).
 
 The methods documented on this page return the objects below.
 
-- `format.icc_recommendation()`: a character vector holding the printed
-  recommendation, one line per element.
+- `format.intraclass_recommendation()`: a character vector holding the
+  printed recommendation, one line per element.
 
-- `print.icc_recommendation()`: the `icc_recommendation` object
-  invisibly, having emitted that recommendation.
+- `print.intraclass_recommendation()`: the `intraclass_recommendation`
+  object invisibly, having emitted that recommendation.
 
 ## Details
 
