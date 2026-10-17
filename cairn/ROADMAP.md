@@ -9,7 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M160 | easystats model_parameters method for icc() results | in-progress | — | normal | milestones/M160-model-parameters-method.md |
+| M160 | easystats model_parameters method for icc() results | review | — | normal | milestones/M160-model-parameters-method.md |
 | M159 | Result classes take the package prefix, so performance cannot replace their methods | done | — | high | milestones/archive/M159-package-prefixed-result-classes.md |
 | M158 | glmmTMB fits retry a variance stuck at zero, and a zero-width interval is refused | done | — | high | milestones/archive/M158-glmmtmb-false-zero.md |
 | M157 | Plain-English printed guidance, corrected glossary glosses, and no record IDs in messages | done | — | normal | milestones/archive/M157-plain-english-printed-text-glosses.md |
