@@ -2,6 +2,21 @@
 
 ## intraclass (development version)
 
+- If the parameters package is installed,
+  [`parameters::model_parameters()`](https://easystats.github.io/parameters/reference/model_parameters.html)
+  now works on
+  [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
+  results. easystats is the family of packages that parameters belongs
+  to. The method returns the
+  [`tidy()`](https://generics.r-lib.org/reference/tidy.html) table under
+  the easystats column names, titled “Intraclass correlation
+  coefficients”. The main columns are `Parameter`, `Coefficient`, `SE`,
+  `CI`, `CI_low`, `CI_high` and `Method`. The other columns are the
+  identifiers `Type`, `Level`, `Occasions` and `SF_Index`. A `ci` value
+  other than the confidence level of the fit is an error, because the
+  table cannot compute the interval again. parameters is an optional
+  dependency.
+
 - The package now ships a citation entry (`citation("intraclass")`), and
   the source repository gains a `CONTRIBUTING.md` that says how to
   report a problem, ask for help, and propose a change. The README

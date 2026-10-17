@@ -59,6 +59,8 @@ icc(
   prior = NULL,
   posterior_summary = "percentile"
 )
+
+model_parameters.intraclass_icc(model, ci = NULL, ...)
 ```
 
 ## Arguments
@@ -112,7 +114,8 @@ icc(
   ignored. That design has no rater main effect to model, so `type` does
   not apply and the coefficients are `ICC(1)` / `ICC(k)`. Fixed raters
   and a `cluster` (multilevel) structure are not defined for a one-way
-  design.
+  design. In `model_parameters()`, `model` is instead the
+  `intraclass_icc` object.
 
 - type:
 
@@ -556,6 +559,13 @@ icc(
   `ci_method = "posterior"`. The other interval methods already report a
   percentile interval.
 
+- ci:
+
+  For `model_parameters()`: `NULL` (the default) or the fit's own
+  confidence level. The table reports the interval the fit computed, so
+  any other value is an error. Fit again with `icc(conf_level = )` for
+  another level.
+
 ## Value
 
 `icc()` returns an `intraclass_icc` object: a list with the estimate
@@ -573,9 +583,11 @@ other one is reading an implementation detail.
 [`glance()`](https://generics.r-lib.org/reference/glance.html) are the
 stable tables, not a re-export of the list. They report the estimated
 coefficients and the model-level summaries, column by column as
-documented below. Those two tables, plus `$fit` and `$call`, are the
-whole supported surface. Everything else the list holds falls under the
-rule above, whether or not a table happens to report it.
+documented below. The `model_parameters()` table is
+[`tidy()`](https://generics.r-lib.org/reference/tidy.html) under other
+column names. Those tables, plus `$fit` and `$call`, are the whole
+supported surface. Everything else the list holds falls under the rule
+above, whether or not a table happens to report it.
 
 The methods documented on this page return the objects below.
 
@@ -638,6 +650,24 @@ The methods documented on this page return the objects below.
 
 - `plot.intraclass_icc()`: the `intraclass_icc` object invisibly, having
   drawn that same plot.
+
+- `model_parameters.intraclass_icc()`: available when the parameters
+  package is installed, through
+  [`parameters::model_parameters()`](https://easystats.github.io/parameters/reference/model_parameters.html).
+  It returns a `parameters_model` data frame with one row per row of
+  [`tidy()`](https://generics.r-lib.org/reference/tidy.html), under the
+  column names of the easystats packages, the family that parameters
+  belongs to. `Parameter` is `term`, `Type` is `type`, `Level` is
+  `level`, `Occasions` is `occasions`, `SF_Index` is `sf_index`,
+  `Coefficient` is `estimate`, `SE` is `std.error`, `CI` is
+  `conf.level`, `CI_low` is `conf.low`, `CI_high` is `conf.high`, and
+  `Method` is `method`. The column names are stable. Their order is not,
+  except that `Parameter` is always the first column. On a multilevel
+  fit, `Parameter` repeats across levels (`ICC(A,1)` at the subject
+  level and at the cluster level), so read it together with `Level`. The
+  printed table is titled "Intraclass correlation coefficients" and
+  hides the columns that are all `NA`. It shows `Level` in the
+  `Parameter` label, as in `ICC(A,1) [subject]`.
 
 `tidy.intraclass_icc()` and `glance.intraclass_icc()` implement the
 [tidy()](https://generics.r-lib.org/reference/tidy.html) and
@@ -1009,11 +1039,11 @@ icc(ratings, score, subject, rater, seed = 1)
 #> 
 #>   index     estimate   95% CI
 #>   Absolute agreement
-#>   ICC(A,1)     0.290   [0.050, 0.706]
+#>   ICC(A,1)     0.290   [0.050, 0.708]
 #>   ICC(A,k)     0.620   [0.175, 0.906]
 #>   Consistency
-#>   ICC(C,1)     0.715   [0.339, 0.924]
-#>   ICC(C,k)     0.909   [0.672, 0.980]
+#>   ICC(C,1)     0.715   [0.334, 0.925]
+#>   ICC(C,k)     0.909   [0.668, 0.980]
 #> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)

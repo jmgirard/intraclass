@@ -312,9 +312,9 @@ Monte-Carlo confidence intervals. The
 [`tidy()`](https://generics.r-lib.org/reference/tidy.html),
 [`glance()`](https://generics.r-lib.org/reference/glance.html),
 [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
-(coefficient forest / variance-component decomposition) and
-[`plot()`](https://rdrr.io/r/graphics/plot.default.html) methods are
-documented on this page.
+(coefficient forest / variance-component decomposition),
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) and
+`model_parameters()` methods are documented on this page.
 
 - [`autoplot.intraclass_icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
   [`plot(`*`<intraclass_icc>`*`)`](https://jmgirard.github.io/intraclass/reference/icc.md)
@@ -323,8 +323,9 @@ documented on this page.
   [`summary(`*`<intraclass_icc>`*`)`](https://jmgirard.github.io/intraclass/reference/icc.md)
   [`tidy(`*`<intraclass_icc>`*`)`](https://jmgirard.github.io/intraclass/reference/icc.md)
   [`glance(`*`<intraclass_icc>`*`)`](https://jmgirard.github.io/intraclass/reference/icc.md)
-  [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) :
-  Intraclass correlation coefficients for interrater reliability
+  [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
+  [`model_parameters.intraclass_icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
+  : Intraclass correlation coefficients for interrater reliability
 
 ## Decision (D-) studies
 

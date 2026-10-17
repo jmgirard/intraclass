@@ -64,9 +64,9 @@ icc(school, score, subject = pupil, rater = rater, cluster = classroom,
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   level      index     estimate   95% CI
-#>   subject    ICC(A,1)     0.431   [0.251, 0.562]
-#>   subject    ICC(A,k)     0.751   [0.573, 0.837]
-#>   cluster    ICC(A,1)     0.880   [0.000, 0.973]
+#>   subject    ICC(A,1)     0.431   [0.253, 0.562]
+#>   subject    ICC(A,k)     0.751   [0.575, 0.837]
+#>   cluster    ICC(A,1)     0.880   [0.000, 0.972]
 #>   cluster    ICC(A,k)     0.967   [0.000, 0.993]
 #> 
 #> Variance components: cluster 0.998, subject 0.461, rater 0.136, cluster:rater 0.000, residual 0.473
