@@ -225,8 +225,9 @@
 #'   incomplete design. So a missing rating and an absent row give the same
 #'   answer. If at least one subject has two or more scores and no subject has
 #'   two different scores, `icc()` refuses the data with an
-#'   `intraclass_singular_fit` error before it fits a model. The rater and
-#'   residual variances of such data are exactly zero.
+#'   `intraclass_singular_fit` error before it fits a model. Every variance
+#'   within subjects is exactly zero on such data. A call that an argument or
+#'   design check refuses first keeps that check's error.
 #' @param cluster Optional column of `data` (unquoted) giving the higher-level
 #'   unit each subject is nested in (e.g. classroom, clinic). Supplying it switches
 #'   on the **multilevel** ICC (ten Hove et al. 2022). Reliability is reported at
@@ -2118,13 +2119,14 @@ icc <- function(
   ) {
     abort_intraclass(
       c(
-        "{.arg score} does not vary within any subject, so no model can be \\
-         fitted.",
-        i = "Each subject's scores are all equal. The rater and residual \\
-             variances are then exactly zero, and an ICC interval cannot be \\
+        "{.arg score} does not vary within any subject, so {.fn icc} does not \\
+         fit a model to it.",
+        i = "Each subject's scores are all equal. Every variance within \\
+             subjects is then exactly zero, and an ICC interval cannot be \\
              estimated.",
         i = "Check that {.arg score}, {.arg subject} and {.arg rater} name the \\
-             intended columns."
+             intended columns. If they do, the ratings agree perfectly within \\
+             every subject."
       ),
       class = "intraclass_singular_fit"
     )

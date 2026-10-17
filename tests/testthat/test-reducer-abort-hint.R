@@ -458,9 +458,10 @@ test_that("no remedy bullet names the ci_method the caller invoked (AC3)", {
   skip_on_cran()
   # One case per (guard, invoking value). The `gen_ssa0` and resample cases fire
   # through `icc()`, the path a user meets them on. The `gen_mse0` cases cannot:
-  # the point fit dies before the guard on some platforms (see `engine_or_null()`
-  # above), and an assertion that a message does not name a method would then
-  # hold of an engine error rather than of the guard. Those fire at the reducer,
+  # since M161 icc() refuses that data before any fit (D-052), and before that
+  # the point fit died before the guard on some platforms, so an assertion that a
+  # message does not name a method would hold of another error rather than of
+  # the guard. Those fire at the reducer,
   # handed the hint the dispatch would have built.
   mse0 <- gen_mse0(6, 3)
   cases <- list(
@@ -524,8 +525,8 @@ test_that("verifying burch from a searle abort terminates, not recurses (AC4)", 
   # carries no hint of its own, so the re-entered guard aborts once and is
   # caught -- one classed condition out, no recursion.
   # Fired at the reducer with the hint the dispatch would have built, so the
-  # re-entry is exercised on every platform rather than only where the point fit
-  # survives this data (`engine_or_null()` above).
+  # re-entry is exercised on every platform. Since M161 icc() refuses this data
+  # before any fit (D-052), so the reducer is the only route to this guard.
   df <- gen_mse0(6, 3)
   cnd <- suppressWarnings(tryCatch(
     searle_ci(df, oneway_ests(3), hint = icc_hint(df, "searle")),
@@ -630,9 +631,8 @@ test_that("no usable candidate leaves the shipped message untouched (AC5)", {
   # works on it (the sweep's `gen_mse0` cells: 0 usable of every method at all
   # three of these guards). Were verification to accept a method wrongly, a
   # bullet would appear here and these pins would red. Fired at the reducers
-  # rather than through `icc()`, which cannot reach them on every platform (see
-  # `engine_or_null()`); the end-to-end path is asserted by the companion test
-  # below, where the fit survives.
+  # rather than through `icc()`, which since M161 refuses this data before any
+  # fit (D-052); the companion test below pins that refusal.
   df <- gen_mse0(6, 3)
   expected <- ac5_expected
   fire <- list(
@@ -661,29 +661,37 @@ test_that("no usable candidate leaves the shipped message untouched (AC5)", {
   }
 })
 
-test_that("where the fit survives, icc() delivers that same message (AC5)", {
+test_that("icc() refuses `gen_mse0` data before the reducer guard (AC5, M161)", {
   skip_on_cran()
-  # The end-to-end half of the criterion above: on a platform whose glmmTMB
-  # survives `gen_mse0`, the message a user actually meets is byte-identical to
-  # the one the reducer produced. Where the fit dies first this has nothing to
-  # say, and says so rather than passing on an engine error that happens to
-  # contain no bullet.
+  # The end-to-end half of the criterion above once checked that, where glmmTMB
+  # survived `gen_mse0`, icc() delivered the reducer's message byte for byte.
+  # Since M161 (D-052) icc() refuses data whose scores do not vary within any
+  # subject before any fit, on every platform, so the reducer guard is reached
+  # only by the direct calls above (GP9). What a user meets is the input
+  # refusal, which names no method.
   df <- gen_mse0(6, 3)
-  skip_if(
-    is.null(engine_or_null(df)),
-    "glmmTMB's point fit dies on this data here, before any CI-stage guard"
-  )
   for (m in names(ac5_expected)) {
-    msg <- abort_message(icc(
-      df,
-      score,
-      subject,
-      rater,
-      model = "oneway",
-      ci_method = m,
-      seed = 1L
-    ))
-    expect_identical(normalize_count(msg), ac5_expected[[m]], info = m)
+    # cli formats the message when the condition is created, so the width is
+    # set around the call itself.
+    err <- withr::with_options(
+      list(cli.width = 10000L, cli.unicode = FALSE),
+      tryCatch(
+        icc(
+          df,
+          score,
+          subject,
+          rater,
+          model = "oneway",
+          ci_method = m,
+          seed = 1L
+        ),
+        error = function(e) e
+      )
+    )
+    expect_s3_class(err, "intraclass_singular_fit")
+    msg <- conditionMessage(err)
+    expect_true(grepl("does not vary within any subject", msg), info = m)
+    expect_false(grepl("ci_method = ", msg, fixed = TRUE), info = m)
   }
 })
 
@@ -751,13 +759,10 @@ test_that("aborts that name no method are not slowed by verification (AC8)", {
   # same `ss`), so every such abort fell through to a full 999-refit bootstrap
   # that could not help either. The screen bounds that.
   df <- gen_mse0(6, 3)
-  # The criterion measures `icc()`, so where the point fit dies on this data
-  # before any guard there is no degeneracy abort here to time -- and the engine's
-  # own error would satisfy both assertions for the wrong reason.
-  skip_if(
-    is.null(engine_or_null(df)),
-    "glmmTMB's point fit dies on this data here, before any CI-stage guard"
-  )
+  # Since M161 (D-052) icc() refuses this data before any fit, on every
+  # platform, so no call below reaches the classical guard or the screen. The
+  # assertions now hold through the input refusal, which this block pins by
+  # class, so they cannot pass on an engine error.
   for (m in list("searle", "burch", NULL)) {
     call_args <- list(
       df,
@@ -773,6 +778,7 @@ test_that("aborts that name no method are not slowed by verification (AC8)", {
       msg <- abort_message(do.call(icc, call_args))
     })[["elapsed"]]
     label <- if (is.null(m)) "default" else m
+    expect_error(do.call(icc, call_args), class = "intraclass_singular_fit")
     # It named nothing (no method is usable on this data)...
     expect_false(grepl("ci_method = ", msg, fixed = TRUE), info = label)
     # ...so it must not have paid a full bootstrap to find that out.

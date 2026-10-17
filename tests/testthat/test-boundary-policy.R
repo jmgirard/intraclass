@@ -122,11 +122,14 @@ test_that("lavaan defers a Heywood boundary via the classed intraclass_singular_
   # case): sv/ev <= 0 cannot be put on the log-SD scale, so no boundary-aware
   # interval can be formed. The failure is converted to the same classed
   # `intraclass_singular_fit` condition pointing at glmmTMB -- the lavaan analog of
-  # the lme4 guard (DESIGN.md § Boundary-fit policy; ADR-014/031).
+  # the lme4 guard (DESIGN.md § Boundary-fit policy; ADR-014/031). Each rater
+  # adds its own constant, so scores vary within subjects and the data pass the
+  # input check that refuses data with no such variation (M161, D-052); the
+  # message pins that the lavaan conversion raised the condition.
   d <- data.frame(
     subject = factor(rep(1:6, 4)),
     rater = factor(rep(1:4, each = 6)),
-    score = rep(c(3, 5, 7, 2, 9, 4), 4)
+    score = rep(c(3, 5, 7, 2, 9, 4), 4) + rep(0:3, each = 6)
   )
   expect_error(
     suppressWarnings(icc(
@@ -137,6 +140,7 @@ test_that("lavaan defers a Heywood boundary via the classed intraclass_singular_
       engine = "lavaan",
       seed = 1
     )),
+    regexp = "could not fit the SEM",
     class = "intraclass_singular_fit"
   )
 })

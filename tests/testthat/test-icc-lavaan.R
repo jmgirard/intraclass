@@ -229,14 +229,16 @@ test_that("lavaan interval is finite and inside [0, 1]", {
 test_that("lavaan aborts loudly on a degenerate (boundary) fit (#5/#8)", {
   skip_if_not_installed("lavaan")
 
-  # Perfectly correlated raters (every rater gives each subject the same score)
-  # give a non-positive-definite sample covariance, which lavaan cannot fit. The
-  # failure is converted to a classed intraclass condition pointing at glmmTMB,
-  # rather than lavaan's raw un-classed error (#8).
+  # Perfectly correlated raters give a non-positive-definite sample covariance,
+  # which lavaan cannot fit. The failure is converted to a classed intraclass
+  # condition pointing at glmmTMB, rather than lavaan's raw un-classed error (#8).
+  # Each rater adds its own constant, so scores vary within subjects and the
+  # data pass the input check that refuses data with no such variation (M161,
+  # D-052); the message pins that the lavaan conversion raised the condition.
   d <- data.frame(
     subject = factor(rep(1:6, 4)),
     rater = factor(rep(1:4, each = 6)),
-    score = rep(c(3, 5, 7, 2, 9, 4), 4)
+    score = rep(c(3, 5, 7, 2, 9, 4), 4) + rep(0:3, each = 6)
   )
   expect_error(
     suppressWarnings(icc(
@@ -247,6 +249,7 @@ test_that("lavaan aborts loudly on a degenerate (boundary) fit (#5/#8)", {
       engine = "lavaan",
       seed = 1
     )),
+    regexp = "could not fit the SEM",
     class = "intraclass_singular_fit"
   )
 })

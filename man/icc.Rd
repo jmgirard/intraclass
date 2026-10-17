@@ -75,8 +75,9 @@ rating that did not happen. The row is dropped with a suppressible
 incomplete design. So a missing rating and an absent row give the same
 answer. If at least one subject has two or more scores and no subject has
 two different scores, \code{icc()} refuses the data with an
-\code{intraclass_singular_fit} error before it fits a model. The rater and
-residual variances of such data are exactly zero.}
+\code{intraclass_singular_fit} error before it fits a model. Every variance
+within subjects is exactly zero on such data. A call that an argument or
+design check refuses first keeps that check's error.}
 
 \item{cluster}{Optional column of \code{data} (unquoted) giving the higher-level
 unit each subject is nested in (e.g. classroom, clinic). Supplying it switches

@@ -243,7 +243,7 @@ test_that("the bootstrap abort site is NOT reachable at the sigma^2 -> 0 boundar
   expect_true(all(res == "ok"))
 })
 
-test_that("the reachable bootstrap abort takes DEGENERATE data, where no method helps (AC2)", {
+test_that("DEGENERATE data that once reached the bootstrap abort are refused before any fit (AC2)", {
   skip_if_not_installed("glmmTMB")
   skip_on_cran()
 
@@ -967,7 +967,9 @@ test_that("silence on degenerate data agrees with the interval, case by case (AC
     bh_hint(df = bh_degen_between(), oneway = TRUE, balanced = TRUE),
     0L
   )
-  # Two-way: all-constant data kill mpl's optim at its initial parameters.
+  # Two-way: all-constant data. Before M161 they killed mpl's optim at its initial
+  # parameters. Since M161 icc() refuses them before any fit, so no candidate run
+  # is usable.
   expect_length(bh_hint(df = bh_degen_flat()), 0L)
   # A missing score silences every row, because every reducer aborts on it -- the
   # hole pass-4 needed two separate mechanisms (`complete` and the probe tryCatch) to
@@ -994,6 +996,9 @@ test_that("data degenerate FOR THE ROW get no hint; data that are not still do (
       c(list(case$d, ci_method = "montecarlo", seed = 1), case$args)
     )
     skip_if(is.na(m), paste("no abort on the", case$lab, "degenerate case"))
+    # Since M161 (D-052) both cases meet icc()'s input refusal before any fit,
+    # which carries no bullet, so this loop now pins that the refusal names no
+    # method. The history below describes the paths it guarded before M161.
     # Read through `bh_msg_methods()`, never a bare `grepl`: a bullet can carry
     # `boot_samples` since M103, whose "mpl" substring reported the mpl method as
     # named and reddened this line on Linux while macOS -- where the point fit
@@ -1014,22 +1019,31 @@ test_that("data degenerate FOR THE ROW get no hint; data that are not still do (
       )
     }
   }
-  # ...and they abort, so the silence is a fence rather than caution.
+  # ...and they abort, so the silence is a fence rather than caution. Since M161
+  # (D-052) the abort through icc() is the input refusal of data whose scores do
+  # not vary within any subject, raised before any fit. The reducer guards are
+  # fired directly, at the reducer, in other test blocks (GP9).
   for (mm in c("searle", "burch")) {
-    expect_error(suppressWarnings(suppressMessages(
-      icc(
-        bh_degen_within(),
-        score,
-        subject,
-        rater,
-        ci_method = mm,
-        model = "oneway"
-      )
-    )))
+    expect_error(
+      suppressWarnings(suppressMessages(
+        icc(
+          bh_degen_within(),
+          score,
+          subject,
+          rater,
+          ci_method = mm,
+          model = "oneway"
+        )
+      )),
+      class = "intraclass_singular_fit"
+    )
   }
-  expect_error(suppressWarnings(suppressMessages(
-    icc(bh_degen_flat(), score, subject, rater, ci_method = "mpl")
-  )))
+  expect_error(
+    suppressWarnings(suppressMessages(
+      icc(bh_degen_flat(), score, subject, rater, ci_method = "mpl")
+    )),
+    class = "intraclass_singular_fit"
+  )
 
   # SSA = 0 (every subject mean exactly equal, MSE > 0) is silenced too, and the
   # REASON matters because the first re-cut un-suppressed this very cell. It did so
@@ -1493,10 +1507,11 @@ test_that("the names the REAL abort gives are exactly the usable set, two-way (A
       character(0)
     )
 
-  # Degenerate data, all three shapes. Each is silent for its OWN reason (MSE = 0
-  # trips the shipped guard, SSA = 0 leaves burch at NaN and searle's ICC(k) at -Inf,
-  # constant two-way data kills mpl's optim) -- and the converse half is what states
-  # that, rather than a `forbid` list asserting silence by fiat.
+  # Degenerate data, all three shapes. Each is silent for its OWN reason (SSA = 0
+  # leaves burch at NaN and searle's ICC(k) at -Inf; MSE = 0 and constant two-way
+  # data are refused by icc() before any fit since M161, where before they tripped
+  # the shipped guard and killed mpl's optim) -- and the converse half is what
+  # states that, rather than a `forbid` list asserting silence by fiat.
   named_total <- named_total +
     run(
       "one-way SSA = 0",
