@@ -67,6 +67,7 @@
 - 2026-10-17: substantive amendment: Scope Out sentence changed from "Zero-width lme4 intervals on other data stay with that row." to "Zero-width lme4 intervals on other data go to the candidate row "M161 review follow-ups on the flat-scores refusal"." (review diff-bug #1). No criterion changed.
 - 2026-10-17: review fix-now work committed as 24ebd65 (eight findings across the three lenses, Review section).
 - 2026-10-17: step-7 approval: m161-flat-scores-refusal approved for merge
+- 2026-10-17: PR #180 CI red on check-references: `data-raw/record-claims.tsv` row `roadmap-terminal-rows` still pinned M159, M158, M157, because the M160 done pass rotated the ROADMAP rows without the pin. Rotated the pin to M160, M159, M158 on the branch. An `Edit` of the row dropped one tab (the M153 TSV lesson), so the tab was restored by a short Python replace, and all 8 rows read 11 fields again. All eight check-references commands pass locally. This is a tracking-pin fix, judged trivial, so approval was not asked again.
 
 ## Decisions
 
