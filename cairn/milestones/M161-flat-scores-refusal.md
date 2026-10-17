@@ -1,6 +1,6 @@
 # M161: Data whose scores do not vary within any subject are refused classed before any fit
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -41,7 +41,7 @@
 - [x] T2: Add the check to `icc()` in `R/icc.R` after the identifiability guards and before the first fit. Count non-missing scores per subject and distinct values per subject. Abort when some subject has two or more scores and every subject has at most one distinct value. Use `abort_intraclass(class = "intraclass_singular_fit")`, with a message that names `{.arg score}`, says why no model can be fitted, and gives one remedy. Add a GP7 comment that cites D-052 and the exact-comparison choice.
 - [x] T3: Update `tests/testthat/test-boundary-abort-hint.R`. The block at about line 246 now meets one outcome on every platform, so assert `intraclass_singular_fit` where it says the class is deliberately not asserted. Correct the comments at about lines 912 to 946 that describe raw point-fit errors on flat data. Keep the reducer-level tests of `classical_guard_observed()` as they are (GP9). Run the file.
 - [x] T4: Document the rule on `?icc` in `R/icc.R`, beside the missing-score text at about line 221. Add the NEWS bullet. Add an input-side line to the Boundary-fit policy in `cairn/DESIGN.md`, citing D-052, as D-022 did. Run `devtools::document()`.
-- [ ] T5: Run `devtools::test()`, `devtools::check()`, `air format --check .` and `lintr::lint_package()`. Fix what they report.
+- [x] T5: Run `devtools::test()`, `devtools::check()`, `air format --check .` and `lintr::lint_package()`. Fix what they report.
 
 ## Work log
 
@@ -63,5 +63,6 @@
 - 2026-10-17: verify: full `devtools::test()` at b6296ca's code had no failures. `test-boundary-abort-hint.R` after the T3 edit: 0 failed, 0 errors, 0 warnings, 0 skipped. `air format --check .` clean, `lintr::lint_package()` 0 lints. T1 to T4 ticked. NEWS long-sentence count stays at 12 by `data-raw/prose-profile.py --limit 25`.
 - 2026-10-17: claim audit: 30 claims read, 3 corrected — R/icc.R, tests/testthat/test-flat-scores.R. A hedged fourth claim in tests/testthat/test-boundary-abort-hint.R was narrowed too. The same reader re-read all four once, and all hold.
 - 2026-10-17: correction of the T2 line above: the check runs after the argument fences and most design fences, not after every fence. The lavaan replicate fence and the fences inside the CI functions come later, so on flat data those combinations now get `intraclass_singular_fit` where main gave `intraclass_unsupported` (claim audit probe: F5 lavaan two-way montecarlo and bootstrap, F3 glmmTMB two-way mpl).
+- 2026-10-17: T5: `devtools::check()` at 429da2e's code: Status OK, 0 errors, 0 warnings, 0 notes. The later commit 5853280 changes comments only. T5 ticked, status set to review.
 
 ## Decisions
