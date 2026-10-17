@@ -17,7 +17,7 @@
 
 **In:** an input check in `icc()` in `R/icc.R`. It runs after the missing-score drop and the identifiability guards (about lines 1160 to 1240) and before the first fit. It fires when at least one subject has two or more non-missing scores and no subject has two different scores. The comparison is exact, with no tolerance, on the D-022 precedent. The abort goes through `abort_intraclass(class = "intraclass_singular_fit")` and names `score` (D-052). The degenerate blocks of `test-boundary-abort-hint.R` change to match. `?icc`, NEWS and the DESIGN.md Boundary-fit policy record the refusal.
 
-**Out:** two-way data whose residual is exactly zero while scores vary within subjects. Examples are scores that vary only by rater and scores that are exactly additive in subject and rater. That remainder goes to the new candidate row "two-way data with zero residual". Zero-width lme4 intervals on other data stay with that row. The axes `raters`, `unit`, `level` and incomplete layouts are not swept by the test grid, and no criterion promises them.
+**Out:** two-way data whose residual is exactly zero while scores vary within subjects. Examples are scores that vary only by rater and scores that are exactly additive in subject and rater. That remainder goes to the new candidate row "two-way data with zero residual". Zero-width lme4 intervals on other data go to the candidate row "M161 review follow-ups on the flat-scores refusal". The axes `raters`, `unit`, `level` and incomplete layouts are not swept by the test grid, and no criterion promises them.
 
 ## Acceptance criteria
 
@@ -64,6 +64,8 @@
 - 2026-10-17: claim audit: 30 claims read, 3 corrected — R/icc.R, tests/testthat/test-flat-scores.R. A hedged fourth claim in tests/testthat/test-boundary-abort-hint.R was narrowed too. The same reader re-read all four once, and all hold.
 - 2026-10-17: correction of the T2 line above: the check runs after the argument fences and most design fences, not after every fence. The lavaan replicate fence and the fences inside the CI functions come later, so on flat data those combinations now get `intraclass_singular_fit` where main gave `intraclass_unsupported` (claim audit probe: F5 lavaan two-way montecarlo and bootstrap, F3 glmmTMB two-way mpl).
 - 2026-10-17: T5: `devtools::check()` at 429da2e's code: Status OK, 0 errors, 0 warnings, 0 notes. The later commit 5853280 changes comments only. T5 ticked, status set to review.
+- 2026-10-17: substantive amendment: Scope Out sentence changed from "Zero-width lme4 intervals on other data stay with that row." to "Zero-width lme4 intervals on other data go to the candidate row "M161 review follow-ups on the flat-scores refusal"." (review diff-bug #1). No criterion changed.
+- 2026-10-17: review fix-now work committed as 24ebd65 (eight findings across the three lenses, Review section).
 
 ## Decisions
 
@@ -75,3 +77,27 @@ Review pass 1, 2026-10-17, at e7ccb32. The branch contains `origin/main` (4caf23
 - AC2 evidence: same run. The AC2 block ran 8 expectations with 0 failed. Both near-flat frames reached the glmmTMB stub for both models.
 - AC3 evidence: same run. The AC3 block ran 8 expectations with 0 failed. All four refusals inherit `intraclass_singular_fit`, and their messages contain `` `score` ``.
 - AC4 evidence: `man/icc.Rd:76` (from `@param score` in `R/icc.R`) states the rule in AC1's words, with the class and "before it fits a model". `NEWS.md:3` has the bullet under "intraclass (development version)", and it includes the lme4 one-way ICC 1 [1, 1] sentence. `devtools::document()` at e7ccb32 left `git status` empty.
+- Gate: `cairn_validate.py` all checks passed. `pkgdown::check_pkgdown()` found no problems. `air format --check .` clean. README.Rmd is untouched by the branch. NEWS has the entry. No new top-level file. No DESIGN.md principle changed, so `cairn_impact` is skipped.
+- spawned: diff-bug, blame-history, prior-review
+- blame-history #1: `test-reducer-abort-hint.R` AC5 and AC8 call `icc()` on flat `gen_mse0` data and skip only where glmmTMB's fit dies, so on a platform where it survives AC5's byte-identical message check fails and AC8 times the wrong path — fix now: both blocks now pin the input refusal by class and message, and three comments that relied on the old skip were corrected, fixed 24ebd65.
+- blame-history #2: the lavaan Heywood tests in `test-icc-lavaan.R` and `test-boundary-policy.R` used flat data, so they hit the new refusal and no longer reached `fit_lavaan()`'s conversion — fix now: each rater adds a constant, so the data vary within subjects and still give lavaan a non-positive-definite covariance, and the tests pin the conversion's message "could not fit the SEM", fixed 24ebd65.
+- blame-history #3: the "degenerate FOR THE ROW get no hint" block's comments and two class-free `expect_error()` calls no longer describe what it tests — fix now: comments corrected and both calls pin `intraclass_singular_fit`, fixed 24ebd65.
+- blame-history #4: the sweep comment says MSE = 0 trips the shipped guard and constant two-way data kill mpl's optim — fix now: comment corrected, fixed 24ebd65.
+- blame-history #5: the removed block was the only `icc()`-level route to D-049's zero-width refusal — reject (planned change): T3 called for replacing that block, and GP9 puts degenerate guards at the reducer, where `test-glmmtmb-false-zero.R` still fires D-049's refusal.
+- blame-history #6: the check runs later than the Scope's "after the identifiability guards" and pre-empts some later fences — reject (false): the Scope and D-052 state "after" and "before the first fit", both true. The pre-emption is recorded in the work log, and NEWS and `?icc` now say that a call refused first keeps its error, fixed 24ebd65.
+- blame-history #7: the message's only remedy is to check the columns — fix now, with diff-bug #4.
+- diff-bug #1: data one step from flat (`1e-12`) give a one-way lme4 ICC 1 [1, 1], and the Out section's pointer to the two-way row does not cover it — follow-up: candidate row "M161 review follow-ups on the flat-scores refusal" (a), and the Out pointer now names that row (substantive amendment, work log).
+- diff-bug #2: the title of the block at `test-boundary-abort-hint.R:246` says the data reach the bootstrap abort — fix now: retitled, fixed 24ebd65.
+- diff-bug #3: stale comments around the hint-silence block and the sweep — fix now, with blame-history #3 and #4, fixed 24ebd65.
+- diff-bug #4: the message says "rater and residual variances" (one-way has no rater variance), says "no model can be fitted" (lme4 did fit), and does not say that flat data mean perfect agreement — fix now: reworded to "does not fit a model to it", "every variance within subjects", and a perfect-agreement sentence, fixed 24ebd65.
+- diff-bug #5: with brms and 2 raters the k = 2 note prints before the refusal — follow-up: candidate row "M161 review follow-ups on the flat-scores refusal" (b).
+- diff-bug #6: fences placed after the check give a different class on flat data than on their control — follow-up: the same row (c). NEWS and `?icc` scope sentence, fixed 24ebd65.
+- diff-bug #7: the empty-domain guard is per engine, not per `ci_method` — follow-up: the same row (d).
+- diff-bug #8: the class name says "fit" for a refusal raised before any fit — reject (planned change): D-052 chose the existing class so callers who catch it keep working.
+- diff-bug #9: no false claim in NEWS, `?icc` or DESIGN.md — noted, no defect.
+- prior-review #1: "on every engine" and "every engine and CI method" are stronger than the check, since earlier fences fire first — fix now: NEWS, `?icc` and DESIGN.md now say that a call refused first keeps that error, fixed 24ebd65.
+- prior-review #2: comments in `test-ci-npbootstrap-unbalanced.R:148` and `:172` say the engine point fit rejects SSE = 0 data — fix now: corrected, fixed 24ebd65. Its comments in `R/boundary-hint.R` and the `?icc` hint text — reject (false): they describe guards outside `icc()` and SSA = 0 data, which are unchanged.
+- prior-review #3: the replacement assertions meet GP9's rules — noted, no defect.
+- prior-review #4: exact comparison leaves near-flat data platform-dependent — follow-up: the same row (a).
+- prior-review #5: two-way zero-residual data stay open — follow-up: already the candidate row "two-way data with zero residual".
+- Re-run after the fixes, at 24ebd65: `test-flat-scores.R` 222 expectations, `test-reducer-abort-hint.R` 188, `test-icc-lavaan.R` 52, `test-boundary-policy.R` 14, `test-boundary-abort-hint.R` 1331, `test-ci-npbootstrap-unbalanced.R` 23, all with 0 failed, 0 errors, 0 warnings, 0 skipped.
