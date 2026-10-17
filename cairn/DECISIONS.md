@@ -2042,3 +2042,38 @@ leaving the method to the easystats packages, since parameters ships no ICC
 method for any package; and a NAMESPACE-level delayed registration, since
 `s3_register()` is already the one mechanism here. Reopened by parameters
 leaving CRAN or by a change in its table conventions that breaks the printer.
+
+### D-052 (2026-10-17): Data whose scores do not vary within any subject are refused classed before any fit, extending D-022's input-side refusals and adding a row to D-004's Boundary-fit policy
+
+**Context.** On data in which no subject's scores vary, `icc()` passed the data
+to the engines, and the outcome depended on the engine, the model and the
+platform. Some paths raised glmmTMB's or lme4's own errors, which carry no
+class, so a caller could not catch them by class (PRINCIPLES.md #8). A one-way
+lme4 fit reported ICC 1 with the interval [1, 1]. Other paths deferred with
+`intraclass_singular_fit`. The probes are in the M161 work log. With no
+variation within subjects, the rater, interaction and residual variances are
+all exactly zero, so no likelihood fit has an interior maximum.
+
+**Decision.** `icc()` aborts with `intraclass_singular_fit`, a subclass of
+`intraclass_error`, before any fit, when at least one subject has two or more
+non-missing scores and no subject has two different scores. The check runs
+after the missing-score drop of D-022 and compares exactly, with no tolerance,
+on D-022's reason: a tolerance wide enough to matter would refuse data that a
+method answers. The check is input-side for D-022's other reason: each engine
+fails in its own words, and one check serves all four engines. The class is
+the existing `intraclass_singular_fit` and not a new one, because the
+Monte-Carlo, classical and lme4 paths already raised it on most such data, so
+a caller who catches it keeps working.
+
+**Consequences.** The contract now refuses one result it used to report: the
+one-way lme4 ICC 1 [1, 1] on such data. A zero-width interval states no
+uncertainty (#3), and D-049 already refuses one on glmmTMB. DESIGN.md's
+Boundary-fit policy gains an input-side line citing this entry, since D-004
+requires an entry for a change to a documented cell. The classical guard on
+MSE = 0 stays in place and is tested at the reducer (GP9), though `icc()` no
+longer reaches it on single-level data. **Untouched:** two-way data whose
+residual is exactly zero while scores vary within subjects, such as scores that
+vary only by rater. Refusing those needs a residual that differs by design
+shape, and it would refuse lme4's finite two-way answer on exactly additive
+scores. That remainder is a ROADMAP candidate. Reopened by a user who needs this
+refusal told apart from a boundary deferral by class.
