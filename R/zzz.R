@@ -11,7 +11,8 @@
 # same way, for parameters, also a Suggests dependency (D-051).
 
 # covr cannot trace `.onLoad()`, which runs when the namespace loads; the
-# registrations are exercised by every autoplot() test instead.
+# registrations are exercised by every autoplot() test and by
+# test-model-parameters.R instead.
 # nocov start
 .onLoad <- function(libname, pkgname) {
   s3_register("ggplot2::autoplot", "intraclass_dstudy")

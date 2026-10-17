@@ -495,8 +495,9 @@ are the list elements you may depend on. Reaching into any other one is
 reading an implementation detail. \code{tidy()} and \code{glance()} are the stable
 tables, not a re-export of the list. They report the estimated
 coefficients and the model-level summaries, column by column as documented
-below. Those two tables, the \code{model_parameters()} table built from
-\code{tidy()}, and \verb{$fit} and \verb{$call} are the whole supported surface. Everything else the list holds falls under the rule above,
+below. The \code{model_parameters()} table is \code{tidy()} under other column
+names. Those tables, plus \verb{$fit} and \verb{$call}, are the whole supported
+surface. Everything else the list holds falls under the rule above,
 whether or not a table happens to report it.
 
 The methods documented on this page return the objects below.
@@ -562,7 +563,9 @@ under the easystats column names. \code{Parameter} is \code{term}, \code{Type} i
 \code{conf.level}, \code{CI_low} is \code{conf.low}, \code{CI_high} is \code{conf.high}, and
 \code{Method} is \code{method}. The column names are stable, and \code{Parameter} is
 always the first column. The printed table is titled "Intraclass
-correlation coefficients" and hides the columns that are all \code{NA}.
+correlation coefficients" and hides the columns that are all \code{NA}. A
+multilevel fit shows \code{Level} in the \code{Parameter} label, as in
+\code{ICC(A,1) [subject]}.
 }
 
 \code{tidy.intraclass_icc()} and \code{glance.intraclass_icc()} implement the

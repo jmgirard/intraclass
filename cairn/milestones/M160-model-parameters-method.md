@@ -62,5 +62,6 @@
 - 2026-10-16: implementation choice: `ci` is a named argument (default NULL) rather than read from `...`, so it is documented on ?icc; a non-numeric or non-scalar `ci` also aborts. The refusal takes its own subclass `intraclass_ci_level` under `intraclass_error`, and the test pins both.
 - 2026-10-16: implementation choice: the method's first argument is `model`, as the parameters generic requires, so ?icc's existing `model` entry gains one sentence for this method instead of a second entry.
 - 2026-10-17: checkpoint (T1 to T3 written, boxes open): the new test file failed 4 of 4 blocks before the method existed (parameters' own "class not supported" error) and passes 68 expectations after it; the full suite is still running. NEWS hits from the simple-english lint are in older bullets that the candidate row "Older NEWS.md bullets over 25 words (R2)" covers, so they stay.
+- 2026-10-17: claim audit: 21 claims read, 3 corrected — R/icc.R (the printer also folds Level into the Parameter label; the supported-surface paragraph named two tables while listing three), NEWS.md (Method was missing from the column list); a stale coverage comment in R/zzz.R also fixed; the same reader re-read all four once and found each holds.
 
 ## Decisions

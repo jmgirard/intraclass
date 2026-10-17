@@ -706,8 +706,9 @@
 #'   reading an implementation detail. `tidy()` and `glance()` are the stable
 #'   tables, not a re-export of the list. They report the estimated
 #'   coefficients and the model-level summaries, column by column as documented
-#'   below. Those two tables, the `model_parameters()` table built from
-#'   `tidy()`, and `$fit` and `$call` are the whole supported surface. Everything else the list holds falls under the rule above,
+#'   below. The `model_parameters()` table is `tidy()` under other column
+#'   names. Those tables, plus `$fit` and `$call`, are the whole supported
+#'   surface. Everything else the list holds falls under the rule above,
 #'   whether or not a table happens to report it.
 #'
 #'   The methods documented on this page return the objects below.
@@ -772,7 +773,9 @@
 #'     `conf.level`, `CI_low` is `conf.low`, `CI_high` is `conf.high`, and
 #'     `Method` is `method`. The column names are stable, and `Parameter` is
 #'     always the first column. The printed table is titled "Intraclass
-#'     correlation coefficients" and hides the columns that are all `NA`.
+#'     correlation coefficients" and hides the columns that are all `NA`. A
+#'     multilevel fit shows `Level` in the `Parameter` label, as in
+#'     `ICC(A,1) [subject]`.
 #'
 #'   `tidy.intraclass_icc()` and `glance.intraclass_icc()` implement the
 #'   [tidy()][generics::tidy] and [glance()][generics::glance] generics.
