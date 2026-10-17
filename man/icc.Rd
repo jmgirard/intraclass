@@ -73,7 +73,10 @@ the subject (object of measurement), and the rater (judge). A non-finite
 rating that did not happen. The row is dropped with a suppressible
 \code{intraclass_dropped_rows} warning, and the rest is analyzed as an
 incomplete design. So a missing rating and an absent row give the same
-answer.}
+answer. If at least one subject has two or more scores and no subject has
+two different scores, \code{icc()} refuses the data with an
+\code{intraclass_singular_fit} error before it fits a model. The rater and
+residual variances of such data are exactly zero.}
 
 \item{cluster}{Optional column of \code{data} (unquoted) giving the higher-level
 unit each subject is nested in (e.g. classroom, clinic). Supplying it switches

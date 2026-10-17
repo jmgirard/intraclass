@@ -1,13 +1,13 @@
 # M161: Data whose scores do not vary within any subject are refused classed before any fit
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP1, GP9
 - **Resolves:** —
 - **Surface tier:** user-facing — `icc()` refuses data it used to pass to the engines
-- **Branch/PR:** —
+- **Branch/PR:** m161-flat-scores-refusal
 
 ## Goal
 
@@ -56,5 +56,9 @@
 - 2026-10-17: plan gate chose the class `intraclass_singular_fit` over a new class, because the Monte-Carlo, classical and lme4 paths already raised it on most such data, so callers who catch it keep working. Falsified by a user who needs to tell this refusal apart from a boundary deferral by class.
 - 2026-10-17: criteria audit (full mode, fresh Opus reader) returned nine findings. Admission by "no condition other than the sentinel" failed for lavaan, whose wrapper re-raises the stub's error, and for `mpl` and brms, which signal messages. Fixed by admission on a recorded stub call, with "reaches no stub" in the promise. The 56-combination count and the per-engine non-empty assertion bound the instrument, so they moved to T1. The probes missed the rule's edges, so F6 (a missing score) and the `1e-12` control in AC2 were added. AC2's `ci_method`-word check held for any input-side message, so it was dropped, and AC3 now pins `` `score` `` with backticks. The real-fit control criterion was fragile, because its rater variance sat on the boundary and lme4 passed by tolerance, so it was dropped. The full suite in AC5 covers ordinary data. The `?icc` and NEWS wording was wider than the rule and wrong for lme4 on all-equal scores, so it was narrowed to the rule's words. No criterion required D-052 or the DESIGN.md row, so D-052 lands in the plan commit and the row is in T4. AC5 had no finding.
 - 2026-10-17: decided toward the narrower promise: `raters`, `unit`, `level` and incomplete layouts stay out of the test grid, recorded under Out, instead of a wider grid.
+- 2026-10-17: implement started on branch m161-flat-scores-refusal, cut from main at 4caf231.
+- 2026-10-17: T1 minor amendment: the empty-domain guard expects every stubbed engine on each frame except lavaan on F5, because the lavaan engine refuses within-cell replicates with `intraclass_unsupported` on every combination.
+- 2026-10-17: T2 placed the check just before the engine-fit dispatch in `icc()`, after every argument and design fence, so an unsupported combination on flat data still reports the fence. `test-flat-scores.R` was red on main (flat frames reached a fit) and is green with the check.
+- 2026-10-17: checkpoint, half-done: T1 to T4 written, not ticked. The full `devtools::test()` run is in progress, so no task is checked off yet.
 
 ## Decisions
