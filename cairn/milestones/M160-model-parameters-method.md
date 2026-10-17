@@ -80,3 +80,25 @@ Review pass 1 (2026-10-17), on 8f575cb. Copilot round off (no header line in `ca
 - AC5 evidence: on 8f575cb, `parameters` appears in DESCRIPTION's `Suggests:` block (line 13 of that block) and 0 times in the `Imports:` and `Depends:` blocks; `grep -c parameters NAMESPACE` is 0; R/zzz.R:20 is `s3_register("parameters::model_parameters", "intraclass_icc")` inside `.onLoad()`; each of the 4 `test_that()` blocks opens with `skip_if_not_installed("parameters")`; the AC5 `grep -lE` over `tests/testthat/*.R` lists only `test-model-parameters.R`.
 - AC6 evidence: on 8f575cb, man/icc.Rd:557-567 documents `model_parameters.intraclass_icc()` with the 11-pair mapping of AC2, and the `ci` argument has its own entry; NEWS.md line 3 is the method's bullet under line 1 `# intraclass (development version)`; `devtools::document()` left `git status` empty; `pkgdown::check_pkgdown()` reported "No problems found".
 
+spawned: diff-bug, blame-history, prior-review
+
+- diff-bug #1: `Parameter` repeats across levels on a multilevel fit, so `see`'s plot overlays the subject and cluster intervals with no legend — follow-up (candidate row "easystats tools beyond model_parameters on icc() results", item a); the doc-side half fixed now: `?icc` says `Parameter` repeats across levels and is read with `Level`, and a test pins the repeat.
+- diff-bug #2: `compare_parameters()` crashes on two `icc()` results and prints a `$fit` `(Intercept)` row for one — follow-up (same row, item b); outside the milestone, which promises `model_parameters()` only.
+- diff-bug #3: `insight::standardize_names(style = "broom")` maps `Level` to `value` — follow-up (same row, item c).
+- diff-bug #4: the refusal's own class `intraclass_ci_level` names an argument, where argument checks such as `validate_conf_level()` use bare `intraclass_error` — fix now: subclass dropped; the test names the failure by its message.
+- diff-bug #5: `?icc`'s Arguments list moved `model` and the new `ci` ahead of `data` — fix now: the method moves to `R/model-parameters.R`, which collates after `R/icc.R`, so `icc()`'s arguments keep signature order and `ci` comes last.
+- diff-bug #6: other easystats arguments (`bootstrap`, `standardize`, …) are ignored silently — reject (planned change): Scope Out says so.
+- diff-bug #7: blocks 3 and 4 each build all four fits to use one — fix now: a `mp_twoway()` helper.
+- diff-bug #8: no test for a non-numeric, vector or `NA` `ci`, or for the tolerance — fix now: four expectations added (`"0.95"`, `c(0.95, 0.95)`, `NA_real_` refused; `0.1 * 9.5` accepted).
+- diff-bug #9: `format_table()` and `export_table()` keep the all-`NA` columns — reject (false): `?icc` scopes the hiding to the printed table.
+- blame-history #1: the supported-surface sentence lists the new table implicitly, and the paragraph omits `summary()`/`print()` — reject (false): the paragraph's first sentence names "the methods below", which include `summary()` and `print()`, and the table's membership follows D-051.
+- blame-history #2: `@param model` now carries two meanings — reject (planned change): the parameters generic fixes the argument name, and one Rd page holds one entry per name; the added sentence states the second meaning.
+- blame-history #3: the printer claims (all-`NA` columns hidden, `Level` in the label) have no test, and `?icc` is silent on column order — fix now: a printer test block (with a two-way control that shows a filled column) and the sentence "Their order is not, except that `Parameter` is always the first column".
+- blame-history #4: the `R/zzz.R` header names only `autoplot.intraclass_dstudy()` — fix now: it names both autoplot methods.
+- blame-history #5 to #8: method export, NEWS placement, WORDLIST order, DESCRIPTION order — no finding (noted).
+- prior-review #1: unpinned `?icc` printer claims — fix now (same fix as blame-history #3).
+- prior-review #2: column names pinned by `expect_setequal`, not exact order — reject (planned change): AC1 asserts the set by design (D-038, D-051).
+- prior-review #3: "easystats" has no gloss in NEWS — fix now: NEWS and `?icc` say it is the family of packages that parameters belongs to.
+- prior-review #4: `(D-051)` in code comments — reject (style): the repo's code comments cite record ids throughout, and M157's rule covers messages users see.
+- prior-review #5: `@param model` placement — reject (false): the reviewer found no dangling referent, and the reorder it noted is fixed by diff-bug #5.
+

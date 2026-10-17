@@ -767,15 +767,18 @@
 #'   * `model_parameters.intraclass_icc()`: available when the \pkg{parameters}
 #'     package is installed, through [parameters::model_parameters()]. It
 #'     returns a `parameters_model` data frame with one row per row of `tidy()`,
-#'     under the easystats column names. `Parameter` is `term`, `Type` is
+#'     under the column names of the easystats packages, the family that
+#'     \pkg{parameters} belongs to. `Parameter` is `term`, `Type` is
 #'     `type`, `Level` is `level`, `Occasions` is `occasions`, `SF_Index` is
 #'     `sf_index`, `Coefficient` is `estimate`, `SE` is `std.error`, `CI` is
 #'     `conf.level`, `CI_low` is `conf.low`, `CI_high` is `conf.high`, and
-#'     `Method` is `method`. The column names are stable, and `Parameter` is
-#'     always the first column. The printed table is titled "Intraclass
-#'     correlation coefficients" and hides the columns that are all `NA`. A
-#'     multilevel fit shows `Level` in the `Parameter` label, as in
-#'     `ICC(A,1) [subject]`.
+#'     `Method` is `method`. The column names are stable. Their order is not,
+#'     except that `Parameter` is always the first column. On a multilevel
+#'     fit, `Parameter` repeats across levels (`ICC(A,1)` at the subject level
+#'     and at the cluster level), so read it together with `Level`. The
+#'     printed table is titled "Intraclass correlation coefficients" and hides
+#'     the columns that are all `NA`. It shows `Level` in the `Parameter`
+#'     label, as in `ICC(A,1) [subject]`.
 #'
 #'   `tidy.intraclass_icc()` and `glance.intraclass_icc()` implement the
 #'   [tidy()][generics::tidy] and [glance()][generics::glance] generics.

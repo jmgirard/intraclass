@@ -1,7 +1,8 @@
 # intraclass (development version)
 
 * If the parameters package is installed, `parameters::model_parameters()`
-  now works on `icc()` results. It returns the `tidy()` table under the
+  now works on `icc()` results. easystats is the family of packages that
+  parameters belongs to. The method returns the `tidy()` table under the
   easystats column names, titled "Intraclass correlation coefficients". The
   main columns are `Parameter`, `Coefficient`, `SE`, `CI`, `CI_low`, `CI_high`
   and `Method`. The other columns are the identifiers `Type`, `Level`,
