@@ -9,11 +9,15 @@
 # (https://vctrs.r-lib.org/reference/s3_register.html); copied here rather than
 # adding vctrs to Imports.
 
+# covr cannot trace `.onLoad()`, which runs when the namespace loads; the
+# registrations are exercised by every autoplot() test instead.
+# nocov start
 .onLoad <- function(libname, pkgname) {
   s3_register("ggplot2::autoplot", "intraclass_dstudy")
   s3_register("ggplot2::autoplot", "intraclass_icc")
   invisible()
 }
+# nocov end
 
 # Register a method for a generic that lives in a Suggested package, taking
 # effect when (and only when) that package is loaded. Verbatim vctrs copy.

@@ -243,6 +243,17 @@ test_that("plot.intraclass_icc returns its input invisibly", {
   expect_invisible(plot(fit))
 })
 
+test_that("plot.intraclass_dstudy returns its input invisibly", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("ggplot2")
+  fit <- icc(sf_ratings_long(), score, subject, rater, seed = 1)
+  d <- d_study(fit, m = c(1, 2, 4))
+  pdf(NULL)
+  on.exit(dev.off(), add = TRUE)
+  expect_invisible(plot(d))
+  expect_identical(plot(d), d)
+})
+
 test_that("autoplot.intraclass_dstudy renders each projected curve faithfully", {
   skip_if_not_installed("glmmTMB")
   skip_if_not_installed("ggplot2")

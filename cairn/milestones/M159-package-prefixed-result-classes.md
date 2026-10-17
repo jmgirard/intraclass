@@ -62,6 +62,7 @@ The results of `icc()`, `d_study()` and `choose_icc()` carry the classes `"intra
 - 2026-10-16: T2 to T6 done. `devtools::test()`: 0 failed, 0 errors, 9994 passed, 4 skipped (vignettes not installed, and glmmTMB's point fit dying on two reducer-hint frames, both unrelated). `devtools::document()` leaves no diff, and `air format --check .` is clean. The D-entry (D-050) landed with the plan commit. Status set to review.
 - 2026-10-16: step-7 approval: m159-package-prefixed-result-classes approved for merge
 - 2026-10-16: CI wait on PR #178 reached the harness ceiling and was stopped: check-references, checkpoint-guard, lint, format-check and pkgdown pass; test-coverage and the three R-CMD-check jobs (ubuntu release, ubuntu 4.5.0, windows release) still pending. Not merged.
+- 2026-10-16: resume (route c): PR #178 open; the three R-CMD-check jobs, test-coverage and codecov/project pass, codecov/patch fails (80%, 3 lines). Codecov's per-line report shows the same 3 lines missed on main, shifted by one line: `.onLoad()`'s two `s3_register()` calls in `R/zzz.R` and `plot.intraclass_dstudy()`'s body in `R/autoplot.R`. Fixed by a `plot()` test on a `d_study()` result and `# nocov` around `.onLoad()`, which covr cannot trace. No behavior change, so the step-7 approval stands.
 
 ## Decisions
 
@@ -95,3 +96,6 @@ spawned: diff-bug, blame-history, prior-review
 - prior-review #2: `test-class-names.R` compares two `cli::cli_fmt()` captures with no non-empty check (LESSONS M129) — fix now, with diff-bug #1, fixed 648d3c8.
 
 After the fixes: full `devtools::test()` on `648d3c8` gave 0 failed, 0 errors, 10000 passed, 4 skipped (the 6 added expectations are the positive control and the non-empty check). `cairn_validate.py` all checks passed. `cairn_impact.py --changed` reports no changed principles (GP2 gained a pointer to D-050, its rule text unchanged). The linter count on `cairn/doctrine/prose-style.md` is 36 before and after the edit.
+
+Pass 1 resume (route c), PR-conversation read on PR #178: no reviews, no unresolved threads.
+- conversation: codecov[bot] (Bot) PR — "Patch coverage is `80.00000%` with `3 lines` in your changes missing coverage", the lines in `R/zzz.R` (2) and `R/autoplot.R` (1), project coverage unchanged at 697 missed lines — fix now (the renamed lines were already uncovered on main; a `plot()` test now covers `plot.intraclass_dstudy()`, and `.onLoad()` carries `# nocov`). `test-autoplot.R` passes locally.
