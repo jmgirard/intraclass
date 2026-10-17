@@ -1,13 +1,13 @@
 # M160: easystats model_parameters method for icc() results
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP2
 - **Resolves:** —
 - **Surface tier:** user-facing — a new method that users call on `icc()` results
-- **Branch/PR:** —
+- **Branch/PR:** m160-model-parameters-method
 
 ## Goal
 
@@ -58,5 +58,9 @@
 - 2026-10-16: plan gate chose lazy registration through s3_register() in .onLoad() over a roxygen `@exportS3Method parameters::model_parameters` NAMESPACE entry, because autoplot already uses the first and one mechanism is easier to read; falsified by a check NOTE or a load failure from s3_register() under parameters.
 - 2026-10-16: plan gate chose to abort on a numeric ci that differs from the fitted level over ignoring it, because #5 says a request the result cannot honor fails loudly; falsified by a user report that easystats tooling passes ci by default and so cannot call the method.
 - 2026-10-16: plan gate chose a fixed title "Intraclass correlation coefficients" over a design-specific title from format(), because the printer's header line is short and the design is in the table rows; falsified by a user reading two printed tables as the same design.
+- 2026-10-16: started on branch m160-model-parameters-method, cut from main at fcc8403.
+- 2026-10-16: implementation choice: `ci` is a named argument (default NULL) rather than read from `...`, so it is documented on ?icc; a non-numeric or non-scalar `ci` also aborts. The refusal takes its own subclass `intraclass_ci_level` under `intraclass_error`, and the test pins both.
+- 2026-10-16: implementation choice: the method's first argument is `model`, as the parameters generic requires, so ?icc's existing `model` entry gains one sentence for this method instead of a second entry.
+- 2026-10-17: checkpoint (T1 to T3 written, boxes open): the new test file failed 4 of 4 blocks before the method existed (parameters' own "class not supported" error) and passes 68 expectations after it; the full suite is still running. NEWS hits from the simple-english lint are in older bullets that the candidate row "Older NEWS.md bullets over 25 words (R2)" covers, so they stay.
 
 ## Decisions

@@ -8,6 +8,7 @@
 \alias{summary.intraclass_icc}
 \alias{tidy.intraclass_icc}
 \alias{glance.intraclass_icc}
+\alias{model_parameters.intraclass_icc}
 \alias{icc}
 \title{Intraclass correlation coefficients for interrater reliability}
 \usage{
@@ -24,6 +25,8 @@ autoplot.intraclass_icc(object, what = "coefficients", ...)
 \method{tidy}{intraclass_icc}(x, ...)
 
 \method{glance}{intraclass_icc}(x, ...)
+
+model_parameters.intraclass_icc(model, ci = NULL, ...)
 
 icc(
   data,
@@ -61,6 +64,22 @@ variance-component decomposition.}
 
 \item{x, object}{An \code{intraclass_icc} object.}
 
+\item{model}{Design: \code{"twoway"} (the default, subjects crossed with a common
+set of raters) or \code{"oneway"} (each subject rated by a possibly different set
+of raters). Under \code{"oneway"} (Shrout & Fleiss Case 1) the raters are treated
+as \strong{interchangeable}. In that design the \code{rater} column is used only to
+count the ratings per subject, and its labels are ignored. That design has
+no rater main effect to model, so \code{type} does not apply and the
+coefficients are \code{ICC(1)} / \code{ICC(k)}.
+Fixed raters and a \code{cluster} (multilevel) structure are not defined for a
+one-way design. In \code{model_parameters()}, \code{model} is instead the
+\code{intraclass_icc} object.}
+
+\item{ci}{For \code{model_parameters()}: \code{NULL} (the default) or the fit's own
+confidence level. The table reports the interval the fit computed, so any
+other value is an error. Fit again with \code{icc(conf_level = )} for another
+level.}
+
 \item{data}{A data frame with one rating per row.}
 
 \item{score, subject, rater}{Columns of \code{data} (unquoted): the numeric rating,
@@ -76,16 +95,6 @@ unit each subject is nested in (e.g. classroom, clinic). Supplying it switches
 on the \strong{multilevel} ICC (ten Hove et al. 2022). Reliability is reported at
 the subject and/or cluster level. See \code{level} and the \emph{Multilevel designs}
 section. Left \code{NULL} (the default) for an ordinary single-level two-way ICC.}
-
-\item{model}{Design: \code{"twoway"} (the default, subjects crossed with a common
-set of raters) or \code{"oneway"} (each subject rated by a possibly different set
-of raters). Under \code{"oneway"} (Shrout & Fleiss Case 1) the raters are treated
-as \strong{interchangeable}. In that design the \code{rater} column is used only to
-count the ratings per subject, and its labels are ignored. That design has
-no rater main effect to model, so \code{type} does not apply and the
-coefficients are \code{ICC(1)} / \code{ICC(k)}.
-Fixed raters and a \code{cluster} (multilevel) structure are not defined for a
-one-way design.}
 
 \item{type}{Error definition(s) (two-way only): \code{"agreement"} (absolute
 agreement) counts systematic rater differences as error, and
@@ -486,8 +495,8 @@ are the list elements you may depend on. Reaching into any other one is
 reading an implementation detail. \code{tidy()} and \code{glance()} are the stable
 tables, not a re-export of the list. They report the estimated
 coefficients and the model-level summaries, column by column as documented
-below. Those two tables, plus \verb{$fit} and \verb{$call}, are the whole supported
-surface. Everything else the list holds falls under the rule above,
+below. Those two tables, the \code{model_parameters()} table built from
+\code{tidy()}, and \verb{$fit} and \verb{$call} are the whole supported surface. Everything else the list holds falls under the rule above,
 whether or not a table happens to report it.
 
 The methods documented on this page return the objects below.
@@ -544,6 +553,16 @@ forest plot, or the variance-component decomposition when
 \code{what = "components"}.
 \item \code{plot.intraclass_icc()}: the \code{intraclass_icc} object invisibly, having
 drawn that same plot.
+\item \code{model_parameters.intraclass_icc()}: available when the \pkg{parameters}
+package is installed, through \code{\link[parameters:model_parameters]{parameters::model_parameters()}}. It
+returns a \code{parameters_model} data frame with one row per row of \code{tidy()},
+under the easystats column names. \code{Parameter} is \code{term}, \code{Type} is
+\code{type}, \code{Level} is \code{level}, \code{Occasions} is \code{occasions}, \code{SF_Index} is
+\code{sf_index}, \code{Coefficient} is \code{estimate}, \code{SE} is \code{std.error}, \code{CI} is
+\code{conf.level}, \code{CI_low} is \code{conf.low}, \code{CI_high} is \code{conf.high}, and
+\code{Method} is \code{method}. The column names are stable, and \code{Parameter} is
+always the first column. The printed table is titled "Intraclass
+correlation coefficients" and hides the columns that are all \code{NA}.
 }
 
 \code{tidy.intraclass_icc()} and \code{glance.intraclass_icc()} implement the

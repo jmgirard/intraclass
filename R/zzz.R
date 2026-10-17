@@ -7,7 +7,8 @@
 # still installs and attaches without ggplot2 present. `s3_register()` is the
 # canonical, dependency-free helper vendored from vctrs
 # (https://vctrs.r-lib.org/reference/s3_register.html); copied here rather than
-# adding vctrs to Imports.
+# adding vctrs to Imports. `model_parameters.intraclass_icc()` is registered the
+# same way, for parameters, also a Suggests dependency (D-051).
 
 # covr cannot trace `.onLoad()`, which runs when the namespace loads; the
 # registrations are exercised by every autoplot() test instead.
@@ -15,6 +16,7 @@
 .onLoad <- function(libname, pkgname) {
   s3_register("ggplot2::autoplot", "intraclass_dstudy")
   s3_register("ggplot2::autoplot", "intraclass_icc")
+  s3_register("parameters::model_parameters", "intraclass_icc")
   invisible()
 }
 # nocov end

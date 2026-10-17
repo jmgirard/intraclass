@@ -1,5 +1,13 @@
 # intraclass (development version)
 
+* If the parameters package is installed, `parameters::model_parameters()`
+  now works on `icc()` results. It returns the `tidy()` table under the
+  easystats column names, titled "Intraclass correlation coefficients". The
+  columns are `Parameter`, `Coefficient`, `SE`, `CI`, `CI_low`, `CI_high`, and
+  the identifier columns. A `ci` value other than the confidence level of the
+  fit is an error, because the table cannot compute the interval again.
+  parameters is an optional dependency.
+
 * The package now ships a citation entry (`citation("intraclass")`), and the
   source repository gains a `CONTRIBUTING.md` that says how to report a
   problem, ask for help, and propose a change. The README carries a Citation

@@ -38,6 +38,7 @@ Suggests:
     lavaan,
     lme4,
     merDeriv,
+    parameters,
     posterior,
     psych,
     rmarkdown,
