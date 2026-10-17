@@ -66,6 +66,7 @@
 - 2026-10-17: T5: `devtools::check()` at 429da2e's code: Status OK, 0 errors, 0 warnings, 0 notes. The later commit 5853280 changes comments only. T5 ticked, status set to review.
 - 2026-10-17: substantive amendment: Scope Out sentence changed from "Zero-width lme4 intervals on other data stay with that row." to "Zero-width lme4 intervals on other data go to the candidate row "M161 review follow-ups on the flat-scores refusal"." (review diff-bug #1). No criterion changed.
 - 2026-10-17: review fix-now work committed as 24ebd65 (eight findings across the three lenses, Review section).
+- 2026-10-17: step-7 approval: m161-flat-scores-refusal approved for merge
 
 ## Decisions
 
