@@ -30,8 +30,8 @@ zr_grid <- function() {
   )
 }
 
-# The outcome of one call: "result", the class vector of an error, or NULL when
-# the call neither returned a result nor raised an error.
+# The outcome of one call: "result", the error object, or NULL when the call
+# neither returned a result nor raised an error.
 zr_outcome <- function(row) {
   d <- zr_frame(row$n, row$k, row$shape)
   res <- tryCatch(
@@ -65,7 +65,7 @@ test_that("zero-residual two-way data return a result or a classed singular-fit 
   grid <- zr_grid()
   expect_identical(nrow(grid), 72L)
   bad <- character(0)
-  n_abort <- 0L
+  n_reraised <- 0L
   for (i in seq_len(nrow(grid))) {
     row <- grid[i, ]
     out <- zr_outcome(row)
@@ -81,7 +81,11 @@ test_that("zero-residual two-way data return a result or a classed singular-fit 
       next
     }
     if (inherits(out, "intraclass_singular_fit")) {
-      n_abort <- n_abort + 1L
+      # Only the engine-error re-raise sets a parent here; the older deferrals
+      # (the lme4 singular-fit guard, the interval-time aborts) do not.
+      if (!is.null(out$parent)) {
+        n_reraised <- n_reraised + 1L
+      }
       next
     }
     if (is.null(out)) {
@@ -102,8 +106,8 @@ test_that("zero-residual two-way data return a result or a classed singular-fit 
     length(bad) == 0L,
     paste(c("Unclassed outcomes:", bad), collapse = "\n")
   )
-  # The grid reaches the degenerate path, so the check above is not vacuous.
-  expect_gt(n_abort, 0L)
+  # The grid reaches the re-raise, so the check above is not vacuous.
+  expect_gt(n_reraised, 0L)
 })
 
 # The re-raise at the engine dispatch (AC2) ------------------------------------
@@ -162,7 +166,7 @@ test_that("an unclassed engine error is re-raised as a singular fit (AC2)", {
       msg <- cli::ansi_strip(conditionMessage(cnd))
       expect_match(
         msg,
-        paste("The", case$engine, "engine could not fit"),
+        paste("The", case$engine, "engine failed on these data"),
         fixed = TRUE
       )
       expect_match(msg, conditionMessage(err), fixed = TRUE)

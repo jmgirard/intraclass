@@ -1,8 +1,9 @@
 # intraclass (development version)
 
-* On the glmmTMB and lme4 engines, an error that the engine raises while it
-  fits the model now reaches the caller as an `intraclass_singular_fit`
-  error. The engine's own error is kept as its cause. Before, such errors
+* On the glmmTMB and lme4 engines, an engine error without a package class
+  now reaches the caller as an `intraclass_singular_fit` error. This covers
+  errors while the engine fits the model or reads the fitted parameter
+  covariance. The engine's own error is kept as its cause. Before, such errors
   carried no package class, so a handler that catches by class missed them.
   Two-way data whose residual is exactly zero raised them, for example scores
   that vary only by rater. Under `ci_method = "montecarlo"` or `"bootstrap"`, an
