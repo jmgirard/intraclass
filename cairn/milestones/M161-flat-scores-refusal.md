@@ -7,7 +7,7 @@
 - **Principles touched:** GP1, GP9
 - **Resolves:** —
 - **Surface tier:** user-facing — `icc()` refuses data it used to pass to the engines
-- **Branch/PR:** m161-flat-scores-refusal
+- **Branch/PR:** m161-flat-scores-refusal, https://github.com/jmgirard/intraclass/pull/180
 
 ## Goal
 
