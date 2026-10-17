@@ -25,7 +25,7 @@
 - [x] AC2: Two frames close to flat are not refused. One is F1 with the score in row 1 raised by `1e-12`. The other is F1's control frame. On each frame, a test calls `icc()` with default arguments for `model = "oneway"` and `"twoway"` with the glmmTMB stub in place. All four calls reach the stub.
 - [x] AC3: On F1 and F2, a test calls `icc()` with default arguments and with `model = "oneway"`. In all four calls, the refusal's `conditionMessage()` contains the text `` `score` ``, with its backticks.
 - [x] AC4: The `?icc` help page states the rule of AC1 in words. `icc()` refuses, with `intraclass_singular_fit` and before it fits a model, data in which at least one subject has two or more scores and no subject has two different scores. `NEWS.md` has a bullet under the development-version heading that says so. The bullet also says that a one-way lme4 fit no longer returns ICC 1 with the interval [1, 1] on data whose scores differ between subjects but not within any subject. `devtools::document()` leaves no diff.
-- [ ] AC5: On the review commit, `devtools::test()` reports 0 failures, and `devtools::check()` reports 0 errors and 0 warnings. `air format --check .` passes.
+- [x] AC5: On the review commit, `devtools::test()` reports 0 failures, and `devtools::check()` reports 0 errors and 0 warnings. `air format --check .` passes.
 
 ## Coverage
 
@@ -101,3 +101,4 @@ Review pass 1, 2026-10-17, at e7ccb32. The branch contains `origin/main` (4caf23
 - prior-review #4: exact comparison leaves near-flat data platform-dependent — follow-up: the same row (a).
 - prior-review #5: two-way zero-residual data stay open — follow-up: already the candidate row "two-way data with zero residual".
 - Re-run after the fixes, at 24ebd65: `test-flat-scores.R` 222 expectations, `test-reducer-abort-hint.R` 188, `test-icc-lavaan.R` 52, `test-boundary-policy.R` 14, `test-boundary-abort-hint.R` 1331, `test-ci-npbootstrap-unbalanced.R` 23, all with 0 failed, 0 errors, 0 warnings, 0 skipped.
+- AC5 evidence: at 24ebd65, the last code commit (later commits touch `cairn/` only), `devtools::test()` with `NOT_CRAN=true` reported 0 failed, 0 errors and 0 warnings, with 2 skips. `devtools::check()` reported Status OK with 0 errors, 0 warnings and 0 notes. `air format --check .` was clean at 1c49bc1 and rerun by `air format` before 24ebd65.
