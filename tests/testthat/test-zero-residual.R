@@ -163,7 +163,10 @@ test_that("an unclassed engine error is re-raised as a singular fit (AC2)", {
       expect_s3_class(cnd, "intraclass_singular_fit")
       expect_s3_class(cnd, "intraclass_error")
       expect_identical(cnd$parent, err)
-      msg <- cli::ansi_strip(conditionMessage(cnd))
+      # Rendered as the user sees it (LESSONS, M93); the parent's message is
+      # part of the rendered chain.
+      msg <- cli::ansi_strip(cli::format_message(conditionMessage(cnd)))
+      expect_false(grepl("\\", msg, fixed = TRUE))
       expect_match(
         msg,
         paste("The", case$engine, "engine failed on these data"),

@@ -227,8 +227,9 @@ reraise_engine_error <- function(engine, expr, call = rlang::caller_env()) {
         c(
           "The {.pkg {engine}} engine failed on these data.",
           i = "A variance component that the data cannot identify can cause \\
-               this, for example when scores vary only by rater, or are \\
-               exactly a subject value plus a rater value.",
+               this.",
+          i = "Examples are scores that vary only by rater, and scores that \\
+               are exactly a subject value plus a rater value.",
           i = "Inspect the data and check that {.arg score}, \\
                {.arg subject} and {.arg rater} name the intended columns."
         ),

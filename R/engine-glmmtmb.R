@@ -296,7 +296,9 @@ glmmtmb_second_fit <- function(formula, data, start) {
 
 # Evaluate a fit, holding its warnings back so that only the kept fit's reach
 # the user. An error is never caught here: it propagates from where the fit
-# signalled it, with its stack intact. `on_error`, when given, receives the
+# signalled it, with its stack intact. `icc()` then re-raises an error that is
+# not an rlang error as `intraclass_singular_fit`, with this error as its
+# parent (`reraise_engine_error()`, D-053). `on_error`, when given, receives the
 # warnings held back so far, at the moment the error is signalled, so a failed
 # first fit still shows them before its error.
 glmmtmb_capture <- function(expr, on_error = NULL) {
