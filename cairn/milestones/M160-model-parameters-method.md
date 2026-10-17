@@ -66,6 +66,7 @@
 - 2026-10-17: T1 to T3 done: full `devtools::test()` at 2dfe47e passed with no failures and 4 skips (vignettes not installed; glmmTMB point fit dies on two reducer frames), and `pkgdown::check_pkgdown()` found no problems.
 - 2026-10-17: T4: first `devtools::check()` at d0042f1 gave 1 error, 0 warnings, 0 notes: the spelling test flagged "easystats" (in NEWS and ?icc); added it to `inst/WORDLIST`, and `spelling::spell_check_package()` then found no errors. Check re-run pending.
 - 2026-10-17: T4 done: `devtools::check()` at 01831ae reports 0 errors, 0 warnings, 0 notes. Status set to review.
+- 2026-10-17: step-7 approval: m160-model-parameters-method approved for merge
 
 ## Decisions
 
