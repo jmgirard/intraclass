@@ -2013,3 +2013,32 @@ re-created. The companion paper's examples call functions and methods, not
 class names, so they keep running. The `icc()` function name still collides
 with performance's when both packages are attached. Reopened by a report of
 user code that a transition class would have kept working.
+
+### D-051 (2026-10-16): `parameters` joins `Suggests:` for a `model_parameters()` method on `icc()` results, and that table joins D-035's public surface
+
+**Context.** Users of the easystats packages report model results through
+`parameters::model_parameters()`, which today fails on an `icc()` result with
+"possible class 'intraclass_icc' not supported". The maintainer chose at the
+M160 plan gate to add the method in intraclass. A dependency change goes
+through a question gate and is recorded here (tracking-rules, Universal
+tracking rules). D-035 clause 2 names the public surface of a result as what
+`tidy()`, `glance()`, `summary()` and `print()` return, plus `$fit` and
+`$call`.
+
+**Decision.** `parameters` is added to `Suggests:` and nowhere else. The method
+`model_parameters.intraclass_icc()` is registered in `.onLoad()` through the
+vendored `s3_register()`, so it takes effect only when parameters is loaded,
+as `autoplot()` does with ggplot2. The table it returns joins D-035's public
+surface: its column names `Parameter`, `Type`, `Level`, `Occasions`,
+`SF_Index`, `Coefficient`, `SE`, `CI`, `CI_low`, `CI_high` and `Method` are
+contract, each a renamed `tidy()` column. As with D-038, column order is not
+contract, except that `Parameter` comes first, which the parameters printer
+expects.
+
+**Consequences.** No package code outside the method calls parameters, and its
+tests skip when parameters is absent. After the next CRAN release, renaming or
+removing a column of this table takes a deprecation cycle under GP2. Rejected:
+leaving the method to the easystats packages, since parameters ships no ICC
+method for any package; and a NAMESPACE-level delayed registration, since
+`s3_register()` is already the one mechanism here. Reopened by parameters
+leaving CRAN or by a change in its table conventions that breaks the printer.
