@@ -86,3 +86,29 @@ On the glmmTMB and lme4 engines, a fit that cannot support an interval ends in t
 
 ## Review
 <!-- owner: review · exclusive -->
+
+Pass 1, 2026-10-17. Route (d): no PR, Copilot round off, main not moved since the branch was cut (merge base 12508b6).
+
+spawned: diff-bug, blame-history, prior-review
+
+Findings (20), with dispositions:
+- diff-bug #1: under `options(warn = 2)`, an allocation failure, or a package bug, a non-rlang error inside a glmmTMB or lme4 engine function is relabeled `intraclass_singular_fit` with a message about the data — follow-up, row "M162 review follow-ups on the engine re-raise" (a). Not load-bearing: the parent keeps the original, and D-053 records the bug case.
+- diff-bug #2: NEWS said "an engine error without a package class", but the filter is "not an rlang error" — fix now, fixed e14bff3 (NEWS: "an engine error that does not come from rlang").
+- diff-bug #3: `test-abort-remedy-truthfulness.R` comment still called glmmTMB's LU error unclassed — fix now, fixed e14bff3.
+- diff-bug #4: the AC1 grid checks outcomes and a re-raise count, not which cells re-raise — reject, planned change: AC1 admits results by design, and pinning per-cell outcomes is platform-dependent (GP9).
+- diff-bug #5: the handler keys on the `engine` argument, not on the function dispatched — reject, false: the reviewer found no reachable path where a lavaan or brms call reaches a glmmTMB or lme4 function (fences at `R/icc.R` 1056, 1912 and the replicate fence).
+- diff-bug #6: no test pins that the boundary hint drops a method when the lme4 equal-limits refusal fires — follow-up, row "M162 review follow-ups on the engine re-raise" (b).
+- diff-bug #7: the re-raised error has no opt-in `ci_method` bullet — reject, false: every alternative method also needs the engine point estimate, so none applies.
+- diff-bug #8: `d_study()` does not refuse equal limits — follow-up, already item (d) of row "M158 review follow-ups on the glmmTMB boundary path" (Scope Out).
+- diff-bug #9: `?icc` did not document the re-raise — fix now, fixed e14bff3 (`score` parameter text, `man/icc.Rd` regenerated).
+- blame-history #1: the `glmmtmb_capture()` comment said a first-fit error propagates unchanged, with no word on the new re-raise — fix now, fixed e14bff3 (comment names `reraise_engine_error()` and D-053).
+- blame-history #2: D-053 does not say why the lme4 `isSingular` guard misses equal-limit fits — reject, planned change: the extension was the user's plan-gate choice. `isSingular` tests the random-effect parameters, not the residual, as the DESIGN.md lme4 row states.
+- blame-history #3: the `refuse_zero_width()` comment that lme4 [1, 1] limits differ in the last digits is unverified — reject, false: measured at plan time (work log: 0.99999999999998235 against 0.99999999999999911), and confirmed by the claim audit.
+- blame-history #4: the roxygen block's backtrace claim — reject, noted: the reviewer found it consistent, and it asks for nothing.
+- blame-history #5: the DESIGN.md classed-deferral bullet's data-pointing message is not in a D-entry — reject, planned change: T4 called for the DESIGN.md update, and D-053 records the class and parent.
+- blame-history #6: the boundary hint side effect is unrecorded — follow-up, same row (b) as diff-bug #6.
+- blame-history #7: D-053 reads D-022 by its stated reason — reject, planned change: recorded at the plan gate (work log, D-053).
+- prior-review #1: the message bullet ran 29 words, past the 25-word rule for condition text (M156) — fix now, fixed e14bff3 (split into two bullets).
+- prior-review #2: the `refuse_zero_width()` bullet names flat data, which D-052 now refuses upstream — follow-up, row "M162 review follow-ups on the engine re-raise" (c). The line is unmodified by this diff.
+- prior-review #3: the AC2 test read `conditionMessage()` without `cli::format_message()` (M93 lesson) — fix now, fixed e14bff3 (renders with `format_message()` and asserts no backslash).
+- prior-review #4: NEWS names one design family as the source — reject, false: the sentence reports where the errors were observed, with "for example", and claims no condition.
