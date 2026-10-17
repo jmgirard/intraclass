@@ -64,5 +64,6 @@
 - 2026-10-17: checkpoint (T1 to T3 written, boxes open): the new test file failed 4 of 4 blocks before the method existed (parameters' own "class not supported" error) and passes 68 expectations after it; the full suite is still running. NEWS hits from the simple-english lint are in older bullets that the candidate row "Older NEWS.md bullets over 25 words (R2)" covers, so they stay.
 - 2026-10-17: claim audit: 21 claims read, 3 corrected — R/icc.R (the printer also folds Level into the Parameter label; the supported-surface paragraph named two tables while listing three), NEWS.md (Method was missing from the column list); a stale coverage comment in R/zzz.R also fixed; the same reader re-read all four once and found each holds.
 - 2026-10-17: T1 to T3 done: full `devtools::test()` at 2dfe47e passed with no failures and 4 skips (vignettes not installed; glmmTMB point fit dies on two reducer frames), and `pkgdown::check_pkgdown()` found no problems.
+- 2026-10-17: T4: first `devtools::check()` at d0042f1 gave 1 error, 0 warnings, 0 notes: the spelling test flagged "easystats" (in NEWS and ?icc); added it to `inst/WORDLIST`, and `spelling::spell_check_package()` then found no errors. Check re-run pending.
 
 ## Decisions
