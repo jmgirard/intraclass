@@ -2,6 +2,16 @@
 
 ## intraclass (development version)
 
+- [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) now
+  refuses data in which at least one subject has two or more scores and
+  no subject has two different scores. It raises an
+  `intraclass_singular_fit` error before it fits a model, on every
+  engine. A call that an argument or design check refuses first keeps
+  that check’s error. Before, such data ended in an unclassed glmmTMB or
+  lme4 error on some paths. Some data have scores that differ between
+  subjects but not within any subject. On such data, a one-way lme4 fit
+  no longer returns ICC 1 with the interval \[1, 1\].
+
 - If the parameters package is installed,
   [`parameters::model_parameters()`](https://easystats.github.io/parameters/reference/model_parameters.html)
   now works on

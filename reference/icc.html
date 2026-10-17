@@ -163,7 +163,11 @@ the subject (object of measurement), and the rater (judge). A non-finite
 rating that did not happen. The row is dropped with a suppressible
 <code>intraclass_dropped_rows</code> warning, and the rest is analyzed as an
 incomplete design. So a missing rating and an absent row give the same
-answer.</p></dd>
+answer. If at least one subject has two or more scores and no subject has
+two different scores, <code>icc()</code> refuses the data with an
+<code>intraclass_singular_fit</code> error before it fits a model. Every variance
+within subjects is exactly zero on such data. A call that an argument or
+design check refuses first keeps that check's error.</p></dd>
 
 
 <dt id="arg-cluster">cluster<a class="anchor" aria-label="anchor" href="#arg-cluster"></a></dt>

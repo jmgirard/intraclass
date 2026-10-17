@@ -93,7 +93,11 @@ model_parameters.intraclass_icc(model, ci = NULL, ...)
   that did not happen. The row is dropped with a suppressible
   `intraclass_dropped_rows` warning, and the rest is analyzed as an
   incomplete design. So a missing rating and an absent row give the same
-  answer.
+  answer. If at least one subject has two or more scores and no subject
+  has two different scores, `icc()` refuses the data with an
+  `intraclass_singular_fit` error before it fits a model. Every variance
+  within subjects is exactly zero on such data. A call that an argument
+  or design check refuses first keeps that check's error.
 
 - cluster:
 
