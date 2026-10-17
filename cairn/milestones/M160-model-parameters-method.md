@@ -7,7 +7,7 @@
 - **Principles touched:** GP2
 - **Resolves:** —
 - **Surface tier:** user-facing — a new method that users call on `icc()` results
-- **Branch/PR:** m160-model-parameters-method
+- **Branch/PR:** m160-model-parameters-method — https://github.com/jmgirard/intraclass/pull/179
 
 ## Goal
 
