@@ -2077,3 +2077,39 @@ vary only by rater. Refusing those needs a residual that differs by design
 shape, and it would refuse lme4's finite two-way answer on exactly additive
 scores. That remainder is a ROADMAP candidate. Reopened by a user who needs this
 refusal told apart from a boundary deferral by class.
+
+### D-053 (2026-10-17): Raw glmmTMB and lme4 errors are re-raised as `intraclass_singular_fit`, and the equal-limits interval refusal covers lme4 — supersedes D-048's glmmTMB-only gate
+
+**Context.** On two-way data whose residual is exactly zero, many calls on the
+glmmTMB and lme4 engines ended in an engine error with no package class, such
+as lme4's "Downdated VtV is not positive definite" and glmmTMB's "'a' is
+computationally singular". The probes are in the M162 work log. PRINCIPLES.md
+#8 asks for classed errors. D-052's Untouched clause left this data to a
+candidate row. D-048 gated the equal-limits refusal to glmmTMB fits, and D-004
+requires an entry for a change to a Boundary-fit policy cell.
+
+**Decision.** Two parts, which the user chose at the M162 plan gate.
+*Re-raise:* on the glmmTMB and lme4 engines, an error that an engine function
+dispatched by `icc()` raises, and that is not an rlang error, is re-raised as
+`intraclass_singular_fit`. The new error keeps the original message in its text
+and the original condition as its parent. Errors that the package or rlang
+already classes pass unchanged. *Refusal:* D-049's rule now covers lme4 fits
+too. Under `ci_method = "montecarlo"` or `"bootstrap"`, an interval with two
+finite and exactly equal limits aborts with `intraclass_zero_width_interval`.
+No width bound is added. Rejected: an input-side refusal of zero-residual data,
+because the user chose the engine-side route. Rejected: a wrapper that matches
+engine message text, on D-022's reason. Rejected: a separate class such as
+`intraclass_engine_error`, because the handler cannot tell a degenerate-data
+failure from another without matching text, and callers already catch
+`intraclass_singular_fit` on degenerate data (D-052). Rejected: a width bound on
+lme4 intervals, on D-049's reason.
+
+**Consequences.** D-022 is not superseded, because the re-raise matches no
+text. A bug inside an engine function also reaches the user as
+`intraclass_singular_fit`, with the original error as its parent. lme4
+intervals that print as [1, 1] on near-flat or exactly additive data stay
+reported, because their limits are not exactly equal (M162 work log). That
+remainder stays a candidate row. The lavaan and brms engines are unchanged.
+Reopened by a user report of a failure that is not degenerate data but reaches
+the user labeled singular. Also reopened by an lme4 interval whose exactly equal
+limits are the correct answer.
