@@ -243,63 +243,41 @@ test_that("the bootstrap abort site is NOT reachable at the sigma^2 -> 0 boundar
   expect_true(all(res == "ok"))
 })
 
-test_that("the reachable bootstrap abort takes DEGENERATE data, where no method helps (AC2)", {
+test_that("DEGENERATE data that once reached the bootstrap abort are refused before any fit (AC2)", {
   skip_if_not_installed("glmmTMB")
   skip_on_cran()
 
-  # What DOES reach site C: zero within-subject variance. On such data every method
-  # the mapping table would name aborts too, so a hint there would point at another
-  # abort -- exactly what AC3 makes a test failure. This is why AC2 excludes it.
+  # What once reached site C: zero within-subject variance. On such data every
+  # method the mapping table would name aborts too, so a hint there would point at
+  # another abort -- exactly what AC3 makes a test failure. This is why AC2
+  # excludes it. Since M161 the data are refused before any fit (below).
   d <- data.frame(
     subject = factor(rep(1:3, each = 2)),
     rater = factor(rep(1:2, times = 3)),
     score = rep(c(1, 5, 9), each = 2)
   )
-  # Which guard stops this call is a platform fact, not a contract (GP9): the
-  # bootstrap refit guard on macOS before PR #176, and glmmTMB's own point-fit
-  # error ("LU factorization") on macOS at M158 and usually on Linux and
-  # Windows. On Ubuntu's R CMD check of 2026-10-03, though, the fit survived with
-  # a residual variance of 1.7e-33 and icc() returned ICC 1 [1, 1]; an interval
-  # whose two limits are exactly equal is now refused (D-049, M158). So icc()
-  # either returns no result on this data, or returns one with no interval whose
-  # limits are equal; that is all this asserts.
-  call_icc <- function() {
-    suppressWarnings(suppressMessages(icc(
-      d,
-      score,
-      subject,
-      rater,
-      ci_method = "bootstrap",
-      model = "oneway",
-      boot_samples = 30L,
-      seed = 1
-    )))
-  }
-  fit <- tryCatch(call_icc(), error = function(e) NULL)
-  # When icc() returns, it reports no interval whose limits are exactly equal,
-  # and a failure prints the components and estimates it returned.
-  if (!is.null(fit)) {
-    lo <- fit$estimates$conf.low
-    hi <- fit$estimates$conf.high
-    returned <- utils::capture.output(
-      print(unlist(fit$components)),
-      print(as.data.frame(fit$estimates))
-    )
-    expect_false(
-      any(is.finite(lo) & is.finite(hi) & lo == hi),
-      info = paste(c("icc() returned a result:", returned), collapse = "\n")
-    )
-  }
-
-  # Every method the mapping table would name aborts on this data too. The abort
-  # CLASS is deliberately not asserted: our own guards raise
-  # `intraclass_singular_fit`, but on the platforms above glmmTMB's raw point-fit
-  # error arrives first, and the claim AC2 needs is "no method helps here".
-  for (m in c("npbootstrap", "searle", "burch")) {
+  # Before M161 which guard stopped this call was a platform fact: the bootstrap
+  # refit guard, glmmTMB's own point-fit error ("LU factorization"), or a fit
+  # that survived and returned ICC 1 [1, 1]. Since M161 (D-052) icc() refuses
+  # data whose scores do not vary within any subject before any fit, so the
+  # bootstrap call and every method the mapping table would name raise
+  # `intraclass_singular_fit` on every platform. The claim AC2 needs is still
+  # "no method helps here".
+  for (m in c("bootstrap", "npbootstrap", "searle", "burch")) {
     expect_error(
       suppressWarnings(suppressMessages(
-        icc(d, score, subject, rater, ci_method = m, model = "oneway")
-      ))
+        icc(
+          d,
+          score,
+          subject,
+          rater,
+          ci_method = m,
+          model = "oneway",
+          boot_samples = 30L,
+          seed = 1
+        )
+      )),
+      class = "intraclass_singular_fit"
     )
   }
 })
@@ -910,13 +888,15 @@ test_that("an off-grid mpl design is not hinted end to end (AC3, F1)", {
 })
 
 # Degenerate builders, and the distinction that pass-3 F2 turned on. bh_degen_within:
-# scores constant within subject (MSE = 0), where `classical_guard_observed()` fires and
-# both searle and burch abort -- genuinely degenerate FOR THIS ROW. bh_degen_between:
+# scores constant within subject (MSE = 0), where searle and burch both abort --
+# genuinely degenerate FOR THIS ROW. Since M161 (D-052) icc() refuses such data before
+# any fit, so through icc() the refusal is the input check's, and
+# `classical_guard_observed()` fires only outside icc() (GP9). bh_degen_between:
 # every subject mean identical (SSA = 0, MSE > 0), where searle and burch both return
 # intervals -- NOT degenerate for this row, though it does kill `npbootstrap`, and a
 # gate that ORed npbootstrap's conditions in silenced the hint on ordinary boundary
-# data. bh_degen_flat: no variance at all, the two-way case where mpl's optim dies at
-# its initial parameters.
+# data. bh_degen_flat: no variance at all, the two-way case where mpl's optim died at
+# its initial parameters before M161, and which icc() now refuses before any fit.
 bh_degen_within <- function(n_s = 10, n_k = 3) {
   set.seed(7)
   data.frame(
@@ -940,9 +920,9 @@ bh_degen_flat <- function(n_s = 20, n_r = 3) {
   )
 }
 
-# As bh_msg(), but renders a RAW error's message too (degenerate data can kill the
-# point fit outright, platform-depending). Either way the assertion is the same:
-# whatever the user is told, it names no method.
+# As bh_msg(), but renders a RAW error's message too (before M161, degenerate data
+# could kill the point fit outright, platform-depending). Either way the assertion is
+# the same: whatever the user is told, it names no method.
 bh_msg_any <- function(d, ...) {
   tryCatch(
     {
@@ -987,7 +967,9 @@ test_that("silence on degenerate data agrees with the interval, case by case (AC
     bh_hint(df = bh_degen_between(), oneway = TRUE, balanced = TRUE),
     0L
   )
-  # Two-way: all-constant data kill mpl's optim at its initial parameters.
+  # Two-way: all-constant data. Before M161 they killed mpl's optim at its initial
+  # parameters. Since M161 icc() refuses them before any fit, so no candidate run
+  # is usable.
   expect_length(bh_hint(df = bh_degen_flat()), 0L)
   # A missing score silences every row, because every reducer aborts on it -- the
   # hole pass-4 needed two separate mechanisms (`complete` and the probe tryCatch) to
@@ -1014,6 +996,9 @@ test_that("data degenerate FOR THE ROW get no hint; data that are not still do (
       c(list(case$d, ci_method = "montecarlo", seed = 1), case$args)
     )
     skip_if(is.na(m), paste("no abort on the", case$lab, "degenerate case"))
+    # Since M161 (D-052) both cases meet icc()'s input refusal before any fit,
+    # which carries no bullet, so this loop now pins that the refusal names no
+    # method. The history below describes the paths it guarded before M161.
     # Read through `bh_msg_methods()`, never a bare `grepl`: a bullet can carry
     # `boot_samples` since M103, whose "mpl" substring reported the mpl method as
     # named and reddened this line on Linux while macOS -- where the point fit
@@ -1034,22 +1019,31 @@ test_that("data degenerate FOR THE ROW get no hint; data that are not still do (
       )
     }
   }
-  # ...and they abort, so the silence is a fence rather than caution.
+  # ...and they abort, so the silence is a fence rather than caution. Since M161
+  # (D-052) the abort through icc() is the input refusal of data whose scores do
+  # not vary within any subject, raised before any fit. The reducer guards are
+  # fired directly, at the reducer, in other test blocks (GP9).
   for (mm in c("searle", "burch")) {
-    expect_error(suppressWarnings(suppressMessages(
-      icc(
-        bh_degen_within(),
-        score,
-        subject,
-        rater,
-        ci_method = mm,
-        model = "oneway"
-      )
-    )))
+    expect_error(
+      suppressWarnings(suppressMessages(
+        icc(
+          bh_degen_within(),
+          score,
+          subject,
+          rater,
+          ci_method = mm,
+          model = "oneway"
+        )
+      )),
+      class = "intraclass_singular_fit"
+    )
   }
-  expect_error(suppressWarnings(suppressMessages(
-    icc(bh_degen_flat(), score, subject, rater, ci_method = "mpl")
-  )))
+  expect_error(
+    suppressWarnings(suppressMessages(
+      icc(bh_degen_flat(), score, subject, rater, ci_method = "mpl")
+    )),
+    class = "intraclass_singular_fit"
+  )
 
   # SSA = 0 (every subject mean exactly equal, MSE > 0) is silenced too, and the
   # REASON matters because the first re-cut un-suppressed this very cell. It did so
@@ -1513,10 +1507,11 @@ test_that("the names the REAL abort gives are exactly the usable set, two-way (A
       character(0)
     )
 
-  # Degenerate data, all three shapes. Each is silent for its OWN reason (MSE = 0
-  # trips the shipped guard, SSA = 0 leaves burch at NaN and searle's ICC(k) at -Inf,
-  # constant two-way data kills mpl's optim) -- and the converse half is what states
-  # that, rather than a `forbid` list asserting silence by fiat.
+  # Degenerate data, all three shapes. Each is silent for its OWN reason (SSA = 0
+  # leaves burch at NaN and searle's ICC(k) at -Inf; MSE = 0 and constant two-way
+  # data are refused by icc() before any fit since M161, where before they tripped
+  # the shipped guard and killed mpl's optim) -- and the converse half is what
+  # states that, rather than a `forbid` list asserting silence by fiat.
   named_total <- named_total +
     run(
       "one-way SSA = 0",

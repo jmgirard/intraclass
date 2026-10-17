@@ -145,8 +145,8 @@ test_that("npbootstrap aborts on a degenerate unbalanced design (AC6, #5/#8)", {
 
   # SSA = 0: all subject means equal (unbalanced sizes) -> log F = -Inf, so the
   # transform and its jackknife SE are undefined -- the one-way boundary the
-  # reducer owns (SSE = 0, no within variance, is a data pathology the engine
-  # point-fit rejects for every ci_method, upstream of this guard).
+  # reducer owns (SSE = 0, no within variance, is a data pathology icc() refuses
+  # before any fit for every ci_method since M161, upstream of this guard).
   d_ssa0 <- rbind(
     data.frame(subject = "1", rater = factor(1:2), score = c(0, 2)),
     data.frame(subject = "2", rater = factor(1:3), score = c(-1, 1, 3)),
@@ -169,8 +169,9 @@ test_that("npbootstrap aborts on a degenerate unbalanced design (AC6, #5/#8)", {
 })
 
 test_that("the reducer aborts classed on unbalanced SSE=0 and tiny-k resamples (AC6)", {
-  # SSE = 0 (no within-subject variance), unbalanced: via icc() the engine point-fit
-  # rejects it first, so exercise the reducer's own guard directly -- it is classed.
+  # SSE = 0 (no within-subject variance), unbalanced: via icc() the input check
+  # refuses it before any fit (M161), so exercise the reducer's own guard
+  # directly -- it is classed.
   est <- list(icc_estimand(unit = "single", k_eff = NA_real_, oneway = TRUE))
   d_sse0 <- data.frame(
     subject = factor(c(1, 1, 1, 2, 2, 3, 3, 3, 3)),

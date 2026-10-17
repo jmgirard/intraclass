@@ -234,6 +234,14 @@ to the boundary-aware-interval contract (`PRINCIPLES.md #3`) and takes a D-entry
   (bootstrap, posterior); and the fixed-rater θ²_r **average is floored** at 0
   (never per group; see below).
 
+Input-side, before any fit: data in which at least one subject has two or more
+scores and no subject has two different scores are refused with
+`intraclass_singular_fit` on every engine and CI method, because every variance
+within subjects is exactly zero (D-052, M161). A call that an earlier argument or
+design fence refuses keeps that fence's error, and a few fences that run later
+(the lavaan replicate fence, the CI-function fences) are pre-empted on such data.
+So no cell below meets such data through `icc()`.
+
 Fit-time, per engine:
 
 | Engine | Boundary handling | Source |

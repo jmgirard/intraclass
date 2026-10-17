@@ -223,7 +223,11 @@
 #'   rating that did not happen. The row is dropped with a suppressible
 #'   `intraclass_dropped_rows` warning, and the rest is analyzed as an
 #'   incomplete design. So a missing rating and an absent row give the same
-#'   answer.
+#'   answer. If at least one subject has two or more scores and no subject has
+#'   two different scores, `icc()` refuses the data with an
+#'   `intraclass_singular_fit` error before it fits a model. Every variance
+#'   within subjects is exactly zero on such data. A call that an argument or
+#'   design check refuses first keeps that check's error.
 #' @param cluster Optional column of `data` (unquoted) giving the higher-level
 #'   unit each subject is nested in (e.g. classroom, clinic). Supplying it switches
 #'   on the **multilevel** ICC (ten Hove et al. 2022). Reliability is reported at
@@ -2092,6 +2096,40 @@ icc <- function(
              credible interval nominal only at k > 2."
       ))
     }
+  }
+
+  # Data in which no subject's scores vary are refused HERE, after the argument
+  # fences and most design fences and before any fit (#5/#8, M161/D-052). The
+  # lavaan replicate fence below and the fences inside the CI functions come
+  # later, so on such data those combinations get this refusal. With no variation
+  # within subjects the rater, interaction and residual variances are all
+  # exactly zero, and the engines then fail each in their own words (glmmTMB
+  # "LU factorization ... failed" or "NA/NaN gradient evaluation", an unclassed
+  # lme4 error) or report a zero-width ICC 1 [1, 1] -- the D-022 reason to check
+  # input-side rather than wrap the engines. The comparison is exact, as in
+  # D-022: a tolerance wide enough to matter would refuse data a method answers.
+  # A subject rated once says nothing about within-subject variation, so it
+  # neither triggers nor blocks the check; at least one subject must be rated
+  # twice. The class is the existing `intraclass_singular_fit`, which the
+  # Monte-Carlo, classical and lme4 paths already raised on most such data.
+  scores_by_subject <- split(df$score, df$subject)
+  if (
+    any(lengths(scores_by_subject) >= 2L) &&
+      all(vapply(scores_by_subject, function(s) length(unique(s)) <= 1L, TRUE))
+  ) {
+    abort_intraclass(
+      c(
+        "{.arg score} does not vary within any subject, so {.fn icc} does not \\
+         fit a model to it.",
+        i = "Each subject's scores are all equal. Every variance within \\
+             subjects is then exactly zero, and an ICC interval cannot be \\
+             estimated.",
+        i = "Check that {.arg score}, {.arg subject} and {.arg rater} name the \\
+             intended columns. If they do, the ratings agree perfectly within \\
+             every subject."
+      ),
+      class = "intraclass_singular_fit"
+    )
   }
 
   engine_fit <- if (multilevel && replicates) {
