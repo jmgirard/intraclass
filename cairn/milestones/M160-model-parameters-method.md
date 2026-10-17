@@ -41,9 +41,9 @@
 
 ## Tasks
 
-- [ ] T1: Write `tests/testthat/test-model-parameters.R` first (AC1 to AC5): the four fits, the column set and row count, the `identical()` mapping, the printed title, and the `ci` abort and pass-through. Each `test_that()` block opens with `skip_if_not_installed("parameters")`. Seed the Monte-Carlo fits with `seed =`, never the global seed.
-- [ ] T2: Add `model_parameters.intraclass_icc(model, ...)` to `R/icc-methods.R` beside `tidy.intraclass_icc()` (~line 370): rename the `tidy()` columns, return a base data frame, set the class and `attr(, "title")`. Read `ci` from `...`; compare it with `model$ci$conf_level` by `all.equal()` and abort through `abort_intraclass()` with a message that names `icc(conf_level = )`. Register it in `.onLoad()` in `R/zzz.R` beside the two `autoplot` lines. Add `parameters` to `Suggests:` in alphabetical order.
-- [ ] T3: Document the method with `@rdname icc` and no `@export`, as `autoplot.intraclass_icc()` is: what it returns, the column mapping, and the `ci` rule. Name `model_parameters()` in the "Estimating an ICC" description in `_pkgdown.yml`. Add the NEWS bullet. Run `devtools::document()`.
+- [x] T1: Write `tests/testthat/test-model-parameters.R` first (AC1 to AC5): the four fits, the column set and row count, the `identical()` mapping, the printed title, and the `ci` abort and pass-through. Each `test_that()` block opens with `skip_if_not_installed("parameters")`. Seed the Monte-Carlo fits with `seed =`, never the global seed.
+- [x] T2: Add `model_parameters.intraclass_icc(model, ...)` to `R/icc-methods.R` beside `tidy.intraclass_icc()` (~line 370): rename the `tidy()` columns, return a base data frame, set the class and `attr(, "title")`. Read `ci` from `...`; compare it with `model$ci$conf_level` by `all.equal()` and abort through `abort_intraclass()` with a message that names `icc(conf_level = )`. Register it in `.onLoad()` in `R/zzz.R` beside the two `autoplot` lines. Add `parameters` to `Suggests:` in alphabetical order.
+- [x] T3: Document the method with `@rdname icc` and no `@export`, as `autoplot.intraclass_icc()` is: what it returns, the column mapping, and the `ci` rule. Name `model_parameters()` in the "Estimating an ICC" description in `_pkgdown.yml`. Add the NEWS bullet. Run `devtools::document()`.
 - [ ] T4: Run `devtools::test()`, `devtools::check()`, and `pkgdown::check_pkgdown()`; fix what they report.
 
 ## Work log
@@ -63,5 +63,6 @@
 - 2026-10-16: implementation choice: the method's first argument is `model`, as the parameters generic requires, so ?icc's existing `model` entry gains one sentence for this method instead of a second entry.
 - 2026-10-17: checkpoint (T1 to T3 written, boxes open): the new test file failed 4 of 4 blocks before the method existed (parameters' own "class not supported" error) and passes 68 expectations after it; the full suite is still running. NEWS hits from the simple-english lint are in older bullets that the candidate row "Older NEWS.md bullets over 25 words (R2)" covers, so they stay.
 - 2026-10-17: claim audit: 21 claims read, 3 corrected — R/icc.R (the printer also folds Level into the Parameter label; the supported-surface paragraph named two tables while listing three), NEWS.md (Method was missing from the column list); a stale coverage comment in R/zzz.R also fixed; the same reader re-read all four once and found each holds.
+- 2026-10-17: T1 to T3 done: full `devtools::test()` at 2dfe47e passed with no failures and 4 skips (vignettes not installed; glmmTMB point fit dies on two reducer frames), and `pkgdown::check_pkgdown()` found no problems.
 
 ## Decisions
