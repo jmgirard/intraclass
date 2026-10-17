@@ -4,7 +4,7 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M162: Raw glmmTMB and lme4 errors reach the caller as intraclass_singular_fit, and lme4 refuses equal interval limits
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate; RR<NN> whose Binding criteria bind this milestone's ACs (binding-criteria check), or — -->
@@ -54,9 +54,9 @@ On the glmmTMB and lme4 engines, a fit that cannot support an interval ends in t
 
 - [x] T1: Write `test-zero-residual.R` with the AC1 grid. Fix the subject values by a seed, keep `mc_samples` and `boot_samples` small, and add `skip_on_cran()`. Run it on main and record which calls end in an error without a package class.
 - [x] T2: Wrap the `engine_fit <-` dispatch in `icc()` in one handler, active for `engine` "glmmTMB" and "lme4" only. Keep the engine warnings that reach the user before the error. Write the message with cli. For lme4 it can point at glmmTMB, and for glmmTMB it points at the data. Add the AC2 tests, rendering messages with `cli::format_message()` (LESSONS, M93).
-- [ ] T3: Extend the gate in `refuse_zero_width()` to lme4 and update its header comment. Turn the lme4 pin at `test-glmmtmb-false-zero.R:362` into a refusal pin, and add the AC3 controls under both methods.
-- [ ] T4: Write the NEWS entry. Update the DESIGN.md Boundary-fit policy rows (lme4 fit-time, Monte-Carlo, Bootstrap) and the classed-deferral bullet to cite D-053. If the `test-boundary-policy.R` pins for those rows name the old behavior, update them.
-- [ ] T5: Run `devtools::document()`, `devtools::test()` and `devtools::check()`, and read the raw Status line. Run `lintr::lint_package()` too, since CI lints `tests/` (LESSONS, M141).
+- [x] T3: Extend the gate in `refuse_zero_width()` to lme4 and update its header comment. Turn the lme4 pin at `test-glmmtmb-false-zero.R:362` into a refusal pin, and add the AC3 controls under both methods.
+- [x] T4: Write the NEWS entry. Update the DESIGN.md Boundary-fit policy rows (lme4 fit-time, Monte-Carlo, Bootstrap) and the classed-deferral bullet to cite D-053. If the `test-boundary-policy.R` pins for those rows name the old behavior, update them.
+- [x] T5: Run `devtools::document()`, `devtools::test()` and `devtools::check()`, and read the raw Status line. Run `lintr::lint_package()` too, since CI lints `tests/` (LESSONS, M141).
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates. -->
@@ -79,6 +79,7 @@ On the glmmTMB and lme4 engines, a fit that cannot support an interval ends in t
 - 2026-10-17: T3 code in: `refuse_zero_width()` now gates on glmmTMB and lme4 (`isTRUE(%in%)`, so an engine list with no `$engine` still passes). The two stubbed interval tests loop over both engines for the refusal and the 1e-10-wide control, and use a lavaan stub for the equal-limits control. Six affected test files pass (2161). Box left open until the full suite at T5.
 - 2026-10-17: T4 records in: NEWS entry at the top of the development section; DESIGN.md Boundary-fit policy classed-deferral bullet, glmmTMB and lme4 fit-time rows, and Monte-Carlo and Bootstrap rows cite D-053. `test-boundary-policy.R` pins no text from those rows and no behavior that changed, so it is untouched. The simple-english hook reports 15 hits on NEWS.md, the same count as on main, none in the new entry (candidate row "Older NEWS bullets over 25 words"). Reference checkers, `air format --check` and `lintr::lint_package()` clean. Box left open until T5.
 - 2026-10-17: claim audit: 31 claims read, 5 corrected — R/abort.R, tests/testthat/test-zero-residual.R, NEWS.md. (1) The roxygen block said the calling handler is why caught errors never reach it and why warnings "come first"; reworded to what the handler does (keeps engine frames, raises the warnings first). (2) "lavaan re-raises its own errors" narrowed to its `lavaan()` fit. (3) The handler covers errors anywhere in the engine function, the covariance read included; roxygen, the user message ("failed on these data", was "could not fit the model") and the DESIGN.md rows say so. (4) The NEWS entry named the fit only; it now names the covariance read too. (5) A test comment called the error object a class vector, and the non-vacuity check counted aborts that predate the change; it now counts aborts with a parent. A first T5 run was stopped before it finished so that it runs on the corrected code.
+- 2026-10-17: T3, T4, T5 done at 22cd1f2. `devtools::document()` changed no file. `devtools::test()`: FAIL 0, WARN 0, SKIP 2, PASS 10408. `devtools::check()` raw Status line: OK (0 errors, 0 warnings, 0 notes). Status set to review.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
