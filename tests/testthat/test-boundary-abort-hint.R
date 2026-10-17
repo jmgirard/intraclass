@@ -891,7 +891,7 @@ test_that("an off-grid mpl design is not hinted end to end (AC3, F1)", {
 # scores constant within subject (MSE = 0), where searle and burch both abort --
 # genuinely degenerate FOR THIS ROW. Since M161 (D-052) icc() refuses such data before
 # any fit, so through icc() the refusal is the input check's, and
-# `classical_guard_observed()` fires only when called directly (GP9). bh_degen_between:
+# `classical_guard_observed()` fires only outside icc() (GP9). bh_degen_between:
 # every subject mean identical (SSA = 0, MSE > 0), where searle and burch both return
 # intervals -- NOT degenerate for this row, though it does kill `npbootstrap`, and a
 # gate that ORed npbootstrap's conditions in silenced the hint on ordinary boundary

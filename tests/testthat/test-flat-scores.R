@@ -115,7 +115,7 @@ fs_call <- function(d, record, ...) {
 }
 
 test_that("flat data are refused classed, before any fit, wherever a fit would run (AC1)", {
-  skip_on_cran() # 672 icc() calls, each ended by a stub or a guard
+  skip_on_cran() # about 440 icc() calls, each ended by a stub or a guard
   record <- new.env()
   stubbed <- fs_local_stubs(record)
   frames <- fs_frames()
@@ -156,8 +156,9 @@ test_that("flat data are refused classed, before any fit, wherever a fit would r
     }
     # The domain is not empty: every engine this run stubbed reaches a fit on
     # each control frame for at least one combination. The one exception is
-    # lavaan on F5, because the lavaan engine refuses within-cell replicates
-    # with `intraclass_unsupported` on every combination.
+    # lavaan on F5, which reaches no fit: its two-way montecarlo and bootstrap
+    # calls are refused for within-cell replicates, and every other combination
+    # by a one-way or `ci_method` scope fence.
     expected <- if (nm == "F5") setdiff(stubbed, "lavaan") else stubbed
     expect_setequal(unique(admitted), expected)
   }

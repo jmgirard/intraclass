@@ -61,5 +61,7 @@
 - 2026-10-17: T2 placed the check just before the engine-fit dispatch in `icc()`, after every argument and design fence, so an unsupported combination on flat data still reports the fence. `test-flat-scores.R` was red on main (flat frames reached a fit) and is green with the check.
 - 2026-10-17: checkpoint, half-done: T1 to T4 written, not ticked. The full `devtools::test()` run is in progress, so no task is checked off yet.
 - 2026-10-17: verify: full `devtools::test()` at b6296ca's code had no failures. `test-boundary-abort-hint.R` after the T3 edit: 0 failed, 0 errors, 0 warnings, 0 skipped. `air format --check .` clean, `lintr::lint_package()` 0 lints. T1 to T4 ticked. NEWS long-sentence count stays at 12 by `data-raw/prose-profile.py --limit 25`.
+- 2026-10-17: claim audit: 30 claims read, 3 corrected — R/icc.R, tests/testthat/test-flat-scores.R. A hedged fourth claim in tests/testthat/test-boundary-abort-hint.R was narrowed too. The same reader re-read all four once, and all hold.
+- 2026-10-17: correction of the T2 line above: the check runs after the argument fences and most design fences, not after every fence. The lavaan replicate fence and the fences inside the CI functions come later, so on flat data those combinations now get `intraclass_singular_fit` where main gave `intraclass_unsupported` (claim audit probe: F5 lavaan two-way montecarlo and bootstrap, F3 glmmTMB two-way mpl).
 
 ## Decisions

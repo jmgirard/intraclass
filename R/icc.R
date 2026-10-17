@@ -2097,8 +2097,10 @@ icc <- function(
     }
   }
 
-  # Data in which no subject's scores vary are refused HERE, after every argument
-  # and design fence and before any fit (#5/#8, M161/D-052). With no variation
+  # Data in which no subject's scores vary are refused HERE, after the argument
+  # fences and most design fences and before any fit (#5/#8, M161/D-052). The
+  # lavaan replicate fence below and the fences inside the CI functions come
+  # later, so on such data those combinations get this refusal. With no variation
   # within subjects the rater, interaction and residual variances are all
   # exactly zero, and the engines then fail each in their own words (glmmTMB
   # "LU factorization ... failed" or "NA/NaN gradient evaluation", an unclassed
