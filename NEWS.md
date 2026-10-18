@@ -3,13 +3,13 @@
 * On the glmmTMB and lme4 engines, `ci_method = "montecarlo"` and
   `"bootstrap"` now warn about some intervals near 1. For a single-rating row,
   an interval whose lower limit lies within 1e-12 of 1 is now reported with an
-  `intraclass_unresolved_interval` warning. For a row that averages ratings,
-  the bound is 1e-12 divided by the number of ratings averaged. On unbalanced
-  data that is an effective number. For a numeric `unit` it is the projected
-  number of raters. The warning
-  names its rows. Data with almost no residual variation can give such an
-  interval. An example on lme4 is scores that are exactly a subject value plus
-  a rater value. Its width can then reflect rounding rather than the data.
+  `intraclass_unresolved_interval` warning. For a row that averages ratings
+  over raters, occasions or both, the bound is 1e-12 divided by the number of
+  ratings averaged. On unbalanced data the number of raters is an effective
+  number. For a numeric `unit` it is the projected number of raters. The
+  warning names its rows. Data with almost no residual variation can give such
+  an interval. An example on lme4 is scores that are exactly a subject value
+  plus a rater value. Its width can then reflect rounding rather than the data.
   Correct intervals from scores with very little noise can also get the
   warning. The interval itself is unchanged.
 

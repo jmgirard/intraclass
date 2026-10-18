@@ -15,9 +15,9 @@
 # `x3n` spread over [1.5e-12, 1.8e-12] and divided by 3 puts a lower limit
 # between 1 - 1e-12 and 1 - 1e-12/3; `x3w` spread over [3e-13, 6e-13] puts
 # one above 1 - 1e-12/3 when divided by 3, and above 1 - 1e-12/6 when divided
-# by 6; `e6n` spread over
-# [1.32e-12, 1.68e-12] and divided by 6 puts one between 1 - 1e-12/3 and
-# 1 - 1e-12/6.
+# by 6; `e6n` spread over [1.08e-12, 1.38e-12] and divided by 6 puts one
+# between 1 - 1e-12/4 and 1 - 1e-12/6, so a bound read off the mean of the
+# divisors 3, 3 and 6 (that is, 4) would warn and the largest does not.
 
 ui_estimand <- function(signal, error, label = "ICC(A,1)") {
   list(signal = signal, error = error, error_divisors = list(1), label = label)
@@ -85,7 +85,7 @@ ui_mc_stub <- function(engine) {
         z = rep(0, n),
         x3n = 1.5e-12 + 3e-13 * stats::pnorm(par[1, ]),
         x3w = 3e-13 + 3e-13 * stats::pnorm(par[1, ]),
-        e6n = 1.32e-12 + 3.6e-13 * stats::pnorm(par[1, ]),
+        e6n = 1.08e-12 + 3e-13 * stats::pnorm(par[1, ]),
         big = 1 + exp(par[2, ])
       )
     }
@@ -107,7 +107,7 @@ ui_boot_stub <- function(engine) {
         z = rep(0, n),
         x3n = seq(1.5e-12, 1.8e-12, length.out = n),
         x3w = seq(3e-13, 6e-13, length.out = n),
-        e6n = seq(1.32e-12, 1.68e-12, length.out = n),
+        e6n = seq(1.08e-12, 1.38e-12, length.out = n),
         big = seq(1, 3, length.out = n)
       )
     }
@@ -140,10 +140,22 @@ ui_message <- function(w) {
   cli::ansi_strip(cli::format_message(conditionMessage(w)))
 }
 
+# Checks that `value` is the one the reducer returns with the helper replaced
+# by one that returns its input and signals nothing (AC1).
+ui_expect_unchanged <- function(fn, engine, estimands, value) {
+  local_mocked_bindings(
+    warn_unresolved_interval = function(intervals, estimands, engine) {
+      invisible(intervals)
+    }
+  )
+  bare <- ui_run(fn, engine, estimands)
+  expect_length(bare$warnings, 0L)
+  expect_identical(bare$value, value, info = paste(engine, fn))
+}
+
 test_that("a near-1 interval on glmmTMB and lme4 fits warns once and is reported (D-054, D-056 AC1, AC3)", {
   for (engine in c("glmmTMB", "lme4")) {
     for (fn in c("mc", "boot")) {
-      info <- paste(engine, fn)
       out <- ui_run(fn, engine, list(ui_wide, ui_near))
       expect_length(out$warnings, 1L)
       expect_s3_class(out$warnings[[1]], "intraclass_unresolved_interval")
@@ -151,18 +163,7 @@ test_that("a near-1 interval on glmmTMB and lme4 fits warns once and is reported
       # The near-1 interval is the one that fired it, and it is reported.
       expect_gt(out$value[[2]]$conf.low, 1 - 1e-12)
       expect_lt(out$value[[2]]$conf.low, out$value[[2]]$conf.high)
-      # The value is the one returned with the helper replaced by one that
-      # returns its input and signals nothing.
-      local({
-        local_mocked_bindings(
-          warn_unresolved_interval = function(intervals, estimands, engine) {
-            invisible(intervals)
-          }
-        )
-        bare <- ui_run(fn, engine, list(ui_wide, ui_near))
-        expect_length(bare$warnings, 0L)
-        expect_identical(out$value, bare$value, info = info)
-      })
+      ui_expect_unchanged(fn, engine, list(ui_wide, ui_near), out$value)
       msg <- ui_message(out$warnings[[1]])
       expect_match(
         msg,
@@ -187,6 +188,12 @@ test_that("two near-1 intervals after a wide one give one warning that counts an
       out <- ui_run(fn, engine, list(ui_wide, ui_near, ui_near2))
       expect_length(out$warnings, 1L)
       expect_gt(out$value[[3]]$conf.low, 1 - 1e-12)
+      ui_expect_unchanged(
+        fn,
+        engine,
+        list(ui_wide, ui_near, ui_near2),
+        out$value
+      )
       msg <- ui_message(out$warnings[[1]])
       expect_match(
         msg,
@@ -217,20 +224,7 @@ ui_band <- function(est, lo, hi, warned) {
       expect_gt(low, lo + 1e-15, label = info)
       expect_lt(low, hi - 1e-15, label = info)
       expect_length(out$warnings, warned)
-      # The value is the one returned with the helper replaced by one that
-      # returns its input and signals nothing.
-      local({
-        local_mocked_bindings(
-          warn_unresolved_interval = function(intervals, estimands, engine) {
-            invisible(intervals)
-          }
-        )
-        expect_identical(
-          ui_run(fn, engine, list(ui_wide, est))$value,
-          out$value,
-          info = info
-        )
-      })
+      ui_expect_unchanged(fn, engine, list(ui_wide, est), out$value)
     }
   }
 }
@@ -244,7 +238,9 @@ test_that("with d = 3, a lower limit above 1 - 1e-12/3 warns (D-056 AC1)", {
 })
 
 test_that("with divisors 3, 3 and 6, a lower limit between 1 - 1e-12/3 and 1 - 1e-12/6 does not warn (D-056 AC1)", {
-  ui_band(ui_d6_inner, 1 - 1e-12 / 3, 1 - 1e-12 / 6, 0L)
+  # Inside that band, and past 1 - 1e-12/4, where a bound read off the mean
+  # divisor would warn: the largest divisor is the one read.
+  ui_band(ui_d6_inner, 1 - 1e-12 / 4, 1 - 1e-12 / 6, 0L)
 })
 
 test_that("with divisors 3, 3 and 6, a lower limit above 1 - 1e-12/6 warns (D-056 AC1)", {
@@ -288,6 +284,7 @@ test_that("a lower limit between 1e-13 and 1e-12 from 1 warns (D-054 AC1)", {
       # The case sits inside the bound, away from 1.
       expect_gt(out$value[[2]]$conf.low, 1 - 1e-12)
       expect_lt(out$value[[2]]$conf.low, 1 - 1e-13)
+      ui_expect_unchanged(fn, engine, list(ui_wide, ui_inner), out$value)
     }
   }
 })
@@ -300,6 +297,7 @@ test_that("a lower limit just below 1 - 1e-12 does not warn (D-054 AC1)", {
       # The control sits near the bound, on its far side.
       expect_lte(out$value[[2]]$conf.low, 1 - 1e-12)
       expect_gt(out$value[[2]]$conf.low, 1 - 1e-11)
+      ui_expect_unchanged(fn, engine, list(ui_wide, ui_mid), out$value)
     }
   }
 })
@@ -309,7 +307,45 @@ test_that("a near-1 interval on a lavaan fit does not warn (D-054 AC1)", {
     out <- ui_run(fn, "lavaan", list(ui_wide, ui_near))
     expect_length(out$warnings, 0L)
     expect_gt(out$value[[2]]$conf.low, 1 - 1e-12)
+    ui_expect_unchanged(fn, "lavaan", list(ui_wide, ui_near), out$value)
   }
+})
+
+test_that("the message names every row that fired it, past 20 (M164 review)", {
+  rows <- lapply(sprintf("ICC(R%02d)", 1:25), function(l) {
+    ui_estimand("t", "u", l)
+  })
+  for (engine in c("glmmTMB", "lme4")) {
+    for (fn in c("mc", "boot")) {
+      out <- ui_run(fn, engine, c(list(ui_wide), rows))
+      expect_length(out$warnings, 1L)
+      msg <- ui_message(out$warnings[[1]])
+      expect_match(msg, "25 intervals have a lower limit near 1", fixed = TRUE)
+      for (l in sprintf("ICC(R%02d)", 1:25)) {
+        expect_match(msg, l, fixed = TRUE, info = paste(engine, fn))
+      }
+    }
+  }
+})
+
+test_that("a large divisor reads the gap from 1, not a rounded bound (M164 review)", {
+  # With d = 8000 the bound is 1e-12/8000 = 1.25e-16. `1 - 1.25e-16`
+  # rounds to the largest double below 1, so comparing the lower limit with it
+  # could not warn; the gap 2^-53 (about 1.11e-16) lies inside the bound and
+  # the gap 2^-52 (about 2.22e-16) outside it.
+  est <- icc_estimand(type = "consistency", unit = 8000)
+  expect_identical(est$error_divisors, 8000)
+  engine <- list(engine = "lme4")
+  inside <- list(conf.low = 1 - 2^-53, conf.high = 1)
+  outside <- list(conf.low = 1 - 2^-52, conf.high = 1)
+  expect_identical(1 - inside$conf.low, 2^-53)
+  expect_warning(
+    warn_unresolved_interval(list(inside), list(est), engine),
+    class = "intraclass_unresolved_interval"
+  )
+  expect_no_warning(
+    warn_unresolved_interval(list(outside), list(est), engine)
+  )
 })
 
 # Through icc() (D-054, D-056 AC2) ----------------------------------------------
@@ -483,7 +519,7 @@ test_that("rater noise of 1e-5 gives no near-1 warning on either engine (D-054 A
     g$score <- stats::rnorm(20)[g$subject] + stats::rnorm(nrow(g), 0, 1e-5)
     g
   })
-  frame <- list(data = d, model = "twoway")
+  frame <- list(data = d, args = list(model = "twoway"), k = 3)
   for (engine in c("glmmTMB", "lme4")) {
     for (method in c("montecarlo", "bootstrap")) {
       out <- ui_icc(frame, engine, method)

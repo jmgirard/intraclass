@@ -233,24 +233,31 @@ warn_unresolved_interval <- function(intervals, estimands, engine) {
   if (!isTRUE(engine$engine %in% c("glmmTMB", "lme4"))) {
     return(invisible(intervals))
   }
+  # The gap `1 - low` is compared, not `low` with `1 - bound / d`: for d in the
+  # thousands, `1 - bound / d` rounds to the largest double below 1, and a
+  # lower limit there would not warn (M164 review).
   near <- vapply(
     seq_along(intervals),
     function(i) {
       low <- intervals[[i]]$conf.low
       d <- max(unlist(estimands[[i]]$error_divisors))
-      is.finite(low) && low > 1 - unresolved_interval_bound / d
+      isTRUE(is.finite(low) && 1 - low < unresolved_interval_bound / d)
     },
     logical(1)
   )
   n <- sum(near)
   if (n > 0L) {
-    rows <- vapply(estimands[near], unresolved_row_name, character(1))
+    rows <- collapse_and(
+      vapply(estimands[near], unresolved_row_name, character(1))
+    )
     warn_intraclass(
       c(
         "{n} interval{?s} {?has/have} a lower limit near 1: {rows}.",
         i = "A lower limit is near 1 when it lies within 1e-12 of 1. For a row \\
-             that averages ratings, 1e-12 is divided by the number of ratings, \\
-             or effective ratings, it averages.",
+             that averages ratings over raters or occasions, 1e-12 is divided \\
+             by the number of ratings, or effective ratings, it averages. For \\
+             a numeric {.arg unit}, the number of raters in it is the \\
+             projected one.",
         i = "{cli::qty(n)}Data with almost no residual variation can give \\
              {?such an interval/such intervals}, so {?its width/their widths} \\
              may reflect rounding rather than your data.",
@@ -282,6 +289,17 @@ unresolved_row_name <- function(estimand) {
     )
   }
   name
+}
+
+# Joins names as "a", "a and b", or "a, b, and c", in full. cli's `{x}`
+# collapse shows only the first 20 and the last of a longer vector, and the
+# near-1 warning names every row (M164 review).
+collapse_and <- function(x) {
+  n <- length(x)
+  if (n <= 2L) {
+    return(paste(x, collapse = " and "))
+  }
+  paste0(paste(x[-n], collapse = ", "), ", and ", x[n])
 }
 
 mc_ci <- function(
