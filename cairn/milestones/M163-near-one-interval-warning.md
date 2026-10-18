@@ -82,6 +82,7 @@ A glmmTMB or lme4 Monte-Carlo or bootstrap interval whose lower limit lies withi
 - 2026-10-18: minor amendment: T3 wording now says the 1e-5 frame is built in the new file, as done.
 - 2026-10-18: T5 done at the final code. `devtools::test()`: FAIL 0, WARN 0, SKIP 2, PASS 10509. `devtools::check()` raw Status line: OK. `lintr::lint_package()`: no lints. `air format --check .` clean. Status set to review.
 - 2026-10-18: step-7 approval: m163-near-one-interval-warning approved for merge
+- 2026-10-18: PR #182 CI: `check-references` failed. `check-mpl-doc-claims.py` found the new `?icc` sentence "Data with almost no residual variation can give such an interval…" with no row in `data-raw/mpl-doc-claims.tsv`. Added an `out` row (not an MPL claim, settled by `test-unresolved-interval.R`); every Python step of the CI workflows now exits 0 locally. The local gate never ran these checkers (LESSONS, M130).
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
