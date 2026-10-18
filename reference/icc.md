@@ -97,7 +97,10 @@ model_parameters.intraclass_icc(model, ci = NULL, ...)
   has two different scores, `icc()` refuses the data with an
   `intraclass_singular_fit` error before it fits a model. Every variance
   within subjects is exactly zero on such data. A call that an argument
-  or design check refuses first keeps that check's error.
+  or design check refuses first keeps that check's error. On the glmmTMB
+  and lme4 engines, an engine error that does not come from `rlang` is
+  re-raised as an `intraclass_singular_fit` error, with the engine's
+  error as its cause. Scores that vary only by rater can raise one.
 
 - cluster:
 
@@ -1043,11 +1046,11 @@ icc(ratings, score, subject, rater, seed = 1)
 #> 
 #>   index     estimate   95% CI
 #>   Absolute agreement
-#>   ICC(A,1)     0.290   [0.050, 0.708]
+#>   ICC(A,1)     0.290   [0.050, 0.706]
 #>   ICC(A,k)     0.620   [0.175, 0.906]
 #>   Consistency
-#>   ICC(C,1)     0.715   [0.334, 0.925]
-#>   ICC(C,k)     0.909   [0.668, 0.980]
+#>   ICC(C,1)     0.715   [0.339, 0.924]
+#>   ICC(C,k)     0.909   [0.672, 0.980]
 #> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
