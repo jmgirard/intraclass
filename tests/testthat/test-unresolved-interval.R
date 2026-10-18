@@ -6,9 +6,11 @@
 # reducers with stub engines (GP9), on the stub shapes of
 # test-glmmtmb-false-zero.R. Each component pair below gives one interval:
 # `wide` varies across draws; `near` and `near2` are 1 - u with u spread over
-# [0, 1e-13], so their lower limits lie within 1e-13 of 1; `mid` is 1 - v with
-# v spread over [2e-12, 2.5e-12], so its lower limit lies just below
-# 1 - 1e-12; `flat` is 1 on every draw, so its two limits are equal.
+# [0, 1e-13], so their lower limits lie within 1e-13 of 1; `inner` is 1 - w
+# with w spread over [4e-13, 5e-13], so its lower limit lies between 1e-13 and
+# 1e-12 from 1; `mid` is 1 - v with v spread over [2e-12, 2.5e-12], so its
+# lower limit lies just below 1 - 1e-12; `flat` is 1 on every draw, so its two
+# limits are equal.
 
 ui_estimand <- function(signal, error) {
   list(signal = signal, error = error, error_divisors = list(1))
@@ -16,6 +18,7 @@ ui_estimand <- function(signal, error) {
 ui_wide <- ui_estimand("subject", "residual")
 ui_near <- ui_estimand("t", "u")
 ui_near2 <- ui_estimand("t", "u2")
+ui_inner <- ui_estimand("t", "w")
 ui_mid <- ui_estimand("t", "v")
 ui_flat <- ui_estimand("t", "z")
 
@@ -32,6 +35,7 @@ ui_mc_stub <- function(engine) {
         t = rep(1, n),
         u = 1e-13 * stats::pnorm(par[1, ]),
         u2 = 1e-13 * stats::pnorm(par[2, ]),
+        w = 4e-13 + 1e-13 * stats::pnorm(par[1, ]),
         v = 2e-12 + 5e-13 * stats::pnorm(par[1, ]),
         z = rep(0, n)
       )
@@ -49,6 +53,7 @@ ui_boot_stub <- function(engine) {
         t = rep(1, n),
         u = seq(0, 1e-13, length.out = n),
         u2 = seq(1e-13, 0, length.out = n),
+        w = seq(4e-13, 5e-13, length.out = n),
         v = seq(2e-12, 2.5e-12, length.out = n),
         z = rep(0, n)
       )
@@ -93,9 +98,18 @@ test_that("a near-1 interval on glmmTMB and lme4 fits warns once and is reported
       # The near-1 interval is the one that fired it, and it is reported.
       expect_gt(out$value[[2]]$conf.low, 1 - 1e-12)
       expect_lt(out$value[[2]]$conf.low, out$value[[2]]$conf.high)
-      # The value is the one returned with every warning muffled.
-      muffled <- suppressWarnings(ui_run(fn, engine, list(ui_wide, ui_near)))
-      expect_identical(out$value, muffled$value, info = info)
+      # The value is the one returned with the helper replaced by one that
+      # returns its input and signals nothing.
+      local({
+        local_mocked_bindings(
+          warn_unresolved_interval = function(intervals, engine) {
+            invisible(intervals)
+          }
+        )
+        bare <- ui_run(fn, engine, list(ui_wide, ui_near))
+        expect_length(bare$warnings, 0L)
+        expect_identical(out$value, bare$value, info = info)
+      })
       msg <- ui_message(out$warnings[[1]])
       expect_match(msg, "1 interval has a lower limit within 1e-12 of 1")
       expect_match(msg, "almost no residual variation", fixed = TRUE)
@@ -114,6 +128,18 @@ test_that("two near-1 intervals after a wide one give one warning that counts bo
         ui_message(out$warnings[[1]]),
         "2 intervals have a lower limit within 1e-12 of 1"
       )
+    }
+  }
+})
+
+test_that("a lower limit between 1e-13 and 1e-12 from 1 warns (D-054 AC1)", {
+  for (engine in c("glmmTMB", "lme4")) {
+    for (fn in c("mc", "boot")) {
+      out <- ui_run(fn, engine, list(ui_wide, ui_inner))
+      expect_length(out$warnings, 1L)
+      # The case sits inside the bound, away from 1.
+      expect_gt(out$value[[2]]$conf.low, 1 - 1e-12)
+      expect_lt(out$value[[2]]$conf.low, 1 - 1e-13)
     }
   }
 })
@@ -250,6 +276,8 @@ test_that("rater noise of 1e-5 gives no near-1 warning on either engine (D-054 A
   for (engine in c("glmmTMB", "lme4")) {
     for (method in c("montecarlo", "bootstrap")) {
       out <- ui_icc(frame, engine, method)
+      # A result came back, so the count below is not met by an abort.
+      expect_s3_class(out$result, "intraclass_icc")
       expect_identical(out$n_warned, 0L, info = paste(engine, method))
     }
   }

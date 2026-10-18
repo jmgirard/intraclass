@@ -1,13 +1,15 @@
 # intraclass (development version)
 
-* On the glmmTMB and lme4 engines, under `ci_method = "montecarlo"` or
-  `"bootstrap"`, an interval whose lower limit lies within 1e-12 of 1 is now
-  reported with an `intraclass_unresolved_interval` warning. Data with almost
-  no residual variation can give such an interval. An example on lme4 is
-  scores that are exactly a subject value plus a rater value. Its width can
-  then reflect rounding rather than the data. Scores whose noise is about 1e-7
-  of their spread also give such an interval, and there it is correct. The
-  interval itself is unchanged.
+* On the glmmTMB and lme4 engines, `ci_method = "montecarlo"` and
+  `"bootstrap"` now warn about some intervals near 1. An interval whose lower
+  limit lies within 1e-12 of 1 is now reported with an
+  `intraclass_unresolved_interval` warning. Data with almost no residual
+  variation can give such an interval. An example on lme4 is scores that are
+  exactly a subject value plus a rater value. Its width can then reflect
+  rounding rather than the data. Correct intervals from scores with very
+  little noise can also get the warning. This happens at larger noise for
+  average-rater rows, whose lower limits lie nearer 1. The interval itself is
+  unchanged.
 
 * On the glmmTMB and lme4 engines, an engine error that does not come from
   `rlang` now reaches the caller as an `intraclass_singular_fit` error. This covers

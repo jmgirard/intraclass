@@ -224,7 +224,9 @@ unresolved_interval_bound <- 1e-12
 # no residual variation can give it. Called after
 # `refuse_zero_width()`, so equal limits abort first. Takes no `hint`: forcing
 # that promise would run the hint's trial fits. Gated to glmmTMB and lme4 fits,
-# as the refusal is.
+# as the refusal is. The bound reads every reported row. An average-unit row
+# lies about its divisor times nearer 1 than the single row, so there the
+# warning also fires on data with more noise (M163 review, D-055).
 warn_unresolved_interval <- function(intervals, engine) {
   if (!isTRUE(engine$engine %in% c("glmmTMB", "lme4"))) {
     return(invisible(intervals))
@@ -241,9 +243,9 @@ warn_unresolved_interval <- function(intervals, engine) {
     warn_intraclass(
       c(
         "{n} interval{?s} {?has/have} a lower limit within 1e-12 of 1.",
-        i = "Data with almost no residual variation can give such an \\
-             interval, so its width may reflect rounding rather than your \\
-             data.",
+        i = "{cli::qty(n)}Data with almost no residual variation can give \\
+             {?such an interval/such intervals}, so {?its width/their widths} \\
+             may reflect rounding rather than your data.",
         i = "Suppress the {.cls intraclass_unresolved_interval} warning class \\
              to silence this."
       ),
