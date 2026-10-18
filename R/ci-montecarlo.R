@@ -172,8 +172,9 @@ mc_interval <- function(
 # Gated to glmmTMB and lme4 fits (D-053, M162). The lavaan and brms engines
 # meet the boundary through their own guards (D-004), and a lavaan fit is
 # pinned as not refused here. lme4 intervals that print as [1, 1] on near-flat
-# data have limits that differ in the last digits, so they are reported. Shared
-# by `mc_ci()` and `bootstrap_ci()`.
+# data have limits that differ in the last digits, so they are reported, with
+# the warning of `warn_unresolved_interval()` below (D-054). Shared by `mc_ci()`
+# and `bootstrap_ci()`.
 refuse_zero_width <- function(
   intervals,
   engine,
@@ -210,6 +211,47 @@ refuse_zero_width <- function(
   invisible(intervals)
 }
 
+# The lower limit above which an interval near 1 is warned about (D-054).
+unresolved_interval_bound <- 1e-12
+
+# The warning on intervals near 1 (D-054, M163). On near-flat or exactly
+# additive data, lme4 reports intervals whose lower limit lies within about
+# 1e-13 of 1 and whose limits differ, so `refuse_zero_width()` lets them
+# through. Data with rater noise of about 1e-7 of the score spread give
+# intervals of the same width, and those are correct, so a refusal is ruled out
+# (D-049). Instead the interval is reported, and one classed warning says that
+# data with almost no residual variation can give it. Called after
+# `refuse_zero_width()`, so equal limits abort first. Takes no `hint`: forcing
+# that promise would run the hint's trial fits. Gated to glmmTMB and lme4 fits,
+# as the refusal is.
+warn_unresolved_interval <- function(intervals, engine) {
+  if (!isTRUE(engine$engine %in% c("glmmTMB", "lme4"))) {
+    return(invisible(intervals))
+  }
+  near <- vapply(
+    intervals,
+    function(iv) {
+      is.finite(iv$conf.low) && iv$conf.low > 1 - unresolved_interval_bound
+    },
+    logical(1)
+  )
+  n <- sum(near)
+  if (n > 0L) {
+    warn_intraclass(
+      c(
+        "{n} interval{?s} {?has/have} a lower limit within 1e-12 of 1.",
+        i = "Data with almost no residual variation can give such an \\
+             interval, so its width may reflect rounding rather than your \\
+             data.",
+        i = "Suppress the {.cls intraclass_unresolved_interval} warning class \\
+             to silence this."
+      ),
+      class = "intraclass_unresolved_interval"
+    )
+  }
+  invisible(intervals)
+}
+
 mc_ci <- function(
   engine,
   estimands,
@@ -236,5 +278,6 @@ mc_ci <- function(
     )
   })
   refuse_zero_width(out, engine, call = call, hint = hint)
+  warn_unresolved_interval(out, engine)
   out
 }

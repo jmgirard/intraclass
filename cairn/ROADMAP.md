@@ -9,7 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M163 | glmmTMB and lme4 intervals whose lower limit lies within 1e-12 of 1 come with a classed warning | planned | — | normal | milestones/M163-near-one-interval-warning.md |
+| M163 | glmmTMB and lme4 intervals whose lower limit lies within 1e-12 of 1 come with a classed warning | in-progress | — | normal | milestones/M163-near-one-interval-warning.md |
 | M162 | Raw glmmTMB and lme4 errors reach the caller as intraclass_singular_fit, and lme4 refuses equal interval limits | done | — | normal | milestones/archive/M162-zero-residual-classed-errors.md |
 | M161 | Data whose scores do not vary within any subject are refused classed before any fit | done | — | normal | milestones/archive/M161-flat-scores-refusal.md |
 | M160 | easystats model_parameters method for icc() results | done | — | normal | milestones/archive/M160-model-parameters-method.md |

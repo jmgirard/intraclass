@@ -4,14 +4,14 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M163: glmmTMB and lme4 intervals whose lower limit lies within 1e-12 of 1 come with a classed warning
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate; RR<NN> whose Binding criteria bind this milestone's ACs (binding-criteria check), or — -->
 - **Principles touched:** GP1, GP7, GP9   <!-- owner: plan · create/amend-via-gate; comma-separated IPn/GPn ids this milestone touches, or — -->
 - **Resolves:** —   <!-- owner: plan · create/amend-via-gate; comma-separated GitHub issues the scope absorbs, each `#N closes` (the PR closes it at merge) or `#N partial` (the remainder gets a candidate row), or — ; skill conduct only — no validate check parses it -->
 - **Surface tier:** user-facing — `icc()` gains a warning that users see and can catch by class   <!-- owner: plan · create/amend-via-gate; user-facing | internal — <one-clause reason>; skill conduct only — no validate check parses it -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create; a companion checkout the milestone also works in is one further entry per checkout, `companion: <abs-path> <branch>` (implement), its PR URL appended by review — /milestone-review merges companions first, in listed order -->
+- **Branch/PR:** m163-near-one-interval-warning   <!-- owner: implement (branch) / review (PR URL) · create; a companion checkout the milestone also works in is one further entry per checkout, `companion: <abs-path> <branch>` (implement), its PR URL appended by review — /milestone-review merges companions first, in listed order -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -73,6 +73,11 @@ A glmmTMB or lme4 Monte-Carlo or bootstrap interval whose lower limit lies withi
 - 2026-10-18: collisions: D-049 and D-053 quoted ("any width bound refuses some correct interval near 1"); not superseded, since nothing is refused. D-053's Consequences sentence on [1, 1] intervals is annotated by D-054. D-004 requires an entry for the Boundary-fit policy change. Candidate rows absorbed in part: "two-way data with zero residual", "M161 review follow-ups on the flat-scores refusal". GitHub inbox: 0 open issues, 0 open PRs.
 - 2026-10-18: criteria audit (full mode, fresh Opus reader) returned 7 findings and 1 note, all fixed. Its run: every glmmTMB call on the near-flat and additive frames aborts, and lme4 aborts on the near-flat frame under `model = "twoway"`. (1) AC3 and the Goal claimed degenerate data "give the same output", false where glmmTMB aborts: narrowed to "can give such an interval". (2) AC2 named no model: set per frame. (3) AC2 reached glmmTMB only through aborts: frame (c), noise SD 1e-7, added, and the 1e-5 control runs on both engines. (4) AC1's abort control could not fail, and nothing tested the count or the bound's near side: stubs added in T1. (5) "Exactly one warning" read as any class, and "the same intervals" had no reference: worded by class and `identical()` to the muffled call. (6) AC1 and AC2 bound the test's structure: restated as behavior, layout moved to T1 and T3. (7) Note: a helper that took `hint` would run the hint trials: T2 says it takes none. Also noted: `d_study()` calls neither function, so the warning appears at most once per `icc()` call.
 - 2026-10-18: lessons surfaced: M162 (print raw numbers with `sprintf("%.17g")`), M93 (`cli::format_message()`), M150 (`expect_warning()` takes one warning; read WARN 0), M141 (CI lints `tests/`), M127 (raw Status line). No dependency change and no outward action beyond the merge-gate PR.
+- 2026-10-18: started /milestone-implement on branch m163-near-one-interval-warning.
+- 2026-10-18: T1: `test-unresolved-interval.R` stub tests written. On the unchanged code the two warning tests fail and the three controls pass. A planted swap of the refusal and the warning in `mc_ci()` fails the abort-order test on both engines.
+- 2026-10-18: T2: `warn_unresolved_interval()` and `unresolved_interval_bound` added beside `refuse_zero_width()`, called after it in `mc_ci()` and `bootstrap_ci()`; it takes no `hint`. Message: "{n} interval{?s} {?has/have} a lower limit within 1e-12 of 1", then the rounding bullet and the class to suppress. Stub tests pass.
+- 2026-10-18: T3: grid test added to `test-unresolved-interval.R`, and the 1e-5 control there on both engines, with the frame built as in `test-glmmtmb-false-zero.R` rather than editing that glmmTMB file's test. Local outcomes: 7 of 12 calls return a result and all 7 warn (lme4 on all three frames under both methods, glmmTMB Monte-Carlo on the noise 1e-7 frame); 5 abort with `intraclass_singular_fit`. With the helper made a no-op, the grid test fails 8 times.
+- 2026-10-18: T4: NEWS entry, `?icc` `ci_method` text (`devtools::document()` rewrote `man/icc.Rd`), DESIGN.md Monte-Carlo and Bootstrap rows cite D-054. `test-boundary-policy.R` pins no text of those rows. NEWS lint count back to main's 15 after replacing "may". `air format .` and `lintr` on the changed files clean.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
