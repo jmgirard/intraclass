@@ -4,7 +4,7 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M163: glmmTMB and lme4 intervals whose lower limit lies within 1e-12 of 1 come with a classed warning
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate; RR<NN> whose Binding criteria bind this milestone's ACs (binding-criteria check), or — -->
@@ -51,11 +51,11 @@ A glmmTMB or lme4 Monte-Carlo or bootstrap interval whose lower limit lies withi
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Write the AC1 and AC3 tests in a new `tests/testthat/test-unresolved-interval.R`, reusing the stub shapes of `test-glmmtmb-false-zero.R:297-332` for glmmTMB, lme4 and lavaan under both functions. Stubs: one near-1 interval (a component spread over [0, 1e-13]); two near-1 intervals after a wide one (one warning, count 2); a lower limit near 1 − 2e-12 (no warning); an equal-limits interval beside a near-1 one (abort, no warning). Match the warning by class, since a bootstrap stub can also raise `intraclass_bootstrap_dropouts`. Render messages with `cli::format_message()` (LESSONS, M93). Run them on the unchanged code and record that they fail.
-- [ ] T2: Add the helper beside `refuse_zero_width()` and call it from `mc_ci()` (`R/ci-montecarlo.R:238`) and `bootstrap_ci()` (`R/ci-bootstrap.R:96`) after the refusal, with a comment naming D-054 (GP7). The helper takes no `hint`, since forcing that promise runs the hint trials. Name the 1e-12 bound once. Update the header comment of `refuse_zero_width()`, which says such lme4 intervals "are reported".
-- [ ] T3: Write the AC2 test. Assert the rule on each call and keep the anti-vacuity check a floor of one warning over the grid, not a count per platform (GP9). Add `skip_on_cran()` and keep `mc_samples` and `boot_samples` small. Run the 1e-5 test in `test-glmmtmb-false-zero.R` on both engines and add the no-warning check.
-- [ ] T4: Write the NEWS entry and the `?icc` text, then run `devtools::document()`. Update the DESIGN.md Monte-Carlo and Bootstrap rows to name the warning and cite D-054. If a `test-boundary-policy.R` pin names those rows' old text, update it.
-- [ ] T5: Run `devtools::test()` and read WARN 0 (LESSONS, M150). Run `devtools::check()` and read the raw Status line (LESSONS, M127). Run `lintr::lint_package()` and `air format --check .`.
+- [x] T1: Write the AC1 and AC3 tests in a new `tests/testthat/test-unresolved-interval.R`, reusing the stub shapes of `test-glmmtmb-false-zero.R:297-332` for glmmTMB, lme4 and lavaan under both functions. Stubs: one near-1 interval (a component spread over [0, 1e-13]); two near-1 intervals after a wide one (one warning, count 2); a lower limit near 1 − 2e-12 (no warning); an equal-limits interval beside a near-1 one (abort, no warning). Match the warning by class, since a bootstrap stub can also raise `intraclass_bootstrap_dropouts`. Render messages with `cli::format_message()` (LESSONS, M93). Run them on the unchanged code and record that they fail.
+- [x] T2: Add the helper beside `refuse_zero_width()` and call it from `mc_ci()` (`R/ci-montecarlo.R:238`) and `bootstrap_ci()` (`R/ci-bootstrap.R:96`) after the refusal, with a comment naming D-054 (GP7). The helper takes no `hint`, since forcing that promise runs the hint trials. Name the 1e-12 bound once. Update the header comment of `refuse_zero_width()`, which says such lme4 intervals "are reported".
+- [x] T3: Write the AC2 test. Assert the rule on each call and keep the anti-vacuity check a floor of one warning over the grid, not a count per platform (GP9). Add `skip_on_cran()` and keep `mc_samples` and `boot_samples` small. Run the 1e-5 frame of `test-glmmtmb-false-zero.R`, built the same way in the new file, on both engines with the no-warning check.
+- [x] T4: Write the NEWS entry and the `?icc` text, then run `devtools::document()`. Update the DESIGN.md Monte-Carlo and Bootstrap rows to name the warning and cite D-054. If a `test-boundary-policy.R` pin names those rows' old text, update it.
+- [x] T5: Run `devtools::test()` and read WARN 0 (LESSONS, M150). Run `devtools::check()` and read the raw Status line (LESSONS, M127). Run `lintr::lint_package()` and `air format --check .`.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates. -->
@@ -79,6 +79,8 @@ A glmmTMB or lme4 Monte-Carlo or bootstrap interval whose lower limit lies withi
 - 2026-10-18: T3: grid test added to `test-unresolved-interval.R`, and the 1e-5 control there on both engines, with the frame built as in `test-glmmtmb-false-zero.R` rather than editing that glmmTMB file's test. Local outcomes: 7 of 12 calls return a result and all 7 warn (lme4 on all three frames under both methods, glmmTMB Monte-Carlo on the noise 1e-7 frame); 5 abort with `intraclass_singular_fit`. With the helper made a no-op, the grid test fails 8 times.
 - 2026-10-18: T4: NEWS entry, `?icc` `ci_method` text (`devtools::document()` rewrote `man/icc.Rd`), DESIGN.md Monte-Carlo and Bootstrap rows cite D-054. `test-boundary-policy.R` pins no text of those rows. NEWS lint count back to main's 15 after replacing "may". `air format .` and `lintr` on the changed files clean.
 - 2026-10-18: claim audit: 44 claims read, 2 corrected — NEWS.md, tests/testthat/test-unresolved-interval.R. (1) NEWS gave the additive example as if for both engines, but glmmTMB aborts on it: scoped to lme4. (2) The 1e-5 frame's lower limits lie 5e-11 to 2e-10 from 1, not "about 1e-10". Borderline note taken: NEWS and `?icc` now say a correct interval from noise of about 1e-7 also gets the warning, and the code comment cites the SEARLE agreement. The reader's re-read found all corrections accurate.
+- 2026-10-18: minor amendment: T3 wording now says the 1e-5 frame is built in the new file, as done.
+- 2026-10-18: T5 done at the final code. `devtools::test()`: FAIL 0, WARN 0, SKIP 2, PASS 10509. `devtools::check()` raw Status line: OK. `lintr::lint_package()`: no lints. `air format --check .` clean. Status set to review.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
