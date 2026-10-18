@@ -4,7 +4,7 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M164: The near-1 interval warning reads each row against 1e-12 divided by the ratings it averages, and names its rows
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate; RR<NN> whose Binding criteria bind this milestone's ACs (binding-criteria check), or — -->
@@ -86,6 +86,7 @@ On glmmTMB and lme4 Monte-Carlo and bootstrap intervals, the near-1 warning read
 - 2026-10-18: re-audit: AC1 (full) — 6 findings on the revised wording: (1) the abort sentence has no engine scope and no "finite", and a lavaan stub with a flat interval does not abort; (2) the warning and abort rules disagree on the equal-limits case with no stated order; (3) "greater than its 1 − 1e-12/d" in doubles is the rounded comparison review rejected (d = 8000); (4) no case puts rows of different d in one call, so a planted "largest d over all estimands" rule passes the whole file; (5) the `intraclass_warning` class is checked in one firing case only; (6) the `icc_estimand()` sentence binds the test instrument. Second re-audit line on AC1: further churn on its wording goes to the user (stop).
 - 2026-10-18: stop chip on AC1 wording — the user chose the proposed text (equal limits first, the gap from 1, d per interval's own estimand, the mixed-d case, both classes per firing case; the `icc_estimand()` sentence moves to T1, which already requires it).
 - 2026-10-18: amendment return: AC1 — "On a glmmTMB or lme4 fit, `mc_ci()` and `bootstrap_ci()` first check for an interval with two finite, exactly equal limits. If one has them, the call aborts with `intraclass_zero_width_interval` and signals no warning of class `intraclass_unresolved_interval`. Otherwise each interval is read against the bound 1e-12/d, where d is the largest error divisor of that interval's own estimand. If at least one interval has a finite lower limit whose gap from 1 (1 − lower) is less than its bound, the function signals exactly one warning of class `intraclass_unresolved_interval`, which also carries `intraclass_warning`. If no interval has such a gap, it signals no warning of that class. On a lavaan fit it signals no warning of that class. … A d = 3 interval in its no-warning band, beside a d = 1 interval inside its own bound, gives one warning. An equal-limits interval beside a firing one aborts. Each firing case shows both warning classes. Under both functions, a lavaan case with a lower limit above 1 − 1e-12 gives no warning."
+- 2026-10-18: amendment executed: per-interval d test and both-class checks added (a planted one-d-per-call rule reds the new test); test file 18 of 18 green; full `devtools::test()` FAIL 0, WARN 0, SKIP 2, PASS 10866; lintr 0; air clean; status review.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
