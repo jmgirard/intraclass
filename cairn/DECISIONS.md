@@ -2167,3 +2167,33 @@ all on average-rater rows. The warning's text stays true for them, since it
 says only that data with almost no residual variation can give such an
 interval. Reopened as D-054 is, or by a user report of the warning on an
 average-rater row of data that are not near degenerate.
+
+### D-056 (2026-10-18): the near-1 warning divides its bound by the largest error divisor of each row, and names the rows that fire it — supersedes D-055's decision and narrows D-054's rule to single-rating rows
+
+**Context.** D-054 set the bound 1e-12 from probes of single-rater rows. D-055
+found that an average-rater row lies about its divisor times nearer 1, so the
+warning fires on average-rater rows of data the engines resolve. D-055 kept the
+rule for M163 and left the scaled bound as a candidate row. The M164 plan probe
+reproduced the false warning on both engines (M164 work log). D-004 requires an
+entry for a change to a Boundary-fit policy cell.
+
+**Decision.** On a glmmTMB or lme4 fit under `ci_method = "montecarlo"` or
+`"bootstrap"`, each interval is read against 1 − 1e-12/d. Here d is the largest
+error divisor of the row's estimand: 1 for a single rating, the number of
+raters averaged, and that number times the occasion count where the row also
+averages occasions. One `intraclass_unresolved_interval` warning fires when at
+least one finite lower limit is greater than its 1 − 1e-12/d. Its message names
+each row that fired it. The user chose both at the M164 plan gate. Near 1, the
+largest divisor maps a row back to a gap no smaller than that of its
+single-rating, single-occasion coefficient, so the 1e-12 bound keeps the scale
+D-054 set it on. Rejected: the rater divisor alone, because pure error in an
+occasion-averaged row is also divided by the occasion count. Rejected:
+recomputing each row's single-rating coefficient from the draws, because the
+warning would then read a coefficient the call may not report.
+
+**Consequences.** No reported number changes. Single-rating rows warn as
+before, and D-054's reopening conditions still govern the 1e-12 bound. An
+average-rater row warns only within 1e-12/d of 1. Reopened by degenerate data
+whose averaged row lies further than 1e-12/d from 1 while its single row lies
+within 1e-12, or by a user report of the warning on an averaged row of data
+that are not near degenerate.
