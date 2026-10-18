@@ -1,7 +1,7 @@
 # intraclass (development version)
 
 * On the glmmTMB and lme4 engines, an engine error that does not come from
-  rlang now reaches the caller as an `intraclass_singular_fit` error. This covers
+  `rlang` now reaches the caller as an `intraclass_singular_fit` error. This covers
   errors while the engine fits the model or reads the fitted parameter
   covariance. The engine's own error is kept as its cause. Before, such errors
   carried no package class, so a handler that catches by class missed them.

@@ -112,3 +112,5 @@ Findings (20), with dispositions:
 - prior-review #2: the `refuse_zero_width()` bullet names flat data, which D-052 now refuses upstream — follow-up, row "M162 review follow-ups on the engine re-raise" (c). The line is unmodified by this diff.
 - prior-review #3: the AC2 test read `conditionMessage()` without `cli::format_message()` (M93 lesson) — fix now, fixed e14bff3 (renders with `format_message()` and asserts no backslash).
 - prior-review #4: NEWS names one design family as the source — reject, false: the sentence reports where the errors were observed, with "for example", and claims no condition.
+
+Verify re-run after the fix-now commit e14bff3: `devtools::test()` FAIL 0, WARN 0, SKIP 2, PASS 10414. `pkgdown::check_pkgdown()`: no problems. `devtools::check()` Status: 1 ERROR, from `tests/spelling.R`: "Potential spelling errors: rlang", a word the e14bff3 fixes added to `?icc` and NEWS in plain prose. Fixed by setting it as code in both, not by a WORDLIST entry (LESSONS, M127). `spelling::spell_check_package()` then found no errors. Check re-run pending.

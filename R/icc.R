@@ -228,7 +228,7 @@
 #'   `intraclass_singular_fit` error before it fits a model. Every variance
 #'   within subjects is exactly zero on such data. A call that an argument or
 #'   design check refuses first keeps that check's error. On the glmmTMB and
-#'   lme4 engines, an engine error that does not come from rlang is re-raised
+#'   lme4 engines, an engine error that does not come from `rlang` is re-raised
 #'   as an `intraclass_singular_fit` error, with the engine's error as its
 #'   cause. Scores that vary only by rater can raise one.
 #' @param cluster Optional column of `data` (unquoted) giving the higher-level
