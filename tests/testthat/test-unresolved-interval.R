@@ -187,6 +187,8 @@ test_that("two near-1 intervals after a wide one give one warning that counts an
     for (fn in c("mc", "boot")) {
       out <- ui_run(fn, engine, list(ui_wide, ui_near, ui_near2))
       expect_length(out$warnings, 1L)
+      expect_s3_class(out$warnings[[1]], "intraclass_unresolved_interval")
+      expect_s3_class(out$warnings[[1]], "intraclass_warning")
       expect_gt(out$value[[3]]$conf.low, 1 - 1e-12)
       ui_expect_unchanged(
         fn,
@@ -224,6 +226,10 @@ ui_band <- function(est, lo, hi, warned) {
       expect_gt(low, lo + 1e-15, label = info)
       expect_lt(low, hi - 1e-15, label = info)
       expect_length(out$warnings, warned)
+      for (w in out$warnings) {
+        expect_s3_class(w, "intraclass_unresolved_interval")
+        expect_s3_class(w, "intraclass_warning")
+      }
       ui_expect_unchanged(fn, engine, list(ui_wide, est), out$value)
     }
   }
@@ -245,6 +251,31 @@ test_that("with divisors 3, 3 and 6, a lower limit between 1 - 1e-12/3 and 1 - 1
 
 test_that("with divisors 3, 3 and 6, a lower limit above 1 - 1e-12/6 warns (D-056 AC1)", {
   ui_band(ui_d6_near, 1 - 1e-12 / 6, 1, 1L)
+})
+
+test_that("each interval is read against the d of its own estimand (D-056 AC1)", {
+  # A d = 3 row in its no-warning band, then a d = 1 row inside 1e-12 but
+  # outside 1e-12/3: only the second fires. A rule taking one d for the whole
+  # call, the largest or the last, would leave the second silent.
+  for (engine in c("glmmTMB", "lme4")) {
+    for (fn in c("mc", "boot")) {
+      ests <- list(ui_wide, ui_d3_inner, ui_inner)
+      out <- ui_run(fn, engine, ests)
+      expect_gt(1 - out$value[[3]]$conf.low, 1e-12 / 3)
+      expect_lt(1 - out$value[[3]]$conf.low, 1e-12)
+      expect_length(out$warnings, 1L)
+      expect_s3_class(out$warnings[[1]], "intraclass_unresolved_interval")
+      expect_s3_class(out$warnings[[1]], "intraclass_warning")
+      msg <- ui_message(out$warnings[[1]])
+      expect_match(
+        msg,
+        "1 interval has a lower limit near 1: ICC(A,1).",
+        fixed = TRUE
+      )
+      expect_no_match(msg, "ICC(k)", fixed = TRUE)
+      ui_expect_unchanged(fn, engine, ests, out$value)
+    }
+  }
 })
 
 test_that("the message tells a firing row from a non-firing row of the same label (D-056 AC3)", {
