@@ -86,3 +86,27 @@ On glmmTMB and lme4 Monte-Carlo and bootstrap intervals, the near-1 warning read
 <!-- owner: implement / review · append-only; milestone-local -->
 
 ## Review
+
+Pass 1 (2026-10-18).
+- spawned: diff-bug, blame-history, prior-review
+- prior-review: no prior-review evidence reintroduced or contradicted (M162 and M163 Review sections read; GitHub inline-comment probe empty).
+- diff-bug #1: tests cannot tell the largest divisor from the mean of the divisors (the `e6n` stub's gap, about 2.79e-13, is outside the mean rule's 2.5e-13 too) — fix now.
+- diff-bug #2: `data-raw/record-claims.tsv` row roadmap-terminal-rows must rotate again at this milestone's done pass, and its text carries branch history — fix now (text), rotation at step 9.
+- diff-bug #3: the noise-1e-5 test frame still sets `model = "twoway"`, which `ui_icc()` no longer reads — fix now.
+- diff-bug #4: NEWS, `?icc` and the message disagree on numeric `unit` and occasion averaging, and "single-rating row" is unclear for a row averaged over occasions — fix now.
+- diff-bug #5: for d above about 4500, `1 - 1e-12/d` rounds to within one ulp of 1, so large numeric `unit` rows cannot warn — fix now (compare the gap `1 - low` with the bound).
+- diff-bug #6: an NA divisor or a missing `error_divisors` would error or leak a base warning — fix now for NA (`isTRUE()`); the missing field is rejected, false: every `icc_estimand()` return sets it.
+- diff-bug #7: cli truncates `{rows}` after 20 names, so the message does not name every row — fix now (collapse with no truncation).
+- diff-bug #8: AC1's no-op identity is asserted in only two of its listed cases; AC1 says its lavaan case holds "on both engines" — fix now (identity in every case); AC1 wording routed as an amendment.
+- diff-bug #9: row names read oddly for a conflated row and a cluster replicate row — reject, false: the names mirror `tidy()`'s `level` and `occasions` columns, so a user can find the row.
+- diff-bug #10: long roxygen and comment lines, an odd NEWS wrap — reject, style (lintr and air pass); the NEWS wrap is reflowed with #4.
+- diff-bug #11: `ui_message()` formats text twice, so a label with braces errors — reject, false: labels come from `sprintf("ICC(%s,%s)")` and hold no braces.
+- diff-bug #12: the largest-divisor rule can under-warn when error sits in terms with smaller divisors — reject, planned change (D-056, with its reopening clause).
+- blame-history #1: the documented bound leaves out the occasion factor — reject, false: a row averaged over occasions averages that many ratings (claim audit confirmed); the wording is tightened under diff-bug #4.
+- blame-history #2: the comment states the max-divisor scaling as exact and it can silence degenerate averaged rows — reject, planned change (D-056 records the lenient end); the comment says "about".
+- blame-history #3: the `icc()` grid expectation rebuilds d itself — reject, false: d comes from the `tidy()` term and the frame design, not from `error_divisors`, and planted wrong rules turn it red.
+- blame-history #4: reverses D-055's choice and drops its caveat — reject, planned change (D-056, AC4).
+- blame-history #5: the record-claims row was red on main — fixed on the branch already (see diff-bug #2).
+- blame-history #6: a missing `error_divisors` gives `-Inf` — reject, false: unreachable (diff-bug #6).
+- blame-history #7: message text changed, class unchanged — reject, planned change.
+- blame-history #8: long lines and a short NEWS wrap — reject, style.
