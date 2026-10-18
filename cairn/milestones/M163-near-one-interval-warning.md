@@ -96,18 +96,20 @@ Review pass 1 (2026-10-18), at `0b5d436`.
 - AC5: fresh at `0b5d436`: `devtools::document()` changed no file; `devtools::test()` FAIL 0, ERROR 0, WARN 0, SKIP 2, PASS 10509; `devtools::check()` raw Status line "Status: OK".
 - Gate: `cairn_validate.py` all checks passed. No principle changed, so `cairn_impact` is skipped. Toolchain slot: `document()` no diff (AC5); no README or export change, so `build_readme()` and `check_pkgdown()` are not owed; NEWS entry present (AC4); no new top-level file; check Status OK.
 - spawned: diff-bug, blame-history, prior-review.
-- diff-bug #1: the 1e-12 bound also applies to average-unit rows, whose lower limits sit about k times nearer 1, so data with noise 1e-6 and 3 raters warn on ICC(k) rows, and the 1e-5 frame warns at `unit = 1000`; the D-054 sentence that the bound lies between degenerate and resolved data is false for such rows — fix now (NEWS, `?icc` and a correcting D-entry), and scaling the bound by the unit goes to the new row "M163 review follow-ups on the near-1 warning" (a).
-- diff-bug #2: NEWS and `?icc` say only noise of about 1e-7 gives a warned correct interval — fix now, with #1.
-- diff-bug #3: the `identical()` check compares two muffled runs of the same stub, so it cannot fail — fix now: compare against a run with the helper mocked to return its input.
-- diff-bug #4: no stub sits between 1e-13 and 1e-12 from 1, so a tighter bound passes every test — fix now: add a stub at about 5e-13.
+- diff-bug #1: the 1e-12 bound also applies to average-unit rows, whose lower limits sit about k times nearer 1, so data with noise 1e-6 and 3 raters warn on ICC(k) rows, and the 1e-5 frame warns at `unit = 1000`; the D-054 sentence that the bound lies between degenerate and resolved data is false for such rows — fix now, fixed 90b9937 (NEWS, `?icc` and a correcting D-entry), and scaling the bound by the unit goes to the new row "M163 review follow-ups on the near-1 warning" (a).
+- diff-bug #2: NEWS and `?icc` say only noise of about 1e-7 gives a warned correct interval — fix now, fixed 90b9937, with #1.
+- diff-bug #3: the `identical()` check compares two muffled runs of the same stub, so it cannot fail — fix now, fixed 90b9937: compare against a run with the helper mocked to return its input.
+- diff-bug #4: no stub sits between 1e-13 and 1e-12 from 1, so a tighter bound passes every test — fix now, fixed 90b9937: add a stub at about 5e-13.
 - diff-bug #5: the message does not say which rows set it off — follow-up, row "M163 review follow-ups on the near-1 warning" (b).
-- diff-bug #6: the second bullet says "such an interval, so its width" when the count is 2 — fix now.
+- diff-bug #6: the second bullet says "such an interval, so its width" when the count is 2 — fix now, fixed 90b9937.
 - diff-bug #7: under `options(warn = 2)` the warning becomes an unclassed error — reject (false as a defect): every `warn_intraclass()` warning does the same, and the plan made this a warning.
 - diff-bug #8: the AC2 rule repeats the helper's own comparison — reject (false): the bound is pinned independently by the stub tests, both sides once #4 lands.
 - diff-bug #9: `skip_if_not_installed("lme4")` is redundant since glmmTMB imports lme4 — reject (style).
 - blame-history #1: the M162 NEWS sentence on [1, 1] intervals omits the warning — reject (false): the sentence stays true, and the new entry above it states its own bound.
 - blame-history #2: `d_study()` projection bands get neither the refusal nor the warning — follow-up, row "M163 review follow-ups on the near-1 warning" (c); the refusal half predates M163.
-- blame-history #3: D-054's separation claim is overstated — fix now, with diff-bug #1.
+- blame-history #3: D-054's separation claim is overstated — fix now, fixed 90b9937, with diff-bug #1.
 - blame-history #4: the `?icc` sentence sits after the bootstrap text though it covers Monte-Carlo too — reject (false): the sentence names both methods.
-- prior-review #1: the new `?icc` sentence (26 words) and NEWS sentence (27 words) pass the 25-word limit of `cairn/doctrine/prose-style.md` R2 — fix now.
-- prior-review #2: the 1e-5 control passes if a call aborts, since it never asserts a result — fix now.
+- prior-review #1: the new `?icc` sentence (26 words) and NEWS sentence (27 words) pass the 25-word limit of `cairn/doctrine/prose-style.md` R2 — fix now, fixed 90b9937.
+- prior-review #2: the 1e-5 control passes if a call aborts, since it never asserts a result — fix now, fixed 90b9937.
+- After the fixes, at `90b9937`: the new tests pass (8 tests), and a bound planted at 1e-13 fails the new inner-bound test 4 times. The rendered message reads "such intervals, so their widths" at a count of 2. `devtools::test()` FAIL 0, ERROR 0, WARN 0, SKIP 2, PASS 10529. `devtools::check()` raw Status line "Status: OK". `lintr::lint_package()` no lints, `air format --check .` clean, `cairn_validate.py` all checks passed. D-055 corrects D-054's sentence on where the bound lies.
+- Findings: 15 reported; 8 fixed on the branch, 2 sent to the new candidate row "M163 review follow-ups on the near-1 warning", 5 rejected. No PR exists yet, so there is no PR conversation to read. No substantive amendment or amendment return in the work log.
