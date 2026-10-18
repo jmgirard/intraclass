@@ -2113,3 +2113,33 @@ remainder stays a candidate row. The lavaan and brms engines are unchanged.
 Reopened by a user report of a failure that is not degenerate data but reaches
 the user labeled singular. Also reopened by an lme4 interval whose exactly equal
 limits are the correct answer.
+
+### D-054 (2026-10-18): glmmTMB and lme4 intervals whose lower limit lies within 1e-12 of 1 are reported with a classed warning, not refused — annotates D-053's sentence on [1, 1] intervals
+
+**Context.** D-053 left reported the lme4 intervals that print as [1, 1] on
+near-flat or exactly additive data, because their limits are not exactly
+equal. The M163 plan probes found that neither the interval width nor the
+fitted residual variance tells those intervals from the correct intervals of
+data whose rater noise is a small fraction of the score spread. On such data
+the SEARLE exact-F interval agrees with the Monte-Carlo interval. The probe
+figures are in the M163 work log. D-004 requires an entry for a change to a
+Boundary-fit policy cell.
+
+**Decision.** On a glmmTMB or lme4 fit under `ci_method = "montecarlo"` or
+`"bootstrap"`, when the lower limit of a reported interval is finite and
+greater than 1 − 1e-12, `icc()` returns the result and signals one warning of
+class `intraclass_unresolved_interval`, a subclass of `intraclass_warning`. The
+warning says that data with almost no residual variation can give such an
+interval. The user chose this at the M163 plan gate. The bound lies between the
+lower limits the engines report on degenerate data and those they report on
+data they resolve (M163 work log). Rejected: a refusal below a width, on
+D-049's reason, which the probes confirm at this scale. Rejected: closing the
+candidate rows with no change, because the user chose to tell the user.
+
+**Consequences.** No reported number changes, and D-049's exact-equality
+refusal stands. A user whose scores agree to about seven digits sees the
+warning on a correct interval, and can silence it by class. The SEARLE, Burch,
+npbootstrap, MPL and posterior intervals are unchanged. SEARLE and Burch report
+exactly [1, 1] on near-flat data, which is a candidate row. Reopened by
+degenerate data whose lower limit lies further than 1e-12 from 1, or by a user
+report of the warning on data that are not near degenerate.
