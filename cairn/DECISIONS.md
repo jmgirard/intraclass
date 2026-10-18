@@ -2143,3 +2143,27 @@ npbootstrap, MPL and posterior intervals are unchanged. SEARLE and Burch report
 exactly [1, 1] on near-flat data, which is a candidate row. Reopened by
 degenerate data whose lower limit lies further than 1e-12 from 1, or by a user
 report of the warning on data that are not near degenerate.
+
+### D-055 (2026-10-18): the near-1 warning reads every reported row, so on average-rater rows it fires on data with more noise — corrects D-054's sentence on where the bound lies
+
+**Context.** D-054 says the 1e-12 bound "lies between the lower limits the
+engines report on degenerate data and those they report on data they
+resolve". The M163 review found that this holds for single-rater rows only.
+An average-rater row lies about its divisor times nearer 1, so data that the
+engines resolve can put that row's lower limit within 1e-12 of 1. The
+measurements are in the M163 Review section.
+
+**Decision.** D-054's rule stands as written: the warning reads every reported
+row, average-rater rows and a numeric `unit` included. Its sentence on where
+the bound lies is narrowed to single-rater rows. The NEWS entry and `?icc` say
+that correct intervals from scores with very little noise can also get the
+warning, at larger noise for average-rater rows. Rejected for M163: scaling
+the bound by each row's averaging divisor, because the divisor differs by
+design and the change would alter the rule the milestone's criteria fix. It
+is a candidate row.
+
+**Consequences.** More correct intervals get the warning than D-054 implied,
+all on average-rater rows. The warning's text stays true for them, since it
+says only that data with almost no residual variation can give such an
+interval. Reopened as D-054 is, or by a user report of the warning on an
+average-rater row of data that are not near degenerate.
