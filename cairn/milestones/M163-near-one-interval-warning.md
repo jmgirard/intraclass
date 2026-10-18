@@ -81,6 +81,7 @@ A glmmTMB or lme4 Monte-Carlo or bootstrap interval whose lower limit lies withi
 - 2026-10-18: claim audit: 44 claims read, 2 corrected — NEWS.md, tests/testthat/test-unresolved-interval.R. (1) NEWS gave the additive example as if for both engines, but glmmTMB aborts on it: scoped to lme4. (2) The 1e-5 frame's lower limits lie 5e-11 to 2e-10 from 1, not "about 1e-10". Borderline note taken: NEWS and `?icc` now say a correct interval from noise of about 1e-7 also gets the warning, and the code comment cites the SEARLE agreement. The reader's re-read found all corrections accurate.
 - 2026-10-18: minor amendment: T3 wording now says the 1e-5 frame is built in the new file, as done.
 - 2026-10-18: T5 done at the final code. `devtools::test()`: FAIL 0, WARN 0, SKIP 2, PASS 10509. `devtools::check()` raw Status line: OK. `lintr::lint_package()`: no lints. `air format --check .` clean. Status set to review.
+- 2026-10-18: step-7 approval: m163-near-one-interval-warning approved for merge
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
