@@ -117,3 +117,28 @@ Pass 1 (2026-10-18).
 - blame-history #6: a missing `error_divisors` gives `-Inf` — reject, false: unreachable (diff-bug #6).
 - blame-history #7: message text changed, class unchanged — reject, planned change.
 - blame-history #8: long lines and a short NEWS wrap — reject, style.
+
+Pass 2 (2026-10-18, after the AC1 amendment).
+- spawned: diff-bug, blame-history, prior-review
+- diff-bug #1: the AC3 name tests never fire a subject-level row or a 1-occasion row, so names that drop those parts pass (planted, 0 failures) — fix now.
+- diff-bug #2: the d = 1 "between 1e-13 and 1e-12" firing case checks only the count, not `intraclass_warning` — fix now.
+- diff-bug #3: tests cannot tell the largest divisor from the last one — reject, false as a defect: `icc_estimand()` puts pure error last with the largest divisor (`R/estimand.R:154`), so the two agree on every reachable estimand.
+- diff-bug #4: the identity check cannot fail while the callers ignore the helper's return value — reject, false as a defect: AC1's identity holds, and the check guards a caller that starts using the value.
+- diff-bug #5: D-056 says "greater than its 1 − 1e-12/d" where the code compares the gap — reject, false: the two are the same rule in exact arithmetic; the code comment records why the gap is compared.
+- diff-bug #6: for d above about 9007 no row can warn, and the comment's rounding range is wrong above about 18000 — fix now (comment states the range and that such rows cannot warn).
+- diff-bug #7: the AC2 grid test uses the rounded comparison — fix now (gap comparison).
+- diff-bug #8: `between` has no `is.finite()` guard — fix now.
+- diff-bug #9: the record-claims text names the M163 done pass — reject, false: that pass did rotate the ROADMAP rows; the text is rewritten at this milestone's own rotation in step 9.
+- diff-bug #10: a test comment calls a single-rater row an average row — reject, false: on that call ICC(A,k) and ICC(C,k) over 2 occasions lie 3.2e-13 and 5.7e-13 from 1.
+- diff-bug #11: the numeric-`unit` sentence appears in every warning and reads awkwardly — fix now (shown only when a firing row has a numeric `unit`).
+- diff-bug #12: "at the conflated level" — reject, false: as pass 1, the name mirrors `tidy()`'s `level` column.
+- diff-bug #13: an 88-character comment line — reject, style.
+- diff-bug #14: `is.finite()` removal, `<` versus `<=` and the Oxford comma are untested — reject, false as defects: no reachable data separates them.
+- diff-bug #15: Monte-Carlo lower limits near 0 on every row of the replicate frame — follow-up, new candidate row "Monte-Carlo intervals near 0 on near-flat replicate data".
+- blame-history #1: averaged rows whose error sits in smaller-divisor terms can under-warn — reject, planned change (D-056 and its reopening clause).
+- blame-history #2: D-055's caveat removed — reject, planned change (D-056, AC4).
+- blame-history #3: the grid test copies the rule — reject, false: as pass 1, d comes from the term and the frame design.
+- blame-history #4: the noise-1e-7 frame's average-row warning is not pinned per frame — reject, false: main's floor was global too, so nothing is weaker.
+- blame-history #5: old message text replaced — reject, planned change.
+- blame-history #6: record-claims row stale on main — fixed on the branch already.
+- prior-review #1: the message's first bullet sentence states the 1e-12 bound with no scope, as M163 diff-bug #1 named — fix now (scoped to single-rating rows).
