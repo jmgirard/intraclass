@@ -356,7 +356,15 @@ model_parameters.intraclass_icc(model, ci = NULL, ...)
   `tests/testthat/fixtures/bootstrap-point-containment.tsv`, each such
   gap and each such point estimate is below `1e-8`. Nothing is clamped
   and no error is raised, and in that sweep's cells with real
-  between-subject signal the interval contains its point. `"posterior"`
+  between-subject signal the interval contains its point. Under
+  `"montecarlo"` or `"bootstrap"` on the `"glmmTMB"` and `"lme4"`
+  engines, some intervals near 1 come with a warning. An interval whose
+  lower limit lies within 1e-12 of 1 is reported with an
+  `intraclass_unresolved_interval` warning. Data with almost no residual
+  variation can give such an interval, and its width can then reflect
+  rounding rather than the data. Correct intervals from scores with very
+  little noise can also get the warning. This happens at larger noise
+  for average-rater rows, whose lower limits lie nearer 1. `"posterior"`
   is the percentile **credible** interval from the Bayesian engine's
   posterior draws. It is the forced default for, and available only
   with, `engine = "brms"`, and `"brms"` requires it. The other methods
