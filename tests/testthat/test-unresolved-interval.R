@@ -236,7 +236,8 @@ test_that("icc() warns on a near-1 interval exactly when one is reported (D-054 
 
 # The near-perfect-agreement frame of test-glmmtmb-false-zero.R (rater noise SD
 # 1e-5), built the same way. Its intervals near 1 are correct and their lower
-# limits lie about 1e-10 from 1, so no call warns.
+# limits lie between about 5e-11 and 2e-10 from 1, outside 1e-12, so no call
+# warns.
 test_that("rater noise of 1e-5 gives no near-1 warning on either engine (D-054 AC2)", {
   skip_if_not_installed("lme4")
   skip_on_cran()

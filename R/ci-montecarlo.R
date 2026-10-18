@@ -218,9 +218,10 @@ unresolved_interval_bound <- 1e-12
 # additive data, lme4 reports intervals whose lower limit lies within about
 # 1e-13 of 1 and whose limits differ, so `refuse_zero_width()` lets them
 # through. Data with rater noise of about 1e-7 of the score spread give
-# intervals of the same width, and those are correct, so a refusal is ruled out
-# (D-049). Instead the interval is reported, and one classed warning says that
-# data with almost no residual variation can give it. Called after
+# intervals of the same width, and those are correct (the SEARLE exact-F
+# interval agrees, M163 work log), so a refusal is ruled out (D-049). Instead
+# the interval is reported, and one classed warning says that data with almost
+# no residual variation can give it. Called after
 # `refuse_zero_width()`, so equal limits abort first. Takes no `hint`: forcing
 # that promise would run the hint's trial fits. Gated to glmmTMB and lme4 fits,
 # as the refusal is.

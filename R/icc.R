@@ -446,7 +446,8 @@
 #'   `"bootstrap"`, an interval whose lower limit lies within 1e-12 of 1 is
 #'   reported with an `intraclass_unresolved_interval` warning. Data with
 #'   almost no residual variation can give such an interval, and its width can
-#'   then reflect rounding rather than the data.
+#'   then reflect rounding rather than the data. Scores whose noise is about
+#'   1e-7 of their spread also give such an interval, and there it is correct.
 #'   `"posterior"` is the percentile **credible** interval from the Bayesian
 #'   engine's posterior draws. It is the forced default for, and available only
 #'   with, `engine = "brms"`, and `"brms"` requires it. The other methods do not
