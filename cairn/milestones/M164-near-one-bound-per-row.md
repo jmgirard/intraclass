@@ -4,7 +4,7 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M164: The near-1 interval warning reads each row against 1e-12 divided by the ratings it averages, and names its rows
 
-- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate; RR<NN> whose Binding criteria bind this milestone's ACs (binding-criteria check), or — -->
@@ -81,6 +81,7 @@ On glmmTMB and lme4 Monte-Carlo and bootstrap intervals, the near-1 warning read
 - 2026-10-18: claim audit: 38 claims read, 4 corrected — tests/testthat/test-unresolved-interval.R (x3w band comment, resolved-frames comment, stale grid comment), NEWS.md and R/icc.R (`?icc`): "number of ratings averaged" now adds that it is an effective number on unbalanced data or for a numeric `unit`. Reader also noted Monte-Carlo lower limits near 0 on every row of the replicate frame on both engines, outside this milestone's scope.
 - 2026-10-18: claim-audit re-read (same reader, once): 3 true; the fourth was false for a numeric `unit`, which divides by the projected number of raters, not an effective number; NEWS.md and `?icc` now say so. After it: `devtools::document()`, air clean, all eight lint.yaml checker steps green, unresolved-interval/boundary/exported-contract tests FAIL 0, WARN 0, PASS 1679. T1–T5 checked; status review.
 - 2026-10-18: implement done; status review.
+- 2026-10-18: amendment routed: AC1 — its last sentences list "A lavaan fit" among the cases in which each property "holds on both engines under both functions", which a lavaan fit cannot satisfy (diff-bug #8); the work is right, the wording is not.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
@@ -90,14 +91,15 @@ On glmmTMB and lme4 Monte-Carlo and bootstrap intervals, the near-1 warning read
 Pass 1 (2026-10-18).
 - spawned: diff-bug, blame-history, prior-review
 - prior-review: no prior-review evidence reintroduced or contradicted (M162 and M163 Review sections read; GitHub inline-comment probe empty).
-- diff-bug #1: tests cannot tell the largest divisor from the mean of the divisors (the `e6n` stub's gap, about 2.79e-13, is outside the mean rule's 2.5e-13 too) — fix now.
-- diff-bug #2: `data-raw/record-claims.tsv` row roadmap-terminal-rows must rotate again at this milestone's done pass, and its text carries branch history — fix now (text), rotation at step 9.
-- diff-bug #3: the noise-1e-5 test frame still sets `model = "twoway"`, which `ui_icc()` no longer reads — fix now.
-- diff-bug #4: NEWS, `?icc` and the message disagree on numeric `unit` and occasion averaging, and "single-rating row" is unclear for a row averaged over occasions — fix now.
-- diff-bug #5: for d above about 4500, `1 - 1e-12/d` rounds to within one ulp of 1, so large numeric `unit` rows cannot warn — fix now (compare the gap `1 - low` with the bound).
-- diff-bug #6: an NA divisor or a missing `error_divisors` would error or leak a base warning — fix now for NA (`isTRUE()`); the missing field is rejected, false: every `icc_estimand()` return sets it.
-- diff-bug #7: cli truncates `{rows}` after 20 names, so the message does not name every row — fix now (collapse with no truncation).
-- diff-bug #8: AC1's no-op identity is asserted in only two of its listed cases; AC1 says its lavaan case holds "on both engines" — fix now (identity in every case); AC1 wording routed as an amendment.
+- diff-bug #1: tests cannot tell the largest divisor from the mean of the divisors (the `e6n` stub's gap, about 2.79e-13, is outside the mean rule's 2.5e-13 too) — fix now, fixed b329759.
+- diff-bug #2: `data-raw/record-claims.tsv` row roadmap-terminal-rows must rotate again at this milestone's done pass, and its text carries branch history — fix now (text), rotation at step 9; text fixed b329759.
+- diff-bug #3: the noise-1e-5 test frame still sets `model = "twoway"`, which `ui_icc()` no longer reads — fix now, fixed b329759.
+- diff-bug #4: NEWS, `?icc` and the message disagree on numeric `unit` and occasion averaging, and "single-rating row" is unclear for a row averaged over occasions — fix now, fixed b329759.
+- diff-bug #5: for d above about 4500, `1 - 1e-12/d` rounds to within one ulp of 1, so large numeric `unit` rows cannot warn — fix now (compare the gap `1 - low` with the bound), fixed b329759.
+- diff-bug #6: an NA divisor or a missing `error_divisors` would error or leak a base warning — fix now for NA (`isTRUE()`), fixed b329759; the missing field is rejected, false: every `icc_estimand()` return sets it.
+- diff-bug #7: cli truncates `{rows}` after 20 names, so the message does not name every row — fix now (collapse with no truncation), fixed b329759.
+- diff-bug #8: AC1's no-op identity is asserted in only two of its listed cases; AC1 says its lavaan case holds "on both engines" — fix now (identity in every case), fixed b329759; AC1 wording routed as an amendment.
+- fix-now check (planted wrong rules on b329759): mean of the divisors reds the (3, 3, 6) no-warning test (4 checks); the old rounded comparison reds the d = 8000 test (1 check); cli's truncating collapse reds the 25-row test (20 checks). Test file 17 of 17 green; lintr 0; air clean; all eight lint.yaml checker steps green.
 - diff-bug #9: row names read oddly for a conflated row and a cluster replicate row — reject, false: the names mirror `tidy()`'s `level` and `occasions` columns, so a user can find the row.
 - diff-bug #10: long roxygen and comment lines, an odd NEWS wrap — reject, style (lintr and air pass); the NEWS wrap is reflowed with #4.
 - diff-bug #11: `ui_message()` formats text twice, so a label with braces errors — reject, false: labels come from `sprintf("ICC(%s,%s)")` and hold no braces.

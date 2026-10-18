@@ -9,7 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M164 | The near-1 interval warning reads each row against 1e-12 divided by the ratings it averages, and names its rows | review | — | normal | milestones/M164-near-one-bound-per-row.md |
+| M164 | The near-1 interval warning reads each row against 1e-12 divided by the ratings it averages, and names its rows | in-progress | — | normal | milestones/M164-near-one-bound-per-row.md |
 | M163 | glmmTMB and lme4 intervals whose lower limit lies within 1e-12 of 1 come with a classed warning | done | — | normal | milestones/archive/M163-near-one-interval-warning.md |
 | M162 | Raw glmmTMB and lme4 errors reach the caller as intraclass_singular_fit, and lme4 refuses equal interval limits | done | — | normal | milestones/archive/M162-zero-residual-classed-errors.md |
 | M161 | Data whose scores do not vary within any subject are refused classed before any fit | done | — | normal | milestones/archive/M161-flat-scores-refusal.md |
