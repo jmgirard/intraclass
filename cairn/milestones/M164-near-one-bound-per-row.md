@@ -77,6 +77,8 @@ On glmmTMB and lme4 Monte-Carlo and bootstrap intervals, the near-1 warning read
 - 2026-10-18: T4: the new `?icc` sentences need no `mpl-doc-claims.tsv` row (checker 0 failures). Found main's lint job red since 9162da9: `data-raw/record-claims.tsv` row roadmap-terminal-rows still expected M162, M161, M160 after the M163 done pass; rotated to M163, M162, M161 here, since AC5 needs every lint step. M164's done pass must rotate it again. The Edit tool dropped a tab on that row (10 fields); fixed to 11 (LESSONS, M153).
 - 2026-10-18: checkpoint: T1–T4 written, `test-unresolved-interval.R` 15 of 15 green, lintr 0, air clean, lint.yaml checkers green; tasks stay unchecked until the full `devtools::test()` and `devtools::check()` run (T5) is green.
 - 2026-10-18: T5 first run: `devtools::test()` FAIL 0, WARN 0, SKIP 2, PASS 10650; `devtools::check()` Status 1 ERROR, 18 test failures inside rstan's Stan compile (`base::sink`) while other repos' R sessions ran on the machine; check dir was deleted, so a rerun keeping it is under way.
+- 2026-10-18: T5 rerun: `devtools::check()` Status: OK, so the first run's Stan-compile failures did not recur; lintr 0, `air format --check .` clean, every `python3 data-raw/` step of lint.yaml green.
+- 2026-10-18: claim audit: 38 claims read, 4 corrected — tests/testthat/test-unresolved-interval.R (x3w band comment, resolved-frames comment, stale grid comment), NEWS.md and R/icc.R (`?icc`): "number of ratings averaged" now adds that it is an effective number on unbalanced data or for a numeric `unit`. Reader also noted Monte-Carlo lower limits near 0 on every row of the replicate frame on both engines, outside this milestone's scope.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->

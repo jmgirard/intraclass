@@ -13,8 +13,9 @@
 # lower limit lies just below 1 - 1e-12; `flat` is 1 on every draw, so its two
 # limits are equal. The averaged stubs take the divisors of real estimands:
 # `x3n` spread over [1.5e-12, 1.8e-12] and divided by 3 puts a lower limit
-# between 1 - 1e-12 and 1 - 1e-12/3; `x3w` spread over [3e-13, 6e-13] and
-# divided by 3 or 6 puts one above 1 - 1e-12/6; `e6n` spread over
+# between 1 - 1e-12 and 1 - 1e-12/3; `x3w` spread over [3e-13, 6e-13] puts
+# one above 1 - 1e-12/3 when divided by 3, and above 1 - 1e-12/6 when divided
+# by 6; `e6n` spread over
 # [1.32e-12, 1.68e-12] and divided by 6 puts one between 1 - 1e-12/3 and
 # 1 - 1e-12/6.
 
@@ -311,13 +312,13 @@ test_that("a near-1 interval on a lavaan fit does not warn (D-054 AC1)", {
   }
 })
 
-# Through icc() (D-054 AC2) -----------------------------------------------------
+# Through icc() (D-054, D-056 AC2) ----------------------------------------------
 #
 # Whether a fit on these frames returns a result or aborts depends on the engine
 # and the platform (GP9), so each call asserts the rule: an abort carries
 # `intraclass_singular_fit`, and a result warns exactly when one of its tidy()
-# lower limits lies above 1 - 1e-12. The floor of one warning over the grid
-# keeps the rule from passing on aborts alone.
+# lower limits lies above 1 - 1e-12/d, d as `ui_row_d()` gives it. The floors
+# over each grid keep the rule from passing on aborts alone.
 
 ui_frames <- function() {
   # M161's near-flat frame: each score its subject's index, 1e-12 added to one.
@@ -349,9 +350,11 @@ ui_frames <- function() {
   )
 }
 
-# Two frames the engines resolve, on which average rows lie within 1e-12 of 1
-# and within 1e-12/d of 1 for no row (D-056, M164 work log): rater noise SD
-# 1e-6, and the same noise on 2 occasions per cell.
+# Two frames the engines resolve: rater noise SD 1e-6, and the same noise on 2
+# occasions per cell. At the settings of `ui_icc()`, no row lies within
+# 1e-12/d of 1, and on some calls an average row lies within 1e-12 of 1: every
+# call on the first frame, glmmTMB bootstrap on the second (D-056, M164 work
+# log).
 ui_frames_resolved <- function() {
   noisy6 <- with_rng_seed(1, {
     g <- expand.grid(subject = factor(1:20), rater = factor(1:3))

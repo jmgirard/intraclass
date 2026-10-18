@@ -4,7 +4,8 @@
   `"bootstrap"` now warn about some intervals near 1. For a single-rating row,
   an interval whose lower limit lies within 1e-12 of 1 is now reported with an
   `intraclass_unresolved_interval` warning. For a row that averages ratings,
-  the bound is 1e-12 divided by the number of ratings averaged. The warning
+  the bound is 1e-12 divided by the number of ratings averaged. On unbalanced
+  data or for a numeric `unit`, that is an effective number. The warning
   names its rows. Data with almost no residual variation can give such an
   interval. An example on lme4 is scores that are exactly a subject value plus
   a rater value. Its width can then reflect rounding rather than the data.

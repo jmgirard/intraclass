@@ -307,7 +307,8 @@ Under \code{"montecarlo"} or \code{"bootstrap"} on the \code{"glmmTMB"} and \cod
 engines, some intervals near 1 come with a warning. For a single-rating
 row, an interval whose lower limit lies within 1e-12 of 1 is reported with
 an \code{intraclass_unresolved_interval} warning. For a row that averages
-ratings, the bound is 1e-12 divided by the number of ratings averaged. The
+ratings, the bound is 1e-12 divided by the number of ratings averaged. On
+unbalanced data or for a numeric \code{unit}, that is an effective number. The
 warning names its rows. Data with almost no residual
 variation can give such an interval, and its width can then reflect
 rounding rather than the data. Correct intervals from scores with very
