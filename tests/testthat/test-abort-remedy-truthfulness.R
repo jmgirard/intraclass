@@ -181,7 +181,8 @@ test_that("the npbootstrap observed-data abort asserts no cause its guard does n
 # The two guards below are reached through their REDUCERS, not through `icc()`,
 # because `gen_mse0` (exactly zero within-subject variance) sits at the numerical
 # edge of the engine fit: glmmTMB survives it on some platforms and dies first
-# with an unclassed "LU factorization ... near-singular" on others, so an
+# with "LU factorization ... near-singular" on others (re-raised by `icc()` as
+# `intraclass_singular_fit` since D-053, M162), so an
 # `icc()`-level test of these two messages is platform-dependent. M100's sweep
 # reached every site the same way -- "caught as its classed condition from the
 # reducer called directly". The three sites whose fit IS robust (`gen_ssa0`,

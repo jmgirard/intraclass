@@ -227,7 +227,10 @@
 #'   two different scores, `icc()` refuses the data with an
 #'   `intraclass_singular_fit` error before it fits a model. Every variance
 #'   within subjects is exactly zero on such data. A call that an argument or
-#'   design check refuses first keeps that check's error.
+#'   design check refuses first keeps that check's error. On the glmmTMB and
+#'   lme4 engines, an engine error that does not come from `rlang` is re-raised
+#'   as an `intraclass_singular_fit` error, with the engine's error as its
+#'   cause. Scores that vary only by rater can raise one.
 #' @param cluster Optional column of `data` (unquoted) giving the higher-level
 #'   unit each subject is nested in (e.g. classroom, clinic). Supplying it switches
 #'   on the **multilevel** ICC (ten Hove et al. 2022). Reliability is reported at
@@ -2132,199 +2135,204 @@ icc <- function(
     )
   }
 
-  engine_fit <- if (multilevel && replicates) {
-    # Multilevel within-cell replicates (M20 Slice 2): add (1|cluster:subject:rater) to
-    # the M5 crossed (Design 1, six-component) / M8 nested (Design 2, five-component)
-    # fit, splitting the residual into the interaction and pure error. Design 3
-    # (one-way), fixed raters, conflated, and ragged data are aborted upstream; random,
-    # balanced/complete only.
-    if (ml_design == "nested_in_clusters") {
-      if (engine == "brms") {
-        # Nested Design 2 replicates, Bayesian (M33 Slice 3, ADR-043): the M8
-        # four-component fit + (1|cluster:subject:rater) split; random raters -> a
-        # variance-ratio push-forward, no theta^2. Subject level only.
-        fit_brms_nested_replicates(df, seed = seed, brm_args = brm_args)
-      } else if (engine == "lme4") {
-        fit_lme4_nested_replicates(df)
-      } else {
-        fit_glmmtmb_nested_replicates(df)
-      }
-    } else if (engine == "brms") {
-      # Crossed Design 1 replicates, Bayesian (M33 Slice 3, ADR-043): the M5
-      # five-component fit + (1|cluster:subject:rater) split (six components); random
-      # raters -> a variance-ratio push-forward, no theta^2.
-      fit_brms_ml_replicates(df, seed = seed, brm_args = brm_args)
-    } else if (engine == "lme4") {
-      fit_lme4_ml_replicates(df)
-    } else {
-      fit_glmmtmb_ml_replicates(df)
-    }
-  } else if (multilevel) {
-    # lme4 (M14) mirrors every balanced multilevel glmmTMB fit; the guards above
-    # confine the lme4 branches to the balanced/complete case.
-    if (ml_design == "nested_in_clusters") {
-      if (raters == "fixed") {
-        # Design 2 with raters fixed -- theta^2_{r:c} (finite-population, averaged over
-        # clusters) in the rater slot (M19 Slice 2). Balanced/complete only, guarded
-        # above. Design 3 fixed aborted by design (no separable rater effect).
+  # An error a glmmTMB or lme4 engine function raises without a package or
+  # rlang class is re-raised as `intraclass_singular_fit` (D-053, M162).
+  engine_fit <- reraise_engine_error(
+    engine,
+    if (multilevel && replicates) {
+      # Multilevel within-cell replicates (M20 Slice 2): add (1|cluster:subject:rater) to
+      # the M5 crossed (Design 1, six-component) / M8 nested (Design 2, five-component)
+      # fit, splitting the residual into the interaction and pure error. Design 3
+      # (one-way), fixed raters, conflated, and ragged data are aborted upstream; random,
+      # balanced/complete only.
+      if (ml_design == "nested_in_clusters") {
         if (engine == "brms") {
-          # Design 2 fixed raters, Bayesian (M27 Slice 2, ADR-037): score ~ 0 + rater +
-          # (1|cluster:subject) with theta^2_{r:c} read raw per posterior draw into the
-          # rater `draws` row. Subject level only; MAP + percentile credible interval.
-          fit_brms_nested_fixed(df, seed = seed, brm_args = brm_args)
+          # Nested Design 2 replicates, Bayesian (M33 Slice 3, ADR-043): the M8
+          # four-component fit + (1|cluster:subject:rater) split; random raters -> a
+          # variance-ratio push-forward, no theta^2. Subject level only.
+          fit_brms_nested_replicates(df, seed = seed, brm_args = brm_args)
         } else if (engine == "lme4") {
-          fit_lme4_nested_fixed(df)
+          fit_lme4_nested_replicates(df)
         } else {
-          fit_glmmtmb_nested_fixed(df)
+          fit_glmmtmb_nested_replicates(df)
         }
       } else if (engine == "brms") {
-        # Design 2 (raters nested in clusters), Bayesian (M25 Slice 1, ADR-035): the M8
-        # four-component fit under the half-t(4, 0, 1) SD prior; the MAP point and the
-        # percentile credible interval come from posterior_summary() off the `draws`
-        # contract, exactly as the crossed Design-1 brms path. Nested Design 3, fixed,
-        # conflated, incomplete, and replicate brms fits are refused upstream (#5).
-        fit_brms_nested_clusters(df, seed = seed, brm_args = brm_args)
+        # Crossed Design 1 replicates, Bayesian (M33 Slice 3, ADR-043): the M5
+        # five-component fit + (1|cluster:subject:rater) split (six components); random
+        # raters -> a variance-ratio push-forward, no theta^2.
+        fit_brms_ml_replicates(df, seed = seed, brm_args = brm_args)
       } else if (engine == "lme4") {
-        fit_lme4_nested_clusters(df)
+        fit_lme4_ml_replicates(df)
       } else {
-        fit_glmmtmb_nested_clusters(df)
+        fit_glmmtmb_ml_replicates(df)
       }
-    } else if (ml_design == "nested_in_subjects") {
-      if (engine == "brms") {
-        # Design 3 (raters nested in subjects), Bayesian (M25 Slice 2, ADR-035): the M8
-        # three-component multilevel one-way fit under the half-t(4, 0, 1) SD prior;
-        # agreement-only (consistency aborted upstream). MAP + percentile credible interval
-        # off the `draws` contract, as the other brms multilevel paths.
-        fit_brms_nested_subjects(df, seed = seed, brm_args = brm_args)
+    } else if (multilevel) {
+      # lme4 (M14) mirrors every balanced multilevel glmmTMB fit; the guards above
+      # confine the lme4 branches to the balanced/complete case.
+      if (ml_design == "nested_in_clusters") {
+        if (raters == "fixed") {
+          # Design 2 with raters fixed -- theta^2_{r:c} (finite-population, averaged over
+          # clusters) in the rater slot (M19 Slice 2). Balanced/complete only, guarded
+          # above. Design 3 fixed aborted by design (no separable rater effect).
+          if (engine == "brms") {
+            # Design 2 fixed raters, Bayesian (M27 Slice 2, ADR-037): score ~ 0 + rater +
+            # (1|cluster:subject) with theta^2_{r:c} read raw per posterior draw into the
+            # rater `draws` row. Subject level only; MAP + percentile credible interval.
+            fit_brms_nested_fixed(df, seed = seed, brm_args = brm_args)
+          } else if (engine == "lme4") {
+            fit_lme4_nested_fixed(df)
+          } else {
+            fit_glmmtmb_nested_fixed(df)
+          }
+        } else if (engine == "brms") {
+          # Design 2 (raters nested in clusters), Bayesian (M25 Slice 1, ADR-035): the M8
+          # four-component fit under the half-t(4, 0, 1) SD prior; the MAP point and the
+          # percentile credible interval come from posterior_summary() off the `draws`
+          # contract, exactly as the crossed Design-1 brms path. Nested Design 3, fixed,
+          # conflated, incomplete, and replicate brms fits are refused upstream (#5).
+          fit_brms_nested_clusters(df, seed = seed, brm_args = brm_args)
+        } else if (engine == "lme4") {
+          fit_lme4_nested_clusters(df)
+        } else {
+          fit_glmmtmb_nested_clusters(df)
+        }
+      } else if (ml_design == "nested_in_subjects") {
+        if (engine == "brms") {
+          # Design 3 (raters nested in subjects), Bayesian (M25 Slice 2, ADR-035): the M8
+          # three-component multilevel one-way fit under the half-t(4, 0, 1) SD prior;
+          # agreement-only (consistency aborted upstream). MAP + percentile credible interval
+          # off the `draws` contract, as the other brms multilevel paths.
+          fit_brms_nested_subjects(df, seed = seed, brm_args = brm_args)
+        } else if (engine == "lme4") {
+          fit_lme4_nested_subjects(df)
+        } else {
+          fit_glmmtmb_nested_subjects(df)
+        }
+      } else if (raters == "fixed") {
+        # Crossed (Design 1) with raters as fixed effects -- theta^2_r in the rater
+        # slot. Subject level (M10) and, on balanced data, the cluster level (M37,
+        # ADR-047) both read off this one fit; the estimand map keys the cluster error
+        # set {theta^2_r, sigma^2_cr} on `level`, not `raters`. Fixed-rater nested and
+        # incomplete cluster-level are guarded above.
+        if (engine == "brms") {
+          # Crossed (Design 1) fixed raters, Bayesian (M27 Slice 1, ADR-037): the M10
+          # five-component fit with a fixed `rater` effect under the half-t(4, 0, 1) SD
+          # prior; theta^2_r read raw per posterior draw into the rater `draws` row. MAP +
+          # percentile credible interval off the shared contract. Nested (Design 2) fixed
+          # brms is refused upstream (M27 Slice 2 follow-on, #5).
+          fit_brms_multilevel_fixed(df, seed = seed, brm_args = brm_args)
+        } else if (engine == "lme4") {
+          fit_lme4_multilevel_fixed(df)
+        } else if (engine == "lavaan") {
+          # Crossed (Design 1) fixed raters via the two-level SEM (M57): the same
+          # two-level CFA as the random path, read with the Case-3A finite-population
+          # correction on the between-level rater intercepts. Both levels + the
+          # conflated diagnostic read off this one fit; complete/balanced, equal
+          # cluster sizes only (fixed nested / replicate / incomplete aborted
+          # upstream). MC-only -- the bootstrap factory is random-only (M56).
+          fit_lavaan_multilevel(df, raters = "fixed")
+        } else {
+          fit_glmmtmb_multilevel_fixed(df)
+        }
+      } else if (engine == "brms") {
+        # Crossed (Design 1) random raters, Bayesian (M24 Slice 1, ADR-034): the M5
+        # five-component fit under the half-t(4, 0, 1) SD prior; the point (MAP) and the
+        # percentile credible interval come from posterior_summary() off the `draws`
+        # contract. Also serves the conflated diagnostic (M29 Slice 1, ADR-039): Eq. 14
+        # composes off these same five components (signal cluster + subject, error rater +
+        # cluster_rater + residual) per posterior draw. Nested, fixed, incomplete, and
+        # replicate brms fits are refused upstream (#5).
+        fit_brms_multilevel(df, seed = seed, brm_args = brm_args)
       } else if (engine == "lme4") {
-        fit_lme4_nested_subjects(df)
+        # Crossed (Design 1) random raters via lme4 (M14 Slice 2).
+        fit_lme4_multilevel(df)
+      } else if (engine == "lavaan") {
+        # Crossed (Design 1) random raters via the two-level SEM (M54, D-005):
+        # the five-component two-level CFA the pilot established. Complete/balanced,
+        # incomplete (two-level FIML), or unbalanced (unequal cluster sizes) --
+        # random raters only; fixed and nested aborted upstream. Serves both levels
+        # + the conflated diagnostic off the same fit, as the mixed-model engines.
+        fit_lavaan_multilevel(df)
       } else {
-        fit_glmmtmb_nested_subjects(df)
+        fit_glmmtmb_multilevel(df)
+      }
+    } else if (oneway) {
+      # One-way random (M6). brms (M26 Slice 1, ADR-036): the two-component
+      # score ~ 1 + (1 | subject) fit under the half-t(4, 0, 1) SD prior; MAP + percentile
+      # credible interval off the `draws` contract, as the other brms paths. Runs unchanged on
+      # incomplete/ragged data (M33 Slice 1, ADR-043) -- the M3/M6 harmonic-mean k_eff divisor
+      # threads pre-dispatch (design_info$k_eff), a variance-ratio push-forward (no theta^2, no
+      # 2b -- the M30 regime). Fixed / numeric-unit brms one-way are refused upstream (#5).
+      if (engine == "brms") {
+        fit_brms_oneway(df, seed = seed, brm_args = brm_args)
+      } else if (engine == "lme4") {
+        fit_lme4_oneway(df)
+      } else {
+        fit_glmmtmb_oneway(df)
       }
     } else if (raters == "fixed") {
-      # Crossed (Design 1) with raters as fixed effects -- theta^2_r in the rater
-      # slot. Subject level (M10) and, on balanced data, the cluster level (M37,
-      # ADR-047) both read off this one fit; the estimand map keys the cluster error
-      # set {theta^2_r, sigma^2_cr} on `level`, not `raters`. Fixed-rater nested and
-      # incomplete cluster-level are guarded above.
-      if (engine == "brms") {
-        # Crossed (Design 1) fixed raters, Bayesian (M27 Slice 1, ADR-037): the M10
-        # five-component fit with a fixed `rater` effect under the half-t(4, 0, 1) SD
-        # prior; theta^2_r read raw per posterior draw into the rater `draws` row. MAP +
-        # percentile credible interval off the shared contract. Nested (Design 2) fixed
-        # brms is refused upstream (M27 Slice 2 follow-on, #5).
-        fit_brms_multilevel_fixed(df, seed = seed, brm_args = brm_args)
+      if (replicates) {
+        # Fixed-rater within-cell replicates (M20 Slice 1): the interaction fit with
+        # raters fixed -- theta^2_r in the rater slot (fit_*_replicates_fixed). lavaan
+        # replicates already aborted upstream; balanced/complete single-level only. brms
+        # (M33 Slice 2, ADR-043) reads theta^2_r per posterior draw (2b ~ 0 on balanced
+        # replicated data); the multilevel replicate corner is refused upstream.
+        if (engine == "brms") {
+          fit_brms_replicates_fixed(df, seed = seed, brm_args = brm_args)
+        } else if (engine == "lme4") {
+          fit_lme4_replicates_fixed(df)
+        } else {
+          fit_glmmtmb_replicates_fixed(df)
+        }
       } else if (engine == "lme4") {
-        fit_lme4_multilevel_fixed(df)
+        fit_lme4_fixed(df)
       } else if (engine == "lavaan") {
-        # Crossed (Design 1) fixed raters via the two-level SEM (M57): the same
-        # two-level CFA as the random path, read with the Case-3A finite-population
-        # correction on the between-level rater intercepts. Both levels + the
-        # conflated diagnostic read off this one fit; complete/balanced, equal
-        # cluster sizes only (fixed nested / replicate / incomplete aborted
-        # upstream). MC-only -- the bootstrap factory is random-only (M56).
-        fit_lavaan_multilevel(df, raters = "fixed")
+        # Fixed-rater two-way SEM (M21 Slice 2, ADR-031): the same one-factor fit, with
+        # the rater intercepts read as the Case-3A bias-corrected finite-population
+        # theta^2_r instead of the raw random-rater sigma^2_r.
+        fit_lavaan(df, raters = "fixed")
+      } else if (engine == "brms") {
+        # Fixed-rater two-way Bayesian (M26 Slice 2, ADR-036): score ~ 1 + rater +
+        # (1 | subject) with raters as population-level fixed effects; theta^2_r (Case-3A
+        # finite-population variance of the k rater means) is read PER POSTERIOR DRAW from the
+        # rater fixed-effect draws, raw (no frequentist bias correction -- the posterior
+        # integrates the parameter uncertainty the correction subtracts; oracle-pinned vs
+        # glmmTMB fixed). MAP + percentile credible interval off the `draws` contract.
+        fit_brms_fixed(df, seed = seed, brm_args = brm_args)
       } else {
-        fit_glmmtmb_multilevel_fixed(df)
+        fit_glmmtmb_fixed(df)
       }
-    } else if (engine == "brms") {
-      # Crossed (Design 1) random raters, Bayesian (M24 Slice 1, ADR-034): the M5
-      # five-component fit under the half-t(4, 0, 1) SD prior; the point (MAP) and the
-      # percentile credible interval come from posterior_summary() off the `draws`
-      # contract. Also serves the conflated diagnostic (M29 Slice 1, ADR-039): Eq. 14
-      # composes off these same five components (signal cluster + subject, error rater +
-      # cluster_rater + residual) per posterior draw. Nested, fixed, incomplete, and
-      # replicate brms fits are refused upstream (#5).
-      fit_brms_multilevel(df, seed = seed, brm_args = brm_args)
-    } else if (engine == "lme4") {
-      # Crossed (Design 1) random raters via lme4 (M14 Slice 2).
-      fit_lme4_multilevel(df)
-    } else if (engine == "lavaan") {
-      # Crossed (Design 1) random raters via the two-level SEM (M54, D-005):
-      # the five-component two-level CFA the pilot established. Complete/balanced,
-      # incomplete (two-level FIML), or unbalanced (unequal cluster sizes) --
-      # random raters only; fixed and nested aborted upstream. Serves both levels
-      # + the conflated diagnostic off the same fit, as the mixed-model engines.
-      fit_lavaan_multilevel(df)
-    } else {
-      fit_glmmtmb_multilevel(df)
-    }
-  } else if (oneway) {
-    # One-way random (M6). brms (M26 Slice 1, ADR-036): the two-component
-    # score ~ 1 + (1 | subject) fit under the half-t(4, 0, 1) SD prior; MAP + percentile
-    # credible interval off the `draws` contract, as the other brms paths. Runs unchanged on
-    # incomplete/ragged data (M33 Slice 1, ADR-043) -- the M3/M6 harmonic-mean k_eff divisor
-    # threads pre-dispatch (design_info$k_eff), a variance-ratio push-forward (no theta^2, no
-    # 2b -- the M30 regime). Fixed / numeric-unit brms one-way are refused upstream (#5).
-    if (engine == "brms") {
-      fit_brms_oneway(df, seed = seed, brm_args = brm_args)
-    } else if (engine == "lme4") {
-      fit_lme4_oneway(df)
-    } else {
-      fit_glmmtmb_oneway(df)
-    }
-  } else if (raters == "fixed") {
-    if (replicates) {
-      # Fixed-rater within-cell replicates (M20 Slice 1): the interaction fit with
-      # raters fixed -- theta^2_r in the rater slot (fit_*_replicates_fixed). lavaan
-      # replicates already aborted upstream; balanced/complete single-level only. brms
-      # (M33 Slice 2, ADR-043) reads theta^2_r per posterior draw (2b ~ 0 on balanced
-      # replicated data); the multilevel replicate corner is refused upstream.
-      if (engine == "brms") {
-        fit_brms_replicates_fixed(df, seed = seed, brm_args = brm_args)
-      } else if (engine == "lme4") {
-        fit_lme4_replicates_fixed(df)
+    } else if (replicates) {
+      # Within-cell replicates (M17 Slice 3): the interaction fit (subject, rater,
+      # subject_rater, residual). The SEM engine has no replicate path.
+      if (engine == "lavaan") {
+        abort_unsupported(c(
+          "The {.pkg lavaan} (SEM) engine does not support within-cell replicates.",
+          i = "Use {.code engine = \"glmmTMB\"} (default) or {.code \"lme4\"}."
+        ))
+      }
+      if (engine == "lme4") {
+        fit_lme4_replicates(df)
+      } else if (engine == "brms") {
+        # Two-way random replicates, Bayesian (M29 Slice 2, ADR-039): the same
+        # interaction fit under the half-t(4, 0, 1) SD prior; the residual splits into
+        # sigma^2_sr (subject:rater) and pure error, and `occasions` averaging divides
+        # pure error by n_o PER DRAW (posterior_summary -> icc_point). Fixed / multilevel /
+        # incomplete replicate brms are refused upstream (#5).
+        fit_brms_replicates(df, seed = seed, brm_args = brm_args)
       } else {
-        fit_glmmtmb_replicates_fixed(df)
+        fit_glmmtmb_replicates(df)
       }
     } else if (engine == "lme4") {
-      fit_lme4_fixed(df)
+      fit_lme4(df)
     } else if (engine == "lavaan") {
-      # Fixed-rater two-way SEM (M21 Slice 2, ADR-031): the same one-factor fit, with
-      # the rater intercepts read as the Case-3A bias-corrected finite-population
-      # theta^2_r instead of the raw random-rater sigma^2_r.
-      fit_lavaan(df, raters = "fixed")
+      fit_lavaan(df)
     } else if (engine == "brms") {
-      # Fixed-rater two-way Bayesian (M26 Slice 2, ADR-036): score ~ 1 + rater +
-      # (1 | subject) with raters as population-level fixed effects; theta^2_r (Case-3A
-      # finite-population variance of the k rater means) is read PER POSTERIOR DRAW from the
-      # rater fixed-effect draws, raw (no frequentist bias correction -- the posterior
-      # integrates the parameter uncertainty the correction subtracts; oracle-pinned vs
-      # glmmTMB fixed). MAP + percentile credible interval off the `draws` contract.
-      fit_brms_fixed(df, seed = seed, brm_args = brm_args)
+      fit_brms_twoway(df, seed = seed, brm_args = brm_args)
     } else {
-      fit_glmmtmb_fixed(df)
+      fit_glmmtmb(df)
     }
-  } else if (replicates) {
-    # Within-cell replicates (M17 Slice 3): the interaction fit (subject, rater,
-    # subject_rater, residual). The SEM engine has no replicate path.
-    if (engine == "lavaan") {
-      abort_unsupported(c(
-        "The {.pkg lavaan} (SEM) engine does not support within-cell replicates.",
-        i = "Use {.code engine = \"glmmTMB\"} (default) or {.code \"lme4\"}."
-      ))
-    }
-    if (engine == "lme4") {
-      fit_lme4_replicates(df)
-    } else if (engine == "brms") {
-      # Two-way random replicates, Bayesian (M29 Slice 2, ADR-039): the same
-      # interaction fit under the half-t(4, 0, 1) SD prior; the residual splits into
-      # sigma^2_sr (subject:rater) and pure error, and `occasions` averaging divides
-      # pure error by n_o PER DRAW (posterior_summary -> icc_point). Fixed / multilevel /
-      # incomplete replicate brms are refused upstream (#5).
-      fit_brms_replicates(df, seed = seed, brm_args = brm_args)
-    } else {
-      fit_glmmtmb_replicates(df)
-    }
-  } else if (engine == "lme4") {
-    fit_lme4(df)
-  } else if (engine == "lavaan") {
-    fit_lavaan(df)
-  } else if (engine == "brms") {
-    fit_brms_twoway(df, seed = seed, brm_args = brm_args)
-  } else {
-    fit_glmmtmb(df)
-  }
+  )
   # Averaging divisor: the effective number of ratings per subject (harmonic
   # mean), which is k on balanced data (ADR-008; M3 §5). "single" uses 1; a
   # numeric unit projects to that many raters. Resolved per estimand.

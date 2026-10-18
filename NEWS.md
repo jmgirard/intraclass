@@ -1,5 +1,16 @@
 # intraclass (development version)
 
+* On the glmmTMB and lme4 engines, an engine error that does not come from
+  `rlang` now reaches the caller as an `intraclass_singular_fit` error. This covers
+  errors while the engine fits the model or reads the fitted parameter
+  covariance. The engine's own error is kept as its cause. Before, such errors
+  carried no package class, so a handler that catches by class missed them.
+  Two-way data whose residual is exactly zero raised them, for example scores
+  that vary only by rater. Under `ci_method = "montecarlo"` or `"bootstrap"`, an
+  lme4 interval whose two limits are exactly equal is now refused, as a
+  glmmTMB interval already was. An interval that prints as [1, 1] but whose
+  limits differ in the last digits is still reported.
+
 * `icc()` now refuses data in which at least one subject has two or more
   scores and no subject has two different scores. It raises an
   `intraclass_singular_fit` error before it fits a model, on every engine.

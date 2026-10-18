@@ -169,16 +169,18 @@ mc_interval <- function(
 # than reported. Only exact equality: a width bound also refused correct tight
 # intervals of near-perfect agreement (M158 review), and no bound tells those
 # from a false zero, which the second start of `fit_glmmtmb_ml_model()` handles.
-# Gated to glmmTMB fits: the other engines meet the boundary through their own
-# guards (D-004), and an lme4 fit is pinned as not refused here. Shared by
-# `mc_ci()` and `bootstrap_ci()`.
+# Gated to glmmTMB and lme4 fits (D-053, M162). The lavaan and brms engines
+# meet the boundary through their own guards (D-004), and a lavaan fit is
+# pinned as not refused here. lme4 intervals that print as [1, 1] on near-flat
+# data have limits that differ in the last digits, so they are reported. Shared
+# by `mc_ci()` and `bootstrap_ci()`.
 refuse_zero_width <- function(
   intervals,
   engine,
   call = rlang::caller_env(),
   hint = character(0)
 ) {
-  if (!identical(engine$engine, "glmmTMB")) {
+  if (!isTRUE(engine$engine %in% c("glmmTMB", "lme4"))) {
     return(invisible(intervals))
   }
   equal <- vapply(

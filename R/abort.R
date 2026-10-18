@@ -191,3 +191,52 @@ abort_unsupported <- function(
     .envir = .envir
   )
 }
+
+#' Re-raise an unclassed glmmTMB or lme4 engine error as a singular fit
+#'
+#' Evaluates `expr`, the engine dispatch of `icc()`. On the glmmTMB and lme4
+#' engines, an error that is not an rlang error, raised anywhere in the engine
+#' function, is re-raised as `intraclass_singular_fit`, with the original error
+#' as its parent (D-053). Examples are lme4's C++ exceptions from the optimizer
+#' and base `solve()` failures inside glmmTMB's `sdreport()`, and also errors
+#' after the fit, such as reading the parameter covariance. The interval step
+#' runs later, outside this handler. The package's and rlang's own errors, for
+#' example the classed deferrals and a missing optional package, pass
+#' unchanged. The handler matches no message text (D-022). An error that an
+#' engine function catches itself, such as a failed second start, never
+#' reaches it. As a calling handler it keeps the engine frames in the
+#' backtrace, and warnings raised before the error are still raised before the
+#' re-raised error. The lavaan engine re-raises errors from its own `lavaan()`
+#' fit as a classed error, and brms is not covered.
+#'
+#' @param engine The `engine` argument of `icc()`.
+#' @param expr The engine dispatch, evaluated lazily.
+#' @keywords internal
+#' @noRd
+reraise_engine_error <- function(engine, expr, call = rlang::caller_env()) {
+  if (!engine %in% c("glmmTMB", "lme4")) {
+    return(expr)
+  }
+  withCallingHandlers(
+    expr,
+    error = function(e) {
+      if (inherits(e, "rlang_error")) {
+        return()
+      }
+      abort_intraclass(
+        c(
+          "The {.pkg {engine}} engine failed on these data.",
+          i = "A variance component that the data cannot identify can cause \\
+               this.",
+          i = "Examples are scores that vary only by rater, and scores that \\
+               are exactly a subject value plus a rater value.",
+          i = "Inspect the data and check that {.arg score}, \\
+               {.arg subject} and {.arg rater} name the intended columns."
+        ),
+        class = "intraclass_singular_fit",
+        parent = e,
+        call = call
+      )
+    }
+  )
+}
