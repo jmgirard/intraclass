@@ -92,10 +92,11 @@ bootstrap_ci <- function(
     two_sided_interval(icc_point(components, est), conf_level)
   })
   # A glmmTMB or lme4 interval whose limits are finite and exactly equal is
-  # refused (D-048, D-049, D-053). One whose lower limit lies within 1e-12 of 1
-  # is reported with a warning (D-054).
+  # refused (D-048, D-049, D-053). One whose lower limit lies within 1e-12/d of
+  # 1, d the largest error divisor of its estimand, is reported with a warning
+  # (D-054, D-056).
   refuse_zero_width(out, engine, call = call, hint = hint)
-  warn_unresolved_interval(out, engine)
+  warn_unresolved_interval(out, estimands, engine)
   # Expose the kept resample components so a D-study projection can reproject them
   # across `m` without a second round of refits (M18 Slice 4, ADR-028). The fit
   # stores these on its `boot` slot; the band then reuses the SAME resamples that

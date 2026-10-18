@@ -4,14 +4,14 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M164: The near-1 interval warning reads each row against 1e-12 divided by the ratings it averages, and names its rows
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate; RR<NN> whose Binding criteria bind this milestone's ACs (binding-criteria check), or — -->
 - **Principles touched:** GP1, GP7, GP9   <!-- owner: plan · create/amend-via-gate; comma-separated IPn/GPn ids this milestone touches, or — -->
 - **Resolves:** —   <!-- owner: plan · create/amend-via-gate; comma-separated GitHub issues the scope absorbs, each `#N closes` (the PR closes it at merge) or `#N partial` (the remainder gets a candidate row), or — ; skill conduct only — no validate check parses it -->
 - **Surface tier:** user-facing — `icc()` changes which results carry a warning that users see and catch by class   <!-- owner: plan · create/amend-via-gate; user-facing | internal — <one-clause reason>; skill conduct only — no validate check parses it -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create; a companion checkout the milestone also works in is one further entry per checkout, `companion: <abs-path> <branch>` (implement), its PR URL appended by review — /milestone-review merges companions first, in listed order -->
+- **Branch/PR:** m164-near-one-bound-per-row   <!-- owner: implement (branch) / review (PR URL) · create; a companion checkout the milestone also works in is one further entry per checkout, `companion: <abs-path> <branch>` (implement), its PR URL appended by review — /milestone-review merges companions first, in listed order -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -69,6 +69,13 @@ On glmmTMB and lme4 Monte-Carlo and bootstrap intervals, the near-1 warning read
 - 2026-10-18: collisions: D-054 (rule) and D-055 ("Rejected for M163: scaling the bound by each row's averaging divisor … It is a candidate row") quoted and superseded in part by D-056 in this commit, since D-004 requires an entry for a Boundary-fit policy change. M163 (done) is the work this extends. Candidate row "M163 review follow-ups on the near-1 warning" absorbed in part (items (a) and (b)); item (c) stays. GitHub inbox: 0 open issues, 0 open PRs.
 - 2026-10-18: criteria audit (full mode, fresh Opus reader, probes in scratch) returned 13 findings. Fixed: (2) fourth frame pinned to `with_rng_seed(1, ...)`, 500/30, seed 1; (3) fourth frame asserted as rule plus floor, not four results; (4) AC2 wording; (5) replicate frame added to AC2, d times `occasions`; (6) stub divisors from `icc_estimand()`, 1e-15 band margin in T1; (7) identity compared with a no-op helper, not a muffled warning; (8) AC1 names its cases; (9) AC3 shared-label pairs for level and occasions; (10) "or effective ratings"; (12) AC5 names the lint, air and lint.yaml checker steps. Answered: (1) D-056 lands in this plan commit, a record and not a deliverable, so no criterion binds it; (11) DESIGN.md rows are a tracking record, kept in T4, and the ledger row is covered by AC5's checker steps. (13) no IP conflict. Audit probe at the test's settings: fourth frame single-row gaps 1.64e-12 to 2.07e-12 and average-row gaps 5.48e-13 to 6.91e-13; replicate frame glmmTMB bootstrap separates the old and new rule.
 - 2026-10-18: lessons surfaced: M163 (probe every `tidy()` row before setting a bound near 1), M162 (`sprintf("%.17g")`), M130 and M163 (`?icc` sentence changes need `mpl-doc-claims.tsv` rows; run the lint.yaml checkers), M153 (TSV field counts), M93, M150, M127, M141. No dependency change and no outward action beyond the merge-gate PR.
+- 2026-10-18: implement started on branch m164-near-one-bound-per-row, cut from main at 3e3383d.
+- 2026-10-18: T1: on the unchanged code the two no-warning band tests fail 4 checks each (the old rule warns) and the message tests fail 20 checks; the two warning-band tests pass, as they must under the old rule too.
+- 2026-10-18: T2 choice: a row name is the label plus " at the <level> level" and " over <n> occasion(s)"; the message reads "<n> intervals have a lower limit near 1: <rows>." with a bullet stating the bound, the rows joined by cli's vector collapse.
+- 2026-10-18: T3 probe at the test's settings (500/30, seed 1): noise-1e-6 frame single-row gaps 1.64e-12 (glmmTMB bootstrap) to 2.07e-12 (lme4 Monte-Carlo), average-row gaps 5.48e-13 to 6.91e-13, no call warns; replicate frame Monte-Carlo lower limits 0 on both engines, glmmTMB bootstrap ICC(A,1) over 2 occasions 9.67e-13 from 1 (d = 2, 1.93 times its bound, no warning), lme4 bootstrap gaps 5.4e-12 to 3.2e-11.
+- 2026-10-18: T3 discrimination: a planted d = 1 rule reds 3 tests (14 checks), a planted rater-divisor rule reds 2 tests (5 checks), the replicate frame among them.
+- 2026-10-18: T4: the new `?icc` sentences need no `mpl-doc-claims.tsv` row (checker 0 failures). Found main's lint job red since 9162da9: `data-raw/record-claims.tsv` row roadmap-terminal-rows still expected M162, M161, M160 after the M163 done pass; rotated to M163, M162, M161 here, since AC5 needs every lint step. M164's done pass must rotate it again. The Edit tool dropped a tab on that row (10 fields); fixed to 11 (LESSONS, M153).
+- 2026-10-18: checkpoint: T1–T4 written, `test-unresolved-interval.R` 15 of 15 green, lintr 0, air clean, lint.yaml checkers green; tasks stay unchecked until the full `devtools::test()` and `devtools::check()` run (T5) is green.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->

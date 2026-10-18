@@ -443,13 +443,14 @@
 #'   raised, and in that sweep's cells with real between-subject signal the
 #'   interval contains its point.
 #'   Under `"montecarlo"` or `"bootstrap"` on the `"glmmTMB"` and `"lme4"`
-#'   engines, some intervals near 1 come with a warning. An interval whose
-#'   lower limit lies within 1e-12 of 1 is reported with an
-#'   `intraclass_unresolved_interval` warning. Data with almost no residual
+#'   engines, some intervals near 1 come with a warning. For a single-rating
+#'   row, an interval whose lower limit lies within 1e-12 of 1 is reported with
+#'   an `intraclass_unresolved_interval` warning. For a row that averages
+#'   ratings, the bound is 1e-12 divided by the number of ratings averaged. The
+#'   warning names its rows. Data with almost no residual
 #'   variation can give such an interval, and its width can then reflect
 #'   rounding rather than the data. Correct intervals from scores with very
-#'   little noise can also get the warning. This happens at larger noise for
-#'   average-rater rows, whose lower limits lie nearer 1.
+#'   little noise can also get the warning.
 #'   `"posterior"` is the percentile **credible** interval from the Bayesian
 #'   engine's posterior draws. It is the forced default for, and available only
 #'   with, `engine = "brms"`, and `"brms"` requires it. The other methods do not

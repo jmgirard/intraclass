@@ -173,7 +173,7 @@ mc_interval <- function(
 # meet the boundary through their own guards (D-004), and a lavaan fit is
 # pinned as not refused here. lme4 intervals that print as [1, 1] on near-flat
 # data have limits that differ in the last digits, so they are reported, with
-# the warning of `warn_unresolved_interval()` below (D-054). Shared by `mc_ci()`
+# the warning of `warn_unresolved_interval()` below (D-054, D-056). Shared by `mc_ci()`
 # and `bootstrap_ci()`.
 refuse_zero_width <- function(
   intervals,
@@ -211,12 +211,12 @@ refuse_zero_width <- function(
   invisible(intervals)
 }
 
-# The lower limit above which an interval near 1 is warned about (D-054).
+# The gap from 1 below which a single-rating interval is warned about (D-054).
 unresolved_interval_bound <- 1e-12
 
-# The warning on intervals near 1 (D-054, M163). On near-flat or exactly
-# additive data, lme4 reports intervals whose lower limit lies within about
-# 1e-13 of 1 and whose limits differ, so `refuse_zero_width()` lets them
+# The warning on intervals near 1 (D-054, M163; D-056, M164). On near-flat or
+# exactly additive data, lme4 reports intervals whose lower limit lies within
+# about 1e-13 of 1 and whose limits differ, so `refuse_zero_width()` lets them
 # through. Data with rater noise of about 1e-7 of the score spread give
 # intervals of the same width, and those are correct (the SEARLE exact-F
 # interval agrees, M163 work log), so a refusal is ruled out (D-049). Instead
@@ -224,25 +224,33 @@ unresolved_interval_bound <- 1e-12
 # no residual variation can give it. Called after
 # `refuse_zero_width()`, so equal limits abort first. Takes no `hint`: forcing
 # that promise would run the hint's trial fits. Gated to glmmTMB and lme4 fits,
-# as the refusal is. The bound reads every reported row. An average-unit row
-# lies about its divisor times nearer 1 than the single row, so there the
-# warning also fires on data with more noise (M163 review, D-055).
-warn_unresolved_interval <- function(intervals, engine) {
+# as the refusal is. The bound is set on the single-rating scale. A row whose
+# error terms are divided by d lies about d times nearer 1, so each row is read
+# against the bound divided by the largest of its error divisors, the occasion
+# count included where the row averages occasions (D-056). Without that, an
+# average-rater row warned on data the engines resolve (M163 review, D-055).
+warn_unresolved_interval <- function(intervals, estimands, engine) {
   if (!isTRUE(engine$engine %in% c("glmmTMB", "lme4"))) {
     return(invisible(intervals))
   }
   near <- vapply(
-    intervals,
-    function(iv) {
-      is.finite(iv$conf.low) && iv$conf.low > 1 - unresolved_interval_bound
+    seq_along(intervals),
+    function(i) {
+      low <- intervals[[i]]$conf.low
+      d <- max(unlist(estimands[[i]]$error_divisors))
+      is.finite(low) && low > 1 - unresolved_interval_bound / d
     },
     logical(1)
   )
   n <- sum(near)
   if (n > 0L) {
+    rows <- vapply(estimands[near], unresolved_row_name, character(1))
     warn_intraclass(
       c(
-        "{n} interval{?s} {?has/have} a lower limit within 1e-12 of 1.",
+        "{n} interval{?s} {?has/have} a lower limit near 1: {rows}.",
+        i = "A lower limit is near 1 when it lies within 1e-12 of 1. For a row \\
+             that averages ratings, 1e-12 is divided by the number of ratings, \\
+             or effective ratings, it averages.",
         i = "{cli::qty(n)}Data with almost no residual variation can give \\
              {?such an interval/such intervals}, so {?its width/their widths} \\
              may reflect rounding rather than your data.",
@@ -253,6 +261,27 @@ warn_unresolved_interval <- function(intervals, engine) {
     )
   }
   invisible(intervals)
+}
+
+# The name of a row in the near-1 warning: the coefficient label, with the
+# level of a multilevel row and the occasion count of a replicate row, since
+# two rows can share a label and differ only by those (D-056, M164).
+unresolved_row_name <- function(estimand) {
+  name <- estimand$label
+  level <- estimand$level
+  if (length(level) == 1L && !is.na(level)) {
+    name <- sprintf("%s at the %s level", name, level)
+  }
+  occ <- estimand$occasions
+  if (length(occ) == 1L && !is.na(occ)) {
+    name <- sprintf(
+      "%s over %s occasion%s",
+      name,
+      format(occ, trim = TRUE),
+      if (occ == 1) "" else "s"
+    )
+  }
+  name
 }
 
 mc_ci <- function(
@@ -281,6 +310,6 @@ mc_ci <- function(
     )
   })
   refuse_zero_width(out, engine, call = call, hint = hint)
-  warn_unresolved_interval(out, engine)
+  warn_unresolved_interval(out, estimands, engine)
   out
 }
