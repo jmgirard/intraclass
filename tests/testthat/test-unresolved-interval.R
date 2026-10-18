@@ -173,9 +173,17 @@ test_that("a near-1 interval on glmmTMB and lme4 fits warns once and is reported
       expect_no_match(msg, "ICC(C,1)", fixed = TRUE)
       expect_match(
         msg,
+        "For a single-rating row, a lower limit is near 1 when it lies within 1e-12 of 1.",
+        fixed = TRUE
+      )
+      expect_match(
+        msg,
         "divided by the number of ratings, or effective ratings, it averages",
         fixed = TRUE
       )
+      # No firing row has a numeric `unit`, so the projected count is not
+      # mentioned.
+      expect_no_match(msg, "projected count", fixed = TRUE)
       expect_match(msg, "almost no residual variation", fixed = TRUE)
       expect_match(msg, "intraclass_unresolved_interval", fixed = TRUE)
     }
@@ -291,6 +299,20 @@ test_that("the message tells a firing row from a non-firing row of the same labe
       quiet = ui_occ(1, c("z", "z", "big")),
       fire_name = "ICC(A,1) over 2 occasions",
       quiet_name = "ICC(A,1) over 1 occasion"
+    ),
+    # The same pairs with the other row firing, so each part of each name is
+    # read from a firing row.
+    level_reversed = list(
+      fire = ui_ml("subject", c("z", "u")),
+      quiet = ui_ml("cluster", c("z", "big")),
+      fire_name = "ICC(A,1) at the subject level",
+      quiet_name = "ICC(A,1) at the cluster level"
+    ),
+    occasions_reversed = list(
+      fire = ui_occ(1, c("z", "z", "u")),
+      quiet = ui_occ(2, c("z", "z", "big")),
+      fire_name = "ICC(A,1) over 1 occasion.",
+      quiet_name = "ICC(A,1) over 2 occasions"
     )
   )
   for (p in pairs) {
@@ -312,6 +334,8 @@ test_that("a lower limit between 1e-13 and 1e-12 from 1 warns (D-054 AC1)", {
     for (fn in c("mc", "boot")) {
       out <- ui_run(fn, engine, list(ui_wide, ui_inner))
       expect_length(out$warnings, 1L)
+      expect_s3_class(out$warnings[[1]], "intraclass_unresolved_interval")
+      expect_s3_class(out$warnings[[1]], "intraclass_warning")
       # The case sits inside the bound, away from 1.
       expect_gt(out$value[[2]]$conf.low, 1 - 1e-12)
       expect_lt(out$value[[2]]$conf.low, 1 - 1e-13)
@@ -339,6 +363,29 @@ test_that("a near-1 interval on a lavaan fit does not warn (D-054 AC1)", {
     expect_length(out$warnings, 0L)
     expect_gt(out$value[[2]]$conf.low, 1 - 1e-12)
     ui_expect_unchanged(fn, "lavaan", list(ui_wide, ui_near), out$value)
+  }
+})
+
+test_that("the message names the projected count only when a firing row has a numeric unit (M164 review)", {
+  # ICC(C,5): a numeric `unit` of 5, error divisor 5.
+  projected <- ui_remap(
+    icc_estimand(type = "consistency", unit = 5),
+    "t",
+    "u"
+  )
+  expect_identical(projected$error_divisors, 5)
+  for (engine in c("glmmTMB", "lme4")) {
+    for (fn in c("mc", "boot")) {
+      out <- ui_run(fn, engine, list(ui_wide, projected))
+      expect_length(out$warnings, 1L)
+      msg <- ui_message(out$warnings[[1]])
+      expect_match(msg, "ICC(C,5)", fixed = TRUE)
+      expect_match(
+        msg,
+        "For a numeric `unit`, the number of raters is the projected count.",
+        fixed = TRUE
+      )
+    }
   }
 })
 
@@ -505,11 +552,13 @@ ui_grid <- function(frames) {
         tidied <- tidy(out$result)
         lower <- tidied$conf.low
         bound <- 1e-12 / ui_row_d(tidied, frames[[nm]]$k)
-        near <- any(is.finite(lower) & lower > 1 - bound)
+        # The gap from 1, compared as the code compares it.
+        gap <- 1 - lower
+        near <- any(is.finite(lower) & gap < bound)
         expect_identical(out$n_warned, as.integer(near), info = info)
         seen[[info]] <- c(
           warned = out$n_warned > 0L,
-          between = any(lower > 1 - 1e-12 & lower <= 1 - bound)
+          between = any(is.finite(lower) & gap < 1e-12 & gap >= bound)
         )
       }
     }

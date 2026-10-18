@@ -233,9 +233,11 @@ warn_unresolved_interval <- function(intervals, estimands, engine) {
   if (!isTRUE(engine$engine %in% c("glmmTMB", "lme4"))) {
     return(invisible(intervals))
   }
-  # The gap `1 - low` is compared, not `low` with `1 - bound / d`: for d in the
-  # thousands, `1 - bound / d` rounds to the largest double below 1, and a
-  # lower limit there would not warn (M164 review).
+  # The gap `1 - low` is compared, not `low` with `1 - bound / d`: from d of
+  # about 4500, `1 - bound / d` rounds to the largest double below 1 or to 1,
+  # and a lower limit there would not warn (M164 review). Above d of about
+  # 9000 the bound is below the smallest gap a double below 1 has, so only a
+  # lower limit of exactly 1 is near, and its equal limits abort first.
   near <- vapply(
     seq_along(intervals),
     function(i) {
@@ -250,14 +252,24 @@ warn_unresolved_interval <- function(intervals, estimands, engine) {
     rows <- collapse_and(
       vapply(estimands[near], unresolved_row_name, character(1))
     )
+    projected <- any(vapply(
+      estimands[near],
+      function(est) is.numeric(est$unit),
+      logical(1)
+    ))
+    bound_text <- c(
+      "For a single-rating row, a lower limit is near 1 when it lies within \\
+       1e-12 of 1. For a row that averages ratings over raters or occasions, \\
+       1e-12 is divided by the number of ratings, or effective ratings, it \\
+       averages.",
+      if (projected) {
+        "For a numeric {.arg unit}, the number of raters is the projected count."
+      }
+    )
     warn_intraclass(
       c(
         "{n} interval{?s} {?has/have} a lower limit near 1: {rows}.",
-        i = "A lower limit is near 1 when it lies within 1e-12 of 1. For a row \\
-             that averages ratings over raters or occasions, 1e-12 is divided \\
-             by the number of ratings, or effective ratings, it averages. For \\
-             a numeric {.arg unit}, the number of raters in it is the \\
-             projected one.",
+        i = paste(bound_text, collapse = " "),
         i = "{cli::qty(n)}Data with almost no residual variation can give \\
              {?such an interval/such intervals}, so {?its width/their widths} \\
              may reflect rounding rather than your data.",
