@@ -526,18 +526,31 @@ test_that("d_study() returns the recorded values of the plan commit (D-058 AC4)"
 test_that("d_study() returns what it returns with the band checks removed (D-058 AC4)", {
   skip_if_not_installed("lme4")
   skip_on_cran()
+  compared <- 0L
   for (cl in bc_recorded_calls()) {
     fit <- bc_icc(cl$frame, cl$engine, cl$method)$value
+    # Another platform's engines can refuse a near-degenerate frame (GP9).
     if (inherits(fit, "error")) {
+      expect_s3_class(fit, "intraclass_singular_fit")
       next
     }
     checked <- bc_d_study(fit, m = cl$m)$value
+    expect_s3_class(checked, "intraclass_dstudy")
+    stub_calls <- 0L
     bare <- local({
       local_mocked_bindings(
-        check_band_single_rating = function(...) invisible(NULL)
+        check_band_single_rating = function(...) {
+          stub_calls <<- stub_calls + 1L
+          invisible(NULL)
+        }
       )
       bc_d_study(fit, m = cl$m)$value
     })
+    # The stub replaced the checks, so `bare` is the band without them.
+    expect_identical(stub_calls, 1L, info = cl$id)
     expect_identical(checked, bare, info = cl$id)
+    compared <- compared + 1L
   }
+  # The comparison is not met by skipped calls alone.
+  expect_gt(compared, 0L)
 })

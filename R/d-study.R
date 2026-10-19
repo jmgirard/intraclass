@@ -653,7 +653,8 @@ d_study <- function(
 # draws. Equal finite limits abort with `refuse_zero_width()`; otherwise a
 # lower limit within 1e-12 of 1 warns once with `warn_unresolved_band()`.
 # Both gate to glmmTMB and lme4 fits by the engine alone, whatever the fit's
-# `ci_method`: an MPL fit's band is a Monte-Carlo band from the same draws. `intervals` and `estimands` are the single-rating intervals and
+# `ci_method`: an MPL fit's band is a Monte-Carlo band from the same draws.
+# `intervals` and `estimands` are the single-rating intervals and
 # estimands; `engine` is the fit's engine name.
 check_band_single_rating <- function(
   intervals,
