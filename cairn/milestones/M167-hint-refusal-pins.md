@@ -67,6 +67,7 @@ Tests pin that `boundary_method_usable()` judges a Monte-Carlo or bootstrap cand
 - 2026-10-19: T4 done. `devtools::test()`: FAIL 0, WARN 0, SKIP 2, PASS 11362. `lintr::lint_package()`: 0 lints. `air format --check .`: clean.
 - 2026-10-19: claim audit: not owed — internal tier.
 - 2026-10-19: implement complete; status set to review.
+- 2026-10-19: step-7 approval: m167-hint-refusal-pins approved for merge
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
