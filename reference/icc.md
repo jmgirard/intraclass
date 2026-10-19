@@ -358,18 +358,21 @@ model_parameters.intraclass_icc(model, ci = NULL, ...)
   and no error is raised, and in that sweep's cells with real
   between-subject signal the interval contains its point. Under
   `"montecarlo"` or `"bootstrap"` on the `"glmmTMB"` and `"lme4"`
-  engines, some intervals near 1 come with a warning. An interval whose
-  lower limit lies within 1e-12 of 1 is reported with an
-  `intraclass_unresolved_interval` warning. Data with almost no residual
-  variation can give such an interval, and its width can then reflect
-  rounding rather than the data. Correct intervals from scores with very
-  little noise can also get the warning. This happens at larger noise
-  for average-rater rows, whose lower limits lie nearer 1. `"posterior"`
-  is the percentile **credible** interval from the Bayesian engine's
-  posterior draws. It is the forced default for, and available only
-  with, `engine = "brms"`, and `"brms"` requires it. The other methods
-  do not apply to a Bayesian fit, and `"posterior"` needs posterior
-  draws no other engine produces. `"npbootstrap"` is the
+  engines, some intervals near 1 come with a warning. For a
+  single-rating row, an interval whose lower limit lies within 1e-12 of
+  1 is reported with an `intraclass_unresolved_interval` warning. For a
+  row that averages ratings over raters, occasions or both, the bound is
+  1e-12 divided by the number of ratings averaged. On unbalanced data
+  the number of raters is an effective number. For a numeric `unit` it
+  is the projected number of raters. The warning names its rows. Data
+  with almost no residual variation can give such an interval, and its
+  width can then reflect rounding rather than the data. Correct
+  intervals from scores with very little noise can also get the warning.
+  `"posterior"` is the percentile **credible** interval from the
+  Bayesian engine's posterior draws. It is the forced default for, and
+  available only with, `engine = "brms"`, and `"brms"` requires it. The
+  other methods do not apply to a Bayesian fit, and `"posterior"` needs
+  posterior draws no other engine produces. `"npbootstrap"` is the
   **non-parametric** transformed bootstrap-*t* of Ukoumunne et al.
   (2003), which resamples whole subjects and studentizes. It serves the
   **one-way random design** only (`model = "oneway"`, and it aborts
@@ -1054,11 +1057,11 @@ icc(ratings, score, subject, rater, seed = 1)
 #> 
 #>   index     estimate   95% CI
 #>   Absolute agreement
-#>   ICC(A,1)     0.290   [0.050, 0.706]
+#>   ICC(A,1)     0.290   [0.050, 0.708]
 #>   ICC(A,k)     0.620   [0.175, 0.906]
 #>   Consistency
-#>   ICC(C,1)     0.715   [0.339, 0.924]
-#>   ICC(C,k)     0.909   [0.672, 0.980]
+#>   ICC(C,1)     0.715   [0.334, 0.925]
+#>   ICC(C,k)     0.909   [0.668, 0.980]
 #> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
