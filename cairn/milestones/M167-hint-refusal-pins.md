@@ -35,7 +35,7 @@ Tests pin that `boundary_method_usable()` judges a Monte-Carlo or bootstrap cand
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets. -->
 
 - [x] AC1: On the T1 stub engines, whose every draw gives `subject = residual = 1` (single-rating one-way ICC 0.5), with the one estimand `icc_estimand(oneway = TRUE)`, `boundary_method_usable()` returns `FALSE` for each of `method = "montecarlo"` and `"bootstrap"` on the stub whose `engine` is `"glmmTMB"` and on the one whose `engine` is `"lme4"`. The same four calls with `refuse_zero_width()` replaced by a function that returns its intervals unchanged return `TRUE`.
-- [ ] AC2: `devtools::test()` passes with WARN 0. `lintr::lint_package()` reports nothing, and `air format --check .` passes.
+- [x] AC2: `devtools::test()` passes with WARN 0. `lintr::lint_package()` reports nothing, and `air format --check .` passes.
 
 ## Coverage
 <!-- owner: plan · create/amend-via-gate -->
@@ -74,25 +74,27 @@ Tests pin that `boundary_method_usable()` judges a Monte-Carlo or bootstrap cand
 ## Review
 
 - AC1 evidence (2026-10-19, fresh scratch script independent of the test file, at 3e01215): stubs with zero `vcov`, `to_components` and `simulate_refit` giving subject = residual = 1 (point ICC printed 0.5), estimand `icc_estimand(oneway = TRUE)`, n0 = 3. With the refusal in place, `boundary_method_usable()` returned FALSE for montecarlo and bootstrap on glmmTMB and on lme4 (4 of 4). With `refuse_zero_width()` replaced by a pass-through via `testthat::with_mocked_bindings()`, the same four calls returned TRUE (4 of 4). PASS.
+- AC2 evidence (2026-10-19, at 1d13757, after the review fixes): `devtools::test()` FAIL 0, WARN 0, SKIP 2, PASS 11362. `lintr::lint_package()` 0 lints. `air format --check .` clean. PASS.
+- Consistency gate (2026-10-19): `cairn_validate.py` all checks passed (exit 0); no principle changed, so `cairn_impact` skipped; `devtools::document()` left no diff; `pkgdown::check_pkgdown()` no problems; `devtools::check()` at 1d13757 0 errors, 0 warnings, 0 notes; README and NEWS untouched (internal tier, no user-visible change, so no NEWS entry owed); no new top-level files.
 - spawned: diff-bug, blame-history, prior-review, ripple
-- diff-bug #1: the mock of `refuse_zero_width()` drops the real defaults for `call` and `hint` — fix now
-- diff-bug #2: the FALSE assertions and the TRUE control sit in separate `test_that()` blocks, so the first block's causal name rests on the second — fix now (control folded into the first block)
-- diff-bug #3: the `bh_site()` test's `bootstrap_ci()` call omits `seed = 1` — fix now
+- diff-bug #1: the mock of `refuse_zero_width()` drops the real defaults for `call` and `hint` — fix now, fixed 1d13757
+- diff-bug #2: the FALSE assertions and the TRUE control sit in separate `test_that()` blocks, so the first block's causal name rests on the second — fix now (control folded into the first block), fixed 1d13757
+- diff-bug #3: the `bh_site()` test's `bootstrap_ci()` call omits `seed = 1` — fix now, fixed 1d13757
 - diff-bug #4: `expect_false("Z" %in% …)` repeats what `expect_setequal` enforces — reject, planned change (T2 asks for the assertion; it names the failure)
 - diff-bug #5: the class checks on the stubs appear in two tests — reject, style
 - diff-bug #6: ROADMAP rows "M158 review follow-ups on the glmmTMB boundary path" and "M162 review follow-ups on the engine re-raise" still list the pinned items — reject, planned change (step-9 hygiene graduates or narrows them)
 - diff-bug #7: AC2 is unticked — reject, false (review ticks it against its own evidence)
 - diff-bug #8: no test pins that a stub under a non-gated engine stays usable — reject, false (`test-glmmtmb-false-zero.R:428` pins a lavaan fit's equal limits as reported, not refused)
-- blame-history #1: the file header still names three CI-stage sites; also no D-entry records that the refusal carries the hint, and no real-data case of it is on record — fix now (header), follow-up (rest) to new row "Equal-limits refusal unseen on real fits"
+- blame-history #1: the file header still names three CI-stage sites; also no D-entry records that the refusal carries the hint, and no real-data case of it is on record — fix now (header), follow-up (rest) to new row "Equal-limits refusal unseen on real fits", fixed 1d13757
 - blame-history #2: the open half of M158 item (b) could be dropped — reject, planned change (the plan files a row only for a confirmed case; T3's null result is in the work log)
-- blame-history #3: the sweep comment "A or B" omits Z — fix now
+- blame-history #3: the sweep comment "A or B" omits Z — fix now, fixed 1d13757
 - blame-history #4: the Z phrase straddles a source line continuation — reject, false (the label test reads "Z" from real rendered refusals, so a break fails loudly; diff-bug probed cli widths 20 to 200)
 - prior-review #1: the near-collapse half of M158 item (b) is probed, not pinned — reject, planned change (Scope: probe only)
-- prior-review #2: `expect_false()` passes on any error, since `boundary_method_usable()` swallows errors — fix now (same fix as diff-bug #2; identity asserted beside it)
+- prior-review #2: `expect_false()` passes on any error, since `boundary_method_usable()` swallows errors — fix now (same fix as diff-bug #2; identity asserted beside it), fixed 1d13757
 - prior-review #3: the identity checks run 50 resamples while the usability path screens at 25 — reject, false (the stub's refits are constant at any count, and the control flip shows the cause)
-- prior-review #4: the missing seed — fix now (same as diff-bug #3)
+- prior-review #4: the missing seed — fix now (same as diff-bug #3), fixed 1d13757
 - prior-review #5: engine loops do not label failures — reject, style
-- ripple #1: the header count of sites is stale — fix now (same as blame-history #1)
+- ripple #1: the header count of sites is stale — fix now (same as blame-history #1), fixed 1d13757
 - ripple #2: ROADMAP M158 row items (b), (c) stale — reject, planned change (step-9 hygiene)
 - ripple #3: ROADMAP M162 row item (b) stale — reject, planned change (step-9 hygiene)
-- ripple #4: the sweep comment omits Z — fix now (same as blame-history #3)
+- ripple #4: the sweep comment omits Z — fix now (same as blame-history #3), fixed 1d13757
