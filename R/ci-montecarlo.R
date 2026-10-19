@@ -272,7 +272,7 @@ warn_unresolved_interval <- function(intervals, estimands, engine) {
 # Which intervals have a finite lower limit within 1e-12/d of 1, d the largest
 # error divisor of each interval's estimand (D-056). Shared by
 # `warn_unresolved_interval()` and `warn_unresolved_band()`. The gap
-# `1 - low` is compared, not `low` with `1 - bound / d`: from d of about 4500,
+# `1 - low` is compared, not `low` with `1 - bound / d`: from d of about 3600,
 # `1 - bound / d` rounds to one of the two largest doubles below 1, and from
 # about 18000 to 1, so a lower limit there would not warn (M164 review). Above
 # d of about 9000 the bound is below the smallest gap a double below 1 has, so

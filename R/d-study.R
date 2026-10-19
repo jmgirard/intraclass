@@ -548,19 +548,24 @@ d_study <- function(
   boot_band <- identical(x$ci$method, "bootstrap") && !is.null(x$boot)
   # The single-rating coefficient behind each curve: one rater, and one
   # occasion where the fit has replicates, per distinct type and level of the
-  # band rows. Its interval comes from the band's own draws, below.
+  # band rows. Its interval comes from the band's own draws, below. Other
+  # engines build none, so their bands are computed exactly as before (D-058).
   curves <- unique(data.frame(
     type = row_type,
     level = levels_arg,
     stringsAsFactors = FALSE
   ))
-  single <- Map(
-    make_estimand,
-    1,
-    curves$level,
-    if (replicates) 1 else NA_real_,
-    curves$type
-  )
+  single <- if (isTRUE(x$engine %in% c("glmmTMB", "lme4"))) {
+    Map(
+      make_estimand,
+      1,
+      curves$level,
+      if (replicates) 1 else NA_real_,
+      curves$type
+    )
+  } else {
+    list()
+  }
   if (boot_band) {
     bc <- x$boot$components
     intervals <- lapply(
