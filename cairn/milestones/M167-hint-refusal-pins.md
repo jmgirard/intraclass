@@ -47,7 +47,7 @@ Tests pin that `boundary_method_usable()` judges a Monte-Carlo or bootstrap cand
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
 - [x] T1: Add the AC1 tests. Build the engine objects as stubs in the shape `mc_ci()` and `bootstrap_ci()` read (`estimate`, `vcov`, `to_components`, `simulate_refit`, `engine`), as `ui_mc_stub()` and `ui_boot_stub()` in `test-unresolved-interval.R` do, with components that put the single-rating ICC at 0.5. Replace `refuse_zero_width()` in the namespace for the control (LESSONS, M164). Confirm that the `FALSE` case reaches the refusal: with the refusal left in place, call `mc_ci()` and `bootstrap_ci()` directly on the same stubs and assert the class `intraclass_zero_width_interval` (failure-identity rule).
-- [ ] T2: Add a label for the zero-width refusal to `bh_site()`, matched on a phrase of the message `refuse_zero_width()` renders. Assert that `bh_site()` gives that label for the message of a real refusal raised from the T1 stubs, and still gives `"other"` for an unrelated message. Add the label to the M93 sweep's "never reached" assertions beside `"C"` and `"other"`.
+- [x] T2: Add a label for the zero-width refusal to `bh_site()`, matched on a phrase of the message `refuse_zero_width()` renders. Assert that `bh_site()` gives that label for the message of a real refusal raised from the T1 stubs, and still gives `"other"` for an unrelated message. Add the label to the M93 sweep's "never reached" assertions beside `"C"` and `"other"`.
 - [ ] T3: Probe item (b)'s second half in a scratch script. Search for data on which `ci_method = "bootstrap"` on a glmmTMB or lme4 fit aborts with `intraclass_zero_width_interval` and the hint names `"montecarlo"`, then print that Monte-Carlo interval with `sprintf("%.17g", x)` (LESSONS, M162). Record the search and its result in a work-log line. If a case is found, add a candidate row with the data and the interval (search-first).
 - [ ] T4: Run `devtools::test()` and read WARN 0 (LESSONS, M150). Run `lintr::lint_package()` over `tests/` (LESSONS, M141) and `air format --check .`.
 
@@ -62,6 +62,7 @@ Tests pin that `boundary_method_usable()` judges a Monte-Carlo or bootstrap cand
 - 2026-10-19: implement started; branch `m167-hint-refusal-pins` cut from origin/main at 54ec3a9.
 - 2026-10-19: implementation choice: one stub `hr_stub(engine)` carries both the Monte-Carlo and bootstrap fields (zero `vcov`, constant `simulate_refit`), and the tests sit in a new section at the end of `test-boundary-abort-hint.R`.
 - 2026-10-19: T1 done. On both engines `mc_ci()` and `bootstrap_ci()` abort with `intraclass_zero_width_interval` on the stubs; `boundary_method_usable()` returns FALSE for both methods, and TRUE with `refuse_zero_width()` mocked to return its intervals. Test file: FAIL 0, WARN 0, PASS 1343.
+- 2026-10-19: T2 done. `bh_site()` labels the refusal `"Z"`, matched on "lower and upper limits are equal"; the label test reads `"Z"` from real refusals of both reducers on both engines and `"other"` for an unrelated message, and the M93 sweep asserts `"Z"` is never reached. Plant: the pre-T2 `bh_site()` gives `"other"` on the same refusal message. Test file: FAIL 0, WARN 0, PASS 1357.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->

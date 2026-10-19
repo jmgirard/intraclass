@@ -99,6 +99,11 @@ bh_site <- function(msg) {
   if (grepl("refits converged", m, fixed = TRUE)) {
     return("C")
   }
+  # The equal-limits refusal of `refuse_zero_width()` (D-049, D-053), which
+  # carries `intraclass_singular_fit` too.
+  if (grepl("lower and upper limits are equal", m, fixed = TRUE)) {
+    return("Z")
+  }
   "other"
 }
 
@@ -213,6 +218,7 @@ test_that("a near-zero-variance dataset aborts through the DEFAULT MC path (AC1)
     intersect(c("A", "B"), c(ow, tw))
   )
   expect_false("C" %in% c(ow, tw))
+  expect_false("Z" %in% c(ow, tw))
   expect_false("other" %in% c(ow, tw))
 
   # Site B (non-finite draws) is the dominant one -- the site the hint most needs.
@@ -2989,6 +2995,27 @@ test_that("an equal-limits refusal makes montecarlo and bootstrap unusable on gl
       expect_false(hr_usable(method, engine))
     }
   }
+})
+
+test_that("bh_site() labels the equal-limits refusal, so the M93 sweep can name it", {
+  for (engine in c("glmmTMB", "lme4")) {
+    for (fn in c("mc", "boot")) {
+      e <- tryCatch(
+        if (fn == "mc") {
+          mc_ci(hr_stub(engine), hr_estimands, mc_samples = 200L, seed = 1)
+        } else {
+          bootstrap_ci(hr_stub(engine), hr_estimands, boot_samples = 50L)
+        },
+        intraclass_zero_width_interval = function(e) e
+      )
+      expect_s3_class(e, "intraclass_zero_width_interval")
+      # The class `bh_probe()` catches, so the label is reachable there.
+      expect_s3_class(e, "intraclass_singular_fit")
+      expect_identical(bh_site(conditionMessage(e)), "Z")
+    }
+  }
+  # An unrelated message still reads as "other".
+  expect_identical(bh_site("The model could not be fitted."), "other")
 })
 
 test_that("without the refusal the same candidates are usable (control)", {
