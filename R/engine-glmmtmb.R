@@ -301,8 +301,9 @@ glmmtmb_second_fit <- function(formula, data, start) {
 # were signalled, so that only the kept fit's reach the user (M165). An error is
 # never caught here: it propagates from where the fit signalled it, with its
 # stack intact. `icc()` then re-raises an error that is not an rlang error as
-# `intraclass_singular_fit`, with this error as its parent
-# (`reraise_engine_error()`, D-053). `on_error`, when given, receives the
+# `intraclass_singular_fit`, with this error as its parent, except R's
+# conversion of a warning and a stack overflow (`reraise_engine_error()`,
+# D-053, D-059). `on_error`, when given, receives the
 # conditions held back so far, at the moment the error is signalled, so a failed
 # first fit still signals them before its error (under `options(warn = 0)` R
 # prints the warnings after the error).

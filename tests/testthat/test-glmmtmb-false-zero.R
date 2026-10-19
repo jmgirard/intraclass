@@ -407,8 +407,8 @@ fz_expect_refusal_text <- function(msg) {
 test_that("icc() raises the equal-limits refusal with no example of its cause (M168 AC5)", {
   skip_if_not_installed("lme4")
   skip_if_not_installed("merDeriv")
-  # Every interval the Monte-Carlo reduction returns has equal limits, so the
-  # refusal is the one icc() raises on a real fit.
+  # The fit is real; only the Monte-Carlo reduction is stubbed to return equal
+  # limits, so icc() reaches the refusal through its own interval step.
   local_mocked_bindings(
     two_sided_interval = function(vals, conf_level = 0.95) {
       list(conf.low = 0.5, conf.high = 0.5, std.error = 0)

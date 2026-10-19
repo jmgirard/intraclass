@@ -216,8 +216,9 @@ abort_unsupported <- function(
 #' warning's call, is that conversion. The text is R's, not an engine's. The
 #' call alone does not tell it apart: a cli warning has a `NULL` call, and a
 #' warning that a caller's handler muffles is never converted. R cuts a
-#' converted message at `getOption("warning.length")`, so a conversion of a
-#' longer warning no longer matches and is re-raised. The second is an error of
+#' converted message at `getOption("warning.length")` bytes, so the conversion
+#' of a warning whose message is longer no longer matches and is re-raised. So
+#' is a conversion that engine code catches and raises again in its own words. The second is an error of
 #' R's class `stackOverflowError`. An allocation failure and a bug in package
 #' code that raise an error with neither class are still re-raised, because
 #' only message text could tell them from a degenerate-data failure. A bug that
