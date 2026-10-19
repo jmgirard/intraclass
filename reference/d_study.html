@@ -216,6 +216,24 @@ having drawn that curve.</p></li>
 <a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a> and <a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a> generics.</p>
     </div>
     <div class="section level2">
+    <h2 id="checks-on-the-band">Checks on the band<a class="anchor" aria-label="anchor" href="#checks-on-the-band"></a></h2>
+
+
+<p>On a glmmTMB or lme4 fit, whatever its <code>ci_method</code>, <code>d_study()</code> reads each
+curve's single-rating coefficient from the band's draws. That is the
+coefficient at one rater, and at one occasion on a within-cell replicate
+fit. Every projected row of the curve comes from the same draws. If the
+two limits of that coefficient's interval are exactly equal, <code>d_study()</code>
+refuses the band with an <code>intraclass_zero_width_interval</code> error, which is
+also an <code>intraclass_singular_fit</code> error. If the limits differ and the lower
+limit lies within 1e-12 of 1, <code>d_study()</code> returns the projection with an
+<code>intraclass_unresolved_interval</code> warning. Data with almost no residual
+variation can give such an interval. At a very large <code>m</code>, a projected row
+can print as <code>[1, 1]</code> through rounding. The checks read only the
+single-rating interval, so such a row raises neither the error nor the
+warning by itself.</p>
+    </div>
+    <div class="section level2">
     <h2 id="projection-is-extrapolation">Projection is extrapolation<a class="anchor" aria-label="anchor" href="#projection-is-extrapolation"></a></h2>
 
 

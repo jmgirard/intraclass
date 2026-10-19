@@ -154,6 +154,23 @@ The methods documented on this page return the objects below.
 the [tidy()](https://generics.r-lib.org/reference/tidy.html) and
 [glance()](https://generics.r-lib.org/reference/glance.html) generics.
 
+## Checks on the band
+
+On a glmmTMB or lme4 fit, whatever its `ci_method`, `d_study()` reads
+each curve's single-rating coefficient from the band's draws. That is
+the coefficient at one rater, and at one occasion on a within-cell
+replicate fit. Every projected row of the curve comes from the same
+draws. If the two limits of that coefficient's interval are exactly
+equal, `d_study()` refuses the band with an
+`intraclass_zero_width_interval` error, which is also an
+`intraclass_singular_fit` error. If the limits differ and the lower
+limit lies within 1e-12 of 1, `d_study()` returns the projection with an
+`intraclass_unresolved_interval` warning. Data with almost no residual
+variation can give such an interval. At a very large `m`, a projected
+row can print as `[1, 1]` through rounding. The checks read only the
+single-rating interval, so such a row raises neither the error nor the
+warning by itself.
+
 ## Projection is extrapolation
 
 Projecting to an `m` you did not run is an **extrapolation**. Its
