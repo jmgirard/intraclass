@@ -531,10 +531,29 @@ d_study <- function(
   # sample from the parameter covariance, reused across every m (and level). An older
   # bootstrap object without a `boot` slot falls back to the Monte-Carlo band.
   boot_band <- identical(x$ci$method, "bootstrap") && !is.null(x$boot)
+  # The single-rating coefficient behind each curve: one rater, and one
+  # occasion where the fit has replicates, per distinct type and level of the
+  # band rows. Its interval comes from the band's own draws, below.
+  curves <- unique(data.frame(
+    type = row_type,
+    level = levels_arg,
+    stringsAsFactors = FALSE
+  ))
+  single <- Map(
+    make_estimand,
+    1,
+    curves$level,
+    if (replicates) 1 else NA_real_,
+    curves$type
+  )
   if (boot_band) {
     bc <- x$boot$components
     intervals <- lapply(
       estimands,
+      function(e) two_sided_interval(icc_point(bc, e), conf_level)
+    )
+    single_intervals <- lapply(
+      single,
       function(e) two_sided_interval(icc_point(bc, e), conf_level)
     )
   } else {
@@ -546,7 +565,12 @@ d_study <- function(
       estimands,
       function(e) mc_interval(components, e, conf_level, engine = engine)
     )
+    single_intervals <- lapply(
+      single,
+      function(e) mc_interval(components, e, conf_level, engine = engine)
+    )
   }
+  check_band_single_rating(single_intervals, single, x$engine)
 
   tbl <- tibble::tibble(
     m = row_m,
@@ -602,6 +626,37 @@ d_study <- function(
     k_observed = x$n$raters,
     k_eff = x$k_eff
   )
+}
+
+# The band checks (D-058, M166). `icc()` refuses an interval with equal limits
+# (D-049, D-053) and warns on one whose lower limit lies near 1 (D-054,
+# D-056), but a per-row rule cannot serve a projection: at very large `m`
+# the rows of ordinary data round to exactly [1, 1] while the one-rater limits
+# are far from 1 (M166 plan probe). So `d_study()` reads each curve's
+# single-rating coefficient, at one rater and one occasion, from the same
+# draws as the band, and every projected row of that curve comes from those
+# draws. Equal finite limits abort with `refuse_zero_width()`, which gates
+# the check to glmmTMB and lme4 fits by the engine alone, whatever the fit's
+# `ci_method`: an MPL fit's band is a Monte-Carlo band from the same draws. `intervals` and `estimands` are the single-rating intervals and
+# estimands; `engine` is the fit's engine name.
+check_band_single_rating <- function(
+  intervals,
+  estimands,
+  engine,
+  call = rlang::caller_env()
+) {
+  engine <- list(engine = engine)
+  refuse_zero_width(
+    intervals,
+    engine,
+    call = call,
+    hint = c(
+      i = "In {.fn d_study}, this is the interval of the single-rating \\
+           coefficient behind the projected curves, read from the same draws \\
+           as the band."
+    )
+  )
+  invisible(intervals)
 }
 
 # Validate the projected rater counts: a non-empty numeric vector, all finite and
