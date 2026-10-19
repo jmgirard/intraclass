@@ -184,16 +184,7 @@ refuse_zero_width <- function(
   if (!isTRUE(engine$engine %in% c("glmmTMB", "lme4"))) {
     return(invisible(intervals))
   }
-  equal <- vapply(
-    intervals,
-    function(iv) {
-      is.finite(iv$conf.low) &&
-        is.finite(iv$conf.high) &&
-        iv$conf.low == iv$conf.high
-    },
-    logical(1)
-  )
-  if (any(equal)) {
+  if (any(zero_width(intervals))) {
     abort_intraclass(
       c(
         "The interval could not be computed: its lower and upper limits are \\
@@ -209,6 +200,20 @@ refuse_zero_width <- function(
     )
   }
   invisible(intervals)
+}
+
+# Which intervals have two finite and exactly equal limits. Shared by
+# `refuse_zero_width()` and `check_band_single_rating()`, which names them.
+zero_width <- function(intervals) {
+  vapply(
+    intervals,
+    function(iv) {
+      is.finite(iv$conf.low) &&
+        is.finite(iv$conf.high) &&
+        iv$conf.low == iv$conf.high
+    },
+    logical(1)
+  )
 }
 
 # The gap from 1 below which a single-rating interval is warned about (D-054).
@@ -312,8 +317,9 @@ warn_unresolved_band <- function(intervals, estimands, engine) {
         i = "{.fn d_study} reads each curve's coefficient at one rater, and at \\
              one occasion on a replicate fit, from the same draws as the band. \\
              A lower limit is near 1 when it lies within 1e-12 of 1.",
-        i = "Data with almost no residual variation can give such an interval, \\
-             so the band's width may reflect rounding rather than your data.",
+        i = "{cli::qty(n)}Data with almost no residual variation can give \\
+             {?such an interval/such intervals}, so the band's width may \\
+             reflect rounding rather than your data.",
         i = "Suppress the {.cls intraclass_unresolved_interval} warning class \\
              to silence this."
       ),

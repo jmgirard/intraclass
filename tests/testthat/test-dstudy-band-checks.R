@@ -12,7 +12,8 @@
 # frames are those of helper-near-one-frames.R (M163, M164), and the ordinary
 # frame is `scale_two_way(11)` of helper-glmmtmb-frames.R.
 
-bc_on_ci <- function() identical(tolower(Sys.getenv("CI")), "true")
+# Reads `CI` as `testthat::skip_on_ci()` does.
+bc_on_ci <- function() isTRUE(as.logical(Sys.getenv("CI", "false")))
 
 # Runs `expr`. Returns its value or its error, and every
 # `intraclass_unresolved_interval` warning it signaled. Other warnings and all
@@ -330,11 +331,111 @@ test_that("the band warning names every near coefficient and skips lavaan fits (
     "2 single-rating coefficients behind the projected curves have lower limits near 1: ICC(A,1) at the subject level and ICC(A,1) at the cluster level.",
     fixed = TRUE
   )
+  expect_match(
+    bc_message(out$warnings[[1]]),
+    "can give such intervals",
+    fixed = TRUE
+  )
   expect_no_match(bc_message(out$warnings[[1]]), "ICC(C,1)", fixed = TRUE)
   expect_length(
     bc_run(warn_unresolved_band(ivs, ests, list(engine = "lavaan")))$warnings,
     0L
   )
+})
+
+# The coefficients the checks read, captured from `check_band_single_rating()`:
+# one per type and level, at one rater and one occasion, whatever the axis or
+# the occasion settings of the band. Constant draws cannot tell these apart,
+# so the estimands are read directly (M166 review).
+bc_read <- function(fit, ...) {
+  seen <- NULL
+  local_mocked_bindings(
+    check_band_single_rating = function(intervals, estimands, engine, ...) {
+      seen <<- estimands
+      invisible(intervals)
+    }
+  )
+  suppressMessages(d_study(fit, ..., seed = 1, mc_samples = 200))
+  seen
+}
+
+test_that("the checks read each curve's coefficient at one rater and one occasion (D-058 AC1, AC3)", {
+  skip_if_not_installed("lme4")
+  skip_on_cran()
+  q <- function(expr) suppressMessages(suppressWarnings(expr))
+  reps <- q(icc(
+    ratings_replicates,
+    score,
+    subject,
+    rater,
+    engine = "lme4",
+    occasions = c("single", "average"),
+    mc_samples = 200L,
+    seed = 1
+  ))
+  # The band carries curves over 1 and over the fitted occasion count.
+  expect_gt(length(unique(reps$estimates$occasions)), 1L)
+  for (args in list(list(m = c(1, 2)), list(n_o = 1:3))) {
+    read <- do.call(bc_read, c(list(reps), args))
+    expect_setequal(
+      vapply(read, `[[`, character(1), "label"),
+      c("ICC(A,1)", "ICC(C,1)")
+    )
+    for (e in read) {
+      expect_identical(e$occasions, 1)
+      expect_true(all(unlist(e$error_divisors) == 1))
+    }
+  }
+  school_fit <- q(icc(
+    school,
+    score,
+    pupil,
+    rater,
+    cluster = classroom,
+    engine = "glmmTMB",
+    mc_samples = 200L,
+    seed = 1
+  ))
+  read <- bc_read(school_fit, m = c(2, 3))
+  names <- vapply(read, unresolved_row_name, character(1))
+  expect_setequal(
+    names,
+    c(
+      "ICC(A,1) at the subject level",
+      "ICC(A,1) at the cluster level",
+      "ICC(C,1) at the subject level",
+      "ICC(C,1) at the cluster level"
+    )
+  )
+  # A lavaan fit builds none, so its band is computed as before.
+  lav <- q(icc(
+    scale_two_way(11),
+    score,
+    subject,
+    rater,
+    engine = "lavaan",
+    mc_samples = 200L,
+    seed = 1
+  ))
+  expect_length(bc_read(lav, m = c(1, 2)), 0L)
+})
+
+test_that("the refusal names the coefficients whose limits are equal (M166 review)", {
+  ests <- lapply(c("subject", "cluster"), function(lv) {
+    icc_estimand(type = "agreement", multilevel = TRUE, level = lv)
+  })
+  ivs <- list(
+    list(conf.low = 0.2, conf.high = 0.9),
+    list(conf.low = 0.5, conf.high = 0.5)
+  )
+  err <- rlang::catch_cnd(
+    check_band_single_rating(ivs, ests, "glmmTMB"),
+    classes = "error"
+  )
+  expect_s3_class(err, "intraclass_zero_width_interval")
+  msg <- bc_message(err)
+  expect_match(msg, "as the band: ICC(A,1) at the cluster level.", fixed = TRUE)
+  expect_no_match(msg, "subject level", fixed = TRUE)
 })
 
 # No reported number changes (D-058 AC4) ----------------------------------------

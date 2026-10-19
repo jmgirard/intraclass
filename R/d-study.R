@@ -668,14 +668,23 @@ check_band_single_rating <- function(
   call = rlang::caller_env()
 ) {
   engine <- list(engine = engine)
+  equal <- collapse_and(
+    vapply(estimands[zero_width(intervals)], unresolved_row_name, character(1))
+  )
   refuse_zero_width(
     intervals,
     engine,
     call = call,
+    # `refuse_zero_width()` interpolates the hint in its own frame, so the
+    # names are pasted in; a coefficient name holds no braces.
     hint = c(
-      i = "In {.fn d_study}, this is the interval of the single-rating \\
-           coefficient behind the projected curves, read from the same draws \\
-           as the band."
+      i = paste0(
+        "In {.fn d_study}, this is the interval of the single-rating ",
+        "coefficient behind the projected curves, read from the same draws ",
+        "as the band: ",
+        equal,
+        "."
+      )
     )
   )
   warn_unresolved_band(intervals, estimands, engine)
