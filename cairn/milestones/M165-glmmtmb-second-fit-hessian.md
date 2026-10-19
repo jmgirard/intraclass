@@ -4,7 +4,7 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M165: The glmmTMB second start never trades a positive-definite fit for one that is not, and passes on only the kept fit's conditions
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate; RR<NN> whose Binding criteria bind this milestone's ACs (binding-criteria check), or — -->
@@ -59,7 +59,7 @@
 - [x] T3: Write the AC3 and AC4 tests first, then change `glmmtmb_capture()` (`:304`) to hold messages as it holds warnings, and pass the kept fit's messages on through cli (PRINCIPLES.md #8). Pass message text as a value, as `glmmtmb_warn()` does, so braces are not read as cli markup. In the `on_error` path, show held messages, and skip the warning replay when `getOption("warn") >= 2`. Rewrite the `glmmtmb_capture()` header comment to say both. Capture the AC4 `warn = 0` and `warn = 1` warnings in the test so the suite stays at WARN 0.
 - [x] T4: Change `scale_two_way()` to draw inside `with_rng_seed(seed, ...)` or `withr::with_seed()` (`withr` is already in Suggests). Add tests that `.Random.seed` is `identical()` after a call when one was set, and still absent when none existed, and that seeds 1, 11 and 40 give the frames the old body gave. Confirm `test-glmmtmb-start-scale.R` and `test-glmmtmb-false-zero.R` pass unchanged.
 - [x] T5: Edit the NEWS entry on the second start (`NEWS.md:87`) and the DESIGN.md glmmTMB row of the Boundary-fit policy to state the Hessian condition, citing D-057 in DESIGN.md. If a `?icc` sentence changes, update its `data-raw/mpl-doc-claims.tsv` row and count its fields with `awk -F'\t'` (LESSONS, M153). Run the `data-raw/` checkers with and without `--self-test`, as CI's lint job does (LESSONS, M130).
-- [ ] T6: Run `devtools::test()` and read WARN 0 (LESSONS, M150). Run `devtools::check()` and read the raw Status line (LESSONS, M127). Run `lintr::lint_package()`, `air format --check .`, and the `python3 data-raw/` steps of `.github/workflows/lint.yaml`.
+- [x] T6: Run `devtools::test()` and read WARN 0 (LESSONS, M150). Run `devtools::check()` and read the raw Status line (LESSONS, M127). Run `lintr::lint_package()`, `air format --check .`, and the `python3 data-raw/` steps of `.github/workflows/lint.yaml`.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates. -->
@@ -85,6 +85,7 @@
 - 2026-10-18: T6 suite: full `devtools::test()` on 7a83dbd, no failures and no warnings section; `test-glmmtmb-fit-conditions.R` ran in it.
 - 2026-10-18: claim audit: 44 claims read, 8 corrected — NEWS.md, R/engine-glmmtmb.R, test-glmmtmb-fit-conditions.R, test-glmmtmb-false-zero.R, helper-glmmtmb-frames.R. Corrections: finite-objective condition in NEWS and two test names; "needs that Hessian" → draws usually overflow (probe: 3 fits with pdHess FALSE gave finite indefinite covariances, the interval aborted at the non-finite-draws guard); "before its error" → signalled before (R prints warn = 0 warnings after), with a signal-order assertion added to the AC3 failed-fit test; "non-fatal unless warn >= 2"; the warn = 2 sentence in NEWS; the helper's third user. Re-read once by the same reader: all 8 hold. D-057's Context sentence and heading corrected by D-057 Amendment 1 (one history correction for this milestone).
 - 2026-10-18: the first `devtools::check()` run started before the claim fixes and was stopped; check re-run on the final code.
+- 2026-10-18: T6: `devtools::check()` on 2053075, raw Status line "Status: OK" (0 errors, 0 warnings, 0 notes). Status → review.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->

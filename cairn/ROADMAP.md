@@ -9,7 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M165 | The glmmTMB second start never trades a positive-definite fit for one that is not, and passes on only the kept fit's conditions | in-progress | — | high | milestones/M165-glmmtmb-second-fit-hessian.md |
+| M165 | The glmmTMB second start never trades a positive-definite fit for one that is not, and passes on only the kept fit's conditions | review | — | high | milestones/M165-glmmtmb-second-fit-hessian.md |
 | M166 | d_study() bands from glmmTMB and lme4 fits are refused or warned on by each curve's single-rating coefficient | planned | — | high | milestones/M166-d-study-band-checks.md |
 | M167 | The boundary hint's verification counts a refused interval as unusable on glmmTMB and lme4, pinned by tests | planned | — | high | milestones/M167-hint-refusal-pins.md |
 | M164 | The near-1 interval warning reads each row against 1e-12 divided by the ratings it averages, and names its rows | done | — | normal | milestones/archive/M164-near-one-bound-per-row.md |
