@@ -84,6 +84,7 @@ On a glmmTMB or lme4 fit, `d_study()` reads each projected curve's single-rating
 - 2026-10-19: T5 done: `devtools::check()` on the tree of b581bdd gave the raw line `Status: OK` (0 errors, 0 warnings, 0 notes); the claim-audit commit 6aaa692 after it changed comments, roxygen prose, the Rd and test names only, and the band-check file passed again on it (254 expectations, 0 failures). `devtools::test()` WARN 0, `lintr` no lints, `air format --check .` and the eight `data-raw/` steps pass (entries above). Status set to review.
 
 - 2026-10-19: resume: `/milestone-review M166` re-invoked after the first merge chip was interrupted with no answer; route (d), no PR; main still 908532f; `git diff 1192c19..HEAD` touches only this file, so the Review-section evidence at 1192c19 stands for the tree that merges, and the merge question is posed again.
+- 2026-10-19: step-7 approval: m166-d-study-band-checks approved for merge
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
