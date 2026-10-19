@@ -93,8 +93,8 @@
   positive definite Hessian. A Monte-Carlo interval draws from the covariance
   that the Hessian gives, and from a Hessian that is not positive definite
   the draws usually overflow. Only the kept fit's warnings and messages are
-  shown. Under `options(warn = 2)`, a failed fit's warnings are not shown, so
-  its own error is the one you see. On test data where the default starting
+  shown. Under `options(warn = 2)` or above, a failed first fit's warnings
+  are not shown, so its own error is the one you see. On test data where the default starting
   values of glmmTMB stopped at a false 0, the fit now reaches the ICC of the
   `lme4` engine. Under `ci_method = "montecarlo"` or `"bootstrap"`, a glmmTMB
   interval whose two limits are exactly equal is no longer reported.

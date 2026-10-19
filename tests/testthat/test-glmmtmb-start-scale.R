@@ -7,7 +7,8 @@
 # an ICC is unchanged when every score is multiplied by a constant, so a fit on
 # `score * 100` must match the fit on `score`; and the lme4 engine (a different
 # optimizer) must reach the same REML estimate. `scale_two_way()` lives in
-# helper-glmmtmb-frames.R, shared with test-glmmtmb-false-zero.R.
+# helper-glmmtmb-frames.R, shared with test-glmmtmb-false-zero.R and
+# test-glmmtmb-fit-conditions.R.
 
 scale_multilevel <- function(seed = 13L, n_c = 6L, n_s = 5L, n_r = 3L) {
   set.seed(seed)

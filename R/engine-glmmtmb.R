@@ -253,7 +253,8 @@ fit_glmmtmb_oneway <- function(data, call = rlang::caller_env()) {
 # glmmTMB's default start, M158), so the threshold is 1e-2. A retry on a fit
 # that was already at its optimum costs one fit. Its second fit can stop a hair
 # lower, so the second fit is kept only when its REML objective is lower by more
-# than `glmmtmb_keep_tol`, or when only its objective is finite (D-049); a
+# than `glmmtmb_keep_tol`, or when only its objective is finite (D-049), subject
+# to the Hessian condition below; a
 # smaller gain is optimizer noise and leaves the first fit, and the interval it
 # gives, in place. Nor does a gain replace a first fit whose Hessian is positive
 # definite with a second fit whose Hessian is not (`glmmtmb_second_wins()`,
@@ -375,8 +376,9 @@ glmmtmb_second_wins <- function(first, second) {
     (isTRUE(second$sdr$pdHess) || !isTRUE(first$sdr$pdHess))
 }
 
-# Fit a glmmTMB model (REML, scaled start), routing convergence warnings through
-# cli but keeping them non-fatal (PRINCIPLES.md #8). Shared by every design:
+# Fit a glmmTMB model (REML, scaled start), passing the kept fit's warnings and
+# messages on through cli, warnings non-fatal unless `options(warn)` is 2 or
+# above (PRINCIPLES.md #8). Shared by every design:
 # two-way, one-way, fixed-rater, and the multilevel designs (D1/D2/...). A fit
 # with a random-effect or residual SD below `glmmtmb_zero_sd` of sd(score) is
 # refit once from a second start (D-048), and the second fit is kept only when
