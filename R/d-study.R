@@ -35,6 +35,20 @@
 #' a bootstrap fit, at `m` = the observed rater count the band matches the
 #' fitted `ICC(*,k)` interval exactly.
 #'
+#' @section Checks on the band:
+#' On a glmmTMB or lme4 fit, whatever its `ci_method`, `d_study()` reads each
+#' curve's single-rating coefficient from the band's draws. That is the
+#' coefficient at one rater, and at one occasion on a within-cell replicate
+#' fit. Every projected row of the curve comes from the same draws. If the
+#' two limits of that coefficient's interval are exactly equal, `d_study()`
+#' refuses the band with an `intraclass_zero_width_interval` error, which is
+#' also an `intraclass_singular_fit` error. If the limits differ and the lower
+#' limit lies within 1e-12 of 1, `d_study()` returns the projection with an
+#' `intraclass_unresolved_interval` warning. Data with almost no residual
+#' variation can give such an interval. At a very large `m`, a projected row
+#' can print as `[1, 1]` through rounding. If its curve's single-rating limits
+#' differ, that row gets neither the error nor the warning.
+#'
 #' @section Projection is extrapolation:
 #' Projecting to an `m` you did not run is an **extrapolation**. Its
 #' trustworthiness depends on how well the variance components are pinned
@@ -635,8 +649,9 @@ d_study <- function(
 # are far from 1 (M166 plan probe). So `d_study()` reads each curve's
 # single-rating coefficient, at one rater and one occasion, from the same
 # draws as the band, and every projected row of that curve comes from those
-# draws. Equal finite limits abort with `refuse_zero_width()`, which gates
-# the check to glmmTMB and lme4 fits by the engine alone, whatever the fit's
+# draws. Equal finite limits abort with `refuse_zero_width()`; otherwise a
+# lower limit within 1e-12 of 1 warns once with `warn_unresolved_band()`.
+# Both gate to glmmTMB and lme4 fits by the engine alone, whatever the fit's
 # `ci_method`: an MPL fit's band is a Monte-Carlo band from the same draws. `intervals` and `estimands` are the single-rating intervals and
 # estimands; `engine` is the fit's engine name.
 check_band_single_rating <- function(
@@ -656,6 +671,7 @@ check_band_single_rating <- function(
            as the band."
     )
   )
+  warn_unresolved_band(intervals, estimands, engine)
   invisible(intervals)
 }
 

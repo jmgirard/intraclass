@@ -233,20 +233,7 @@ warn_unresolved_interval <- function(intervals, estimands, engine) {
   if (!isTRUE(engine$engine %in% c("glmmTMB", "lme4"))) {
     return(invisible(intervals))
   }
-  # The gap `1 - low` is compared, not `low` with `1 - bound / d`: from d of
-  # about 4500, `1 - bound / d` rounds to the largest double below 1 or to 1,
-  # and a lower limit there would not warn (M164 review). Above d of about
-  # 9000 the bound is below the smallest gap a double below 1 has, so only a
-  # lower limit of exactly 1 is near, and its equal limits abort first.
-  near <- vapply(
-    seq_along(intervals),
-    function(i) {
-      low <- intervals[[i]]$conf.low
-      d <- max(unlist(estimands[[i]]$error_divisors))
-      isTRUE(is.finite(low) && 1 - low < unresolved_interval_bound / d)
-    },
-    logical(1)
-  )
+  near <- near_one(intervals, estimands)
   n <- sum(near)
   if (n > 0L) {
     rows <- collapse_and(
@@ -273,6 +260,60 @@ warn_unresolved_interval <- function(intervals, estimands, engine) {
         i = "{cli::qty(n)}Data with almost no residual variation can give \\
              {?such an interval/such intervals}, so {?its width/their widths} \\
              may reflect rounding rather than your data.",
+        i = "Suppress the {.cls intraclass_unresolved_interval} warning class \\
+             to silence this."
+      ),
+      class = "intraclass_unresolved_interval"
+    )
+  }
+  invisible(intervals)
+}
+
+# Which intervals have a finite lower limit within 1e-12/d of 1, d the largest
+# error divisor of each interval's estimand (D-056). Shared by
+# `warn_unresolved_interval()` and `warn_unresolved_band()`. The gap
+# `1 - low` is compared, not `low` with `1 - bound / d`: from d of about 4500,
+# `1 - bound / d` rounds to the largest double below 1 or to 1, and a lower
+# limit there would not warn (M164 review). Above d of about 9000 the bound is
+# below the smallest gap a double below 1 has, so only a lower limit of
+# exactly 1 is near, and its equal limits abort first.
+near_one <- function(intervals, estimands) {
+  vapply(
+    seq_along(intervals),
+    function(i) {
+      low <- intervals[[i]]$conf.low
+      d <- max(unlist(estimands[[i]]$error_divisors))
+      isTRUE(is.finite(low) && 1 - low < unresolved_interval_bound / d)
+    },
+    logical(1)
+  )
+}
+
+# The near-1 warning for a `d_study()` band (D-058, M166). `intervals` are the
+# single-rating intervals that `check_band_single_rating()` reads, one per
+# curve, so d is 1 and the bound is 1e-12, the scale D-054 set it on. The
+# message says the coefficients it names are the single-rating coefficients
+# behind the projected curves, since a call need not report a one-rater row.
+# Gated to glmmTMB and lme4 fits, as `warn_unresolved_interval()` is.
+warn_unresolved_band <- function(intervals, estimands, engine) {
+  if (!isTRUE(engine$engine %in% c("glmmTMB", "lme4"))) {
+    return(invisible(intervals))
+  }
+  near <- near_one(intervals, estimands)
+  n <- sum(near)
+  if (n > 0L) {
+    rows <- collapse_and(
+      vapply(estimands[near], unresolved_row_name, character(1))
+    )
+    warn_intraclass(
+      c(
+        "{n} single-rating coefficient{?s} behind the projected curves \\
+         {?has a lower limit/have lower limits} near 1: {rows}.",
+        i = "{.fn d_study} reads each curve's coefficient at one rater, and at \\
+             one occasion on a replicate fit, from the same draws as the band. \\
+             A lower limit is near 1 when it lies within 1e-12 of 1.",
+        i = "Data with almost no residual variation can give such an interval, \\
+             so the band's width may reflect rounding rather than your data.",
         i = "Suppress the {.cls intraclass_unresolved_interval} warning class \\
              to silence this."
       ),

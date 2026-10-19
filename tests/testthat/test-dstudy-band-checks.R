@@ -313,6 +313,30 @@ test_that("resolved and ordinary fits give no d_study() warning (D-058 AC3)", {
   }
 })
 
+test_that("the band warning names every near coefficient and skips lavaan fits (D-058 AC3)", {
+  # Two single-rating coefficients, one per level, both within 1e-12 of 1,
+  # and a third far from 1.
+  ests <- lapply(c("subject", "cluster"), function(lv) {
+    icc_estimand(type = "agreement", multilevel = TRUE, level = lv)
+  })
+  ests[[3]] <- icc_estimand(type = "consistency")
+  near <- list(conf.low = 1 - 1e-13, conf.high = 1)
+  far <- list(conf.low = 0.2, conf.high = 0.9)
+  ivs <- list(near, near, far)
+  out <- bc_run(warn_unresolved_band(ivs, ests, list(engine = "lme4")))
+  expect_length(out$warnings, 1L)
+  expect_match(
+    bc_message(out$warnings[[1]]),
+    "2 single-rating coefficients behind the projected curves have lower limits near 1: ICC(A,1) at the subject level and ICC(A,1) at the cluster level.",
+    fixed = TRUE
+  )
+  expect_no_match(bc_message(out$warnings[[1]]), "ICC(C,1)", fixed = TRUE)
+  expect_length(
+    bc_run(warn_unresolved_band(ivs, ests, list(engine = "lavaan")))$warnings,
+    0L
+  )
+})
+
 # No reported number changes (D-058 AC4) ----------------------------------------
 
 # The four columns of each AC2 and AC3 call that returns, at `%.17g`, as the
