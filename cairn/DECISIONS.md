@@ -2278,3 +2278,34 @@ sentence is to be read as "usually aborts". D-057's heading says "never
 replaces" without its condition: the rule applies when both objectives are
 finite, as its Decision states. D-057's decision and reopening conditions
 stand.
+
+### D-059 (2026-10-19): the glmmTMB and lme4 re-raise passes R's converted warnings and stack overflows unchanged, and its message no longer says the data failed — supersedes D-053's re-raise rule in part
+
+**Context.** D-053 re-raises every error that is not an rlang error from a
+glmmTMB or lme4 engine function as `intraclass_singular_fit`, with a message
+that opens "The <engine> engine failed on these data." Under
+`options(warn = 2)`, R turns a fitting warning into such an error, so a warning
+on ordinary data reaches the caller labeled singular (M168 work log, plan
+probe). D-053's reopening condition was a user report, and none exists. The
+user chose at the M168 plan gate to reopen it.
+
+**Decision.** Two kinds of error now pass the re-raise unchanged. The first is
+R's conversion of a warning that the handler saw under `options(warn = 2)` or
+above, told apart by R's own translated conversion text and the warning's
+call. The second is an error of R's class `stackOverflowError`. Every other
+error that is not an rlang error is re-raised as before. The re-raised
+message's first line becomes "The <engine> engine stopped with an error.", and
+an unidentifiable variance component stays as one possible cause. The
+equal-limits refusal drops its example of scores that do not vary within
+subjects, which D-052 refuses before any fit. Rejected: re-raising converted
+warnings under a new class, because warn = 2 asks for R's own conversion.
+Rejected: telling allocation failures and package bugs apart, because R gives
+them a plain `simpleError` and only message text could separate them (D-022).
+
+**Consequences.** A converted warning or a stack overflow reaches the caller as
+an error with no package class. PRINCIPLES.md #8 asks for classed conditions;
+this is a stated exception, since the caller asked R for that error, or the
+error is R's own resource failure. Allocation failures and bugs in package
+code still reach the caller as `intraclass_singular_fit`, as D-053 recorded.
+D-053's other parts and the equal-limits rule stand. Reopened by a user who
+needs the converted warning caught by a package class.
