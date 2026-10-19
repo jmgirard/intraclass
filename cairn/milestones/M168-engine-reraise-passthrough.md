@@ -79,6 +79,7 @@ On the glmmTMB and lme4 engines, `icc()` stops labeling as a singular fit the en
 - 2026-10-19: amendment return: AC7 — "`devtools::document()` leaves no diff except the `Config/roxygen2/version:` line of `DESCRIPTION`. … Each `data-raw/check-*` script, run with no arguments from the repo root, exits 0, except `check-vignette-render-warnings.py`, whose input is a built pkgdown site rather than the repo."
 - 2026-10-19: verify at ba59748 (after af44e07): full suite (NOT_CRAN) 0 failed, 0 errors, 0 warnings, 2 skipped (vignettes not installed), 11434 passed; `devtools::check()` Status OK, 0/0/0; `document()` diff only `Config/roxygen2/version:` 8.1.0 -> 8.1.1, reverted; air clean; lintr 0. `check-abort-remedy-verdicts.R` re-running.
 - 2026-10-19: `check-abort-remedy-verdicts.R` at cf34368 exits 0 (52 cells, 0 broken promises); the other five non-excepted `check-*` scripts exit 0 at ba59748. Status set to review.
+- 2026-10-19: step-7 approval: m168-engine-reraise-passthrough approved for merge
 
 ## Decisions
 
