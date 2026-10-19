@@ -206,7 +206,7 @@ fz_keep <- function(o1, o2, pd1 = NULL, pd2 = NULL) {
 # The Hessian verdicts the keep rule can meet: `NA` and `NULL` are not TRUE.
 fz_pd <- list(TRUE, FALSE, NA, NULL)
 
-test_that("a second fit that fails the Hessian check never replaces a first that passes it (M165 AC1)", {
+test_that("with both objectives finite, a second fit that fails the Hessian check never replaces a first that passes it (M165 AC1)", {
   for (pd1 in fz_pd) {
     for (pd2 in fz_pd) {
       info <- paste0("first ", format(pd1), ", second ", format(pd2))
@@ -222,7 +222,7 @@ test_that("a second fit that fails the Hessian check never replaces a first that
   }
 })
 
-test_that("on real fits, a passing first fit is kept over a failing second fit (M165 AC2)", {
+test_that("on a real first fit, a passing first fit is kept over a failing second fit (M165 AC2)", {
   skip_if_not_installed("glmmTMB")
   d <- scale_two_way(11L)
   f <- fz_models$random$formula

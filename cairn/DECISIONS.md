@@ -2264,3 +2264,17 @@ D-054's and D-056's rules for `icc()` stand. Reopened by degenerate data
 whose projected rows have equal limits while the one-rater limits differ, or
 by a user report of the `d_study()` warning on data that are not near
 degenerate.
+
+### D-057 Amendment 1 (2026-10-18): the Monte-Carlo interval does not read `pdHess`, and D-057's rule holds only when both objectives are finite — corrects D-057's Context and heading, decision unchanged
+
+D-057's Context says "A Monte-Carlo interval needs that Hessian, so such a
+swap trades a reported interval for an abort." The M165 claim audit found
+that the interval does not read `sdr$pdHess`. It draws from the covariance
+that the Hessian gives. From a Hessian that is not positive definite that
+covariance is usually finite but indefinite, so the draws usually overflow and
+the interval aborts at the non-finite-draws guard, and from a singular
+Hessian it is `NA` and the interval aborts earlier (M165 work log). That
+sentence is to be read as "usually aborts". D-057's heading says "never
+replaces" without its condition: the rule applies when both objectives are
+finite, as its Decision states. D-057's decision and reopening conditions
+stand.

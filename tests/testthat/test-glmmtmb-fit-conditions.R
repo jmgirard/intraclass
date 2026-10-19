@@ -3,9 +3,10 @@
 # `fit_glmmtmb_ml_model()` can run two fits: the first, and a second start when
 # the first leaves an SD near zero (D-048). Only the fit it keeps describes the
 # result, so only that fit's warnings and messages are passed on. A first fit
-# that fails shows what it held, then its error, except that under
+# that fails signals what it held, then its error, except that under
 # `options(warn = 2)` or above its held warnings are not replayed, so the fit's
-# own error is the error the user gets.
+# own error is the error the user gets. Under `options(warn = 0)` R prints the
+# signalled warnings after the error; the tests read signal order.
 
 # A stub fit that signals two warnings and two messages, one of each with a
 # brace, then returns. `tag` makes each fit's texts distinct.
@@ -74,7 +75,7 @@ test_that("only the kept fit's warnings and messages reach the user (M165 AC3)",
   }
 })
 
-test_that("a failed first fit shows its held message and warning before its error (M165 AC3)", {
+test_that("a failed first fit signals its held message and warning before its error (M165 AC3)", {
   local_mocked_bindings(
     glmmtmb_reml = function(formula, data) {
       message("planted message")
@@ -96,10 +97,15 @@ test_that("a failed first fit shows its held message and warning before its erro
         invokeRestart("muffleMessage")
       }
     ),
-    error = function(e) e
+    error = function(e) {
+      seen <<- c(seen, "<error>")
+      e
+    }
   )
   expect_identical(fc_count(seen, "planted message"), 1L)
   expect_identical(fc_count(seen, "planted warning"), 1L)
+  # Both were signalled before the error reached the caller.
+  expect_identical(seen[length(seen)], "<error>")
   expect_identical(conditionMessage(cnd), "planted failure")
 })
 
@@ -149,7 +155,7 @@ test_that("under warn = 2 or 3, a failed first fit's own error is the error (M16
   }
 })
 
-test_that("under warn = 0 or 1, the held warning shows once before the same error (M165 AC4)", {
+test_that("under warn = 0 or 1, the held warning is signalled once, then the same error (M165 AC4)", {
   skip_if_not_installed("glmmTMB")
   for (warn in c(0, 1)) {
     out <- fc_icc(warn, muffle = TRUE)
