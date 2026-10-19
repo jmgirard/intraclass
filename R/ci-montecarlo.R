@@ -173,8 +173,8 @@ mc_interval <- function(
 # meet the boundary through their own guards (D-004), and a lavaan fit is
 # pinned as not refused here. lme4 intervals that print as [1, 1] on near-flat
 # data have limits that differ in the last digits, so they are reported, with
-# the warning of `warn_unresolved_interval()` below (D-054, D-056). Shared by `mc_ci()`
-# and `bootstrap_ci()`.
+# the warning of `warn_unresolved_interval()` below (D-054, D-056). Shared by `mc_ci()`,
+# `bootstrap_ci()`, and `check_band_single_rating()` of `d_study()` (D-058).
 refuse_zero_width <- function(
   intervals,
   engine,
