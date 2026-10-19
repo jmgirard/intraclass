@@ -253,9 +253,12 @@ fit_glmmtmb_oneway <- function(data, call = rlang::caller_env()) {
 # glmmTMB's default start, M158), so the threshold is 1e-2. A retry on a fit
 # that was already at its optimum costs one fit. Its second fit can stop a hair
 # lower, so the second fit is kept only when its REML objective is lower by more
-# than `glmmtmb_keep_tol`, or when only its objective is finite (D-049); a
+# than `glmmtmb_keep_tol`, or when only its objective is finite (D-049), subject
+# to the Hessian condition below; a
 # smaller gain is optimizer noise and leaves the first fit, and the interval it
-# gives, in place. The second start puts each
+# gives, in place. Nor does a gain replace a first fit whose Hessian is positive
+# definite with a second fit whose Hessian is not (`glmmtmb_second_wins()`,
+# D-057). The second start puts each
 # such SD at sd(score), every other SD at the even split of `glmmtmb_start()`,
 # and the fixed effects at the first fit's estimates when all are finite (else
 # glmmTMB's own fixed-effect start). Starting the other SDs at their fitted
@@ -294,62 +297,99 @@ glmmtmb_second_fit <- function(formula, data, start) {
   glmmTMB::glmmTMB(formula, data = data, REML = TRUE, start = start)
 }
 
-# Evaluate a fit, holding its warnings back so that only the kept fit's reach
-# the user. An error is never caught here: it propagates from where the fit
-# signalled it, with its stack intact. `icc()` then re-raises an error that is
-# not an rlang error as `intraclass_singular_fit`, with this error as its
-# parent (`reraise_engine_error()`, D-053). `on_error`, when given, receives the
-# warnings held back so far, at the moment the error is signalled, so a failed
-# first fit still shows them before its error.
+# Evaluate a fit, holding its warnings and messages back, in the order they
+# were signalled, so that only the kept fit's reach the user (M165). An error is
+# never caught here: it propagates from where the fit signalled it, with its
+# stack intact. `icc()` then re-raises an error that is not an rlang error as
+# `intraclass_singular_fit`, with this error as its parent
+# (`reraise_engine_error()`, D-053). `on_error`, when given, receives the
+# conditions held back so far, at the moment the error is signalled, so a failed
+# first fit still signals them before its error (under `options(warn = 0)` R
+# prints the warnings after the error).
 glmmtmb_capture <- function(expr, on_error = NULL) {
-  warnings <- list()
+  conditions <- list()
   value <- withCallingHandlers(
     expr,
     warning = function(w) {
-      warnings[[length(warnings) + 1L]] <<- w
+      conditions[[length(conditions) + 1L]] <<- w
       invokeRestart("muffleWarning")
     },
+    message = function(m) {
+      conditions[[length(conditions) + 1L]] <<- m
+      invokeRestart("muffleMessage")
+    },
     error = function(e) {
-      if (!is.null(on_error)) on_error(warnings)
+      if (!is.null(on_error)) on_error(conditions)
     }
   )
-  list(value = value, warnings = warnings)
+  list(value = value, conditions = conditions)
 }
 
-# Route captured fitting warnings through cli, non-fatal (PRINCIPLES.md #8). The
-# warning's text is passed as a value, so braces in it are not read as cli
-# markup.
-glmmtmb_warn <- function(warnings) {
-  for (w in warnings) {
-    text <- conditionMessage(w)
-    cli::cli_warn(c(
-      "The {.pkg glmmTMB} engine reported a fitting warning.",
-      i = "{text}"
-    ))
+# Pass held fitting warnings and messages on through cli, warnings non-fatal
+# unless `options(warn)` is 2 or above (PRINCIPLES.md #8). The text is passed as a value, so braces in it are not
+# read as cli markup. With `warnings = FALSE` only the messages are passed on.
+glmmtmb_replay <- function(conditions, warnings = TRUE) {
+  for (cnd in conditions) {
+    text <- sub("\n$", "", conditionMessage(cnd))
+    if (inherits(cnd, "warning")) {
+      if (warnings) {
+        cli::cli_warn(c(
+          "The {.pkg glmmTMB} engine reported a fitting warning.",
+          i = "{text}"
+        ))
+      }
+    } else {
+      cli::cli_inform(c(
+        "The {.pkg glmmTMB} engine reported a message.",
+        i = "{text}"
+      ))
+    }
   }
 }
 
-# Whether the second fit replaces the first (D-049): only when both REML
-# objectives are finite and the second is lower by more than `glmmtmb_keep_tol`,
-# or when only the second is finite.
-glmmtmb_second_wins <- function(o1, o2) {
+# What a failed first fit signals before its error: its held messages, and its
+# held warnings unless `options(warn = 2)` or above would turn the first of them
+# into an error that hides the fit's own (M165).
+glmmtmb_replay_failed <- function(conditions) {
+  glmmtmb_replay(conditions, warnings = getOption("warn", 0) < 2)
+}
+
+# Whether the second fit replaces the first. When both REML objectives are
+# finite, only when the second is lower by more than `glmmtmb_keep_tol` (D-049)
+# and the swap does not trade a Hessian that is positive definite for one that
+# is not: the second fit's `sdr$pdHess` is TRUE, or the first fit's is not
+# (D-057). `NA` and `NULL` count as not TRUE. The Monte-Carlo interval draws
+# from the covariance this Hessian gives, and when the Hessian is not positive
+# definite the draws usually overflow and the interval aborts. When
+# only the second objective is finite, it replaces the first whatever the
+# Hessians, since a first fit with no finite objective is never kept (D-049).
+glmmtmb_second_wins <- function(first, second) {
+  o1 <- first$fit$objective
+  o2 <- second$fit$objective
   if (!isTRUE(is.finite(o2))) {
     return(FALSE)
   }
-  !isTRUE(is.finite(o1)) || o2 < o1 - glmmtmb_keep_tol
+  if (!isTRUE(is.finite(o1))) {
+    return(TRUE)
+  }
+  o2 < o1 - glmmtmb_keep_tol &&
+    (isTRUE(second$sdr$pdHess) || !isTRUE(first$sdr$pdHess))
 }
 
-# Fit a glmmTMB model (REML, scaled start), routing convergence warnings through
-# cli but keeping them non-fatal (PRINCIPLES.md #8). Shared by every design:
+# Fit a glmmTMB model (REML, scaled start), passing the kept fit's warnings and
+# messages on through cli, warnings non-fatal unless `options(warn)` is 2 or
+# above (PRINCIPLES.md #8). Shared by every design:
 # two-way, one-way, fixed-rater, and the multilevel designs (D1/D2/...). A fit
 # with a random-effect or residual SD below `glmmtmb_zero_sd` of sd(score) is
 # refit once from a second start (D-048), and the second fit is kept only when
-# `glmmtmb_second_wins()` says so (D-049); a second fit that fails leaves the
-# first in place. A first fit that fails signals its warnings, then its error.
+# `glmmtmb_second_wins()` says so (D-049, D-057); a second fit that fails leaves the
+# first in place. Only the kept fit's warnings and messages are passed on. A
+# first fit that fails signals its messages, and its warnings unless
+# `options(warn)` is 2 or above, then its error (`glmmtmb_replay_failed()`).
 fit_glmmtmb_ml_model <- function(formula, data) {
   kept <- glmmtmb_capture(
     glmmtmb_reml(formula, data),
-    on_error = glmmtmb_warn
+    on_error = glmmtmb_replay_failed
   )
   start <- tryCatch(
     glmmtmb_retry_start(kept$value, data),
@@ -360,17 +400,11 @@ fit_glmmtmb_ml_model <- function(formula, data) {
       glmmtmb_capture(glmmtmb_second_fit(formula, data, start)),
       error = function(e) NULL
     )
-    if (
-      !is.null(second) &&
-        glmmtmb_second_wins(
-          kept$value$fit$objective,
-          second$value$fit$objective
-        )
-    ) {
+    if (!is.null(second) && glmmtmb_second_wins(kept$value, second$value)) {
       kept <- second
     }
   }
-  glmmtmb_warn(kept$warnings)
+  glmmtmb_replay(kept$conditions)
   kept$value
 }
 

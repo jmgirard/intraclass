@@ -88,7 +88,13 @@
   the fit now runs once more from a second starting point. The engine is the
   software that does the fitting. If the second fit is better than the first
   by a set margin, or the first has no finite result, it replaces the first.
-  Otherwise the first fit is kept. On test data where the default starting
+  Otherwise the first fit is kept. A second fit whose Hessian is not positive
+  definite does not replace a first fit that has a finite result and a
+  positive definite Hessian. A Monte-Carlo interval draws from the covariance
+  that the Hessian gives, and from a Hessian that is not positive definite
+  the draws usually overflow. Only the kept fit's warnings and messages are
+  shown. Under `options(warn = 2)` or above, a failed first fit's warnings
+  are not shown, so its own error is the one you see. On test data where the default starting
   values of glmmTMB stopped at a false 0, the fit now reaches the ICC of the
   `lme4` engine. Under `ci_method = "montecarlo"` or `"bootstrap"`, a glmmTMB
   interval whose two limits are exactly equal is no longer reported.

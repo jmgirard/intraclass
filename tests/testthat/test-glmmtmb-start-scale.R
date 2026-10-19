@@ -7,7 +7,8 @@
 # an ICC is unchanged when every score is multiplied by a constant, so a fit on
 # `score * 100` must match the fit on `score`; and the lme4 engine (a different
 # optimizer) must reach the same REML estimate. `scale_two_way()` lives in
-# helper-glmmtmb-frames.R, shared with test-glmmtmb-false-zero.R.
+# helper-glmmtmb-frames.R, shared with test-glmmtmb-false-zero.R and
+# test-glmmtmb-fit-conditions.R.
 
 scale_multilevel <- function(seed = 13L, n_c = 6L, n_s = 5L, n_r = 3L) {
   set.seed(seed)
@@ -120,4 +121,27 @@ test_that("multilevel glmmTMB ICCs do not depend on the score scale", {
   # the two optimizer runs stop slightly apart: looser tolerance than above.
   expect_gt(big_fit$components$subject, 1)
   expect_equal(estimates(big_fit), estimates(small_fit), tolerance = 1e-3)
+})
+
+test_that("scale_two_way() leaves the global random-number state as it found it (M165)", {
+  withr::local_seed(99)
+  before <- get(".Random.seed", envir = globalenv())
+  scale_two_way()
+  expect_identical(get(".Random.seed", envir = globalenv()), before)
+
+  withr::with_preserve_seed({
+    suppressWarnings(rm(".Random.seed", envir = globalenv()))
+    scale_two_way()
+    expect_false(exists(".Random.seed", envir = globalenv(), inherits = FALSE))
+  })
+
+  # The frames are the ones the helper drew before M165, when it called
+  # set.seed() itself.
+  for (seed in c(1L, 11L, 40L)) {
+    old <- withr::with_preserve_seed({
+      set.seed(seed)
+      scale_two_way_draw(17L, 2L)
+    })
+    expect_identical(scale_two_way(seed), old, info = paste("seed", seed))
+  }
 })

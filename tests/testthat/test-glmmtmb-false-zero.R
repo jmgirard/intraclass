@@ -8,7 +8,9 @@
 # glmmtmb_start() to return NULL, so they check the second start on its own:
 # a fit that leaves an SD below 1e-2 of sd(score) is refit once from another start
 # and the second fit is kept only when its REML objective is lower by more than
-# 1e-6, or when only its objective is finite (D-049).
+# 1e-6, or when only its objective is finite (D-049). With both objectives
+# finite, it is also not kept when its Hessian is not positive definite and the
+# first fit's is (D-057).
 #
 # Two oracles: the lme4 engine (a different optimizer on the same REML criterion)
 # and scale invariance (the same fit on the unscaled scores).
@@ -180,21 +182,79 @@ test_that("a second fit that raises an error leaves the first fit in place (AC2)
 })
 
 # Which fit is kept, at the seams: the first and second fits are stubs that carry
-# only an objective and a label, so the keep rule is read with no optimizer.
-fz_keep <- function(o1, o2) {
+# only an objective, a Hessian verdict (`sdr$pdHess`) and a label, so the keep
+# rule is read with no optimizer. A stub with no verdict has `pdHess` NULL.
+fz_keep <- function(o1, o2, pd1 = NULL, pd2 = NULL) {
   local_mocked_bindings(
     glmmtmb_reml = function(formula, data) {
-      list(fit = list(objective = o1), which = "first")
+      list(
+        fit = list(objective = o1),
+        sdr = list(pdHess = pd1),
+        which = "first"
+      )
     },
     glmmtmb_retry_start = function(fit, data) list(),
     glmmtmb_second_fit = function(formula, data, start) {
-      list(fit = list(objective = o2), which = "second")
+      list(
+        fit = list(objective = o2),
+        sdr = list(pdHess = pd2),
+        which = "second"
+      )
     }
   )
   fit_glmmtmb_ml_model(score ~ 1, data.frame(score = 1:3))$which
 }
 
-test_that("the second fit is kept only past the 1e-6 margin, or over a non-finite first fit (AC2)", {
+# The Hessian verdicts the keep rule can meet: `NA` and `NULL` are not TRUE.
+fz_pd <- list(TRUE, FALSE, NA, NULL)
+
+test_that("with both objectives finite, a second fit that fails the Hessian check never replaces a first that passes it (M165 AC1)", {
+  for (pd1 in fz_pd) {
+    for (pd2 in fz_pd) {
+      info <- paste0("first ", deparse(pd1), ", second ", deparse(pd2))
+      # Both objectives finite: past the margin, the second fit is kept unless
+      # it would trade a passing Hessian for one that is not (D-057).
+      past <- if (isTRUE(pd2) || !isTRUE(pd1)) "second" else "first"
+      expect_identical(fz_keep(100, 100 - 1e-3, pd1, pd2), past, info = info)
+      expect_identical(fz_keep(100, 100 - 1e-7, pd1, pd2), "first", info = info)
+      # Only one objective finite: D-049's rule, whatever the verdicts.
+      expect_identical(fz_keep(NaN, 100, pd1, pd2), "second", info = info)
+      expect_identical(fz_keep(100, NaN, pd1, pd2), "first", info = info)
+    }
+  }
+})
+
+test_that("on a real first fit, a passing first fit is kept over a failing second fit (M165 AC2)", {
+  skip_if_not_installed("glmmTMB")
+  d <- scale_two_way(11L)
+  f <- fz_models$random$formula
+  for (pd2 in c(FALSE, TRUE)) {
+    first <- NULL
+    second <- NULL
+    local_mocked_bindings(
+      glmmtmb_retry_start = function(fit, data) {
+        first <<- fit
+        list()
+      },
+      glmmtmb_second_fit = function(formula, data, start) {
+        copy <- first
+        copy$fit$objective <- copy$fit$objective - 1e-3
+        copy$sdr$pdHess <- pd2
+        second <<- copy
+        copy
+      }
+    )
+    kept <- suppressMessages(suppressWarnings(fit_glmmtmb_ml_model(f, d)))
+    expect_true(isTRUE(first$sdr$pdHess))
+    if (pd2) {
+      expect_identical(kept, second)
+    } else {
+      expect_identical(kept, first)
+    }
+  }
+})
+
+test_that("with no Hessian verdicts, the second fit is kept only past the 1e-6 margin, or over a non-finite first fit (AC2)", {
   expect_identical(fz_keep(100, 100 - 5e-7), "first")
   expect_identical(fz_keep(100, 100 - 2e-6), "second")
   expect_identical(fz_keep(100, 100 + 1), "first")
@@ -255,7 +315,7 @@ test_that("a first fit's error reaches the caller from inside the fit, unchanged
 
 test_that("a fitting warning that contains braces reaches the user verbatim (M158 review)", {
   expect_warning(
-    glmmtmb_warn(list(simpleWarning("bad {brace} in a message"))),
+    glmmtmb_replay(list(simpleWarning("bad {brace} in a message"))),
     "bad {brace} in a message",
     fixed = TRUE
   )
