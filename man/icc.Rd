@@ -304,13 +304,16 @@ each such point estimate is below \code{1e-8}. Nothing is clamped and no error i
 raised, and in that sweep's cells with real between-subject signal the
 interval contains its point.
 Under \code{"montecarlo"} or \code{"bootstrap"} on the \code{"glmmTMB"} and \code{"lme4"}
-engines, some intervals near 1 come with a warning. An interval whose
-lower limit lies within 1e-12 of 1 is reported with an
-\code{intraclass_unresolved_interval} warning. Data with almost no residual
+engines, some intervals near 1 come with a warning. For a single-rating
+row, an interval whose lower limit lies within 1e-12 of 1 is reported with
+an \code{intraclass_unresolved_interval} warning. For a row that averages
+ratings over raters, occasions or both, the bound is 1e-12 divided by the
+number of ratings averaged. On unbalanced data the number of raters is an
+effective number. For a numeric \code{unit} it is the projected number of
+raters. The warning names its rows. Data with almost no residual
 variation can give such an interval, and its width can then reflect
 rounding rather than the data. Correct intervals from scores with very
-little noise can also get the warning. This happens at larger noise for
-average-rater rows, whose lower limits lie nearer 1.
+little noise can also get the warning.
 \code{"posterior"} is the percentile \strong{credible} interval from the Bayesian
 engine's posterior draws. It is the forced default for, and available only
 with, \code{engine = "brms"}, and \code{"brms"} requires it. The other methods do not
