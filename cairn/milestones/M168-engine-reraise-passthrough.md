@@ -1,6 +1,6 @@
 # M168: The engine re-raise passes converted warnings and stack overflows unchanged
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -46,7 +46,7 @@ On the glmmTMB and lme4 engines, `icc()` stops labeling as a singular fit the en
 - [x] T3: Reword the re-raised message. The first line is "The {.pkg {engine}} engine stopped with an error.", and one bullet keeps the unidentifiable variance component as one possible cause. Check each sentence with `data-raw/condition-text-profile.R` and `cairn/doctrine/prose-style.md`. Extend the existing re-raise test for AC4.
 - [x] T4: Delete the "for example" clause from the third bullet of `refuse_zero_width()` (`R/ci-montecarlo.R:195`). Add the AC5 assertions to the existing equal-limits tests in `test-glmmtmb-false-zero.R` and `test-dstudy-band-checks.R`. Run `test-boundary-abort-hint.R` again, because it pins the site of this refusal.
 - [x] T5: Edit `?icc` (`R/icc.R:231`) and the development NEWS bullet that begins "On the glmmTMB and lme4 engines, an engine error that does not come from `rlang`". Add no new bullet. Run `devtools::document()`. In DESIGN.md, update the Classed-deferral line (`cairn/DESIGN.md:229`) and the glmmTMB and lme4 rows of the Boundary-fit policy to cite D-059. If a `?icc` sentence carries a trigger word, add its row to `data-raw/mpl-doc-claims.tsv` (LESSONS M130).
-- [ ] T6: Run the AC7 gate.
+- [x] T6: Run the AC7 gate.
 
 ## Work log
 
@@ -71,6 +71,7 @@ On the glmmTMB and lme4 engines, `icc()` stops labeling as a singular fit the en
 - 2026-10-19: `data-raw/check-vignette-render-warnings.py` exits 1 on the gitignored local `docs/` build of 2026-09-23 (a TMB version-skew warning from this machine's package set); the other six `check-*` scripts exit 0. The pkgdown workflow (`.github/workflows/pkgdown.yaml:89-90`) runs it on pull requests against a fresh build, after rebuilding glmmTMB against the runner's TMB.
 - 2026-10-19: full suite at f05b20c (NOT_CRAN): 0 failed, 0 errors, 0 warnings, 2 skipped (vignettes not installed), 11424 passed. T2 to T5 checked off.
 - 2026-10-19: claim audit: 24 claims read, 3 corrected — R/abort.R, NEWS.md. The roxygen now says the handler keeps the last warning, that a conversion cut at `warning.length` is re-raised (probe: a 2000-character warning gave a 1041-character error), and that bugs pass or are re-raised by class, not "a plain `simpleError`". The NEWS pass-through sentence moved after "vary only by rater", where "them" had pointed at it. Edits are comments and NEWS only, made while `devtools::check()` ran on f05b20c's successor.
+- 2026-10-19: T6: `devtools::check()` on the tarball built before 00fba5b (its edits are a `@noRd` comment and NEWS): Status OK, 0 errors, 0 warnings, 0 notes. `air format --check .` clean, `lintr::lint_package()` 0 lints. `devtools::document()` at 00fba5b changes only `Config/roxygen2/version` (local roxygen2 8.1.1), reverted. Data-raw checkers as logged above. Status set to review.
 
 ## Decisions
 
