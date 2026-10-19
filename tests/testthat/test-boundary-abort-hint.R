@@ -10,6 +10,12 @@
 #   A  R/ci-montecarlo.R:43   "fitted parameter covariance is not finite"  (rmvn)
 #   B  R/ci-montecarlo.R:124  "draws were non-finite"                      (mc_interval)
 #   C  R/ci-bootstrap.R:48    "refits converged"                           (bootstrap_ci)
+#
+# A fourth site came later (M158; D-049, D-053): the equal-limits refusal of
+# `refuse_zero_width()`, called from `mc_ci()` and `bootstrap_ci()`. Its class
+# `intraclass_zero_width_interval` also carries `intraclass_singular_fit`, and
+# `bh_site()` labels it Z (M167):
+#   Z  R/ci-montecarlo.R:178  "lower and upper limits are equal"   (refuse_zero_width)
 
 # ---- Shared boundary fixtures -----------------------------------------------
 # sigma^2_subject driven to ~0 with a healthy error variance: the cell where the
@@ -98,6 +104,11 @@ bh_site <- function(msg) {
   }
   if (grepl("refits converged", m, fixed = TRUE)) {
     return("C")
+  }
+  # The equal-limits refusal of `refuse_zero_width()` (D-049, D-053), which
+  # carries `intraclass_singular_fit` too.
+  if (grepl("lower and upper limits are equal", m, fixed = TRUE)) {
+    return("Z")
   }
   "other"
 }
@@ -207,12 +218,14 @@ test_that("a near-zero-variance dataset aborts through the DEFAULT MC path (AC1)
   expect_gt(sum(ow != "ok"), 0L)
   expect_gt(sum(tw != "ok"), 0L)
 
-  # Every abort reached is a Monte-Carlo site (A or B), never the bootstrap site.
+  # Every abort reached is a Monte-Carlo site (A or B), never the bootstrap site
+  # and never the equal-limits refusal (Z).
   expect_setequal(
     setdiff(unique(c(ow, tw)), "ok"),
     intersect(c("A", "B"), c(ow, tw))
   )
   expect_false("C" %in% c(ow, tw))
+  expect_false("Z" %in% c(ow, tw))
   expect_false("other" %in% c(ow, tw))
 
   # Site B (non-finite draws) is the dominant one -- the site the hint most needs.
@@ -2936,4 +2949,102 @@ test_that("no interval computed during verification reaches the message (AC5)", 
       length(num_tokens(base))
     )
   }
+})
+
+# ---- The equal-limits refusal makes a candidate unusable (M167) ---------------
+# `mc_ci()` and `bootstrap_ci()` refuse an interval whose two limits are finite
+# and exactly equal on a glmmTMB or lme4 fit (D-049, D-053), and
+# `boundary_method_usable()` catches that abort as "unusable". These stubs put
+# every draw and every refit at subject = residual = 1, so the one-way
+# single-rating ICC is 0.5 on each, and the interval is [0.5, 0.5]. With the
+# refusal removed, that interval passes `boundary_interval_usable()` at n0 = 3,
+# so the refusal is the only thing that makes the candidate unusable.
+hr_stub <- function(engine) {
+  list(
+    engine = engine,
+    estimate = c(a = 0, b = 0),
+    vcov = matrix(0, 2, 2),
+    to_components = function(par) {
+      n <- ncol(par)
+      list(subject = rep(1, n), residual = rep(1, n))
+    },
+    simulate_refit = function(n, seed = NULL) {
+      rbind(subject = rep(1, n), residual = rep(1, n))
+    }
+  )
+}
+
+hr_estimands <- list(icc_estimand(oneway = TRUE))
+
+hr_usable <- function(method, engine) {
+  boundary_method_usable(
+    method,
+    df = NULL,
+    estimands = hr_estimands,
+    conf_level = 0.95,
+    n0 = 3,
+    engine = hr_stub(engine)
+  )
+}
+
+test_that("an equal-limits refusal makes montecarlo and bootstrap unusable on glmmTMB and lme4", {
+  for (engine in c("glmmTMB", "lme4")) {
+    # The stubs reach the refusal itself, not another abort (failure identity).
+    expect_error(
+      mc_ci(hr_stub(engine), hr_estimands, mc_samples = 200L, seed = 1),
+      class = "intraclass_zero_width_interval"
+    )
+    expect_error(
+      bootstrap_ci(hr_stub(engine), hr_estimands, boot_samples = 50L, seed = 1),
+      class = "intraclass_zero_width_interval"
+    )
+    for (method in c("montecarlo", "bootstrap")) {
+      expect_false(hr_usable(method, engine))
+    }
+  }
+  # Control: with the refusal replaced by a pass-through, the same calls are
+  # usable, so the refusal is what made them unusable above.
+  local({
+    local_mocked_bindings(
+      refuse_zero_width = function(
+        intervals,
+        engine,
+        call = rlang::caller_env(),
+        hint = character(0)
+      ) {
+        invisible(intervals)
+      }
+    )
+    for (engine in c("glmmTMB", "lme4")) {
+      for (method in c("montecarlo", "bootstrap")) {
+        expect_true(hr_usable(method, engine))
+      }
+    }
+  })
+})
+
+test_that("bh_site() labels the equal-limits refusal, so the M93 sweep can name it", {
+  for (engine in c("glmmTMB", "lme4")) {
+    for (fn in c("mc", "boot")) {
+      e <- tryCatch(
+        if (fn == "mc") {
+          mc_ci(hr_stub(engine), hr_estimands, mc_samples = 200L, seed = 1)
+        } else {
+          bootstrap_ci(
+            hr_stub(engine),
+            hr_estimands,
+            boot_samples = 50L,
+            seed = 1
+          )
+        },
+        intraclass_zero_width_interval = function(e) e
+      )
+      expect_s3_class(e, "intraclass_zero_width_interval")
+      # The class `bh_probe()` catches, so the label is reachable there.
+      expect_s3_class(e, "intraclass_singular_fit")
+      expect_identical(bh_site(conditionMessage(e)), "Z")
+    }
+  }
+  # An unrelated message still reads as "other".
+  expect_identical(bh_site("The model could not be fitted."), "other")
 })
