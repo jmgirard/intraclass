@@ -91,3 +91,34 @@
 <!-- owner: implement / review · append-only; milestone-local -->
 
 ## Review
+
+Pass 1 (2026-10-18), on branch head 5c1d0d7, level with origin/main b55567d. Copilot round off.
+
+Consistency gate: `cairn_validate.py` all checks passed. `devtools::document()` no diff. `lintr::lint_package()` 0 lints. `air format --check .` passes. All eight `python3 data-raw/` steps of lint.yaml exit 0. `pkgdown::check_pkgdown()` no problems. README.Rmd untouched by the diff. NEWS.md carries the change in the development second-start entry. No new top-level file. No principle changed, so `cairn_impact` skipped.
+
+spawned: diff-bug, blame-history, prior-review, ripple
+
+- diff-bug #1: replayed messages pass through cli inline formatting, so multi-line or aligned glmmTMB text is flattened — follow-up, row "M165 review follow-ups on the glmmTMB condition replay".
+- diff-bug #2: replayed messages lose their original class (`packageStartupMessage`, deprecation) — follow-up, same row.
+- diff-bug #3: `invokeRestart("muffleMessage")` errors on a message signalled with no muffle restart — follow-up, same row (the warning branch on main had the same exposure).
+- diff-bug #4: the failed-first-fit AC3 test would also pass on main — reject, planned change: that clause pins behavior M165 keeps, so a test of it cannot fail on main; the discriminating AC3 test is `fc_seen`, which fails on main.
+- diff-bug #5: the NEWS warn sentence should name the first fit and say 2 or above — fix now.
+- diff-bug #6: the same-frame check in `test-glmmtmb-start-scale.R` compares two calls of `scale_two_way_draw()` — reject, false as a defect: the diff moves the draw body unchanged, and the check certifies `with_rng_seed()` against `set.seed()`, which is the change.
+- diff-bug #7: `scale_multilevel()` in `test-glmmtmb-start-scale.R` still calls `set.seed()` — follow-up, same row.
+- diff-bug #8: `test-glmmtmb-start-scale.R:9-10` names only one other user of `scale_two_way()` — fix now.
+- diff-bug #9: the AC1 test's `info` label reads empty for `NULL` cells — fix now.
+- diff-bug #10: two comment lines over 80 characters — reject, style (air and lintr pass).
+- diff-bug #11: bootstrap refits print glmmTMB messages unsuppressed (pre-existing) — follow-up, same row.
+- blame-history #1: a false-zero first fit with a positive-definite Hessian is now kept over a lower, failing second fit — reject, planned change: the trade the user chose at the plan gate (D-057, which names it as a reopening condition); the M158 grid test "the second start reaches the REML optimum on a planted false zero" passes in this pass's suite.
+- blame-history #2: under warn >= 2 a failed first fit's warnings are dropped — reject, planned change (AC4, NEWS).
+- blame-history #3: messages are now held and replayed after the fit under a new header — reject, planned change (Scope item (e)).
+- blame-history #4: under warn = 2 a kept fit's replayed warning becomes the error and is relabeled singular (pre-existing) — follow-up, already item (a) of "M162 review follow-ups on the engine re-raise".
+- blame-history #5: M158's "shown before its error" wording — reject, already corrected on the branch by the claim audit.
+- blame-history #6: `$sdr$pdHess` on an atomic `sdr` — reject, false: glmmTMB sets `sdr` to NULL or an sdreport list.
+- prior-review #1: a first fit with `NA` or `NULL` `pdHess` can be replaced by a failing second fit — reject, planned change (D-057, AC1).
+- ripple #1: the ROADMAP row "M158 review follow-ups on the glmmTMB boundary path" still lists items (a), (e), (f) — reject, planned change: step 9 hygiene narrows the row.
+- ripple #2: `test-glmmtmb-false-zero.R:9-11` header states the keep rule without the Hessian condition — fix now.
+- ripple #3: test name "kept only past the 1e-6 margin, or over a non-finite first fit" omits the Hessian condition — fix now.
+- ripple #4: comment above `glmmtmb_keep_tol` states the rule before the added Hessian sentence — fix now (one clause).
+- ripple #5: `fit_glmmtmb_ml_model()` header says it routes "convergence warnings" — fix now.
+- ripple #6: condition counts in `test-n-o-disposition-grid.R` could change — reject if this pass's suite passes that file (see AC6 line).
