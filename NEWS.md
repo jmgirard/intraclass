@@ -1,5 +1,16 @@
 # intraclass (development version)
 
+* On glmmTMB and lme4 fits, `d_study()` now checks its interval band. It
+  reads each curve's single-rating coefficient from the band's draws, at one
+  rater and one occasion. If that coefficient's two limits are exactly equal,
+  `d_study()` refuses the band with an `intraclass_zero_width_interval` error.
+  If the limits differ and the lower limit lies within 1e-12 of 1, `d_study()`
+  warns with `intraclass_unresolved_interval`. At a very large `m`, a projected
+  row can print as [1, 1] through rounding. The checks read only the
+  single-rating interval, so such a row raises neither the error nor the
+  warning by itself. Before, `d_study()`
+  applied neither check. The projected numbers are unchanged.
+
 * On the glmmTMB and lme4 engines, `ci_method = "montecarlo"` and
   `"bootstrap"` now warn about some intervals near 1. For a single-rating row,
   an interval whose lower limit lies within 1e-12 of 1 is now reported with an

@@ -129,6 +129,23 @@ model on simulated data many times, reprojects its stored resamples. So on
 a bootstrap fit, at \code{m} = the observed rater count the band matches the
 fitted \verb{ICC(*,k)} interval exactly.
 }
+\section{Checks on the band}{
+
+On a glmmTMB or lme4 fit, whatever its \code{ci_method}, \code{d_study()} reads each
+curve's single-rating coefficient from the band's draws. That is the
+coefficient at one rater, and at one occasion on a within-cell replicate
+fit. Every projected row of the curve comes from the same draws. If the
+two limits of that coefficient's interval are exactly equal, \code{d_study()}
+refuses the band with an \code{intraclass_zero_width_interval} error, which is
+also an \code{intraclass_singular_fit} error. If the limits differ and the lower
+limit lies within 1e-12 of 1, \code{d_study()} returns the projection with an
+\code{intraclass_unresolved_interval} warning. Data with almost no residual
+variation can give such an interval. At a very large \code{m}, a projected row
+can print as \verb{[1, 1]} through rounding. The checks read only the
+single-rating interval, so such a row raises neither the error nor the
+warning by itself.
+}
+
 \section{Projection is extrapolation}{
 
 Projecting to an \code{m} you did not run is an \strong{extrapolation}. Its

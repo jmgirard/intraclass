@@ -35,6 +35,21 @@
 #' a bootstrap fit, at `m` = the observed rater count the band matches the
 #' fitted `ICC(*,k)` interval exactly.
 #'
+#' @section Checks on the band:
+#' On a glmmTMB or lme4 fit, whatever its `ci_method`, `d_study()` reads each
+#' curve's single-rating coefficient from the band's draws. That is the
+#' coefficient at one rater, and at one occasion on a within-cell replicate
+#' fit. Every projected row of the curve comes from the same draws. If the
+#' two limits of that coefficient's interval are exactly equal, `d_study()`
+#' refuses the band with an `intraclass_zero_width_interval` error, which is
+#' also an `intraclass_singular_fit` error. If the limits differ and the lower
+#' limit lies within 1e-12 of 1, `d_study()` returns the projection with an
+#' `intraclass_unresolved_interval` warning. Data with almost no residual
+#' variation can give such an interval. At a very large `m`, a projected row
+#' can print as `[1, 1]` through rounding. The checks read only the
+#' single-rating interval, so such a row raises neither the error nor the
+#' warning by itself.
+#'
 #' @section Projection is extrapolation:
 #' Projecting to an `m` you did not run is an **extrapolation**. Its
 #' trustworthiness depends on how well the variance components are pinned
@@ -531,10 +546,34 @@ d_study <- function(
   # sample from the parameter covariance, reused across every m (and level). An older
   # bootstrap object without a `boot` slot falls back to the Monte-Carlo band.
   boot_band <- identical(x$ci$method, "bootstrap") && !is.null(x$boot)
+  # The single-rating coefficient behind each curve: one rater, and one
+  # occasion where the fit has replicates, per distinct type and level of the
+  # band rows. Its interval comes from the band's own draws, below. Other
+  # engines build none, so their bands are computed exactly as before (D-058).
+  curves <- unique(data.frame(
+    type = row_type,
+    level = levels_arg,
+    stringsAsFactors = FALSE
+  ))
+  single <- if (isTRUE(x$engine %in% c("glmmTMB", "lme4"))) {
+    Map(
+      make_estimand,
+      1,
+      curves$level,
+      if (replicates) 1 else NA_real_,
+      curves$type
+    )
+  } else {
+    list()
+  }
   if (boot_band) {
     bc <- x$boot$components
     intervals <- lapply(
       estimands,
+      function(e) two_sided_interval(icc_point(bc, e), conf_level)
+    )
+    single_intervals <- lapply(
+      single,
       function(e) two_sided_interval(icc_point(bc, e), conf_level)
     )
   } else {
@@ -546,7 +585,12 @@ d_study <- function(
       estimands,
       function(e) mc_interval(components, e, conf_level, engine = engine)
     )
+    single_intervals <- lapply(
+      single,
+      function(e) mc_interval(components, e, conf_level, engine = engine)
+    )
   }
+  check_band_single_rating(single_intervals, single, x$engine)
 
   tbl <- tibble::tibble(
     m = row_m,
@@ -602,6 +646,49 @@ d_study <- function(
     k_observed = x$n$raters,
     k_eff = x$k_eff
   )
+}
+
+# The band checks (D-058, M166). `icc()` refuses an interval with equal limits
+# (D-049, D-053) and warns on one whose lower limit lies near 1 (D-054,
+# D-056), but a per-row rule cannot serve a projection: at very large `m`
+# the rows of ordinary data round to exactly [1, 1] while the one-rater limits
+# are far from 1 (M166 plan probe). So `d_study()` reads each curve's
+# single-rating coefficient, at one rater and one occasion, from the same
+# draws as the band, and every projected row of that curve comes from those
+# draws. Equal finite limits abort with `refuse_zero_width()`; otherwise a
+# lower limit within 1e-12 of 1 warns once with `warn_unresolved_band()`.
+# Both gate to glmmTMB and lme4 fits by the engine alone, whatever the fit's
+# `ci_method`: an MPL fit's band is a Monte-Carlo band from the same draws.
+# `intervals` and `estimands` are the single-rating intervals and
+# estimands; `engine` is the fit's engine name.
+check_band_single_rating <- function(
+  intervals,
+  estimands,
+  engine,
+  call = rlang::caller_env()
+) {
+  engine <- list(engine = engine)
+  equal <- collapse_and(
+    vapply(estimands[zero_width(intervals)], unresolved_row_name, character(1))
+  )
+  refuse_zero_width(
+    intervals,
+    engine,
+    call = call,
+    # `refuse_zero_width()` interpolates the hint in its own frame, so the
+    # names are pasted in; a coefficient name holds no braces.
+    hint = c(
+      i = paste0(
+        "In {.fn d_study}, this is the interval of the single-rating ",
+        "coefficient behind the projected curves, read from the same draws ",
+        "as the band: ",
+        equal,
+        "."
+      )
+    )
+  )
+  warn_unresolved_band(intervals, estimands, engine)
+  invisible(intervals)
 }
 
 # Validate the projected rater counts: a non-empty numeric vector, all finite and
