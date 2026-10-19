@@ -4,7 +4,7 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M167: The boundary hint's verification counts a refused interval as unusable on glmmTMB and lme4, pinned by tests
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate; RR<NN> whose Binding criteria bind this milestone's ACs (binding-criteria check), or — -->
@@ -49,7 +49,7 @@ Tests pin that `boundary_method_usable()` judges a Monte-Carlo or bootstrap cand
 - [x] T1: Add the AC1 tests. Build the engine objects as stubs in the shape `mc_ci()` and `bootstrap_ci()` read (`estimate`, `vcov`, `to_components`, `simulate_refit`, `engine`), as `ui_mc_stub()` and `ui_boot_stub()` in `test-unresolved-interval.R` do, with components that put the single-rating ICC at 0.5. Replace `refuse_zero_width()` in the namespace for the control (LESSONS, M164). Confirm that the `FALSE` case reaches the refusal: with the refusal left in place, call `mc_ci()` and `bootstrap_ci()` directly on the same stubs and assert the class `intraclass_zero_width_interval` (failure-identity rule).
 - [x] T2: Add a label for the zero-width refusal to `bh_site()`, matched on a phrase of the message `refuse_zero_width()` renders. Assert that `bh_site()` gives that label for the message of a real refusal raised from the T1 stubs, and still gives `"other"` for an unrelated message. Add the label to the M93 sweep's "never reached" assertions beside `"C"` and `"other"`.
 - [x] T3: Probe item (b)'s second half in a scratch script. Search for data on which `ci_method = "bootstrap"` on a glmmTMB or lme4 fit aborts with `intraclass_zero_width_interval` and the hint names `"montecarlo"`, then print that Monte-Carlo interval with `sprintf("%.17g", x)` (LESSONS, M162). Record the search and its result in a work-log line. If a case is found, add a candidate row with the data and the interval (search-first).
-- [ ] T4: Run `devtools::test()` and read WARN 0 (LESSONS, M150). Run `lintr::lint_package()` over `tests/` (LESSONS, M141) and `air format --check .`.
+- [x] T4: Run `devtools::test()` and read WARN 0 (LESSONS, M150). Run `lintr::lint_package()` over `tests/` (LESSONS, M141) and `air format --check .`.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates. -->
@@ -64,6 +64,9 @@ Tests pin that `boundary_method_usable()` judges a Monte-Carlo or bootstrap cand
 - 2026-10-19: T1 done. On both engines `mc_ci()` and `bootstrap_ci()` abort with `intraclass_zero_width_interval` on the stubs; `boundary_method_usable()` returns FALSE for both methods, and TRUE with `refuse_zero_width()` mocked to return its intervals. Test file: FAIL 0, WARN 0, PASS 1343.
 - 2026-10-19: T2 done. `bh_site()` labels the refusal `"Z"`, matched on "lower and upper limits are equal"; the label test reads `"Z"` from real refusals of both reducers on both engines and `"other"` for an unrelated message, and the M93 sweep asserts `"Z"` is never reached. Plant: the pre-T2 `bh_site()` gives `"other"` on the same refusal message. Test file: FAIL 0, WARN 0, PASS 1357.
 - 2026-10-19: T3 done, no case found, so no candidate row. Two scratch probes ran `icc(ci_method = "bootstrap", boot_samples = 50, seed = 1)` on 144 engine-by-data cases: (1) 96 cases, glmmTMB and lme4, one-way and two-way, on permuted equal-mean data, 1-3 integers, and near-flat data (noise SD 1e-6, 1e-9), sizes 6x3 and 10x4, seeds 1-3; (2) 48 one-way cases on near-flat data with noise SD 1e-7, 3e-8, 1e-8, 3e-9, sizes 6x3, 10x4, 20x3, seeds 1-2. None aborted with `intraclass_zero_width_interval`. The aborts were lme4's singular-fit refusal, the engine re-raise (D-053), and the refits-converged guard; lme4 near-flat intervals that returned had limits that differ, for example [0.99999999999998357, 0.999999999999999].
+- 2026-10-19: T4 done. `devtools::test()`: FAIL 0, WARN 0, SKIP 2, PASS 11362. `lintr::lint_package()`: 0 lints. `air format --check .`: clean.
+- 2026-10-19: claim audit: not owed — internal tier.
+- 2026-10-19: implement complete; status set to review.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
