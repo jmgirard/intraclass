@@ -64,6 +64,7 @@ On the glmmTMB and lme4 engines, `icc()` stops labeling as a singular fit the en
 - 2026-10-19: plan gate chose deleting the "for example" clause of the equal-limits message over a new example, because no real-data case of the refusal is on record (M167); falsified by a reproducible real fit that reaches the refusal.
 
 - 2026-10-19: T1: new tests in `test-zero-residual.R` red on main for their own reason: at warn = 2 both engines raise `intraclass_singular_fit` where R's `simpleError` is asserted (AC1), and all four stack-overflow stubs come back wrapped (AC2). The warn = 0 controls and the AC3 re-raise cases pass on main. The test asserts the prefix with `gettext("(converted from warning) ", domain = "R")` as AC1 words it; testthat runs in the C locale, where it equals R's template prefix.
+- 2026-10-19: T2: `reraise_engine_error()` records warnings at warn >= 2 and passes an error that `is_converted_warning()` matches (same call, R's translated template) or that inherits `stackOverflowError`. AC1, AC2, AC3 tests, the 72-call grid (NOT_CRAN) and `test-glmmtmb-fit-conditions.R` pass. Planted a call-only `is_converted_warning()`: the AC3 muffled-warning case went red on both engines, so the test tells the two rules apart. Box left open until the full suite runs after T4.
 
 ## Decisions
 

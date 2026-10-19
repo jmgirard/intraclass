@@ -202,12 +202,22 @@ abort_unsupported <- function(
 #' after the fit, such as reading the parameter covariance. The interval step
 #' runs later, outside this handler. The package's and rlang's own errors, for
 #' example the classed deferrals and a missing optional package, pass
-#' unchanged. The handler matches no message text (D-022). An error that an
-#' engine function catches itself, such as a failed second start, never
+#' unchanged. The handler matches no engine message text (D-022). An error that
+#' an engine function catches itself, such as a failed second start, never
 #' reaches it. As a calling handler it keeps the engine frames in the
 #' backtrace, and warnings raised before the error are still raised before the
 #' re-raised error. The lavaan engine re-raises errors from its own `lavaan()`
 #' fit as a classed error, and brms is not covered.
+#'
+#' Two kinds of error say nothing about the data and pass unchanged (D-059).
+#' The first is R's conversion of a warning under `options(warn = 2)` or above.
+#' The handler records each warning it sees at that level, and an error whose
+#' message is R's translated conversion text for the recorded warning, with the
+#' warning's call, is that conversion. The text is R's, not an engine's. The
+#' call alone does not tell it apart: a cli warning has a `NULL` call, and a
+#' warning that a caller's handler muffles is never converted. The second is an
+#' error of R's class `stackOverflowError`. An allocation failure and a bug in
+#' package code are still re-raised, because R gives them a plain `simpleError`.
 #'
 #' @param engine The `engine` argument of `icc()`.
 #' @param expr The engine dispatch, evaluated lazily.
@@ -217,10 +227,19 @@ reraise_engine_error <- function(engine, expr, call = rlang::caller_env()) {
   if (!engine %in% c("glmmTMB", "lme4")) {
     return(expr)
   }
+  warned <- NULL
   withCallingHandlers(
     expr,
+    warning = function(w) {
+      if (getOption("warn") >= 2) {
+        warned <<- w
+      }
+    },
     error = function(e) {
-      if (inherits(e, "rlang_error")) {
+      if (
+        inherits(e, c("rlang_error", "stackOverflowError")) ||
+          is_converted_warning(e, warned)
+      ) {
         return()
       }
       abort_intraclass(
@@ -239,4 +258,17 @@ reraise_engine_error <- function(engine, expr, call = rlang::caller_env()) {
       )
     }
   )
+}
+
+# Whether `e` is R's conversion of the warning `w` under `options(warn = 2)`:
+# the same call, and the message R's own translated template gives (D-059).
+is_converted_warning <- function(e, w) {
+  if (is.null(w) || !identical(conditionCall(e), conditionCall(w))) {
+    return(FALSE)
+  }
+  converted <- sprintf(
+    gettext("(converted from warning) %s", domain = "R"),
+    conditionMessage(w)
+  )
+  identical(conditionMessage(e), converted)
 }
