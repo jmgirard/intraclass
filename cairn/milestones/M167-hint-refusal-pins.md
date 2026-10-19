@@ -4,14 +4,14 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M167: The boundary hint's verification counts a refused interval as unusable on glmmTMB and lme4, pinned by tests
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate; RR<NN> whose Binding criteria bind this milestone's ACs (binding-criteria check), or — -->
 - **Principles touched:** GP7, GP9   <!-- owner: plan · create/amend-via-gate; comma-separated IPn/GPn ids this milestone touches, or — -->
 - **Resolves:** —   <!-- owner: plan · create/amend-via-gate; comma-separated GitHub issues the scope absorbs, each `#N closes` (the PR closes it at merge) or `#N partial` (the remainder gets a candidate row), or — ; skill conduct only — no validate check parses it -->
 - **Surface tier:** internal — tests and a test helper only; no package code changes   <!-- owner: plan · create/amend-via-gate; user-facing | internal — <one-clause reason>; skill conduct only — no validate check parses it -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create; a companion checkout the milestone also works in is one further entry per checkout, `companion: <abs-path> <branch>` (implement), its PR URL appended by review — /milestone-review merges companions first, in listed order -->
+- **Branch/PR:** m167-hint-refusal-pins   <!-- owner: implement (branch) / review (PR URL) · create; a companion checkout the milestone also works in is one further entry per checkout, `companion: <abs-path> <branch>` (implement), its PR URL appended by review — /milestone-review merges companions first, in listed order -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -46,7 +46,7 @@ Tests pin that `boundary_method_usable()` judges a Monte-Carlo or bootstrap cand
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Add the AC1 tests. Build the engine objects as stubs in the shape `mc_ci()` and `bootstrap_ci()` read (`estimate`, `vcov`, `to_components`, `simulate_refit`, `engine`), as `ui_mc_stub()` and `ui_boot_stub()` in `test-unresolved-interval.R` do, with components that put the single-rating ICC at 0.5. Replace `refuse_zero_width()` in the namespace for the control (LESSONS, M164). Confirm that the `FALSE` case reaches the refusal: with the refusal left in place, call `mc_ci()` and `bootstrap_ci()` directly on the same stubs and assert the class `intraclass_zero_width_interval` (failure-identity rule).
+- [x] T1: Add the AC1 tests. Build the engine objects as stubs in the shape `mc_ci()` and `bootstrap_ci()` read (`estimate`, `vcov`, `to_components`, `simulate_refit`, `engine`), as `ui_mc_stub()` and `ui_boot_stub()` in `test-unresolved-interval.R` do, with components that put the single-rating ICC at 0.5. Replace `refuse_zero_width()` in the namespace for the control (LESSONS, M164). Confirm that the `FALSE` case reaches the refusal: with the refusal left in place, call `mc_ci()` and `bootstrap_ci()` directly on the same stubs and assert the class `intraclass_zero_width_interval` (failure-identity rule).
 - [ ] T2: Add a label for the zero-width refusal to `bh_site()`, matched on a phrase of the message `refuse_zero_width()` renders. Assert that `bh_site()` gives that label for the message of a real refusal raised from the T1 stubs, and still gives `"other"` for an unrelated message. Add the label to the M93 sweep's "never reached" assertions beside `"C"` and `"other"`.
 - [ ] T3: Probe item (b)'s second half in a scratch script. Search for data on which `ci_method = "bootstrap"` on a glmmTMB or lme4 fit aborts with `intraclass_zero_width_interval` and the hint names `"montecarlo"`, then print that Monte-Carlo interval with `sprintf("%.17g", x)` (LESSONS, M162). Record the search and its result in a work-log line. If a case is found, add a candidate row with the data and the interval (search-first).
 - [ ] T4: Run `devtools::test()` and read WARN 0 (LESSONS, M150). Run `lintr::lint_package()` over `tests/` (LESSONS, M141) and `air format --check .`.
@@ -59,6 +59,9 @@ Tests pin that `boundary_method_usable()` judges a Monte-Carlo or bootstrap cand
 - 2026-10-18: plan chose to record a confirmed near-collapse case as a candidate row over changing which methods the hint names here, because the case is unconfirmed and the change would reach users; falsified by a T3 case that a user can reach.
 - 2026-10-18: criteria audit (reduced mode, fresh Opus reader, probe in scratch) returned 3 findings. Fixed: (1) AC1 narrowed to the T1 stubs and the one estimand. Answered: (2) AC2 keeps `lintr::lint_package()` over the whole package, since CI's lint job runs it and main is lint-clean; (3) T2's `bh_site()` label is a test-helper property, so it maps to AC2 and takes no criterion of its own. Probe: zero `vcov` and constant `simulate_refit` reach the refusal on both engines and both methods, the 25-resample screen included; [0.5, 0.5] passes `boundary_interval_usable()` at n0 = 3.
 - 2026-10-18: lessons surfaced: M164 (namespace replacement), M141 (lint covers `tests/`), M162, M150.
+- 2026-10-19: implement started; branch `m167-hint-refusal-pins` cut from origin/main at 54ec3a9.
+- 2026-10-19: implementation choice: one stub `hr_stub(engine)` carries both the Monte-Carlo and bootstrap fields (zero `vcov`, constant `simulate_refit`), and the tests sit in a new section at the end of `test-boundary-abort-hint.R`.
+- 2026-10-19: T1 done. On both engines `mc_ci()` and `bootstrap_ci()` abort with `intraclass_zero_width_interval` on the stubs; `boundary_method_usable()` returns FALSE for both methods, and TRUE with `refuse_zero_width()` mocked to return its intervals. Test file: FAIL 0, WARN 0, PASS 1343.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->

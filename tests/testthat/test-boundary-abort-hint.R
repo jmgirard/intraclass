@@ -2937,3 +2937,69 @@ test_that("no interval computed during verification reaches the message (AC5)", 
     )
   }
 })
+
+# ---- The equal-limits refusal makes a candidate unusable (M167) ---------------
+# `mc_ci()` and `bootstrap_ci()` refuse an interval whose two limits are finite
+# and exactly equal on a glmmTMB or lme4 fit (D-049, D-053), and
+# `boundary_method_usable()` catches that abort as "unusable". These stubs put
+# every draw and every refit at subject = residual = 1, so the one-way
+# single-rating ICC is 0.5 on each, and the interval is [0.5, 0.5]. With the
+# refusal removed, that interval passes `boundary_interval_usable()` at n0 = 3,
+# so the refusal is the only thing that makes the candidate unusable.
+hr_stub <- function(engine) {
+  list(
+    engine = engine,
+    estimate = c(a = 0, b = 0),
+    vcov = matrix(0, 2, 2),
+    to_components = function(par) {
+      n <- ncol(par)
+      list(subject = rep(1, n), residual = rep(1, n))
+    },
+    simulate_refit = function(n, seed = NULL) {
+      rbind(subject = rep(1, n), residual = rep(1, n))
+    }
+  )
+}
+
+hr_estimands <- list(icc_estimand(oneway = TRUE))
+
+hr_usable <- function(method, engine) {
+  boundary_method_usable(
+    method,
+    df = NULL,
+    estimands = hr_estimands,
+    conf_level = 0.95,
+    n0 = 3,
+    engine = hr_stub(engine)
+  )
+}
+
+test_that("an equal-limits refusal makes montecarlo and bootstrap unusable on glmmTMB and lme4", {
+  for (engine in c("glmmTMB", "lme4")) {
+    # The stubs reach the refusal itself, not another abort (failure identity).
+    expect_error(
+      mc_ci(hr_stub(engine), hr_estimands, mc_samples = 200L, seed = 1),
+      class = "intraclass_zero_width_interval"
+    )
+    expect_error(
+      bootstrap_ci(hr_stub(engine), hr_estimands, boot_samples = 50L, seed = 1),
+      class = "intraclass_zero_width_interval"
+    )
+    for (method in c("montecarlo", "bootstrap")) {
+      expect_false(hr_usable(method, engine))
+    }
+  }
+})
+
+test_that("without the refusal the same candidates are usable (control)", {
+  local_mocked_bindings(
+    refuse_zero_width = function(intervals, engine, call, hint) {
+      invisible(intervals)
+    }
+  )
+  for (engine in c("glmmTMB", "lme4")) {
+    for (method in c("montecarlo", "bootstrap")) {
+      expect_true(hr_usable(method, engine))
+    }
+  }
+})
