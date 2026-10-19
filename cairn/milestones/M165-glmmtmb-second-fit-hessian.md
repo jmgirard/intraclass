@@ -4,14 +4,14 @@
      cairn_validate's <150 over the plan-owned body. -->
 # M165: The glmmTMB second start never trades a positive-definite fit for one that is not, and passes on only the kept fit's conditions
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate; RR<NN> whose Binding criteria bind this milestone's ACs (binding-criteria check), or — -->
 - **Principles touched:** GP7, GP9   <!-- owner: plan · create/amend-via-gate; comma-separated IPn/GPn ids this milestone touches, or — -->
 - **Resolves:** —   <!-- owner: plan · create/amend-via-gate; comma-separated GitHub issues the scope absorbs, each `#N closes` (the PR closes it at merge) or `#N partial` (the remainder gets a candidate row), or — ; skill conduct only — no validate check parses it -->
 - **Surface tier:** user-facing — changes which glmmTMB fit `icc()` reports and which engine messages and warnings users see   <!-- owner: plan · create/amend-via-gate; user-facing | internal — <one-clause reason>; skill conduct only — no validate check parses it -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create; a companion checkout the milestone also works in is one further entry per checkout, `companion: <abs-path> <branch>` (implement), its PR URL appended by review — /milestone-review merges companions first, in listed order -->
+- **Branch/PR:** m165-glmmtmb-second-fit-hessian   <!-- owner: implement (branch) / review (PR URL) · create; a companion checkout the milestone also works in is one further entry per checkout, `companion: <abs-path> <branch>` (implement), its PR URL appended by review — /milestone-review merges companions first, in listed order -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -74,6 +74,10 @@
 - 2026-10-18: criteria audit (full mode, fresh Opus reader, probes in scratch) returned 11 findings. Fixed: (1) NA/NULL in either slot; (2) only-second-finite kept on D-049's rule, AC1 states both directions; (3) the first fit is the object the retry-start replacement receives; (4) first-fit pdHess asserted; (5) AC3 scoped to both fits returning, failed first fit's messages settled; (6) two warnings and two messages, one with a brace; (7) AC4 reworded to handlers around icc() with unmuffled recording; (8) warn = 1 and 3 added; (9) item (f) moved from a criterion to T4 as test hygiene. No finding on AC5 or AC6 (former AC6, AC7). No IP or D-entry conflict once D-057 lands.
 - 2026-10-18: collisions: D-048 and D-049 (kept-fit rule, "the second fit replaces the first only when it is lower by more than 1e-6") superseded in part by D-057 in this commit. Candidate rows "M158 review follow-ups on the glmmTMB boundary path" (absorbed in full across M165-M167), "M162 review follow-ups on the engine re-raise" (item (b) → M167; (a), (c) stay) and "M163 review follow-ups on the near-1 warning" (item (c) → M166). GitHub inbox: 0 open issues, 0 open PRs.
 - 2026-10-18: lessons surfaced: M164 (replace a function in the namespace and in package:intraclass), M150 (WARN 0), M127 (raw Status line), M130 and M163 (lint.yaml checkers), M153 (TSV fields). No dependency change and no outward action beyond the merge-gate PR.
+- 2026-10-18: implement started on branch m165-glmmtmb-second-fit-hessian, cut from main at b55567d.
+- 2026-10-18: T1: AC1 table and AC2 real-fit pair added to `test-glmmtmb-false-zero.R`; on the unchanged code four failed, as planned: the 1e-3 cells with the first `TRUE` and the second `FALSE`, `NA` or `NULL`, and the AC2 `FALSE` case.
+- 2026-10-18: T2: `glmmtmb_second_wins()` now takes both fits and applies D-057; comments cite D-057. `test-glmmtmb-false-zero.R` passes with NOT_CRAN=true; full-suite run pending.
+- 2026-10-18: checkpoint, T3 half-done: `glmmtmb_capture()` holds messages and `glmmtmb_replay()` / `glmmtmb_replay_failed()` replace `glmmtmb_warn()`; new `test-glmmtmb-fit-conditions.R` failed 10 times on the T2 code as planned; the old `glmmtmb_warn()` brace test still needs its rename, held until the running suite ends. DESIGN.md glmmTMB row updated for D-057.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
