@@ -1,0 +1,66 @@
+<!-- Section ownership + write-modes: see tracking-rules.md "Milestone-file
+     section ownership". A phase skill never rewrites another phase's section.
+     Per-section owners are tagged below. The one size check that can fail is
+     cairn_validate's <150 over the plan-owned body. -->
+# M167: The boundary hint's verification counts a refused interval as unusable on glmmTMB and lme4, pinned by tests
+
+- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
+- **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
+- **Driving RR:** —   <!-- owner: plan · create/amend-via-gate; RR<NN> whose Binding criteria bind this milestone's ACs (binding-criteria check), or — -->
+- **Principles touched:** GP7, GP9   <!-- owner: plan · create/amend-via-gate; comma-separated IPn/GPn ids this milestone touches, or — -->
+- **Resolves:** —   <!-- owner: plan · create/amend-via-gate; comma-separated GitHub issues the scope absorbs, each `#N closes` (the PR closes it at merge) or `#N partial` (the remainder gets a candidate row), or — ; skill conduct only — no validate check parses it -->
+- **Surface tier:** internal — tests and a test helper only; no package code changes   <!-- owner: plan · create/amend-via-gate; user-facing | internal — <one-clause reason>; skill conduct only — no validate check parses it -->
+- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create; a companion checkout the milestone also works in is one further entry per checkout, `companion: <abs-path> <branch>` (implement), its PR URL appended by review — /milestone-review merges companions first, in listed order -->
+
+## Goal
+<!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
+
+Tests pin that `boundary_method_usable()` judges a Monte-Carlo or bootstrap candidate unusable when the equal-limits refusal fires on a glmmTMB or lme4 engine.
+
+## Scope
+<!-- owner: plan · create/amend-via-gate -->
+
+**In:** Items (b) and (c) of "M158 review follow-ups on the glmmTMB boundary path", and item (b) of "M162 review follow-ups on the engine re-raise".
+- Tests in `tests/testthat/test-boundary-abort-hint.R` for `boundary_method_usable()` (`R/boundary-hint.R:204`) with `method = "montecarlo"` and `"bootstrap"`, on engine objects named glmmTMB and lme4 whose draws give one interval with equal limits.
+- A label of its own in `bh_site()` (`tests/testthat/test-boundary-abort-hint.R:91`) for the zero-width refusal's message, so the M93 sweep names that abort rather than reading it as "other".
+- A probe of item (b)'s unconfirmed half: whether a bootstrap refusal's hint can name `"montecarlo"` while the Monte-Carlo interval on the same fit is nearly collapsed. A confirmed case becomes a candidate row; no package code changes here.
+
+**Out:**
+- Items (a), (e) and (f) of the M158 row → M165; item (d) → M166.
+- Items (a) and (c) of the M162 row, which stay in that row.
+- Any change to which methods the hint names. A confirmed near-collapse case goes to a candidate row.
+
+## Acceptance criteria
+<!-- owner: plan · create/amend-via-gate; review reads, never reinterprets. -->
+
+- [ ] AC1: On the T1 stub engines, whose every draw gives `subject = residual = 1` (single-rating one-way ICC 0.5), with the one estimand `icc_estimand(oneway = TRUE)`, `boundary_method_usable()` returns `FALSE` for each of `method = "montecarlo"` and `"bootstrap"` on the stub whose `engine` is `"glmmTMB"` and on the one whose `engine` is `"lme4"`. The same four calls with `refuse_zero_width()` replaced by a function that returns its intervals unchanged return `TRUE`.
+- [ ] AC2: `devtools::test()` passes with WARN 0. `lintr::lint_package()` reports nothing, and `air format --check .` passes.
+
+## Coverage
+<!-- owner: plan · create/amend-via-gate -->
+
+- AC1 → T1
+- AC2 → T1, T2, T4
+
+## Tasks
+<!-- owner: plan (create) / implement (check-off, minor edits) -->
+
+- [ ] T1: Add the AC1 tests. Build the engine objects as stubs in the shape `mc_ci()` and `bootstrap_ci()` read (`estimate`, `vcov`, `to_components`, `simulate_refit`, `engine`), as `ui_mc_stub()` and `ui_boot_stub()` in `test-unresolved-interval.R` do, with components that put the single-rating ICC at 0.5. Replace `refuse_zero_width()` in the namespace for the control (LESSONS, M164). Confirm that the `FALSE` case reaches the refusal: with the refusal left in place, call `mc_ci()` and `bootstrap_ci()` directly on the same stubs and assert the class `intraclass_zero_width_interval` (failure-identity rule).
+- [ ] T2: Add a label for the zero-width refusal to `bh_site()`, matched on a phrase of the message `refuse_zero_width()` renders. Assert that `bh_site()` gives that label for the message of a real refusal raised from the T1 stubs, and still gives `"other"` for an unrelated message. Add the label to the M93 sweep's "never reached" assertions beside `"C"` and `"other"`.
+- [ ] T3: Probe item (b)'s second half in a scratch script. Search for data on which `ci_method = "bootstrap"` on a glmmTMB or lme4 fit aborts with `intraclass_zero_width_interval` and the hint names `"montecarlo"`, then print that Monte-Carlo interval with `sprintf("%.17g", x)` (LESSONS, M162). Record the search and its result in a work-log line. If a case is found, add a candidate row with the data and the interval (search-first).
+- [ ] T4: Run `devtools::test()` and read WARN 0 (LESSONS, M150). Run `lintr::lint_package()` over `tests/` (LESSONS, M141) and `air format --check .`.
+
+## Work log
+<!-- owner: any skill · append-only; one line per entry; absolute dates. -->
+
+- 2026-10-18: created by /milestone-plan.
+- 2026-10-18: tier check: milestone — part of the split of the [high] candidate row "M158 review follow-ups on the glmmTMB boundary path" (see M165's work log for the split).
+- 2026-10-18: plan chose to record a confirmed near-collapse case as a candidate row over changing which methods the hint names here, because the case is unconfirmed and the change would reach users; falsified by a T3 case that a user can reach.
+- 2026-10-18: criteria audit (reduced mode, fresh Opus reader, probe in scratch) returned 3 findings. Fixed: (1) AC1 narrowed to the T1 stubs and the one estimand. Answered: (2) AC2 keeps `lintr::lint_package()` over the whole package, since CI's lint job runs it and main is lint-clean; (3) T2's `bh_site()` label is a test-helper property, so it maps to AC2 and takes no criterion of its own. Probe: zero `vcov` and constant `simulate_refit` reach the refusal on both engines and both methods, the 25-resample screen included; [0.5, 0.5] passes `boundary_interval_usable()` at n0 = 3.
+- 2026-10-18: lessons surfaced: M164 (namespace replacement), M141 (lint covers `tests/`), M162, M150.
+
+## Decisions
+<!-- owner: implement / review · append-only; milestone-local -->
+
+## Review

@@ -2197,3 +2197,70 @@ average-rater row warns only within 1e-12/d of 1. Reopened by degenerate data
 whose averaged row lies further than 1e-12/d from 1 while its single row lies
 within 1e-12, or by a user report of the warning on an averaged row of data
 that are not near degenerate.
+
+### D-057 (2026-10-18): the glmmTMB second start never replaces a fit whose Hessian is positive definite with one whose Hessian is not — supersedes D-049's kept-fit rule in part
+
+**Context.** D-049 keeps the second fit of the glmmTMB second start when both
+REML objectives are finite and the second is lower by more than 1e-6, or when
+only the second is finite. The M158 review found that the rule ignores
+`sdr$pdHess`, so a second fit whose Hessian is not positive definite can
+replace a first fit whose Hessian is. A Monte-Carlo interval needs that
+Hessian, so such a swap trades a reported interval for an abort. No such swap
+was seen in M158's probes. D-004 requires an entry for a change to a
+Boundary-fit policy cell.
+
+**Decision.** When both objectives are finite, the second fit replaces the
+first only when it is lower by more than 1e-6 and either its `pdHess` is
+`TRUE` or the first fit's `pdHess` is not `TRUE`. A `pdHess` of `NA` or `NULL`
+counts as not `TRUE`. When only the second objective is finite, the second
+fit is kept, as before. The user chose this at the M165 plan gate. Rejected:
+keeping whichever fit passes the Hessian check whatever the objectives,
+because that keeps a higher-objective fit over the REML optimum. Rejected:
+applying the Hessian condition when only the second objective is finite,
+because it would keep a first fit whose objective is not finite, which D-048
+and D-049 never allowed.
+
+**Consequences.** The rest of D-048 and D-049 stands. A swap that the
+objective rule makes still happens when the second fit passes the check or
+the first fails it. The boundary-fit policy's glmmTMB row cites D-048, D-049
+and this entry. Reopened by a reported case where a first fit that passes the
+check is kept while the second, failing fit is the REML optimum and lme4
+agrees with it.
+
+### D-058 (2026-10-18): `d_study()` refuses or warns on a glmmTMB or lme4 band by each curve's single-rating coefficient, read from the band's draws — extends D-049, D-053 and D-054 to projections
+
+**Context.** `d_study()` builds its band from the fit's Monte-Carlo draws or
+stored bootstrap components, and it applies neither the equal-limits refusal
+(D-049, D-053) nor the near-1 warning (D-054, D-056). The M165 to M167 plan
+probe found that ordinary glmmTMB and lme4 fits give rows whose two limits
+are exactly 1 at very large rater counts, through rounding, while the
+one-rater limits are far from 1 (M166 work log). A per-row refusal would refuse those
+correct bands. D-056 rejected, for `icc()`, reading a recomputed
+single-rating coefficient, because the warning would then read a coefficient
+the call may not report. D-004 requires an entry for a change to a
+Boundary-fit policy cell.
+
+**Decision.** On a fit whose engine is glmmTMB or lme4, whatever its
+`ci_method`, `d_study()` computes for each type and level of its band the
+interval of the coefficient at one rater, and at one occasion where the fit
+has replicates, from the same draws as the band. If any such interval has
+two finite and exactly equal limits, `d_study()` aborts with
+`intraclass_zero_width_interval`, which also carries
+`intraclass_singular_fit`. Otherwise, if any such interval has a finite
+lower limit greater than 1 − 1e-12, it returns its result with one
+`intraclass_unresolved_interval` warning that names those coefficients and
+says they are the single-rating coefficients behind the projected curves.
+The user chose this at the M166 plan gate. D-056's reason does not hold
+here: every projected row is computed from the same draws as that
+coefficient, and the message says which coefficient it read, so a call that
+prints no one-rater row still gets a warning that is true of its curves.
+Rejected: `icc()`'s per-row rules, because they refuse the rounded rows
+above.
+
+**Consequences.** No reported number changes. A row whose limits are equal
+only through rounding is reported with no abort and no warning when its
+curve's one-rater limits differ. The lavaan and brms engines are unchanged.
+D-054's and D-056's rules for `icc()` stand. Reopened by degenerate data
+whose projected rows have equal limits while the one-rater limits differ, or
+by a user report of the `d_study()` warning on data that are not near
+degenerate.
