@@ -86,6 +86,7 @@
 - 2026-10-18: claim audit: 44 claims read, 8 corrected — NEWS.md, R/engine-glmmtmb.R, test-glmmtmb-fit-conditions.R, test-glmmtmb-false-zero.R, helper-glmmtmb-frames.R. Corrections: finite-objective condition in NEWS and two test names; "needs that Hessian" → draws usually overflow (probe: 3 fits with pdHess FALSE gave finite indefinite covariances, the interval aborted at the non-finite-draws guard); "before its error" → signalled before (R prints warn = 0 warnings after), with a signal-order assertion added to the AC3 failed-fit test; "non-fatal unless warn >= 2"; the warn = 2 sentence in NEWS; the helper's third user. Re-read once by the same reader: all 8 hold. D-057's Context sentence and heading corrected by D-057 Amendment 1 (one history correction for this milestone).
 - 2026-10-18: the first `devtools::check()` run started before the claim fixes and was stopped; check re-run on the final code.
 - 2026-10-18: T6: `devtools::check()` on 2053075, raw Status line "Status: OK" (0 errors, 0 warnings, 0 notes). Status → review.
+- 2026-10-18: step-7 approval: m165-glmmtmb-second-fit-hessian approved for merge
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
