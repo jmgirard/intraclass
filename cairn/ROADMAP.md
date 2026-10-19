@@ -9,7 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M168 | The engine re-raise passes converted warnings and stack overflows unchanged | planned | — | high | milestones/M168-engine-reraise-passthrough.md |
+| M168 | The engine re-raise passes converted warnings and stack overflows unchanged | in-progress | — | high | milestones/M168-engine-reraise-passthrough.md |
 | M167 | The boundary hint's verification counts a refused interval as unusable on glmmTMB and lme4, pinned by tests | done | — | high | milestones/archive/M167-hint-refusal-pins.md |
 | M166 | d_study() bands from glmmTMB and lme4 fits are refused or warned on by each curve's single-rating coefficient | done | — | high | milestones/archive/M166-d-study-band-checks.md |
 | M165 | The glmmTMB second start never trades a positive-definite fit for one that is not, and passes on only the kept fit's conditions | done | — | high | milestones/archive/M165-glmmtmb-second-fit-hessian.md |

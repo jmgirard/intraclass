@@ -1,13 +1,13 @@
 # M168: The engine re-raise passes converted warnings and stack overflows unchanged
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP1
 - **Resolves:** —
 - **Surface tier:** user-facing — changes which error class `icc()` callers receive and the text of two error messages
-- **Branch/PR:** —
+- **Branch/PR:** m168-engine-reraise-passthrough
 
 ## Goal
 
@@ -41,7 +41,7 @@ On the glmmTMB and lme4 engines, `icc()` stops labeling as a singular fit the en
 
 ## Tasks
 
-- [ ] T1: Write the failing tests first in `tests/testthat/test-zero-residual.R`. These are the converted-warning plants on both engines at `warn = 2` and `warn = 0` (AC1), the stack-overflow stub (AC2), and the re-raise with no warning at both `warn` levels (AC3). Plant the glmmTMB warning in `glmmtmb_reml()` (LESSONS M164 for replacing a binding after `load_all()`) and the lme4 warning with `local_mocked_bindings(lmer = ..., .package = "lme4")`. Add the muffled-warning case of AC3. Make sure that each new test fails on main for its own reason (failure-identity rule).
+- [x] T1: Write the failing tests first in `tests/testthat/test-zero-residual.R`. These are the converted-warning plants on both engines at `warn = 2` and `warn = 0` (AC1), the stack-overflow stub (AC2), and the re-raise with no warning at both `warn` levels (AC3). Plant the glmmTMB warning in `glmmtmb_reml()` (LESSONS M164 for replacing a binding after `load_all()`) and the lme4 warning with `local_mocked_bindings(lmer = ..., .package = "lme4")`. Add the muffled-warning case of AC3. Make sure that each new test fails on main for its own reason (failure-identity rule).
 - [ ] T2: In `reraise_engine_error()` (`R/abort.R:216`), add a calling `warning` handler. When `getOption("warn") >= 2`, it records the warning. The error handler returns without a re-raise only when the error message is identical to R's translated template applied to the recorded warning's message, `sprintf(gettext("(converted from warning) %s", domain = "R"), conditionMessage(w))`, and the error has the warning's call. A cli warning carries a `NULL` call, so the call alone does not tell the conversion from a later error. The template is R's text, not an engine's (D-022). The error handler also returns when the error inherits `stackOverflowError`. Update the roxygen block above the function. Run the M165 warn tests and the 72-call grid.
 - [ ] T3: Reword the re-raised message. The first line is "The {.pkg {engine}} engine stopped with an error.", and one bullet keeps the unidentifiable variance component as one possible cause. Check each sentence with `data-raw/condition-text-profile.R` and `cairn/doctrine/prose-style.md`. Extend the existing re-raise test for AC4.
 - [ ] T4: Delete the "for example" clause from the third bullet of `refuse_zero_width()` (`R/ci-montecarlo.R:195`). Add the AC5 assertions to the existing equal-limits tests in `test-glmmtmb-false-zero.R` and `test-dstudy-band-checks.R`. Run `test-boundary-abort-hint.R` again, because it pins the site of this refusal.
@@ -62,6 +62,8 @@ On the glmmTMB and lme4 engines, `icc()` stops labeling as a singular fit the en
 - 2026-10-19: plan gate chose detecting a converted warning by R's translated template plus the warning's call over the call alone, because a cli warning has a `NULL` call and a muffled warning then lets a later `NULL`-call error pass; falsified by an R version whose conversion text differs from `gettext("(converted from warning) %s", domain = "R")`.
 - 2026-10-19: plan gate chose passing converted warnings through unchanged over re-raising them under a new class, because warn = 2 asks for R's own conversion; falsified by a user asking to catch that error by a package class.
 - 2026-10-19: plan gate chose deleting the "for example" clause of the equal-limits message over a new example, because no real-data case of the refusal is on record (M167); falsified by a reproducible real fit that reaches the refusal.
+
+- 2026-10-19: T1: new tests in `test-zero-residual.R` red on main for their own reason: at warn = 2 both engines raise `intraclass_singular_fit` where R's `simpleError` is asserted (AC1), and all four stack-overflow stubs come back wrapped (AC2). The warn = 0 controls and the AC3 re-raise cases pass on main. The test asserts the prefix with `gettext("(converted from warning) ", domain = "R")` as AC1 words it; testthat runs in the C locale, where it equals R's template prefix.
 
 ## Decisions
 
