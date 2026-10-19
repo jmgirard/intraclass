@@ -46,8 +46,9 @@
 #' limit lies within 1e-12 of 1, `d_study()` returns the projection with an
 #' `intraclass_unresolved_interval` warning. Data with almost no residual
 #' variation can give such an interval. At a very large `m`, a projected row
-#' can print as `[1, 1]` through rounding. If its curve's single-rating limits
-#' differ, that row gets neither the error nor the warning.
+#' can print as `[1, 1]` through rounding. The checks read only the
+#' single-rating interval, so such a row raises neither the error nor the
+#' warning by itself.
 #'
 #' @section Projection is extrapolation:
 #' Projecting to an `m` you did not run is an **extrapolation**. Its

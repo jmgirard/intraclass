@@ -273,10 +273,10 @@ warn_unresolved_interval <- function(intervals, estimands, engine) {
 # error divisor of each interval's estimand (D-056). Shared by
 # `warn_unresolved_interval()` and `warn_unresolved_band()`. The gap
 # `1 - low` is compared, not `low` with `1 - bound / d`: from d of about 4500,
-# `1 - bound / d` rounds to the largest double below 1 or to 1, and a lower
-# limit there would not warn (M164 review). Above d of about 9000 the bound is
-# below the smallest gap a double below 1 has, so only a lower limit of
-# exactly 1 is near, and its equal limits abort first.
+# `1 - bound / d` rounds to one of the two largest doubles below 1, and from
+# about 18000 to 1, so a lower limit there would not warn (M164 review). Above
+# d of about 9000 the bound is below the smallest gap a double below 1 has, so
+# only a lower limit of exactly 1 is near, and its equal limits abort first.
 near_one <- function(intervals, estimands) {
   vapply(
     seq_along(intervals),

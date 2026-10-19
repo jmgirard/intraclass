@@ -5,8 +5,8 @@
 # fit) from the same draws as the band. It aborts with
 # `intraclass_zero_width_interval` when that coefficient's limits are finite
 # and exactly equal, and otherwise warns with `intraclass_unresolved_interval`
-# when its lower limit lies within 1e-12 of 1. A projected row whose own limits
-# are equal only through rounding near 1 is reported with neither.
+# when its lower limit lies within 1e-12 of 1. A projected row's own limits are
+# not checked, so a row equal only through rounding near 1 fires neither.
 #
 # Fits use seed 1, 500 Monte-Carlo draws and 30 bootstrap refits. The near-1
 # frames are those of helper-near-one-frames.R (M163, M164), and the ordinary
@@ -495,7 +495,7 @@ bc_recorded_calls <- function() {
   })
 }
 
-test_that("every AC2 and AC3 call is recorded (D-058 AC4)", {
+test_that("the 18 recorded call ids round-trip through bc_id() (D-058 AC4)", {
   # The ids round-trip through `bc_id()`, so the parsed calls are the
   # recorded ones.
   for (cl in bc_recorded_calls()) {
@@ -508,7 +508,7 @@ test_that("d_study() returns the recorded values of the plan commit (D-058 AC4)"
   skip_if_not_installed("lme4")
   skip_on_cran()
   # Recorded on one platform: the engines' last digits differ across
-  # platforms, so the comparison runs off CI. The test below runs everywhere.
+  # platforms, so the comparison runs off CI. The test below runs on CI too.
   skip_on_ci()
   for (cl in bc_recorded_calls()) {
     fit <- bc_icc(cl$frame, cl$engine, cl$method)$value

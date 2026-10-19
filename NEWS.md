@@ -6,8 +6,9 @@
   `d_study()` refuses the band with an `intraclass_zero_width_interval` error.
   If the limits differ and the lower limit lies within 1e-12 of 1, `d_study()`
   warns with `intraclass_unresolved_interval`. At a very large `m`, a projected
-  row can print as [1, 1] through rounding. If its curve's single-rating limits
-  differ, that row gets neither the error nor the warning. Before, `d_study()`
+  row can print as [1, 1] through rounding. The checks read only the
+  single-rating interval, so such a row raises neither the error nor the
+  warning by itself. Before, `d_study()`
   applied neither check. The projected numbers are unchanged.
 
 * On the glmmTMB and lme4 engines, `ci_method = "montecarlo"` and
