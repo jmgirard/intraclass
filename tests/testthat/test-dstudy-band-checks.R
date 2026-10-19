@@ -169,6 +169,18 @@ test_that("constant band draws on glmmTMB and lme4 fits abort, and the fitted dr
       "single-rating coefficient behind the projected curves",
       fixed = TRUE
     )
+    # The refusal names no example of the data that cause it; the one it gave
+    # is refused before any fit (D-052, M168 AC5).
+    expect_no_match(
+      bc_message(err),
+      "do not vary within subjects",
+      fixed = TRUE
+    )
+    expect_match(
+      bc_message(err),
+      "Inspect the data and the fitted variances",
+      fixed = TRUE
+    )
   }
 })
 

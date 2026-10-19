@@ -244,9 +244,9 @@ reraise_engine_error <- function(engine, expr, call = rlang::caller_env()) {
       }
       abort_intraclass(
         c(
-          "The {.pkg {engine}} engine failed on these data.",
-          i = "A variance component that the data cannot identify can cause \\
-               this.",
+          "The {.pkg {engine}} engine stopped with an error.",
+          i = "One possible cause is a variance component that the data \\
+               cannot identify.",
           i = "Examples are scores that vary only by rater, and scores that \\
                are exactly a subject value plus a rater value.",
           i = "Inspect the data and check that {.arg score}, \\

@@ -167,10 +167,20 @@ test_that("an unclassed engine error is re-raised as a singular fit (AC2)", {
       # part of the rendered chain.
       msg <- cli::ansi_strip(cli::format_message(conditionMessage(cnd)))
       expect_false(grepl("\\", msg, fixed = TRUE))
+      # The first line names the engine and no cause; a later bullet names one
+      # possible cause (M168 AC4). `format_message()` joins the bullets into
+      # one line, so the header is read as the start of the render, and as the
+      # first line of the message that rlang prints.
+      header <- paste("The", case$engine, "engine stopped with an error.")
+      expect_true(startsWith(msg, paste0(header, " ")))
       expect_match(
-        msg,
-        paste("The", case$engine, "engine failed on these data"),
+        substring(msg, nchar(header) + 1L),
+        "possible cause is a variance component that the data cannot identify",
         fixed = TRUE
+      )
+      expect_identical(
+        strsplit(conditionMessage(cnd), "\n", fixed = TRUE)[[1]][1],
+        header
       )
       expect_match(msg, conditionMessage(err), fixed = TRUE)
     }

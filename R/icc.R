@@ -230,7 +230,9 @@
 #'   design check refuses first keeps that check's error. On the glmmTMB and
 #'   lme4 engines, an engine error that does not come from `rlang` is re-raised
 #'   as an `intraclass_singular_fit` error, with the engine's error as its
-#'   cause. Scores that vary only by rater can raise one.
+#'   cause. Scores that vary only by rater can raise one. Two kinds of error
+#'   pass unchanged: an error that R converts from a warning under
+#'   `options(warn = 2)`, and an error of class `stackOverflowError`.
 #' @param cluster Optional column of `data` (unquoted) giving the higher-level
 #'   unit each subject is nested in (e.g. classroom, clinic). Supplying it switches
 #'   on the **multilevel** ICC (ten Hove et al. 2022). Reliability is reported at
