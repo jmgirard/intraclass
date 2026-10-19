@@ -1,6 +1,6 @@
 # M168: The engine re-raise passes converted warnings and stack overflows unchanged
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** high
 - **Depends on:** —
 - **Driving RR:** —
@@ -72,6 +72,8 @@ On the glmmTMB and lme4 engines, `icc()` stops labeling as a singular fit the en
 - 2026-10-19: full suite at f05b20c (NOT_CRAN): 0 failed, 0 errors, 0 warnings, 2 skipped (vignettes not installed), 11424 passed. T2 to T5 checked off.
 - 2026-10-19: claim audit: 24 claims read, 3 corrected — R/abort.R, NEWS.md. The roxygen now says the handler keeps the last warning, that a conversion cut at `warning.length` is re-raised (probe: a 2000-character warning gave a 1041-character error), and that bugs pass or are re-raised by class, not "a plain `simpleError`". The NEWS pass-through sentence moved after "vary only by rater", where "them" had pointed at it. Edits are comments and NEWS only, made while `devtools::check()` ran on f05b20c's successor.
 - 2026-10-19: T6: `devtools::check()` on the tarball built before 00fba5b (its edits are a `@noRd` comment and NEWS): Status OK, 0 errors, 0 warnings, 0 notes. `air format --check .` clean, `lintr::lint_package()` 0 lints. `devtools::document()` at 00fba5b changes only `Config/roxygen2/version` (local roxygen2 8.1.1), reverted. Data-raw checkers as logged above. Status set to review.
+- 2026-10-19: review pass 1: AC1-AC6 verified and ticked; four lenses gave 19 findings: 9 fixed on the branch (af44e07), 3 to the new row "M168 review follow-ups on the re-raise pass-through", 7 rejected. No finding meets the return floor.
+- 2026-10-19: amendment routed: AC7 — "each `data-raw/check-*` script exits 0 on the repo" fails as written for `check-vignette-render-warnings.py`, which reads only a built pkgdown site, here the gitignored local `docs/` of 2026-09-23 with this machine's TMB skew; that script's domain is not the repo.
 
 ## Decisions
 
@@ -86,4 +88,23 @@ Pass 1, 2026-10-19, at f81d943 (main unmoved since the cut). Test files run fres
 - AC5: `test-glmmtmb-false-zero.R` (16 tests, 0 failed) asserts absence of "do not vary within subjects" and presence of "Inspect the data and the fitted variances" for the refusal through `icc()` (stubbed `two_sided_interval()`), `mc_ci()` and `bootstrap_ci()`; `test-dstudy-band-checks.R` (11 tests, 0 failed) asserts both for the `d_study()` band refusal. With the old message restored all of them went red (T4 log). `test-boundary-abort-hint.R` 38 tests, 0 failed.
 - AC6: `R/icc.R:233-235` (and `man/icc.Rd`) and the NEWS bullet at `NEWS.md:32-34` name `options(warn = 2)` and `stackOverflowError`; both open by saying engine errors that do not come from rlang are re-raised. The AC1, AC2 and AC3 tests assert each claim (above).
 - AC7: not ticked. Full suite at f05b20c 0 failed, 0 warnings, 11424 passed (code after it changed only a `@noRd` comment and NEWS); `devtools::check()` Status OK, 0/0/0; `devtools::document()` at f81d943 changes only the local `Config/roxygen2/version` stamp, reverted; `air format --check .` clean; `lintr::lint_package()` 0 lints. Six `data-raw/check-*` scripts exit 0. `check-vignette-render-warnings.py` exits 1: it reads only a built site, here the gitignored local `docs/` of 2026-09-23 with this machine's TMB skew, so "exits 0 on the repo" fails as written for that script for a reason outside the work. The criterion is wrong for it; routed as an amendment return (work log).
+- spawned: diff-bug, blame-history, prior-review, ripple.
+- diff-bug #1: the AC1 helper's `gettext("(converted from warning) ", domain = "R")` is never translated, so AC1 fails in a translated locale — reject, false: testthat sets `LANGUAGE=C` inside `test_that()` (probe under `LANGUAGE=de`: English conversion inside `test_that()`, German outside), and AC1 words the helper this way.
+- diff-bug #2: NEWS and `?icc` say a converted warning passes with no condition, but a conversion R shortened at `warning.length` is re-raised — fix now: both now say so, and an AC3-block test plants a warning 100 bytes over the limit and asserts the re-raise., fixed af44e07
+- diff-bug #3: the cutoff counts bytes, not characters — fix now: roxygen, NEWS and `?icc` say bytes (probe: 1000 ASCII characters match; 999 plus "é", 1001 bytes, do not)., fixed af44e07
+- diff-bug #4: a conversion that engine code catches and raises in its own words is still re-raised — follow-up, row "M168 review follow-ups on the re-raise pass-through" (a); the roxygen now names it.
+- diff-bug #5: a recorded-then-muffled warning lets a later error with the same call and exactly R's conversion text pass — follow-up, same row (b).
+- diff-bug #6: no test covers a matching message with a different call — fix now: added to the AC3 test; a planted message-only matcher turned it red on both engines., fixed af44e07
+- diff-bug #7: the AC1 plants persist across loop iterations — fix now: each iteration runs in `local()` with the plant bound to it., fixed af44e07
+- diff-bug #8: pre-existing, warnings inside `tryCatch()`/`try()` blocks under warn = 2 are converted and swallowed — follow-up, same row (c).
+- blame-history #1: PRINCIPLES #8 states no exception for unclassed errors — reject, false: #8 is tagged [GP], tradeable with stated justification, and D-059's Consequences state it.
+- blame-history #2: matching R's template conflicts with D-022/D-053's "matches no text" — reject, false: D-022's reason is engine message text, D-059's Decision names the match on R's own translated text, and the roxygen says the text is R's, not an engine's; D-053 is superseded in part by D-059.
+- blame-history #3: the reworded message still names a data cause that allocation failures and bugs also reach — reject, planned change: the user chose the rewording that keeps one possible cause, hedged.
+- blame-history #4: the length cutoff mislabels a long conversion — fix now, as diff-bug #2., fixed af44e07
+- prior-review #1: the new `icc()` equal-limits test comment claims a real-fit refusal while a stub forces it — fix now: comment says the fit is real and the reduction is stubbed. Its positive control is the helper's `expect_match()` on "Inspect the data and the fitted variances"., fixed af44e07
+- prior-review #2: the `warning.length` roxygen claim is untested — fix now, as diff-bug #2., fixed af44e07
+- ripple #1: the ROADMAP row "M162 review follow-ups on the engine re-raise" still describes (a) and (c) — reject, planned change: post-merge hygiene graduates the row.
+- ripple #2: `R/engine-glmmtmb.R` comment says every non-rlang error is re-raised — fix now., fixed af44e07
+- ripple #3: `R/icc.R` dispatch comment says the same — fix now., fixed af44e07
+- ripple #4: first clauses in roxygen, `?icc`, DESIGN.md and NEWS state the re-raise before its exception — reject, false: each is qualified in the same paragraph.
 - Gate: `cairn_validate.py` all checks passed; `pkgdown::check_pkgdown()` no problems; NEWS carries the change (no milestone numbers); no new top-level files; README.Rmd untouched; no DESIGN principle changed, so `cairn_impact` skipped.
