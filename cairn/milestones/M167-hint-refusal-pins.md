@@ -34,7 +34,7 @@ Tests pin that `boundary_method_usable()` judges a Monte-Carlo or bootstrap cand
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets. -->
 
-- [ ] AC1: On the T1 stub engines, whose every draw gives `subject = residual = 1` (single-rating one-way ICC 0.5), with the one estimand `icc_estimand(oneway = TRUE)`, `boundary_method_usable()` returns `FALSE` for each of `method = "montecarlo"` and `"bootstrap"` on the stub whose `engine` is `"glmmTMB"` and on the one whose `engine` is `"lme4"`. The same four calls with `refuse_zero_width()` replaced by a function that returns its intervals unchanged return `TRUE`.
+- [x] AC1: On the T1 stub engines, whose every draw gives `subject = residual = 1` (single-rating one-way ICC 0.5), with the one estimand `icc_estimand(oneway = TRUE)`, `boundary_method_usable()` returns `FALSE` for each of `method = "montecarlo"` and `"bootstrap"` on the stub whose `engine` is `"glmmTMB"` and on the one whose `engine` is `"lme4"`. The same four calls with `refuse_zero_width()` replaced by a function that returns its intervals unchanged return `TRUE`.
 - [ ] AC2: `devtools::test()` passes with WARN 0. `lintr::lint_package()` reports nothing, and `air format --check .` passes.
 
 ## Coverage
@@ -72,3 +72,5 @@ Tests pin that `boundary_method_usable()` judges a Monte-Carlo or bootstrap cand
 <!-- owner: implement / review · append-only; milestone-local -->
 
 ## Review
+
+- AC1 evidence (2026-10-19, fresh scratch script independent of the test file, at 3e01215): stubs with zero `vcov`, `to_components` and `simulate_refit` giving subject = residual = 1 (point ICC printed 0.5), estimand `icc_estimand(oneway = TRUE)`, n0 = 3. With the refusal in place, `boundary_method_usable()` returned FALSE for montecarlo and bootstrap on glmmTMB and on lme4 (4 of 4). With `refuse_zero_width()` replaced by a pass-through via `testthat::with_mocked_bindings()`, the same four calls returned TRUE (4 of 4). PASS.
