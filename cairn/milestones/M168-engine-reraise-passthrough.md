@@ -77,6 +77,7 @@ On the glmmTMB and lme4 engines, `icc()` stops labeling as a singular fit the en
 - 2026-10-19: re-audit: AC7 (full) — reachable, no IP/D conflict; asked to name "run with no arguments from the repo root" (four scripts have other modes) and to say the `document()` exception is a line, not a file; noted the `document()` clause also failed as written on the local roxygen2 8.1.1 stamp.
 - 2026-10-19: re-audit: AC7 (full) — clean; noted that a fresh `test()`, `check()`, air and lintr run at HEAD is owed after af44e07, and that the pkgdown workflow's run of the excepted script is not required by the criterion (kept out, the narrower promise; the milestone edits no vignette).
 - 2026-10-19: amendment return: AC7 — "`devtools::document()` leaves no diff except the `Config/roxygen2/version:` line of `DESCRIPTION`. … Each `data-raw/check-*` script, run with no arguments from the repo root, exits 0, except `check-vignette-render-warnings.py`, whose input is a built pkgdown site rather than the repo."
+- 2026-10-19: verify at ba59748 (after af44e07): full suite (NOT_CRAN) 0 failed, 0 errors, 0 warnings, 2 skipped (vignettes not installed), 11434 passed; `devtools::check()` Status OK, 0/0/0; `document()` diff only `Config/roxygen2/version:` 8.1.0 -> 8.1.1, reverted; air clean; lintr 0. `check-abort-remedy-verdicts.R` re-running.
 
 ## Decisions
 
