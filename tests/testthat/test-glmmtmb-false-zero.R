@@ -185,11 +185,19 @@ test_that("a second fit that raises an error leaves the first fit in place (AC2)
 fz_keep <- function(o1, o2, pd1 = NULL, pd2 = NULL) {
   local_mocked_bindings(
     glmmtmb_reml = function(formula, data) {
-      list(fit = list(objective = o1), sdr = list(pdHess = pd1), which = "first")
+      list(
+        fit = list(objective = o1),
+        sdr = list(pdHess = pd1),
+        which = "first"
+      )
     },
     glmmtmb_retry_start = function(fit, data) list(),
     glmmtmb_second_fit = function(formula, data, start) {
-      list(fit = list(objective = o2), sdr = list(pdHess = pd2), which = "second")
+      list(
+        fit = list(objective = o2),
+        sdr = list(pdHess = pd2),
+        which = "second"
+      )
     }
   )
   fit_glmmtmb_ml_model(score ~ 1, data.frame(score = 1:3))$which
@@ -305,7 +313,7 @@ test_that("a first fit's error reaches the caller from inside the fit, unchanged
 
 test_that("a fitting warning that contains braces reaches the user verbatim (M158 review)", {
   expect_warning(
-    glmmtmb_warn(list(simpleWarning("bad {brace} in a message"))),
+    glmmtmb_replay(list(simpleWarning("bad {brace} in a message"))),
     "bad {brace} in a message",
     fixed = TRUE
   )

@@ -1,8 +1,14 @@
 # A 17-subject, 2-rater, complete two-way frame on a score scale near 1 -- the
 # shape of the user report behind PR #176 and M158. Shared by
-# test-glmmtmb-start-scale.R and test-glmmtmb-false-zero.R.
+# test-glmmtmb-start-scale.R and test-glmmtmb-false-zero.R. Draws under
+# `with_rng_seed()`, so the global random-number state is left as it was found
+# (M165).
 scale_two_way <- function(seed = 11L, n_s = 17L, n_r = 2L) {
-  set.seed(seed)
+  with_rng_seed(seed, scale_two_way_draw(n_s, n_r))
+}
+
+# The draws of `scale_two_way()`, from whatever state the stream is in.
+scale_two_way_draw <- function(n_s, n_r) {
   grid <- expand.grid(
     subject = factor(seq_len(n_s)),
     rater = factor(letters[seq_len(n_r)])

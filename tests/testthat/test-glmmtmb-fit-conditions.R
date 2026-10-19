@@ -21,7 +21,12 @@ fc_stub <- function(tag, objective) {
 
 fc_texts <- function(tag) {
   sprintf(
-    c("%s warning one", "%s message one", "%s warning {two}", "%s message {two}"),
+    c(
+      "%s warning one",
+      "%s message one",
+      "%s warning {two}",
+      "%s message {two}"
+    ),
     tag
   )
 }
@@ -136,7 +141,11 @@ test_that("under warn = 2 or 3, a failed first fit's own error is the error (M16
     expect_s3_class(out$cnd, "intraclass_singular_fit")
     expect_identical(conditionMessage(out$cnd$parent), "planted failure")
     expect_identical(fc_count(out$seen, "planted WTEXT"), 0L, info = info)
-    expect_false(grepl("planted WTEXT", conditionMessage(out$cnd), fixed = TRUE))
+    expect_false(grepl(
+      "planted WTEXT",
+      conditionMessage(out$cnd),
+      fixed = TRUE
+    ))
   }
 })
 
