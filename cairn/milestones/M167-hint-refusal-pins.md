@@ -69,6 +69,7 @@ Tests pin that `boundary_method_usable()` judges a Monte-Carlo or bootstrap cand
 - 2026-10-19: implement complete; status set to review.
 - 2026-10-19: step-7 approval: m167-hint-refusal-pins approved for merge
 - 2026-10-19: CI wait on PR #186 hit the 10-minute ceiling with all checks still pending (queued); stopped before merge, approval marker written.
+- 2026-10-19: resume: PR #186 open, route (c). CI red on `check-references` only: `check-record-claims.py` row `roadmap-terminal-rows` still expected M165, M164, M163, but the M166 done pass on main (54ec3a9) rotated the table to M166, M165, M164 without updating the row, and main's own lint.yaml run on 54ec3a9 failed the same way. Fixed on the branch by rotating that row; all 8 `check-references` commands pass locally. Trivial fix outside the tested code, so no re-approval.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
