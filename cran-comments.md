@@ -8,7 +8,7 @@ several fitting and interval bugs. NEWS.md lists the changes.
 ## Test environments
 
 - Local: macOS 27.0.1, aarch64-apple-darwin23, R 4.6.1
-- win-builder: R-devel
+- win-builder: R-devel (2026-10-18 r90707 ucrt)
 - GitHub Actions: macOS, Windows and Ubuntu, R-devel / release / oldrel-1,
   and R 4.5.0 (the declared minimum)
 
