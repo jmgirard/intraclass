@@ -396,6 +396,44 @@ fz_expect_tiny <- function(iv) {
   expect_lt(width, sqrt(.Machine$double.eps))
 }
 
+# The rendered refusal names no example of the data that cause it: the one it
+# gave, scores that do not vary within subjects, is refused before any fit
+# (D-052), so it cannot reach this message (M168 AC5).
+fz_expect_refusal_text <- function(msg) {
+  expect_false(grepl("do not vary within subjects", msg, fixed = TRUE))
+  expect_match(msg, "Inspect the data and the fitted variances", fixed = TRUE)
+}
+
+test_that("icc() raises the equal-limits refusal with no example of its cause (M168 AC5)", {
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+  # The fit is real; only the Monte-Carlo reduction is stubbed to return equal
+  # limits, so icc() reaches the refusal through its own interval step.
+  local_mocked_bindings(
+    two_sided_interval = function(vals, conf_level = 0.95) {
+      list(conf.low = 0.5, conf.high = 0.5, std.error = 0)
+    }
+  )
+  for (engine in c("glmmTMB", "lme4")) {
+    cnd <- rlang::catch_cnd(
+      suppressWarnings(icc(
+        sf_ratings_long(),
+        score = score,
+        subject = subject,
+        rater = rater,
+        engine = engine,
+        mc_samples = 200L,
+        seed = 1
+      )),
+      classes = "error"
+    )
+    expect_s3_class(cnd, "intraclass_zero_width_interval")
+    fz_expect_refusal_text(
+      cli::ansi_strip(cli::format_message(conditionMessage(cnd)))
+    )
+  }
+})
+
 test_that("mc_ci() refuses equal limits on glmmTMB and lme4 fits only (AC3; M162 AC3)", {
   for (engine in c("glmmTMB", "lme4")) {
     cnd <- rlang::catch_cnd(
@@ -414,6 +452,7 @@ test_that("mc_ci() refuses equal limits on glmmTMB and lme4 fits only (AC3; M162
     msg <- cli::ansi_strip(cli::format_message(conditionMessage(cnd)))
     expect_match(msg, "lower and upper limits are equal", fixed = TRUE)
     expect_false(grepl("draw", msg, fixed = TRUE))
+    fz_expect_refusal_text(msg)
     # An interval about 1e-10 wide is reported, beside a wide one.
     ok <- mc_ci(
       fz_mc_stub(engine),
@@ -448,6 +487,9 @@ test_that("bootstrap_ci() refuses equal limits on glmmTMB and lme4 fits only (AC
     )
     expect_s3_class(cnd, "intraclass_zero_width_interval")
     expect_s3_class(cnd, "intraclass_singular_fit")
+    fz_expect_refusal_text(
+      cli::ansi_strip(cli::format_message(conditionMessage(cnd)))
+    )
     ok <- bootstrap_ci(
       fz_boot_stub(engine),
       list(fz_wide, fz_tiny),

@@ -229,8 +229,9 @@ to the boundary-aware-interval contract (`PRINCIPLES.md #3`) and takes a D-entry
   interval aborts with the classed condition `intraclass_singular_fit`, pointing
   the user at the boundary-robust default engine (glmmTMB). On the glmmTMB and
   lme4 engines, an error the engine function raises that is not an rlang error
-  is re-raised with the same class, its message pointing at the data, with the
-  engine's error as its parent (D-053, M162).
+  is re-raised with the same class, with the engine's error as its parent
+  (D-053, M162). R's conversion of a warning under `options(warn = 2)` and an
+  error of class `stackOverflowError` pass unchanged (D-059, M168).
 - **Reach-zero (kept or floored).** A boundary value is admitted rather than
   discarded, so the estimate/interval can reach 0: a resample or posterior draw
   with a component at exactly 0 is a legitimate draw and is **kept**
@@ -249,8 +250,8 @@ Fit-time, per engine:
 
 | Engine | Boundary handling | Source |
 |---|---|---|
-| glmmTMB | Smooth log-SD; the boundary maps to −∞ and the fit stays finite — the reference boundary-robust engine. A fit that leaves an SD below 1e-2 of `sd(score)` is run once more from a second start. If its REML objective is lower by more than 1e-6, or only its objective is finite, the second fit is kept, except that when both objectives are finite it never replaces a first fit whose Hessian is positive definite with one whose Hessian is not. An engine-function error with no rlang class, during the fit or the covariance read → classed deferral (re-raised) | ADR-002/003; D-048; D-049; D-053; D-057 |
-| lme4 | Interval draws delta-transformed to log-SD (Smooth); an exactly-singular fit (`lme4::isSingular`) has a singular merDeriv covariance → classed deferral to glmmTMB. The guard was introduced for the two-way-random path (ADR-012) and **reused per shape** as later fits were added (ADR-023 fixed/multilevel; ADR-024 incomplete/ragged) — all 7 fit shapes. An engine-function error with no rlang class, such as lme4's "Downdated VtV is not positive definite" → classed deferral (re-raised) | ADR-012/023/024; D-053 |
+| glmmTMB | Smooth log-SD; the boundary maps to −∞ and the fit stays finite — the reference boundary-robust engine. A fit that leaves an SD below 1e-2 of `sd(score)` is run once more from a second start. If its REML objective is lower by more than 1e-6, or only its objective is finite, the second fit is kept, except that when both objectives are finite it never replaces a first fit whose Hessian is positive definite with one whose Hessian is not. An engine-function error with no rlang class, during the fit or the covariance read → classed deferral (re-raised), except a converted warning or a stack overflow | ADR-002/003; D-048; D-049; D-053; D-057; D-059 |
+| lme4 | Interval draws delta-transformed to log-SD (Smooth); an exactly-singular fit (`lme4::isSingular`) has a singular merDeriv covariance → classed deferral to glmmTMB. The guard was introduced for the two-way-random path (ADR-012) and **reused per shape** as later fits were added (ADR-023 fixed/multilevel; ADR-024 incomplete/ragged) — all 7 fit shapes. An engine-function error with no rlang class, such as lme4's "Downdated VtV is not positive definite" → classed deferral (re-raised), except a converted warning or a stack overflow | ADR-012/023/024; D-053; D-059 |
 | brms | Posterior draws on the natural variance scale, strictly positive → Smooth by construction; the point estimate is the boundary-aware mode of the draws | ADR-033 |
 | lavaan | Variances on the log-SD scale (Smooth); a Heywood boundary (non-positive variance, `sv`/`ev` ≤ 0) → classed deferral to glmmTMB | ADR-014/031 |
 

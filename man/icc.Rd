@@ -80,7 +80,11 @@ within subjects is exactly zero on such data. A call that an argument or
 design check refuses first keeps that check's error. On the glmmTMB and
 lme4 engines, an engine error that does not come from \code{rlang} is re-raised
 as an \code{intraclass_singular_fit} error, with the engine's error as its
-cause. Scores that vary only by rater can raise one.}
+cause. Scores that vary only by rater can raise one. Two kinds of error
+pass unchanged: an error that R converts from a warning under
+\code{options(warn = 2)}, and an error of class \code{stackOverflowError}. When R
+converts a warning longer than \code{getOption("warning.length")} bytes, it
+shortens the text, and that error is still re-raised.}
 
 \item{cluster}{Optional column of \code{data} (unquoted) giving the higher-level
 unit each subject is nested in (e.g. classroom, clinic). Supplying it switches

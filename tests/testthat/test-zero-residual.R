@@ -167,10 +167,20 @@ test_that("an unclassed engine error is re-raised as a singular fit (AC2)", {
       # part of the rendered chain.
       msg <- cli::ansi_strip(cli::format_message(conditionMessage(cnd)))
       expect_false(grepl("\\", msg, fixed = TRUE))
+      # The first line names the engine and no cause; a later bullet names one
+      # possible cause (M168 AC4). `format_message()` joins the bullets into
+      # one line, so the header is read as the start of the render, and as the
+      # first line of the message that rlang prints.
+      header <- paste("The", case$engine, "engine stopped with an error.")
+      expect_true(startsWith(msg, paste0(header, " ")))
       expect_match(
-        msg,
-        paste("The", case$engine, "engine failed on these data"),
+        substring(msg, nchar(header) + 1L),
+        "possible cause is a variance component that the data cannot identify",
         fixed = TRUE
+      )
+      expect_identical(
+        strsplit(conditionMessage(cnd), "\n", fixed = TRUE)[[1]][1],
+        header
       )
       expect_match(msg, conditionMessage(err), fixed = TRUE)
     }
@@ -212,4 +222,232 @@ test_that("classed errors and other engines pass the re-raise unchanged (AC2)", 
     expect_identical(class(cnd), class(err))
     expect_identical(conditionMessage(cnd), "lavaan stub failure")
   })
+})
+
+# What the re-raise passes unchanged (D-059) ----------------------------------
+#
+# Under `options(warn = 2)` R turns a warning into a `simpleError`, and a deep
+# recursion ends in an error of class `stackOverflowError`. Neither says
+# anything about the data, so `reraise_engine_error()` passes both unchanged.
+
+# icc() on the Shrout-Fleiss data at a given `warn` level. Every warning that
+# reaches a handler around icc() is recorded. It is muffled only below
+# `warn = 2`: a muffled warning is never converted, and the conversion is what
+# the warn = 2 test reads. Returns the error, or NULL, and the recorded warning
+# messages.
+zr_warn_call <- function(engine, warn) {
+  withr::local_options(warn = warn)
+  seen <- character(0)
+  cnd <- tryCatch(
+    withCallingHandlers(
+      {
+        icc(
+          sf_ratings_long(),
+          score = score,
+          subject = subject,
+          rater = rater,
+          engine = engine,
+          mc_samples = 200L,
+          seed = 1
+        )
+        NULL
+      },
+      warning = function(w) {
+        seen <<- c(seen, conditionMessage(w))
+        if (warn < 2) invokeRestart("muffleWarning")
+      }
+    ),
+    error = function(e) e
+  )
+  list(cnd = cnd, seen = seen)
+}
+
+# The prefix R puts on a warning it converts, in the session's language.
+zr_converted_prefix <- function() {
+  gettext("(converted from warning) ", domain = "R")
+}
+
+test_that("under warn = 2, a fitting warning reaches the caller as R's converted error (M168 AC1)", {
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+
+  planted <- "planted engine warning"
+  # glmmTMB holds the fit's warnings back and replays them through cli; lme4
+  # passes them on through cli from the handler in `fit_lme4()`. Each plant
+  # sits in the fit that the engine keeps. Each plant lasts for its own engine's
+  # iteration only (`env`).
+  reml <- glmmtmb_reml
+  lmer <- lme4::lmer
+  plants <- list(
+    glmmTMB = function(env) {
+      local_mocked_bindings(
+        glmmtmb_reml = function(formula, data) {
+          warning(planted)
+          reml(formula, data)
+        },
+        .env = env
+      )
+    },
+    lme4 = function(env) {
+      local_mocked_bindings(
+        lmer = function(...) {
+          warning(planted)
+          lmer(...)
+        },
+        .package = "lme4",
+        .env = env
+      )
+    }
+  )
+  for (engine in names(plants)) {
+    local({
+      plants[[engine]](environment())
+      out <- zr_warn_call(engine, warn = 2)
+      expect_identical(
+        class(out$cnd),
+        c("simpleError", "error", "condition"),
+        info = engine
+      )
+      msg <- conditionMessage(out$cnd)
+      expect_true(startsWith(msg, zr_converted_prefix()), info = engine)
+      expect_match(msg, planted, fixed = TRUE, info = engine)
+      # Control: at warn = 0 the same call returns a result and signals the
+      # planted warning once.
+      out <- zr_warn_call(engine, warn = 0)
+      expect_null(out$cnd, info = engine)
+      expect_identical(
+        sum(grepl(planted, out$seen, fixed = TRUE)),
+        1L,
+        info = engine
+      )
+    })
+  }
+})
+
+test_that("a stack-overflow error passes the re-raise unchanged (M168 AC2)", {
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+
+  overflows <- list(
+    structure(
+      class = c(
+        "expressionStackOverflowError",
+        "stackOverflowError",
+        "error",
+        "condition"
+      ),
+      list(message = "stub expression overflow", call = NULL)
+    ),
+    structure(
+      class = c(
+        "CStackOverflowError",
+        "stackOverflowError",
+        "error",
+        "condition"
+      ),
+      list(message = "stub C stack overflow", call = NULL)
+    )
+  )
+  cases <- list(
+    list(engine = "glmmTMB", fn = "fit_glmmtmb"),
+    list(engine = "lme4", fn = "fit_lme4")
+  )
+  for (case in cases) {
+    for (err in overflows) {
+      stub <- rlang::set_names(list(function(...) stop(err)), case$fn)
+      cnd <- local({
+        rlang::inject(local_mocked_bindings(!!!stub))
+        zr_call(case$engine)
+      })
+      expect_identical(cnd, err)
+    }
+  }
+})
+
+test_that("other engine errors are still re-raised under warn = 0 and warn = 2 (M168 AC3)", {
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+
+  cases <- list(
+    list(engine = "glmmTMB", fn = "fit_glmmtmb"),
+    list(engine = "lme4", fn = "fit_lme4")
+  )
+  for (case in cases) {
+    # No warning before the error.
+    for (warn in c(0, 2)) {
+      err <- simpleError(paste(case$engine, "stub failure"))
+      stub <- rlang::set_names(list(function(...) stop(err)), case$fn)
+      cnd <- local({
+        rlang::inject(local_mocked_bindings(!!!stub))
+        withr::local_options(warn = warn)
+        zr_call(case$engine)
+      })
+      info <- paste(case$engine, "warn =", warn)
+      expect_s3_class(cnd, "intraclass_singular_fit")
+      expect_identical(cnd$parent, err, info = info)
+    }
+    # A warning with a NULL call that the caller's handler muffles is never
+    # converted, so the error after it, also with a NULL call, is not R's
+    # conversion and is still re-raised.
+    err <- zr_cpp_error(paste(case$engine, "stub failure after a warning"))
+    stub <- rlang::set_names(
+      list(function(...) {
+        rlang::warn("stub warning with no call")
+        stop(err)
+      }),
+      case$fn
+    )
+    cnd <- local({
+      rlang::inject(local_mocked_bindings(!!!stub))
+      withr::local_options(warn = 2)
+      zr_call(case$engine)
+    })
+    expect_s3_class(cnd, "intraclass_singular_fit")
+    expect_identical(cnd$parent, err, info = case$engine)
+
+    # An error whose message is R's conversion text for the muffled warning,
+    # but whose call differs from the warning's, is still re-raised.
+    err <- simpleError(
+      sprintf(
+        gettext("(converted from warning) %s", domain = "R"),
+        "stub warning with no call"
+      ),
+      call = quote(zr_other_call())
+    )
+    stub <- rlang::set_names(
+      list(function(...) {
+        rlang::warn("stub warning with no call")
+        stop(err)
+      }),
+      case$fn
+    )
+    cnd <- local({
+      rlang::inject(local_mocked_bindings(!!!stub))
+      withr::local_options(warn = 2)
+      zr_call(case$engine)
+    })
+    expect_s3_class(cnd, "intraclass_singular_fit")
+    expect_identical(cnd$parent, err, info = case$engine)
+
+    # R shortens the converted text of a warning longer than
+    # `getOption("warning.length")` bytes, so that conversion is re-raised.
+    long <- strrep("a", getOption("warning.length") + 100L)
+    stub <- rlang::set_names(
+      list(function(...) warning(long)),
+      case$fn
+    )
+    out <- local({
+      rlang::inject(local_mocked_bindings(!!!stub))
+      zr_warn_call(case$engine, warn = 2)
+    })
+    expect_s3_class(out$cnd, "intraclass_singular_fit")
+    expect_identical(
+      class(out$cnd$parent),
+      c("simpleError", "error", "condition")
+    )
+    expect_true(
+      startsWith(conditionMessage(out$cnd$parent), zr_converted_prefix()),
+      info = case$engine
+    )
+  }
 })
