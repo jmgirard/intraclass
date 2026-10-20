@@ -92,11 +92,11 @@ fit
 #> 
 #>   index     estimate   95% CI
 #>   Absolute agreement
-#>   ICC(A,1)     0.290   [0.053, 0.714]
-#>   ICC(A,k)     0.620   [0.183, 0.909]
+#>   ICC(A,1)     0.290   [0.050, 0.717]
+#>   ICC(A,k)     0.620   [0.173, 0.910]
 #>   Consistency
-#>   ICC(C,1)     0.715   [0.334, 0.924]
-#>   ICC(C,k)     0.909   [0.667, 0.980]
+#>   ICC(C,1)     0.715   [0.341, 0.926]
+#>   ICC(C,k)     0.909   [0.674, 0.980]
 #> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
@@ -138,8 +138,8 @@ choose_icc(model = "twoway", type = "consistency", unit = "average", raters = "r
 #> Recommendation: ICC(C,k)
 #> 
 #> Why:
-#>   - Crossed (two-way): the same raters judge every subject.
-#>   - Consistency: only the rank order must match; a constant per-rater offset is forgiven.
+#>   - Crossed (two-way): each rater is tracked across the subjects they score.
+#>   - Consistency: only the rank order must match. A constant per-rater offset is forgiven.
 #>   - Average: you will act on the mean of your raters.
 #>   - Random raters: a sample you generalize beyond, to the rater universe they were drawn from.
 #> 
@@ -170,13 +170,13 @@ icc(school, score, subject = pupil, rater = rater, cluster = classroom, seed = 2
 #> 
 #>   level      index     estimate   95% CI
 #>   Absolute agreement
-#>   subject    ICC(A,1)     0.431   [0.256, 0.565]
-#>   subject    ICC(A,k)     0.751   [0.579, 0.838]
-#>   cluster    ICC(A,1)     0.880   [0.000, 0.972]
+#>   subject    ICC(A,1)     0.431   [0.258, 0.562]
+#>   subject    ICC(A,k)     0.751   [0.582, 0.837]
+#>   cluster    ICC(A,1)     0.880   [0.000, 0.974]
 #>   cluster    ICC(A,k)     0.967   [0.000, 0.993]
 #>   Consistency
-#>   subject    ICC(C,1)     0.493   [0.372, 0.615]
-#>   subject    ICC(C,k)     0.796   [0.703, 0.865]
+#>   subject    ICC(C,1)     0.493   [0.373, 0.616]
+#>   subject    ICC(C,k)     0.796   [0.704, 0.865]
 #>   cluster    ICC(C,1)     1.000   [0.000, 1.000]
 #>   cluster    ICC(C,k)     1.000   [0.000, 1.000]
 #> 
@@ -246,7 +246,7 @@ citation("intraclass")
 #> To cite intraclass in publications use:
 #> 
 #>   Girard J (2026). _intraclass: Modern Intraclass Correlation
-#>   Coefficients_. R package version 0.1.0.9000,
+#>   Coefficients_. R package version 0.2.0,
 #>   <https://CRAN.R-project.org/package=intraclass>.
 #> 
 #> A BibTeX entry for LaTeX users is
@@ -255,7 +255,7 @@ citation("intraclass")
 #>     title = {{intraclass}: Modern Intraclass Correlation Coefficients},
 #>     author = {Jeffrey Girard},
 #>     year = {2026},
-#>     note = {R package version 0.1.0.9000},
+#>     note = {R package version 0.2.0},
 #>     url = {https://CRAN.R-project.org/package=intraclass},
 #>   }
 #> 
