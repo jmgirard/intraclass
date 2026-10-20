@@ -16,6 +16,8 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 <!-- rows grouped by status; keep only the 3 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
+Released 0.2.0 2026-10-20.
+
 ## Candidates
 
 - [low] Statistical-extension parking lot: Statistical-extension parking lot (grouped; see `cairn/legacy/ROADMAP.md` for the full descriptions + readiness/status per item): the `d_study()` cluster-level / occasion-ragged projection; the occasion-averaged coefficient on ragged replicates (research); incomplete/unbalanced **fixed** cluster-level `ICC(c,k)` (still blocked by ten Hove's small-`k` estimator). Promote individually via `/milestone-plan` — migrated 2026-07-12 — cairn/legacy/ROADMAP.md
