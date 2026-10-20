@@ -1,78 +1,4 @@
-# intraclass (development version)
-
-* On glmmTMB and lme4 fits, `d_study()` now checks its interval band. It
-  reads each curve's single-rating coefficient from the band's draws, at one
-  rater and one occasion. If that coefficient's two limits are exactly equal,
-  `d_study()` refuses the band with an `intraclass_zero_width_interval` error.
-  If the limits differ and the lower limit lies within 1e-12 of 1, `d_study()`
-  warns with `intraclass_unresolved_interval`. At a very large `m`, a projected
-  row can print as [1, 1] through rounding. The checks read only the
-  single-rating interval, so such a row raises neither the error nor the
-  warning by itself. Before, `d_study()`
-  applied neither check. The projected numbers are unchanged.
-
-* On the glmmTMB and lme4 engines, `ci_method = "montecarlo"` and
-  `"bootstrap"` now warn about some intervals near 1. For a single-rating row,
-  an interval whose lower limit lies within 1e-12 of 1 is now reported with an
-  `intraclass_unresolved_interval` warning. For a row that averages ratings
-  over raters, occasions or both, the bound is 1e-12 divided by the number of
-  ratings averaged. On unbalanced data the number of raters is an effective
-  number. For a numeric `unit` it is the projected number of raters. The
-  warning names its rows. Data with almost no residual variation can give such
-  an interval. An example on lme4 is scores that are exactly a subject value
-  plus a rater value. Its width can then reflect rounding rather than the data.
-  Correct intervals from scores with very little noise can also get the
-  warning. The interval itself is unchanged.
-
-* On the glmmTMB and lme4 engines, an engine error that does not come from
-  `rlang` now reaches the caller as an `intraclass_singular_fit` error. This covers
-  errors while the engine fits the model or reads the fitted parameter
-  covariance. The engine's own error is kept as its cause. Before, such errors
-  carried no package class, so a handler that catches by class missed them.
-  Two-way data whose residual is exactly zero raised them, for example scores
-  that vary only by rater. Two kinds of error pass unchanged: an error that R
-  converts from a warning under `options(warn = 2)`, and an error of class
-  `stackOverflowError`. When R converts a warning longer than
-  `getOption("warning.length")` bytes, it shortens the text, and that error is
-  still re-raised. Under `ci_method = "montecarlo"` or `"bootstrap"`, an
-  lme4 interval whose two limits are exactly equal is now refused, as a
-  glmmTMB interval already was. An interval that prints as [1, 1] but whose
-  limits differ in the last digits is still reported.
-
-* `icc()` now refuses data in which at least one subject has two or more
-  scores and no subject has two different scores. It raises an
-  `intraclass_singular_fit` error before it fits a model, on every engine.
-  A call that an argument or design check refuses first keeps that check's
-  error. Before, such data ended in an unclassed glmmTMB or lme4 error on some
-  paths. Some data have scores that differ between subjects but not within
-  any subject. On such data, a one-way lme4 fit no longer returns ICC 1 with
-  the interval [1, 1].
-
-* If the parameters package is installed, `parameters::model_parameters()`
-  now works on `icc()` results. easystats is the family of packages that
-  parameters belongs to. The method returns the `tidy()` table under the
-  easystats column names, titled "Intraclass correlation coefficients". The
-  main columns are `Parameter`, `Coefficient`, `SE`, `CI`, `CI_low`, `CI_high`
-  and `Method`. The other columns are the identifiers `Type`, `Level`,
-  `Occasions` and `SF_Index`. A `ci` value other than the confidence level of the
-  fit is an error, because the table cannot compute the interval again.
-  parameters is an optional dependency.
-
-* The package now ships a citation entry (`citation("intraclass")`), and the
-  source repository gains a `CONTRIBUTING.md` that says how to report a
-  problem, ask for help, and propose a change. The README carries a Citation
-  section and links to the contributing guide and to the companion software
-  paper's repository, <https://github.com/jmgirard/intraclass-paper>.
-
-* Four simulated teaching datasets now ship with the package: `school`
-  (pupils nested in classrooms), `school_incomplete` (the same design with a
-  fifth of the ratings dropped), `ratings_replicates` (three ratings per
-  subject-by-rater cell) and `ratings_twoway` (20 subjects by 4 raters). The
-  articles and the README load them instead of simulating data inline, so the
-  examples can be run from a fresh session with no setup. Each has a
-  reference page that names the generating script and seed. The values the
-  articles report do not change. The README's multilevel example, which
-  used its own smaller simulation before, now shows the `school` results.
+# intraclass 0.2.0
 
 ## Breaking changes
 
@@ -90,6 +16,35 @@
   the package that you attach last still masks the `icc()` function of the
   other. Call `intraclass::icc()` to be sure which function runs.
 
+## New features
+
+* If the parameters package is installed, `parameters::model_parameters()`
+  now works on `icc()` results. The method returns the `tidy()` table under
+  the column names of easystats, the family of packages that parameters
+  belongs to. The table is titled "Intraclass correlation coefficients". Its
+  main columns are `Parameter`, `Coefficient`, `SE`, `CI`, `CI_low`,
+  `CI_high` and `Method`. The other columns are the identifiers `Type`,
+  `Level`, `Occasions` and `SF_Index`. A `ci` value other than the confidence
+  level of the fit is an error, because the table cannot compute the interval
+  again. parameters is an optional dependency.
+
+* Four simulated teaching datasets now ship with the package. `school` holds
+  pupils nested in classrooms, and `school_incomplete` is the same design with
+  a fifth of the ratings dropped. `ratings_replicates` has three ratings per
+  subject-by-rater cell, and `ratings_twoway` has 20 subjects by 4 raters. The
+  articles and the README load them instead of simulating data inline, so the
+  examples run from a fresh session with no setup. Each has a reference page
+  that names the generating script and seed. The values the articles report
+  do not change. The README's multilevel example now shows the `school`
+  results.
+
+* The package now ships a citation entry, which `citation("intraclass")`
+  prints. The README carries a Citation section, which links to the
+  companion software paper's repository,
+  <https://github.com/jmgirard/intraclass-paper>. A separate README section
+  links to a new contributing guide. The guide says how to report a problem,
+  ask for help and propose a change.
+
 ## Bug fixes
 
 * If the scores spread far more than 1 unit, the default
@@ -101,85 +56,92 @@
 
 * If a default `engine = "glmmTMB"` fit stops with a variance at or near 0,
   the fit now runs once more from a second starting point. The engine is the
-  software that does the fitting. If the second fit is better than the first
-  by a set margin, or the first has no finite result, it replaces the first.
-  Otherwise the first fit is kept. A second fit whose Hessian is not positive
-  definite does not replace a first fit that has a finite result and a
-  positive definite Hessian. A Monte-Carlo interval draws from the covariance
-  that the Hessian gives, and from a Hessian that is not positive definite
-  the draws usually overflow. Only the kept fit's warnings and messages are
-  shown. Under `options(warn = 2)` or above, a failed first fit's warnings
-  are not shown, so its own error is the one you see. On test data where the default starting
-  values of glmmTMB stopped at a false 0, the fit now reaches the ICC of the
-  `lme4` engine. Under `ci_method = "montecarlo"` or `"bootstrap"`, a glmmTMB
-  interval whose two limits are exactly equal is no longer reported.
-  `icc()` stops with an error of class `intraclass_zero_width_interval`
-  instead. Before, scores that did not vary within subjects sometimes printed
-  an ICC of 1 with an interval of [1, 1]. A narrow interval whose limits
-  differ is still reported. A Monte-Carlo interval is built by drawing
-  parameter values from the fitted model's uncertainty. When one of its
-  variances overflows, the error no longer tells a glmmTMB user to refit with
-  `engine = "glmmTMB"`.
+  software that does the fitting. If only the second fit has a finite result,
+  it replaces the first. If the second fit is better by a set margin, it also
+  replaces the first. But if the first fit's Hessian is positive definite and
+  the second's is not, the first fit is kept. In all other cases the first
+  fit is kept. Only the kept fit's warnings and messages are shown. On test data where the default starting values of glmmTMB
+  stopped at a false 0, the fit now reaches the ICC of the `lme4` engine.
+
+* `icc()` now refuses data in which at least one subject has two or more
+  scores and no subject has two different scores. It raises an
+  `intraclass_singular_fit` error before it fits a model, on every engine.
+  A call that an earlier argument or design check refuses keeps that check's
+  error. Before, such data ended in an unclassed glmmTMB or lme4 error on some
+  paths. On such data whose scores differed between subjects, a one-way lme4
+  fit returned an ICC of 1 with the interval [1, 1].
+
+* On the glmmTMB and lme4 engines, an engine error that does not come from
+  `rlang` now reaches the caller as an `intraclass_singular_fit` error. This
+  covers errors while the engine fits the model or reads the fitted parameter
+  covariance. The engine's own error is kept as its cause. Before, such
+  errors carried no package class, so a handler that catches by class missed
+  them. Two-way data whose residual is exactly zero raised them, for example
+  scores that vary only by rater. An error that R converts from a warning
+  under `options(warn = 2)`, and an error of class `stackOverflowError`, pass
+  unchanged. If R shortened the warning's text, the error is still
+  re-raised.
+
+* A Monte-Carlo interval is built by drawing parameter values from the fitted
+  model's uncertainty. Under `ci_method = "montecarlo"` or `"bootstrap"`, an
+  interval whose two limits are exactly equal is no longer reported on the
+  glmmTMB and lme4 engines. `icc()` stops with an
+  `intraclass_zero_width_interval` error instead. Before, a glmmTMB fit with
+  a variance stuck at 0 sometimes printed an ICC of 0 with the interval [0, 0]. A
+  narrow interval whose limits differ is still reported.
+
+* Under the same two methods on the same two engines, `icc()` now warns about
+  some intervals near 1. For a single-rating row, an interval whose lower
+  limit lies within 1e-12 of 1 gets an `intraclass_unresolved_interval`
+  warning. For a row that averages ratings over raters, occasions or both,
+  the bound is 1e-12 divided by the number of ratings averaged. The warning
+  names its rows. Data with almost no residual variation can give such an
+  interval, and its width can then reflect rounding rather than the data.
+  Correct intervals from scores with very little noise can also get the
+  warning. The interval itself is unchanged.
+
+* On glmmTMB and lme4 fits, `d_study()` now checks its interval band in the
+  same two ways. It reads each curve's single-rating coefficient, at one
+  rater and one occasion. If that coefficient's two limits are exactly equal,
+  `d_study()` refuses the band with an `intraclass_zero_width_interval` error.
+  If the limits differ and the lower limit lies within 1e-12 of 1, it warns
+  with `intraclass_unresolved_interval`. At a very large `m`, a projected row
+  can print as [1, 1] through rounding without raising either. The projected
+  numbers are unchanged.
+
+* When a variance in a Monte-Carlo draw overflows, the error no longer tells
+  a glmmTMB user to refit with `engine = "glmmTMB"`.
 
 ## Documentation
 
-* The package's own errors, warnings, notes and install prompts now use
-  plainer English. None uses a dash as punctuation, and no
-  sentence runs past 25 words. Long sentences are split, and semicolons
-  become full stops except between references. Which condition fires, and
-  when, is unchanged. Nothing computed changes.
+* The package's messages, the reference manual, the README and the articles
+  are rewritten in plainer English. The messages cover errors, warnings,
+  notes and install prompts. They also cover the questions and advice that
+  `choose_icc()` prints, and the notes that `print()` and `summary()` add to
+  an `icc()` fit. Each glossary term is defined in plain words, or linked to
+  the *Glossary* article, where a page first uses it. Which condition or note
+  fires, and when, is unchanged. Nothing computed changes.
 
-* The questions and advice that `choose_icc()` prints, and the notes that
-  `print()` and `summary()` add to an `icc()` fit, now use plainer English.
-  None uses a dash as punctuation, and no sentence runs past 25 words. Which
-  note prints, and when, is unchanged. Five definitions in the *Glossary*
-  article were imprecise or said less than the package does, and they are
-  corrected. Every page that quoted them now carries the new text. Four error
-  messages from `icc()` and `d_study()` no longer cite internal record
-  numbers. Nothing computed changes.
+* Five definitions in the *Glossary* article were imprecise or said less than
+  the package does, and they are corrected. Every page that quoted them now
+  carries the new text. Each glossary entry now opens with a short
+  definition, or points to the entry that holds one.
 
-* Four articles now show their comparison tables as `gt` tables with a title,
-  plain column headings and rounded numbers. The four are *Comparison with
-  other packages*, *Estimation engines* (an engine is the software that does
-  the fitting), *Confidence-interval methods* and *Choosing an ICC*. The code
-  that assembles each table is hidden. The calls that fit the models stay
-  visible. The one exception is the `psych` and `irr` comparison: there, one
-  hidden chunk fits the models and builds the table. `gt` joins `Suggests:`.
-  Without it, those tables are skipped. The sentences that disagreed with
-  their tables are corrected. The packages agree to within 0.00001, not
-  exactly. In the *Choosing an ICC* incomplete-data example, the random-rater
-  interval is wider only for the agreement coefficients, which ask whether
-  raters give the same score.
+* The `icc()` help page is now titled "Intraclass correlation coefficients for
+  interrater reliability", and the `d_study()` page "Project reliability to
+  other numbers of raters". In the *Confidence-interval methods* article,
+  each `ci_method` section now opens with a paragraph on what the method is
+  for and when to choose it. Four error messages from `icc()` and `d_study()`
+  no longer cite internal record numbers.
 
-* The reference manual pages for `icc()`, `d_study()`, `choose_icc()`,
-  `ratings` and `ratings_incomplete` are rewritten in plainer English. No
-  sentence runs past 25 words, except seven on the `icc()` and `d_study()`
-  pages that carry clauses the test suite pins verbatim. Glossary terms are
-  defined in plain words where the pages first use them. The `icc()` page is
-  now titled "Intraclass correlation coefficients for interrater
-  reliability" and the `d_study()` page "Project reliability to other
-  numbers of raters". Nothing computed changes.
-
-* The *Getting started*, *Choosing an ICC* and *Glossary* articles and the
-  README are rewritten in plainer English. No sentence runs past 25 words,
-  except two glossary sentences that carry clauses the test suite pins
-  verbatim. Each glossary term is defined in plain words at its first use in
-  *Getting started*, *Choosing an ICC* and the README. The glossary's entries
-  each open with a one-sentence definition. Nothing computed changes.
-
-* Five more articles are rewritten in plainer English. A D-study projects the
-  fitted variance components to other rater or
-  [occasion](https://jmgirard.github.io/intraclass/articles/glossary.html#occasion-within-cell-replicate)
-  counts, each a share of the total variation traced to one source. One of the five covers
-  D-studies and the within-cell replicate, one of several ratings by the same
-  rater of the same subject. The five are *Estimation engines*, *Comparison with other
-  packages*, *D-studies and within-cell replicates*, *Multilevel designs* and
-  *Confidence-interval methods*. No sentence runs past 25 words, except two
-  in the interval-methods article that carry clauses the test suite pins
-  verbatim. Each glossary term is defined in plain words or linked to the
-  glossary at its first use in each article. In the interval-methods article
-  every `ci_method` section now opens with a paragraph on what the method is
-  for and when to choose it. Nothing computed changes.
+* Four articles now show their comparison tables as `gt` tables with a
+  title, plain column headings and rounded numbers. The four are *Comparison
+  with other packages*, *Estimation engines*, *Confidence-interval methods*
+  and *Choosing an ICC*. `gt` joins `Suggests:`, and without it those tables
+  are skipped. The sentences that disagreed with their tables are corrected.
+  The packages agree to within 0.00001, not exactly. In the *Choosing an ICC*
+  incomplete-data example, the random-rater interval is wider only for the
+  agreement coefficients, which ask whether raters give the same score.
 
 # intraclass 0.1.0
 
