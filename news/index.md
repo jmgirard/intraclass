@@ -38,7 +38,11 @@
   fitted parameter covariance. The engine’s own error is kept as its
   cause. Before, such errors carried no package class, so a handler that
   catches by class missed them. Two-way data whose residual is exactly
-  zero raised them, for example scores that vary only by rater. Under
+  zero raised them, for example scores that vary only by rater. Two
+  kinds of error pass unchanged: an error that R converts from a warning
+  under `options(warn = 2)`, and an error of class `stackOverflowError`.
+  When R converts a warning longer than `getOption("warning.length")`
+  bytes, it shortens the text, and that error is still re-raised. Under
   `ci_method = "montecarlo"` or `"bootstrap"`, an lme4 interval whose
   two limits are exactly equal is now refused, as a glmmTMB interval
   already was. An interval that prints as \[1, 1\] but whose limits
